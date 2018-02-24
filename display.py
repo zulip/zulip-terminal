@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import urwid
+import zulip
 
 
 class MessageBox(urwid.Pile):
@@ -14,6 +15,7 @@ class MessageBox(urwid.Pile):
         ('selected', ">"),
         ('custom', self.message['title'])
         ])
+        content = self.message['sender'] + " : " + self.message['content']
         stream_title = urwid.Text(stream_title)
         time = urwid.Text(('custom', self.message['time']), align='right')
         header = urwid.Columns([
@@ -21,7 +23,7 @@ class MessageBox(urwid.Pile):
             time,
         ])
         header = urwid.AttrWrap(header, "header")
-        content = urwid.Text(self.message['content'])
+        content = urwid.Text(content.encode('utf-8'))
         return [header, content]
 
 
@@ -53,6 +55,7 @@ class MessageView(urwid.ListBox):
                 return key
 
         return key
+
 class MenuButton(urwid.Button):
     def __init__(self, caption):
         super(MenuButton, self).__init__("")
@@ -64,34 +67,13 @@ class ZulipModel(object):
     A class responsible for storing the data to be displayed.
     """
 
-    def __init__(self):
+    def __init__(self, client):
+        self.client = client
         self.menu = [
             u'All messages',
             u'Private messages',
         ]
 
-        self.users = [
-            u'Tim Abbott',
-            u'Steve Howell',
-            u'Eeshan Garg',
-            u'Alena Volkova',
-            u'Tarun Kumar',
-            u'Rishi Gupta',
-            u'David Johnson',
-            u'Vishnu Ks',
-            u'Aman Agrawal',
-        ]
-
-        self.streams = [
-            u'general',
-            u'integrations',
-            u'announce',
-            u'design',
-            u'frontend',
-            u'backend',
-            u'commits',
-            u'documentation',
-        ]
         self.messages = [
             {
                 'sender' : 'Aman Agrawal',
@@ -109,6 +91,25 @@ class ZulipModel(object):
             },
         ]
 
+    def get_all_users(self):
+        try:
+            users = self.client.get_members()
+            users_list = [user for user in users['members'] if user['is_active']]
+            users_list.sort(key=lambda x: x['full_name'].lower())
+            user_names = [user['full_name'] for user in users_list]
+            return user_names
+        except Exception:
+            print("Invalid API key")
+            raise urwid.ExitMainLoop()
+
+    def get_subscribed_streams(self):
+        try :
+            streams = self.client.get_streams(include_subscribed=True, include_public=False)
+            stream_names = [stream['name'] for stream in streams['streams']]
+            return sorted(stream_names, key=str.lower)
+        except Exception:
+            print("Invalid API key")
+            raise urwid.ExitMainLoop()
 
 class ZulipView(urwid.WidgetWrap):
     """
@@ -120,14 +121,15 @@ class ZulipView(urwid.WidgetWrap):
         ('msg_selected', 'light gray', 'dark red','bold'),
         ('header','dark cyan', 'dark blue', 'bold'),
         ('custom','light cyan', 'dark blue', 'underline'),
+        ('content', 'white', 'black', 'standout'),
         ]
 
     def __init__(self, controller):
         self.model = controller.model
-        self.users = self.model.users
+        self.users = self.model.get_all_users()
         self.menu = self.model.menu
         self.messages = self.model.messages
-        self.streams = self.model.streams
+        self.streams = self.model.get_subscribed_streams()
         urwid.WidgetWrap.__init__(self, self.main_window())
 
     def menu_view(self):
@@ -191,7 +193,7 @@ class ZulipView(urwid.WidgetWrap):
         body = [
             ('weight', 30, left_column),
             ('weight', 100, center_column),
-            ('weight', 29, right_column),
+            ('weight', 35, right_column),
         ]
 
         w = urwid.Columns(body, focus_column=1)
@@ -206,7 +208,8 @@ class ZulipController:
     """
 
     def __init__(self):
-        self.model = ZulipModel()
+        self.client = zulip.Client(config_file="./zit")
+        self.model = ZulipModel(self.client)
         self.view = ZulipView( self )
 
     def main(self):
