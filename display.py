@@ -1,7 +1,22 @@
 #!/usr/bin/env python3
 
+import time
+from functools import wraps
+from threading import Thread
+
 import urwid
 import zulip
+
+def async(func):
+    """
+    Decorator for executing a function in a separate :class:`threading.Thread`.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        thread = Thread(target=func, args=args, kwargs=kwargs)
+        thread.daemon = True
+        return thread.start()
+    return wrapper
 
 
 class MessageBox(urwid.Pile):
@@ -30,8 +45,8 @@ class MessageBox(urwid.Pile):
 class MessageView(urwid.ListBox):
     def __init__(self, messages):
         self.messages = messages
-        body = urwid.SimpleFocusListWalker(self.main_view())
-        super(MessageView, self).__init__(body)
+        self.log = urwid.SimpleFocusListWalker(self.main_view())
+        super(MessageView, self).__init__(self.log)
 
     def main_view(self):
         msg_btn_list = [urwid.AttrMap(MessageBox(item), None, 'msg_selected') for item in self.messages]
@@ -74,6 +89,8 @@ class WriteBox(urwid.Pile):
     def __init__(self, view):
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
+        self.to_write_box=None
+        self.stream_write_box=None
 
     def main_view(self, new):
         private_button = MenuButton(u"New Private Message")
@@ -114,7 +131,7 @@ class WriteBox(urwid.Pile):
 
     def keypress(self, size, key):
         if key == 'enter':
-            if self.to_write_box.edit_text == '':
+            if not self.to_write_box:
                 request = {
                     'type' : 'stream',
                     'to' : self.stream_write_box.edit_text,
@@ -145,8 +162,9 @@ class ZulipModel(object):
     A class responsible for storing the data to be displayed.
     """
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, controller):
+        self.controller = controller
+        self.client = controller.client
         self.menu = [
             u'All messages',
             u'Private messages',
@@ -188,6 +206,16 @@ class ZulipModel(object):
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
+
+    def update_messages(self, response):
+        msg = {
+            'sender' : response['sender_full_name'],
+            'time' : time.ctime(int(response['timestamp'])),
+            'stream' : response['display_recipient'],
+            'title' : response['subject'],
+            'content' : response['content'],
+        }
+        self.controller.view.msg_list.log.append(urwid.AttrMap(MessageBox(msg), None, 'msg_selected'))
 
 
 class ZulipView(urwid.WidgetWrap):
@@ -236,8 +264,8 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def message_view(self):
-        msg_list = MessageView(self.messages)
-        w = urwid.Frame(msg_list, footer=self.write_box)
+        self.msg_list = MessageView(self.messages)
+        w = urwid.Frame(self.msg_list, footer=self.write_box)
         w = urwid.LineBox(w)
         return w
 
@@ -276,11 +304,16 @@ class ZulipController:
 
     def __init__(self):
         self.client = zulip.Client(config_file="./zit")
-        self.model = ZulipModel(self.client)
+        self.model = ZulipModel(self)
         self.view = ZulipView(self)
+
+    @async
+    def update(self):
+        self.client.call_on_each_message(self.model.update_messages)
 
     def main(self):
         self.loop = urwid.MainLoop(self.view, self.view.palette)
+        self.update()
         self.loop.run()
 
 
