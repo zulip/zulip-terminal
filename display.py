@@ -56,11 +56,63 @@ class MessageView(urwid.ListBox):
 
         return key
 
+
 class MenuButton(urwid.Button):
     def __init__(self, caption):
         super(MenuButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [u'  # ', caption], 0), None, 'selected')
+
+
+class WriteBox(urwid.Pile):
+    def __init__(self, view):
+        super(WriteBox, self).__init__(self.main_view())
+        self.client = view.client
+        self.stream = ''
+        self.title = ''
+        self.msg = ''
+
+    def set_stream(self, edit, new_text):
+        self.stream = new_text
+
+    def set_title(self, edit, new_text):
+        self.title = new_text
+
+    def set_msg(self, edit, new_text):
+        self.msg = new_text
+
+    def main_view(self):
+        msg_write_box = urwid.Edit(u"> ")
+        urwid.connect_signal(msg_write_box, 'change', self.set_msg)
+
+        stream_write_box = urwid.Edit(caption=u"Stream :  ")
+        urwid.connect_signal(stream_write_box, 'change', self.set_stream)
+
+        title_write_box = urwid.Edit(caption=u"Title :  ")
+        urwid.connect_signal(title_write_box, 'change', self.set_title)
+
+        header_write_box = urwid.Columns([
+            urwid.LineBox(stream_write_box),
+            urwid.LineBox(title_write_box),
+        ])
+        write_box = [
+            header_write_box,
+            msg_write_box
+        ]
+
+        return write_box
+
+    def keypress(self, size, key):
+        if key != 'enter':
+            return super(WriteBox, self).keypress(size, key)
+        request = {
+            'type' : 'stream',
+            'to' : self.stream,
+            'subject' : self.title,
+            'content' : self.msg,
+        }
+        self.client.send_message(request)
+
 
 class ZulipModel(object):
     """
@@ -111,6 +163,7 @@ class ZulipModel(object):
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
+
 class ZulipView(urwid.WidgetWrap):
     """
     A class responsible for providing the application's interface.
@@ -126,6 +179,7 @@ class ZulipView(urwid.WidgetWrap):
 
     def __init__(self, controller):
         self.model = controller.model
+        self.client = controller.client
         self.users = self.model.get_all_users()
         self.menu = self.model.menu
         self.messages = self.model.messages
@@ -156,20 +210,7 @@ class ZulipView(urwid.WidgetWrap):
 
     def message_view(self):
         msg_list = MessageView(self.messages)
-
-        msg_write_box = urwid.Edit(u" ")
-        stream_write_box = urwid.Edit(caption=u"Stream :  ")
-        title_write_box = urwid.Edit(caption=u"Title :  ")
-        header_write_box = urwid.Columns([
-            urwid.LineBox(stream_write_box),
-            urwid.LineBox(title_write_box),
-        ])
-        write_box = urwid.Pile([
-            header_write_box,
-            msg_write_box
-        ])
-        write_box = urwid.LineBox(write_box, title=u"New Message")
-
+        write_box = WriteBox(self)
         w = urwid.Frame(msg_list, footer=write_box)
         w = urwid.LineBox(w)
         return w
@@ -210,7 +251,7 @@ class ZulipController:
     def __init__(self):
         self.client = zulip.Client(config_file="./zit")
         self.model = ZulipModel(self.client)
-        self.view = ZulipView( self )
+        self.view = ZulipView(self)
 
     def main(self):
         self.loop = urwid.MainLoop(self.view, self.view.palette)
