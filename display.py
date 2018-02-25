@@ -74,22 +74,6 @@ class WriteBox(urwid.Pile):
     def __init__(self, view):
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
-        self.stream = ''
-        self.title = ''
-        self.msg = ''
-        self.to = ''
-
-    def set_stream(self, edit, new_text):
-        self.stream = new_text
-
-    def set_title(self, edit, new_text):
-        self.title = new_text
-
-    def set_msg(self, edit, new_text):
-        self.msg = new_text
-
-    def set_to(self, edit, new_text):
-        self.to = new_text
 
     def main_view(self, new):
         private_button = MenuButton(u"New Private Message")
@@ -106,51 +90,49 @@ class WriteBox(urwid.Pile):
             self.contents = [(w, self.options())]
 
     def private_box_view(self, button):
-        to_write_box = urwid.Edit(u"To: ", edit_text=button.email)
-        urwid.connect_signal(to_write_box, 'change', self.set_to)
-        msg_write_box = urwid.Edit(u"> ")
-        urwid.connect_signal(msg_write_box, 'change', self.set_msg)
+        self.to_write_box = urwid.Edit(u"To: ", edit_text=button.email)
+        self.msg_write_box = urwid.Edit(u"> ")
         self.contents = [
-            (urwid.LineBox(to_write_box), self.options()),
-            (msg_write_box, self.options()),
+            (urwid.LineBox(self.to_write_box), self.options()),
+            (self.msg_write_box, self.options()),
         ]
 
     def stream_box_view(self, button):
-        msg_write_box = urwid.Edit(u"> ")
-        urwid.connect_signal(msg_write_box, 'change', self.set_msg)
-
-        stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=button.caption)
-        urwid.connect_signal(stream_write_box, 'change', self.set_stream)
-
-        title_write_box = urwid.Edit(caption=u"Title:  ")
-        urwid.connect_signal(title_write_box, 'change', self.set_title)
+        self.msg_write_box = urwid.Edit(u"> ")
+        self.stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=button.caption)
+        self.title_write_box = urwid.Edit(caption=u"Title:  ")
 
         header_write_box = urwid.Columns([
-            urwid.LineBox(stream_write_box),
-            urwid.LineBox(title_write_box),
+            urwid.LineBox(self.stream_write_box),
+            urwid.LineBox(self.title_write_box),
         ])
         write_box = [
             (header_write_box, self.options()),
-            (msg_write_box, self.options()),
+            (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
 
     def keypress(self, size, key):
         if key == 'enter':
-            if self.to == '':
+            if self.to_write_box.edit_text == '':
                 request = {
                     'type' : 'stream',
-                    'to' : self.stream,
-                    'subject' : self.title,
-                    'content' : self.msg,
+                    'to' : self.stream_write_box.edit_text,
+                    'subject' : self.title_write_box.edit_text,
+                    'content' : self.msg_write_box.edit_text,
                 }
-                self.client.send_message(request)
-            request = {
-                'type' : 'private',
-                'to' : self.to,
-                'content' : self.msg,
-            }
-            self.client.send_message(request)
+                response = self.client.send_message(request)
+
+            else:
+                request = {
+                    'type' : 'private',
+                    'to' : self.to_write_box.edit_text,
+                    'content' : self.msg_write_box.edit_text,
+                }
+                response = self.client.send_message(request)
+
+            if response['result'] == 'success':
+                self.msg_write_box.edit_text = ''
 
         if key == 'esc':
             self.main_view(False)
