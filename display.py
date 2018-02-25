@@ -58,10 +58,16 @@ class MessageView(urwid.ListBox):
 
 
 class MenuButton(urwid.Button):
-    def __init__(self, caption):
+    def __init__(self, caption, email='', view=None, user=False, stream=False):
+        self.caption = caption
+        self.email = email
         super(MenuButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [u'  # ', caption], 0), None, 'selected')
+        if stream:
+            urwid.connect_signal(self, 'click', view.write_box.stream_box_view)
+        if user:
+            urwid.connect_signal(self, 'click', view.write_box.private_box_view)
 
 
 class WriteBox(urwid.Pile):
@@ -100,7 +106,7 @@ class WriteBox(urwid.Pile):
             self.contents = [(w, self.options())]
 
     def private_box_view(self, button):
-        to_write_box = urwid.Edit(u"To: ")
+        to_write_box = urwid.Edit(u"To: ", edit_text=button.email)
         urwid.connect_signal(to_write_box, 'change', self.set_to)
         msg_write_box = urwid.Edit(u"> ")
         urwid.connect_signal(msg_write_box, 'change', self.set_msg)
@@ -113,7 +119,7 @@ class WriteBox(urwid.Pile):
         msg_write_box = urwid.Edit(u"> ")
         urwid.connect_signal(msg_write_box, 'change', self.set_msg)
 
-        stream_write_box = urwid.Edit(caption=u"Stream:  ")
+        stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=button.caption)
         urwid.connect_signal(stream_write_box, 'change', self.set_stream)
 
         title_write_box = urwid.Edit(caption=u"Title:  ")
@@ -186,8 +192,8 @@ class ZulipModel(object):
             users = self.client.get_members()
             users_list = [user for user in users['members'] if user['is_active']]
             users_list.sort(key=lambda x: x['full_name'].lower())
-            user_names = [user['full_name'] for user in users_list]
-            return user_names
+            return [(user['full_name'][:20], user['email']) for user in users_list]
+
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
@@ -222,6 +228,7 @@ class ZulipView(urwid.WidgetWrap):
         self.menu = self.model.menu
         self.messages = self.model.messages
         self.streams = self.model.get_subscribed_streams()
+        self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
 
     def menu_view(self):
@@ -231,7 +238,7 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def streams_view(self):
-        streams_btn_list = [MenuButton(item) for item in self.streams]
+        streams_btn_list = [MenuButton(item, view=self, stream=True) for item in self.streams]
 
         w = urwid.ListBox(urwid.SimpleFocusListWalker(streams_btn_list))
         w = urwid.LineBox(w, title="Streams")
@@ -248,13 +255,12 @@ class ZulipView(urwid.WidgetWrap):
 
     def message_view(self):
         msg_list = MessageView(self.messages)
-        write_box = WriteBox(self)
-        w = urwid.Frame(msg_list, footer=write_box)
+        w = urwid.Frame(msg_list, footer=self.write_box)
         w = urwid.LineBox(w)
         return w
 
     def users_view(self):
-        users_btn_list = [MenuButton(item) for item in self.users]
+        users_btn_list = [MenuButton(item[0], item[1], view=self, user=True) for item in self.users]
 
         w = urwid.ListBox(urwid.SimpleFocusListWalker(users_btn_list))
         return w
@@ -272,7 +278,7 @@ class ZulipView(urwid.WidgetWrap):
         body = [
             ('weight', 30, left_column),
             ('weight', 100, center_column),
-            ('weight', 35, right_column),
+            ('weight', 30, right_column),
         ]
 
         w = urwid.Columns(body, focus_column=1)
