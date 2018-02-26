@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from display import ZulipController
+from core import ZulipController
 
 def parse_args():
     description = '''
