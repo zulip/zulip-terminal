@@ -20,7 +20,8 @@ def async(func):
 
 
 class MessageBox(urwid.Pile):
-    def __init__(self, message):
+    def __init__(self, message, model):
+        self.model = model
         self.message = message
         super(MessageBox, self).__init__(self.main_view())
 
@@ -62,32 +63,41 @@ class MessageBox(urwid.Pile):
 
 
 class MessageView(urwid.ListBox):
-    def __init__(self, messages):
+    def __init__(self, messages, model):
+        self.model = model
         self.messages = messages
         self.log = urwid.SimpleFocusListWalker(self.main_view())
         super(MessageView, self).__init__(self.log)
+        self.focus_position = 50
 
     def main_view(self):
-        msg_btn_list = [urwid.AttrMap(MessageBox(item), None, 'msg_selected') for item in self.messages]
+        msg_btn_list = [urwid.AttrMap(MessageBox(item, self.model), None, 'msg_selected') for item in self.messages]
         return msg_btn_list
 
-    def keypress(self, size, key):
-        key = super(MessageView, self).keypress(size, key)
+    def load_old_messages(self):
+        self.model.num_before += 50
+        self.model.messages = self.model.load_old_messages(False)
+        new_messages = self.model.messages[:50]
+        new_messages.reverse()
+        for msg in new_messages:
+            self.log.insert(0, urwid.AttrMap(MessageBox(msg, self), None, 'msg_selected'))
 
+    def keypress(self, size, key):
         if key == 'down':
             try:
-                self.focus_position += 1
+                self.focus_position = self.log.next_position(self.focus_position)
                 return key
             except Exception:
                 return key
 
         if key == 'up':
             try:
-                self.focus_position -= 1
+                self.focus_position = self.log.prev_position(self.focus_position)
                 return key
             except Exception:
+                self.load_old_messages()
                 return key
-
+        key = super(MessageView, self).keypress(size, key)
         return key
 
 
@@ -184,27 +194,28 @@ class ZulipModel(object):
     def __init__(self, controller):
         self.controller = controller
         self.client = controller.client
-        self.anchor = 0
+        self.anchor = 10000000000000000
+        self.num_before = 50
+        self.num_after = 0
         self.menu = [
             u'All messages',
             u'Private messages',
         ]
 
-        self.messages = self.load_old_messages()
+        self.messages = self.load_old_messages(first_anchor=True)
 
-    def load_old_messages(self):
+    def load_old_messages(self, first_anchor):
         request = {
             'anchor' : self.anchor,
-            'num_before': 50,
-            'num_after': 50,
+            'num_before': self.num_before,
+            'num_after': self.num_after,
             'apply_markdown': False,
-            'use_first_unread_anchor': True,
+            'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
         messages = []
         if response['result'] == 'success':
-            self.anchor = response['anchor']
             for msg in response['messages']:
                 messages.append({
                     'sender' : msg['sender_full_name'],
@@ -245,7 +256,7 @@ class ZulipModel(object):
             'content' : response['content'],
             'type' : response['type'],
         }
-        self.controller.view.msg_list.log.append(urwid.AttrMap(MessageBox(msg), None, 'msg_selected'))
+        self.controller.view.msg_list.log.append(urwid.AttrMap(MessageBox(msg, self), None, 'msg_selected'))
 
 
 class ZulipView(urwid.WidgetWrap):
@@ -294,7 +305,7 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def message_view(self):
-        self.msg_list = MessageView(self.messages)
+        self.msg_list = MessageView(self.messages, self.model)
         w = urwid.Frame(self.msg_list, footer=self.write_box)
         w = urwid.LineBox(w)
         return w
