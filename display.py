@@ -24,13 +24,12 @@ class MessageBox(urwid.Pile):
         self.message = message
         super(MessageBox, self).__init__(self.main_view())
 
-    def main_view(self):
+    def stream_view(self):
         stream_title = ('header', [
         ('custom', self.message['stream']), 
         ('selected', ">"),
         ('custom', self.message['title'])
         ])
-        content = self.message['sender'] + " : " + self.message['content']
         stream_title = urwid.Text(stream_title)
         time = urwid.Text(('custom', self.message['time']), align='right')
         header = urwid.Columns([
@@ -38,6 +37,26 @@ class MessageBox(urwid.Pile):
             time,
         ])
         header = urwid.AttrWrap(header, "header")
+        return header
+
+    def private_view(self):
+        title = ('header', [('custom', 'Private Message')])
+        title = urwid.Text(title)
+        time = urwid.Text(('custom', self.message['time']), align='right')
+        header = urwid.Columns([
+            title,
+            time,
+        ])
+        header = urwid.AttrWrap(header, "header")
+        return header
+
+    def main_view(self):
+        if self.message['type'] == 'stream':
+            header = self.stream_view()
+        else:
+            header = self.private_view()
+
+        content = self.message['sender'] + " : " + self.message['content']
         content = urwid.Text(content.encode('utf-8'))
         return [header, content]
 
@@ -174,9 +193,16 @@ class ZulipModel(object):
             {
                 'sender' : 'Aman Agrawal',
                 'time' : '8:56 AM',
-                'stream' : 'integrations',
-                'title' : 'Zulip Terminal',
+                'display_recipient':[
+                    {
+                        'full_name':'Hamlet of Denmark',
+                        'email':'hamlet@example.com',
+                        'short_name':'hamlet',
+                        'id':31572
+                    }
+                ],
                 'content' : 'Hi Eeshan',
+                'type' : 'private'
             },
             {
                 'sender' : 'Eeshan Garg',
@@ -184,6 +210,7 @@ class ZulipModel(object):
                 'stream' : 'integrations',
                 'title' : 'Zulip Terminal',
                 'content' : 'Hi Aman',
+                'type' : 'stream'
             },
         ]
 
@@ -214,6 +241,7 @@ class ZulipModel(object):
             'stream' : response['display_recipient'],
             'title' : response['subject'],
             'content' : response['content'],
+            'type' : response['type'],
         }
         self.controller.view.msg_list.log.append(urwid.AttrMap(MessageBox(msg), None, 'msg_selected'))
 
