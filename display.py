@@ -184,35 +184,37 @@ class ZulipModel(object):
     def __init__(self, controller):
         self.controller = controller
         self.client = controller.client
+        self.anchor = 0
         self.menu = [
             u'All messages',
             u'Private messages',
         ]
 
-        self.messages = [
-            {
-                'sender' : 'Aman Agrawal',
-                'time' : '8:56 AM',
-                'display_recipient':[
-                    {
-                        'full_name':'Hamlet of Denmark',
-                        'email':'hamlet@example.com',
-                        'short_name':'hamlet',
-                        'id':31572
-                    }
-                ],
-                'content' : 'Hi Eeshan',
-                'type' : 'private'
-            },
-            {
-                'sender' : 'Eeshan Garg',
-                'time' : '8:57 AM',
-                'stream' : 'integrations',
-                'title' : 'Zulip Terminal',
-                'content' : 'Hi Aman',
-                'type' : 'stream'
-            },
-        ]
+        self.messages = self.load_old_messages()
+
+    def load_old_messages(self):
+        request = {
+            'anchor' : self.anchor,
+            'num_before': 50,
+            'num_after': 50,
+            'apply_markdown': False,
+            'use_first_unread_anchor': True,
+            'client_gravatar': False,
+        }
+        response = self.client.do_api_query(request, '/json/messages', method="GET")
+        messages = []
+        if response['result'] == 'success':
+            self.anchor = response['anchor']
+            for msg in response['messages']:
+                messages.append({
+                    'sender' : msg['sender_full_name'],
+                    'time' : time.ctime(int(msg['timestamp'])),
+                    'stream' : msg['display_recipient'],
+                    'title' : msg['subject'],
+                    'content' : msg['content'],
+                    'type' : msg['type'],
+                })
+        return messages
 
     def get_all_users(self):
         try:
