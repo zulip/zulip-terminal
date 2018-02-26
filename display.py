@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
-
 import time
 from functools import wraps
 from threading import Thread
+from typing import List, Any, Tuple, Dict
 
 import urwid
 import zulip
 
-def async(func):
+def async(func: Any) -> Any:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
@@ -20,12 +19,12 @@ def async(func):
 
 
 class MessageBox(urwid.Pile):
-    def __init__(self, message, model):
+    def __init__(self, message: str, model: Any) -> None:
         self.model = model
         self.message = message
         super(MessageBox, self).__init__(self.main_view())
 
-    def stream_view(self):
+    def stream_view(self) -> Any:
         stream_title = ('header', [
         ('custom', self.message['stream']), 
         ('selected', ">"),
@@ -40,7 +39,7 @@ class MessageBox(urwid.Pile):
         header = urwid.AttrWrap(header, "header")
         return header
 
-    def private_view(self):
+    def private_view(self) -> Any:
         title = ('header', [('custom', 'Private Message')])
         title = urwid.Text(title)
         time = urwid.Text(('custom', self.message['time']), align='right')
@@ -51,7 +50,7 @@ class MessageBox(urwid.Pile):
         header = urwid.AttrWrap(header, "header")
         return header
 
-    def main_view(self):
+    def main_view(self) -> List[Any]:
         if self.message['type'] == 'stream':
             header = self.stream_view()
         else:
@@ -63,18 +62,18 @@ class MessageBox(urwid.Pile):
 
 
 class MessageView(urwid.ListBox):
-    def __init__(self, messages, model):
+    def __init__(self, messages: str, model: Any) -> None:
         self.model = model
         self.messages = messages
         self.log = urwid.SimpleFocusListWalker(self.main_view())
         super(MessageView, self).__init__(self.log)
         self.focus_position = 50
 
-    def main_view(self):
+    def main_view(self) -> List[Any]:
         msg_btn_list = [urwid.AttrMap(MessageBox(item, self.model), None, 'msg_selected') for item in self.messages]
         return msg_btn_list
 
-    def load_old_messages(self):
+    def load_old_messages(self) -> None:
         self.model.num_before += 50
         self.model.messages = self.model.load_old_messages(False)
         new_messages = self.model.messages[:50]
@@ -82,7 +81,7 @@ class MessageView(urwid.ListBox):
         for msg in new_messages:
             self.log.insert(0, urwid.AttrMap(MessageBox(msg, self), None, 'msg_selected'))
 
-    def keypress(self, size, key):
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'down':
             try:
                 self.focus_position = self.log.next_position(self.focus_position)
@@ -102,7 +101,7 @@ class MessageView(urwid.ListBox):
 
 
 class MenuButton(urwid.Button):
-    def __init__(self, caption, email='', view=None, user=False, stream=False):
+    def __init__(self, caption: str, email: str='', view: Any=None, user: str=False, stream: bool=False) -> None:
         self.caption = caption
         self.email = email
         super(MenuButton, self).__init__("")
@@ -115,13 +114,13 @@ class MenuButton(urwid.Button):
 
 
 class WriteBox(urwid.Pile):
-    def __init__(self, view):
+    def __init__(self, view: Any) -> None:
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
         self.to_write_box=None
         self.stream_write_box=None
 
-    def main_view(self, new):
+    def main_view(self, new: bool) -> Any:
         private_button = MenuButton(u"New Private Message")
         urwid.connect_signal(private_button, 'click', self.private_box_view)
         stream_button = MenuButton(u"New Topic")
@@ -135,7 +134,7 @@ class WriteBox(urwid.Pile):
         else:
             self.contents = [(w, self.options())]
 
-    def private_box_view(self, button):
+    def private_box_view(self, button: Any) -> None:
         self.to_write_box = urwid.Edit(u"To: ", edit_text=button.email)
         self.msg_write_box = urwid.Edit(u"> ")
         self.contents = [
@@ -143,7 +142,7 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
 
-    def stream_box_view(self, button):
+    def stream_box_view(self, button: Any) -> None:
         self.msg_write_box = urwid.Edit(u"> ")
         self.stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=button.caption)
         self.title_write_box = urwid.Edit(caption=u"Title:  ")
@@ -158,7 +157,7 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
-    def keypress(self, size, key):
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'enter':
             if not self.to_write_box:
                 request = {
@@ -191,7 +190,7 @@ class ZulipModel(object):
     A class responsible for storing the data to be displayed.
     """
 
-    def __init__(self, controller):
+    def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
         self.anchor = 10000000000000000
@@ -204,7 +203,7 @@ class ZulipModel(object):
 
         self.messages = self.load_old_messages(first_anchor=True)
 
-    def load_old_messages(self, first_anchor):
+    def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
         request = {
             'anchor' : self.anchor,
             'num_before': self.num_before,
@@ -227,7 +226,7 @@ class ZulipModel(object):
                 })
         return messages
 
-    def get_all_users(self):
+    def get_all_users(self) -> List[Tuple[Any, Any]]:
         try:
             users = self.client.get_members()
             users_list = [user for user in users['members'] if user['is_active']]
@@ -238,7 +237,7 @@ class ZulipModel(object):
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
-    def get_subscribed_streams(self):
+    def get_subscribed_streams(self) -> List[str]:
         try :
             streams = self.client.get_streams(include_subscribed=True, include_public=False)
             stream_names = [stream['name'] for stream in streams['streams']]
@@ -247,7 +246,7 @@ class ZulipModel(object):
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
-    def update_messages(self, response):
+    def update_messages(self, response: Dict[str, str]) -> None:
         msg = {
             'sender' : response['sender_full_name'],
             'time' : time.ctime(int(response['timestamp'])),
@@ -272,7 +271,7 @@ class ZulipView(urwid.WidgetWrap):
         ('content', 'white', 'black', 'standout'),
         ]
 
-    def __init__(self, controller):
+    def __init__(self, controller: Any) -> None:
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.get_all_users()
@@ -282,20 +281,20 @@ class ZulipView(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
 
-    def menu_view(self):
+    def menu_view(self) -> None:
         menu_btn_list = [MenuButton(item) for item in self.menu]
 
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
-    def streams_view(self):
+    def streams_view(self) -> Any:
         streams_btn_list = [MenuButton(item, view=self, stream=True) for item in self.streams]
 
         w = urwid.ListBox(urwid.SimpleFocusListWalker(streams_btn_list))
         w = urwid.LineBox(w, title="Streams")
         return w
 
-    def left_column_view(self):
+    def left_column_view(self) -> Any:
         left_column_structure = [
             (4, self.menu_view()),
             self.streams_view(),
@@ -304,24 +303,24 @@ class ZulipView(urwid.WidgetWrap):
         w = urwid.Pile(left_column_structure)
         return w
 
-    def message_view(self):
+    def message_view(self) -> Any:
         self.msg_list = MessageView(self.messages, self.model)
         w = urwid.Frame(self.msg_list, footer=self.write_box)
         w = urwid.LineBox(w)
         return w
 
-    def users_view(self):
+    def users_view(self) -> Any:
         users_btn_list = [MenuButton(item[0], item[1], view=self, user=True) for item in self.users]
 
         w = urwid.ListBox(urwid.SimpleFocusListWalker(users_btn_list))
         return w
 
-    def right_column_view(self):
+    def right_column_view(self) -> Any:
         w = urwid.Frame(self.users_view())
         w = urwid.LineBox(w, title=u"Users")
         return w
 
-    def main_window(self):
+    def main_window(self) -> Any:
         left_column = self.left_column_view()
         center_column = self.message_view()
         right_column = self.right_column_view()
@@ -343,23 +342,16 @@ class ZulipController:
     the application.
     """
 
-    def __init__(self):
-        self.client = zulip.Client(config_file="./zit")
+    def __init__(self, config_file: str) -> None:
+        self.client = zulip.Client(config_file=config_file)
         self.model = ZulipModel(self)
         self.view = ZulipView(self)
 
     @async
-    def update(self):
+    def update(self) -> None:
         self.client.call_on_each_message(self.model.update_messages)
 
-    def main(self):
+    def main(self) -> None:
         self.loop = urwid.MainLoop(self.view, self.view.palette)
         self.update()
         self.loop.run()
-
-
-def main():
-    ZulipController().main()
-
-if '__main__'==__name__:
-    main()
