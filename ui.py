@@ -1,3 +1,4 @@
+import itertools
 from typing import List, Any, Tuple, Dict
 import urwid
 
@@ -5,6 +6,7 @@ from ui_tools import (
     WriteBox,
     MenuButton,
     MessageView,
+    MiddleColumnView,
 )
 
 class ZulipView(urwid.WidgetWrap):
@@ -16,28 +18,30 @@ class ZulipView(urwid.WidgetWrap):
         ('selected', 'white', 'dark blue'),
         ('msg_selected', 'light red', 'black'),
         ('header','dark cyan', 'dark blue', 'bold'),
-        ('custom','light cyan', 'dark blue', 'underline'),
+        ('custom','white', 'dark blue', 'underline'),
         ('content', 'white', 'black', 'standout'),
         ('name', 'yellow', 'black')
         ]
 
     def __init__(self, controller: Any) -> None:
+        self.controller = controller
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.get_all_users()
         self.menu = self.model.menu
-        self.messages = self.model.messages
+        self.narrow = '[]'
+        self.messages = itertools.chain.from_iterable(self.model.messages.values())
         self.streams = self.model.get_subscribed_streams()
         self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
 
     def menu_view(self) -> None:
-        menu_btn_list = [MenuButton(item) for item in self.menu]
+        menu_btn_list = [MenuButton(item, controller=self.controller) for item in self.menu]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
     def streams_view(self) -> Any:
-        streams_btn_list = [MenuButton(item, view=self, stream=True) for item in self.streams]
+        streams_btn_list = [MenuButton(item, controller=self.controller, view=self, stream=True) for item in self.streams]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(streams_btn_list))
         w = urwid.LineBox(w, title="Streams")
         return w
@@ -51,13 +55,12 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def message_view(self) -> Any:
-        self.msg_list = MessageView(self.messages, self.model)
-        w = urwid.Frame(self.msg_list, footer=self.write_box)
+        w = MiddleColumnView(self.messages, self.model, self.write_box)
         w = urwid.LineBox(w)
         return w
 
     def users_view(self) -> Any:
-        users_btn_list = [MenuButton(item[0], item[1], view=self, user=True) for item in self.users]
+        users_btn_list = [MenuButton(item[0], item[1], controller=self.controller, view=self, user=True) for item in self.users]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(users_btn_list))
         return w
 

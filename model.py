@@ -1,8 +1,10 @@
 from typing import Any, List, Tuple, Dict
 import time
 import urwid
+import ujson
 
 from ui_tools import MessageBox
+from helper import classify_message
 
 class ZulipModel(object):
     """
@@ -12,37 +14,76 @@ class ZulipModel(object):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
-        self.anchor = 10000000000000000
+        self.msg_view = None  # List Walker of urwid
+        self.anchor = 0
         self.num_before = 50
         self.num_after = 0
+        self.msg_list = None # Updated by MiddleColumnView
         self.menu = [
             u'All messages',
             u'Private messages',
         ]
+
+        ''' 
+        Stores all the messages, type: Dict[str, Dict[Dict[str, Any]]]
+            Example:
+            {
+                'aman@zulip.com' : [
+                    # List of Messages
+                    {
+                        'sender' : 'Aman Agrawal',
+                        'time' : '8 AM',
+                        'stream':[ # Actually recipient
+                            {
+                                'full_name':'Hamlet of Denmark',
+                                'email':'hamlet@example.com',
+                                'short_name':'hamlet',
+                                'id':31572
+                            }
+                        ],
+                        'title' : '',
+                        'content' : 'HI',
+                        'type' : 'private',
+                        'sender_email' : 'aman@zulip.com',
+                    },
+                    ...
+                ],
+                'integrations' : [
+                    {
+                        'sender' : 'aman',
+                        'time' : '8 AM',
+                        'stream' : 'integrations',
+                        'title' : 'zulip-terminal',
+                        'content' : 'HI',
+                        'type' : 'stream',
+                        'sender_email' : 'aman@zulip.com',
+                    },
+                    ...
+                ],
+                ...
+            }
+        '''
         self.messages = self.load_old_messages(first_anchor=True)
 
     def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
+        if first_anchor:
+            narrow =  '[]'
+        else:
+            narrow = self.controller.view.narrow
         request = {
             'anchor' : self.anchor,
             'num_before': self.num_before,
             'num_after': self.num_after,
             'apply_markdown': False,
-            'use_first_unread_anchor': first_anchor,
+            'use_first_unread_anchor': True,
             'client_gravatar': False,
+            'narrow': narrow,
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
-        messages = []
         if response['result'] == 'success':
-            for msg in response['messages']:
-                messages.append({
-                    'sender' : msg['sender_full_name'],
-                    'time' : time.ctime(int(msg['timestamp'])),
-                    'stream' : msg['display_recipient'],
-                    'title' : msg['subject'],
-                    'content' : msg['content'],
-                    'type' : msg['type'],
-                })
-        return messages
+            if first_anchor:
+                self.anchor = response['anchor']
+            return classify_message(self.client.email, response['messages'])
 
     def get_all_users(self) -> List[Tuple[Any, Any]]:
         try:
@@ -64,12 +105,9 @@ class ZulipModel(object):
             raise urwid.ExitMainLoop()
 
     def update_messages(self, response: Dict[str, str]) -> None:
-        msg = {
-            'sender' : response['sender_full_name'],
-            'time' : time.ctime(int(response['timestamp'])),
-            'stream' : response['display_recipient'],
-            'title' : response['subject'],
-            'content' : response['content'],
-            'type' : response['type'],
-        }
-        self.controller.view.msg_list.log.append(urwid.AttrMap(MessageBox(msg, self), None, 'msg_selected'))
+        cmsg = classify_message(self.client.email, [response])
+        view = self.controller.view
+        key = list(cmsg.keys())[0]
+        self.messages[key] += cmsg[key]
+        if view.narrow == ujson.dumps([]) or ujson.loads(view.narrow)[0][1] == key:
+            self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))

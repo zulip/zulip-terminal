@@ -1,5 +1,17 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Dict
 import urwid
+from time import ctime
+import itertools
+
+# No of MESSAGES LOADED PER REQUEST
+LOAD_MSG = 50
+
+class MiddleColumnView(urwid.Frame):
+    def __init__(self, messages: Any, model: Any, write_box: Any) -> None:
+        msg_list = MessageView(messages, model)
+        model.msg_list = msg_list
+        super(MiddleColumnView, self).__init__(msg_list, footer=write_box)
+
 
 class MessageBox(urwid.Pile):
     def __init__(self, message: str, model: Any) -> None:
@@ -14,7 +26,7 @@ class MessageBox(urwid.Pile):
         ('custom', self.message['title'])
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text(('custom', self.message['time']), align='right')
+        time = urwid.Text(('custom', ctime(self.message['time'])), align='right')
         header = urwid.Columns([
             stream_title,
             time,
@@ -25,7 +37,7 @@ class MessageBox(urwid.Pile):
     def private_view(self) -> Any:
         title = ('header', [('custom', 'Private Message')])
         title = urwid.Text(title)
-        time = urwid.Text(('custom', self.message['time']), align='right')
+        time = urwid.Text(('custom', ctime(self.message['time'])), align='right')
         header = urwid.Columns([
             title,
             time,
@@ -42,26 +54,43 @@ class MessageBox(urwid.Pile):
         content = urwid.Text(content)
         return [header, content]
 
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        if key == 'enter':
+            if self.message['type'] == 'private':
+                self.model.controller.view.write_box.private_box_view(email=self.message['sender_email'])
+            if self.message['type'] == 'stream':
+                self.model.controller.view.write_box.stream_box_view(caption=self.message['stream'], title=self.message['title'])
+        return key
+
 
 class MessageView(urwid.ListBox):
     def __init__(self, messages: str, model: Any) -> None:
         self.model = model
         self.messages = messages
         self.log = urwid.SimpleFocusListWalker(self.main_view())
+
+        # This Function completely controls the messages shown in the MessageView
+        self.model.msg_view = self.log
+
         super(MessageView, self).__init__(self.log)
-        self.focus_position = 50
+
+        # Set Focus to the last message
+        self.focus_position = LOAD_MSG
 
     def main_view(self) -> List[Any]:
-        msg_btn_list = [urwid.AttrMap(MessageBox(item, self.model), None, 'msg_selected') for item in self.messages]
+        msg_btn_list = create_msg_box_list(self.messages, self.model)
         return msg_btn_list
 
     def load_old_messages(self) -> None:
-        self.model.num_before += 50
-        self.model.messages = self.model.load_old_messages(False)
-        new_messages = self.model.messages[:50]
-        new_messages.reverse()
-        for msg in new_messages:
-            self.log.insert(0, urwid.AttrMap(MessageBox(msg, self), None, 'msg_selected'))
+        self.model.num_before += LOAD_MSG
+        new_messages = self.model.load_old_messages(False)
+        new_messages = itertools.chain.from_iterable(new_messages.values())
+        new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
+        for msg in new_messages[self.model.num_before-LOAD_MSG:]:
+            self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'down':
@@ -81,18 +110,22 @@ class MessageView(urwid.ListBox):
         key = super(MessageView, self).keypress(size, key)
         return key
 
-
+# TODO: Create Separate Buttons for streams, users and view.menu
 class MenuButton(urwid.Button):
-    def __init__(self, caption: str, email: str='', view: Any=None, user: str=False, stream: bool=False) -> None:
+    def __init__(self, caption: str, email: str='', controller: Any=None, view: Any=None, user: str=False, stream: bool=False) -> None:
         self.caption = caption
         self.email = email
         super(MenuButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [u'  # ', caption], 0), None, 'selected')
         if stream:
+            urwid.connect_signal(self, 'click', controller.narrow_to_stream)
             urwid.connect_signal(self, 'click', view.write_box.stream_box_view)
         if user:
+            urwid.connect_signal(self, 'click', controller.narrow_to_user)
             urwid.connect_signal(self, 'click', view.write_box.private_box_view)
+        if caption == u'All messages':
+            urwid.connect_signal(self, 'click', controller.show_all_messages)
 
 
 class WriteBox(urwid.Pile):
@@ -116,18 +149,22 @@ class WriteBox(urwid.Pile):
         else:
             self.contents = [(w, self.options())]
 
-    def private_box_view(self, button: Any) -> None:
-        self.to_write_box = urwid.Edit(u"To: ", edit_text=button.email)
+    def private_box_view(self, button: Any=None, email: str='') -> None:
+        if email=='':
+            email = button.email
+        self.to_write_box = urwid.Edit(u"To: ", edit_text=email)
         self.msg_write_box = urwid.Edit(u"> ")
         self.contents = [
             (urwid.LineBox(self.to_write_box), self.options()),
             (self.msg_write_box, self.options()),
         ]
 
-    def stream_box_view(self, button: Any) -> None:
+    def stream_box_view(self, button: Any=None, caption: str='', title: str='') -> None:
+        if caption == '':
+            caption = button.caption
         self.msg_write_box = urwid.Edit(u"> ")
-        self.stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=button.caption)
-        self.title_write_box = urwid.Edit(caption=u"Title:  ")
+        self.stream_write_box = urwid.Edit(caption=u"Stream:  ", edit_text=caption)
+        self.title_write_box = urwid.Edit(caption=u"Title:  ", edit_text=title)
 
         header_write_box = urwid.Columns([
             urwid.LineBox(self.stream_write_box),
@@ -162,3 +199,7 @@ class WriteBox(urwid.Pile):
             self.main_view(False)
         key = super(WriteBox, self).keypress(size, key)
         return key
+
+def create_msg_box_list(messages: List[Dict[str, Any]], model: Any) -> List[Any]:
+    messages = sorted(messages, key=lambda msg: msg['time'])
+    return [urwid.AttrMap(MessageBox(item, model), None, 'msg_selected') for item in messages]
