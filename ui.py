@@ -14,10 +14,11 @@ class ZulipView(urwid.WidgetWrap):
     palette = [
         (None,  'light gray', 'black'),
         ('selected', 'white', 'dark blue'),
-        ('msg_selected', 'light gray', 'dark red','bold'),
+        ('msg_selected', 'light red', 'black'),
         ('header','dark cyan', 'dark blue', 'bold'),
         ('custom','light cyan', 'dark blue', 'underline'),
         ('content', 'white', 'black', 'standout'),
+        ('name', 'yellow', 'black')
         ]
 
     def __init__(self, controller: Any) -> None:

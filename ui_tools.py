@@ -38,8 +38,8 @@ class MessageBox(urwid.Pile):
             header = self.stream_view()
         else:
             header = self.private_view()
-        content = self.message['sender'] + " : " + self.message['content']
-        content = urwid.Text(content.encode('utf-8'))
+        content = [('name', self.message['sender']), "\n" + self.message['content']]
+        content = urwid.Text(content)
         return [header, content]
 
 
