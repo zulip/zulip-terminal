@@ -1,7 +1,7 @@
 from typing import Any, List, Tuple, Dict
 import time
 import urwid
-import ujson
+import json
 
 from ui_tools import MessageBox
 from helper import classify_message
@@ -117,6 +117,6 @@ class ZulipModel(object):
         view = self.controller.view
         key = list(cmsg.keys())[0]
         self.messages[key] += cmsg[key]
-        if view.narrow == ujson.dumps([]) or ujson.loads(view.narrow)[0][1] == key:
+        if view.narrow == json.dumps([]) or json.loads(view.narrow)[0][1] == key:
             self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))
         self.controller.loop.draw_screen()
