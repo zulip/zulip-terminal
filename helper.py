@@ -36,8 +36,11 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
             msg_type = msg['display_recipient'][0]['email']
             pm_with_name = msg['display_recipient'][0]['full_name']
             if msg_type == own_email:
-                msg_type = msg['display_recipient'][1]['email']
-                pm_with_name = msg['display_recipient'][1]['full_name']
+                try:
+                    msg_type = msg['display_recipient'][1]['email']
+                    pm_with_name = msg['display_recipient'][1]['full_name']
+                except IndexError:
+                    pass
 
             if own_email == msg['sender_email']:
                 pm_with_name = "You and " + pm_with_name
