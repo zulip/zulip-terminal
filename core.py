@@ -1,7 +1,7 @@
 import zulip
 import urwid
 from typing import Any
-import ujson
+import json
 import itertools
 
 from ui_tools import create_msg_box_list
@@ -21,7 +21,7 @@ class ZulipController:
         self.view = ZulipView(self)
 
     def narrow_to_stream(self, button: Any) -> None:
-        self.view.narrow = ujson.dumps([['stream', button.caption]])
+        self.view.narrow = json.dumps([['stream', button.caption]])
         self.model.msg_view.clear()
         messages = self.model.messages[button.stream_id]
         if len(messages) == 0:
@@ -31,7 +31,7 @@ class ZulipController:
         self.model.num_before = len(messages)
 
     def narrow_to_user(self, button: Any) -> None:
-        self.view.narrow = ujson.dumps([["pm_with", button.email]])
+        self.view.narrow = json.dumps([["pm_with", button.email]])
         self.model.msg_view.clear()
         messages = self.model.messages[button.email]
         if len(messages) == 0:
@@ -51,7 +51,7 @@ class ZulipController:
         self.model.num_before = len(messages)
 
     def show_all_messages(self, button: Any) -> None:
-        self.view.narrow = ujson.dumps([])
+        self.view.narrow = json.dumps([])
         self.model.msg_view.clear()
         self.model.msg_view.extend(create_msg_box_list(itertools.chain.from_iterable(self.model.messages.values()), self.model))
         self.num_before = len(list(itertools.chain.from_iterable(self.model.messages.values())))

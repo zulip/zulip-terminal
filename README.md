@@ -11,7 +11,8 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
   2. Install the requirements:
   ```
   cd zulip-terminal
-  pip install -r requirements.txt
+  sudo apt-get install python3-pip
+  pip3 install -r requirements.txt
   ```
 
   3. Download the `zuliprc` file into zulip-terminal directory from [Zulip](https://chat.zulip.org/#settings/your-account)
