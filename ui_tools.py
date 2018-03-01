@@ -6,6 +6,37 @@ import itertools
 # No of MESSAGES LOADED PER REQUEST
 LOAD_MSG = 50
 
+class StreamsView(urwid.ListBox):
+    def __init__(self, streams_btn_list: List[Any]) -> None:
+        self.log = urwid.SimpleFocusListWalker(streams_btn_list)
+        super(StreamsView, self).__init__(self.log)
+
+    def mouse_event(self, size, event, button, col, row, focus):
+        if event == 'mouse press':
+            if button == 4:
+                self.keypress(size, 'up')
+                return True
+            if button == 5:
+                self.keypress(size, 'down')
+                return True
+        return super(StreamsView, self).mouse_event(size, event, button, col, row, focus)
+
+class UsersView(urwid.ListBox):
+    def __init__(self, users_btn_list: List[Any]) -> None:
+        self.log = urwid.SimpleFocusListWalker(users_btn_list)
+        super(UsersView, self).__init__(self.log)
+
+    def mouse_event(self, size, event, button, col, row, focus):
+        if event == 'mouse press':
+            if button == 4:
+                for _ in range(5):
+                    self.keypress(size, 'up')
+                return True
+            if button == 5:
+                for _ in range(5):
+                    self.keypress(size, 'down')
+        return super(UsersView, self).mouse_event(size, event, button, col, row, focus)
+
 class MiddleColumnView(urwid.Frame):
     def __init__(self, messages: Any, model: Any, write_box: Any) -> None:
         msg_list = MessageView(messages, model)
@@ -57,6 +88,13 @@ class MessageBox(urwid.Pile):
     def selectable(self):
         return True
 
+    def mouse_event(self, size, event, button, col, row, focus):
+        if event == 'mouse press':
+            if button == 1:
+                self.keypress(size, 'enter')
+                return True
+        return super(MessageBox, self).mouse_event(size, event, button, col, row, focus)
+
     def keypress(self, size, key):
         if key == 'enter':
             if self.message['type'] == 'private':
@@ -92,6 +130,16 @@ class MessageView(urwid.ListBox):
         for msg in new_messages[self.model.num_before-LOAD_MSG:]:
             self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
 
+    def mouse_event(self, size, event, button, col, row, focus):
+        if event == 'mouse press':
+            if button == 4:
+                self.keypress(size, 'up')
+                return True
+            if button == 5:
+                self.keypress(size, 'down')
+                return True
+        return super(MessageView, self).mouse_event(size, event, button, col, row, focus)
+
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'down':
             try:
@@ -110,21 +158,23 @@ class MessageView(urwid.ListBox):
         key = super(MessageView, self).keypress(size, key)
         return key
 
-# TODO: Create Separate Buttons for streams, users and view.menu
 class MenuButton(urwid.Button):
-    def __init__(self, caption: str, email: str='', controller: Any=None, view: Any=None, user: str=False, stream: bool=False) -> None:
-        self.caption = caption
+    def __init__(self, caption: Any, email: str='', controller: Any=None, view: Any=None, user: str=False, stream: bool=False) -> None:
+        self.caption = caption  # str
+        if stream:  # caption = [stream_name, stream_id]
+            self.caption = caption[0]
+            self.stream_id = caption[1]
         self.email = email
         super(MenuButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
-            [u'  # ', caption], 0), None, 'selected')
+            [u'  # ', self.caption], 0), None, 'selected')
         if stream:
             urwid.connect_signal(self, 'click', controller.narrow_to_stream)
             urwid.connect_signal(self, 'click', view.write_box.stream_box_view)
         if user:
             urwid.connect_signal(self, 'click', controller.narrow_to_user)
             urwid.connect_signal(self, 'click', view.write_box.private_box_view)
-        if caption == u'All messages':
+        if self.caption == u'All messages':
             urwid.connect_signal(self, 'click', controller.show_all_messages)
 
 
