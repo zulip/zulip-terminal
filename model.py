@@ -24,11 +24,11 @@ class ZulipModel(object):
             u'Private messages',
         ]
 
-        '''
+        ''' 
         Stores all the messages, type: Dict[str, Dict[Dict[str, Any]]]
             Example:
             {
-                'hamelet@example.com' : [ # Store other user's id in PM (regardless of sender)
+                'aman@zulip.com' : [
                     # List of Messages
                     {
                         'sender' : 'Aman Agrawal',
@@ -39,12 +39,6 @@ class ZulipModel(object):
                                 'email':'hamlet@example.com',
                                 'short_name':'hamlet',
                                 'id':31572
-                            },
-                            {
-                                'full_name': 'Aman Agrawal',
-                                'email' : 'aman@zulip.com',
-                                'short_name' : 'aman',
-                                'id' : '123',
                             }
                         ],
                         'title' : '',
@@ -54,7 +48,7 @@ class ZulipModel(object):
                     },
                     ...
                 ],
-                '89' : [ # Stream ID
+                'integrations' : [
                     {
                         'sender' : 'aman',
                         'time' : '8 AM',
@@ -101,13 +95,11 @@ class ZulipModel(object):
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
-    def get_subscribed_streams(self) -> List[List[str]]:
+    def get_subscribed_streams(self) -> List[str]:
         try :
             streams = self.client.get_streams(include_subscribed=True, include_public=False)
-            # Store Pair of stream name and id's for storing in buttons
-            # this is useful when narrowing to a stream
-            stream_names = [[stream['name'], stream['stream_id']] for stream in streams['streams']]
-            return sorted(stream_names, key=lambda s: s[0].lower())
+            stream_names = [stream['name'] for stream in streams['streams']]
+            return sorted(stream_names, key=str.lower)
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
@@ -119,4 +111,3 @@ class ZulipModel(object):
         self.messages[key] += cmsg[key]
         if view.narrow == ujson.dumps([]) or ujson.loads(view.narrow)[0][1] == key:
             self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))
-        self.controller.loop.draw_screen()

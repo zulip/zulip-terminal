@@ -7,8 +7,6 @@ from ui_tools import (
     MenuButton,
     MessageView,
     MiddleColumnView,
-    StreamsView,
-    UsersView,
 )
 
 class ZulipView(urwid.WidgetWrap):
@@ -44,7 +42,7 @@ class ZulipView(urwid.WidgetWrap):
 
     def streams_view(self) -> Any:
         streams_btn_list = [MenuButton(item, controller=self.controller, view=self, stream=True) for item in self.streams]
-        w = StreamsView(streams_btn_list)
+        w = urwid.ListBox(urwid.SimpleFocusListWalker(streams_btn_list))
         w = urwid.LineBox(w, title="Streams")
         return w
 
@@ -63,7 +61,7 @@ class ZulipView(urwid.WidgetWrap):
 
     def users_view(self) -> Any:
         users_btn_list = [MenuButton(item[0], item[1], controller=self.controller, view=self, user=True) for item in self.users]
-        w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
+        w = urwid.ListBox(urwid.SimpleFocusListWalker(users_btn_list))
         return w
 
     def right_column_view(self) -> Any:
@@ -76,10 +74,10 @@ class ZulipView(urwid.WidgetWrap):
         center_column = self.message_view()
         right_column = self.right_column_view()
         body = [
-            ('weight', 3, left_column),
-            ('weight', 10, center_column),
-            ('weight', 3, right_column),
+            ('weight', 30, left_column),
+            ('weight', 100, center_column),
+            ('weight', 30, right_column),
         ]
-        self.body = urwid.Columns(body, focus_column=1)
-        w = urwid.LineBox(self.body, title=u"Zulip")
+        w = urwid.Columns(body, focus_column=1)
+        w = urwid.LineBox(w, title=u"Zulip")
         return w

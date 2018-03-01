@@ -22,17 +22,13 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
     """
     Classifies messages into their respective types/streams.
     """
-    # Initialize classified_messages
     if classified_messages is None:
-        # defaultdict is used to ease the process of adding new keys
         classified_messages = defaultdict(list)
-
     for msg in new_messages:
-        if msg['type'] == 'stream':
-            msg_type = msg['stream_id']
-            sender = msg['sender_full_name']
-        else:  # Private message
-            # Just a hunch to get the email of the other person in PM
+
+        msg_type = msg['display_recipient']
+        sender = msg['sender_full_name']
+        if msg['type'] == 'private':
             msg_type = msg['display_recipient'][0]['email']
             pm_with_name = msg['display_recipient'][0]['full_name']
             if msg_type == own_email:

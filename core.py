@@ -23,10 +23,10 @@ class ZulipController:
     def narrow_to_stream(self, button: Any) -> None:
         self.view.narrow = ujson.dumps([['stream', button.caption]])
         self.model.msg_view.clear()
-        messages = self.model.messages[button.stream_id]
+        messages = self.model.messages[button.caption]
         if len(messages) == 0:
             classified_msgs = self.model.load_old_messages(False)
-            messages = classified_msgs[button.stream_id]
+            messages = classified_msgs[button.caption]
         self.model.msg_view.extend(create_msg_box_list(messages, self.model))
         self.model.num_before = len(messages)
 
