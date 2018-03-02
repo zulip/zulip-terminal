@@ -28,7 +28,6 @@ class ZulipController:
             classified_msgs = self.model.load_old_messages(False)
             messages = classified_msgs[button.stream_id]
         self.model.msg_view.extend(create_msg_box_list(messages, self.model))
-        self.model.num_before = len(messages)
 
     def narrow_to_user(self, button: Any) -> None:
         self.view.narrow = json.dumps([["pm_with", button.email]])
@@ -46,9 +45,9 @@ class ZulipController:
                     'sender': '',
                     'stream': '',
                     'sender_email': button.email,
+                    'id' : 10000000000,
                 }]
         self.model.msg_view.extend(create_msg_box_list(messages, self.model))
-        self.model.num_before = len(messages)
 
     def show_all_messages(self, button: Any) -> None:
         self.view.narrow = json.dumps([])
