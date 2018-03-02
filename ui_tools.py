@@ -124,12 +124,24 @@ class MessageView(urwid.ListBox):
         self.model.anchor = anchor
         # We don't want message after the current message
         self.model.num_after = 0
+        self.model.num_before = 30
         new_messages = self.model.load_old_messages(False)
         new_messages = itertools.chain.from_iterable(new_messages.values())
         new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
         # Skip the first message as we don't want to display the focused message again
         for msg in new_messages[1:]:
             self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
+
+    def load_new_messages(self, anchor: int) -> None:
+        self.model.anchor = anchor
+        self.model.num_before = 0
+        self.model.num_after = 30
+        new_messages = self.model.load_old_messages(False)
+        new_messages = itertools.chain.from_iterable(new_messages.values())
+        new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
+        # Skip the first message as we don't want to display the focused message again
+        for msg in new_messages[:-1]:
+            self.log.insert(self.focus_position + 1, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
 
     def mouse_event(self, size: Any, event: str, button: int, col: int, row: int, focus: Any) -> Any:
         if event == 'mouse press':
@@ -147,6 +159,8 @@ class MessageView(urwid.ListBox):
                 self.focus_position = self.log.next_position(self.focus_position)
                 return key
             except Exception:
+                if self.focus:
+                    self.load_new_messages(self.focus.original_widget.message['id'])
                 return key
 
         if key == 'up':
@@ -156,6 +170,8 @@ class MessageView(urwid.ListBox):
             except Exception:
                 if self.focus:
                     self.load_old_messages(self.focus.original_widget.message['id'])
+                else:
+                    self.load_old_messages()
                 return key
         key = super(MessageView, self).keypress(size, key)
         return key

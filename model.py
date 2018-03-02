@@ -19,6 +19,7 @@ class ZulipModel(object):
         self.num_before = 30
         self.num_after = 10
         self.msg_list = None  # Updated by MiddleColumnView (ListBox)
+        self.narrow = []
         self.menu = [
             u'All messages',
             u'Private messages',
@@ -72,10 +73,6 @@ class ZulipModel(object):
         self.messages = self.load_old_messages(first_anchor=True)
 
     def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
-        if first_anchor:
-            narrow =  '[]'
-        else:
-            narrow = self.controller.view.narrow
         request = {
             'anchor' : self.anchor,
             'num_before': self.num_before,
@@ -83,7 +80,7 @@ class ZulipModel(object):
             'apply_markdown': False,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
-            'narrow': narrow,
+            'narrow': json.dumps(self.narrow),
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
         if response['result'] == 'success':
@@ -112,9 +109,8 @@ class ZulipModel(object):
 
     def update_messages(self, response: Dict[str, str]) -> None:
         cmsg = classify_message(self.client.email, [response])
-        view = self.controller.view
         key = list(cmsg.keys())[0]
         self.messages[key] += cmsg[key]
-        if view.narrow == json.dumps([]) or json.loads(view.narrow)[0][1] == key:
+        if self.narrow == [] or self.narrow[0][1] == key:
             self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))
         self.controller.loop.draw_screen()
