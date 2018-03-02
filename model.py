@@ -20,6 +20,7 @@ class ZulipModel(object):
         self.num_after = 10
         self.msg_list = None  # Updated by MiddleColumnView (ListBox)
         self.narrow = []
+        self.update = False
         self.menu = [
             u'All messages',
             u'Private messages',
@@ -84,6 +85,8 @@ class ZulipModel(object):
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
         if response['result'] == 'success':
+            if (len(response['messages']) < 41) and first_anchor:
+                self.update = True
             return classify_message(self.client.email, response['messages'])
 
     def get_all_users(self) -> List[Tuple[Any, Any]]:
@@ -110,7 +113,6 @@ class ZulipModel(object):
     def update_messages(self, response: Dict[str, str]) -> None:
         cmsg = classify_message(self.client.email, [response])
         key = list(cmsg.keys())[0]
-        self.messages[key] += cmsg[key]
-        if self.narrow == [] or self.narrow[0][1] == key:
+        if ((self.narrow == []) or (self.narrow[0][1] == key)) and self.update:
             self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))
         self.controller.loop.draw_screen()

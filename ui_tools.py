@@ -137,6 +137,9 @@ class MessageView(urwid.ListBox):
         self.model.num_before = 0
         self.model.num_after = 30
         new_messages = self.model.load_old_messages(False)
+        msgs_length = len(list(itertools.chain.from_iterable(new_messages.values())))
+        if msgs_length < 31:
+            self.model.update = True
         new_messages = itertools.chain.from_iterable(new_messages.values())
         new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
         # Skip the first message as we don't want to display the focused message again
