@@ -26,10 +26,22 @@ def main():
     args = parse_args()
     try:
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
         ZulipController(args.config_file, args.theme).main()
 =======
         ZulipController(args.config_file,args.theme).main()
 >>>>>>> 01e2011... Add Light theme
+=======
+        ZulipController(args.config_file, args.theme).main()
+>>>>>>> bebe8c1... Final Commit
+=======
+        ZulipController(args.config_file,args.theme).main()
+>>>>>>> 01e2011... Add Light theme
+=======
+        ZulipController(args.config_file, args.theme).main()
+>>>>>>> c3f004d... Update with a space
     except KeyboardInterrupt:
         print("\nThanks for using the Zulip-Terminal interface.\n")
         sys.exit(1)

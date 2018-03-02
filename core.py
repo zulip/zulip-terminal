@@ -16,10 +16,22 @@ class ZulipController:
     """
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
     def __init__(self, config_file: str, theme: str) -> None:
 =======
     def __init__(self, config_file: str, theme:str) -> None:
 >>>>>>> 01e2011... Add Light theme
+=======
+    def __init__(self, config_file: str, theme: str) -> None:
+>>>>>>> bebe8c1... Final Commit
+=======
+    def __init__(self, config_file: str, theme:str) -> None:
+>>>>>>> 01e2011... Add Light theme
+=======
+    def __init__(self, config_file: str, theme: str) -> None:
+>>>>>>> 39cbd55... Added space
         self.client = zulip.Client(config_file=config_file)
         self.model = ZulipModel(self)
         self.view = ZulipView(self)
