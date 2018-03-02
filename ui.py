@@ -31,7 +31,6 @@ class ZulipView(urwid.WidgetWrap):
         self.client = controller.client
         self.users = self.model.get_all_users()
         self.menu = self.model.menu
-        self.narrow = '[]'
         self.messages = itertools.chain.from_iterable(self.model.messages.values())
         self.streams = self.model.get_subscribed_streams()
         self.write_box = WriteBox(self)
