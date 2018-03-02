@@ -15,10 +15,27 @@ class ZulipController:
     the application.
     """
 
-    def __init__(self, config_file: str) -> None:
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+    def __init__(self, config_file: str, theme: str) -> None:
+=======
+    def __init__(self, config_file: str, theme:str) -> None:
+>>>>>>> 01e2011... Add Light theme
+=======
+    def __init__(self, config_file: str, theme: str) -> None:
+>>>>>>> bebe8c1... Final Commit
+=======
+    def __init__(self, config_file: str, theme:str) -> None:
+>>>>>>> 01e2011... Add Light theme
+=======
+    def __init__(self, config_file: str, theme: str) -> None:
+>>>>>>> 39cbd55... Added space
         self.client = zulip.Client(config_file=config_file)
         self.model = ZulipModel(self)
         self.view = ZulipView(self)
+        self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:
         self.view.narrow = json.dumps([['stream', button.caption]])
@@ -61,6 +78,13 @@ class ZulipController:
         self.client.call_on_each_message(self.model.update_messages)
 
     def main(self) -> None:
-        self.loop = urwid.MainLoop(self.view, self.view.palette)
+        try:
+            self.loop = urwid.MainLoop(self.view, self.view.palette[self.theme])
+        except KeyError:
+            print ('Following are the themes available:')
+            for theme in self.view.palette.keys():
+                print (theme,) 
+            return
+
         self.update()
         self.loop.run()
