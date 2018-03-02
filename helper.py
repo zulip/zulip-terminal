@@ -54,5 +54,6 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
             'content' : msg['content'],
             'type' : msg['type'],
             'sender_email' : msg['sender_email'],
+            'id' : msg['id'],
         })
     return classified_messages
