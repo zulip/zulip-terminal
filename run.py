@@ -25,7 +25,11 @@ def parse_args():
 def main():
     args = parse_args()
     try:
+<<<<<<< HEAD
         ZulipController(args.config_file, args.theme).main()
+=======
+        ZulipController(args.config_file,args.theme).main()
+>>>>>>> 01e2011... Add Light theme
     except KeyboardInterrupt:
         print("\nThanks for using the Zulip-Terminal interface.\n")
         sys.exit(1)
