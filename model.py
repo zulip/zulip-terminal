@@ -16,9 +16,9 @@ class ZulipModel(object):
         self.client = controller.client
         self.msg_view = None  # List Walker of urwid
         self.anchor = 0
-        self.num_before = 50
-        self.num_after = 0
-        self.msg_list = None # Updated by MiddleColumnView
+        self.num_before = 30
+        self.num_after = 10
+        self.msg_list = None  # Updated by MiddleColumnView (ListBox)
         self.menu = [
             u'All messages',
             u'Private messages',
@@ -81,14 +81,12 @@ class ZulipModel(object):
             'num_before': self.num_before,
             'num_after': self.num_after,
             'apply_markdown': False,
-            'use_first_unread_anchor': True,
+            'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
             'narrow': narrow,
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
         if response['result'] == 'success':
-            if first_anchor:
-                self.anchor = response['anchor']
             return classify_message(self.client.email, response['messages'])
 
     def get_all_users(self) -> List[Tuple[Any, Any]]:
