@@ -29,6 +29,8 @@ class ZulipController:
             self.model.num_before = 30
             classified_msgs = self.model.load_old_messages(True)
             messages = classified_msgs[button.stream_id]
+            if len(messages) < 41:
+                self.model.update = True
             # FIXME EMPTY `messages` on old streams with no new messages
             if len(messages) == 0:
                 messages = [{
@@ -52,6 +54,8 @@ class ZulipController:
             self.model.num_before = 30
             classified_msgs = self.model.load_old_messages(True)
             messages = classified_msgs[button.email]
+            if len(messages) < 41:
+                self.model.update = True
             if len(messages) == 0:
                 messages = [{
                     'content': '  No Messages yet! Why not start the conversation?',
