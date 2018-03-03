@@ -40,6 +40,17 @@ class MiddleColumnView(urwid.Frame):
         model.msg_list = msg_list
         super(MiddleColumnView, self).__init__(msg_list, footer=write_box)
 
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'r':
+            if not self.focus_position == 'footer':
+                self.body.keypress(size, 'enter')
+                self.set_focus('footer')
+                self.footer.focus_position = 1
+                return key
+        if key == 'esc':
+            self.footer.keypress(size, 'esc')
+            self.set_focus('body')
+        return super(MiddleColumnView, self).keypress(size, key)
 
 class MessageBox(urwid.Pile):
     def __init__(self, message: str, model: Any) -> None:

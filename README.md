@@ -24,3 +24,10 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
   ```
 
 
+## Hot Keys
+| Command | Key Combination |
+| ------- | --------------- |
+| Reply to a message | `r` |
+| Move back from Compose box to the message | `esc` |
+
+Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
