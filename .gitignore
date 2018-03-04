@@ -83,3 +83,5 @@ core
 # (Ideally this section is empty.)
 zthumbor/thumbor_local_settings.py
 .transifexrc
+*.py[cod]
+zuliprc
