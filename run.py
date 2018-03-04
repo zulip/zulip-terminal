@@ -17,7 +17,7 @@ def parse_args():
                         help='config file downloaded from your zulip organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme','-t',
                         default='default',
-                        help='choose color theme. (e.g. light)')
+                        help='choose color theme. (e.g. blue, light)')
 
     args = parser.parse_args()
     return args
