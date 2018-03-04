@@ -32,7 +32,16 @@ class ZulipView(urwid.WidgetWrap):
                 ('custom','white', 'dark blue','underline'),
                 ('content','black', 'light gray','standout'),
                 ('name', 'dark magenta', 'light gray','bold'),
-                ],                
+                ],
+                'blue':[
+                (None,  'black', 'light blue'),
+                ('selected','white', 'dark blue'),
+                ('msg_selected', 'black', 'light gray'),
+                ('header','black', 'dark blue','bold'),
+                ('custom','white', 'dark blue','underline'),
+                ('content','black', 'light gray','standout'),
+                ('name', 'dark red', 'light gray','bold'),
+                ]                
             }
 
     def __init__(self, controller: Any) -> None:
