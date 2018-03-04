@@ -16,23 +16,32 @@ class ZulipView(urwid.WidgetWrap):
     A class responsible for providing the application's interface.
     """
     palette = {'default':[
-                (None,  'light gray', 'black'),
-                ('selected', 'white', 'dark blue'),
-                ('msg_selected', 'light red', 'black'),
-                ('header','dark cyan', 'dark blue', 'bold'),
-                ('custom','white', 'dark blue', 'underline'),
-                ('content', 'white', 'black', 'standout'),
-                ('name', 'yellow', 'black')
+                (None,           'light gray',   'black'),
+                ('selected',     'white',        'dark blue'),
+                ('msg_selected', 'light red',    'black'),
+                ('header',       'dark cyan',    'dark blue',  'bold'),
+                ('custom',       'white',        'dark blue',  'underline'),
+                ('content',      'white',        'black',      'standout'),
+                ('name',         'yellow',       'black')
                 ],
                 'light':[
-                (None,  'black', 'white'),
-                ('selected','white', 'dark blue'),
-                ('msg_selected', 'dark blue', 'light gray'),
-                ('header','white', 'dark blue','bold'),
-                ('custom','white', 'dark blue','underline'),
-                ('content','black', 'light gray','standout'),
-                ('name', 'dark magenta', 'light gray','bold'),
-                ],                
+                (None,           'black',        'white'),
+                ('selected',     'white',        'dark blue'),
+                ('msg_selected', 'dark blue',    'light gray'),
+                ('header',       'white',        'dark blue',  'bold'),
+                ('custom',       'white',        'dark blue',  'underline'),
+                ('content',      'black',        'light gray', 'standout'),
+                ('name',         'dark magenta', 'light gray', 'bold'),
+                ],
+                'blue':[
+                (None,           'black',        'light blue'),
+                ('selected',     'white',        'dark blue'),
+                ('msg_selected', 'black',        'light gray'),
+                ('header',       'black',        'dark blue',  'bold'),
+                ('custom',       'white',        'dark blue',  'underline'),
+                ('content',      'black',        'light gray', 'standout'),
+                ('name',         'dark red',     'light gray', 'bold'),
+                ]
             }
 
     def __init__(self, controller: Any) -> None:
