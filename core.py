@@ -15,10 +15,11 @@ class ZulipController:
     the application.
     """
 
-    def __init__(self, config_file: str) -> None:
+    def __init__(self, config_file: str, theme: str) -> None:
         self.client = zulip.Client(config_file=config_file)
         self.model = ZulipModel(self)
         self.view = ZulipView(self)
+        self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:
         self.model.narrow = [['stream', button.caption]]
@@ -72,13 +73,20 @@ class ZulipController:
     def show_all_messages(self, button: Any) -> None:
         self.model.msg_view.clear()
         self.model.msg_view.extend(create_msg_box_list(itertools.chain.from_iterable(self.model.messages.values()), self.model))
-        self.num_before = len(list(itertools.chain.from_iterable(self.model.messages.values())))
+        self.model.narrow = []
 
     @async
     def update(self) -> None:
         self.client.call_on_each_message(self.model.update_messages)
 
     def main(self) -> None:
-        self.loop = urwid.MainLoop(self.view, self.view.palette)
+        try:
+            self.loop = urwid.MainLoop(self.view, self.view.palette[self.theme])
+        except KeyError:
+            print('Following are the themes available:')
+            for theme in self.view.palette.keys():
+                print(theme,)
+            return
+
         self.update()
         self.loop.run()
