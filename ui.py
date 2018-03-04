@@ -5,6 +5,7 @@ import urwid
 from ui_tools import (
     WriteBox,
     MenuButton,
+    StreamButton,
     MessageView,
     MiddleColumnView,
     StreamsView,
@@ -22,7 +23,15 @@ class ZulipView(urwid.WidgetWrap):
                 ('header',       'dark cyan',    'dark blue',  'bold'),
                 ('custom',       'white',        'dark blue',  'underline'),
                 ('content',      'white',        'black',      'standout'),
-                ('name',         'yellow',       'black')
+                ('name',         'yellow',       'black'),
+                ('custom1',      'dark blue',    'black',      'underline'),
+                ('custom2',      'dark cyan',    'black',      'underline'),
+                ('custom3',      'dark green',   'black',      'underline'),
+                ('custom4',      'brown',        'black',      'underline'),
+                ('custom5',      'light blue',   'black',      'underline'),
+                ('custom6',      'light magenta','black',      'underline'),
+                ('custom7',      'light cyan',   'black',      'underline'),
+                ('custom8',      'white',        'black',      'underline')
                 ],
                 'light':[
                 (None,           'black',        'white'),
@@ -61,7 +70,7 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def streams_view(self) -> Any:
-        streams_btn_list = [MenuButton(item, controller=self.controller, view=self, stream=True) for item in self.streams]
+        streams_btn_list = [StreamButton(item, controller=self.controller, view=self, stream=True) for item in self.streams]
         w = StreamsView(streams_btn_list)
         w = urwid.LineBox(w, title="Streams")
         return w

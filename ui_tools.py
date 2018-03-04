@@ -60,7 +60,7 @@ class MessageBox(urwid.Pile):
 
     def stream_view(self) -> Any:
         stream_title = ('header', [
-        ('custom', self.message['stream']), 
+        ('custom', self.message['stream']),
         ('selected', ">"),
         ('custom', self.message['title'])
         ])
@@ -209,6 +209,19 @@ class MenuButton(urwid.Button):
         if self.caption == u'All messages':
             urwid.connect_signal(self, 'click', controller.show_all_messages)
 
+class StreamButton(urwid.Button):
+    i = 0
+    colors = ['custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7', 'custom8']
+    def __init__(self, caption: Any, email: str='', controller: Any=None, view: Any=None, stream: bool=True) -> None:
+        self.caption = caption[0]
+        self.stream_id = caption[1]
+        self.email = email
+        super(StreamButton, self).__init__("")
+        self._w = urwid.AttrMap(urwid.SelectableIcon(
+            [u'  # ', self.caption],0), StreamButton.colors[StreamButton.i])
+        urwid.connect_signal(self, 'click', controller.narrow_to_stream)
+        urwid.connect_signal(self, 'click', view.write_box.stream_box_view)
+        StreamButton.i=(StreamButton.i+1)%8
 
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
