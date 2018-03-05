@@ -50,6 +50,12 @@ class MiddleColumnView(urwid.Frame):
         if key == 'esc':
             self.footer.keypress(size, 'esc')
             self.set_focus('body')
+        if key == 'c':
+            if not self.focus_position == 'footer':
+                self.body.keypress(size, 'c')
+                self.set_focus('footer')
+                self.footer.focus_position = 0
+                return key
         return super(MiddleColumnView, self).keypress(size, key)
 
 class MessageBox(urwid.Pile):
@@ -109,6 +115,11 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.private_box_view(email=self.message['sender_email'])
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(caption=self.message['stream'], title=self.message['title'])
+        if key == 'c':
+            if self.message['type'] == 'private':
+                self.model.controller.view.write_box.private_box_view(email=self.message['sender_email'])
+            if self.message['type'] == 'stream':
+                self.model.controller.view.write_box.stream_box_view(caption=self.message['stream'])
         return key
 
 
