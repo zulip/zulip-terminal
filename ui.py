@@ -22,7 +22,8 @@ class ZulipView(urwid.WidgetWrap):
                 ('header',       'dark cyan',    'dark blue',  'bold'),
                 ('custom',       'white',        'dark blue',  'underline'),
                 ('content',      'white',        'black',      'standout'),
-                ('name',         'yellow',       'black')
+                ('name',         'yellow',       'black'),
+                ('unread',       'black',        'light gray'),
                 ],
                 'light':[
                 (None,           'black',        'white'),
@@ -50,7 +51,7 @@ class ZulipView(urwid.WidgetWrap):
         self.client = controller.client
         self.users = self.model.get_all_users()
         self.menu = self.model.menu
-        self.messages = itertools.chain.from_iterable(self.model.messages.values())
+        self.messages = list(itertools.chain.from_iterable(self.model.messages.values()))
         self.streams = self.model.get_subscribed_streams()
         self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
