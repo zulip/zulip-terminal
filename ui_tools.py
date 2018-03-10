@@ -127,6 +127,7 @@ class MessageView(urwid.ListBox):
     def __init__(self, messages: str, model: Any) -> None:
         self.model = model
         self.messages = messages
+        self.focus_msg = None  # type: int
         self.log = urwid.SimpleFocusListWalker(self.main_view())
 
         # This Function completely controls the messages shown in the MessageView
@@ -135,10 +136,11 @@ class MessageView(urwid.ListBox):
         super(MessageView, self).__init__(self.log)
 
         # Set Focus to the last message
-        self.set_focus(len(self.body) - 1)
+        self.set_focus(self.focus_msg)
 
     def main_view(self) -> List[Any]:
-        msg_btn_list = create_msg_box_list(self.messages, self.model)
+        msg_btn_list, focus_msg = create_msg_box_list(self.messages, self.model)
+        self.focus_msg = focus_msg
         return msg_btn_list
 
     def load_old_messages(self, anchor: int=10000000000) -> None:
@@ -152,21 +154,21 @@ class MessageView(urwid.ListBox):
         new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
         # Skip the first message as we don't want to display the focused message again
         for msg in new_messages[1:]:
-            self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
+            self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model), msg['color'], 'msg_selected'))
 
     def load_new_messages(self, anchor: int) -> None:
         self.model.anchor = anchor
         self.model.num_before = 0
         self.model.num_after = 30
         new_messages = self.model.load_old_messages(False)
-        msgs_length = len(list(itertools.chain.from_iterable(new_messages.values())))
-        if msgs_length < 31:
+        msg_list = list(itertools.chain.from_iterable(new_messages.values()))
+        if len(msg_list) < 31:
             self.model.update = True
-        new_messages = itertools.chain.from_iterable(new_messages.values())
+        new_messages = msg_list
         new_messages = sorted(new_messages, key=lambda msg: msg['time'], reverse=True)
         # Skip the first message as we don't want to display the focused message again
         for msg in new_messages[:-1]:
-            self.log.insert(self.focus_position + 1, urwid.AttrMap(MessageBox(msg, self.model), None, 'msg_selected'))
+            self.log.insert(self.focus_position + 1, urwid.AttrMap(MessageBox(msg, self.model), msg['color'], 'msg_selected'))
 
     def mouse_event(self, size: Any, event: str, button: int, col: int, row: int, focus: Any) -> Any:
         if event == 'mouse press':
@@ -181,7 +183,7 @@ class MessageView(urwid.ListBox):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'down':
             try:
-                self.focus_position = self.log.next_position(self.focus_position)
+                self.set_focus(self.log.next_position(self.focus_position), 'above')
                 return key
             except Exception:
                 if self.focus:
@@ -190,7 +192,7 @@ class MessageView(urwid.ListBox):
 
         if key == 'up':
             try:
-                self.focus_position = self.log.prev_position(self.focus_position)
+                self.set_focus(self.log.prev_position(self.focus_position), 'below')
                 return key
             except Exception:
                 if self.focus:
@@ -225,8 +227,8 @@ class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
-        self.to_write_box=None
-        self.stream_write_box=None
+        self.to_write_box = None
+        self.stream_write_box = None
 
     def main_view(self, new: bool) -> Any:
         private_button = MenuButton(u"New Private Message")
@@ -253,6 +255,7 @@ class WriteBox(urwid.Pile):
         ]
 
     def stream_box_view(self, button: Any=None, caption: str='', title: str='') -> None:
+        self.to_write_box = None
         if caption == '':
             caption = button.caption
         self.msg_write_box = urwid.Edit(u"> ")
@@ -293,6 +296,17 @@ class WriteBox(urwid.Pile):
         key = super(WriteBox, self).keypress(size, key)
         return key
 
-def create_msg_box_list(messages: List[Dict[str, Any]], model: Any) -> List[Any]:
+def create_msg_box_list(messages: List[Dict[str, Any]], model: Any, narrow: bool=False) -> List[Any]:
     messages = sorted(messages, key=lambda msg: msg['time'])
-    return [urwid.AttrMap(MessageBox(item, model), None, 'msg_selected') for item in messages]
+
+    focus_msg_id = model.focus_all_msg
+    if narrow:
+        focus_msg_id = model.focus_narrow
+
+    focus_msg = len(messages)
+    for msg in messages:
+        if msg['id'] == focus_msg_id:
+            focus_msg = messages.index(msg)
+
+    w_list = [urwid.AttrMap(MessageBox(item, model), item['color'], 'msg_selected') for item in messages]
+    return w_list, (focus_msg - 1)

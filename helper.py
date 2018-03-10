@@ -46,14 +46,22 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
                 pm_with_name = "You and " + pm_with_name
             sender = pm_with_name
 
+        msg_flag = 'unread'
+        flags = msg.get('flags')
+        # update_messages sends messages with no flags
+        # but flags are set to [] when fetching old messages.
+        if flags and ('read' in flags):
+            msg_flag = None
+
         classified_messages[msg_type].append({
-            'sender' : sender,
-            'time' : int(msg['timestamp']),
-            'stream' : msg['display_recipient'],
-            'title' : msg['subject'],
-            'content' : msg['content'],
-            'type' : msg['type'],
+            'sender'       : sender,
+            'time'         : int(msg['timestamp']),
+            'stream'       : msg['display_recipient'],
+            'title'        : msg['subject'],
+            'content'      : msg['content'],
+            'type'         : msg['type'],
             'sender_email' : msg['sender_email'],
-            'id' : msg['id'],
+            'id'           : msg['id'],
+            'color'        : msg_flag,
         })
     return classified_messages

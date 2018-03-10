@@ -21,6 +21,10 @@ class ZulipModel(object):
         self.msg_list = None  # Updated by MiddleColumnView (ListBox)
         self.narrow = []
         self.update = False
+        # ID of the message to select when viewing all messages.
+        self.focus_all_msg = -1
+        # ID of the message to select when in a narrow.
+        self.focus_narrow = -1
         self.menu = [
             u'All messages',
             u'Private messages',
@@ -85,8 +89,15 @@ class ZulipModel(object):
         }
         response = self.client.do_api_query(request, '/json/messages', method="GET")
         if response['result'] == 'success':
-            if (len(response['messages']) < 41) and first_anchor:
-                self.update = True
+
+            if first_anchor:
+                self.focus_narrow = response['anchor']
+                if self.narrow == []:
+                    self.focus_all_msg = response['anchor']
+
+                if (len(response['messages']) < 41):
+                    self.update = True
+
             return classify_message(self.client.email, response['messages'])
 
     def get_all_users(self) -> List[Tuple[Any, Any]]:
@@ -114,5 +125,5 @@ class ZulipModel(object):
         cmsg = classify_message(self.client.email, [response])
         key = list(cmsg.keys())[0]
         if ((self.narrow == []) or (self.narrow[0][1] == key)) and self.update:
-            self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), None, 'msg_selected'))
+            self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), cmsg[key][0]['color'], 'msg_selected'))
         self.controller.loop.draw_screen()
