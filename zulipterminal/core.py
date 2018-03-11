@@ -4,10 +4,10 @@ from typing import Any
 import json
 import itertools
 
-from ui_tools import create_msg_box_list
-from helper import async
-from model import ZulipModel
-from ui import ZulipView
+from zulipterminal.ui_tools import create_msg_box_list
+from zulipterminal.helper import async
+from zulipterminal.model import ZulipModel
+from zulipterminal.ui import ZulipView
 
 class ZulipController:
     """

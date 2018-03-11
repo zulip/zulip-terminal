@@ -2,7 +2,7 @@ from typing import Any, List, Tuple, Dict
 import urwid
 from time import ctime
 import itertools
-from helper import update_flag
+from zulipterminal.helper import update_flag
 
 class StreamsView(urwid.ListBox):
     def __init__(self, streams_btn_list: List[Any]) -> None:

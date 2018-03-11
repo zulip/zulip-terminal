@@ -85,3 +85,6 @@ zthumbor/thumbor_local_settings.py
 .transifexrc
 *.py[cod]
 zuliprc
+.pytest_cache/*
+cov_html/*
+.coverage
