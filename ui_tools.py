@@ -2,6 +2,7 @@ from typing import Any, List, Tuple, Dict
 import urwid
 from time import ctime
 import itertools
+from helper import update_flag
 
 class StreamsView(urwid.ListBox):
     def __init__(self, streams_btn_list: List[Any]) -> None:
@@ -18,6 +19,7 @@ class StreamsView(urwid.ListBox):
                 return True
         return super(StreamsView, self).mouse_event(size, event, button, col, row, focus)
 
+
 class UsersView(urwid.ListBox):
     def __init__(self, users_btn_list: List[Any]) -> None:
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
@@ -33,6 +35,7 @@ class UsersView(urwid.ListBox):
                 for _ in range(5):
                     self.keypress(size, 'down')
         return super(UsersView, self).mouse_event(size, event, button, col, row, focus)
+
 
 class MiddleColumnView(urwid.Frame):
     def __init__(self, messages: Any, model: Any, write_box: Any) -> None:
@@ -57,6 +60,7 @@ class MiddleColumnView(urwid.Frame):
                 self.footer.focus_position = 0
                 return key
         return super(MiddleColumnView, self).keypress(size, key)
+
 
 class MessageBox(urwid.Pile):
     def __init__(self, message: str, model: Any) -> None:
@@ -129,7 +133,7 @@ class MessageView(urwid.ListBox):
         self.messages = messages
         self.focus_msg = None  # type: int
         self.log = urwid.SimpleFocusListWalker(self.main_view())
-
+        urwid.connect_signal(self.log, 'modified', self.read_message)
         # This Function completely controls the messages shown in the MessageView
         self.model.msg_view = self.log
 
@@ -202,6 +206,22 @@ class MessageView(urwid.ListBox):
                 return key
         key = super(MessageView, self).keypress(size, key)
         return key
+
+    def read_message(self):
+        # Message currently in focus
+        msg_w, curr_pos = self.body.get_focus()
+        if msg_w is None:
+            return
+        # msg ids that have been read
+        read_msg_ids = list()  # type: List[int]
+        # until we find a read message above the current message
+        while msg_w.original_widget.message['color'] == 'unread':
+            read_msg_ids.append(msg_w.original_widget.message['id'])
+            msg_w.set_attr_map({None : None})
+            msg_w, curr_pos = self.body.get_prev(curr_pos)
+            if msg_w is None:
+                break
+        update_flag(read_msg_ids, self.model.controller.client)
 
 class MenuButton(urwid.Button):
     def __init__(self, caption: Any, email: str='', controller: Any=None, view: Any=None, user: str=False, stream: bool=False) -> None:
