@@ -3,8 +3,8 @@ import time
 import urwid
 import json
 
-from ui_tools import MessageBox
-from helper import classify_message
+from zulipterminal.ui_tools import MessageBox
+from zulipterminal.helper import classify_message
 
 class ZulipModel(object):
     """
