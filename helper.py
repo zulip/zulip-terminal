@@ -65,3 +65,14 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
             'color'        : msg_flag,
         })
     return classified_messages
+
+@async
+def update_flag(id_list: List[int], client: Any) -> None:
+    if id_list == []:
+        return
+    request = {
+        'messages' : id_list,
+        'flag' : 'read',
+        'op' : 'add',
+    }
+    client.do_api_query(request, '/json/messages/flags', method="POST")
