@@ -31,3 +31,13 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 | Move back from Compose box to the message | `esc` |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
+
+### Running tests
+* To run all tests:
+```
+pytest
+```
+* To generate coverage report for tests:
+```
+pytest --cov-report html:cov_html --cov=./
+```

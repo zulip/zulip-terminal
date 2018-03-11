@@ -2,7 +2,7 @@ import itertools
 from typing import List, Any, Tuple, Dict
 import urwid
 
-from ui_tools import (
+from zulipterminal.ui_tools import (
     WriteBox,
     MenuButton,
     MessageView,
