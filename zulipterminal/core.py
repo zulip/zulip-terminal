@@ -49,6 +49,23 @@ class ZulipController:
         self.model.msg_view.extend(w_list)
         self.model.msg_list.set_focus(focus_msg)
 
+
+    def narrow_to_topic(self, button: Any) -> None:
+        if self.model.narrow == [['stream', button.caption], ['topic', button.title]]:
+            return
+        self.model.narrow = [["stream", button.caption], ["topic", button.title]]
+        self.model.num_after = 10
+        self.model.num_before = 30
+        classified_msgs = self.model.load_old_messages(True)
+        messages = list(itertools.chain.from_iterable(classified_msgs.values()))
+        if len(messages) < 41:
+            self.model.update = True
+        w_list, focus_msg = create_msg_box_list(messages, self.model, narrow=True)
+        self.model.msg_view.clear()
+        self.model.msg_view.extend(w_list)
+        self.model.msg_list.set_focus(focus_msg)
+
+
     def narrow_to_user(self, button: Any) -> None:
         if self.model.narrow == [["pm_with", button.email]]:
             return
