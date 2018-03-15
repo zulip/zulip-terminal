@@ -29,8 +29,8 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 | Reply to a message | `r` |
 | New stream message | `c` |
 | Move back from Compose box to the message | `esc` |
-| Narrow to a stream | `s` |
-| Narrow to a topic | `S` |
+| Narrow to a stream | `S` |
+| Narrow to a topic | `s` |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
