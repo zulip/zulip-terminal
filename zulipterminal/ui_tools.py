@@ -147,12 +147,12 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['stream']
                     )
-        if key == 's':
+        if key == 'S':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             if self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
-        if key == 'S':
+        if key == 's':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             if self.message['type'] == 'stream':
