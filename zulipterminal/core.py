@@ -22,6 +22,8 @@ class ZulipController:
         self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:
+        if self.model.narrow == [['stream', button.caption]]:
+            return
         self.model.narrow = [['stream', button.caption]]
         self.model.num_after = 10
         self.model.num_before = 30
@@ -48,6 +50,8 @@ class ZulipController:
         self.model.msg_list.set_focus(focus_msg)
 
     def narrow_to_user(self, button: Any) -> None:
+        if self.model.narrow == [["pm_with", button.email]]:
+            return
         self.model.narrow = [["pm_with", button.email]]
         self.model.num_after = 10
         self.model.num_before = 30
