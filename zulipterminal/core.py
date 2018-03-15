@@ -80,10 +80,6 @@ class ZulipController:
         self.model.msg_list.set_focus(focus_msg)
         self.model.narrow = []
 
-    @async
-    def update(self) -> None:
-        self.client.call_on_each_message(self.model.update_messages)
-
     def main(self) -> None:
         try:
             self.loop = urwid.MainLoop(self.view, self.view.palette[self.theme])
@@ -93,5 +89,4 @@ class ZulipController:
                 print(theme,)
             return
 
-        self.update()
         self.loop.run()
