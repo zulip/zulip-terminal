@@ -1,10 +1,11 @@
-from typing import Any, List, Tuple, Dict
 import time
 import urwid
 import json
+from collections import defaultdict
+from typing import Any, List, Tuple, Dict
 
 from zulipterminal.ui_tools import MessageBox
-from zulipterminal.helper import classify_message
+from zulipterminal.helper import classify_message, async
 
 class ZulipModel(object):
     """
@@ -75,7 +76,16 @@ class ZulipModel(object):
                 ...
             }
         '''
+        # TODO: make initial fetch async so that no message is lost
+        #       when the messages are being fetched.
+        self.initial_update = list()
+        self.update_new_message()
         self.messages = self.load_old_messages(first_anchor=True)
+        self.messages = classify_message(self.client.email, self.initial_update, self.messages)
+
+    @async
+    def update_new_message(self) -> None:
+        self.client.call_on_each_message(self.update_messages)
 
     def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
         request = {
@@ -122,8 +132,14 @@ class ZulipModel(object):
             raise urwid.ExitMainLoop()
 
     def update_messages(self, response: Dict[str, str]) -> None:
-        cmsg = classify_message(self.client.email, [response])
-        key = list(cmsg.keys())[0]
-        if ((self.narrow == []) or (self.narrow[0][1] == key)) and self.update:
-            self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), cmsg[key][0]['color'], 'msg_selected'))
-        self.controller.loop.draw_screen()
+        if hasattr(self.controller, 'view'):
+            cmsg = classify_message(self.client.email, [response])
+            key = list(cmsg.keys())[0]
+            if ((self.narrow == []) or (self.narrow[0][1] == key)) and self.update:
+                self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), cmsg[key][0]['color'], 'msg_selected'))
+            self.controller.loop.draw_screen()
+        else:
+            if hasattr(self, 'messages'):
+                self.messages = classify_message(self.client.email, [response], self.messages)
+            else:
+                self.initial_update.append(response)
