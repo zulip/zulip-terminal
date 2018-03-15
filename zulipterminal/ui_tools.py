@@ -68,12 +68,14 @@ class MessageBox(urwid.Pile):
         self.message = message
         self.caption = None
         self.stream_id = None
+        self.title = None
         self.email = None
         super(MessageBox, self).__init__(self.main_view())
 
     def stream_view(self) -> Any:
         self.caption = self.message['stream']
         self.stream_id = self.message['stream_id']
+        self.title = self.message['title']
         stream_title = ('header', [
         ('custom', self.message['stream']),
         ('selected', ">"),
@@ -135,6 +137,13 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_user(self)
             if self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
+        if key == 'S':
+            if self.message['type'] == 'private':
+                self.model.controller.narrow_to_user(self)
+            if self.message['type'] == 'stream':
+                self.model.controller.narrow_to_topic(self)
+        if key == 'esc':
+            self.model.controller.show_all_messages(self)
         return key
 
 
