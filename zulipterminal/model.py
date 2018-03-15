@@ -7,6 +7,7 @@ from typing import Any, List, Tuple, Dict
 from zulipterminal.ui_tools import MessageBox
 from zulipterminal.helper import classify_message, async
 
+
 class ZulipModel(object):
     """
     A class responsible for storing the data to be displayed.
@@ -35,7 +36,8 @@ class ZulipModel(object):
         Stores all the messages, type: Dict[str, Dict[Dict[str, Any]]]
             Example:
             {
-                'hamelet@example.com' : [ # Store other user's id in PM (regardless of sender)
+                'hamelet@example.com' : [ # Store other user's id in PM
+                                          # (regardless of sender)
                     # List of Messages
                     {
                         'sender' : 'Aman Agrawal',
@@ -81,7 +83,8 @@ class ZulipModel(object):
         self.initial_update = list()
         self.update_new_message()
         self.messages = self.load_old_messages(first_anchor=True)
-        self.messages = classify_message(self.client.email, self.initial_update, self.messages)
+        self.messages = classify_message(self.client.email,
+                                         self.initial_update, self.messages)
 
     @async
     def update_new_message(self) -> None:
@@ -89,7 +92,7 @@ class ZulipModel(object):
 
     def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
         request = {
-            'anchor' : self.anchor,
+            'anchor': self.anchor,
             'num_before': self.num_before,
             'num_after': self.num_after,
             'apply_markdown': False,
@@ -97,7 +100,8 @@ class ZulipModel(object):
             'client_gravatar': False,
             'narrow': json.dumps(self.narrow),
         }
-        response = self.client.do_api_query(request, '/json/messages', method="GET")
+        response = self.client.do_api_query(request, '/json/messages',
+                                            method="GET")
         if response['result'] == 'success':
 
             if first_anchor:
@@ -113,19 +117,27 @@ class ZulipModel(object):
     def get_all_users(self) -> List[Tuple[Any, Any]]:
         try:
             users = self.client.get_members()
-            users_list = [user for user in users['members'] if user['is_active']]
+            users_list = [
+                user for user in users['members'] if user['is_active']
+                ]
             users_list.sort(key=lambda x: x['full_name'].lower())
-            return [(user['full_name'][:20], user['email']) for user in users_list]
+            return [
+                (user['full_name'][:20], user['email']) for user in users_list
+                ]
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
     def get_subscribed_streams(self) -> List[List[str]]:
-        try :
-            streams = self.client.get_streams(include_subscribed=True, include_public=False)
+        try:
+            streams = self.client.get_streams(include_subscribed=True,
+                                              include_public=False)
             # Store Pair of stream name and id's for storing in buttons
             # this is useful when narrowing to a stream
-            stream_names = [[stream['name'], stream['stream_id']] for stream in streams['streams']]
+            stream_names = [[
+                stream['name'],
+                stream['stream_id']
+                ] for stream in streams['streams']]
             return sorted(stream_names, key=lambda s: s[0].lower())
         except Exception:
             print("Invalid API key")
@@ -135,11 +147,20 @@ class ZulipModel(object):
         if hasattr(self.controller, 'view'):
             cmsg = classify_message(self.client.email, [response])
             key = list(cmsg.keys())[0]
-            if ((self.narrow == []) or (self.narrow[0][1] == key)) and self.update:
-                self.msg_list.log.append(urwid.AttrMap(MessageBox(cmsg[key][0], self), cmsg[key][0]['color'], 'msg_selected'))
+            if ((self.narrow == []) or (self.narrow[0][1] == key)) and\
+                    self.update:
+                self.msg_list.log.append(
+                    urwid.AttrMap(
+                        MessageBox(
+                            cmsg[key][0], self
+                            ),
+                        cmsg[key][0]['color'],
+                        'msg_selected')
+                    )
             self.controller.loop.draw_screen()
         else:
             if hasattr(self, 'messages'):
-                self.messages = classify_message(self.client.email, [response], self.messages)
+                self.messages = classify_message(self.client.email, [response],
+                                                 self.messages)
             else:
                 self.initial_update.append(response)

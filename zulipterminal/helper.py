@@ -7,6 +7,7 @@ import urwid
 CMSG = Dict[str, List[Dict[str, Any]]]  # Classified Messages
 NMSGL = List[Dict[str, Any]]  # Normal Message List
 
+
 def async(func: Any) -> Any:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
@@ -18,7 +19,9 @@ def async(func: Any) -> Any:
         return thread.start()
     return wrapper
 
-def classify_message(own_email: str, new_messages: NMSGL, classified_messages: CMSG=None) -> CMSG:
+
+def classify_message(own_email: str, new_messages: NMSGL,
+                     classified_messages: CMSG=None) -> CMSG:
     """
     Classifies messages into their respective types/streams.
     """
@@ -54,26 +57,27 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
             msg_flag = None
 
         classified_messages[msg_type].append({
-            'sender'       : sender,
-            'time'         : int(msg['timestamp']),
-            'stream'       : msg['display_recipient'],
-            'title'        : msg['subject'],
-            'content'      : msg['content'],
-            'type'         : msg['type'],
-            'sender_email' : msg['sender_email'],
-            'id'           : msg['id'],
-            'color'        : msg_flag,
-            'stream_id'    : msg_type,
+            'sender': sender,
+            'time': int(msg['timestamp']),
+            'stream': msg['display_recipient'],
+            'title': msg['subject'],
+            'content': msg['content'],
+            'type': msg['type'],
+            'sender_email': msg['sender_email'],
+            'id': msg['id'],
+            'color': msg_flag,
+            'stream_id': msg_type,
         })
     return classified_messages
+
 
 @async
 def update_flag(id_list: List[int], client: Any) -> None:
     if id_list == []:
         return
     request = {
-        'messages' : id_list,
-        'flag' : 'read',
-        'op' : 'add',
+        'messages': id_list,
+        'flag': 'read',
+        'op': 'add',
     }
     client.do_api_query(request, '/json/messages/flags', method="POST")

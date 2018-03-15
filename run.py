@@ -4,23 +4,26 @@ import sys
 
 from zulipterminal.core import ZulipController
 
+
 def parse_args():
     description = '''
         Starts Zulip-Terminal.
         '''
-
+    formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=description,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+                                     formatter_class=formatter_class)
 
     parser.add_argument('--config-file', '-c',
                         action='store',
-                        help='config file downloaded from your zulip organization.(e.g. ~/zuliprc)')
-    parser.add_argument('--theme','-t',
+                        help='config file downloaded from your zulip\
+                             organization.(e.g. ~/zuliprc)')
+    parser.add_argument('--theme', '-t',
                         default='default',
                         help='choose color theme. (e.g. blue, light)')
 
     args = parser.parse_args()
     return args
+
 
 def main():
     args = parse_args()
