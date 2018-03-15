@@ -9,6 +9,7 @@ from zulipterminal.helper import async
 from zulipterminal.model import ZulipModel
 from zulipterminal.ui import ZulipView
 
+
 class ZulipController:
     """
     A class responsible for setting up the model and view and running
@@ -34,37 +35,41 @@ class ZulipController:
         # FIXME EMPTY `messages` on old streams with no new messages
         if len(messages) == 0:
             messages = [{
-                'content': '  No Messages yet! Why not start the conversation?',
+                'content': ' No Messages yet! Why not start the conversation?',
                 'title': '',
                 'type': 'stream',
                 'time': 0,
                 'sender': '',
                 'stream': button.caption,
                 'sender_email': '',
-                'id' : 10000000000,
-                'color' : None
+                'id': 10000000000,
+                'color': None
             }]
-        w_list, focus_msg = create_msg_box_list(messages, self.model, narrow=True)
+        w_list, focus_msg = create_msg_box_list(messages, self.model,
+                                                narrow=True)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         self.model.msg_list.set_focus(focus_msg)
 
-
     def narrow_to_topic(self, button: Any) -> None:
-        if self.model.narrow == [['stream', button.caption], ['topic', button.title]]:
+        if self.model.narrow == [['stream', button.caption],
+                                 ['topic', button.title]]:
             return
-        self.model.narrow = [["stream", button.caption], ["topic", button.title]]
+        self.model.narrow = [["stream", button.caption],
+                             ["topic", button.title]]
         self.model.num_after = 10
         self.model.num_before = 30
         classified_msgs = self.model.load_old_messages(True)
-        messages = list(itertools.chain.from_iterable(classified_msgs.values()))
+        messages = list(
+            itertools.chain.from_iterable(classified_msgs.values())
+            )
         if len(messages) < 41:
             self.model.update = True
-        w_list, focus_msg = create_msg_box_list(messages, self.model, narrow=True)
+        w_list, focus_msg = create_msg_box_list(messages, self.model,
+                                                narrow=True)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         self.model.msg_list.set_focus(focus_msg)
-
 
     def narrow_to_user(self, button: Any) -> None:
         if self.model.narrow == [["pm_with", button.email]]:
@@ -78,17 +83,18 @@ class ZulipController:
             self.model.update = True
         if len(messages) == 0:
             messages = [{
-                'content': '  No Messages yet! Why not start the conversation?',
+                'content': ' No Messages yet! Why not start the conversation?',
                 'title': '',
                 'type': 'private',
                 'time': 0,
                 'sender': '',
                 'stream': '',
                 'sender_email': button.email,
-                'id' : 10000000000,
-                'color' : None,
+                'id': 10000000000,
+                'color': None,
             }]
-        w_list, focus_msg = create_msg_box_list(messages, self.model, narrow=True)
+        w_list, focus_msg = create_msg_box_list(messages, self.model,
+                                                narrow=True)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         self.model.msg_list.set_focus(focus_msg)
@@ -108,17 +114,21 @@ class ZulipController:
         self.model.num_after = 10
         self.model.num_before = 30
         classified_msgs = self.model.load_old_messages(True)
-        messages = list(itertools.chain.from_iterable(classified_msgs.values()))
+        messages = list(itertools.chain.from_iterable(
+                                            classified_msgs.values()
+                                        ))
         if len(messages) < 41:
             self.model.update = True
-        w_list, focus_msg = create_msg_box_list(messages, self.model, narrow=True)
+        w_list, focus_msg = create_msg_box_list(messages, self.model,
+                                                narrow=True)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         self.model.msg_list.set_focus(focus_msg)
 
     def main(self) -> None:
         try:
-            self.loop = urwid.MainLoop(self.view, self.view.palette[self.theme])
+            self.loop = urwid.MainLoop(self.view,
+                                       self.view.palette[self.theme])
         except KeyError:
             print('Following are the themes available:')
             for theme in self.view.palette.keys():
