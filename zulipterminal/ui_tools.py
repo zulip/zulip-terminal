@@ -261,6 +261,8 @@ class MenuButton(urwid.Button):
             urwid.connect_signal(self, 'click', view.write_box.private_box_view)
         if self.caption == u'All messages':
             urwid.connect_signal(self, 'click', controller.show_all_messages)
+        if self.caption == u'Private messages':
+            urwid.connect_signal(self, 'click', controller.show_all_pm)
 
 
 class WriteBox(urwid.Pile):
