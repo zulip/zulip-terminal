@@ -66,11 +66,16 @@ class MessageBox(urwid.Pile):
     def __init__(self, message: str, model: Any) -> None:
         self.model = model
         self.message = message
+        self.caption = None
+        self.stream_id = None
+        self.email = None
         super(MessageBox, self).__init__(self.main_view())
 
     def stream_view(self) -> Any:
+        self.caption = self.message['stream']
+        self.stream_id = self.message['stream_id']
         stream_title = ('header', [
-        ('custom', self.message['stream']), 
+        ('custom', self.message['stream']),
         ('selected', ">"),
         ('custom', self.message['title'])
         ])
@@ -84,6 +89,7 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_view(self) -> Any:
+        self.email = self.message['sender_email']
         title = ('header', [('custom', 'Private Message')])
         title = urwid.Text(title)
         time = urwid.Text(('custom', ctime(self.message['time'])), align='right')
@@ -124,6 +130,11 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.private_box_view(email=self.message['sender_email'])
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(caption=self.message['stream'])
+        if key == 's':
+            if self.message['type'] == 'private':
+                self.model.controller.narrow_to_user(self)
+            if self.message['type'] == 'stream':
+                self.model.controller.narrow_to_stream(self)
         return key
 
 

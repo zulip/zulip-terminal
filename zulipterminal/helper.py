@@ -63,6 +63,7 @@ def classify_message(own_email: str, new_messages: NMSGL, classified_messages: C
             'sender_email' : msg['sender_email'],
             'id'           : msg['id'],
             'color'        : msg_flag,
+            'stream_id'    : msg_type,
         })
     return classified_messages
 
