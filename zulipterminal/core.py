@@ -163,6 +163,7 @@ class ZulipController:
         try:
             self.loop = urwid.MainLoop(self.view,
                                        self.view.palette[self.theme])
+            self.loop.screen.set_terminal_properties(colors=256)
         except KeyError:
             print('Following are the themes available:')
             for theme in self.view.palette.keys():

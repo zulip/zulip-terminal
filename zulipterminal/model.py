@@ -85,6 +85,7 @@ class ZulipModel(object):
         self.messages = self.load_old_messages(first_anchor=True)
         self.messages = classify_message(self.client.email,
                                          self.initial_update, self.messages)
+        self.initial_data = self.fetch_initial_data()
 
     @async
     def update_new_message(self) -> None:
@@ -114,34 +115,62 @@ class ZulipModel(object):
 
             return classify_message(self.client.email, response['messages'])
 
-    def get_all_users(self) -> List[Tuple[Any, Any]]:
+    def fetch_initial_data(self):
         try:
-            users = self.client.get_members()
-            users_list = [
-                user for user in users['members'] if user['is_active']
-                ]
-            users_list.sort(key=lambda x: x['full_name'].lower())
-            return [
-                (user['full_name'][:20], user['email']) for user in users_list
-                ]
+            result = self.client.register(
+                fetch_event_types=[
+                    'presence',
+                    'subscription',
+                    'realm_user',
+                    ],
+            )
+            return result
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
+    def get_all_users(self) -> List[Tuple[Any, Any]]:
+        # All the users in the realm
+        users = self.initial_data['realm_users']
+        user_dict = dict()
+        # store the relevant info for a user in Dict[Dict[str, Any]] format.
+        for user in users:
+            user_dict[user['email']] = {
+                'full_name' : user['full_name'],
+                'email' : user['email'],
+                'status' : 'idle',
+            }
+        # The to display
+        user_list = list()
+        # List which stores the active/idle status of users
+        presences = self.initial_data['presences']
+        # sort the list according to the full name of users.
+        presence_list = sorted(
+            presences.keys(),
+            key=lambda p: user_dict[p]['full_name'].lower()
+            )
+        for user in presence_list:
+            # if the user is active append it to the list
+            if presences[user]['aggregated']['status'] == 'active':
+                user_dict[user]['status'] = 'active'
+                user_list.append(user_dict[user])
+                # remove the user from dictionary
+                user_dict.pop(user)
+        # add the remaining users to the list.
+        user_list += sorted(user_dict.values(),
+                            key=lambda u: u['full_name'].lower(),
+                    )
+        return user_list
+
     def get_subscribed_streams(self) -> List[List[str]]:
-        try:
-            streams = self.client.get_streams(include_subscribed=True,
-                                              include_public=False)
-            # Store Pair of stream name and id's for storing in buttons
-            # this is useful when narrowing to a stream
-            stream_names = [[
-                stream['name'],
-                stream['stream_id']
-                ] for stream in streams['streams']]
-            return sorted(stream_names, key=lambda s: s[0].lower())
-        except Exception:
-            print("Invalid API key")
-            raise urwid.ExitMainLoop()
+        subscriptions = self.initial_data['subscriptions']
+        stream_names = [[
+            stream['name'],
+            stream['stream_id'],
+            stream['color'],
+            ] for stream in subscriptions
+        ]
+        return sorted(stream_names, key=lambda s: s[0].lower())
 
     def update_messages(self, response: Dict[str, str]) -> None:
         if hasattr(self.controller, 'view'):
