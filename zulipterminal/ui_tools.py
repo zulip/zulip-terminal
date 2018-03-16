@@ -382,12 +382,14 @@ class WriteBox(urwid.Pile):
 
 
 def create_msg_box_list(messages: List[Dict[str, Any]], model: Any,
-                        narrow: bool=False) -> List[Any]:
+                        narrow: bool=False, id: int=None) -> List[Any]:
     messages = sorted(messages, key=lambda msg: msg['time'])
 
     focus_msg_id = model.focus_all_msg
     if narrow:
         focus_msg_id = model.focus_narrow
+    if id is not None:
+        focus_msg_id = id
 
     focus_msg = len(messages)
     for msg in messages:
