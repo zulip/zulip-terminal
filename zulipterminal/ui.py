@@ -19,13 +19,15 @@ class ZulipView(urwid.WidgetWrap):
     palette = {
         'default': [
                 (None,           'light gray',   'black'),
-                ('selected',     'light magenta',        'dark blue'),
+                ('selected',     'light magenta','dark blue'),
                 ('msg_selected', 'light red',    'black'),
                 ('header',       'dark cyan',    'dark blue',  'bold'),
                 ('custom',       'white',        'dark blue',  'underline'),
                 ('content',      'white',        'black',      'standout'),
                 ('name',         'yellow',       'black'),
                 ('unread',       'black',        'light gray'),
+                ('active',       'white',        'black'),
+                ('idle',         'yellow',       'black')
                 ],
         'light': [
                 (None,           'black',        'white'),
@@ -96,13 +98,16 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def users_view(self) -> Any:
+        with open('ab', 'w') as f:
+            f.write(str(self.users))
         users_btn_list = [
                 MenuButton(
-                    item[0],
-                    item[1],
+                    item['full_name'],
+                    item['email'],
                     controller=self.controller,
                     view=self,
-                    user=True
+                    user=True,
+                    color=item['status']
                 ) for item in self.users
             ]
         w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
