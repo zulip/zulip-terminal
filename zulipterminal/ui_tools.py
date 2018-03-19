@@ -2,7 +2,7 @@ from typing import Any, List, Tuple, Dict
 import urwid
 from time import ctime
 import itertools
-from zulipterminal.helper import update_flag
+from zulipterminal.helper import update_flag, async
 
 
 class StreamsView(urwid.ListBox):
@@ -177,6 +177,9 @@ class MessageView(urwid.ListBox):
 
         # Set Focus to the last message
         self.set_focus(self.focus_msg)
+        # if loading new/old messages - True
+        self.old_loading = False
+        self.new_loading = False
 
     def main_view(self) -> List[Any]:
         msg_btn_list, focus_msg = create_msg_box_list(self.messages,
@@ -184,7 +187,9 @@ class MessageView(urwid.ListBox):
         self.focus_msg = focus_msg
         return msg_btn_list
 
+    @async
     def load_old_messages(self, anchor: int=10000000000) -> None:
+        self.old_loading = True
         # Use the currently focused image as anchor
         self.model.anchor = anchor
         # We don't want message after the current message
@@ -199,8 +204,11 @@ class MessageView(urwid.ListBox):
         for msg in new_messages[1:]:
             self.log.insert(0, urwid.AttrMap(MessageBox(msg, self.model),
                             msg['color'], 'msg_selected'))
+        self.old_loading = False
 
-    def load_new_messages(self, anchor: int) -> None:
+    @async
+    def load_new_messages(self, anchor: int, focus_position: int) -> None:
+        self.new_loading = True
         self.model.anchor = anchor
         self.model.num_before = 0
         self.model.num_after = 30
@@ -222,6 +230,7 @@ class MessageView(urwid.ListBox):
                     'msg_selected'
                 )
             )
+        self.new_loading = False
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
@@ -236,7 +245,7 @@ class MessageView(urwid.ListBox):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'down':
+        if key == 'down' and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -244,10 +253,10 @@ class MessageView(urwid.ListBox):
             except Exception:
                 if self.focus:
                     id = self.focus.original_widget.message['id']
-                    self.load_new_messages(id)
+                    self.load_new_messages(id, self.focus_position)
                 return key
 
-        if key == 'up':
+        if key == 'up' and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
