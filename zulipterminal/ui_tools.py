@@ -405,4 +405,6 @@ def create_msg_box_list(messages: List[Dict[str, Any]], model: Any,
                 item['color'],
                 'msg_selected'
             ) for item in messages]
-    return w_list, (focus_msg - 1)
+    if focus_msg > 0:
+        focus_msg -= 1
+    return w_list, focus_msg
