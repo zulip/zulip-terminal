@@ -18,16 +18,16 @@ class ZulipView(urwid.WidgetWrap):
     """
     palette = {
         'default': [
-                (None,           'light gray',   'black'),
-                ('selected',     'light magenta','dark blue'),
-                ('msg_selected', 'light red',    'black'),
-                ('header',       'dark cyan',    'dark blue',  'bold'),
-                ('custom',       'white',        'dark blue',  'underline'),
-                ('content',      'white',        'black',      'standout'),
-                ('name',         'yellow',       'black'),
-                ('unread',       'black',        'light gray'),
-                ('active',       'white',        'black'),
-                ('idle',         'yellow',       'black')
+                (None,           'light gray',    'black'),
+                ('selected',     'light magenta', 'dark blue'),
+                ('msg_selected', 'light red',     'black'),
+                ('header',       'dark cyan',     'dark blue',  'bold'),
+                ('custom',       'white',         'dark blue',  'underline'),
+                ('content',      'white',         'black',      'standout'),
+                ('name',         'yellow',        'black'),
+                ('unread',       'black',         'light gray'),
+                ('active',       'white',         'black'),
+                ('idle',         'yellow',        'black')
                 ],
         'light': [
                 (None,           'black',        'white'),
