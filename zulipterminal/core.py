@@ -49,7 +49,8 @@ class ZulipController:
                 'stream': button.caption,
                 'sender_email': '',
                 'id': 10000000000,
-                'color': None
+                'color': None,
+                'stream_id': button.stream_id,
             }]
         if hasattr(button, 'message'):
             w_list, focus_msg = create_msg_box_list(messages,
