@@ -3,7 +3,12 @@ from typing import Any
 import urwid
 
 from zulipterminal.ui_tools.boxes import WriteBox
-from zulipterminal.ui_tools.buttons import MenuButton
+from zulipterminal.ui_tools.buttons import (
+    StreamButton,
+    UserButton,
+    PMButton,
+    HomeButton,
+)
 from zulipterminal.ui_tools.views import (
     MiddleColumnView,
     StreamsView,
@@ -53,7 +58,6 @@ class ZulipView(urwid.WidgetWrap):
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.get_all_users()
-        self.menu = self.model.menu
         self.messages = list(itertools.chain.from_iterable(
                              self.model.messages.values()))
         self.streams = self.model.get_subscribed_streams()
@@ -62,21 +66,18 @@ class ZulipView(urwid.WidgetWrap):
 
     def menu_view(self) -> None:
         menu_btn_list = [
-                MenuButton(
-                    item,
-                    controller=self.controller
-                ) for item in self.menu
+            HomeButton(self.controller),
+            PMButton(self.controller),
             ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
     def streams_view(self) -> Any:
         streams_btn_list = [
-                MenuButton(
+                StreamButton(
                     item,
                     controller=self.controller,
                     view=self,
-                    stream=True
                 ) for item in self.streams
             ]
         w = StreamsView(streams_btn_list)
@@ -98,12 +99,11 @@ class ZulipView(urwid.WidgetWrap):
 
     def users_view(self) -> Any:
         users_btn_list = [
-                MenuButton(
+                UserButton(
                     item['full_name'],
                     item['email'],
                     controller=self.controller,
                     view=self,
-                    user=True,
                     color=item['status']
                 ) for item in self.users
             ]
