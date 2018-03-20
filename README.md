@@ -27,6 +27,7 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 | Command | Key Combination |
 | ------- | --------------- |
 | Reply to a message | `r` |
+| Reply to an author | `R` |
 | New stream message | `c` |
 | Move back from Compose box to the message | `esc` |
 | Narrow to a stream | `S` |
