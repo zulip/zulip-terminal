@@ -1,8 +1,9 @@
 import pytest
+from typing import Any, List, Dict
 
 
 @pytest.fixture(scope='module')
-def messages_successful_response():
+def messages_successful_response() -> Dict[str, List[Dict[str, Any]]]:
     """
     A successful response from a /messages API query.
     """
@@ -69,7 +70,7 @@ def messages_successful_response():
 
 
 @pytest.fixture(scope='module')
-def classified_message():
+def classified_message() -> Dict[Any, List[Dict[str, Any]]]:
     """
     Classified messages for `messages_successful_response` fixture.
     """
@@ -114,7 +115,7 @@ def classified_message():
 
 
 @pytest.fixture(scope='module')
-def user_email():
+def user_email() -> str:
     """
     Email of the user running zulip-terminal.
     """
