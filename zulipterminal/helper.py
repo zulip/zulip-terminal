@@ -2,7 +2,6 @@ from typing import Any, List, Dict
 from functools import wraps
 from threading import Thread
 from collections import defaultdict
-import urwid
 
 CMSG = Dict[str, List[Dict[str, Any]]]  # Classified Messages
 NMSGL = List[Dict[str, Any]]  # Normal Message List
