@@ -62,6 +62,12 @@ class MiddleColumnView(urwid.Frame):
                 self.set_focus('footer')
                 self.footer.focus_position = 0
                 return key
+        if key == 'R':
+            if not self.focus_position == 'footer':
+                self.body.keypress(size, 'R')
+                self.set_focus('footer')
+                self.footer.focus_position = 1
+                return key
         return super(MiddleColumnView, self).keypress(size, key)
 
 
@@ -159,6 +165,10 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_topic(self)
         if key == 'esc':
             self.model.controller.show_all_messages(self)
+        if key == 'R':
+            self.model.controller.view.write_box.private_box_view(
+                email=self.message['sender_email']
+                )
         return key
 
 
