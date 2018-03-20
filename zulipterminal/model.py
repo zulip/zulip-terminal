@@ -25,11 +25,6 @@ class ZulipModel(object):
         self.focus_all_msg = -1
         # ID of the message to select when in a narrow.
         self.focus_narrow = -1
-        self.menu = [
-            u'All messages',
-            u'Private messages',
-        ]
-
         '''
         Stores all the messages, type: Dict[str, Dict[Dict[str, Any]]]
             Example:
