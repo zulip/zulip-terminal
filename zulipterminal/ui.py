@@ -1,11 +1,10 @@
 import itertools
-from typing import List, Any, Tuple, Dict
+from typing import Any
 import urwid
 
-from zulipterminal.ui_tools import (
-    WriteBox,
-    MenuButton,
-    MessageView,
+from zulipterminal.ui_tools.boxes import WriteBox
+from zulipterminal.ui_tools.buttons import MenuButton
+from zulipterminal.ui_tools.views import (
     MiddleColumnView,
     StreamsView,
     UsersView,

@@ -1,10 +1,8 @@
-import time
 import urwid
 import json
-from collections import defaultdict
 from typing import Any, List, Tuple, Dict
 
-from zulipterminal.ui_tools import MessageBox
+from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.helper import classify_message, async
 
 
@@ -122,6 +120,8 @@ class ZulipModel(object):
                     'presence',
                     'subscription',
                     'realm_user',
+                    'message',
+                    'update_message_flags',
                     ],
             )
             return result

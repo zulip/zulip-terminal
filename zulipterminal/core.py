@@ -1,11 +1,9 @@
 import zulip
 import urwid
 from typing import Any
-import json
 import itertools
 
-from zulipterminal.ui_tools import create_msg_box_list
-from zulipterminal.helper import async
+from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.model import ZulipModel
 from zulipterminal.ui import ZulipView
 
