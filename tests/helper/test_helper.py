@@ -1,19 +1,7 @@
 from zulipterminal.helper import (
-    classify_message,
     update_flag,
 )
-from typing import Any, List, Dict
-
-MSR = Dict[str, List[Dict[str, Any]]]
-CMSG = Dict[Any, List[Dict[str, Any]]]
-
-
-def test_classify_message(user_email: str,
-                          messages_successful_response: MSR,
-                          classified_message: CMSG) -> None:
-    result = classify_message(user_email,
-                              messages_successful_response['messages'])
-    assert result == classified_message
+from typing import Any
 
 
 def test_update_flag(mocker: Any) -> None:

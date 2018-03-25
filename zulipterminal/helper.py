@@ -19,57 +19,6 @@ def async(func: Any) -> Any:
     return wrapper
 
 
-def classify_message(own_email: str, new_messages: NMSGL,
-                     classified_messages: CMSG=None) -> CMSG:
-    """
-    Classifies messages into their respective types/streams.
-    """
-    # Initialize classified_messages
-    if classified_messages is None:
-        # defaultdict is used to ease the process of adding new keys
-        classified_messages = defaultdict(list)
-
-    for msg in new_messages:
-        if msg['type'] == 'stream':
-            msg_type = msg['stream_id']
-            sender = msg['sender_full_name']
-        else:  # Private message
-            # Just a hunch to get the email of the other person in PM
-            msg_type = msg['display_recipient'][0]['email']
-            pm_with_name = msg['display_recipient'][0]['full_name']
-            if msg_type == own_email:
-                try:
-                    msg_type = msg['display_recipient'][1]['email']
-                    pm_with_name = msg['display_recipient'][1]['full_name']
-                except IndexError:
-                    pass
-
-            if own_email == msg['sender_email']:
-                pm_with_name = "You and " + pm_with_name
-            sender = pm_with_name
-
-        msg_flag = 'unread'
-        flags = msg.get('flags')
-        # update_messages sends messages with no flags
-        # but flags are set to [] when fetching old messages.
-        if flags and ('read' in flags):
-            msg_flag = None
-
-        classified_messages[msg_type].append({
-            'sender': sender,
-            'time': int(msg['timestamp']),
-            'stream': msg['display_recipient'],
-            'title': msg['subject'],
-            'content': msg['content'],
-            'type': msg['type'],
-            'sender_email': msg['sender_email'],
-            'id': msg['id'],
-            'color': msg_flag,
-            'stream_id': msg_type,
-        })
-    return classified_messages
-
-
 @async
 def update_flag(id_list: List[int], client: Any) -> None:
     if id_list == []:
@@ -80,3 +29,151 @@ def update_flag(id_list: List[int], client: Any) -> None:
         'op': 'add',
     }
     client.do_api_query(request, '/json/messages/flags', method="POST")
+
+
+def index_messages(messages, model, index=None):
+    """
+    STRUCTURE OF INDEX
+    {
+        'pointer': {
+            '[]': 30  # str(ZulipModel.narrow)
+            '[["stream", "verona"]]': 32,
+            ...
+        }
+        'stream': {
+            123: {    # stream_id
+                'topic name': {
+                    51234,  # message id
+                    56454,
+                    ...
+                }
+        },
+        'private': {
+            (3, 7): {  # user_ids frozenset
+                51234,
+                56454,
+                ...
+            },
+            (1, 2, 3, 4): {  # multiple recipients
+                12345,
+                32553,
+            }
+        },
+        'all_messages': {
+            14231,
+            23423,
+            ...
+        },
+        'all_private': {
+            22334,
+            23423,
+            ...
+        },
+        'all_stream': {
+            123: {
+                53434,
+                36435,
+                ...
+            }
+            234: {
+                23423,
+                23423,
+                ...
+            }
+        }
+        'messages': {
+            # all the messages mapped to their id
+            # for easy retrieval of message from id
+            45645: {  # PRIVATE
+                'id': 4290,
+                'timestamp': 1521817473,
+                'content': 'Hi @**Cordelia Lear**',
+                'sender_full_name': 'Iago',
+                'flags': [],
+                'sender_short_name': 'iago',
+                'sender_email': 'iago@zulip.com',
+                'subject': '',
+                'subject_links': [],
+                'sender_id': 73,
+                'type': 'private',
+                'recipient_id': 124,
+                'reactions': [],
+                'display_recipient': [
+                    {
+                        'email': 'ZOE@zulip.com',
+                        'id': 70,
+                        'full_name': 'Zoe',
+                    }, {
+                        'email': 'cordelia@zulip.com',
+                        'id': 71,
+                        'full_name': 'Cordelia Lear',
+                    }, {
+                        'email': 'hamlet@zulip.com',
+                        'id': 72,
+                        'full_name': 'King Hamlet',
+                    }, {
+                        'email': 'iago@zulip.com',
+                        'id': 73,
+                        'full_name': 'Iago',
+                    }
+                ]
+            },
+            45645: {  # STREAM
+                'timestamp': 1521863062,
+                'sender_id': 72,
+                'sender_full_name': 'King Hamlet',
+                'recipient_id': 119,
+                'content': 'https://github.com/zulip/zulip-terminal',
+                'type': 'stream',
+                'sender_email': 'hamlet@zulip.com',
+                'id': 4298,
+                'display_recipient': 'Verona',
+                'flags': [],
+                'reactions': [],
+                'subject': 'Verona2',
+                'stream_id': 32,
+            },
+        },
+    }
+    """
+    if index is None:
+        index = {
+            'pointer': defaultdict(set),
+            'stream': defaultdict(dict),
+            'private': defaultdict(set),
+            'all_messages': set(),
+            'all_private': set(),
+            'all_stream': defaultdict(set),
+            'messages': defaultdict(dict),
+        }
+    narrow = model.narrow
+    for msg in messages:
+
+        index['messages'][msg['id']] = msg
+        if narrow == []:
+            index['all_messages'].add(msg['id'])
+
+        if len(narrow) == 1:
+
+            if msg['type'] == 'private':
+                index['all_private'].add(msg['id'])
+                recipients = frozenset(set(
+                    recipient['id'] for recipient in msg['display_recipient']
+                ))
+
+                if narrow[0][0] == 'pm_with' and recipients == frozenset({
+                        model.user_id, model.user_dict[narrow[0][1]]['user_id']
+                        }):
+                    index['private'][recipients].add(msg['id'])
+
+            if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
+                index['all_stream'][msg['stream_id']].add(msg['id'])
+
+        if msg['type'] == 'stream' and len(narrow) == 2 and\
+                narrow[1][1] == msg['subject']:
+
+            if not index['stream'][msg['stream_id']].get(msg['subject']):
+                index['stream'][msg['stream_id']][msg['subject']] = set()
+            index['stream'][msg['stream_id']][msg['subject']].add(msg['id'])
+
+    return index

@@ -1,4 +1,3 @@
-import itertools
 from typing import Any
 import urwid
 
@@ -57,10 +56,8 @@ class ZulipView(urwid.WidgetWrap):
         self.controller = controller
         self.model = controller.model
         self.client = controller.client
-        self.users = self.model.get_all_users()
-        self.messages = list(itertools.chain.from_iterable(
-                             self.model.messages.values()))
-        self.streams = self.model.get_subscribed_streams()
+        self.users = self.model.users
+        self.streams = self.model.streams
         self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
 
@@ -93,19 +90,18 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def message_view(self) -> Any:
-        w = MiddleColumnView(self.messages, self.model, self.write_box)
+        w = MiddleColumnView(self.model, self.write_box)
         w = urwid.LineBox(w)
         return w
 
     def users_view(self) -> Any:
         users_btn_list = [
                 UserButton(
-                    item['full_name'],
-                    item['email'],
+                    user,
                     controller=self.controller,
                     view=self,
-                    color=item['status']
-                ) for item in self.users
+                    color=user['status']
+                ) for user in self.users
             ]
         w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
         return w

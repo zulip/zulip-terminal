@@ -1,7 +1,6 @@
 import zulip
 import urwid
 from typing import Any
-import itertools
 
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.model import ZulipModel
@@ -21,146 +20,141 @@ class ZulipController:
         self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:
+        # return if already narrowed
         if self.model.narrow == [['stream', button.caption]]:
             return
-        if hasattr(button, 'message') and self.model.narrow == []:
-            self.model.focus_all_msg = button.message['id']
+        self.update = False
+        # store the steam id in the model
+        self.model.stream_id = button.stream_id
+        # set the current narrow
         self.model.narrow = [['stream', button.caption]]
-        self.model.num_after = 10
-        self.model.num_before = 30
-        if hasattr(button, 'message'):
-            self.model.anchor = button.message['id']
-            classified_msgs = self.model.load_old_messages(False)
-        else:
-            classified_msgs = self.model.load_old_messages(True)
-        messages = classified_msgs[button.stream_id]
-        if len(messages) < 41:
-            self.model.update = True
-        # FIXME EMPTY `messages` on old streams with no new messages
-        if len(messages) == 0:
-            messages = [{
-                'content': ' No Messages yet! Why not start the conversation?',
-                'title': '',
-                'type': 'stream',
-                'time': 0,
-                'sender': '',
-                'stream': button.caption,
-                'sender_email': '',
-                'id': 10000000000,
-                'color': None,
-                'stream_id': button.stream_id,
-            }]
-        if hasattr(button, 'message'):
-            w_list, focus_msg = create_msg_box_list(messages,
-                                                    self.model,
-                                                    narrow=True,
-                                                    id=button.message['id'])
-            focus_msg += 1
-        else:
-            w_list, focus_msg = create_msg_box_list(messages, self.model,
-                                                    narrow=True)
+        # get the message ids of the current narrow
+        msg_id_list = self.model.index['all_stream'][button.stream_id]
+        # if no messages are found get more messages
+        if len(msg_id_list) == 0:
+            self.model.num_after = 10
+            self.model.num_before = 30
+            if hasattr(button, 'message'):
+                self.model.anchor = button.message['id']
+                self.model.get_messages(False)
+            else:
+                self.model.get_messages(True)
+        msg_id_list = self.model.index['all_stream'][button.stream_id]
+        w_list = create_msg_box_list(self.model, msg_id_list)
+        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        if focus_position == set():
+            focus_position = len(w_list) - 1
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        self.model.msg_list.set_focus(focus_msg)
+        if focus_position > 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_topic(self, button: Any) -> None:
         if self.model.narrow == [['stream', button.caption],
                                  ['topic', button.title]]:
             return
-        if hasattr(button, 'message') and self.model.narrow == []:
-            self.model.focus_all_msg = button.message['id']
+        self.update = False
+        self.model.stream_id = button.stream_id
         self.model.narrow = [["stream", button.caption],
                              ["topic", button.title]]
-        self.model.num_after = 10
-        self.model.num_before = 30
+        msg_list = self.model.index['stream'][button.stream_id].get(
+                                                    button.title, [])
+        if len(msg_list) == 0:
+            first_anchor = True
+            if hasattr(button, 'message'):
+                self.model.anchor = button.message['id']
+                first_anchor = False
+            self.model.num_after = 10
+            self.model.num_before = 30
+            self.model.get_messages(first_anchor)
+            msg_id_list = self.model.index['stream'][button.stream_id].get(
+                                                    button.title, [])
         if hasattr(button, 'message'):
-            self.model.anchor = button.message['id']
-            classified_msgs = self.model.load_old_messages(False)
+            w_list = create_msg_box_list(
+                self.model, msg_id_list, button.message['id'])
         else:
-            classified_msgs = self.model.load_old_messages(True)
-        messages = list(
-            itertools.chain.from_iterable(classified_msgs.values())
-            )
-        if len(messages) < 41:
-            self.model.update = True
-        if hasattr(button, 'message'):
-            w_list, focus_msg = create_msg_box_list(messages,
-                                                    self.model,
-                                                    narrow=True,
-                                                    id=button.message['id'])
-            focus_msg += 1
-            if len(w_list) == 1:
-                focus_msg = 0
-        else:
-            w_list, focus_msg = create_msg_box_list(messages, self.model,
-                                                    narrow=True)
+            w_list = create_msg_box_list(self.model, msg_id_list)
+
+        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        if focus_position == set():
+            focus_position = len(w_list) - 1
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        self.model.msg_list.set_focus(focus_msg)
+        if focus_position > 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_user(self, button: Any) -> None:
         if self.model.narrow == [["pm_with", button.email]]:
             return
-        if hasattr(button, 'message'):
-            if self.model.narrow == []:
-                self.model.focus_all_msg = button.message['id']
+
+        self.update = False
+
+        self.model.recipients = button.recipients
+
         self.model.narrow = [["pm_with", button.email]]
+        msg_id_list = self.model.index['private'].get(frozenset(
+            [self.model.user_id, button.user_id]), [])
+
         self.model.num_after = 10
         self.model.num_before = 30
-        classified_msgs = self.model.load_old_messages(True)
-        messages = classified_msgs[button.email]
-        if len(messages) < 41:
-            self.model.update = True
-        if len(messages) == 0:
-            messages = [{
-                'content': ' No Messages yet! Why not start the conversation?',
-                'title': '',
-                'type': 'private',
-                'time': 0,
-                'sender': '',
-                'stream': '',
-                'sender_email': button.email,
-                'id': 10000000000,
-                'color': None,
-            }]
-        w_list, focus_msg = create_msg_box_list(messages, self.model,
-                                                narrow=True)
+        if hasattr(button, 'message'):
+            self.model.anchor = button.message['id']
+            self.model.get_messages(False)
+        elif len(msg_id_list) == 0:
+            self.model.get_messages(True)
+
+        msg_id_list = self.model.index['private'].get(frozenset(
+            [self.model.user_id, button.user_id]), [])
+        if hasattr(button, 'message'):
+            w_list = create_msg_box_list(
+                self.model, msg_id_list, button.message['id'])
+        else:
+            w_list = create_msg_box_list(self.model, msg_id_list)
+
+        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        if focus_position == set():
+            focus_position = len(w_list) - 1
+
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        self.model.msg_list.set_focus(focus_msg)
+        if focus_position > 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
 
     def show_all_messages(self, button: Any) -> None:
+        if self.model.narrow == []:
+            return
+        self.update = False
         self.model.msg_view.clear()
-        msg_list = itertools.chain.from_iterable(self.model.messages.values())
-        w_list, focus_msg = create_msg_box_list(msg_list, self.model)
-        if hasattr(button, 'message') and self.model.narrow != []:
-            focus_msg += 1
+        msg_list = self.model.index['all_messages']
+        w_list = create_msg_box_list(self.model, msg_list)
+        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        if focus_position == set():
+            focus_position = len(w_list) - 1
+        self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        self.model.msg_list.set_focus(focus_msg)
+        if focus_position > 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
         self.model.narrow = []
 
     def show_all_pm(self, button: Any) -> None:
         if self.model.narrow == [['is', 'private']]:
             return
-        if hasattr(button, 'message'):
-            if self.model.narrow == []:
-                self.model.focus_all_msg = button.message['id']
+        self.update = False
         self.model.narrow = [['is', 'private']]
-        self.model.num_after = 10
-        self.model.num_before = 30
-        classified_msgs = self.model.load_old_messages(True)
-        messages = list(itertools.chain.from_iterable(
-                                            classified_msgs.values()
-                                        ))
-        if len(messages) < 41:
-            self.model.update = True
-        w_list, focus_msg = create_msg_box_list(messages, self.model,
-                                                narrow=True)
+        msg_list = self.model.index['all_private']
+        if len(msg_list) == 0:
+            self.model.num_after = 10
+            self.model.num_before = 30
+            self.model.get_messages(True)
+            msg_list = self.model.index['all_private']
+        w_list = create_msg_box_list(self.model, msg_list)
+        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        if focus_position == set():
+            focus_position = len(w_list) - 1
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        if focus_msg == -1:
-            focus_msg = 0
-        self.model.msg_list.set_focus(focus_msg)
+        if focus_position > 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
 
     def main(self) -> None:
         try:

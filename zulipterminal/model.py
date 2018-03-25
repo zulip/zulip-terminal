@@ -2,8 +2,11 @@ import urwid
 import json
 from typing import Any, List, Tuple, Dict
 
-from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.helper import classify_message, async
+from zulipterminal.helper import (
+    async,
+    index_messages,
+)
+from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
 class ZulipModel(object):
@@ -21,70 +24,21 @@ class ZulipModel(object):
         self.msg_list = None  # Updated by MiddleColumnView (ListBox)
         self.narrow = []
         self.update = False
-        # ID of the message to select when viewing all messages.
-        self.focus_all_msg = -1
-        # ID of the message to select when in a narrow.
-        self.focus_narrow = -1
-        '''
-        Stores all the messages, type: Dict[str, Dict[Dict[str, Any]]]
-            Example:
-            {
-                'hamelet@example.com' : [ # Store other user's id in PM
-                                          # (regardless of sender)
-                    # List of Messages
-                    {
-                        'sender' : 'Aman Agrawal',
-                        'time' : '8 AM',
-                        'stream':[ # Actually recipient
-                            {
-                                'full_name':'Hamlet of Denmark',
-                                'email':'hamlet@example.com',
-                                'short_name':'hamlet',
-                                'id':31572
-                            },
-                            {
-                                'full_name': 'Aman Agrawal',
-                                'email' : 'aman@zulip.com',
-                                'short_name' : 'aman',
-                                'id' : '123',
-                            }
-                        ],
-                        'title' : '',
-                        'content' : 'HI',
-                        'type' : 'private',
-                        'sender_email' : 'aman@zulip.com',
-                    },
-                    ...
-                ],
-                '89' : [ # Stream ID
-                    {
-                        'sender' : 'aman',
-                        'time' : '8 AM',
-                        'stream' : 'integrations',
-                        'title' : 'zulip-terminal',
-                        'content' : 'HI',
-                        'type' : 'stream',
-                        'sender_email' : 'aman@zulip.com',
-                    },
-                    ...
-                ],
-                ...
-            }
-        '''
-        # TODO: make initial fetch async so that no message is lost
-        #       when the messages are being fetched.
+        self.stream_id = -1
         self.initial_update = list()
         self.update_new_message()
-        self.messages = self.load_old_messages(first_anchor=True)
-        self.messages = classify_message(self.client.email,
-                                         self.initial_update, self.messages)
         self.initial_data = self.fetch_initial_data()
+        self.index = None
+        self.get_messages(first_anchor=True)
+        self.user_id = self.client.get_profile()['user_id']
+        self.users = self.get_all_users()
+        self.streams = self.get_subscribed_streams()
 
     @async
     def update_new_message(self) -> None:
         self.client.call_on_each_message(self.update_messages)
 
-    def load_old_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
+    def get_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
         request = {
             'anchor': self.anchor,
             'num_before': self.num_before,
@@ -97,16 +51,13 @@ class ZulipModel(object):
         response = self.client.do_api_query(request, '/json/messages',
                                             method="GET")
         if response['result'] == 'success':
-
+            self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
-                self.focus_narrow = response['anchor']
-                if self.narrow == []:
-                    self.focus_all_msg = response['anchor']
-
-                if (len(response['messages']) < 41):
-                    self.update = True
-
-            return classify_message(self.client.email, response['messages'])
+                self.index[str(self.narrow)] = response['anchor']
+            query_range = self.num_after + self.num_before + 1
+            if len(response['messages']) < (query_range):
+                self.update = True
+            return self.index
 
     def fetch_initial_data(self):
         try:
@@ -134,8 +85,10 @@ class ZulipModel(object):
                 'full_name': user['full_name'],
                 'email': user['email'],
                 'status': 'idle',
+                'user_id': user['user_id']
             }
-        # The to display
+        self.user_dict = user_dict.copy()
+        # List to display
         user_list = list()
         # List which stores the active/idle status of users
         presences = self.initial_data['presences']
@@ -168,23 +121,31 @@ class ZulipModel(object):
         return sorted(stream_names, key=lambda s: s[0].lower())
 
     def update_messages(self, response: Dict[str, str]) -> None:
-        if hasattr(self.controller, 'view'):
-            cmsg = classify_message(self.client.email, [response])
-            key = list(cmsg.keys())[0]
-            if ((self.narrow == []) or (self.narrow[0][1] == key)) and\
-                    self.update:
-                self.msg_list.log.append(
-                    urwid.AttrMap(
-                        MessageBox(
-                            cmsg[key][0], self
-                            ),
-                        cmsg[key][0]['color'],
-                        'msg_selected')
-                    )
+        response['flags'] = []
+        if len(self.initial_update) > 0 and hasattr(self.controller, 'view'):
+
+            for msg in self.initial_update:
+                self.index = index_messages([msg], self, self.index)
+                msg_w = create_msg_box_list(self, [msg['id']])[0]
+                self.msg_list.log.append(msg_w)
+
+            self.initial_update = []
+        elif not hasattr(self.controller, 'view'):
+            self.initial_update.append(response)
+
+        if hasattr(self.controller, 'view') and self.update:
+            self.index = index_messages([response], self, self.index)
+            msg_w = create_msg_box_list(self, [response['id']])[0]
+
+            if self.narrow == []:
+                self.msg_list.log.append(msg_w)
+
+            elif self.narrow[0][1] == response['type'] and\
+                    len(self.narrow) == 1:
+                self.msg_list.log.append(msg_w)
+
+            elif response['type'] == 'stream' and len(self.narrow) == 2 and\
+                    self.narrow[1][1] == response['subject']:
+                self.msg_list.log.append(msg_w)
+
             self.controller.loop.draw_screen()
-        else:
-            if hasattr(self, 'messages'):
-                self.messages = classify_message(self.client.email, [response],
-                                                 self.messages)
-            else:
-                self.initial_update.append(response)

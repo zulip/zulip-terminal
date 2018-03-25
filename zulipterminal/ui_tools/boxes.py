@@ -94,16 +94,16 @@ class MessageBox(urwid.Pile):
         super(MessageBox, self).__init__(self.main_view())
 
     def stream_view(self) -> Any:
-        self.caption = self.message['stream']
+        self.caption = self.message['display_recipient']
         self.stream_id = self.message['stream_id']
-        self.title = self.message['title']
+        self.title = self.message['subject']
         stream_title = ('header', [
-            ('custom', self.message['stream']),
+            ('custom', self.caption),
             ('selected', ">"),
-            ('custom', self.message['title'])
+            ('custom', self.title)
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text(('custom', ctime(self.message['time'])),
+        time = urwid.Text(('custom', ctime(self.message['timestamp'])),
                           align='right')
         header = urwid.Columns([
             stream_title,
@@ -114,9 +114,21 @@ class MessageBox(urwid.Pile):
 
     def private_view(self) -> Any:
         self.email = self.message['sender_email']
-        title = ('header', [('custom', 'Private Message')])
+        self.user_id = self.message['sender_id']
+        self.recipients = frozenset(set(
+            recipient['id'] for recipient in self.message['display_recipient']
+        ))
+        self.recipients = ' ,'.join(list(
+            recipient['full_name']
+            for recipient in self.message['display_recipient']
+        ))
+        title = ('header', [
+            ('custom', 'Private Message'),
+            ('selected', " : "),
+            ('custom', self.recipients)
+            ])
         title = urwid.Text(title)
-        time = urwid.Text(('custom', ctime(self.message['time'])),
+        time = urwid.Text(('custom', ctime(self.message['timestamp'])),
                           align='right')
         header = urwid.Columns([
             title,
@@ -130,7 +142,7 @@ class MessageBox(urwid.Pile):
             header = self.stream_view()
         else:
             header = self.private_view()
-        content = [('name', self.message['sender']), "\n" +
+        content = [('name', self.message['sender_full_name']), "\n" +
                    self.message['content']]
         content = urwid.Text(content)
         return [header, content]
@@ -154,7 +166,8 @@ class MessageBox(urwid.Pile):
                     )
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
-                    caption=self.message['stream'], title=self.message['title']
+                    caption=self.message['display_recipient'],
+                    title=self.message['subject']
                     )
         if key == 'c':
             if self.message['type'] == 'private':
@@ -163,7 +176,7 @@ class MessageBox(urwid.Pile):
                     )
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
-                    caption=self.message['stream']
+                    caption=self.message['display_recipient']
                     )
         if key == 'S':
             if self.message['type'] == 'private':
@@ -177,4 +190,8 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_topic(self)
         if key == 'esc':
             self.model.controller.show_all_messages(self)
+        if key == 'R':
+            self.model.controller.view.write_box.private_box_view(
+                email=self.message['sender_email']
+                )
         return key

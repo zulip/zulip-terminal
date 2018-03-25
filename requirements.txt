@@ -5,3 +5,4 @@ pytest==3.4.2
 pytest-cov==2.5.1
 pytest-pep8==1.0.6
 pytest-mock==1.7.1
+pudb==2017.1.4
