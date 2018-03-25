@@ -52,8 +52,8 @@ def main():
     except Exception:
         # A unexpected exception occurred, open the debugger in debug mode
         if args.debug:
-            import pdb
-            pdb.post_mortem()
+            import pudb
+            pudb.post_mortem()
     finally:
         if args.debug:
             restore_stdout()

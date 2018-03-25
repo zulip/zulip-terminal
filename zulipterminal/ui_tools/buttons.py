@@ -49,10 +49,13 @@ class StreamButton(urwid.Button):
 
 
 class UserButton(urwid.Button):
-    def __init__(self, caption: Any, email: str='', controller: Any=None,
+    def __init__(self, user, controller: Any=None,
                  view: Any=None, color: str=None) -> None:
-        self.caption = caption  # str
-        self.email = email
+        self.caption = user['full_name']  # str
+        self.email = user['email']
+        self.user_id = user['user_id']
+        self.recipients = frozenset({
+            self.user_id, view.model.user_id})
         super(UserButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [u'  \N{BULLET} ', self.caption], 0), color, 'selected')
