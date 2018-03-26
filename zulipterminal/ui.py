@@ -62,23 +62,31 @@ class ZulipView(urwid.WidgetWrap):
         urwid.WidgetWrap.__init__(self, self.main_window())
 
     def menu_view(self) -> None:
+        count = self.model.unread_counts.get('all_msg', 0)
+        self.home_button = HomeButton(self.controller, count=count)
+        count = self.model.unread_counts.get('all_pms', 0)
+        self.pm_button = PMButton(self.controller, count=count)
         menu_btn_list = [
-            HomeButton(self.controller),
-            PMButton(self.controller),
+            self.home_button,
+            self.pm_button,
             ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
     def streams_view(self) -> Any:
-        streams_btn_list = [
-                StreamButton(
-                    item,
-                    controller=self.controller,
-                    view=self,
-                ) for item in self.streams
-            ]
-        w = StreamsView(streams_btn_list)
-        w = urwid.LineBox(w, title="Streams")
+        streams_btn_list = list()
+        for stream in self.streams:
+            unread_count = self.model.unread_counts.get(stream[1], 0)
+            streams_btn_list.append(
+                    StreamButton(
+                        stream,
+                        controller=self.controller,
+                        view=self,
+                        count=unread_count,
+                    )
+            )
+        self.stream_w = StreamsView(streams_btn_list)
+        w = urwid.LineBox(self.stream_w, title="Streams")
         return w
 
     def left_column_view(self) -> Any:
@@ -95,16 +103,20 @@ class ZulipView(urwid.WidgetWrap):
         return w
 
     def users_view(self) -> Any:
-        users_btn_list = [
-                UserButton(
-                    user,
-                    controller=self.controller,
-                    view=self,
-                    color=user['status']
-                ) for user in self.users
-            ]
-        w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
-        return w
+        users_btn_list = list()
+        for user in self.users:
+            unread_count = self.model.unread_counts.get(user['user_id'], 0)
+            users_btn_list.append(
+                    UserButton(
+                        user,
+                        controller=self.controller,
+                        view=self,
+                        color=user['status'],
+                        count=unread_count
+                    )
+            )
+        self.user_w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
+        return self.user_w
 
     def right_column_view(self) -> Any:
         w = urwid.Frame(self.users_view())

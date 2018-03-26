@@ -5,6 +5,7 @@ from typing import Any, List, Tuple, Dict
 from zulipterminal.helper import (
     async,
     index_messages,
+    classify_unread_counts,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -33,6 +34,9 @@ class ZulipModel(object):
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
         self.streams = self.get_subscribed_streams()
+        self.unread_counts = classify_unread_counts(
+            self.initial_data['unread_msgs']
+            )
 
     @async
     def update_new_message(self) -> None:
