@@ -19,8 +19,34 @@ def async(func: Any) -> Any:
     return wrapper
 
 
+def set_count(id_list, controller):
+    streams = controller.view.stream_w.log
+    users = controller.view.user_w.log
+    all_msg = controller.view.home_button
+    all_pm = controller.view.pm_button
+    messages = controller.model.index['messages']
+    for id in id_list:
+        msg_type = messages[id]['type']
+        if msg_type == 'stream':
+            stream_id = messages[id]['stream_id']
+            for stream in streams:
+                if stream.stream_id == stream_id:
+                    stream.update_count(stream.count - 1)
+                    break
+
+        else:
+            user_id = messages[id]['sender_id']
+            for user in users:
+                if user.user_id == user_id:
+                    user.update_count(user.count - 1)
+                    break
+            all_pm.update_count(all_pm.count - 1)
+        all_msg.update_count(all_msg.count - 1)
+    controller.loop.draw_screen()
+
+
 @async
-def update_flag(id_list: List[int], client: Any) -> None:
+def update_flag(id_list: List[int], controller: Any) -> None:
     if id_list == []:
         return
     request = {
@@ -28,7 +54,9 @@ def update_flag(id_list: List[int], client: Any) -> None:
         'flag': 'read',
         'op': 'add',
     }
+    client = controller.client
     client.do_api_query(request, '/json/messages/flags', method="POST")
+    set_count(id_list, controller)
 
 
 def index_messages(messages, model, index=None):
@@ -177,3 +205,25 @@ def index_messages(messages, model, index=None):
             index['stream'][msg['stream_id']][msg['subject']].add(msg['id'])
 
     return index
+
+
+def classify_unread_counts(unread_msg_counts: Dict[str, Any]):
+    # TODO: supprot group pms
+    unread_counts = dict()
+    unread_counts['all_msg'] = 0
+    unread_counts['all_pms'] = 0
+    for pm in unread_msg_counts['pms']:
+        count = len(pm['unread_message_ids'])
+        unread_counts[pm['sender_id']] = count
+        unread_counts['all_msg'] += count
+        unread_counts['all_pms'] += count
+
+    for stream in unread_msg_counts['streams']:
+        count = len(stream['unread_message_ids'])
+        if not unread_counts.get(stream['stream_id']):
+            unread_counts[stream['stream_id']] = count
+        else:
+            unread_counts[stream['stream_id']] += count
+        unread_counts['all_msg'] += count
+
+    return unread_counts
