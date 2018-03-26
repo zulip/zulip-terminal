@@ -66,8 +66,6 @@ class MessageView(urwid.ListBox):
             self.log.insert(0, msg_w)
         self.model.controller.loop.draw_screen()
         self.old_loading = False
-        # from pudb.remote import set_trace
-        # set_trace()
 
     @async
     def load_new_messages(self, anchor: int, focus_position: int) -> None:
