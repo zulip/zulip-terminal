@@ -6,6 +6,7 @@ from zulipterminal.helper import (
     async,
     index_messages,
     classify_unread_counts,
+    set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -151,5 +152,5 @@ class ZulipModel(object):
             elif response['type'] == 'stream' and len(self.narrow) == 2 and\
                     self.narrow[1][1] == response['subject']:
                 self.msg_list.log.append(msg_w)
-
+            set_count([response['id']], self.controller, 1)
             self.controller.loop.draw_screen()

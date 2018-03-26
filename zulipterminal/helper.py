@@ -19,7 +19,7 @@ def async(func: Any) -> Any:
     return wrapper
 
 
-def set_count(id_list, controller):
+def set_count(id_list, controller, new_count):
     streams = controller.view.stream_w.log
     users = controller.view.user_w.log
     all_msg = controller.view.home_button
@@ -31,17 +31,17 @@ def set_count(id_list, controller):
             stream_id = messages[id]['stream_id']
             for stream in streams:
                 if stream.stream_id == stream_id:
-                    stream.update_count(stream.count - 1)
+                    stream.update_count(stream.count + new_count)
                     break
 
         else:
             user_id = messages[id]['sender_id']
             for user in users:
                 if user.user_id == user_id:
-                    user.update_count(user.count - 1)
+                    user.update_count(user.count + new_count)
                     break
-            all_pm.update_count(all_pm.count - 1)
-        all_msg.update_count(all_msg.count - 1)
+            all_pm.update_count(all_pm.count + new_count)
+        all_msg.update_count(all_msg.count + new_count)
     controller.loop.draw_screen()
 
 
@@ -56,7 +56,7 @@ def update_flag(id_list: List[int], controller: Any) -> None:
     }
     client = controller.client
     client.do_api_query(request, '/json/messages/flags', method="POST")
-    set_count(id_list, controller)
+    set_count(id_list, controller, -1)
 
 
 def index_messages(messages, model, index=None):

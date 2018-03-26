@@ -5,9 +5,10 @@ from typing import Any
 
 
 def test_update_flag(mocker: Any) -> None:
-    mock_client = mocker.patch('zulip.Client')
-    mock_api_query = mocker.patch('zulip.Client.do_api_query')
-    update_flag([1, 2], mock_client)
+    mock_controller = mocker.patch('zulipterminal.core.ZulipController')
+    mock_api_query = mocker.patch('zulipterminal.core.ZulipController'
+                                  '.client.do_api_query')
+    update_flag([1, 2], mock_controller)
     mock_api_query.assert_called_once_with(
         {'flag': 'read', 'messages': [1, 2], 'op': 'add'},
         '/json/messages/flags',
