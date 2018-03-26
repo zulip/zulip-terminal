@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import argparse
 import os
-import subprocess
 import sys
-from typing import List
-
-from zulint import lister
+import argparse
+import subprocess
+import lister
+from typing import cast, Dict, List
+from pathlib import PurePath
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
@@ -78,3 +78,94 @@ if rc != 0:
     print("See https://zulip.readthedocs.io/en/latest/testing/mypy.html for debugging tips.")
 
 sys.exit(rc)
+
+parser = argparse.ArgumentParser(description="Run mypy on files tracked"
+                                             " by git.")
+
+parser.add_argument('targets', nargs='*', default=[],
+                    help="""files and directories to include in the result.
+                    If this is not specified, the current directory is used""")
+
+parser.add_argument('-m', '--modified', action='store_true', default=False,
+                    help='list only modified files')
+
+parser.add_argument('-a', '--all', dest='all', action='store_true',
+                    default=False, help="""run mypy on all python files,
+                    ignoring the exclude list. This is useful if you have to 
+                    find out which files fail mypy check.""")
+
+parser.add_argument('--no-disallow-untyped-defs', dest='disallow_untyped_defs',
+                    action='store_false', default=True,
+                    help="""Don't throw errors when functions are not
+                    annotated""")
+
+parser.add_argument('--scripts-only', dest='scripts_only',
+                    action='store_true', default=False,
+                    help="""Only type check extensionless python scripts""")
+
+parser.add_argument('--no-strict-optional', dest='strict_optional',
+                    action='store_false', default=True,
+                    help="""Don't use the --strict-optional flag with mypy""")
+
+parser.add_argument('--warn-unused-ignores', dest='warn_unused_ignores',
+                    action='store_true', default=False,
+                    help="""Use the --warn-unused-ignores flag with mypy""")
+
+parser.add_argument('--no-ignore-missing-imports',
+                    dest='ignore_missing_imports', action='store_false',
+                    default=True, help="""Don't use the
+                     --ignore-missing-imports flag with mypy""")
+
+parser.add_argument('--quick', action='store_true', default=False,
+                    help="""Use the --quick flag with mypy""")
+
+args = parser.parse_args()
+
+files_dict = cast(Dict[str, List[str]],
+                  lister.list_files(targets=args.targets, ftypes=['py'],
+                                    use_shebang=True,
+                                    modified_only=args.modified,
+                                    group_by_ftype=True,
+                                    ))
+
+
+pyi_files = set(files_dict['pyi'])
+python_files = [fpath for fpath in files_dict['py']
+                if not fpath.endswith('.py') or fpath + 'i' not in pyi_files]
+
+repo_python_files = {}
+repo_python_files['zulipterminal'] = []
+for file_path in python_files:
+    repo = PurePath(file_path).parts[0]
+    if repo in repo_python_files:
+        repo_python_files[repo].append(file_path)
+
+mypy_command = "mypy"
+
+extra_args = ["--check-untyped-defs",
+              "--follow-imports=silent",
+              "--scripts-are-modules",
+              "--disallow-any-generics",
+              "-i"]
+if args.disallow_untyped_defs:
+    extra_args.append("--disallow-untyped-defs")
+if args.warn_unused_ignores:
+    extra_args.append("--warn-unused-ignores")
+if args.strict_optional:
+    extra_args.append("--strict-optional")
+if args.ignore_missing_imports:
+    extra_args.append("--ignore-missing-imports")
+if args.quick:
+    extra_args.append("--quick")
+
+# run mypy
+status = 0
+for repo, python_files in repo_python_files.items():
+    print("Running mypy for `{}`.".format(repo), flush=True)
+    if python_files:
+        result = subprocess.call([mypy_command] + extra_args + python_files)
+        if result != 0:
+            status = result
+    else:
+        print("There are no files to run mypy on.")
+sys.exit(status)

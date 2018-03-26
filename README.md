@@ -63,6 +63,10 @@ pytest --cov-report html:cov_html --cov=./
 ```
 pytest --pep8
 ```
+* To check the type annotations, run:
+```
+./tools/run-mypy
+```
 * To open in debug mode:
 ```
 ./run.py -c ~/zuliprc -d
