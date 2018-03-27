@@ -30,7 +30,7 @@ class WriteBox(urwid.Pile):
         if email == '':
             email = button.email
         self.to_write_box = urwid.Edit(u"To: ", edit_text=email)
-        self.msg_write_box = urwid.Edit(u"> ")
+        self.msg_write_box = urwid.Edit(u"> ", multiline=True)
         self.contents = [
             (urwid.LineBox(self.to_write_box), self.options()),
             (self.msg_write_box, self.options()),
