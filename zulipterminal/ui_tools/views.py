@@ -117,6 +117,19 @@ class MessageView(urwid.ListBox):
                 else:
                     self.load_old_messages()
                 return key
+
+        if key in ['page up', 'K'] and not self.old_loading:
+            if self.focus_position == 0:
+                return self.keypress(size, 'up')
+            else:
+                return super(MessageView, self).keypress(size, 'page up')
+
+        if key in ['page down', 'J'] and not self.old_loading:
+            if self.focus_position == len(self.log) - 1:
+                return self.keypress(size, 'down')
+            else:
+                return super(MessageView, self).keypress(size, 'page down')
+
         key = super(MessageView, self).keypress(size, key)
         return key
 
