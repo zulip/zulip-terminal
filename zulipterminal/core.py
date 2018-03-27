@@ -57,9 +57,9 @@ class ZulipController:
         self.model.stream_id = button.stream_id
         self.model.narrow = [["stream", button.caption],
                              ["topic", button.title]]
-        msg_list = self.model.index['stream'][button.stream_id].get(
+        msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
-        if len(msg_list) == 0:
+        if len(msg_id_list) == 0:
             first_anchor = True
             if hasattr(button, 'message'):
                 self.model.anchor = button.message['id']
