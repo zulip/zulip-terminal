@@ -41,7 +41,7 @@ class WriteBox(urwid.Pile):
         self.to_write_box = None
         if caption == '':
             caption = button.caption
-        self.msg_write_box = urwid.Edit(u"> ")
+        self.msg_write_box = urwid.Edit(u"> ", multiline=True)
         self.stream_write_box = urwid.Edit(
             caption=u"Stream:  ",
             edit_text=caption
@@ -59,7 +59,7 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'enter':
+        if key == 'meta enter':
             if not self.to_write_box:
                 request = {
                     'type': 'stream',
