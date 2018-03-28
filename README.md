@@ -67,5 +67,9 @@ pytest --pep8
 ```
 ./run.py -c ~/zuliprc -d
 ```
+* To profile runtime:
+```
+./run.py -c ~/zuliprc --profile
+```
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
