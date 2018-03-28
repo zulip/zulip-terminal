@@ -15,18 +15,28 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
   pip3 install -r requirements.txt
   ```
 
-  3. Download the `zuliprc` file into zulip-terminal directory from [Zulip](https://chat.zulip.org/#settings/your-account)
-  under the `API Key` section.
+  3. Download the zuliprc configuration file to your computer:
+
+  - Log in to the Zulip server(e.g. chat.zulip.org or yourSubdomain.zulipchat.com, or your own development server).
+  - Go to _Settings_ -> _Your account_
+  - Click on `Show/Change your API key` under the _API key_ section.
+  - Download the `zuliprc` file by clicking _Get API key_.
+  - Copy the file to a destination of your choice, e.g. to `~/zuliprc`
+
 
   4. Run `Zulip-Terminal`
   ```
-  ./run.py -c ./zuliprc
+  ./run.py -c ~/zuliprc
   ```
 
 
 ## Hot Keys
 | Command | Key Combination |
 | ------- | --------------- |
+| Previous message | `Up`, `k` |
+| Next message | `Down`, `j` |
+| Scroll down | `PgDn`, `J` |
+| Scroll up | `PgUp`, `K` |
 | Reply to a message | `r` |
 | Reply to an author | `R` |
 | New stream message | `c` |
@@ -53,3 +63,9 @@ pytest --cov-report html:cov_html --cov=./
 ```
 pytest --pep8
 ```
+* To open in debug mode:
+```
+./run.py -c ~/zuliprc -d
+```
+### **Need Help?**
+Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
