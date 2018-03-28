@@ -36,6 +36,10 @@ def parse_args():
                         action="store_true",
                         help="Start zulip terminal in debug mode.")
 
+    parser.add_argument('--profile', dest='profile',
+                        action="store_true",
+                        default=False, help='Profile runtime.')
+
     args = parser.parse_args()
     return args
 
@@ -47,6 +51,11 @@ def main():
     args = parse_args()
     if args.debug:
         save_stdout()
+    if args.profile:
+        import cProfile
+        prof = cProfile.Profile()
+        prof.enable()
+
     try:
         ZulipController(args.config_file, args.theme).main()
     except Exception:
@@ -57,6 +66,13 @@ def main():
     finally:
         if args.debug:
             restore_stdout()
+
+        if args.profile:
+            prof.disable()
+            prof.dump_stats("/tmp/profile.data")
+            print("Profile data saved to /tmp/profile.data")
+            print("You can visualize it using e.g."
+                  "`snakeviz /tmp/profile.data`")
 
         print("\nThanks for using the Zulip-Terminal interface.\n")
         sys.exit(1)
