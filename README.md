@@ -72,3 +72,8 @@ pytest --pep8
 ```
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+* To check the type annotations, run:
+```
+./tools/run-mypy
+```
