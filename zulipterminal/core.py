@@ -1,5 +1,6 @@
 import zulip
 import urwid
+from platform import platform
 from typing import Any
 
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -14,7 +15,8 @@ class ZulipController:
     """
 
     def __init__(self, config_file: str, theme: str) -> None:
-        self.client = zulip.Client(config_file=config_file)
+        self.client = zulip.Client(config_file=config_file,
+                                   client='ZulipTerminal/0.1.0 ' + platform())
         self.model = ZulipModel(self)
         self.view = ZulipView(self)
         self.theme = theme
