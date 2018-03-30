@@ -88,3 +88,4 @@ zuliprc
 .pytest_cache/*
 cov_html/*
 .coverage
+.mypy_cache/*

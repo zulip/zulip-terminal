@@ -1,8 +1,8 @@
-import urwid
 from typing import Any, List, Tuple
 
-from zulipterminal.helper import update_flag, async
+import urwid
 
+from zulipterminal.helper import async, update_flag
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
@@ -10,7 +10,6 @@ class MessageView(urwid.ListBox):
     def __init__(self, model: Any) -> None:
         self.model = model
         self.index = model.index
-        self.focus_msg = None  # type: int
         self.log = urwid.SimpleFocusListWalker(self.main_view())
         urwid.connect_signal(self.log, 'modified', self.read_message)
         # This Function completely controls the messages
@@ -31,7 +30,7 @@ class MessageView(urwid.ListBox):
         self.focus_msg = focus_msg
         return msg_btn_list
 
-    def get_current_ids(self):
+    def get_current_ids(self) -> Any:
         narrow = self.model.narrow
         if narrow == []:
             current_ids = self.index['all_messages'].copy()
@@ -133,7 +132,7 @@ class MessageView(urwid.ListBox):
         key = super(MessageView, self).keypress(size, key)
         return key
 
-    def read_message(self):
+    def read_message(self) -> None:
         # Message currently in focus
         msg_w, curr_pos = self.body.get_focus()
         if msg_w is None:
@@ -160,7 +159,8 @@ class StreamsView(urwid.ListBox):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         super(StreamsView, self).__init__(self.log)
 
-    def mouse_event(self, size, event, button, col, row, focus):
+    def mouse_event(self, size: Any, event: str, button: int, col: int,
+                    row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
                 self.keypress(size, 'up')
@@ -177,7 +177,8 @@ class UsersView(urwid.ListBox):
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
         super(UsersView, self).__init__(self.log)
 
-    def mouse_event(self, size, event, button, col, row, focus):
+    def mouse_event(self, size: Any, event: str, button: int, col: int,
+                    row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
                 for _ in range(5):

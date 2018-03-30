@@ -1,6 +1,7 @@
-import urwid
 from time import ctime
-from typing import Any, Tuple, List
+from typing import Any, Dict, List, Tuple, Union
+
+import urwid
 
 from zulipterminal.ui_tools.buttons import MenuButton
 
@@ -9,8 +10,6 @@ class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
-        self.to_write_box = None
-        self.stream_write_box = None
 
     def main_view(self, new: bool) -> Any:
         private_button = MenuButton(u"New Private Message")
@@ -27,7 +26,7 @@ class WriteBox(urwid.Pile):
             self.contents = [(w, self.options())]
 
     def private_box_view(self, button: Any=None, email: str='') -> None:
-        if email == '':
+        if email == '' and button is not None:
             email = button.email
         self.to_write_box = urwid.Edit(u"To: ", edit_text=email)
         self.msg_write_box = urwid.Edit(u"> ", multiline=True)
@@ -39,7 +38,7 @@ class WriteBox(urwid.Pile):
     def stream_box_view(self, button: Any=None, caption: str='',
                         title: str='') -> None:
         self.to_write_box = None
-        if caption == '':
+        if caption == '' and button is not None:
             caption = button.caption
         self.msg_write_box = urwid.Edit(u"> ", multiline=True)
         self.stream_write_box = urwid.Edit(
@@ -84,13 +83,13 @@ class WriteBox(urwid.Pile):
 
 
 class MessageBox(urwid.Pile):
-    def __init__(self, message: str, model: Any) -> None:
+    def __init__(self, message: Dict[str, Any], model: Any) -> None:
         self.model = model
         self.message = message
-        self.caption = None
-        self.stream_id = None
-        self.title = None
-        self.email = None
+        self.caption = ''
+        self.stream_id = None  # type: Union[int, None]
+        self.title = ''
+        self.email = ''
         super(MessageBox, self).__init__(self.main_view())
 
     def stream_view(self) -> Any:
@@ -115,9 +114,6 @@ class MessageBox(urwid.Pile):
     def private_view(self) -> Any:
         self.email = self.message['sender_email']
         self.user_id = self.message['sender_id']
-        self.recipients = frozenset(set(
-            recipient['id'] for recipient in self.message['display_recipient']
-        ))
         self.recipients = ' ,'.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
@@ -147,10 +143,11 @@ class MessageBox(urwid.Pile):
         content = urwid.Text(content)
         return [header, content]
 
-    def selectable(self):
+    def selectable(self) -> bool:
         return True
 
-    def mouse_event(self, size, event, button, col, row, focus):
+    def mouse_event(self, size: Tuple[int, int], event: Any, button: Any,
+                    col: int, row: int, focus: int) -> Union[bool, Any]:
         if event == 'mouse press':
             if button == 1:
                 self.keypress(size, 'enter')
@@ -158,7 +155,7 @@ class MessageBox(urwid.Pile):
         return super(MessageBox, self).mouse_event(size, event, button, col,
                                                    row, focus)
 
-    def keypress(self, size, key):
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'enter':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(

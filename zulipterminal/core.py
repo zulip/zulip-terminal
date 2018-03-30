@@ -1,11 +1,12 @@
-import zulip
-import urwid
 from platform import platform
 from typing import Any
 
-from zulipterminal.ui_tools.utils import create_msg_box_list
+import urwid
+import zulip
+
 from zulipterminal.model import ZulipModel
 from zulipterminal.ui import ZulipView
+from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
 class ZulipController:
@@ -90,8 +91,6 @@ class ZulipController:
             return
 
         self.update = False
-
-        self.model.recipients = button.recipients
 
         self.model.narrow = [["pm_with", button.email]]
         msg_id_list = self.model.index['private'].get(frozenset(

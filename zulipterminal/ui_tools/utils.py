@@ -1,18 +1,21 @@
-from typing import Any
+from typing import Any, Iterable, List, Union
+
 import urwid
 
 from zulipterminal.ui_tools.boxes import MessageBox
 
 
-def create_msg_box_list(model: Any, messages=None, focus_msg_id=None):
+def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
+                        focus_msg_id: Any=None) -> List[Any]:
     if model.narrow == [] and messages is None:
-        messages = sorted(list(model.index['all_messages']))
-    message_list = [model.index['messages'][id] for id in messages]
+        messages = list(model.index['all_messages'])
+    if messages is not None:
+        message_list = [model.index['messages'][id] for id in messages]
     message_list.sort(key=lambda msg: msg['timestamp'])
     w_list = []
     focus_msg = None
     for msg in message_list:
-        msg_flag = 'unread'
+        msg_flag = 'unread'  # type: Union[str, None]
         flags = msg.get('flags')
         # update_messages sends messages with no flags
         # but flags are set to [] when fetching old messages.
