@@ -1,12 +1,13 @@
-import urwid
 import json
-from typing import Any, List, Tuple, Dict
+from typing import Any, Dict, List
+
+import urwid
 
 from zulipterminal.helper import (
     async,
-    index_messages,
     classify_unread_counts,
-    set_count,
+    index_messages,
+    set_count
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -19,18 +20,18 @@ class ZulipModel(object):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
-        self.msg_view = None  # List Walker of urwid
+        self.msg_view = None  # type: Any
         self.anchor = 0
         self.num_before = 30
         self.num_after = 10
-        self.msg_list = None  # Updated by MiddleColumnView (ListBox)
-        self.narrow = []
+        self.msg_list = None  # type: Any
+        self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
-        self.initial_update = list()
+        self.initial_update = list()  # type: List[Dict[str, Any]]
         self.update_new_message()
         self.initial_data = self.fetch_initial_data()
-        self.index = None
+        self.index = None  # type: Any
         self.get_messages(first_anchor=True)
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
@@ -43,7 +44,7 @@ class ZulipModel(object):
     def update_new_message(self) -> None:
         self.client.call_on_each_message(self.update_messages)
 
-    def get_messages(self, first_anchor: bool) -> List[Dict[str, str]]:
+    def get_messages(self, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,
             'num_before': self.num_before,
@@ -64,7 +65,7 @@ class ZulipModel(object):
                 self.update = True
             return self.index
 
-    def fetch_initial_data(self):
+    def fetch_initial_data(self) -> Dict[str, Any]:
         try:
             result = self.client.register(
                 fetch_event_types=[
@@ -80,7 +81,7 @@ class ZulipModel(object):
             print("Invalid API key")
             raise urwid.ExitMainLoop()
 
-    def get_all_users(self) -> List[Tuple[Any, Any]]:
+    def get_all_users(self) -> List[Dict[str, Any]]:
         # All the users in the realm
         users = self.initial_data['realm_users']
         user_dict = dict()
@@ -125,7 +126,7 @@ class ZulipModel(object):
         ]
         return sorted(stream_names, key=lambda s: s[0].lower())
 
-    def update_messages(self, response: Dict[str, str]) -> None:
+    def update_messages(self, response: Dict[str, Any]) -> None:
         response['flags'] = []
         if len(self.initial_update) > 0 and hasattr(self.controller, 'view'):
 

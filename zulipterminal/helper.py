@@ -1,10 +1,7 @@
-from typing import Any, List, Dict
+from collections import defaultdict
 from functools import wraps
 from threading import Thread
-from collections import defaultdict
-
-CMSG = Dict[str, List[Dict[str, Any]]]  # Classified Messages
-NMSGL = List[Dict[str, Any]]  # Normal Message List
+from typing import Any, Dict, List
 
 
 def async(func: Any) -> Any:
@@ -12,14 +9,14 @@ def async(func: Any) -> Any:
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
         return thread.start()
     return wrapper
 
 
-def set_count(id_list, controller, new_count):
+def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     streams = controller.view.stream_w.log
     users = controller.view.user_w.log
     all_msg = controller.view.home_button
@@ -59,7 +56,8 @@ def update_flag(id_list: List[int], controller: Any) -> None:
     set_count(id_list, controller, -1)
 
 
-def index_messages(messages, model, index=None):
+def index_messages(messages: List[Any], model: Any, index: Any=None)\
+                                                    -> Dict[str, Any]:
     """
     STRUCTURE OF INDEX
     {
@@ -207,7 +205,8 @@ def index_messages(messages, model, index=None):
     return index
 
 
-def classify_unread_counts(unread_msg_counts: Dict[str, Any]):
+def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
+                                           -> Dict[str, Any]:
     # TODO: supprot group pms
     unread_counts = dict()
     unread_counts['all_msg'] = 0
