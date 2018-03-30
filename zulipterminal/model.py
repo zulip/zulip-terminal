@@ -70,11 +70,11 @@ class ZulipModel(object):
                 fetch_event_types=[
                     'presence',
                     'subscription',
-                    'realm_user',
                     'message',
                     'update_message_flags',
                     ],
             )
+            result['realm_users'] = self.client.get_members()['members']
             return result
         except Exception:
             print("Invalid API key")
