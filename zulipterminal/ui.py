@@ -1,17 +1,18 @@
 from typing import Any
+
 import urwid
 
 from zulipterminal.ui_tools.boxes import WriteBox
 from zulipterminal.ui_tools.buttons import (
-    StreamButton,
-    UserButton,
-    PMButton,
     HomeButton,
+    PMButton,
+    StreamButton,
+    UserButton
 )
 from zulipterminal.ui_tools.views import (
     MiddleColumnView,
     StreamsView,
-    UsersView,
+    UsersView
 )
 
 
@@ -61,7 +62,7 @@ class ZulipView(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         urwid.WidgetWrap.__init__(self, self.main_window())
 
-    def menu_view(self) -> None:
+    def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
         self.home_button = HomeButton(self.controller, count=count)
         count = self.model.unread_counts.get('all_pms', 0)
