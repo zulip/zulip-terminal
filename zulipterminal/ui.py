@@ -16,7 +16,7 @@ from zulipterminal.ui_tools.views import (
 )
 
 
-class ZulipView(urwid.WidgetWrap):
+class View(urwid.WidgetWrap):
     """
     A class responsible for providing the application's interface.
     """

@@ -12,7 +12,7 @@ from zulipterminal.helper import (
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
-class ZulipModel(object):
+class Model:
     """
     A class responsible for storing the data to be displayed.
     """
