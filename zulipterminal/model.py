@@ -74,8 +74,13 @@ class Model:
                     'message',
                     'update_message_flags',
                     ],
+                client_gravatar=True,
             )
-            result['realm_users'] = self.client.get_members()['members']
+            result['realm_users'] = self.client.get_members(
+                request={
+                    'client_gravatar': True,
+                }
+            )['members']
             return result
         except Exception:
             print("Invalid API key")
