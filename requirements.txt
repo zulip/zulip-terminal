@@ -1,6 +1,6 @@
 typing==3.6.4
 urwid==2.0.1
-zulip==0.4.1
+zulip==0.4.2
 pytest==3.4.2
 pytest-cov==2.5.1
 pytest-pep8==1.0.6
