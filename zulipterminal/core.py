@@ -4,12 +4,12 @@ from typing import Any
 import urwid
 import zulip
 
-from zulipterminal.model import ZulipModel
-from zulipterminal.ui import ZulipView
+from zulipterminal.model import Model
+from zulipterminal.ui import View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
-class ZulipController:
+class Controller:
     """
     A class responsible for setting up the model and view and running
     the application.
@@ -18,8 +18,8 @@ class ZulipController:
     def __init__(self, config_file: str, theme: str) -> None:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/0.1.0 ' + platform())
-        self.model = ZulipModel(self)
-        self.view = ZulipView(self)
+        self.model = Model(self)
+        self.view = View(self)
         self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:

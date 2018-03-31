@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from zulipterminal.core import ZulipController
+from zulipterminal.core import Controller
 
 
 def save_stdout():
@@ -57,7 +57,7 @@ def main():
         prof.enable()
 
     try:
-        ZulipController(args.config_file, args.theme).main()
+        Controller(args.config_file, args.theme).main()
     except Exception:
         # A unexpected exception occurred, open the debugger in debug mode
         if args.debug:
