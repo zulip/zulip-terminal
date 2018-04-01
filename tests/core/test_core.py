@@ -12,19 +12,32 @@ class TestController:
         self.client = mocker.patch('zulip.Client')
         self.model = mocker.patch('zulipterminal.model.Model.__init__',
                                   return_value=None)
-        # FIXME: E TypeError: __init__() should return None, not 'MagicMock'
-        #        without __init__
         self.view = mocker.patch('zulipterminal.ui.View.__init__',
                                  return_value=None)
 
-    def test_initialize_controller(self) -> None:
-        config_file = 'path/to/zuliprc'
-        theme = 'default'
-        self.controller = Controller(config_file, theme)
+    @pytest.fixture
+    def controller(self) -> None:
+        self.config_file = 'path/to/zuliprc'
+        self.theme = 'default'
+        return Controller(self.config_file, self.theme)
+
+    def test_initialize_controller(self, controller) -> None:
         self.client.assert_called_once_with(
-            config_file=config_file,
+            config_file=self.config_file,
             client='ZulipTerminal/0.1.0 ' + platform(),
         )
-        self.model.assert_called_once_with(self.controller)
-        self.view.assert_called_once_with(self.controller)
-        assert self.controller.theme == theme
+        self.model.assert_called_once_with(controller)
+        self.view.assert_called_once_with(controller)
+        assert controller.theme == self.theme
+
+    def test_narrow_to_stream(self, mocker, controller,
+                              stream_button, index_stream) -> None:
+        controller.model.narrow = []
+        controller.model.index = index_stream
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.narrow_to_stream(stream_button)
+        assert controller.model.stream_id == stream_button.stream_id
+        assert controller.model.narrow == [['stream', stream_button.caption]]
+        controller.model.msg_view.clear.assert_called_once_with()
+        controller.model.msg_list.set_focus.assert_called_once_with(0)
