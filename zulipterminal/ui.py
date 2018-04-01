@@ -60,7 +60,7 @@ class View(urwid.WidgetWrap):
         self.users = self.model.users
         self.streams = self.model.streams
         self.write_box = WriteBox(self)
-        urwid.WidgetWrap.__init__(self, self.main_window())
+        super(View, self).__init__(self.main_window())
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
