@@ -5,8 +5,8 @@ from typing import Any
 
 
 def test_update_flag(mocker: Any) -> None:
-    mock_controller = mocker.patch('zulipterminal.core.ZulipController')
-    mock_api_query = mocker.patch('zulipterminal.core.ZulipController'
+    mock_controller = mocker.patch('zulipterminal.core.Controller')
+    mock_api_query = mocker.patch('zulipterminal.core.Controller'
                                   '.client.do_api_query')
     update_flag([1, 2], mock_controller)
     mock_api_query.assert_called_once_with(
