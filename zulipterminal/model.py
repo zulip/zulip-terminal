@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, FrozenSet
 
 import urwid
 
@@ -30,6 +30,7 @@ class Model:
         self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
+        self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
         self.get_messages(first_anchor=True)
         self.initial_data = self.fetch_initial_data()
@@ -39,10 +40,6 @@ class Model:
         self.unread_counts = classify_unread_counts(
             self.initial_data['unread_msgs']
             )
-
-    @async
-    def update_new_message(self) -> None:
-        self.client.call_on_each_message(self.update_messages)
 
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
@@ -150,10 +147,21 @@ class Model:
             elif response['type'] == 'stream' and len(self.narrow) == 2 and\
                     self.narrow[1][1] == response['subject']:
                 self.msg_list.log.append(msg_w)
+
+            elif response['type'] == 'private' and len(self.narrow) == 1 and\
+                    self.narrow[0][0] == "pm_with":
+                recipients = self.recipients
+                msg_recipients = frozenset([
+                    self.user_id,
+                    self.user_dict[self.narrow[0][1]]['user_id']
+                    ])
+                if recipients == msg_recipients:
+                    self.msg_list.log.append(msg_w)
+
             set_count([response['id']], self.controller, 1)
             self.controller.loop.draw_screen()
 
-    def update_message(self, response) -> None:
+    def update_message(self, response: Dict[str, Any]) -> None:
         """
         Updates previously rendered message.
         """
@@ -173,7 +181,7 @@ class Model:
                     self.controller.loop.draw_screen()
 
     @async
-    def poll_for_events(self):
+    def poll_for_events(self) -> None:
         queue_id = self.controller.queue_id
         last_event_id = self.controller.last_event_id
         while True:

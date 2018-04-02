@@ -108,9 +108,9 @@ class Controller:
             self.model.get_messages(False)
         elif len(msg_id_list) == 0:
             self.model.get_messages(True)
-
-        msg_id_list = self.model.index['private'].get(frozenset(
-            [self.model.user_id, button.user_id]), [])
+        recipients = frozenset([self.model.user_id, button.user_id])
+        self.model.recipients = recipients
+        msg_id_list = self.model.index['private'].get(recipients, [])
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_id_list, button.message['id'])
