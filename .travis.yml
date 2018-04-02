@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+install:
+  - pip install pipenv
+  - pipenv install --dev
+script:
+  - pipenv run pytest
+  - pipenv run pytest --pep8
+  - pipenv run ./tools/run-mypy
