@@ -150,6 +150,17 @@ class Model:
             elif response['type'] == 'stream' and len(self.narrow) == 2 and\
                     self.narrow[1][1] == response['subject']:
                 self.msg_list.log.append(msg_w)
+
+            elif response['type'] == 'private' and len(self.narrow) == 1 and\
+                    self.narrow[0][0] == "pm_with":
+                recipients = self.recipients
+                msg_recipients = frozenset([
+                    self.user_id,
+                    self.user_dict[self.narrow[0][1]]['user_id']
+                    ])
+                if recipients == msg_recipients:
+                    self.msg_list.log.append(msg_w)
+
             set_count([response['id']], self.controller, 1)
             self.controller.loop.draw_screen()
 
