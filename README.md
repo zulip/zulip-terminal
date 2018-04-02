@@ -12,7 +12,9 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
   ```
   cd zulip-terminal
   sudo apt-get install python3-pip
-  pip3 install -r requirements.txt
+  pip3 install pipenv
+  pipenv --python 3
+  pipenv install
   ```
 
   3. Download the zuliprc configuration file to your computer:
@@ -26,6 +28,7 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 
   4. Run `Zulip-Terminal`
   ```
+  pipenv shell
   ./run.py -c ~/zuliprc
   ```
 
@@ -49,6 +52,11 @@ Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to mov
 
 ### Running tests
 
+* Install Dev Requirements:
+```
+pipenv install --dev
+```
+
 * To run all tests:
 ```
 pytest
@@ -63,17 +71,21 @@ pytest --cov-report html:cov_html --cov=./
 ```
 pytest --pep8
 ```
+
 * To check the type annotations, run:
 ```
 ./tools/run-mypy
 ```
+
 * To open in debug mode:
 ```
 ./run.py -c ~/zuliprc -d
 ```
+
 * To profile runtime:
 ```
 ./run.py -c ~/zuliprc --profile
 ```
+
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).

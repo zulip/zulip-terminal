@@ -1,0 +1,21 @@
+[[source]]
+
+verify_ssl = true
+url = "https://pypi.python.org/simple"
+name = "pypi"
+
+[packages]
+
+typing = "==3.6.4"
+urwid = "==2.0.1"
+zulip = "==0.4.2"
+
+[dev-packages]
+
+pytest = "==3.4.2"
+"pytest-pep8" = "==1.0.6"
+pytest-mock = "==1.7.1"
+pytest-cov = "==2.5.1"
+pudb = "==2017.1.4"
+snakeviz = "==0.4.2"
+mypy = "==0.560"
