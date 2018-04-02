@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Any, Dict, List
 
 import urwid
@@ -20,6 +21,7 @@ class Model:
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
+        # Get message after registering to the queue.
         self.msg_view = None  # type: Any
         self.anchor = 0
         self.num_before = 30
@@ -28,11 +30,9 @@ class Model:
         self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
-        self.initial_update = list()  # type: List[Dict[str, Any]]
-        self.update_new_message()
-        self.initial_data = self.fetch_initial_data()
         self.index = None  # type: Any
         self.get_messages(first_anchor=True)
+        self.initial_data = self.fetch_initial_data()
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
         self.streams = self.get_subscribed_streams()
@@ -131,19 +131,11 @@ class Model:
         ]
         return sorted(stream_names, key=lambda s: s[0].lower())
 
-    def update_messages(self, response: Dict[str, Any]) -> None:
+    def append_message(self, response: Dict[str, Any]) -> None:
+        """
+        Adds message to the end of the view.
+        """
         response['flags'] = []
-        if len(self.initial_update) > 0 and hasattr(self.controller, 'view'):
-
-            for msg in self.initial_update:
-                self.index = index_messages([msg], self, self.index)
-                msg_w = create_msg_box_list(self, [msg['id']])[0]
-                self.msg_list.log.append(msg_w)
-
-            self.initial_update = []
-        elif not hasattr(self.controller, 'view'):
-            self.initial_update.append(response)
-
         if hasattr(self.controller, 'view') and self.update:
             self.index = index_messages([response], self, self.index)
             msg_w = create_msg_box_list(self, [response['id']])[0]
@@ -160,3 +152,37 @@ class Model:
                 self.msg_list.log.append(msg_w)
             set_count([response['id']], self.controller, 1)
             self.controller.loop.draw_screen()
+
+    @async
+    def poll_for_events(self):
+        queue_id = self.controller.queue_id
+        last_event_id = self.controller.last_event_id
+        while True:
+            if queue_id is None:
+                self.controller.register()
+                queue_id = self.controller.queue_id
+                last_event_id = self.controller.last_event_id
+
+            response = self.client.get_events(
+                    queue_id=queue_id,
+                    last_event_id=last_event_id
+                )
+
+            if 'error' in response['result']:
+                if response["msg"].startswith("Bad event queue id:"):
+                    # Our event queue went away, probably because
+                    # we were asleep or the server restarted
+                    # abnormally.  We may have missed some
+                    # events while the network was down or
+                    # something, but there's not really anything
+                    # we can do about it other than resuming
+                    # getting new ones.
+                    #
+                    # Reset queue_id to register a new event queue.
+                    queue_id = None
+                time.sleep(1)
+                continue
+            for event in response['events']:
+                last_event_id = max(last_event_id, int(event['id']))
+                if event['type'] == 'message':
+                    self.append_message(event['message'])
