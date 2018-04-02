@@ -155,11 +155,20 @@ class MessageBox(urwid.Pile):
         return super(MessageBox, self).mouse_event(size, event, button, col,
                                                    row, focus)
 
+    def get_recipients(self) -> str:
+        emails = []
+        for recipient in self.message['display_recipient']:
+            email = recipient['email']
+            if email == self.model.client.email:
+                continue
+            emails.append(recipient['email'])
+        return ', '.join(emails)
+
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'enter':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.message['sender_email']
+                    email=self.get_recipients()
                     )
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
@@ -169,7 +178,7 @@ class MessageBox(urwid.Pile):
         if key == 'c':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.message['sender_email']
+                    email=self.get_recipients()
                     )
             if self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
