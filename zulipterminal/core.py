@@ -18,8 +18,13 @@ class Controller:
     def __init__(self, config_file: str, theme: str) -> None:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/0.1.0 ' + platform())
+        # Register to the queue before initializing Model or View
+        # so that we don't lose any updates while messages are being fetched.
+        self.register()
         self.model = Model(self)
         self.view = View(self)
+        # Start polling for events after view is rendered.
+        self.model.poll_for_events()
         self.theme = theme
 
     def narrow_to_stream(self, button: Any) -> None:
@@ -156,6 +161,16 @@ class Controller:
         self.model.msg_view.extend(w_list)
         if focus_position > 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
+
+    def register(self) -> None:
+        event_types = [
+            'message',
+            'update_message'
+        ]
+        response = self.client.register(event_types=event_types)
+        self.max_message_id = response['max_message_id']
+        self.queue_id = response['queue_id']
+        self.last_event_id = response['last_event_id']
 
     def main(self) -> None:
         try:
