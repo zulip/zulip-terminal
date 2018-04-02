@@ -153,6 +153,25 @@ class Model:
             set_count([response['id']], self.controller, 1)
             self.controller.loop.draw_screen()
 
+    def update_message(self, response) -> None:
+        """
+        Updates previously rendered message.
+        """
+        message_id = response['message_id']
+        content = response['content']
+        # If the message is indexed
+        if self.index['messages'][message_id] != {}:
+            message = self.index['messages'][message_id]
+            message['content'] = content
+            self.index['messages'][message_id] = message
+            # Update new content in the rendered view
+            for msg_w in self.msg_list.log:
+                if msg_w.original_widget.message['id'] == message_id:
+                    new_msg_w = create_msg_box_list(self, [message_id])[0]
+                    msg_pos = self.msg_list.log.index(msg_w)
+                    self.msg_list.log[msg_pos] = new_msg_w
+                    self.controller.loop.draw_screen()
+
     @async
     def poll_for_events(self):
         queue_id = self.controller.queue_id
@@ -186,3 +205,9 @@ class Model:
                 last_event_id = max(last_event_id, int(event['id']))
                 if event['type'] == 'message':
                     self.append_message(event['message'])
+                if event['type'] == 'update_message':
+                    # FIXME: Support Topic Editing
+                    if 'subject' in event.keys():
+                        continue
+                    else:
+                        self.update_message(event)
