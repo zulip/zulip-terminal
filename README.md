@@ -2,6 +2,8 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
+![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)
+
  ## Setup:
   1. Download this repository
   ```
