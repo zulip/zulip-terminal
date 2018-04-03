@@ -40,3 +40,15 @@ def test_index_messages_narrow_stream(mocker,
     model.narrow = [['stream', 'PTEST']]
     model.stream_id = 205
     assert index_messages(messages, model) == index_stream
+
+
+def test_index_messages_narrow_topic(mocker,
+                                     messages_successful_response,
+                                     index_topic) -> None:
+    messages = messages_successful_response['messages']
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.narrow = [['stream', '7'],
+                    ['topic', 'Test']]
+    model.stream_id = 205
+    assert index_messages(messages, model) == index_topic
