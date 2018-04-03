@@ -88,7 +88,7 @@ class Controller:
             focus_position = len(w_list) - 1
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
-        if focus_position > 0 and focus_position < len(w_list):
+        if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_user(self, button: Any) -> None:
