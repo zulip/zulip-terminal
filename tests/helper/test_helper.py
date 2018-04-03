@@ -52,3 +52,19 @@ def test_index_messages_narrow_topic(mocker,
                     ['topic', 'Test']]
     model.stream_id = 205
     assert index_messages(messages, model) == index_topic
+
+
+def test_index_messages_narrow_user(mocker,
+                                    messages_successful_response,
+                                    index_user):
+    messages = messages_successful_response['messages']
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.narrow = [['pm_with', 'boo@zulip.com']]
+    model.user_id = 5140
+    model.user_dict = {
+        'boo@zulip.com': {
+            'user_id': 5179,
+        }
+    }
+    assert index_messages(messages, model) == index_user

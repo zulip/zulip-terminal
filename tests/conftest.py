@@ -4,7 +4,7 @@ from typing import Any, Dict
 import pytest
 
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import StreamButton
+from zulipterminal.ui_tools.buttons import StreamButton, UserButton
 
 
 @pytest.fixture(autouse=True)
@@ -27,6 +27,22 @@ def stream_button(mocker):
         view=mocker.patch('zulipterminal.ui.View')
     )
     return button
+
+
+@pytest.fixture
+def user_button(mocker):
+    """
+    Mocked User Button.
+    """
+    return UserButton(
+        user={
+            'user_id': 5179,
+            'full_name': 'Boo Boo',
+            'email': 'boo@zulip.com',
+        },
+        controller=mocker.patch('zulipterminal.core.Controller'),
+        view=mocker.patch('zulipterminal.ui.View')
+    )
 
 
 @pytest.fixture
@@ -479,4 +495,86 @@ def index_topic():
         'all_private': set(),
         'all_stream': defaultdict(set, {}),
         'all_messages': set()
+    }
+
+
+@pytest.fixture(scope="module")
+def index_user():
+    """
+    Expected index of initial_data when model.narrow = [['pm_with',
+                                                         'boo@zulip.com'],
+    """
+    return {
+        'stream': defaultdict(dict, {}),
+        'private': defaultdict(set, {
+            frozenset({
+                5179,
+                5140
+            }): {
+                537287
+            }
+        }),
+        'all_messages': set(),
+        'pointer': defaultdict(set, {}),
+        'messages': defaultdict(dict, {
+            537286: {
+                'subject': 'Test',
+                'sender_full_name': 'Foo Foo',
+                'sender_short_name': 'foo',
+                'sender_email': 'foo@zulip.com',
+                'is_me_message': False,
+                'content_type': 'text/x-markdown',
+                'type': 'stream',
+                'id': 537286,
+                'sender_id': 5140,
+                'sender_realm_str': '',
+                'stream_id': 205,
+                'content': 'Stream content here.',
+                'reactions': [],
+                'subject_links': [],
+                'client': 'website',
+                'flags': ['read'],
+                'timestamp': 1520918722,
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'recipient_id': 6076,
+                'display_recipient': 'PTEST'
+            },
+            537287: {
+                'subject': '',
+                'sender_full_name': 'Foo Foo',
+                'sender_short_name': 'foo',
+                'sender_email': 'foo@zulip.com',
+                'is_me_message': False,
+                'content_type': 'text/x-markdown',
+                'reactions': [],
+                'id': 537287,
+                'sender_id': 5140,
+                'sender_realm_str': '',
+                'type': 'private',
+                'content': 'Hey PM content here.',
+                'subject_links': [],
+                'client': 'website',
+                'flags': ['read'],
+                'timestamp': 1520918736,
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'recipient_id': 5780,
+                'display_recipient': [{
+                    'short_name': 'boo',
+                    'id': 5179,
+                    'full_name': 'Boo Boo',
+                    'is_mirror_dummy': False,
+                    'email': 'boo@zulip.com'
+                }, {
+                    'id': 5140,
+                    'short_name': 'foo',
+                    'full_name': 'Foo Foo',
+                    'is_mirror_dummy': False,
+                    'email': 'foo@zulip.com'
+                }]
+            }
+        }),
+        'all_private': {
+            537287
+        },
+        'all_stream': defaultdict(set, {})
     }
