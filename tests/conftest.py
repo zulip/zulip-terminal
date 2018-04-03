@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 import pytest
 
+from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton
 
 
@@ -16,7 +17,7 @@ def no_requests(monkeypatch):
 
 
 @pytest.fixture
-def stream_button(mocker, monkeypatch):
+def stream_button(mocker):
     """
     Mocked stream button.
     """
@@ -26,6 +27,17 @@ def stream_button(mocker, monkeypatch):
         view=mocker.patch('zulipterminal.ui.View')
     )
     return button
+
+
+@pytest.fixture
+def msg_box(mocker, messages_successful_response):
+    """
+    Mocked MessageBox with stream message
+    """
+    return MessageBox(
+        messages_successful_response['messages'][0],
+        mocker.patch('zulipterminal.model.Model')
+    )
 
 
 # --------------- Model Fixtures ----------------------------------------------
@@ -388,4 +400,83 @@ def index_stream():
                 'is_me_message': False
             }
         })
+    }
+
+
+@pytest.fixture(scope="module")
+def index_topic():
+    """
+    Expected index of initial_data when model.narrow = [['stream', '7'],
+                                                        ['topic', 'Test']]
+    """
+    return {
+        'stream': defaultdict(dict, {
+            205: {
+                'Test': {
+                    537286
+                }
+            }
+        }),
+        'private': defaultdict(set, {}),
+        'messages': defaultdict(dict, {
+            537286: {
+                'sender_full_name': 'Foo Foo',
+                'sender_id': 5140,
+                'id': 537286,
+                'client': 'website',
+                'is_me_message': False,
+                'subject_links': [],
+                'content': 'Stream content here.',
+                'stream_id': 205,
+                'sender_realm_str': '',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'display_recipient': 'PTEST',
+                'subject': 'Test',
+                'sender_short_name': 'foo',
+                'recipient_id': 6076,
+                'content_type': 'text/x-markdown',
+                'reactions': [],
+                'timestamp': 1520918722,
+                'flags': ['read'],
+                'type': 'stream',
+                'sender_email': 'foo@zulip.com'
+            },
+            537287: {
+                'sender_full_name': 'Foo Foo',
+                'sender_id': 5140,
+                'id': 537287,
+                'client': 'website',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'content': 'Hey PM content here.',
+                'sender_realm_str': '',
+                'is_me_message': False,
+                'display_recipient': [{
+                    'is_mirror_dummy': False,
+                    'id': 5179,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com'
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'full_name': 'Foo Foo',
+                    'is_mirror_dummy': False,
+                    'email': 'foo@zulip.com'
+                }],
+                'subject': '',
+                'sender_short_name': 'foo',
+                'recipient_id': 5780,
+                'content_type': 'text/x-markdown',
+                'reactions': [],
+                'timestamp': 1520918736,
+                'flags': ['read'],
+                'type': 'private',
+                'sender_email': 'foo@zulip.com'
+            }
+        }),
+        'pointer': defaultdict(set, {}),
+        'all_private': set(),
+        'all_stream': defaultdict(set, {}),
+        'all_messages': set()
     }
