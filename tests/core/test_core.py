@@ -82,3 +82,51 @@ class TestController:
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
         id_list = index_user['private'][recipients]
         assert {widget.original_widget.message['id']} == id_list
+
+    def test_show_all_messages(self, mocker, controller, index_all_messages):
+        controller.model.narrow = [['stream', 'PTEST']]
+        controller.model.index = index_all_messages
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.show_all_messages('')
+        assert controller.model.narrow == []
+        controller.model.msg_view.clear.assert_called_once_with()
+        controller.model.msg_list.set_focus.assert_called_once_with(1)
+        widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
+        id_list = index_all_messages['all_messages']
+        msg_ids = set(widget.original_widget.message['id']
+                      for widget in widgets)
+        assert msg_ids == id_list
+
+    def test_show_all_pm(self, mocker, controller, index_user):
+        controller.model.narrow = []
+        controller.model.index = index_user
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.show_all_pm('')
+        assert controller.model.narrow == [['is', 'private']]
+        controller.model.msg_view.clear.assert_called_once_with()
+        controller.model.msg_list.set_focus.assert_called_once_with(0)
+        id_list = index_user['all_private']
+        widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
+        assert {widget.original_widget.message['id']} == id_list
+
+    def test_register(self, mocker):
+        self.config_file = 'path/to/zuliprc'
+        self.theme = 'default'
+        controller = Controller(self.config_file, self.theme)
+        event_types = [
+            'message',
+            'update_message'
+        ]
+        controller.client.register.assert_called_once_with(
+                                   event_types=event_types)
+
+    def test_main(self, mocker, controller):
+        ret_mock = mocker.Mock()
+        mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
+        controller.view.palette = {
+            'default': 'theme_properties'
+        }
+        controller.main()
+        assert mock_loop.call_count == 1
