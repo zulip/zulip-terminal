@@ -49,3 +49,20 @@ class TestController:
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
         id_list = index_stream['all_stream'][stream_button.stream_id]
         assert {widget.original_widget.message['id']} == id_list
+
+    def test_narrow_to_topic(self, mocker, controller,
+                             msg_box, index_topic):
+        expected_narrow = [['stream', msg_box.caption],
+                           ['topic', msg_box.title]]
+        controller.model.narrow = []
+        controller.model.index = index_topic
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.narrow_to_topic(msg_box)
+        assert controller.model.stream_id == msg_box.stream_id
+        assert controller.model.narrow == expected_narrow
+        controller.model.msg_view.clear.assert_called_once_with()
+        controller.model.msg_list.set_focus.assert_called_once_with(0)
+        widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
+        id_list = index_topic['stream'][msg_box.stream_id][msg_box.title]
+        assert {widget.original_widget.message['id']} == id_list
