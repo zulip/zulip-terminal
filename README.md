@@ -89,5 +89,15 @@ pytest --pep8
 ./run.py -c ~/zuliprc --profile
 ```
 
+### Contributor Guidelines
+
+Zulip Terminal is being build by an awesome community of [Zulip](https://zulipchat.com/team).
+
+To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and 
+[git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
+
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
