@@ -14,7 +14,8 @@ class TestController:
                                   return_value=None)
         self.view = mocker.patch('zulipterminal.ui.View.__init__',
                                  return_value=None)
-        self.model.poll_for_events = mocker.patch('zulipterminal.model.Model.poll_for_events')
+        self.model.poll_for_events = mocker.patch('zulipterminal.model.Model'
+                                                  '.poll_for_events')
 
     @pytest.fixture
     def controller(self, mocker) -> None:
@@ -45,3 +46,6 @@ class TestController:
         assert controller.model.narrow == [['stream', stream_button.caption]]
         controller.model.msg_view.clear.assert_called_once_with()
         controller.model.msg_list.set_focus.assert_called_once_with(0)
+        widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
+        id_list = index_stream['all_stream'][stream_button.stream_id]
+        assert {widget.original_widget.message['id']} == id_list
