@@ -14,20 +14,24 @@ class TestController:
                                   return_value=None)
         self.view = mocker.patch('zulipterminal.ui.View.__init__',
                                  return_value=None)
+        self.model.poll_for_events = mocker.patch('zulipterminal.model.Model.poll_for_events')
 
     @pytest.fixture
-    def controller(self) -> None:
+    def controller(self, mocker) -> None:
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
+        mocker.patch('zulipterminal.core.Controller.register')
         return Controller(self.config_file, self.theme)
 
-    def test_initialize_controller(self, controller) -> None:
+    def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
             config_file=self.config_file,
             client='ZulipTerminal/0.1.0 ' + platform(),
         )
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
+        self.model.poll_for_events.assert_called_once_with()
+        controller.register.assert_called_once_with()
         assert controller.theme == self.theme
 
     def test_narrow_to_stream(self, mocker, controller,
