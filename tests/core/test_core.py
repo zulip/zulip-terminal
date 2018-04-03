@@ -66,3 +66,19 @@ class TestController:
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
         id_list = index_topic['stream'][msg_box.stream_id][msg_box.title]
         assert {widget.original_widget.message['id']} == id_list
+
+    def test_narrow_to_user(self, mocker, controller, user_button, index_user):
+        controller.model.narrow = []
+        controller.model.index = index_user
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.user_id = 5140
+        controller.narrow_to_user(user_button)
+        assert controller.model.narrow == [["pm_with", user_button.email]]
+        controller.model.msg_view.clear.assert_called_once_with()
+        controller.model.msg_list.set_focus.assert_called_once_with(0)
+        recipients = frozenset([controller.model.user_id, user_button.user_id])
+        assert controller.model.recipients == recipients
+        widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
+        id_list = index_user['private'][recipients]
+        assert {widget.original_widget.message['id']} == id_list
