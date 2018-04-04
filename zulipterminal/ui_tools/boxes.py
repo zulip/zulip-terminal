@@ -1,6 +1,8 @@
+from collections import defaultdict
 from time import ctime
 from typing import Any, Dict, List, Tuple, Union
 
+import emoji
 import urwid
 
 from zulipterminal.ui_tools.buttons import MenuButton
@@ -133,15 +135,40 @@ class MessageBox(urwid.Pile):
         header = urwid.AttrWrap(header, "header")
         return header
 
+    def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
+        if reactions == []:
+            return ''
+        try:
+            reacts = defaultdict(int)  # type: Dict[str, int]
+            custom_reacts = defaultdict(int)  # type: Dict[str, int]
+            for reaction in reactions:
+                if reaction['reaction_type'] == 'unicode_emoji':
+                    reacts[reaction['emoji_code']] += 1
+                if reaction['reaction_type'] == 'realm_emoji':
+                    custom_reacts[reaction['emoji_name']] += 1
+            dis = [
+                '\\U' + '0'*(8-len(emoji)) + emoji + ' ' + str(reacts[emoji]) +
+                ' ' for emoji in reacts]
+            emojis = ''.join(e.encode().decode('unicode-escape') for e in dis)
+            custom_emojis = ''.join(
+                ['{} {}'.format(r, custom_reacts[r]) for r in custom_reacts])
+            return urwid.Text(emoji.demojize(emojis + custom_emojis))
+        except:
+            return ''
+
     def main_view(self) -> List[Any]:
         if self.message['type'] == 'stream':
             header = self.stream_view()
         else:
             header = self.private_view()
+        reactions = self.reactions_view(self.message['reactions'])
         content = [('name', self.message['sender_full_name']), "\n" +
                    self.message['content']]
         content = urwid.Text(content)
-        return [header, content]
+        if reactions == '':
+            return [header, content]
+        else:
+            return [header, content, reactions]
 
     def selectable(self) -> bool:
         return True
