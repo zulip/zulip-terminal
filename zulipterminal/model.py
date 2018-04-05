@@ -180,6 +180,38 @@ class Model:
                     self.msg_list.log[msg_pos] = new_msg_w
                     self.controller.loop.draw_screen()
 
+    def update_reaction(self, response: Dict[str, Any]) -> None:
+        message_id = response['message_id']
+        # If the message is indexed
+        if self.index['messages'][message_id] != {}:
+
+            message = self.index['messages'][message_id]
+            if response['op'] == 'add':
+                message['reactions'].append(
+                    {
+                        'user': response['user'],
+                        'reaction_type': response['reaction_type'],
+                        'emoji_code': response['emoji_code'],
+                        'emoji_name': response['emoji_name'],
+                    }
+                )
+            else:
+                emoji_code = response['emoji_code']
+                for reaction in message['reactions']:
+                    # Since Who reacted is not displayed,
+                    # remove the first one encountered
+                    if reaction['emoji_code'] == emoji_code:
+                        message['reactions'].remove(reaction)
+
+            self.index['messages'][message_id] = message
+            # Update new content in the rendered view
+            for msg_w in self.msg_list.log:
+                if msg_w.original_widget.message['id'] == message_id:
+                    new_msg_w = create_msg_box_list(self, [message_id])[0]
+                    msg_pos = self.msg_list.log.index(msg_w)
+                    self.msg_list.log[msg_pos] = new_msg_w
+                    self.controller.loop.draw_screen()
+
     @async
     def poll_for_events(self) -> None:
         queue_id = self.controller.queue_id
@@ -219,3 +251,5 @@ class Model:
                         continue
                     else:
                         self.update_message(event)
+                if event['type'] == 'reaction':
+                    self.update_reaction(event)

@@ -164,7 +164,8 @@ class Controller:
     def register(self) -> None:
         event_types = [
             'message',
-            'update_message'
+            'update_message',
+            'reaction',
         ]
         response = self.client.register(event_types=event_types)
         self.max_message_id = response['max_message_id']
