@@ -117,7 +117,8 @@ class TestController:
         controller = Controller(self.config_file, self.theme)
         event_types = [
             'message',
-            'update_message'
+            'update_message',
+            'reaction'
         ]
         controller.client.register.assert_called_once_with(
                                    event_types=event_types)

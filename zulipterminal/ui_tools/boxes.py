@@ -153,7 +153,7 @@ class MessageBox(urwid.Pile):
             custom_emojis = ''.join(
                 ['{} {}'.format(r, custom_reacts[r]) for r in custom_reacts])
             return urwid.Text(emoji.demojize(emojis + custom_emojis))
-        except:
+        except Exception:
             return ''
 
     def main_view(self) -> List[Any]:
@@ -163,7 +163,7 @@ class MessageBox(urwid.Pile):
             header = self.private_view()
         reactions = self.reactions_view(self.message['reactions'])
         content = [('name', self.message['sender_full_name']), "\n" +
-                   self.message['content']]
+                   emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
         if reactions == '':
             return [header, content]
