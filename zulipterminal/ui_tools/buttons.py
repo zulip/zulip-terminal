@@ -65,6 +65,8 @@ class StreamButton(urwid.Button):
         self.color = color[:2] + color[3] + color[5]
         view.palette['default'].append((self.color, '', '', '', self.color,
                                        'black'))
+        view.palette['default'].append(('s' + self.color, '', '', '',
+                                       'black', self.color))
         self.count = count
         super(StreamButton, self).__init__("")
         self._w = self.widget(count)
