@@ -85,26 +85,37 @@ class WriteBox(urwid.Pile):
 
 
 class MessageBox(urwid.Pile):
-    def __init__(self, message: Dict[str, Any], model: Any) -> None:
+    def __init__(self, message: Dict[str, Any], model: Any,
+                 last_message: Any) -> None:
         self.model = model
         self.message = message
         self.caption = ''
         self.stream_id = None  # type: Union[int, None]
         self.title = ''
         self.email = ''
+        self.last_message = last_message
+        # if this is the first message
+        if self.last_message is None:
+            self.last_message = defaultdict(dict)
         super(MessageBox, self).__init__(self.main_view())
 
     def stream_view(self) -> Any:
         self.caption = self.message['display_recipient']
         self.stream_id = self.message['stream_id']
         self.title = self.message['subject']
+        # If the topic of last message is same
+        # as current message
+        if self.title == self.last_message['subject']:
+            return urwid.Text(
+                (None, ctime(self.message['timestamp'])[:-8]),
+                align='right')
         stream_title = ('header', [
             ('custom', self.caption),
             ('selected', ">"),
             ('custom', self.title)
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text(('custom', ctime(self.message['timestamp'])),
+        time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
                           align='right')
         header = urwid.Columns([
             stream_title,
@@ -116,6 +127,10 @@ class MessageBox(urwid.Pile):
     def private_view(self) -> Any:
         self.email = self.message['sender_email']
         self.user_id = self.message['sender_id']
+        if self.user_id == self.last_message['sender_id']:
+            return urwid.Text(
+                ('time', ctime(self.message['timestamp'])[:-8]),
+                align='right')
         self.recipients = ' ,'.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
@@ -126,7 +141,7 @@ class MessageBox(urwid.Pile):
             ('custom', self.recipients)
             ])
         title = urwid.Text(title)
-        time = urwid.Text(('custom', ctime(self.message['timestamp'])),
+        time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
                           align='right')
         header = urwid.Columns([
             title,
@@ -165,10 +180,10 @@ class MessageBox(urwid.Pile):
         content = [('name', self.message['sender_full_name']), "\n" +
                    emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
+        view = [header, content, reactions]
         if reactions == '':
-            return [header, content]
-        else:
-            return [header, content, reactions]
+            view.remove(reactions)
+        return view
 
     def selectable(self) -> bool:
         return True

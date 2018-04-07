@@ -52,7 +52,8 @@ def msg_box(mocker, messages_successful_response):
     """
     return MessageBox(
         messages_successful_response['messages'][0],
-        mocker.patch('zulipterminal.model.Model')
+        mocker.patch('zulipterminal.model.Model'),
+        None,
     )
 
 
