@@ -30,6 +30,7 @@ class Model:
         self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
+        self.stream_dict = {}  # type: Dict[int, Any]
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
         self.get_messages(first_anchor=True)
@@ -120,6 +121,9 @@ class Model:
 
     def get_subscribed_streams(self) -> List[List[str]]:
         subscriptions = self.initial_data['subscriptions']
+        # Store streams in id->Stream format
+        for stream in subscriptions:
+            self.stream_dict[stream['stream_id']] = stream
         stream_names = [[
             stream['name'],
             stream['stream_id'],

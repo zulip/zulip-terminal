@@ -109,19 +109,21 @@ class MessageBox(urwid.Pile):
             return urwid.Text(
                 (None, ctime(self.message['timestamp'])[:-8]),
                 align='right')
-        stream_title = ('header', [
-            ('custom', self.caption),
-            ('selected', ">"),
-            ('custom', self.title)
+        bar_color = self.model.stream_dict[self.stream_id]['color']
+        bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
+        stream_title = (bar_color, [
+            (bar_color, self.caption),
+            (bar_color, ">"),
+            (bar_color, self.title)
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
+        time = urwid.Text((bar_color, ctime(self.message['timestamp'])[:-8]),
                           align='right')
         header = urwid.Columns([
             stream_title,
             time,
         ])
-        header = urwid.AttrWrap(header, "header")
+        header = urwid.AttrWrap(header, bar_color)
         return header
 
     def private_view(self) -> Any:

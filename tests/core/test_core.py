@@ -41,6 +41,11 @@ class TestController:
         controller.model.index = index_stream
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.stream_dict = {
+            205: {
+                'color': '#ffffff',
+            }
+        }
         controller.narrow_to_stream(stream_button)
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream', stream_button.caption]]
@@ -58,6 +63,11 @@ class TestController:
         controller.model.index = index_topic
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.stream_dict = {
+            205: {
+                'color': '#ffffff',
+            }
+        }
         controller.narrow_to_topic(msg_box)
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
@@ -88,6 +98,11 @@ class TestController:
         controller.model.index = index_all_messages
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.stream_dict = {
+            205: {
+                'color': '#ffffff',
+            }
+        }
         controller.show_all_messages('')
         assert controller.model.narrow == []
         controller.model.msg_view.clear.assert_called_once_with()
