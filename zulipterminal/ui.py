@@ -1,7 +1,8 @@
-from typing import Any
+from typing import Any, Tuple
 
 import urwid
 
+from config import get_key
 from zulipterminal.ui_tools.boxes import WriteBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton,
@@ -136,3 +137,9 @@ class View(urwid.WidgetWrap):
         self.body = urwid.Columns(body, focus_column=1)
         w = urwid.LineBox(self.body, title=u"Zulip")
         return w
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if self.controller.editor_mode:
+            return self.controller.editor.keypress((20,), key)
+        else:
+            return super(View, self).keypress(size, get_key(key))
