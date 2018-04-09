@@ -40,6 +40,10 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 | ------- | --------------- |
 | Previous message | `Up`, `k` |
 | Next message | `Down`, `j` |
+| Go left | `left`, `h` |
+| Go right | `right`, `l` |
+| Go to the last message | `G`, `end` |
+| Narrow to private messages | `P` |
 | Scroll down | `PgDn`, `J` |
 | Scroll up | `PgUp`, `K` |
 | Reply to a message | `r` |

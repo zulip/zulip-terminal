@@ -12,6 +12,7 @@ class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super(WriteBox, self).__init__(self.main_view(True))
         self.client = view.client
+        self.view = view
 
     def main_view(self, new: bool) -> Any:
         private_button = MenuButton(u"New Private Message")
@@ -27,7 +28,14 @@ class WriteBox(urwid.Pile):
         else:
             self.contents = [(w, self.options())]
 
+    def set_editor_mode(self) -> None:
+        # if not in the editor mode already set editor_mode to True.
+        if not self.view.controller.editor_mode:
+            self.view.controller.editor_mode = True
+            self.view.controller.editor = self
+
     def private_box_view(self, button: Any=None, email: str='') -> None:
+        self.set_editor_mode()
         if email == '' and button is not None:
             email = button.email
         self.to_write_box = urwid.Edit(u"To: ", edit_text=email)
@@ -39,6 +47,7 @@ class WriteBox(urwid.Pile):
 
     def stream_box_view(self, button: Any=None, caption: str='',
                         title: str='') -> None:
+        self.set_editor_mode()
         self.to_write_box = None
         if caption == '' and button is not None:
             caption = button.caption
@@ -78,8 +87,10 @@ class WriteBox(urwid.Pile):
                 response = self.client.send_message(request)
             if response['result'] == 'success':
                 self.msg_write_box.edit_text = ''
-        if key == 'esc':
+        elif key == 'esc':
+            self.view.controller.editor_mode = False
             self.main_view(False)
+
         key = super(WriteBox, self).keypress(size, key)
         return key
 
@@ -161,7 +172,7 @@ class MessageBox(urwid.Pile):
             for reaction in reactions:
                 if reaction['reaction_type'] == 'unicode_emoji':
                     reacts[reaction['emoji_code']] += 1
-                if reaction['reaction_type'] == 'realm_emoji':
+                elif reaction['reaction_type'] == 'realm_emoji':
                     custom_reacts[reaction['emoji_name']] += 1
             dis = [
                 '\\U' + '0'*(8-len(emoji)) + emoji + ' ' + str(reacts[emoji]) +
@@ -214,34 +225,36 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
                     )
-            if self.message['type'] == 'stream':
+            elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     title=self.message['subject']
                     )
-        if key == 'c':
+        elif key == 'c':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
                     )
-            if self.message['type'] == 'stream':
+            elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient']
                     )
-        if key == 'S':
+        elif key == 'S':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
-            if self.message['type'] == 'stream':
+            elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
-        if key == 's':
+        elif key == 's':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
-            if self.message['type'] == 'stream':
+            elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_topic(self)
-        if key == 'esc':
+        elif key == 'esc':
             self.model.controller.show_all_messages(self)
-        if key == 'R':
+        elif key == 'R':
             self.model.controller.view.write_box.private_box_view(
                 email=self.message['sender_email']
                 )
+        elif key == 'P':
+            self.model.controller.show_all_pm(self)
         return key

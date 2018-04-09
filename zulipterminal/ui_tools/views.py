@@ -93,7 +93,7 @@ class MessageView(urwid.ListBox):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key in ['j', 'down'] and not self.new_loading:
+        if key == 'j' and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -104,7 +104,7 @@ class MessageView(urwid.ListBox):
                     self.load_new_messages(id, self.focus_position)
                 return key
 
-        if key in ['k', 'up'] and not self.old_loading:
+        elif key == 'k' and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
@@ -117,13 +117,13 @@ class MessageView(urwid.ListBox):
                     self.load_old_messages()
                 return key
 
-        if key in ['page up', 'K'] and not self.old_loading:
+        elif key == 'page up' and not self.old_loading:
             if self.focus_position == 0:
                 return self.keypress(size, 'up')
             else:
                 return super(MessageView, self).keypress(size, 'page up')
 
-        if key in ['page down', 'J'] and not self.old_loading:
+        elif key == 'page down' and not self.old_loading:
             if self.focus_position == len(self.log) - 1:
                 return self.keypress(size, 'down')
             else:
@@ -165,7 +165,7 @@ class StreamsView(urwid.ListBox):
             if button == 4:
                 self.keypress(size, 'up')
                 return True
-            if button == 5:
+            elif button == 5:
                 self.keypress(size, 'down')
                 return True
         return super(StreamsView, self).mouse_event(size, event, button, col,
@@ -184,7 +184,7 @@ class UsersView(urwid.ListBox):
                 for _ in range(5):
                     self.keypress(size, 'up')
                 return True
-            if button == 5:
+            elif button == 5:
                 for _ in range(5):
                     self.keypress(size, 'down')
         return super(UsersView, self).mouse_event(size, event, button, col,
@@ -204,16 +204,16 @@ class MiddleColumnView(urwid.Frame):
                 self.set_focus('footer')
                 self.footer.focus_position = 1
                 return key
-        if key == 'esc':
+        elif key == 'esc':
             self.footer.keypress(size, 'esc')
             self.set_focus('body')
-        if key == 'c':
+        elif key == 'c':
             if not self.focus_position == 'footer':
                 self.body.keypress(size, 'c')
                 self.set_focus('footer')
                 self.footer.focus_position = 0
                 return key
-        if key == 'R':
+        elif key == 'R':
             if not self.focus_position == 'footer':
                 self.body.keypress(size, 'R')
                 self.set_focus('footer')

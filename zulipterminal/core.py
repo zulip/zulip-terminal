@@ -26,6 +26,8 @@ class Controller:
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
         self.theme = theme
+        self.editor_mode = False  # type: bool
+        self.editor = None  # type: Any
 
     def narrow_to_stream(self, button: Any) -> None:
         # return if already narrowed
