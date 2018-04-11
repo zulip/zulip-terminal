@@ -144,13 +144,13 @@ class MessageBox(urwid.Pile):
             return urwid.Text(
                 ('time', ctime(self.message['timestamp'])[:-8]),
                 align='right')
-        self.recipients = ' ,'.join(list(
+        self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
         ))
         title = ('header', [
             ('custom', 'Private Message'),
-            ('selected', " : "),
+            ('selected', ": "),
             ('custom', self.recipients)
             ])
         title = urwid.Text(title)
