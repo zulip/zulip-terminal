@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import argparse
+import configparser
 import sys
+from os import environ, path
 
 from zulipterminal.core import Controller
 
@@ -44,11 +46,36 @@ def parse_args():
     return args
 
 
+def parse_zuliprc(zuliprc_str):
+    zuliprc_path = path.expanduser(zuliprc_str)
+    if not path.exists(zuliprc_path):
+        sys.exit("Error: Cannot find {}".format(zuliprc_path))
+
+    zuliprc = configparser.ConfigParser()
+    zuliprc.read(zuliprc_path)
+
+    # default settings
+    settings = {'theme': 'default'}
+
+    if 'zterm' in zuliprc:
+        if 'theme' in zuliprc['zterm']:
+            settings['theme'] = zuliprc['zterm']['theme']
+
+    return settings
+
+
 def main():
     """
     Launch Zulip Terminal.
     """
     args = parse_args()
+    if args.config_file:
+        zuliprc_path = args.config_file
+    else:
+        zuliprc_path = '~/zuliprc'
+
+    zterm = parse_zuliprc(zuliprc_path)
+
     if args.debug:
         save_stdout()
     if args.profile:
@@ -57,7 +84,7 @@ def main():
         prof.enable()
 
     try:
-        Controller(args.config_file, args.theme).main()
+        Controller(zuliprc_path, zterm['theme']).main()
     except Exception:
         # A unexpected exception occurred, open the debugger in debug mode
         if args.debug:

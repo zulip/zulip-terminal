@@ -25,14 +25,28 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
   - Go to _Settings_ -> _Your account_
   - Click on `Show/Change your API key` under the _API key_ section.
   - Download the `zuliprc` file by clicking _Get API key_.
-  - Copy the file to a destination of your choice, e.g. to `~/zuliprc`
-
+  - Copy the file to `~/zuliprc`
 
   4. Run `Zulip-Terminal`
   ```
   pipenv shell
-  ./run.py -c ~/zuliprc
+  ./run.py
   ```
+  Alternatively, you can specify the location of `zuliprc` using the -c option
+  ```
+  ./run.py -c /path/to/zuliprc
+  ```
+## Example zuliprc file
+```
+[api]
+email=example@example.com
+key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+site=https://realm.zulipchat.com
+
+[zterm]
+# Theme can also be set to 'blue' and 'light'
+theme=default
+```
 
 
 ## Hot Keys
@@ -85,12 +99,12 @@ pytest --pep8
 
 * To open in debug mode:
 ```
-./run.py -c ~/zuliprc -d
+./run.py -d
 ```
 
 * To profile runtime:
 ```
-./run.py -c ~/zuliprc --profile
+./run.py --profile
 ```
 
 ### Contributor Guidelines
