@@ -1,7 +1,0 @@
-#!/bin/bash
-
-mv ~/zuliprc zuliprc_alt
-
-mv zuliprc ~/zuliprc
-
-
