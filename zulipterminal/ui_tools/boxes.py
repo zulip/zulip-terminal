@@ -60,7 +60,7 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'meta enter':
+        if key == 'enter':
             if not self.to_write_box:
                 request = {
                     'type': 'stream',
