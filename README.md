@@ -2,7 +2,7 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
-![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)
+![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)  [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 
  ## Setup:
   1. Download this repository
