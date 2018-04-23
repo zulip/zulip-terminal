@@ -1,8 +1,10 @@
 # Zulip Terminal
 
-An interactive terminal interface for [Zulip](https://zulipchat.com).
+An interactive terminal interface for [Zulip](https://zulipchat.com).Zulip is a powerful, open source group chat application that combines the
+immediacy of real-time chat with the productivity benefits of threaded conversations. 
 
-![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)
+![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master) [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org)
+[![Twitter](https://img.shields.io/badge/twitter-@zulip-blue.svg?style=flat)](https://twitter.com/zulip)
 
  ## Setup:
   1. Download this repository
