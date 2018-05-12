@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import sys
+from typing import Dict, Any
 from os import path
 
 from zulipterminal.core import Controller
@@ -45,7 +46,7 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def parse_zuliprc(zuliprc_str) -> dict:
+def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     zuliprc_path = path.expanduser(zuliprc_str)
     if not path.exists(zuliprc_path):
         sys.exit("Error: Cannot find {}".format(zuliprc_path))
@@ -87,7 +88,7 @@ def main() -> None:
     except Exception:
         # A unexpected exception occurred, open the debugger in debug mode
         if args.debug:
-            import pudb  # type: ignore
+            import pudb
             pudb.post_mortem()
     finally:
         if args.debug:
