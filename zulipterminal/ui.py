@@ -2,7 +2,7 @@ from typing import Any, Tuple
 
 import urwid
 
-from config import get_key
+from zulipterminal.config import get_key
 from zulipterminal.ui_tools.boxes import WriteBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton,

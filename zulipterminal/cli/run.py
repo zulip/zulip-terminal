@@ -1,23 +1,22 @@
-#!/usr/bin/env python3
 import argparse
 import configparser
 import sys
-from os import environ, path
+from os import path
 
 from zulipterminal.core import Controller
 
 
-def save_stdout():
+def save_stdout() -> None:
     """Save shell screen."""
     sys.stdout.write("\033[?1049h\033[H")
 
 
-def restore_stdout():
+def restore_stdout() -> None:
     """Restore saved shell screen."""
     sys.stdout.write("\033[?1049l")
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     description = '''
         Starts Zulip-Terminal.
         '''
@@ -46,7 +45,7 @@ def parse_args():
     return args
 
 
-def parse_zuliprc(zuliprc_str):
+def parse_zuliprc(zuliprc_str) -> dict:
     zuliprc_path = path.expanduser(zuliprc_str)
     if not path.exists(zuliprc_path):
         sys.exit("Error: Cannot find {}".format(zuliprc_path))
@@ -64,7 +63,7 @@ def parse_zuliprc(zuliprc_str):
     return settings
 
 
-def main():
+def main() -> None:
     """
     Launch Zulip Terminal.
     """
@@ -88,7 +87,7 @@ def main():
     except Exception:
         # A unexpected exception occurred, open the debugger in debug mode
         if args.debug:
-            import pudb
+            import pudb  # type: ignore
             pudb.post_mortem()
     finally:
         if args.debug:
