@@ -88,4 +88,5 @@ zuliprc
 .pytest_cache/*
 cov_html/*
 .coverage
-.mypy_cache/*
+.mypy_cache
+Pipfile.lock
