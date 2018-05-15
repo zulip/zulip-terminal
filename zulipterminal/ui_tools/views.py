@@ -93,7 +93,7 @@ class MessageView(urwid.ListBox):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'j' and not self.new_loading:
+        if key == 'down' and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -104,7 +104,7 @@ class MessageView(urwid.ListBox):
                     self.load_new_messages(id, self.focus_position)
                 return key
 
-        elif key == 'k' and not self.old_loading:
+        elif key == 'up' and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
