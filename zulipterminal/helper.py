@@ -1,3 +1,4 @@
+import time
 from collections import defaultdict
 from functools import wraps
 from threading import Thread
@@ -23,7 +24,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         msg_type = msg['type']
         if msg_type == 'stream':
             unread_id = messages[id]['stream_id']
-            stream_topic = str(unread_id) + '_' + str(msg['subject'])
+            stream_topic = (unread_id, msg['subject'])
             unread_counts = controller.model.unread_counts
             if stream_topic in unread_counts['unread_topics'].keys():
                 unread_counts['unread_topics'][stream_topic] += new_count
@@ -33,11 +34,17 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                 unread_counts['unread_topics'][stream_topic] = new_count
         else:
             unread_id = messages[id]['sender_id']
+            unread_counts = controller.model.unread_counts
+            if unread_id in unread_counts['unread_pms'].keys():
+                unread_counts['unread_pms'][unread_id] += new_count
+                if unread_counts['unread_pms'][unread_id] == 0:
+                    unread_counts['unread_pms'].pop(unread_id)
+            elif new_count == 1:
+                unread_counts['unread_pms'][unread_id] = new_count
 
     # if view is not yet loaded. Usually the case when first message is read.
-    if not hasattr(controller, 'view'):
-        controller.model.unread_counts[unread_id] -= 1
-        return
+    while not hasattr(controller, 'view'):
+        time.sleep(0.1)
 
     streams = controller.view.stream_w.log
     users = controller.view.user_w.log
@@ -60,6 +67,9 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                     break
             all_pm.update_count(all_pm.count + new_count)
         all_msg.update_count(all_msg.count + new_count)
+
+    while not hasattr(controller, 'loop'):
+        time.sleep(0.1)
     controller.loop.draw_screen()
 
 
@@ -233,17 +243,19 @@ def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
     unread_counts['all_msg'] = 0
     unread_counts['all_pms'] = 0
     unread_counts['unread_topics'] = dict()
+    unread_counts['unread_pms'] = dict()
 
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
         unread_counts[pm['sender_id']] = count
+        unread_counts['unread_pms'][pm['sender_id']] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
-        stream_topic = (stream_id, stream['topic'])  # type: Tuple[int, str]
+        stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count
         if not unread_counts.get(stream_id):
             unread_counts[stream_id] = count

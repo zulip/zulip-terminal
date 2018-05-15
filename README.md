@@ -66,6 +66,7 @@ theme=default
 | Narrow to a stream | `S` |
 | Narrow to a topic | `s` |
 | Next Unread Topic | `n` |
+| Next Unread PM | `p` |
 | Send a message | `Alt Enter` |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.

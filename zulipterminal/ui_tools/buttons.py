@@ -122,3 +122,9 @@ class TopicButton(urwid.Button):
         self.caption = model.stream_dict[int(stream_id)]['name']  # stream name
         self.title = topic
         self.stream_id = int(stream_id)
+
+
+class UnreadPMButton(urwid.Button):
+    def __init__(self, user_id: int, email: str) -> None:
+        self.user_id = user_id
+        self.email = email

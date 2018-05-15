@@ -88,6 +88,7 @@ class Model:
         # All the users in the realm
         users = self.initial_data['realm_users']
         user_dict = dict()
+        self.user_id_email_dict = dict()  # type: Dict[int, str]
         # store the relevant info for a user in Dict[Dict[str, Any]] format.
         for user in users:
             user_dict[user['email']] = {
@@ -96,6 +97,8 @@ class Model:
                 'status': 'idle',
                 'user_id': user['user_id']
             }
+            self.user_id_email_dict[user['user_id']] = user['email']
+
         self.user_dict = user_dict.copy()
         # List to display
         user_list = list()
