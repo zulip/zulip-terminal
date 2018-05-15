@@ -2,7 +2,7 @@ from typing import Any, List, Tuple
 
 import urwid
 from zulipterminal.helper import async, update_flag
-from zulipterminal.ui_tools.buttons import TopicButton
+from zulipterminal.ui_tools.buttons import TopicButton, UnreadPMButton
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
@@ -197,6 +197,7 @@ class MiddleColumnView(urwid.Frame):
         self.model = model
         self.controller = model.controller
         self.last_unread_topic = None
+        self.last_unread_pm = None
         model.msg_list = msg_list
         super(MiddleColumnView, self).__init__(msg_list, footer=write_box)
 
@@ -213,6 +214,21 @@ class MiddleColumnView(urwid.Frame):
             topic = topics[0]
             self.last_unread_topic = topic
             return topic
+        return
+
+    def get_next_unread_pm(self) -> Any:
+        pms = list(self.model.unread_counts['unread_pms'].keys())
+        next_pm = False
+        for pm in pms:
+            if next_pm is True:
+                self.last_unread_pm = pm
+                return pm
+            if pm == self.last_unread_pm:
+                next_pm = True
+        if len(pms) > 0:
+            pm = pms[0]
+            self.last_unread_pm = pm
+            return pm
         return
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
@@ -250,5 +266,12 @@ class MiddleColumnView(urwid.Frame):
             self.controller.narrow_to_topic(TopicButton(stream, topic,
                                                         self.model))
             return key
+        elif key == 'p':
+            # narrow to next unread pm
+            pm = self.get_next_unread_pm()
+            if pm is None:
+                return key
+            email = self.model.user_id_email_dict[pm]
+            self.controller.narrow_to_user(UnreadPMButton(pm, email))
 
         return super(MiddleColumnView, self).keypress(size, key)
