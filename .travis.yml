@@ -4,8 +4,8 @@ python:
   - "3.5"
   - "3.6"
 install:
-  - pip install pipenv
-  - pipenv install --dev
+  - pip install pipenv==11.10
+  - pipenv install --dev Pipfile
 script:
   - pipenv run pytest
   - pipenv run pytest --pep8
