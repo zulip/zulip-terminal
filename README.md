@@ -65,6 +65,7 @@ theme=default
 | Move back from Compose box to the message | `esc` |
 | Narrow to a stream | `S` |
 | Narrow to a topic | `s` |
+| Next Unread Topic | `n` |
 | Send a message | `Alt Enter` |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.

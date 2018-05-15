@@ -19,9 +19,18 @@ def async(func: Any) -> Any:
 def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     messages = controller.model.index['messages']
     for id in id_list:
-        msg_type = messages[id]['type']
+        msg = messages[id]
+        msg_type = msg['type']
         if msg_type == 'stream':
             unread_id = messages[id]['stream_id']
+            stream_topic = str(unread_id) + '_' + str(msg['subject'])
+            unread_counts = controller.model.unread_counts
+            if stream_topic in unread_counts['unread_topics'].keys():
+                unread_counts['unread_topics'][stream_topic] += new_count
+                if unread_counts['unread_topics'][stream_topic] == 0:
+                    unread_counts['unread_topics'].pop(stream_topic)
+            elif new_count == 1:
+                unread_counts['unread_topics'][stream_topic] = new_count
         else:
             unread_id = messages[id]['sender_id']
 
@@ -220,9 +229,11 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
 def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
                                            -> Dict[str, Any]:
     # TODO: supprot group pms
-    unread_counts = dict()
+    unread_counts = dict()  # type: Dict[Any, Any]
     unread_counts['all_msg'] = 0
     unread_counts['all_pms'] = 0
+    unread_counts['unread_topics'] = dict()
+
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
         unread_counts[pm['sender_id']] = count
@@ -231,10 +242,13 @@ def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
 
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
-        if not unread_counts.get(stream['stream_id']):
-            unread_counts[stream['stream_id']] = count
+        stream_id = stream['stream_id']
+        stream_topic = (stream_id, stream['topic'])  # type: Tuple[int, str]
+        unread_counts['unread_topics'][stream_topic] = count
+        if not unread_counts.get(stream_id):
+            unread_counts[stream_id] = count
         else:
-            unread_counts[stream['stream_id']] += count
+            unread_counts[stream_id] += count
         unread_counts['all_msg'] += count
 
     return unread_counts

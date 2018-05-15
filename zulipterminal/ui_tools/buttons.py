@@ -115,3 +115,10 @@ class UserButton(urwid.Button):
             len(self.caption) + 5),
             self.color,
             'selected')
+
+
+class TopicButton(urwid.Button):
+    def __init__(self, stream_id: str, topic: str, model: Any) -> None:
+        self.caption = model.stream_dict[int(stream_id)]['name']  # stream name
+        self.title = topic
+        self.stream_id = int(stream_id)
