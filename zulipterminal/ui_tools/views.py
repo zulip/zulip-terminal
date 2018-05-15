@@ -1,8 +1,8 @@
 from typing import Any, List, Tuple
 
 import urwid
-
 from zulipterminal.helper import async, update_flag
+from zulipterminal.ui_tools.buttons import TopicButton
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
@@ -194,29 +194,61 @@ class UsersView(urwid.ListBox):
 class MiddleColumnView(urwid.Frame):
     def __init__(self, model: Any, write_box: Any) -> None:
         msg_list = MessageView(model)
+        self.model = model
+        self.controller = model.controller
+        self.last_unread_topic = None
         model.msg_list = msg_list
         super(MiddleColumnView, self).__init__(msg_list, footer=write_box)
 
+    def get_next_unread_topic(self) -> Any:
+        topics = list(self.model.unread_counts['unread_topics'].keys())
+        next_topic = False
+        for topic in topics:
+            if next_topic is True:
+                self.last_unread_topic = topic
+                return topic
+            if topic == self.last_unread_topic:
+                next_topic = True
+        if len(topics) > 0:
+            topic = topics[0]
+            self.last_unread_topic = topic
+            return topic
+        return
+
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'r':
-            if not self.focus_position == 'footer':
-                self.body.keypress(size, 'enter')
-                self.set_focus('footer')
-                self.footer.focus_position = 1
-                return key
-        elif key == 'esc':
+        if key == 'esc':
             self.footer.keypress(size, 'esc')
             self.set_focus('body')
+
+        elif self.focus_position == 'footer':
+            return super(MiddleColumnView, self).keypress(size, key)
+
+        elif key == 'r':
+            self.body.keypress(size, 'enter')
+            self.set_focus('footer')
+            self.footer.focus_position = 1
+            return key
+
         elif key == 'c':
-            if not self.focus_position == 'footer':
-                self.body.keypress(size, 'c')
-                self.set_focus('footer')
-                self.footer.focus_position = 0
-                return key
+            self.body.keypress(size, 'c')
+            self.set_focus('footer')
+            self.footer.focus_position = 0
+            return key
+
         elif key == 'R':
-            if not self.focus_position == 'footer':
-                self.body.keypress(size, 'R')
-                self.set_focus('footer')
-                self.footer.focus_position = 1
+            self.body.keypress(size, 'R')
+            self.set_focus('footer')
+            self.footer.focus_position = 1
+            return key
+
+        elif key == 'n':
+            # narrow to next unread topic
+            stream_topic = self.get_next_unread_topic()
+            if stream_topic is None:
                 return key
+            stream, topic = stream_topic
+            self.controller.narrow_to_topic(TopicButton(stream, topic,
+                                                        self.model))
+            return key
+
         return super(MiddleColumnView, self).keypress(size, key)
