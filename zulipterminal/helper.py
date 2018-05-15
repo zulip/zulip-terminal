@@ -17,11 +17,23 @@ def async(func: Any) -> Any:
 
 
 def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
+    messages = controller.model.index['messages']
+    for id in id_list:
+        msg_type = messages[id]['type']
+        if msg_type == 'stream':
+            unread_id = messages[id]['stream_id']
+        else:
+            unread_id = messages[id]['sender_id']
+
+    # if view is not yet loaded. Usually the case when first message is read.
+    if not hasattr(controller, 'view'):
+        controller.model.unread_counts[unread_id] -= 1
+        return
+
     streams = controller.view.stream_w.log
     users = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
-    messages = controller.model.index['messages']
     for id in id_list:
         msg_type = messages[id]['type']
         if msg_type == 'stream':
