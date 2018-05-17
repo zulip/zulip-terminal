@@ -4,38 +4,37 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 
 ![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)  [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 
- ## Setup:
-  1. Download this repository
-  ```
-  git clone https://github.com/zulip/zulip-terminal
-  ```
+## Setup:
 
-  2. Install the requirements:
-  ```
-  cd zulip-terminal
-  sudo apt-get install python3-pip
-  pip3 install pipenv
-  pipenv --python 3
-  pipenv install
-  ```
+1. Download and install the prerequisite tools ([pipsi](https://github.com/mitsuhiko/pipsi))
+```
+$ curl -SsLo /tmp/get-pipsi.py https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py
+$ python3 /tmp/get-pipsi.py
+$ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
+```
 
-  3. Download the zuliprc configuration file to your computer:
+2. Install the package:
+```
+$ pipsi install 'git+https://github.com/zulip/zulip-terminal.git@master#egg=zulipterminal'
+```
 
-  - Log in to the Zulip server(e.g. chat.zulip.org or yourSubdomain.zulipchat.com, or your own development server).
-  - Go to _Settings_ -> _Your account_
-  - Click on `Show/Change your API key` under the _API key_ section.
-  - Download the `zuliprc` file by clicking _Get API key_.
-  - Copy the file to `~/zuliprc`
+3. Download the zuliprc configuration file to your computer:
 
-  4. Run `Zulip-Terminal`
-  ```
-  pipenv shell
-  ./run.py
-  ```
-  Alternatively, you can specify the location of `zuliprc` using the -c option
-  ```
-  ./run.py -c /path/to/zuliprc
-  ```
+- Log in to the Zulip server(e.g. chat.zulip.org or yourSubdomain.zulipchat.com, or your own development server).
+- Go to _Settings_ -> _Your account_
+- Click on `Show/Change your API key` under the _API key_ section.
+- Download the `zuliprc` file by clicking _Get API key_.
+- Copy the file to `~/zuliprc`
+
+4. Run Zulip Terminal client (`zulip-client`)
+```
+$ zulip-client
+```
+Alternatively, you can specify the location of `zuliprc` using the -c option
+```
+$ zulip-client -c /path/to/zuliprc
+```
+
 ## Example zuliprc file
 ```
 [api]
@@ -70,41 +69,60 @@ theme=default
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
-### Running tests
+## Development
 
-* Install Dev Requirements:
+For development, the setup process is a little different.
+
+1. Install pipenv
 ```
-pipenv install --dev
+$ curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+$ python3 /tmp/get-pip.py
+$ python3 -m pip install --user pipenv
+$ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
 ```
+
+2. Clone the zulip/zulip-terminal repository locally
+```
+$ git clone git@github.com:zulip/zulip-terminal.git
+```
+
+3. Install dev requirements
+```
+$ cd zulip-terminal
+$ pipenv --python 3
+$ pipenv install --dev
+```
+
+### Running tests
 
 * To run all tests:
 ```
-pytest
+pipenv run pytest
 ```
 
 * To generate coverage report for tests:
 ```
-pytest --cov-report html:cov_html --cov=./
+pipenv run pytest --cov-report html:cov_html --cov=./
 ```
 
 * To run the linter:
 ```
-pytest --pep8
+pipenv run pytest --pep8
 ```
 
 * To check the type annotations, run:
 ```
-./tools/run-mypy
+pipenv run ./tools/run-mypy
 ```
 
 * To open in debug mode:
 ```
-./run.py -d
+pipenv run zulip-client -d
 ```
 
 * To profile runtime:
 ```
-./run.py --profile
+pipenv run zulip-client --profile
 ```
 
 ### Contributor Guidelines
