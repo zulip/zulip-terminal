@@ -68,6 +68,7 @@ theme=default
 | Next Unread Topic | `n` |
 | Next Unread PM | `p` |
 | Send a message | `Alt Enter` |
+| Search Messages | `/` |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 

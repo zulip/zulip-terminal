@@ -3,7 +3,7 @@ from typing import Any, Tuple
 import urwid
 
 from zulipterminal.config import get_key
-from zulipterminal.ui_tools.boxes import WriteBox
+from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton,
     PMButton,
@@ -61,6 +61,7 @@ class View(urwid.WidgetWrap):
         self.users = self.model.users
         self.streams = self.model.streams
         self.write_box = WriteBox(self)
+        self.search_box = SearchBox(self.controller)
         super(View, self).__init__(self.main_window())
 
     def menu_view(self) -> Any:
@@ -100,8 +101,9 @@ class View(urwid.WidgetWrap):
         return w
 
     def message_view(self) -> Any:
-        w = MiddleColumnView(self.model, self.write_box)
-        w = urwid.LineBox(w)
+        self.middle_column = MiddleColumnView(self.model, self.write_box,
+                                              self.search_box)
+        w = urwid.LineBox(self.middle_column)
         return w
 
     def users_view(self) -> Any:

@@ -338,7 +338,8 @@ def index_all_messages():
             }
         }),
         'all_stream': defaultdict(set, {}),
-        'stream': defaultdict(dict, {})
+        'stream': defaultdict(dict, {}),
+        'search': set(),
     }
 
 
@@ -358,6 +359,7 @@ def index_stream():
                 537286
             }
         }),
+        'search': set(),
         'stream': defaultdict(dict, {}),
         'pointer': defaultdict(set, {}),
         'messages': defaultdict(dict, {
@@ -495,7 +497,8 @@ def index_topic():
         'pointer': defaultdict(set, {}),
         'all_private': set(),
         'all_stream': defaultdict(set, {}),
-        'all_messages': set()
+        'all_messages': set(),
+        'search': set(),
     }
 
 
@@ -577,5 +580,6 @@ def index_user():
         'all_private': {
             537287
         },
-        'all_stream': defaultdict(set, {})
+        'all_stream': defaultdict(set, {}),
+        'search': set(),
     }

@@ -258,3 +258,31 @@ class MessageBox(urwid.Pile):
         elif key == 'P':
             self.model.controller.show_all_pm(self)
         return key
+
+
+class SearchBox(urwid.Pile):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        super(SearchBox, self).__init__(self.main_view())
+
+    def main_view(self) -> Any:
+        self.text_box = urwid.Edit(u"Search: ")
+        self.w = urwid.LineBox(self.text_box)
+        return [self.w]
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'esc':
+            self.text_box.set_edit_text("")
+            self.controller.editor_mode = False
+            self.controller.view.middle_column.set_focus('body')
+            return key
+
+        elif key == 'enter':
+            self.controller.editor_mode = False
+            self.controller.model.index['search'] = set()
+            self.controller.search_messages(self.text_box.edit_text)
+            self.controller.view.middle_column.set_focus('body')
+            return key
+
+        key = super(SearchBox, self).keypress(size, key)
+        return key
