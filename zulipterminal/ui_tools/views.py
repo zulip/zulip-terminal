@@ -46,6 +46,8 @@ class MessageView(urwid.ListBox):
         elif narrow[0][0] == 'pm_with':
             recipients = self.model.recipients
             current_ids = self.index['private'][recipients].copy()
+        elif narrow[0][0] == 'search':
+            current_ids = self.index['search'].copy()
         return current_ids
 
     @async
@@ -192,14 +194,16 @@ class UsersView(urwid.ListBox):
 
 
 class MiddleColumnView(urwid.Frame):
-    def __init__(self, model: Any, write_box: Any) -> None:
+    def __init__(self, model: Any, write_box: Any, search_box: Any) -> None:
         msg_list = MessageView(model)
         self.model = model
         self.controller = model.controller
         self.last_unread_topic = None
         self.last_unread_pm = None
+        self.search_box = search_box
         model.msg_list = msg_list
-        super(MiddleColumnView, self).__init__(msg_list, footer=write_box)
+        super(MiddleColumnView, self).__init__(msg_list, header=search_box,
+                                               footer=write_box)
 
     def get_next_unread_topic(self) -> Any:
         topics = list(self.model.unread_counts['unread_topics'].keys())
@@ -233,11 +237,18 @@ class MiddleColumnView(urwid.Frame):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if key == 'esc':
+            self.header.keypress(size, 'esc')
             self.footer.keypress(size, 'esc')
             self.set_focus('body')
 
-        elif self.focus_position == 'footer':
+        elif self.focus_position in ['footer', 'header']:
             return super(MiddleColumnView, self).keypress(size, key)
+
+        elif key == '/':
+            self.controller.editor_mode = True
+            self.controller.editor = self.search_box
+            self.set_focus('header')
+            return key
 
         elif key == 'r':
             self.body.keypress(size, 'enter')
