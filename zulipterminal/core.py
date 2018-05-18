@@ -29,6 +29,22 @@ class Controller:
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
+    def search_messages(self, text: str) -> None:
+        # Search for a text in messages
+        self.update = False
+        self.model.narrow = [['search', text]]
+        self.model.anchor = 10000000000
+        self.model.num_after = 0
+        self.model.num_before = 30
+        self.model.get_messages(False)
+        msg_id_list = self.model.index['search']
+        w_list = create_msg_box_list(self.model, msg_id_list)
+        self.model.msg_view.clear()
+        self.model.msg_view.extend(w_list)
+        focus_position = 0
+        if focus_position >= 0 and focus_position < len(w_list):
+            self.model.msg_list.set_focus(focus_position)
+
     def narrow_to_stream(self, button: Any) -> None:
         # return if already narrowed
         if self.model.narrow == [['stream', button.caption]]:

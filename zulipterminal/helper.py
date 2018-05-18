@@ -138,6 +138,12 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
                 ...
             }
         }
+        'search': {
+            13242,
+            23423,
+            23423,
+            ...
+        },
         'messages': {
             # all the messages mapped to their id
             # for easy retrieval of message from id
@@ -202,6 +208,7 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
             'all_private': set(),
             'all_stream': defaultdict(set),
             'messages': defaultdict(dict),
+            'search': set(),
         }
     narrow = model.narrow
     for msg in messages:
@@ -209,6 +216,10 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
         index['messages'][msg['id']] = msg
         if narrow == []:
             index['all_messages'].add(msg['id'])
+
+        elif narrow[0][0] == 'search':
+            index['search'].add(msg['id'])
+            continue
 
         if len(narrow) == 1:
 
