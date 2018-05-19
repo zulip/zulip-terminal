@@ -79,9 +79,9 @@ For development, the setup process is a little different.
 1. Install pipenv
 ```
 $ curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
-$ python3 /tmp/get-pip.py
-$ python3 -m pip install --user pipenv
+$ python3 /tmp/get-pip.py --user
 $ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
+$ python3 -m pip install --user pipenv
 ```
 
 2. Clone the zulip/zulip-terminal repository locally
@@ -92,8 +92,14 @@ $ git clone git@github.com:zulip/zulip-terminal.git
 3. Install dev requirements
 ```
 $ cd zulip-terminal
-$ pipenv --python 3
+$ pipenv --three
 $ pipenv install --dev
+$ pipenv run python setup.py develop
+```
+
+4. Run the client
+```
+$ pipenv run zulip-client
 ```
 
 ### Running tests
@@ -135,7 +141,7 @@ Zulip Terminal is being build by an awesome community of [Zulip](https://zulipch
 To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
-Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and 
+Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
 [git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
 
 ### **Need Help?**
