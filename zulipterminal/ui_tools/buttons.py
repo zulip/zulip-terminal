@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import urwid
 
@@ -98,9 +98,8 @@ class UserButton(urwid.Button):
             self.user_id, view.model.user_id})
         super(UserButton, self).__init__("")
         self._w = self.widget(count)
-        urwid.connect_signal(self, 'click', controller.narrow_to_user)
-        urwid.connect_signal(self, 'click',
-                             view.write_box.private_box_view)
+        self.controller = controller
+        self.view = view
 
     def update_count(self, count: int) -> None:
         self.count = count
@@ -114,6 +113,15 @@ class UserButton(urwid.Button):
             len(self.caption) + 5),
             self.color,
             'selected')
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'enter':
+            self.controller.narrow_to_user(self)
+            self.view.body.focus_col = 1
+            self.view.body.focus.original_widget.set_focus('footer')
+            self.view.write_box.private_box_view(self)
+            return key
+        return super(UserButton, self).keypress(size, key)
 
 
 class TopicButton(urwid.Button):
