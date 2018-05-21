@@ -68,6 +68,7 @@ theme=default
 | Next Unread Topic                                     | `n`                |
 | Next Unread PM                                        | `p`                |
 | Send a message                                        | `Alt Enter`        |
+| Search People                                         | `w`                |
 | Search Messages                                       | `/`                |
 | Beginning of line                                     | `Ctrl`+`a`         |
 | Backward one character                                | `Ctrl`+`b` / `←`   |

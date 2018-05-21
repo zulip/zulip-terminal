@@ -275,3 +275,19 @@ def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
         unread_counts['all_msg'] += count
 
     return unread_counts
+
+
+def match_user(user: Any, text: str) -> bool:
+    """
+    Matches if the user full name, last name or email matches
+    with `text` or not.
+    """
+    full_name = user.caption.lower()
+    keywords = full_name.split()
+    keywords.append(user.email.lower())
+    # adding full_name helps in further narrowing down the right user.
+    keywords.append(full_name)
+    for keyword in keywords:
+        if keyword.startswith(text.lower()):
+            return True
+    return False

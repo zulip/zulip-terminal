@@ -1,9 +1,15 @@
 from typing import Any, List, Tuple
+import threading
 
 import urwid
-from zulipterminal.helper import async, update_flag
-from zulipterminal.ui_tools.buttons import TopicButton, UnreadPMButton
+from zulipterminal.helper import async, update_flag, match_user
+from zulipterminal.ui_tools.buttons import (
+    TopicButton,
+    UnreadPMButton,
+    UserButton,
+)
 from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.ui_tools.boxes import UserSearchBox
 
 
 class MessageView(urwid.ListBox):
@@ -286,3 +292,69 @@ class MiddleColumnView(urwid.Frame):
             self.controller.narrow_to_user(UnreadPMButton(pm, email))
 
         return super(MiddleColumnView, self).keypress(size, key)
+
+
+class RightColumnView(urwid.Frame):
+    """
+    Displays the users list on the right side of the app.
+    """
+    def __init__(self, view: Any) -> None:
+        self.view = view
+        self.user_search = UserSearchBox(self)
+        urwid.connect_signal(self.user_search, 'change',
+                             self.update_user_list)
+        self.view.user_search = self.user_search
+        search_box = urwid.LineBox(self.user_search)
+        self.search_lock = threading.Lock()
+        super(RightColumnView, self).__init__(self.users_view(),
+                                              header=search_box)
+
+    @async
+    def update_user_list(self, search_box: Any, new_text: str) -> None:
+        if not self.view.controller.editor_mode:
+            return
+        # wait for any previously started search to finish to avoid
+        # displaying wrong user list.
+        self.search_lock.acquire()
+        users_display = self.users_btn_list.copy()
+        for user in self.users_btn_list:
+            if not match_user(user, new_text):
+                users_display.remove(user)
+        self.body = UsersView(
+            urwid.SimpleFocusListWalker(users_display))
+        self.set_body(self.body)
+        self.view.controller.loop.draw_screen()
+        self.search_lock.release()
+
+    def users_view(self) -> Any:
+        self.users_btn_list = list()  # type: List[Any]
+        for user in self.view.users:
+            unread_count = self.view.model.unread_counts.get(user['user_id'],
+                                                             0)
+            self.users_btn_list.append(
+                UserButton(
+                    user,
+                    controller=self.view.controller,
+                    view=self.view,
+                    color=user['status'],
+                    count=unread_count
+                )
+            )
+        self.user_w = UsersView(
+            urwid.SimpleFocusListWalker(self.users_btn_list))
+        self.view.user_w = self.user_w
+        return self.user_w
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'w':
+            self.set_focus('header')
+            return key
+        elif key == 'esc':
+            self.user_search.set_edit_text("Search People")
+            self.body = UsersView(
+                    urwid.SimpleFocusListWalker(self.users_btn_list))
+            self.set_body(self.body)
+            self.set_focus('body')
+            self.view.controller.loop.draw_screen()
+            return key
+        return super(RightColumnView, self).keypress(size, key)

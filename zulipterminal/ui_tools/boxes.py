@@ -296,3 +296,24 @@ class SearchBox(urwid.Pile):
 
         key = super(SearchBox, self).keypress(size, key)
         return key
+
+
+class UserSearchBox(urwid.Edit):
+    """
+    Search Box to search users in real-time.
+    """
+    def __init__(self, user_view: Any) -> None:
+        self.user_view = user_view
+        super(UserSearchBox, self).__init__(edit_text="Search people")
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'enter':
+            self.user_view.view.controller.editor_mode = False
+            self.user_view.set_focus("body")
+        if key == 'esc':
+            self.user_view.view.controller.editor_mode = False
+            self.set_edit_text("Search people")
+            self.user_view.set_focus("body")
+            self.user_view.keypress(size, 'esc')
+
+        return super(UserSearchBox, self).keypress(size, key)
