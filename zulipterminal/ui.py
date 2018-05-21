@@ -8,12 +8,11 @@ from zulipterminal.ui_tools.buttons import (
     HomeButton,
     PMButton,
     StreamButton,
-    UserButton
 )
 from zulipterminal.ui_tools.views import (
+    RightColumnView,
     MiddleColumnView,
     StreamsView,
-    UsersView
 )
 
 
@@ -106,25 +105,9 @@ class View(urwid.WidgetWrap):
         w = urwid.LineBox(self.middle_column)
         return w
 
-    def users_view(self) -> Any:
-        users_btn_list = list()
-        for user in self.users:
-            unread_count = self.model.unread_counts.get(user['user_id'], 0)
-            users_btn_list.append(
-                    UserButton(
-                        user,
-                        controller=self.controller,
-                        view=self,
-                        color=user['status'],
-                        count=unread_count
-                    )
-            )
-        self.user_w = UsersView(urwid.SimpleFocusListWalker(users_btn_list))
-        return self.user_w
-
     def right_column_view(self) -> Any:
-        w = urwid.Frame(self.users_view())
-        w = urwid.LineBox(w, title=u"Users")
+        self.users_view = RightColumnView(self)
+        w = urwid.LineBox(self.users_view, title=u"Users")
         return w
 
     def main_window(self) -> Any:
@@ -143,5 +126,15 @@ class View(urwid.WidgetWrap):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if self.controller.editor_mode:
             return self.controller.editor.keypress((20,), key)
+
+        elif key == "w":
+            # Start User Search if not in editor_mode
+            self.users_view.keypress(size, 'w')
+            self.body.focus_col = 2
+            self.user_search.set_edit_text("")
+            self.controller.editor_mode = True
+            self.controller.editor = self.user_search
+            return key
+
         else:
             return super(View, self).keypress(size, get_key(key))
