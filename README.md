@@ -26,13 +26,13 @@ $ pipsi install 'git+https://github.com/zulip/zulip-terminal.git@master#egg=zuli
 - Download the `zuliprc` file by clicking _Get API key_.
 - Copy the file to `~/zuliprc`
 
-4. Run Zulip Terminal client (`zulip-client`)
+4. Run Zulip Terminal client (`zulip-term`)
 ```
-$ zulip-client
+$ zulip-term
 ```
 Alternatively, you can specify the location of `zuliprc` using the -c option
 ```
-$ zulip-client -c /path/to/zuliprc
+$ zulip-term -c /path/to/zuliprc
 ```
 
 ## Example zuliprc file
@@ -99,7 +99,7 @@ $ pipenv run python setup.py develop
 
 4. Run the client
 ```
-$ pipenv run zulip-client
+$ pipenv run zulip-term
 ```
 
 ### Running tests
@@ -126,12 +126,12 @@ pipenv run ./tools/run-mypy
 
 * To open in debug mode:
 ```
-pipenv run zulip-client -d
+pipenv run zulip-term -d
 ```
 
 * To profile runtime:
 ```
-pipenv run zulip-client --profile
+pipenv run zulip-term --profile
 ```
 
 ### Contributor Guidelines
