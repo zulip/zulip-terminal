@@ -67,7 +67,7 @@ setup(
     test_suite='test',
     entry_points={
         'console_scripts': [
-            'zulip-client = zulipterminal.cli.run:main',
+            'zulip-term = zulipterminal.cli.run:main',
         ],
     },
     extras_require={
