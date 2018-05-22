@@ -44,6 +44,7 @@ class WriteBox(urwid.Pile):
             (urwid.LineBox(self.to_write_box), self.options()),
             (self.msg_write_box, self.options()),
         ]
+        self.focus_position = 1
 
     def stream_box_view(self, button: Any=None, caption: str='',
                         title: str='') -> None:
