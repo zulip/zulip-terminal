@@ -116,7 +116,8 @@ class MessageBox(urwid.Pile):
         self.title = self.message['subject']
         # If the topic of last message is same
         # as current message
-        if self.title == self.last_message['subject']:
+        if self.title == self.last_message['subject'] and\
+                self.last_message['type'] == 'stream':
             return urwid.Text(
                 (None, ctime(self.message['timestamp'])[:-8]),
                 align='right')
@@ -140,7 +141,8 @@ class MessageBox(urwid.Pile):
     def private_view(self) -> Any:
         self.email = self.message['sender_email']
         self.user_id = self.message['sender_id']
-        if self.user_id == self.last_message['sender_id']:
+        if self.user_id == self.last_message['sender_id'] and\
+                self.last_message['type'] == 'private':
             return urwid.Text(
                 ('time', ctime(self.message['timestamp'])[:-8]),
                 align='right')
