@@ -49,26 +49,41 @@ theme=default
 
 
 ## Hot Keys
-| Command | Key Combination |
-| ------- | --------------- |
-| Previous message | `Up`, `k` |
-| Next message | `Down`, `j` |
-| Go left | `left`, `h` |
-| Go right | `right`, `l` |
-| Go to the last message | `G`, `end` |
-| Narrow to private messages | `P` |
-| Scroll down | `PgDn`, `J` |
-| Scroll up | `PgUp`, `K` |
-| Reply to a message | `r` |
-| Reply to an author | `R` |
-| New stream message | `c` |
-| Move back from Compose box to the message | `esc` |
-| Narrow to a stream | `S` |
-| Narrow to a topic | `s` |
-| Next Unread Topic | `n` |
-| Next Unread PM | `p` |
-| Send a message | `Alt Enter` |
-| Search Messages | `/` |
+| Command                                               | Key Combination    |
+| ----------------------------------------------------- | ------------------ |
+| Previous message                                      | `Up`, `k`          |
+| Next message                                          | `Down`, `j`        |
+| Go left                                               | `left`, `h`        |
+| Go right                                              | `right`, `l`       |
+| Go to the last message                                | `G`, `end`         |
+| Narrow to private messages                            | `P`                |
+| Scroll down                                           | `PgDn`, `J`        |
+| Scroll up                                             | `PgUp`, `K`        |
+| Reply to a message                                    | `r`                |
+| Reply to an author                                    | `R`                |
+| New stream message                                    | `c`                |
+| Go Back                                               | `esc`              |
+| Narrow to a stream                                    | `S`                |
+| Narrow to a topic                                     | `s`                |
+| Next Unread Topic                                     | `n`                |
+| Next Unread PM                                        | `p`                |
+| Send a message                                        | `Alt Enter`        |
+| Search Messages                                       | `/`                |
+| Beginning of line                                     | `Ctrl`+`a`         |
+| Backward one character                                | `Ctrl`+`b` / `←`   |
+| Backward one word                                     | `Meta`+`b`         |
+| Send io.EOF                                           | `Ctrl`+`c`         |
+| Delete one character                                  | `Ctrl`+`d`         |
+| Delete one word                                       | `Meta`+`d`         |
+| End of line                                           | `Ctrl`+`e`         |
+| Forward one character                                 | `Ctrl`+`f` / `→`   |
+| Forward one word                                      | `Meta`+`f`         |
+| Delete previous character                             | `Ctrl`+`h`         |
+| Transpose characters                                  | `Ctrl`+`t`         |
+| Kill (cut) forwards to the end of the line            | `Ctrl`+`k`         |
+| Kill (cut) backwards to the start of the line.        | `Ctrl`+`u`         |
+| Kill (cut) forwards to the end of the current word    | `Meta`+`d`         |
+| Kill (cut) backwards to the start of the current word | `Ctrl`+`w`         |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 

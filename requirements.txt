@@ -9,3 +9,4 @@ pudb==2017.1.4
 snakeviz==0.4.2
 mypy==0.560
 emoji==0.5.0
+urwid_readline==0.5
