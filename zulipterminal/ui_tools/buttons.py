@@ -71,7 +71,6 @@ class StreamButton(urwid.Button):
         super(StreamButton, self).__init__("")
         self._w = self.widget(count)
         urwid.connect_signal(self, 'click', controller.narrow_to_stream)
-        urwid.connect_signal(self, 'click', view.write_box.stream_box_view)
 
     def update_count(self, count: int) -> None:
         self.count = count
