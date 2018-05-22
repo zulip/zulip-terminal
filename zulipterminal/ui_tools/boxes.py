@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 import emoji
 import urwid
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.ui_tools.buttons import MenuButton
 
@@ -38,8 +39,8 @@ class WriteBox(urwid.Pile):
         self.set_editor_mode()
         if email == '' and button is not None:
             email = button.email
-        self.to_write_box = urwid.Edit(u"To: ", edit_text=email)
-        self.msg_write_box = urwid.Edit(u"> ", multiline=True)
+        self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
+        self.msg_write_box = ReadlineEdit(u"> ", multiline=True)
         self.contents = [
             (urwid.LineBox(self.to_write_box), self.options()),
             (self.msg_write_box, self.options()),
@@ -52,12 +53,13 @@ class WriteBox(urwid.Pile):
         self.to_write_box = None
         if caption == '' and button is not None:
             caption = button.caption
-        self.msg_write_box = urwid.Edit(u"> ", multiline=True)
-        self.stream_write_box = urwid.Edit(
+        self.msg_write_box = ReadlineEdit(u"> ", multiline=True)
+        self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
             )
-        self.title_write_box = urwid.Edit(caption=u"Title:  ", edit_text=title)
+        self.title_write_box = ReadlineEdit(caption=u"Title:  ",
+                                            edit_text=title)
 
         header_write_box = urwid.Columns([
             urwid.LineBox(self.stream_write_box),
@@ -91,7 +93,12 @@ class WriteBox(urwid.Pile):
         elif key == 'esc':
             self.view.controller.editor_mode = False
             self.main_view(False)
-
+        elif key == 'right' and self.to_write_box is None:
+            self.contents[0][0].focus_col = 1
+        elif key == 'left' and self.to_write_box is None:
+            self.contents[0][0].focus_col = 0
+        elif key == 'enter' and self.focus == self.msg_write_box:
+            self.msg_write_box.insert_text('\n')
         key = super(WriteBox, self).keypress(size, key)
         return key
 
@@ -269,7 +276,7 @@ class SearchBox(urwid.Pile):
         super(SearchBox, self).__init__(self.main_view())
 
     def main_view(self) -> Any:
-        self.text_box = urwid.Edit(u"Search: ")
+        self.text_box = ReadlineEdit(u"Search: ")
         self.w = urwid.LineBox(self.text_box)
         return [self.w]
 
