@@ -110,6 +110,7 @@ class View(urwid.WidgetWrap):
         users_btn_list = list()
         for user in self.users:
             unread_count = self.model.unread_counts.get(user['user_id'], 0)
+
             users_btn_list.append(
                     UserButton(
                         user,

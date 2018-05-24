@@ -68,6 +68,7 @@ class Model:
             result = self.client.register(
                 fetch_event_types=[
                     'presence',
+                    'realm_users', #necessary?
                     'subscription',
                     'message',
                     'update_message_flags',
@@ -187,6 +188,19 @@ class Model:
                     self.msg_list.log[msg_pos] = new_msg_w
                     self.controller.loop.draw_screen()
 
+    def update_users_view(self, response: List[str]) -> None:
+
+        user_list = list()
+        user_list = self.get_all_users()
+        self.users = user_list
+
+        #sort by name, then by activity level
+        sorted(self.users, key=lambda u: u["full_name"].lower())
+        sorted(self.users, key=lambda u: u['status'])
+
+        self.controller.loop.draw_screen()
+
+
     def update_reaction(self, response: Dict[str, Any]) -> None:
         message_id = response['message_id']
         # If the message is indexed
@@ -260,3 +274,5 @@ class Model:
                         self.update_message(event)
                 if event['type'] == 'reaction':
                     self.update_reaction(event)
+                if event['type'] == 'presence':
+                    self.update_users_view(event)

@@ -181,6 +181,8 @@ class Controller:
 
     def register(self) -> None:
         event_types = [
+            'presence',
+            'realm_users',
             'message',
             'update_message',
             'reaction',
@@ -198,7 +200,7 @@ class Controller:
         except KeyError:
             print('Following are the themes available:')
             for theme in self.view.palette.keys():
-                print(theme,)
+                print(theme)
             return
 
         self.loop.run()
