@@ -15,7 +15,7 @@ $ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
 
 2. Install the package:
 ```
-$ pipsi install 'git+https://github.com/zulip/zulip-terminal.git@master#egg=zulipterminal'
+$ pipsi install --python python3 'git+https://github.com/zulip/zulip-terminal.git@master#egg=zulipterminal'
 ```
 
 3. Download the zuliprc configuration file to your computer:
