@@ -583,3 +583,20 @@ def index_user():
         'all_stream': defaultdict(set, {}),
         'search': set(),
     }
+
+
+@pytest.fixture(scope="module")
+def user_profile():
+    return {
+        'max_message_id': 589270,
+        'short_name': 'FOO',
+        'full_name': 'FOO BOO',
+        'email': 'FOO@ZULIP.COM',
+        'is_bot': False,
+        'user_id': 5140,
+        'result': 'success',
+        'client_id': 'abcd',
+        'msg': '',
+        'is_admin': False,
+        'pointer': 589234
+    }
