@@ -49,42 +49,44 @@ theme=default
 
 
 ## Hot Keys
-| Command                                               | Key Combination    |
-| ----------------------------------------------------- | ------------------ |
-| Previous message                                      | `Up`, `k`          |
-| Next message                                          | `Down`, `j`        |
-| Go left                                               | `left`, `h`        |
-| Go right                                              | `right`, `l`       |
-| Go to the last message                                | `G`, `end`         |
-| Narrow to private messages                            | `P`                |
-| Scroll down                                           | `PgDn`, `J`        |
-| Scroll up                                             | `PgUp`, `K`        |
-| Reply to a message                                    | `r`                |
-| Reply to an author                                    | `R`                |
-| New stream message                                    | `c`                |
-| Go Back                                               | `esc`              |
-| Narrow to a stream                                    | `S`                |
-| Narrow to a topic                                     | `s`                |
-| Next Unread Topic                                     | `n`                |
-| Next Unread PM                                        | `p`                |
-| Send a message                                        | `Alt Enter`        |
-| Search People                                         | `w`                |
-| Search Messages                                       | `/`                |
-| Beginning of line                                     | `Ctrl`+`a`         |
-| Backward one character                                | `Ctrl`+`b` / `←`   |
-| Backward one word                                     | `Meta`+`b`         |
-| Send io.EOF                                           | `Ctrl`+`c`         |
-| Delete one character                                  | `Ctrl`+`d`         |
-| Delete one word                                       | `Meta`+`d`         |
-| End of line                                           | `Ctrl`+`e`         |
-| Forward one character                                 | `Ctrl`+`f` / `→`   |
-| Forward one word                                      | `Meta`+`f`         |
-| Delete previous character                             | `Ctrl`+`h`         |
-| Transpose characters                                  | `Ctrl`+`t`         |
-| Kill (cut) forwards to the end of the line            | `Ctrl`+`k`         |
-| Kill (cut) backwards to the start of the line.        | `Ctrl`+`u`         |
-| Kill (cut) forwards to the end of the current word    | `Meta`+`d`         |
-| Kill (cut) backwards to the start of the current word | `Ctrl`+`w`         |
+| Command                                               | Key Combination                               |
+| ----------------------------------------------------- | --------------------------------------------- |
+| Previous message                                      | <kbd>Up</kbd> / <kbd>k</kbd>                  |
+| Next message                                          | <kbd>Down</kbd> / <kbd>j</kbd>                |
+| Go left                                               | <kbd>left</kbd> / <kbd>h</kbd>                |
+| Go right                                              | <kbd>right</kbd> / <kbd>l</kbd>               |
+| Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
+| Narrow to private messages                            | <kbd>P</kbd>                                  |
+| Scroll down                                           | <kbd>PgDn</kbd> / <kbd>J</kbd>                |
+| Scroll up                                             | <kbd>PgUp</kbd> / <kbd>K</kbd>                |
+| Reply to a message                                    | <kbd>r</kbd>                                  |
+| Reply to an author                                    | <kbd>R</kbd>                                  |
+| New stream message                                    | <kbd>c</kbd>                                  |
+| Go Back                                               | <kbd>esc</kbd>                                |
+| Narrow to a stream                                    | <kbd>S</kbd>                                  |
+| Narrow to a topic                                     | <kbd>s</kbd>                                  |
+| Next Unread Topic                                     | <kbd>n</kbd>                                  |
+| Next Unread PM                                        | <kbd>p</kbd>                                  |
+| Send a message                                        | <kbd>Alt Enter</kbd>                          |
+| Search People                                         | <kbd>w</kbd>>                                 |
+| Search Messages                                       | <kbd>/</kbd>                                  |
+| Beginning of line                                     | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
+| Backward one character                                | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
+| Backward one word                                     | <kbd>Meta</kbd> + <kbd>B</kbd>                |
+| Delete one character                                  | <kbd>Ctrl</kbd> + <kbd>D</kbd>                |
+| Delete one word                                       | <kbd>Meta</kbd> + <kbd>D</kbd>                |
+| End of line                                           | <kbd>Ctrl</kbd> + <kbd>E</kbd>                |
+| Forward one character                                 | <kbd>Ctrl</kbd> + <kbd>F</kbd> / <kbd>→</kbd> |
+| Forward one word                                      | <kbd>Meta</kbd> + <kbd>F</kbd>                |
+| Delete previous character                             | <kbd>Ctrl</kbd> + <kbd>H</kbd>                |
+| Transpose characters                                  | <kbd>Ctrl</kbd> + <kbd>T</kbd>                |
+| Kill (cut) forwards to the end of the line            | <kbd>Ctrl</kbd> + <kbd>K</kbd>                |
+| Kill (cut) backwards to the start of the line         | <kbd>Ctrl</kbd> + <kbd>U</kbd>                |
+| Kill (cut) forwards to the end of the current word    | <kbd>Meta</kbd> + <kbd>D</kbd>                |
+| Kill (cut) backwards to the start of the current word | <kbd>Ctrl</kbd> + <kbd>W</kbd>                |
+| Previous line                                         | <kbd>Ctrl</kbd> + <kbd>P</kbd> / <kbd>↑</kbd> |
+| Next line                                             | <kbd>Ctrl</kbd> + <kbd>N</kbd> / <kbd>↓</kbd> |
+| Clear screen                                          | <kbd>Ctrl</kbd> + <kbd>L</kbd>                |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
