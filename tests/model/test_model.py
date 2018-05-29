@@ -159,3 +159,43 @@ class TestModel:
         model.client.do_api_query.assert_called_once_with(
             request, '/json/messages', method="GET")
         assert model.index is None
+
+    def test_fetch_initial_data(self, mocker, initial_data):
+        # Initialize Model
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
+                     return_value=[])
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+
+        # Setup mocks before calling get_messages
+        self.client.register.return_value = initial_data
+        self.client.get_members.return_value = {
+            'members': initial_data['realm_users']}
+        model = Model(self.controller)
+        assert model.initial_data == initial_data
+
+    def test_fetch_initial_data_raises_exception(self, mocker, initial_data):
+        # Initialize Model
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
+                     return_value=[])
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+
+        # Setup mocks before calling get_messages
+        self.client.register.return_value = initial_data
+        self.client.get_members.return_value = {
+            'members': initial_data['realm_users']}
+        model = Model(self.controller)
+
+        # Test if raises Exception
+        self.client.register.side_effect = Exception()
+        with pytest.raises(Exception):
+            model.fetch_initial_data()
