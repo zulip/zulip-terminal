@@ -5,3 +5,4 @@ cov_html/*
 .coverage
 .mypy_cache
 Pipfile.lock
+zulipterminal.egg-info
