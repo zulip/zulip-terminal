@@ -600,3 +600,11 @@ def user_profile():
         'is_admin': False,
         'pointer': 589234
     }
+
+
+@pytest.fixture(scope="module")
+def error_response():
+    return {
+        "msg": "Invalid API key",
+        "result": "error"
+    }
