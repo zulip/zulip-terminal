@@ -1,6 +1,6 @@
 typing==3.6.4
 urwid==2.0.1
-zulip==0.4.2
+zulip==0.4.7
 pytest==3.4.2
 pytest-cov==2.5.1
 pytest-pep8==1.0.6
@@ -9,4 +9,4 @@ pudb==2017.1.4
 snakeviz==0.4.2
 mypy==0.560
 emoji==0.5.0
-urwid_readline==0.5
+urwid_readline==0.6
