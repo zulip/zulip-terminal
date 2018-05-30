@@ -212,3 +212,15 @@ class TestModel:
         model = Model(self.controller)
         assert model.user_dict == user_dict
         assert model.users == user_list
+
+    def test_get_subscribed_streams(self, mocker, initial_data, streams):
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
+                     return_value=initial_data)
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+        model = Model(self.controller)
+        assert model.streams == streams
