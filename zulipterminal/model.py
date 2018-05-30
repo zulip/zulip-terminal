@@ -40,7 +40,7 @@ class Model:
         self.streams = self.get_subscribed_streams()
         self.unread_counts = classify_unread_counts(
             self.initial_data['unread_msgs']
-            )
+        )
 
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
@@ -71,7 +71,7 @@ class Model:
                     'subscription',
                     'message',
                     'update_message_flags',
-                    ],
+                ],
                 client_gravatar=True,
             )
             result['realm_users'] = self.client.get_members(
@@ -108,7 +108,7 @@ class Model:
         presence_list = sorted(
             presences.keys(),
             key=lambda p: user_dict[p]['full_name'].lower()
-            )
+        )
         for user in presence_list:
             # if the user is active append it to the list
             if presences[user]['aggregated']['status'] == 'active':
@@ -131,7 +131,7 @@ class Model:
             stream['name'],
             stream['stream_id'],
             stream['color'],
-            ] for stream in subscriptions
+        ] for stream in subscriptions
         ]
         return sorted(stream_names, key=lambda s: s[0].lower())
 
@@ -161,7 +161,7 @@ class Model:
                 msg_recipients = frozenset([
                     self.user_id,
                     self.user_dict[self.narrow[0][1]]['user_id']
-                    ])
+                ])
                 if recipients == msg_recipients:
                     self.msg_list.log.append(msg_w)
 
@@ -230,9 +230,9 @@ class Model:
                 last_event_id = self.controller.last_event_id
 
             response = self.client.get_events(
-                    queue_id=queue_id,
-                    last_event_id=last_event_id
-                )
+                queue_id=queue_id,
+                last_event_id=last_event_id
+            )
 
             if 'error' in response['result']:
                 if response["msg"].startswith("Bad event queue id:"):

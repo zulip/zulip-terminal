@@ -663,3 +663,15 @@ def user_list():
         'status': 'idle',
         'user_id': 6085
     }]
+
+
+@pytest.fixture(scope="module")
+def streams():
+    """
+    List of streams created corresponding to
+    `initial_data` fixture.
+    """
+    return [
+        ['Django', 86, '#94c849'],
+        ['GSoC', 14, '#c2c2c2']
+    ]
