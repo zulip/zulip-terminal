@@ -154,7 +154,7 @@ def initial_data():
             'bot_type': None,
             'is_bot': False,
             'is_admin': False,
-            'email': 'aero31aero@gmail.com',
+            'email': 'FOOBOO@gmail.com',
             'full_name': 'Tomás Farías',
             'user_id': 5827,
             'avatar_url': None,
@@ -250,7 +250,7 @@ def initial_data():
                     'status': 'idle'
                 }
             },
-            'aero31aero@gmail.com': {
+            'FOOBOO@gmail.com': {
                 'website': {
                     'pushable': True,
                     'client': 'website',
@@ -620,9 +620,9 @@ def user_dict():
     User_dict created according to `initial_data` fixture.
     """
     return {
-        'aero31aero@gmail.com': {
+        'FOOBOO@gmail.com': {
             'full_name': 'Tomás Farías',
-            'email': 'aero31aero@gmail.com',
+            'email': 'FOOBOO@gmail.com',
             'status': 'active',
             'user_id': 5827
         },
@@ -649,7 +649,7 @@ def user_list():
     """
     return [{
         'full_name': 'Tomás Farías',
-        'email': 'aero31aero@gmail.com',
+        'email': 'FOOBOO@gmail.com',
         'status': 'active',
         'user_id': 5827
     }, {
