@@ -224,3 +224,43 @@ class TestModel:
             return_value=[])
         model = Model(self.controller)
         assert model.streams == streams
+
+    @pytest.mark.parametrize('response, narrow, recipients, log', [
+        ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
+        ({'type': 'private', 'id': 1},
+         [['is', 'private']], frozenset(), ['msg_w']),
+        ({'type': 'stream', 'id': 1, 'subject': 'b'},
+         [['stream', 'a'], ['topic', 'b']],
+         frozenset(), ['msg_w']),
+        ({'type': 'private', 'id': 1},
+         [['pm_with', 'FOOBOO@gmail.com']],
+         frozenset({5827, 5140}), ['msg_w']),  # User Ids taken from conftest
+        ({'type': 'private', 'id': 1},
+         [['is', 'search']],
+         frozenset(), []),
+        ({'type': 'private', 'id': 1},
+         [['pm_with', 'FOOBOO@gmail.com']],
+         frozenset({5827, 3212}), []),
+    ])
+    def test_append_message(self, mocker, user_dict, user_profile, response,
+                            narrow, recipients, model, log):
+        model.update = True
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value={})
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        set_count = mocker.patch('zulipterminal.model.set_count')
+        model.msg_list = mocker.Mock()
+        model.msg_list.log = []
+        model.narrow = narrow
+        model.recipients = recipients
+        model.user_id = user_profile['user_id']
+        model.user_dict = user_dict
+        model.append_message(response)
+        assert model.msg_list.log == log
+        set_count.assert_called_once_with([response['id']], self.controller, 1)
+        model.update = False
+        model.append_message(response)
+        # LOG REMAINS THE SAME IF UPDATE IS FALSE
+        assert model.msg_list.log == log
