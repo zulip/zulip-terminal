@@ -88,7 +88,7 @@ def messages_successful_response() -> Dict[str, Any]:
             'sender_short_name': 'foo',
             'content': 'Stream content here.',
             'display_recipient': 'PTEST',
-            }, {
+        }, {
             'id': 537287,
             'sender_full_name': 'Foo Foo',
             'timestamp': 1520918736,
@@ -113,14 +113,14 @@ def messages_successful_response() -> Dict[str, Any]:
                 'full_name': 'Boo Boo',
                 'short_name': 'boo',
                 'email': 'boo@zulip.com',
-                }, {
+            }, {
                 'short_name': 'foo',
                 'id': 5140,
                 'is_mirror_dummy': False,
                 'full_name': 'Foo Foo',
                 'email': 'foo@zulip.com',
-                }],
             }],
+        }],
         'result': 'success',
         'msg': '',
     }
@@ -154,7 +154,7 @@ def initial_data():
             'bot_type': None,
             'is_bot': False,
             'is_admin': False,
-            'email': 'tomasfariassantana@gmail.com',
+            'email': 'aero31aero@gmail.com',
             'full_name': 'Tomás Farías',
             'user_id': 5827,
             'avatar_url': None,
@@ -163,7 +163,11 @@ def initial_data():
             'full_name': 'Jari Winberg',
             'user_id': 6086,
             'avatar_url': None,
-            'is_active': True
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': 'nyan.salmon+sns@gmail.com',
         }, {
             'bot_type': None,
             'is_bot': False,
@@ -608,3 +612,54 @@ def error_response():
         "msg": "Invalid API key",
         "result": "error"
     }
+
+
+@pytest.fixture(scope="module")
+def user_dict():
+    """
+    User_dict created according to `initial_data` fixture.
+    """
+    return {
+        'aero31aero@gmail.com': {
+            'full_name': 'Tomás Farías',
+            'email': 'aero31aero@gmail.com',
+            'status': 'active',
+            'user_id': 5827
+        },
+        'nyan.salmon+sns@gmail.com': {
+            'full_name': 'Jari Winberg',
+            'email': 'nyan.salmon+sns@gmail.com',
+            'status': 'idle',
+            'user_id': 6086
+        },
+        'cloudserver2@hotmail.de': {
+            'full_name': 'Test Account',
+            'email': 'cloudserver2@hotmail.de',
+            'status': 'idle',
+            'user_id': 6085
+        }
+    }
+
+
+@pytest.fixture(scope="module")
+def user_list():
+    """
+    List of users created corresponding to
+    `initial_data` fixture.
+    """
+    return [{
+        'full_name': 'Tomás Farías',
+        'email': 'aero31aero@gmail.com',
+        'status': 'active',
+        'user_id': 5827
+    }, {
+        'full_name': 'Jari Winberg',
+        'email': 'nyan.salmon+sns@gmail.com',
+        'status': 'idle',
+        'user_id': 6086
+    }, {
+        'full_name': 'Test Account',
+        'email': 'cloudserver2@hotmail.de',
+        'status': 'idle',
+        'user_id': 6085
+    }]

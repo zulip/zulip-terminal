@@ -199,3 +199,16 @@ class TestModel:
         self.client.register.side_effect = Exception()
         with pytest.raises(Exception):
             model.fetch_initial_data()
+
+    def test_get_all_users(self, mocker, initial_data, user_list, user_dict):
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
+                     return_value=initial_data)
+        mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
+                     return_value=[])
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+        model = Model(self.controller)
+        assert model.user_dict == user_dict
+        assert model.users == user_list
