@@ -179,13 +179,7 @@ class Model:
             message = self.index['messages'][message_id]
             message['content'] = content
             self.index['messages'][message_id] = message
-            # Update new content in the rendered view
-            for msg_w in self.msg_list.log:
-                if msg_w.original_widget.message['id'] == message_id:
-                    new_msg_w = create_msg_box_list(self, [message_id])[0]
-                    msg_pos = self.msg_list.log.index(msg_w)
-                    self.msg_list.log[msg_pos] = new_msg_w
-                    self.controller.loop.draw_screen()
+            self.update_rendered_view(message_id)
 
     def update_reaction(self, response: Dict[str, Any]) -> None:
         message_id = response['message_id']
@@ -211,13 +205,16 @@ class Model:
                         message['reactions'].remove(reaction)
 
             self.index['messages'][message_id] = message
-            # Update new content in the rendered view
-            for msg_w in self.msg_list.log:
-                if msg_w.original_widget.message['id'] == message_id:
-                    new_msg_w = create_msg_box_list(self, [message_id])[0]
-                    msg_pos = self.msg_list.log.index(msg_w)
-                    self.msg_list.log[msg_pos] = new_msg_w
-                    self.controller.loop.draw_screen()
+            self.update_rendered_view(message_id)
+
+    def update_rendered_view(self, msg_id):
+        # Update new content in the rendered view
+        for msg_w in self.msg_list.log:
+            if msg_w.original_widget.message['id'] == msg_id:
+                new_msg_w = create_msg_box_list(self, [msg_id])[0]
+                msg_pos = self.msg_list.log.index(msg_w)
+                self.msg_list.log[msg_pos] = new_msg_w
+                self.controller.loop.draw_screen()
 
     @async
     def poll_for_events(self) -> None:
