@@ -207,7 +207,7 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
-    def update_rendered_view(self, msg_id):
+    def update_rendered_view(self, msg_id: int) -> None:
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
             if msg_w.original_widget.message['id'] == msg_id:
