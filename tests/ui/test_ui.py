@@ -73,3 +73,12 @@ class TestView:
             streams_view(),
         ])
         assert return_value == pile()
+
+    def test_right_column_view(self, view, mocker):
+        right_view = mocker.patch('zulipterminal.ui.RightColumnView')
+        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
+        return_value = view.right_column_view()
+        right_view.assert_called_once_with(view)
+        assert view.users_view == right_view()
+        line_box.assert_called_once_with(view.users_view, title=u"Users")
+        assert return_value == line_box()
