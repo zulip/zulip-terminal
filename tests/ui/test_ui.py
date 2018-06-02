@@ -74,6 +74,16 @@ class TestView:
         ])
         assert return_value == pile()
 
+    def test_message_view(self, view, mocker):
+        middle_view = mocker.patch('zulipterminal.ui.MiddleColumnView')
+        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
+        return_value = view.message_view()
+        middle_view.assert_called_once_with(view.model, view.write_box,
+                                            view.search_box)
+        assert view.middle_column == middle_view()
+        line_box.assert_called_once_with(view.middle_column)
+        assert return_value == line_box()
+
     def test_right_column_view(self, view, mocker):
         right_view = mocker.patch('zulipterminal.ui.RightColumnView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
