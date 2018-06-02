@@ -42,3 +42,21 @@ class TestView:
         ])
         list_box.assert_called_once_with(walker())
         assert return_value == list_box()
+
+    def test_streams_view(self, view, mocker, streams):
+        view.streams = streams
+        view.model.unread_counts.get.return_value = 1
+        stream_button = mocker.patch('zulipterminal.ui.StreamButton')
+        stream_view = mocker.patch('zulipterminal.ui.StreamsView')
+        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
+        return_value = view.streams_view()
+        stream_button.assert_called_with(
+            streams[1],
+            controller=self.controller,
+            view=view,
+            count=1)
+        stream_view.assert_called_once_with([
+            stream_button(), stream_button()
+        ])
+        line_box.assert_called_once_with(stream_view(), title="Streams")
+        assert return_value == line_box()
