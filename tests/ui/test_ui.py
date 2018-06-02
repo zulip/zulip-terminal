@@ -92,3 +92,21 @@ class TestView:
         assert view.users_view == right_view()
         line_box.assert_called_once_with(view.users_view, title=u"Users")
         assert return_value == line_box()
+
+    def test_main_window(self, mocker):
+        left = mocker.patch('zulipterminal.ui.View.left_column_view')
+        center = mocker.patch('zulipterminal.ui.View.message_view')
+        right = mocker.patch('zulipterminal.ui.View.right_column_view')
+        col = mocker.patch("zulipterminal.ui.urwid.Columns")
+        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
+        view = View(self.controller)
+        left.assert_called_once_with()
+        center.assert_called_once_with()
+        right.assert_called_once_with()
+        col.assert_called_once_with([
+            ('weight', 3, left()),
+            ('weight', 10, center()),
+            ('weight', 3, right()),
+        ], focus_column=1)
+        assert view.body == col()
+        line_box.assert_called_once_with(view.body, title=u"Zulip")
