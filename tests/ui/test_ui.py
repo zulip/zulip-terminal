@@ -60,3 +60,16 @@ class TestView:
         ])
         line_box.assert_called_once_with(stream_view(), title="Streams")
         assert return_value == line_box()
+
+    def test_left_column_view(self, view, mocker):
+        menu_view = mocker.patch('zulipterminal.ui.View.menu_view')
+        streams_view = mocker.patch('zulipterminal.ui.View.streams_view')
+        pile = mocker.patch('zulipterminal.ui.urwid.Pile')
+        return_value = view.left_column_view()
+        menu_view.assert_called_once_with()
+        streams_view.assert_called_once_with()
+        pile.assert_called_once_with([
+            (4, menu_view()),
+            streams_view(),
+        ])
+        assert return_value == pile()
