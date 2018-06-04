@@ -5,7 +5,7 @@ import urwid
 import zulip
 
 from zulipterminal.model import Model
-from zulipterminal.ui import View
+from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
@@ -192,9 +192,11 @@ class Controller:
 
     def main(self) -> None:
         try:
+            screen = Screen()
+            screen.set_terminal_properties(colors=256)
             self.loop = urwid.MainLoop(self.view,
-                                       self.view.palette[self.theme])
-            self.loop.screen.set_terminal_properties(colors=256)
+                                       self.view.palette[self.theme],
+                                       screen=screen)
         except KeyError:
             print('Following are the themes available:')
             for theme in self.view.palette.keys():
