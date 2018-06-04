@@ -1,3 +1,5 @@
+import platform
+import re
 from typing import Any, Tuple
 
 import urwid
@@ -138,3 +140,14 @@ class View(urwid.WidgetWrap):
 
         else:
             return super(View, self).keypress(size, get_key(key))
+
+
+class Screen(urwid.raw_display.Screen):
+
+    def write(self, data: Any) -> None:
+        if "Microsoft" in platform.platform():
+            # replace urwid's SI/SO, which produce artifacts under WSL.
+            # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
+            # Above link describes the change.
+            data = re.sub("[\x0e\x0f]", "", data)
+        super().write(data)
