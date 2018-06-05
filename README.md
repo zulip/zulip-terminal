@@ -164,3 +164,31 @@ Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/lates
 
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+Troubleshooting: Common issues
+------------------------------
+
+###### Unable to render non-ASCII characters
+
+If you see `?` in places of emoji's or Zulip Terminal gives a `UnicodeError` / `CanvasError`, you haven't enabled utf-8
+encoding in your terminal. To enable it by default, add this to the end of you `~/.bashrc`:
+
+```
+export LANG=en_US.utf-8
+```
+
+###### Unable to open links
+ 
+If you are unable to open links in messages, then try double right-click on the link.
+If you are still facing problems, please discuss it at 
+[#zulip-terminall](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
+for it mentioning your terminal name, version, and OS.
+
+###### [DEV] No effect on Zulip Terminal on making local changes
+
+This means that you have installed both Normal and development versions of zulip-terminal. For running the development version, call
+`pipenv run zulip-term` from the cloned / downloaded `zulip-terminal` directory.
+
+###### Above mentioned hotkeys don't work as described
+
+If any of the above mentioned hotkeys don't work for you, feel free to open an issue or discuss it on [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
