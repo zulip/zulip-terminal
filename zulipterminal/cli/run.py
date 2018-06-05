@@ -1,20 +1,11 @@
 import argparse
 import configparser
+import traceback
 import sys
 from typing import Dict, Any
 from os import path
 
 from zulipterminal.core import Controller
-
-
-def save_stdout() -> None:
-    """Save shell screen."""
-    sys.stdout.write("\033[?1049h\033[H")
-
-
-def restore_stdout() -> None:
-    """Restore saved shell screen."""
-    sys.stdout.write("\033[?1049l")
 
 
 def parse_args() -> argparse.Namespace:
@@ -76,8 +67,6 @@ def main() -> None:
 
     zterm = parse_zuliprc(zuliprc_path)
 
-    if args.debug:
-        save_stdout()
     if args.profile:
         import cProfile
         prof = cProfile.Profile()
@@ -85,23 +74,28 @@ def main() -> None:
 
     try:
         Controller(zuliprc_path, zterm['theme']).main()
-    except Exception:
-        # A unexpected exception occurred, open the debugger in debug mode
+    except Exception as e:
         if args.debug:
+            # A unexpected exception occurred, open the debugger in debug mode
             import pudb
             pudb.post_mortem()
-    finally:
-        if args.debug:
-            restore_stdout()
 
+        sys.stdout.flush()
+        traceback.print_exc(file=sys.stderr)
+        print("Zulip Terminal has crashed!", file=sys.stderr)
+        print("You can ask for help at:", file=sys.stderr)
+        print("https://chat.zulip.org/#narrow/stream/206-zulip-terminal",
+              file=sys.stderr)
+        print("\nThanks for using the Zulip-Terminal interface.\n")
+        sys.stderr.flush()
+
+    finally:
         if args.profile:
             prof.disable()
             prof.dump_stats("/tmp/profile.data")
             print("Profile data saved to /tmp/profile.data")
             print("You can visualize it using e.g."
                   "`snakeviz /tmp/profile.data`")
-
-        print("\nThanks for using the Zulip-Terminal interface.\n")
         sys.exit(1)
 
 
