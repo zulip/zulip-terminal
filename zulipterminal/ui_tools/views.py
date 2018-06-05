@@ -16,6 +16,8 @@ class MessageView(urwid.ListBox):
     def __init__(self, model: Any) -> None:
         self.model = model
         self.index = model.index
+        # Initialize for reference
+        self.focus_msg = 0
         self.log = urwid.SimpleFocusListWalker(self.main_view())
         urwid.connect_signal(self.log, 'modified', self.read_message)
         # This Function completely controls the messages
@@ -75,7 +77,7 @@ class MessageView(urwid.ListBox):
         self.old_loading = False
 
     @async
-    def load_new_messages(self, anchor: int, focus_position: int) -> None:
+    def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
         self.model.anchor = anchor
         self.model.num_before = 0
@@ -109,7 +111,7 @@ class MessageView(urwid.ListBox):
             except Exception:
                 if self.focus:
                     id = self.focus.original_widget.message['id']
-                    self.load_new_messages(id, self.focus_position)
+                    self.load_new_messages(id)
                 return key
 
         elif key == 'up' and not self.old_loading:
