@@ -97,8 +97,6 @@ class WriteBox(urwid.Pile):
             self.contents[0][0].focus_col = 1
         elif key == 'left' and self.to_write_box is None:
             self.contents[0][0].focus_col = 0
-        elif key == 'enter' and self.focus == self.msg_write_box:
-            self.msg_write_box.insert_text('\n')
         key = super(WriteBox, self).keypress(size, key)
         return key
 
