@@ -127,8 +127,7 @@ class View(urwid.WidgetWrap):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if self.controller.editor_mode:
-            return self.controller.editor.keypress((20,), key)
-
+            return self.controller.editor.keypress((size[1],), key)
         elif key == "w":
             # Start User Search if not in editor_mode
             self.users_view.keypress(size, 'w')
