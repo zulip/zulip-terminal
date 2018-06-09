@@ -1,6 +1,6 @@
 import pytest
 
-from zulipterminal.ui_tools.views import MessageView
+from zulipterminal.ui_tools.views import MessageView, StreamsView
 
 VIEWS = "zulipterminal.ui_tools.views"
 
@@ -229,3 +229,35 @@ class TestMessageView:
         update_flag = mocker.patch(VIEWS + ".update_flag")
         msg_view.read_message()
         update_flag.assert_not_called()
+
+
+class TestStreamsView:
+
+    @pytest.fixture
+    def stream_view(self, mocker):
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        return StreamsView("STEAM_BTN_LIST")
+
+    def test_mouse_event(self, mocker, stream_view):
+        mocker.patch.object(stream_view, 'keypress')
+        size = (200, 20)
+        col = 1
+        row = 1
+        focus = "WIDGET"
+        # Left click
+        stream_view.mouse_event(size, "mouse press", 4, col, row, focus)
+        stream_view.keypress.assert_called_once_with(size, "up")
+
+        # Right click
+        stream_view.mouse_event(size, "mouse press", 5, col, row, focus)
+        stream_view.keypress.assert_called_with(size, "down")
+
+        # Other actions - No action
+        return_value = stream_view.mouse_event(
+            size, "mouse release", 4, col, row, focus)
+        assert return_value is False
+
+        # Other clicks
+        return_value = stream_view.mouse_event(
+            size, "mouse press", 1, col, row, focus)
+        assert return_value is False
