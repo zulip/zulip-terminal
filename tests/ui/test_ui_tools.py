@@ -1,6 +1,11 @@
 import pytest
 
-from zulipterminal.ui_tools.views import MessageView, StreamsView, UsersView
+from zulipterminal.ui_tools.views import (
+    MessageView,
+    MiddleColumnView,
+    StreamsView,
+    UsersView
+)
 
 VIEWS = "zulipterminal.ui_tools.views"
 
@@ -293,3 +298,207 @@ class TestUsersView:
         return_value = user_view.mouse_event(
             size, "mouse press", 1, col, row, focus)
         assert return_value is False
+
+
+class TestMiddleColumnView:
+
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        mocker.patch(VIEWS + ".MessageView", return_value="MSG_LIST")
+        self.model = mocker.Mock()
+        self.write_box = mocker.Mock()
+        self.search_box = mocker.Mock()
+        self.super = mocker.patch(VIEWS + '.urwid.Frame.__init__')
+        self.super_keypress = mocker.patch(VIEWS + '.urwid.Frame.keypress')
+        self.model.controller == mocker.Mock()
+
+    @pytest.fixture
+    def mid_col_view(self):
+        return MiddleColumnView(self.model, self.write_box, self.search_box)
+
+    def test_init(self, mid_col_view):
+        assert mid_col_view.model == self.model
+        assert mid_col_view.controller == self.model.controller
+        assert mid_col_view.last_unread_topic is None
+        assert mid_col_view.last_unread_pm is None
+        assert mid_col_view.search_box == self.search_box
+        assert self.model.msg_list == "MSG_LIST"
+        self.super.assert_called_once_with("MSG_LIST", header=self.search_box,
+                                           footer=self.write_box)
+
+    def test_get_next_unread_topic(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_topics': {1: 1, 2: 1}
+        }
+        return_value = mid_col_view.get_next_unread_topic()
+        assert return_value == 1
+        assert mid_col_view.last_unread_topic == 1
+
+    def test_get_next_unread_topic_again(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_topics': {1: 1, 2: 1}
+        }
+        mid_col_view.last_unread_topic = 1
+        return_value = mid_col_view.get_next_unread_topic()
+        assert return_value == 2
+        assert mid_col_view.last_unread_topic == 2
+
+    def test_get_next_unread_topic_no_unread(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_topics': {}
+        }
+        return_value = mid_col_view.get_next_unread_topic()
+        assert return_value is None
+        assert mid_col_view.last_unread_topic is None
+
+    def test_get_next_unread_pm(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_pms': {1: 1, 2: 1}
+        }
+        return_value = mid_col_view.get_next_unread_pm()
+        assert return_value == 1
+        assert mid_col_view.last_unread_pm == 1
+
+    def test_get_next_unread_pm_again(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_pms': {1: 1, 2: 1}
+        }
+        mid_col_view.last_unread_pm = 1
+        return_value = mid_col_view.get_next_unread_pm()
+        assert return_value == 2
+        assert mid_col_view.last_unread_pm == 2
+
+    def test_get_next_unread_pm_no_unread(self, mid_col_view):
+        mid_col_view.model.unread_counts = {
+            'unread_pms': {}
+        }
+        return_value = mid_col_view.get_next_unread_pm()
+        assert return_value is None
+        assert mid_col_view.last_unread_pm is None
+
+    def test_keypress_esc(self, mid_col_view, mocker):
+        key = "esc"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.header')
+        mocker.patch(VIEWS + '.MiddleColumnView.footer')
+        mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.header.keypress.assert_called_once_with(size, key)
+        mid_col_view.footer.keypress.assert_called_once_with(size, key)
+        mid_col_view.set_focus.assert_called_once_with('body')
+        self.super_keypress.assert_called_once_with(size, key)
+
+    def test_keypress_focus_header(self, mid_col_view, mocker):
+        key = "/"
+        size = (20,)
+        mid_col_view.focus_part = 'header'
+        mid_col_view.keypress(size, key)
+        self.super_keypress.assert_called_once_with(size, key)
+
+    def test_keypress_search(self, mid_col_view, mocker):
+        key = "/"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
+
+        mid_col_view.keypress(size, key)
+
+        assert mid_col_view.controller.editor_mode is True
+        assert mid_col_view.controller.editor == mid_col_view.search_box
+        mid_col_view.set_focus.assert_called_once_with('header')
+
+    def test_keypress_r(self, mid_col_view, mocker):
+        key = "r"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.body')
+        mocker.patch(VIEWS + '.MiddleColumnView.footer')
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.body.keypress.assert_called_once_with(size, 'enter')
+        mid_col_view.set_focus.assert_called_once_with('footer')
+        assert mid_col_view.footer.focus_position == 1
+
+    def test_keypress_c(self, mid_col_view, mocker):
+        key = "c"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.body')
+        mocker.patch(VIEWS + '.MiddleColumnView.footer')
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.body.keypress.assert_called_once_with(size, 'c')
+        mid_col_view.set_focus.assert_called_once_with('footer')
+        assert mid_col_view.footer.focus_position == 0
+
+    def test_keypress_R(self, mid_col_view, mocker):
+        key = "R"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.body')
+        mocker.patch(VIEWS + '.MiddleColumnView.footer')
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.body.keypress.assert_called_once_with(size, 'R')
+        mid_col_view.set_focus.assert_called_once_with('footer')
+        assert mid_col_view.footer.focus_position == 1
+
+    def test_keypress_n_stream(self, mid_col_view, mocker):
+        key = "n"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        topic_btn = mocker.patch(VIEWS + '.TopicButton')
+        mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
+                     return_value=('stream', 'topic'))
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.get_next_unread_topic.assert_called_once_with()
+        mid_col_view.controller.narrow_to_topic.assert_called_once_with(
+            topic_btn('stream', 'topic', mid_col_view.model)
+        )
+
+    def test_keypress_n_no_stream(self, mid_col_view, mocker):
+        key = "n"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        topic_btn = mocker.patch(VIEWS + '.TopicButton')
+        mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
+                     return_value=None)
+
+        return_value = mid_col_view.keypress(size, key)
+        assert return_value == 'n'
+
+    def test_keypress_p_stream(self, mid_col_view, mocker):
+        key = "p"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
+        mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
+                     return_value=1)
+        mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
+
+        mid_col_view.keypress(size, key)
+
+        mid_col_view.controller.narrow_to_user.assert_called_once_with(
+            pm_btn(1, 'EMAIL')
+        )
+
+    def test_keypress_p_no_pm(self, mid_col_view, mocker):
+        key = "p"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
+        mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
+                     return_value=None)
+
+        return_value = mid_col_view.keypress(size, key)
+        assert return_value == 'p'
