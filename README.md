@@ -3,7 +3,8 @@
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
 ![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)  [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
-
+ [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](
+https://codecov.io/gh/zulip/zulip-terminal)
 ## Setup:
 
 1. Download and install the prerequisite tools ([pipsi](https://github.com/mitsuhiko/pipsi))
@@ -68,7 +69,7 @@ theme=default
 | Next Unread Topic                                     | <kbd>n</kbd>                                  |
 | Next Unread PM                                        | <kbd>p</kbd>                                  |
 | Send a message                                        | <kbd>Alt Enter</kbd>                          |
-| Search People                                         | <kbd>w</kbd>>                                 |
+| Search People                                         | <kbd>w</kbd>                                  |
 | Search Messages                                       | <kbd>/</kbd>                                  |
 | Beginning of line                                     | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Backward one character                                | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
@@ -168,7 +169,7 @@ Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal
 Troubleshooting: Common issues
 ------------------------------
 
-###### Unable to render non-ASCII characters
+##### Unable to render non-ASCII characters
 
 If you see `?` in places of emoji's or Zulip Terminal gives a `UnicodeError` / `CanvasError`, you haven't enabled utf-8
 encoding in your terminal. To enable it by default, add this to the end of you `~/.bashrc`:
@@ -177,18 +178,18 @@ encoding in your terminal. To enable it by default, add this to the end of you `
 export LANG=en_US.utf-8
 ```
 
-###### Unable to open links
- 
+##### Unable to open links
+
 If you are unable to open links in messages, then try double right-click on the link.
-If you are still facing problems, please discuss it at 
-[#zulip-terminall](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
+If you are still facing problems, please discuss it at
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
 for it mentioning your terminal name, version, and OS.
 
-###### [DEV] No effect on Zulip Terminal on making local changes
+##### [DEV] No effect on Zulip Terminal on making local changes
 
 This means that you have installed both Normal and development versions of zulip-terminal. For running the development version, call
 `pipenv run zulip-term` from the cloned / downloaded `zulip-terminal` directory.
 
-###### Above mentioned hotkeys don't work as described
+##### Above mentioned hotkeys don't work as described
 
 If any of the above mentioned hotkeys don't work for you, feel free to open an issue or discuss it on [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).

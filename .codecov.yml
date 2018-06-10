@@ -7,6 +7,6 @@ coverage:
         target: auto
         # Codecov has the tendency to report a lot of false negatives,
         # so we basically suppress comments completely.
-        threshold: 50%
+        threshold: 0.85
         base: auto
     patch: off
