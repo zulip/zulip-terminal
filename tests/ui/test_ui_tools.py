@@ -4,7 +4,8 @@ from zulipterminal.ui_tools.views import (
     MessageView,
     MiddleColumnView,
     StreamsView,
-    UsersView
+    UsersView,
+    RightColumnView,
 )
 
 VIEWS = "zulipterminal.ui_tools.views"
@@ -502,3 +503,113 @@ class TestMiddleColumnView:
 
         return_value = mid_col_view.keypress(size, key)
         assert return_value == 'p'
+
+
+class TestRightColumnView:
+
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.view = mocker.Mock()
+        self.user_search = mocker.patch(VIEWS + ".UserSearchBox")
+        self.connect_signal = mocker.patch(VIEWS + ".urwid.connect_signal")
+        self.line_box = mocker.patch(VIEWS + ".urwid.LineBox")
+        self.thread = mocker.patch(VIEWS + ".threading")
+        self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
+
+    @pytest.fixture
+    def right_col_view(self, mocker):
+        mocker.patch(VIEWS + ".RightColumnView.users_view")
+        return RightColumnView(self.view)
+
+    def test_init(self, right_col_view):
+        assert right_col_view.view == self.view
+        assert right_col_view.user_search == self.user_search(right_col_view)
+        assert right_col_view.view.user_search == right_col_view.user_search
+        self.line_box.assert_called_once_with(right_col_view.user_search)
+        self.thread.Lock.assert_called_with()
+        assert right_col_view.search_lock == self.thread.Lock()
+        self.super.assert_called_once_with(right_col_view.users_view(),
+                                           header=self.line_box(
+                                               right_col_view.user_search
+                                               ))
+
+    def test_update_user_list_editor_mode(self, right_col_view):
+        right_col_view.view.controller.editor_mode = False
+        right_col_view.update_user_list("SEARCH_BOX", "NEW_TEXT")
+        right_col_view.search_lock.acquire.assert_not_called()
+
+    def test_update_user_list_user_match(self, right_col_view, mocker):
+        right_col_view.view.controller.editor_mode = True
+        right_col_view.users_btn_list = ["USER1", "USER2"]
+        mocker.patch(VIEWS + ".match_user", return_value=True)
+        mocker.patch(VIEWS + ".UsersView")
+        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
+
+        right_col_view.update_user_list("SEARCH_BOX", "F")
+
+        right_col_view.search_lock.acquire.assert_called_once_with()
+        list_w.assert_called_once_with(["USER1", "USER2"])
+        set_body.assert_called_once_with(right_col_view.body)
+
+    def test_update_user_list_no_user_match(self, right_col_view, mocker):
+        right_col_view.view.controller.editor_mode = True
+        right_col_view.users_btn_list = ["USER1", "USER2"]
+        mocker.patch(VIEWS + ".match_user", return_value=False)
+        mocker.patch(VIEWS + ".UsersView")
+        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
+
+        right_col_view.update_user_list("SEARCH_BOX", "F")
+
+        right_col_view.search_lock.acquire.assert_called_once_with()
+        list_w.assert_called_once_with([])
+        set_body.assert_called_once_with(right_col_view.body)
+
+    def test_users_view(self, mocker):
+        self.view.users = [{
+            'user_id': 1,
+            'status': 'active'
+        }]
+        self.view.model.unread_counts.get.return_value = 1
+        user_btn = mocker.patch(VIEWS + ".UserButton")
+        mocker.patch(VIEWS + ".UsersView")
+        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+
+        right_col_view = RightColumnView(self.view)
+
+        right_col_view.view.model.unread_counts.get.assert_called_once_with(1,
+                                                                            0)
+        user_btn.assert_called_once_with(
+            self.view.users[0],
+            controller=self.view.controller,
+            view=self.view,
+            color=self.view.users[0]['status'],
+            count=1
+        )
+        list_w.assert_called_once_with(right_col_view.users_btn_list)
+
+    def test_keypress_w(self, right_col_view, mocker):
+        key = 'w'
+        size = (20,)
+        mocker.patch(VIEWS + ".RightColumnView.set_focus")
+        right_col_view.keypress(size, key)
+        right_col_view.set_focus.assert_called_once_with('header')
+
+    def test_keypress_esc(self, right_col_view, mocker):
+        key = 'esc'
+        size = (20,)
+        mocker.patch(VIEWS + ".UsersView")
+        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        mocker.patch(VIEWS + ".RightColumnView.set_focus")
+        mocker.patch(VIEWS + ".RightColumnView.set_body")
+        right_col_view.users_btn_list = []
+
+        right_col_view.keypress(size, key)
+
+        right_col_view.user_search.set_edit_text.assert_called_once_with(
+            "Search People"
+        )
+        right_col_view.set_body.assert_called_once_with(right_col_view.body)
+        right_col_view.set_focus.assert_called_once_with('body')
+        list_w.assert_called_once_with([])
