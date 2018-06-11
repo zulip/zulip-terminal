@@ -66,7 +66,11 @@ class Controller:
             else:
                 self.model.get_messages(True)
         msg_id_list = self.model.index['all_stream'][button.stream_id]
-        w_list = create_msg_box_list(self.model, msg_id_list)
+        if hasattr(button, 'message'):
+            w_list = create_msg_box_list(
+                self.model, msg_id_list, button.message['id'])
+        else:
+            w_list = create_msg_box_list(self.model, msg_id_list)
         focus_position = self.model.index['pointer'][str(self.model.narrow)]
         if focus_position == set():
             focus_position = len(w_list) - 1
@@ -110,12 +114,23 @@ class Controller:
             self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_user(self, button: Any) -> None:
-        if self.model.narrow == [["pm_with", button.email]]:
+        if hasattr(button, 'message'):
+            emails = []
+            for recipient in button.message['display_recipient']:
+                email = recipient['email']
+                if email == self.model.client.email:
+                    continue
+                emails.append(recipient['email'])
+            user_emails = ', '.join(emails)
+        else:
+            user_emails = button.email
+        if self.model.narrow == [["pm_with", user_emails]]:
             return
 
-        self.update = False
+        button.user_id = self.model.user_dict[user_emails]['user_id']
 
-        self.model.narrow = [["pm_with", button.email]]
+        self.update = False
+        self.model.narrow = [["pm_with", user_emails]]
         msg_id_list = self.model.index['private'].get(frozenset(
             [self.model.user_id, button.user_id]), [])
 
@@ -149,7 +164,12 @@ class Controller:
             return
         self.update = False
         msg_list = self.model.index['all_messages']
-        w_list = create_msg_box_list(self.model, msg_list)
+        self.model.narrow = []
+        if hasattr(button, 'message'):
+            w_list = create_msg_box_list(
+                self.model, msg_list, button.message['id'])
+        else:
+            w_list = create_msg_box_list(self.model, msg_list)
         focus_position = self.model.index['pointer'][str(self.model.narrow)]
         if focus_position == set():
             focus_position = len(w_list) - 1
@@ -157,7 +177,6 @@ class Controller:
         self.model.msg_view.extend(w_list)
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
-        self.model.narrow = []
 
     def show_all_pm(self, button: Any) -> None:
         if self.model.narrow == [['is', 'private']]:

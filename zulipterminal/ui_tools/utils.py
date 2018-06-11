@@ -32,7 +32,6 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
                     'msg_selected'
         ))
         last_message = msg
-    if model.index['pointer'][str(model.narrow)] == set() and\
-            focus_msg is not None:
+    if focus_msg is not None:
         model.index['pointer'][str(model.narrow)] = focus_msg
     return w_list
