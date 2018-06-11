@@ -83,6 +83,11 @@ class TestController:
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
         controller.model.user_id = 5140
+        controller.model.user_dict = {
+            user_button.email: {
+                'user_id': user_button.user_id
+            }
+        }
         controller.narrow_to_user(user_button)
         assert controller.model.narrow == [["pm_with", user_button.email]]
         controller.model.msg_view.clear.assert_called_once_with()
