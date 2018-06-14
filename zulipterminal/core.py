@@ -6,7 +6,7 @@ import zulip
 
 from zulipterminal.model import Model
 from zulipterminal.ui import View, Screen
-from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.ui_tools.utils import create_msg_box_list, HELP_TEXT
 
 
 class Controller:
@@ -28,6 +28,18 @@ class Controller:
         self.theme = theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+
+    def show_help(self) -> None:
+        self.prev_view_msgs = self.model.msg_view.copy()
+        self.prev_focus = self.model.msg_list.focus_position
+        self.model.msg_view.clear()
+        self.model.msg_view.extend([urwid.Text(HELP_TEXT)])
+        self.model.msg_view.help_mode = True
+
+    def hide_help(self) -> None:
+        self.model.msg_view.clear()
+        self.model.msg_view.extend(self.prev_view_msgs)
+        self.model.msg_list.set_focus(self.prev_focus)
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

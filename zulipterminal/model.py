@@ -140,7 +140,8 @@ class Model:
         Adds message to the end of the view.
         """
         response['flags'] = []
-        if hasattr(self.controller, 'view') and self.update:
+        if hasattr(self.controller, 'view') and self.update\
+                and not self.msg_view.help_mode:
             self.index = index_messages([response], self, self.index)
             msg_w = create_msg_box_list(self, [response['id']])[0]
 
@@ -208,6 +209,8 @@ class Model:
             self.update_rendered_view(message_id)
 
     def update_rendered_view(self, msg_id: int) -> None:
+        if self.msg_view.help_mode:
+            return
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
             if msg_w.original_widget.message['id'] == msg_id:

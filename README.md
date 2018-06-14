@@ -51,6 +51,7 @@ theme=default
 ## Hot Keys
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
+| Help Menu                                             | <kbd>?</kbd>                                  |
 | Previous message                                      | <kbd>Up</kbd> / <kbd>k</kbd>                  |
 | Next message                                          | <kbd>Down</kbd> / <kbd>j</kbd>                |
 | Go left                                               | <kbd>left</kbd> / <kbd>h</kbd>                |

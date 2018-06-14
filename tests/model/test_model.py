@@ -30,12 +30,15 @@ class TestModel:
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
         self.client.get_profile.return_value = user_profile
-        return Model(self.controller)
+        model = Model(self.controller)
+        model.msg_view = mocker.Mock()
+        model.msg_view.help_mode = False
+        return model
 
     def test_init(self, model, initial_data, user_profile):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
-        assert model.msg_view is None
+        assert model.msg_view.help_mode is False
         assert model.anchor == 0
         assert model.num_before == 30
         assert model.num_after == 10

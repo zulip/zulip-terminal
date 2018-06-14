@@ -29,6 +29,7 @@ class MessageView(urwid.ListBox):
         # if loading new/old messages - True
         self.old_loading = False
         self.new_loading = False
+        self.log.help_mode = False
 
     def main_view(self) -> List[Any]:
         msg_btn_list = create_msg_box_list(self.model)
@@ -103,7 +104,14 @@ class MessageView(urwid.ListBox):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'down' and not self.new_loading:
+        if self.log.help_mode is True and key != 'esc':
+            return super(MessageView, self).keypress(size, key)
+        elif self.log.help_mode is True and key == 'esc':
+            self.model.controller.hide_help()
+            self.log.help_mode = False
+            return ''
+
+        elif key == 'down' and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -145,7 +153,8 @@ class MessageView(urwid.ListBox):
     def read_message(self) -> None:
         # Message currently in focus
         msg_w, curr_pos = self.body.get_focus()
-        if msg_w is None:
+        if not hasattr(msg_w, 'attr_map'):
+            # in case help is displayed
             return
         # save the current focus
         key = str(self.model.narrow)
