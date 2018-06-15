@@ -37,7 +37,9 @@ class Model:
         self.initial_data = self.fetch_initial_data()
         self.user_id = self.client.get_profile()['user_id']
         self.users = self.get_all_users()
+        self.muted_streams = list()  # type: List[int]
         self.streams = self.get_subscribed_streams()
+        self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(
             self.initial_data['unread_msgs']
         )
@@ -71,6 +73,7 @@ class Model:
                     'subscription',
                     'message',
                     'update_message_flags',
+                    'muted_topics',
                 ],
                 client_gravatar=True,
             )
@@ -125,6 +128,10 @@ class Model:
         # Store streams in id->Stream format
         for stream in subscriptions:
             self.stream_dict[stream['stream_id']] = stream
+            # Add if stream is muted.
+            if stream['in_home_view'] is False:
+                self.muted_streams.append(stream['stream_id'])
+
         stream_names = [[
             stream['name'],
             stream['stream_id'],
@@ -140,8 +147,11 @@ class Model:
         response['flags'] = []
         if hasattr(self.controller, 'view') and self.update:
             self.index = index_messages([response], self, self.index)
-            msg_w = create_msg_box_list(self, [response['id']])[0]
-
+            msg_w_list = create_msg_box_list(self, [response['id']])
+            if not msg_w_list:
+                return
+            else:
+                msg_w = msg_w_list[0]
             if self.narrow == []:
                 self.msg_list.log.append(msg_w)
 
@@ -209,7 +219,11 @@ class Model:
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
             if msg_w.original_widget.message['id'] == msg_id:
-                new_msg_w = create_msg_box_list(self, [msg_id])[0]
+                msg_w_list = create_msg_box_list(self, [msg_id])
+                if msg_w_list == []:
+                    return
+                else:
+                    new_msg_w = msg_w_list[0]
                 msg_pos = self.msg_list.log.index(msg_w)
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.loop.draw_screen()
