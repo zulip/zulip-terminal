@@ -40,9 +40,7 @@ class Model:
         self.muted_streams = list()  # type: List[int]
         self.streams = self.get_subscribed_streams()
         self.muted_topics = self.initial_data['muted_topics']
-        self.unread_counts = classify_unread_counts(
-            self.initial_data['unread_msgs']
-        )
+        self.unread_counts = classify_unread_counts(self)
 
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
