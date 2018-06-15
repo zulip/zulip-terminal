@@ -47,6 +47,8 @@ class TestController:
                 'color': '#ffffff',
             }
         }
+        controller.model.muted_streams = []
+        controller.model.muted_topics = []
         controller.narrow_to_stream(stream_button)
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream', stream_button.caption]]
@@ -69,6 +71,8 @@ class TestController:
                 'color': '#ffffff',
             }
         }
+        controller.model.muted_streams = []
+        controller.model.muted_topics = []
         controller.narrow_to_topic(msg_box)
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
@@ -109,6 +113,8 @@ class TestController:
                 'color': '#ffffff',
             }
         }
+        controller.model.muted_streams = []
+        controller.model.muted_topics = []
         controller.show_all_messages('')
         assert controller.model.narrow == []
         controller.model.msg_view.clear.assert_called_once_with()
