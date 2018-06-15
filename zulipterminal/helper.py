@@ -88,7 +88,7 @@ def update_flag(id_list: List[int], controller: Any) -> None:
 
 
 def index_messages(messages: List[Any], model: Any, index: Any=None)\
-                                                    -> Dict[str, Any]:
+        -> Dict[str, Any]:
     """
     STRUCTURE OF INDEX
     {
@@ -231,7 +231,7 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
 
                 if narrow[0][0] == 'pm_with' and recipients == frozenset({
                         model.user_id, model.user_dict[narrow[0][1]]['user_id']
-                        }):
+                }):
                     index['private'][recipients].add(msg['id'])
 
             if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
@@ -247,9 +247,9 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
     return index
 
 
-def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
-                                           -> Dict[str, Any]:
+def classify_unread_counts(model: Any) -> Dict[str, Any]:
     # TODO: supprot group pms
+    unread_msg_counts = model.initial_data['unread_msgs']
     unread_counts = dict()  # type: Dict[Any, Any]
     unread_counts['all_msg'] = 0
     unread_counts['all_pms'] = 0
@@ -266,6 +266,11 @@ def classify_unread_counts(unread_msg_counts: Dict[str, Any])\
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
+        if stream_id in model.muted_streams:
+            continue
+        if [model.stream_dict[stream_id]['name'],
+                stream['topic']] in model.muted_topics:
+            continue
         stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count
         if not unread_counts.get(stream_id):

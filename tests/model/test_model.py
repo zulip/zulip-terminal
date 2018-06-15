@@ -55,9 +55,7 @@ class TestModel:
         assert model.users == []
         model.get_subscribed_streams.assert_called_once_with()
         assert model.streams == []
-        self.classify_unread_counts.assert_called_once_with(
-            initial_data['unread_msgs']
-        )
+        self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
     def test_success_get_messages(self, mocker, messages_successful_response,
