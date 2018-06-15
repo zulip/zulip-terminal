@@ -270,7 +270,8 @@ def initial_data():
                 }
             }
         },
-        'last_event_id': -1
+        'last_event_id': -1,
+        'muted_topics': [],
     }
 
 
