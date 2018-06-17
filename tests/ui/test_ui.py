@@ -31,6 +31,7 @@ class TestView:
     def test_menu_view(self, view, mocker):
         view.model.unread_counts.get.return_value = 1
         home_button = mocker.patch('zulipterminal.ui.HomeButton')
+        divider = mocker.patch('urwid.Divider')
         pm_button = mocker.patch('zulipterminal.ui.PMButton')
         list_box = mocker.patch('zulipterminal.ui.urwid.ListBox')
         walker = mocker.patch('zulipterminal.ui.urwid.SimpleFocusListWalker')
@@ -38,7 +39,7 @@ class TestView:
         home_button.assert_called_once_with(self.controller, count=1)
         pm_button.assert_called_once_with(self.controller, count=1)
         walker.assert_called_once_with([
-            home_button(), pm_button()
+            home_button(), divider(), pm_button()
         ])
         list_box.assert_called_once_with(walker())
         assert return_value == list_box()
