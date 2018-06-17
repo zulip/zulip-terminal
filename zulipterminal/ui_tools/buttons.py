@@ -28,7 +28,7 @@ class HomeButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'  \u26FA  ', self.caption, ('idle', ' ' + str(count))],
+            [u'  🏡 ', self.caption, ('idle', ' ' + str(count))],
             len(self.caption) + 5),
             None,
             'selected')
@@ -50,7 +50,7 @@ class PMButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'  \u260F  ', self.caption, ('idle', ' ' + str(count))],
+            [u'  💬 ', self.caption, ('idle', ' ' + str(count))],
             len(self.caption) + 5),
             None,
             'selected')

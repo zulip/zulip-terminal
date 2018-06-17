@@ -72,6 +72,7 @@ class View(urwid.WidgetWrap):
         self.pm_button = PMButton(self.controller, count=count)
         menu_btn_list = [
             self.home_button,
+            urwid.Divider(),
             self.pm_button,
             ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
