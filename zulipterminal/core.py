@@ -32,7 +32,8 @@ class Controller:
         self.editor = None  # type: Any
 
     def show_help(self) -> None:
-        with open('README.md') as readme, open('/tmp/help', 'w') as hotkeys:
+        text = []
+        with open('README.md') as readme:
             copy = False
             for line in readme:
                 if line.strip() == '## Hot Keys':
@@ -40,10 +41,10 @@ class Controller:
                 elif line.strip() == '## Development':
                     copy = False
                 elif copy:
-                    hotkeys.write(line)
-
+                    text.append(line)
+        text = '\n'.join(text)
         self.loop.widget = urwid.Overlay(
-            muv.preview('/tmp/help', self),
+            muv.preview(text, self, is_message=False),
             self.view,
             align='center',
             width=('relative', 90),

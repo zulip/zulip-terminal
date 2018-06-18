@@ -61,12 +61,13 @@ def load_config(config_file):
         return json.load(f)
 
 
-def preview(file_name, controller, log='INFO', palette=None, config_file=None):
+def preview(text, controller, is_message=True, log='CRITICAL', palette=None,
+            config_file=None):
     """
     Preview markdown file.
 
     Positional argument:
-    file_name -- the file to view
+    text -- the text to view in markdown
     log -- specify log level, valid options include DEBUG, INFO, WARNING,
            ERROR, CRITICAL
     Keyword arguments:
@@ -78,6 +79,8 @@ def preview(file_name, controller, log='INFO', palette=None, config_file=None):
                         format='%(asctime)s %(levelname)s: %(message)s')
     config = load_config(config_file)
     parser = ContentParser(config=config)
-    listbox_content = parser.markdown2markup(file_name)
+    listbox_content = parser.markdown2markup(text)
+    if is_message:
+        return listbox_content
     listbox = PageListBox(urwid.SimpleListWalker(listbox_content), controller)
     return urwid.LineBox(listbox, title="Help | Press `q` to quit")

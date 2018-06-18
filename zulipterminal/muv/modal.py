@@ -27,16 +27,15 @@ class ContentParser:
         }
         self.highlight_set = ['kd', 'nx', 'nf', 'ne', 's1', 's2', 'k']
 
-    def markdown2markup(self, infile):
+    def markdown2markup(self, text):
         """Convert markdown file to urwid widgets"""
-        html = self.markdown2html(infile)
+        html = self.markdown2html(text)
         return self.html2markup(html)
 
-    def markdown2html(self, infile):
+    def markdown2html(self, text):
         """Convert markdown file to html"""
-        source = open(infile).read()
         html = markdown.markdown(
-            source, extensions=[GithubFlavoredMarkdownExtension()])
+            text, extensions=[GithubFlavoredMarkdownExtension()])
         return html
 
     def html2markup(self, html):
