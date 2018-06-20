@@ -85,42 +85,38 @@ class Model:
             raise urwid.ExitMainLoop()
 
     def get_all_users(self) -> List[Dict[str, Any]]:
+        # Dict which stores the active/idle status of users (by email)
+        presences = self.initial_data['presences']
+
         # Construct a dict of each user in the realm to look up by email
         # and a user-id to email mapping
         self.user_dict = dict()  # type: Dict[str, Dict[str, Any]]
         self.user_id_email_dict = dict()  # type: Dict[int, str]
         for user in self.initial_data['realm_users']:
+            if user['email'] in presences:
+                status = presences[user['email']]['aggregated']['status']
+            else:
+                # TODO: Consider if bots & other no-presence results should
+                # also really be treated as 'idle' and adjust accordingly
+                status = 'idle'
             self.user_dict[user['email']] = {
                 'full_name': user['full_name'],
                 'email': user['email'],
                 'user_id': user['user_id'],
-                'status': 'idle',
+                'status': status,
             }
             self.user_id_email_dict[user['user_id']] = user['email']
 
-        # Local copy, which will be filtered while building user_list
-        user_dict = self.user_dict.copy()
+        # Generate filtered lists for active & idle users
+        active = [properties for properties in self.user_dict.values()
+                  if properties['status'] == 'active']
+        idle = [properties for properties in self.user_dict.values()
+                if properties['status'] == 'idle']
 
-        # List to display
-        user_list = list()
-        # List which stores the active/idle status of users
-        presences = self.initial_data['presences']
-        # sort the list according to the full name of users.
-        presence_list = sorted(
-            presences.keys(),
-            key=lambda p: user_dict[p]['full_name'].lower()
-        )
-        for user in presence_list:
-            # if the user is active append it to the list
-            if presences[user]['aggregated']['status'] == 'active':
-                user_dict[user]['status'] = 'active'
-                user_list.append(user_dict[user])
-                # remove the user from dictionary
-                user_dict.pop(user)
-        # add the remaining users to the list.
-        user_list += sorted(user_dict.values(),
-                            key=lambda u: u['full_name'].lower(),
-                            )
+        # Construct user_list from sorted components of each list
+        user_list = sorted(active, key=lambda u: u['full_name'])
+        user_list += sorted(idle, key=lambda u: u['full_name'])
+
         return user_list
 
     def get_subscribed_streams(self) -> List[List[str]]:
