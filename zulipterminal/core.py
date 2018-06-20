@@ -104,12 +104,9 @@ class Controller:
 
     def narrow_to_user(self, button: Any) -> None:
         if hasattr(button, 'message'):
-            emails = []
-            for recipient in button.message['display_recipient']:
-                email = recipient['email']
-                if email == self.model.client.email:
-                    continue
-                emails.append(recipient['email'])
+            emails = [recipient['email']
+                      for recipient in button.message['display_recipient']
+                      if recipient['email'] != self.model.client.email]
             user_emails = ', '.join(emails)
         else:
             user_emails = button.email
