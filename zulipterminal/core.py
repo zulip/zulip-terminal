@@ -20,7 +20,7 @@ class Controller:
                                    client='ZulipTerminal/0.1.0 ' + platform())
         # Register to the queue before initializing Model or View
         # so that we don't lose any updates while messages are being fetched.
-        self.register()
+        self._register_initial_desired_events()
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -176,7 +176,7 @@ class Controller:
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
-    def register(self) -> None:
+    def _register_initial_desired_events(self) -> None:
         event_types = [
             'message',
             'update_message',
