@@ -93,19 +93,20 @@ class Model:
         self.user_dict = dict()  # type: Dict[str, Dict[str, Any]]
         self.user_id_email_dict = dict()  # type: Dict[int, str]
         for user in self.initial_data['realm_users']:
-            if user['email'] in presences:
-                status = presences[user['email']]['aggregated']['status']
+            email = user['email']
+            if email in presences:  # presences currently subset of all users
+                status = presences[email]['aggregated']['status']
             else:
                 # TODO: Consider if bots & other no-presence results should
                 # also really be treated as 'idle' and adjust accordingly
                 status = 'idle'
-            self.user_dict[user['email']] = {
+            self.user_dict[email] = {
                 'full_name': user['full_name'],
-                'email': user['email'],
+                'email': email,
                 'user_id': user['user_id'],
                 'status': status,
             }
-            self.user_id_email_dict[user['user_id']] = user['email']
+            self.user_id_email_dict[user['user_id']] = email
 
         # Generate filtered lists for active & idle users
         active = [properties for properties in self.user_dict.values()
