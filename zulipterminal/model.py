@@ -85,21 +85,22 @@ class Model:
             raise urwid.ExitMainLoop()
 
     def get_all_users(self) -> List[Dict[str, Any]]:
-        # All the users in the realm
-        users = self.initial_data['realm_users']
-        user_dict = dict()
+        # Construct a dict of each user in the realm to look up by email
+        # and a user-id to email mapping
+        self.user_dict = dict()  # type: Dict[str, Dict[str, Any]]
         self.user_id_email_dict = dict()  # type: Dict[int, str]
-        # store the relevant info for a user in Dict[Dict[str, Any]] format.
-        for user in users:
-            user_dict[user['email']] = {
+        for user in self.initial_data['realm_users']:
+            self.user_dict[user['email']] = {
                 'full_name': user['full_name'],
                 'email': user['email'],
+                'user_id': user['user_id'],
                 'status': 'idle',
-                'user_id': user['user_id']
             }
             self.user_id_email_dict[user['user_id']] = user['email']
 
-        self.user_dict = user_dict.copy()
+        # Local copy, which will be filtered while building user_list
+        user_dict = self.user_dict.copy()
+
         # List to display
         user_list = list()
         # List which stores the active/idle status of users
