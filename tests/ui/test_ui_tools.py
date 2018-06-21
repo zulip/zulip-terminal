@@ -34,27 +34,17 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.new_loading is False
 
-    @pytest.mark.parametrize("index, focus_msg", [
-        ({
-            'pointer': {
-                "[]": set(),
-            }
-        }, 1),
-        ({
-            'pointer': {
-                "[]": 0,
-            }
-        }, 0)
+    @pytest.mark.parametrize("narrow_focus_pos, focus_msg", [
+        (set(), 1), (0, 0)
     ])
-    def test_main_view(self, mocker, index, focus_msg):
+    def test_main_view(self, mocker, narrow_focus_pos, focus_msg):
         mocker.patch(VIEWS + ".MessageView.read_message")
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(VIEWS + ".MessageView.set_focus")
         msg_list = ["MSG1", "MSG2"]
         mocker.patch(VIEWS + ".create_msg_box_list",
                      return_value=msg_list)
-        self.model.index = index
-        self.model.narrow = '[]'
+        self.model.get_focus_in_current_narrow.return_value = narrow_focus_pos
         msg_view = MessageView(self.model)
         assert msg_view.focus_msg == focus_msg
 
