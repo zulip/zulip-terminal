@@ -139,7 +139,7 @@ class Controller:
         self._finalize_show(w_list)
 
     def show_all_messages(self, button: Any) -> None:
-        if self.model.narrow == []:
+        if not self.model.narrow:
             return
         self.update = False
         msg_list = self.model.index['all_messages']

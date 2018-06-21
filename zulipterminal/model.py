@@ -152,7 +152,7 @@ class Model:
                 return
             else:
                 msg_w = msg_w_list[0]
-            if self.narrow == []:
+            if not self.narrow:
                 self.msg_list.log.append(msg_w)
 
             elif self.narrow[0][1] == response['type'] and\
@@ -220,7 +220,7 @@ class Model:
         for msg_w in self.msg_list.log:
             if msg_w.original_widget.message['id'] == msg_id:
                 msg_w_list = create_msg_box_list(self, [msg_id])
-                if msg_w_list == []:
+                if not msg_w_list:
                     return
                 else:
                     new_msg_w = msg_w_list[0]

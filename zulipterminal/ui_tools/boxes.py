@@ -172,7 +172,7 @@ class MessageBox(urwid.Pile):
         return header
 
     def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
-        if reactions == []:
+        if not reactions:
             return ''
         try:
             reacts = defaultdict(int)  # type: Dict[str, int]
