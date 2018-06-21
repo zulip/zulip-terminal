@@ -22,7 +22,7 @@ class TestController:
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
         mocker.patch('zulipterminal.core.Controller.'
-                     '_register_initial_desired_events')
+                     'register_initial_desired_events')
         return Controller(self.config_file, self.theme)
 
     def test_initialize_controller(self, controller, mocker) -> None:
@@ -33,7 +33,7 @@ class TestController:
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
-        controller._register_initial_desired_events.assert_called_once_with()
+        controller.register_initial_desired_events.assert_called_once_with()
         assert controller.theme == self.theme
 
     def test_narrow_to_stream(self, mocker, controller,
