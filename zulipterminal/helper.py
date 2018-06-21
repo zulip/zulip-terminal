@@ -75,7 +75,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
 
 @async
 def update_flag(id_list: List[int], controller: Any) -> None:
-    if id_list == []:
+    if not id_list:
         return
     request = {
         'messages': id_list,
@@ -214,7 +214,7 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
     for msg in messages:
 
         index['messages'][msg['id']] = msg
-        if narrow == []:
+        if not narrow:
             index['all_messages'].add(msg['id'])
 
         elif narrow[0][0] == 'search':
