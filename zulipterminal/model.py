@@ -222,7 +222,7 @@ class Model:
         last_event_id = self.controller.last_event_id
         while True:
             if queue_id is None:
-                self.controller.register()
+                self.controller.register_initial_desired_events()
                 queue_id = self.controller.queue_id
                 last_event_id = self.controller.last_event_id
 
