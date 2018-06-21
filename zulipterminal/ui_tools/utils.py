@@ -10,7 +10,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
     """
     MessageBox for every message displayed is created here.
     """
-    if model.narrow == [] and messages is None:
+    if not model.narrow and messages is None:
         messages = list(model.index['all_messages'])
     if messages is not None:
         message_list = [model.index['messages'][id] for id in messages]

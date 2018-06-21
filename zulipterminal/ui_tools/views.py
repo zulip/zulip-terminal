@@ -40,7 +40,7 @@ class MessageView(urwid.ListBox):
 
     def get_current_ids(self) -> Any:
         narrow = self.model.narrow
-        if narrow == []:
+        if not narrow:
             current_ids = self.index['all_messages'].copy()
         elif narrow[0][0] == 'stream':
             stream_id = self.model.stream_id
