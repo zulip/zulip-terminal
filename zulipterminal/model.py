@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List, FrozenSet
+from typing import Any, Dict, List, FrozenSet, Set, Union
 
 import urwid
 
@@ -41,6 +41,13 @@ class Model:
         self.streams = self.get_subscribed_streams()
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
+
+    def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
+        """
+        Returns the focus in the current narrow.
+        For no existing focus this returns {}, otherwise the message ID.
+        """
+        return self.index['pointer'][str(self.narrow)]
 
     def get_messages(self, first_anchor: bool) -> Any:
         request = {

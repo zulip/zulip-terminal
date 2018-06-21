@@ -168,7 +168,8 @@ class Controller:
         self._finalize_show(w_list)
 
     def _finalize_show(self, w_list: List[Any]) -> None:
-        focus_position = self.model.index['pointer'][str(self.model.narrow)]
+        focus_position = self.model.get_focus_in_current_narrow()
+
         if focus_position == set():
             focus_position = len(w_list) - 1
         self.model.msg_view.clear()
