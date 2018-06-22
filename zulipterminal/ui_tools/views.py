@@ -148,8 +148,7 @@ class MessageView(urwid.ListBox):
         if msg_w is None:
             return
         # save the current focus
-        key = str(self.model.narrow)
-        self.model.index['pointer'][key] = self.focus_position
+        self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
         read_msg_ids = list()  # type: List[int]
         # until we find a read message above the current message
