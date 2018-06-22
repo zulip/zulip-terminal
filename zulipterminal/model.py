@@ -49,6 +49,9 @@ class Model:
         """
         return self.index['pointer'][str(self.narrow)]
 
+    def set_focus_in_current_narrow(self, focus_message: int) -> None:
+        self.index['pointer'][str(self.narrow)] = focus_message
+
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,

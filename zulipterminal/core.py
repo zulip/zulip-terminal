@@ -172,6 +172,7 @@ class Controller:
 
         if focus_position == set():
             focus_position = len(w_list) - 1
+        assert not isinstance(focus_position, set)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         if focus_position >= 0 and focus_position < len(w_list):
