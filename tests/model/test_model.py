@@ -58,6 +58,21 @@ class TestModel:
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
+    @pytest.mark.parametrize('msg_id', [1, 5, set()])
+    @pytest.mark.parametrize('narrow', [
+        [],
+        [['stream', 'hello world']],
+        [['stream', 'hello world'], ['topic', "what's it all about?"]],
+        [['pm_with', 'FOO@zulip.com']],
+        [['pm_with', 'Foo@zulip.com, Bar@zulip.com']],
+        [['is', 'private']],
+    ])
+    def test_get_focus_in_current_narrow_individually(self,
+                                                      model, msg_id, narrow):
+        model.index = {'pointer': {str(narrow): msg_id}}
+        model.narrow = narrow
+        assert model.get_focus_in_current_narrow() == msg_id
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
