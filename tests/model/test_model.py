@@ -99,6 +99,19 @@ class TestModel:
         with pytest.raises(RuntimeError):
             model.set_narrow(**bad_args)
 
+    @pytest.mark.parametrize('narrow, good_args', [
+        ([], dict()),
+        ([['stream', 'some stream']], dict(stream='some stream')),
+        ([['stream', 'some stream'], ['topic', 'some topic']],
+         dict(stream='some stream', topic='some topic')),
+        ([['search', 'something interesting']],
+         dict(search='something interesting')),
+    ])
+    def test_set_narrow_already_set(self, model, narrow, good_args):
+        model.narrow = narrow
+        assert model.set_narrow(**good_args)
+        assert model.narrow == narrow
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
