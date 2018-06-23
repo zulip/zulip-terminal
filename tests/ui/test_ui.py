@@ -28,52 +28,10 @@ class TestView:
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
 
-    def test_menu_view(self, view, mocker):
-        view.model.unread_counts.get.return_value = 1
-        home_button = mocker.patch('zulipterminal.ui.HomeButton')
-        divider = mocker.patch('urwid.Divider')
-        pm_button = mocker.patch('zulipterminal.ui.PMButton')
-        list_box = mocker.patch('zulipterminal.ui.urwid.ListBox')
-        walker = mocker.patch('zulipterminal.ui.urwid.SimpleFocusListWalker')
-        return_value = view.menu_view()
-        home_button.assert_called_once_with(self.controller, count=1)
-        pm_button.assert_called_once_with(self.controller, count=1)
-        walker.assert_called_once_with([
-            home_button(), divider(), pm_button()
-        ])
-        list_box.assert_called_once_with(walker())
-        assert return_value == list_box()
-
-    def test_streams_view(self, view, mocker, streams):
-        view.streams = streams
-        view.model.unread_counts.get.return_value = 1
-        stream_button = mocker.patch('zulipterminal.ui.StreamButton')
-        stream_view = mocker.patch('zulipterminal.ui.StreamsView')
-        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
-        return_value = view.streams_view()
-        stream_button.assert_called_with(
-            streams[1],
-            controller=self.controller,
-            view=view,
-            count=1)
-        stream_view.assert_called_once_with([
-            stream_button(), stream_button()
-        ])
-        line_box.assert_called_once_with(stream_view(), title="Streams")
-        assert return_value == line_box()
-
-    def test_left_column_view(self, view, mocker):
-        menu_view = mocker.patch('zulipterminal.ui.View.menu_view')
-        streams_view = mocker.patch('zulipterminal.ui.View.streams_view')
-        pile = mocker.patch('zulipterminal.ui.urwid.Pile')
+    def test_left_column_view(self, mocker, view):
+        left_view = mocker.patch('zulipterminal.ui.LeftColumnView')
         return_value = view.left_column_view()
-        menu_view.assert_called_once_with()
-        streams_view.assert_called_once_with()
-        pile.assert_called_once_with([
-            (4, menu_view()),
-            streams_view(),
-        ])
-        assert return_value == pile()
+        assert return_value == left_view(view)
 
     def test_message_view(self, view, mocker):
         middle_view = mocker.patch('zulipterminal.ui.MiddleColumnView')

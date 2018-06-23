@@ -7,6 +7,9 @@ from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UnreadPMButton,
     UserButton,
+    HomeButton,
+    PMButton,
+    StreamButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.boxes import UserSearchBox
@@ -279,6 +282,7 @@ class RightColumnView(urwid.Frame):
     """
     Displays the users list on the right side of the app.
     """
+
     def __init__(self, view: Any) -> None:
         self.view = view
         self.user_search = UserSearchBox(self)
@@ -333,9 +337,53 @@ class RightColumnView(urwid.Frame):
         elif key == 'esc':
             self.user_search.set_edit_text("Search People")
             self.body = UsersView(
-                    urwid.SimpleFocusListWalker(self.users_btn_list))
+                urwid.SimpleFocusListWalker(self.users_btn_list))
             self.set_body(self.body)
             self.set_focus('body')
             self.view.controller.loop.draw_screen()
             return key
         return super(RightColumnView, self).keypress(size, key)
+
+
+class LeftColumnView(urwid.Pile):
+    """
+    Displays the buttons at the left column of the app.
+    """
+
+    def __init__(self, view: Any) -> None:
+        self.model = view.model
+        self.view = view
+        self.controller = view.controller
+        left_column_structure = [
+            (4, self.menu_view()),
+            self.streams_view(),
+        ]
+        super(LeftColumnView, self).__init__(left_column_structure)
+
+    def menu_view(self) -> Any:
+        count = self.model.unread_counts.get('all_msg', 0)
+        self.view.home_button = HomeButton(self.controller, count=count)
+        count = self.model.unread_counts.get('all_pms', 0)
+        self.view.pm_button = PMButton(self.controller, count=count)
+        menu_btn_list = [
+            self.view.home_button,
+            self.view.pm_button,
+        ]
+        w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
+        return w
+
+    def streams_view(self) -> Any:
+        streams_btn_list = list()
+        for stream in self.view.streams:
+            unread_count = self.model.unread_counts.get(stream[1], 0)
+            streams_btn_list.append(
+                StreamButton(
+                    stream,
+                    controller=self.controller,
+                    view=self.view,
+                    count=unread_count,
+                )
+            )
+        self.view.stream_w = StreamsView(streams_btn_list)
+        w = urwid.LineBox(self.view.stream_w, title="Streams")
+        return w
