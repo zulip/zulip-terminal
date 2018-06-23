@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Dict, List, FrozenSet, Set, Union
+from typing import Any, Dict, List, FrozenSet, Set, Union, Optional
 
 import urwid
 
@@ -51,6 +51,32 @@ class Model:
 
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
         self.index['pointer'][str(self.narrow)] = focus_message
+
+    def set_narrow(self, *,
+                   stream: Optional[str]=None, topic: Optional[str]=None,
+                   search: Optional[str]=None,
+                   pm_with: Optional[str]=None) -> bool:
+        if search and not(stream or topic or pm_with):
+            new_narrow = [['search', search]]
+        elif stream and topic and not(search or pm_with):
+            new_narrow = [["stream", stream],
+                          ["topic", topic]]
+        elif stream and not(topic or search or pm_with):
+            new_narrow = [['stream', stream]]
+        elif pm_with == '' and not(stream or topic or search):
+            new_narrow = [['is', 'private']]
+        elif pm_with and not(stream or topic or search):
+            new_narrow = [['pm_with', pm_with]]
+        elif not stream and not topic and not search and not pm_with:
+            new_narrow = []
+        else:
+            raise RuntimeError("Model.set_narrow parameters used incorrectly.")
+
+        if new_narrow != self.narrow:
+            self.narrow = new_narrow
+            return False
+        else:
+            return True
 
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
