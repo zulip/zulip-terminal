@@ -199,7 +199,7 @@ class TestStreamsView:
     @pytest.fixture
     def stream_view(self, mocker):
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        return StreamsView("STEAM_BTN_LIST")
+        return StreamsView("STEAM_BTN_LIST", view=mocker.Mock())
 
     def test_mouse_event(self, mocker, stream_view):
         mocker.patch.object(stream_view, 'keypress')
@@ -218,12 +218,12 @@ class TestStreamsView:
         # Other actions - No action
         return_value = stream_view.mouse_event(
             size, "mouse release", 4, col, row, focus)
-        assert return_value is False
+        assert return_value is None
 
         # Other clicks
         return_value = stream_view.mouse_event(
-            size, "mouse press", 1, col, row, focus)
-        assert return_value is False
+            size, "mouse press", 2, col, row, focus)
+        assert return_value is None
 
 
 class TestUsersView:

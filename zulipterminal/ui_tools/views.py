@@ -12,7 +12,7 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.boxes import UserSearchBox
+from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
 
 
 class MessageView(urwid.ListBox):
@@ -146,10 +146,34 @@ class MessageView(urwid.ListBox):
         update_flag(read_msg_ids, self.model.controller)
 
 
-class StreamsView(urwid.ListBox):
-    def __init__(self, streams_btn_list: List[Any]) -> None:
+class StreamsView(urwid.Frame):
+    def __init__(self, streams_btn_list: List[Any], view: Any) -> None:
+        self.view = view
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
-        super(StreamsView, self).__init__(self.log)
+        self.streams_btn_list = streams_btn_list
+        list_box = urwid.ListBox(self.log)
+        self.search_box = StreamSearchBox(self)
+        urwid.connect_signal(self.search_box, 'change', self.update_streams)
+        super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
+            self.search_box
+        ))
+        self.search_lock = threading.Lock()
+
+    @async
+    def update_streams(self, search_box: Any, new_text: str) -> None:
+        if not self.view.controller.editor_mode:
+            return
+        # wait for any previously started search to finish to avoid
+        # displaying wrong stream list.
+        self.search_lock.acquire()
+        streams_display = self.streams_btn_list.copy()
+        for stream in self.streams_btn_list:
+            if not stream.caption.startswith(new_text):
+                streams_display.remove(stream)
+        self.log.clear()
+        self.log.extend(streams_display)
+        self.view.controller.loop.draw_screen()
+        self.search_lock.release()
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
@@ -162,6 +186,19 @@ class StreamsView(urwid.ListBox):
                 return True
         return super(StreamsView, self).mouse_event(size, event, button, col,
                                                     row, focus)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'q':
+            self.set_focus('header')
+            return key
+        elif key == 'esc':
+            self.search_box.set_edit_text("Search streams")
+            self.log.clear()
+            self.log.extend(self.streams_btn_list)
+            self.set_focus('body')
+            self.view.controller.loop.draw_screen()
+            return key
+        return super(StreamsView, self).keypress(size, key)
 
 
 class UsersView(urwid.ListBox):
@@ -384,6 +421,13 @@ class LeftColumnView(urwid.Pile):
                     count=unread_count,
                 )
             )
-        self.view.stream_w = StreamsView(streams_btn_list)
+        self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(self.view.stream_w, title="Streams")
         return w
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'q':
+            self.focus_position = 1
+            self.view.stream_w.keypress(size, key)
+            return key
+        return super(LeftColumnView, self).keypress(size, key)

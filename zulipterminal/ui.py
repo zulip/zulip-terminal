@@ -63,8 +63,8 @@ class View(urwid.WidgetWrap):
         super(View, self).__init__(self.main_window())
 
     def left_column_view(self) -> Any:
-        w = LeftColumnView(self)
-        return w
+        self.left_col_w = LeftColumnView(self)
+        return self.left_col_w
 
     def message_view(self) -> Any:
         self.middle_column = MiddleColumnView(self.model, self.write_box,
@@ -116,7 +116,14 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
-
+        elif key == "q":
+            # jump stream search
+            self.left_col_w.keypress(size, 'q')
+            self.body.focus_col = 0
+            self.stream_w.search_box.set_edit_text("")
+            self.controller.editor_mode = True
+            self.controller.editor = self.stream_w.search_box
+            return key
         else:
             return super(View, self).keypress(size, get_key(key))
 
