@@ -57,7 +57,7 @@ class WriteBox(urwid.Pile):
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
-            )
+        )
         self.title_write_box = ReadlineEdit(caption=u"Title:  ",
                                             edit_text=title)
 
@@ -160,7 +160,7 @@ class MessageBox(urwid.Pile):
             ('custom', 'Private Message'),
             ('selected', ": "),
             ('custom', self.recipients)
-            ])
+        ])
         title = urwid.Text(title)
         time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
                           align='right')
@@ -232,21 +232,21 @@ class MessageBox(urwid.Pile):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
-                    )
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     title=self.message['subject']
-                    )
+                )
         elif key == 'c':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
-                    )
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient']
-                    )
+                )
         elif key == 'S':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
@@ -262,7 +262,7 @@ class MessageBox(urwid.Pile):
         elif key == 'R':
             self.model.controller.view.write_box.private_box_view(
                 email=self.message['sender_email']
-                )
+            )
         elif key == 'P':
             self.model.controller.show_all_pm(self)
         return key
@@ -300,6 +300,7 @@ class UserSearchBox(urwid.Edit):
     """
     Search Box to search users in real-time.
     """
+
     def __init__(self, user_view: Any) -> None:
         self.user_view = user_view
         super(UserSearchBox, self).__init__(edit_text="Search people")
@@ -315,3 +316,26 @@ class UserSearchBox(urwid.Edit):
             self.user_view.keypress(size, 'esc')
 
         return super(UserSearchBox, self).keypress(size, key)
+
+
+class StreamSearchBox(urwid.Edit):
+    """
+    Search Box to search streams in real-time.urwid
+    """
+
+    def __init__(self, stream_view: Any) -> None:
+        self.stream_view = stream_view
+        super(StreamSearchBox, self).__init__(edit_text="Search streams")
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == 'enter':
+            self.stream_view.view.controller.editor_mode = False
+            self.stream_view.set_focus("body")
+            self.stream_view.body.set_focus(0)
+        if key == 'esc':
+            self.stream_view.view.controller.editor_mode = False
+            self.set_edit_text("Search streams")
+            self.stream_view.set_focus("body")
+            self.stream_view.keypress(size, 'esc')
+
+        return super(StreamSearchBox, self).keypress(size, key)
