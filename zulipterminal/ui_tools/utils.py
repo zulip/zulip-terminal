@@ -6,7 +6,7 @@ from zulipterminal.ui_tools.boxes import MessageBox
 
 
 def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
-                        focus_msg_id: Any=None) -> List[Any]:
+                        focus_msg_id: Union[None, int]=None) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
     """
