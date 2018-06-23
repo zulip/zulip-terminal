@@ -112,6 +112,19 @@ class TestModel:
         assert model.set_narrow(**good_args)
         assert model.narrow == narrow
 
+    @pytest.mark.parametrize('initial_narrow, narrow, good_args', [
+        ([['stream', 'foo']], [], dict()),
+        ([], [['stream', 'some stream']], dict(stream='some stream')),
+        ([], [['stream', 'some stream'], ['topic', 'some topic']],
+         dict(stream='some stream', topic='some topic')),
+    ])
+    def test_set_narrow_not_already_set(self, model, initial_narrow, narrow,
+                                        good_args):
+        model.narrow = initial_narrow
+        assert not model.set_narrow(**good_args)
+        assert model.narrow != initial_narrow
+        assert model.narrow == narrow
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
