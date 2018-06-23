@@ -89,6 +89,16 @@ class TestModel:
         model.set_focus_in_current_narrow(msg_id)
         assert model.index['pointer'][str(narrow)] == msg_id
 
+    @pytest.mark.parametrize('bad_args', [
+        dict(topic='some topic'),
+        dict(stream='foo', search='text'),
+        dict(topic='blah', search='text'),
+        dict(pm_with='someone', topic='foo')
+    ])
+    def test_set_narrow_bad_input(self, model, bad_args):
+        with pytest.raises(RuntimeError):
+            model.set_narrow(**bad_args)
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
