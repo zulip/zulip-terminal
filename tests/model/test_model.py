@@ -73,6 +73,22 @@ class TestModel:
         model.narrow = narrow
         assert model.get_focus_in_current_narrow() == msg_id
 
+    @pytest.mark.parametrize('msg_id', [1, 5])
+    @pytest.mark.parametrize('narrow', [
+        [],
+        [['stream', 'hello world']],
+        [['stream', 'hello world'], ['topic', "what's it all about?"]],
+        [['pm_with', 'FOO@zulip.com']],
+        [['pm_with', 'Foo@zulip.com, Bar@zulip.com']],
+        [['is', 'private']],
+    ])
+    def test_set_focus_in_current_narrow(self, mocker, model, narrow, msg_id):
+        from collections import defaultdict
+        model.index = dict(pointer=defaultdict(set))
+        model.narrow = narrow
+        model.set_focus_in_current_narrow(msg_id)
+        assert model.index['pointer'][str(narrow)] == msg_id
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
