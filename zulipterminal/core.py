@@ -32,7 +32,7 @@ class Controller:
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
         self.update = False
-        self.model.narrow = [['search', text]]
+        self.model.set_narrow(search=text)
         self.model.anchor = 10000000000
         self.model.num_after = 0
         self.model.num_before = 30
@@ -46,14 +46,13 @@ class Controller:
             self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_stream(self, button: Any) -> None:
-        # return if already narrowed
-        if self.model.narrow == [['stream', button.caption]]:
+        already_narrowed = self.model.set_narrow(stream=button.caption)
+        if already_narrowed:
             return
+
         self.update = False
         # store the steam id in the model
         self.model.stream_id = button.stream_id
-        # set the current narrow
-        self.model.narrow = [['stream', button.caption]]
         # get the message ids of the current narrow
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         # if no messages are found get more messages
@@ -75,13 +74,13 @@ class Controller:
         self._finalize_show(w_list)
 
     def narrow_to_topic(self, button: Any) -> None:
-        if self.model.narrow == [['stream', button.caption],
-                                 ['topic', button.title]]:
+        already_narrowed = self.model.set_narrow(stream=button.caption,
+                                                 topic=button.title)
+        if already_narrowed:
             return
+
         self.update = False
         self.model.stream_id = button.stream_id
-        self.model.narrow = [["stream", button.caption],
-                             ["topic", button.title]]
         msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
         if len(msg_id_list) == 0:
@@ -110,13 +109,14 @@ class Controller:
             user_emails = ', '.join(emails)
         else:
             user_emails = button.email
-        if self.model.narrow == [["pm_with", user_emails]]:
+
+        already_narrowed = self.model.set_narrow(pm_with=user_emails)
+        if already_narrowed:
             return
 
         button.user_id = self.model.user_dict[user_emails]['user_id']
 
         self.update = False
-        self.model.narrow = [["pm_with", user_emails]]
         msg_id_list = self.model.index['private'].get(frozenset(
             [self.model.user_id, button.user_id]), [])
 
@@ -139,11 +139,12 @@ class Controller:
         self._finalize_show(w_list)
 
     def show_all_messages(self, button: Any) -> None:
-        if not self.model.narrow:
+        already_narrowed = self.model.set_narrow()
+        if already_narrowed:
             return
+
         self.update = False
         msg_list = self.model.index['all_messages']
-        self.model.narrow = []
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_list, button.message['id'])
@@ -153,10 +154,11 @@ class Controller:
         self._finalize_show(w_list)
 
     def show_all_pm(self, button: Any) -> None:
-        if self.model.narrow == [['is', 'private']]:
+        already_narrowed = self.model.set_narrow(pm_with='')
+        if already_narrowed:
             return
+
         self.update = False
-        self.model.narrow = [['is', 'private']]
         msg_list = self.model.index['all_private']
         if len(msg_list) == 0:
             self.model.num_after = 10
