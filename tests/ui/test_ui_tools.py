@@ -6,6 +6,7 @@ from zulipterminal.ui_tools.views import (
     StreamsView,
     UsersView,
     RightColumnView,
+    LeftColumnView,
 )
 
 VIEWS = "zulipterminal.ui_tools.views"
@@ -569,3 +570,51 @@ class TestRightColumnView:
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with('body')
         list_w.assert_called_once_with([])
+
+
+class TestLeftColumnView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.view = mocker.Mock()
+        self.view.model = mocker.Mock()
+        self.view.model.unread_counts = {
+            'all_msg': 2,
+            'all_pms': 0,
+            86: 1,
+            14: 1,
+        }
+        self.view.controller = mocker.Mock()
+        self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
+
+    @pytest.fixture
+    def left_col_view(self, mocker):
+        self.menu_view = mocker.patch(VIEWS + ".LeftColumnView.menu_view")
+        self.streams_view = mocker.patch(
+            VIEWS + ".LeftColumnView.streams_view")
+        return LeftColumnView(self.view)
+
+    def test_menu_view(self, mocker):
+        self.streams_view = mocker.patch(
+            VIEWS + ".LeftColumnView.streams_view")
+        home_button = mocker.patch(VIEWS + ".HomeButton")
+        pm_button = mocker.patch(VIEWS + ".PMButton")
+        mocker.patch(VIEWS + ".urwid.ListBox")
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        left_col_view = LeftColumnView(self.view)
+        home_button.assert_called_once_with(left_col_view.controller,
+                                            count=2)
+        pm_button.assert_called_once_with(left_col_view.controller,
+                                          count=0)
+
+    def test_streams_view(self, mocker, streams):
+        self.view.streams = streams
+        stream_button = mocker.patch(VIEWS + '.StreamButton')
+        stream_view = mocker.patch(VIEWS + '.StreamsView')
+        line_box = mocker.patch(VIEWS + '.urwid.LineBox')
+        left_col_view = LeftColumnView(self.view)
+        stream_button.assert_called_with(
+            streams[1],
+            controller=self.view.controller,
+            view=self.view,
+            count=1)
+        line_box.assert_called_once_with(stream_view(), title="Streams")
