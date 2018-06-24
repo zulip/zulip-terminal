@@ -48,46 +48,10 @@ class TestMessageView:
         msg_view = MessageView(self.model)
         assert msg_view.focus_msg == focus_msg
 
-    @pytest.mark.parametrize("narrow, index, current_ids", [
-        ([], {
-            "all_messages": {0, 1}
-        }, {0, 1}),
-        ([['stream', 'FOO']], {
-            "all_stream": {
-                1: {0, 1}
-            }
-        }, {0, 1}),
-        ([['stream', 'FOO'],
-         ['topic', 'BOO']], {
-             'stream': {
-                 1: {
-                     'BOO': {0, 1}
-                 }
-             }
-         }, {0, 1}),
-        ([['is', 'private']], {
-            'all_private': {0, 1}
-        }, {0, 1}),
-        ([['pm_with', 'FOO@zulip.com']], {
-            'private': {
-                frozenset({1, 2}): {0, 1}
-            }
-        }, {0, 1}),
-        ([['search', 'FOO']], {
-            'search': {0, 1}
-        }, {0, 1})
-    ])
-    def test_get_current_ids(self, mocker, msg_view, narrow, index,
-                             current_ids):
-        msg_view.model.recipients = frozenset({1, 2})
-        msg_view.model.stream_id = 1
-        msg_view.model.narrow = narrow
-        msg_view.index = index
-        return_value = msg_view.get_current_ids()
-        assert return_value == current_ids
-
     def test_load_old_messages(self, mocker, msg_view):
-        mocker.patch.object(msg_view, "get_current_ids", return_value={0})
+        mocker.patch.object(msg_view.model,
+                            "get_message_ids_in_current_narrow",
+                            return_value={0})
         self.model.get_messages.return_value = {}
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
@@ -101,7 +65,9 @@ class TestMessageView:
         self.model.controller.loop.draw_screen.assert_called_once_with()
 
     def test_load_new_messages(self, mocker, msg_view):
-        mocker.patch.object(msg_view, "get_current_ids", return_value={0})
+        mocker.patch.object(msg_view.model,
+                            "get_message_ids_in_current_narrow",
+                            return_value={0})
         self.model.get_messages.return_value = {}
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])

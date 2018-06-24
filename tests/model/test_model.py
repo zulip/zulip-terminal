@@ -125,6 +125,43 @@ class TestModel:
         assert model.narrow != initial_narrow
         assert model.narrow == narrow
 
+    @pytest.mark.parametrize("narrow, index, current_ids", [
+        ([], {
+            "all_messages": {0, 1}
+        }, {0, 1}),
+        ([['stream', 'FOO']], {
+            "all_stream": {
+                1: {0, 1}
+            }
+        }, {0, 1}),
+        ([['stream', 'FOO'],
+         ['topic', 'BOO']], {
+             'stream': {
+                 1: {
+                     'BOO': {0, 1}
+                 }
+             }
+         }, {0, 1}),
+        ([['is', 'private']], {
+            'all_private': {0, 1}
+        }, {0, 1}),
+        ([['pm_with', 'FOO@zulip.com']], {
+            'private': {
+                frozenset({1, 2}): {0, 1}
+            }
+        }, {0, 1}),
+        ([['search', 'FOO']], {
+            'search': {0, 1}
+        }, {0, 1})
+    ])
+    def test_get_message_ids_in_current_narrow(self, mocker, model,
+                                               narrow, index, current_ids):
+        model.recipients = frozenset({1, 2})
+        model.stream_id = 1
+        model.narrow = narrow
+        model.index = index
+        assert current_ids == model.get_message_ids_in_current_narrow()
+
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
         # Initialize Model
