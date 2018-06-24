@@ -78,6 +78,26 @@ class Model:
         else:
             return True
 
+    def get_message_ids_in_current_narrow(self) -> Any:
+        narrow = self.narrow
+        if narrow == []:
+            current_ids = self.index['all_messages'].copy()
+        elif narrow[0][0] == 'stream':
+            stream_id = self.stream_id
+            if len(narrow) == 1:
+                current_ids = self.index['all_stream'][stream_id].copy()
+            elif len(narrow) == 2:
+                topic = narrow[1][1]
+                current_ids = self.index['stream'][stream_id][topic].copy()
+        elif narrow[0][1] == 'private':
+            current_ids = self.index['all_private'].copy()
+        elif narrow[0][0] == 'pm_with':
+            recipients = self.recipients
+            current_ids = self.index['private'][recipients].copy()
+        elif narrow[0][0] == 'search':
+            current_ids = self.index['search'].copy()
+        return current_ids
+
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,

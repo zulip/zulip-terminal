@@ -38,26 +38,6 @@ class MessageView(urwid.ListBox):
         self.focus_msg = focus_msg
         return msg_btn_list
 
-    def get_current_ids(self) -> Any:
-        narrow = self.model.narrow
-        if not narrow:
-            current_ids = self.index['all_messages'].copy()
-        elif narrow[0][0] == 'stream':
-            stream_id = self.model.stream_id
-            if len(narrow) == 1:
-                current_ids = self.index['all_stream'][stream_id].copy()
-            elif len(narrow) == 2:
-                topic = narrow[1][1]
-                current_ids = self.index['stream'][stream_id][topic].copy()
-        elif narrow[0][1] == 'private':
-            current_ids = self.index['all_private'].copy()
-        elif narrow[0][0] == 'pm_with':
-            recipients = self.model.recipients
-            current_ids = self.index['private'][recipients].copy()
-        elif narrow[0][0] == 'search':
-            current_ids = self.index['search'].copy()
-        return current_ids
-
     @async
     def load_old_messages(self, anchor: int=10000000000) -> None:
         self.old_loading = True
@@ -66,9 +46,9 @@ class MessageView(urwid.ListBox):
         # We don't want message after the current message
         self.model.num_after = 0
         self.model.num_before = 30
-        current_ids = self.get_current_ids()
+        current_ids = self.model.get_message_ids_in_current_narrow()
         self.index = self.model.get_messages(False)
-        msg_ids = self.get_current_ids() - current_ids
+        msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         message_list.reverse()
         for msg_w in message_list:
@@ -82,9 +62,9 @@ class MessageView(urwid.ListBox):
         self.model.anchor = anchor
         self.model.num_before = 0
         self.model.num_after = 30
-        current_ids = self.get_current_ids()
+        current_ids = self.model.get_message_ids_in_current_narrow()
         self.index = self.model.get_messages(False)
-        msg_ids = self.get_current_ids() - current_ids
+        msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         self.log.extend(message_list)
         self.model.controller.loop.draw_screen()
