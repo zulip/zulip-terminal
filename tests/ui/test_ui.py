@@ -123,6 +123,24 @@ class TestView:
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
 
+    def test_keypress_q(self, view, mocker):
+        view.stream_w = mocker.Mock()
+        view.left_col_w = mocker.Mock()
+        view.stream_w.search_box = mocker.Mock()
+        view.body = mocker.Mock()
+        size = (20,)
+        get_key = mocker.patch("zulipterminal.ui.get_key")
+        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        view.controller.editor_mode = False
+
+        # Test "q" keypress
+        view.keypress(size, "q")
+        view.left_col_w.keypress.assert_called_once_with(size, "q")
+        assert view.body.focus_col == 0
+        view.stream_w.search_box.set_edit_text.assert_called_once_with("")
+        assert view.controller.editor_mode is True
+        assert view.controller.editor == view.stream_w.search_box
+
     def test_keypress_edit_mode(self, view, mocker):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
