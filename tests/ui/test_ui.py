@@ -106,6 +106,15 @@ class TestView:
         get_key.assert_called_once_with("j")
         super_view.assert_called_once_with(size, get_key())
 
+    def test_keypress_w(self, view, mocker):
+        view.users_view = mocker.Mock()
+        view.body = mocker.Mock()
+        view.user_search = mocker.Mock()
+        size = (20,)
+        get_key = mocker.patch("zulipterminal.ui.get_key")
+        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        view.controller.editor_mode = False
+
         # Test "w" keypress
         view.keypress(size, "w")
         view.users_view.keypress.assert_called_once_with(size, "w")
@@ -113,6 +122,14 @@ class TestView:
         view.user_search.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
+
+    def test_keypress_edit_mode(self, view, mocker):
+        view.users_view = mocker.Mock()
+        view.body = mocker.Mock()
+        view.user_search = mocker.Mock()
+        size = (20,)
+        get_key = mocker.patch("zulipterminal.ui.get_key")
+        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
 
         # Test Edit Mode Keypress
         view.controller.editor_mode = True
