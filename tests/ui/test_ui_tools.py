@@ -198,8 +198,30 @@ class TestStreamsView:
 
     @pytest.fixture
     def stream_view(self, mocker):
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        return StreamsView("STEAM_BTN_LIST", view=mocker.Mock())
+        self.log = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                return_value=[])
+        mocker.patch(VIEWS + ".urwid.connect_signal")
+        mocker.patch(VIEWS + ".threading.Lock")
+        self.view = mocker.Mock()
+        self.search_box = mocker.patch(VIEWS + ".StreamSearchBox")
+        stream_btn = mocker.Mock()
+        stream_btn.caption = "FOO"
+        self.streams_btn_list = [stream_btn]
+        return StreamsView(self.streams_btn_list, view=self.view)
+
+    def test_init(self, mocker, stream_view):
+        assert stream_view.view == self.view
+        assert stream_view.log == []
+        assert stream_view.streams_btn_list == self.streams_btn_list
+        assert stream_view.search_box
+        self.search_box.assert_called_once_with(stream_view)
+
+    def test_update_streams(self, mocker, stream_view):
+        self.view.controller.editor_mode = True
+        new_text = "F"
+        search_box = "SEARCH_BOX"
+        stream_view.update_streams(search_box, new_text)
+        assert stream_view.log == self.streams_btn_list
 
     def test_mouse_event(self, mocker, stream_view):
         mocker.patch.object(stream_view, 'keypress')
@@ -215,15 +237,22 @@ class TestStreamsView:
         stream_view.mouse_event(size, "mouse press", 5, col, row, focus)
         stream_view.keypress.assert_called_with(size, "down")
 
-        # Other actions - No action
-        return_value = stream_view.mouse_event(
-            size, "mouse release", 4, col, row, focus)
-        assert return_value is None
+    def test_keypress_q(self, mocker, stream_view):
+        key = "q"
+        size = (20,)
+        mocker.patch.object(stream_view, 'set_focus')
+        stream_view.keypress(size, key)
+        stream_view.set_focus.assert_called_once_with("header")
 
-        # Other clicks
-        return_value = stream_view.mouse_event(
-            size, "mouse press", 2, col, row, focus)
-        assert return_value is None
+    def test_keypress_esc(self, mocker, stream_view):
+        key = "esc"
+        size = (20,)
+        mocker.patch.object(stream_view, 'set_focus')
+        stream_view.keypress(size, key)
+        stream_view.set_focus.assert_called_once_with("body")
+        stream_view.search_box.set_edit_text.assert_called_once_with(
+            "Search streams")
+        assert stream_view.log == self.streams_btn_list
 
 
 class TestUsersView:
@@ -488,7 +517,7 @@ class TestRightColumnView:
         self.super.assert_called_once_with(right_col_view.users_view(),
                                            header=self.line_box(
                                                right_col_view.user_search
-                                               ))
+        ))
 
     def test_update_user_list_editor_mode(self, right_col_view):
         right_col_view.view.controller.editor_mode = False
