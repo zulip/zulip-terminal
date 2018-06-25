@@ -276,20 +276,19 @@ class Model:
 
     def get_subscribed_streams(self) -> List[List[str]]:
         subscriptions = self.initial_data['subscriptions']
-        # Store streams in id->Stream format
-        for stream in subscriptions:
-            self.stream_dict[stream['stream_id']] = stream
-            # Add if stream is muted.
-            if stream['in_home_view'] is False:
-                self.muted_streams.append(stream['stream_id'])
 
-        stream_names = [[
-            stream['name'],
-            stream['stream_id'],
-            stream['color'],
-            stream['invite_only'],
-        ] for stream in subscriptions
-        ]
+        # Mapping of stream-id to all available stream info
+        self.stream_dict = {stream['stream_id']: stream
+                            for stream in subscriptions}
+
+        # Stream IDs for muted streams
+        self.muted_streams = [stream['stream_id'] for stream in subscriptions
+                              if stream['in_home_view'] is False]
+
+        # Limited stream info sorted by name (used in display)
+        stream_keys = ('name', 'stream_id', 'color', 'invite_only')
+        stream_names = [[stream[key] for key in stream_keys]
+                        for stream in subscriptions]
         return sorted(stream_names, key=lambda s: s[0].lower())
 
     def append_message(self, response: Dict[str, Any]) -> None:
