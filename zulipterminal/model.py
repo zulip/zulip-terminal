@@ -45,9 +45,10 @@ class Model:
         # Mapping of stream-id to all available stream info
         self.stream_dict = {}  # type: Dict[int, Any]
         # Limited stream info ('name', 'stream_id', 'color') sorted by name
-        self.streams = self.get_subscribed_streams()  # type: List[List[Any]]
+        self.streams = []  # type: List[List[Any]]
         # Stream IDs for muted streams
         self.muted_streams = list()  # type: List[int]
+        self.update_subscribed_streams()
 
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
@@ -202,7 +203,7 @@ class Model:
 
         return user_list
 
-    def get_subscribed_streams(self) -> List[List[str]]:
+    def update_subscribed_streams(self) -> None:
         # FIXME: This currently just draws from the initial_data
         subscriptions = self.initial_data['subscriptions']
 
@@ -217,7 +218,7 @@ class Model:
         # Limited stream info ('name', 'stream_id', 'color') sorted by name
         stream_names = [[stream[key] for key in ('name', 'stream_id', 'color')]
                         for stream in subscriptions]
-        return sorted(stream_names, key=lambda s: s[0].lower())
+        self.streams = sorted(stream_names, key=lambda s: s[0].lower())
 
     def append_message(self, response: Dict[str, Any]) -> None:
         """
