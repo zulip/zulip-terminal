@@ -53,7 +53,7 @@ class MessageView(urwid.ListBox):
         self.model.num_after = 0
         self.model.num_before = 30
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(False)
+        self.index = self.model.get_messages(first_anchor=False)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         message_list.reverse()
@@ -69,7 +69,7 @@ class MessageView(urwid.ListBox):
         self.model.num_before = 0
         self.model.num_after = 30
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(False)
+        self.index = self.model.get_messages(first_anchor=False)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         self.log.extend(message_list)

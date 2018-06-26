@@ -151,7 +151,7 @@ class Model:
                                              method=method,
                                              request=reaction_to_toggle_spec)
 
-    def get_messages(self, first_anchor: bool) -> Any:
+    def get_messages(self, *, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,
             'num_before': self.num_before,
