@@ -31,7 +31,7 @@ class Model:
         self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
-        self.stream_dict = {}  # type: Dict[int, Any]
+
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
         self.user_id = -1  # type: int
@@ -39,8 +39,16 @@ class Model:
         self._update_user_id()
         self._update_initial_data()
         self.users = self.get_all_users()
+
+        # STREAMS (subscriptions in Zulip)
+        # FIXME: This data is only updated at startup, from initial_data
+        # Mapping of stream-id to all available stream info
+        self.stream_dict = {}  # type: Dict[int, Any]
+        # Limited stream info ('name', 'stream_id', 'color') sorted by name
+        self.streams = self.get_subscribed_streams()  # type: List[List[Any]]
+        # Stream IDs for muted streams
         self.muted_streams = list()  # type: List[int]
-        self.streams = self.get_subscribed_streams()
+
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
 
@@ -195,6 +203,7 @@ class Model:
         return user_list
 
     def get_subscribed_streams(self) -> List[List[str]]:
+        # FIXME: This currently just draws from the initial_data
         subscriptions = self.initial_data['subscriptions']
 
         # Mapping of stream-id to all available stream info
