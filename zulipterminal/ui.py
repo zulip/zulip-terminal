@@ -1,6 +1,6 @@
 import platform
 import re
-from typing import Any, Tuple
+from typing import Any, Tuple, List
 
 import urwid
 
@@ -60,9 +60,11 @@ class View(urwid.WidgetWrap):
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.users
-        self.streams = self.model.streams
+        self.pinned_streams = self.model.pinned_streams
+        self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
+        self.stream_w = []  # type: List[Any]
         super(View, self).__init__(self.main_window())
 
     def menu_view(self) -> Any:
@@ -78,9 +80,9 @@ class View(urwid.WidgetWrap):
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
-    def streams_view(self) -> Any:
+    def streams_view(self, *, stream_list: List[List[Any]], title: str) -> Any:
         streams_btn_list = list()
-        for stream in self.streams:
+        for stream in stream_list:
             unread_count = self.model.unread_counts.get(stream[1], 0)
             streams_btn_list.append(
                     StreamButton(
@@ -90,14 +92,18 @@ class View(urwid.WidgetWrap):
                         count=unread_count,
                     )
             )
-        self.stream_w = StreamsView(streams_btn_list)
-        w = urwid.LineBox(self.stream_w, title="Streams")
+        stream_view = StreamsView(streams_btn_list)
+        self.stream_w.extend(stream_view.log)  # For multiple calls
+        w = urwid.LineBox(stream_view, title=title)
         return w
 
     def left_column_view(self) -> Any:
         left_column_structure = [
             (4, self.menu_view()),
-            self.streams_view(),
+            self.streams_view(stream_list=self.pinned_streams,
+                              title="Pinned Streams"),
+            self.streams_view(stream_list=self.unpinned_streams,
+                              title="Other Streams"),
         ]
         w = urwid.Pile(left_column_structure)
         return w

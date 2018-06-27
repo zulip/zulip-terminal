@@ -23,7 +23,8 @@ class TestView:
         assert view.controller == self.controller
         assert view.model == self.model
         assert view.client == self.client
-        assert view.streams == self.model.streams
+        assert view.pinned_streams == self.model.pinned_streams
+        assert view.unpinned_streams == self.model.unpinned_streams
         self.write_box.assert_called_once_with(view)
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
@@ -50,7 +51,7 @@ class TestView:
         stream_button = mocker.patch('zulipterminal.ui.StreamButton')
         stream_view = mocker.patch('zulipterminal.ui.StreamsView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
-        return_value = view.streams_view()
+        return_value = view.streams_view(stream_list=view.streams, title="foo")
         stream_button.assert_called_with(
             streams[1],
             controller=self.controller,
@@ -59,7 +60,7 @@ class TestView:
         stream_view.assert_called_once_with([
             stream_button(), stream_button()
         ])
-        line_box.assert_called_once_with(stream_view(), title="Streams")
+        line_box.assert_called_once_with(stream_view(), title="foo")
         assert return_value == line_box()
 
     def test_left_column_view(self, view, mocker):
@@ -68,9 +69,16 @@ class TestView:
         pile = mocker.patch('zulipterminal.ui.urwid.Pile')
         return_value = view.left_column_view()
         menu_view.assert_called_once_with()
-        streams_view.assert_called_once_with()
+        expected_streams_view_calls = [
+            mocker.call(stream_list=view.pinned_streams,
+                        title="Pinned Streams"),
+            mocker.call(stream_list=view.unpinned_streams,
+                        title="Other Streams"),
+        ]
+        streams_view.assert_has_calls(expected_streams_view_calls)
         pile.assert_called_once_with([
             (4, menu_view()),
+            streams_view(),
             streams_view(),
         ])
         assert return_value == pile()

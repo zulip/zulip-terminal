@@ -45,7 +45,8 @@ class Model:
         # Mapping of stream-id to all available stream info
         self.stream_dict = {}  # type: Dict[int, Any]
         # Limited stream info ('name', 'stream_id', 'color') sorted by name
-        self.streams = []  # type: List[List[Any]]
+        self.pinned_streams = []  # type: List[List[Any]]
+        self.unpinned_streams = []  # type: List[List[Any]]
         # Stream IDs for muted streams
         self.muted_streams = list()  # type: List[int]
         self.update_subscribed_streams()
@@ -223,7 +224,8 @@ class Model:
         pinned, unpinned = [[stream for stream in sorted_stream_meta
                              if stream[3] == pinned_stream]
                             for pinned_stream in (True, False)]
-        self.streams = pinned + unpinned
+        self.pinned_streams = pinned
+        self.unpinned_streams = unpinned
 
     def append_message(self, response: Dict[str, Any]) -> None:
         """

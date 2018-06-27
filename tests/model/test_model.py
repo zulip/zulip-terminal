@@ -54,7 +54,8 @@ class TestModel:
         model.get_all_users.assert_called_once_with()
         assert model.users == []
         model.update_subscribed_streams.assert_called_once_with()
-        assert model.streams == []
+        assert model.pinned_streams == []
+        assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
@@ -310,7 +311,10 @@ class TestModel:
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
         model = Model(self.controller)
-        assert model.streams == streams
+        pinned_streams = [stream for stream in streams if stream[3]]
+        unpinned_streams = [stream for stream in streams if not stream[3]]
+        assert model.unpinned_streams == unpinned_streams
+        assert model.pinned_streams == pinned_streams
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),

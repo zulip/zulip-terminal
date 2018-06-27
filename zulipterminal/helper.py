@@ -46,7 +46,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     while not hasattr(controller, 'view'):
         time.sleep(0.1)
 
-    streams = controller.view.stream_w.log
+    streams = controller.view.stream_w  # combined pinned & other
     users = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
