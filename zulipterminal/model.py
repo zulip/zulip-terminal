@@ -217,9 +217,13 @@ class Model:
 
         # Limited stream info sorted by name
         keys = ('name', 'stream_id', 'color', 'pin_to_top')
-        stream_names = [[stream[key] for key in keys]
-                        for stream in subscriptions]
-        self.streams = sorted(stream_names, key=lambda s: s[0].lower())
+        stream_meta = [[stream[key] for key in keys]
+                       for stream in subscriptions]
+        sorted_stream_meta = sorted(stream_meta, key=lambda s: s[0].lower())
+        pinned, unpinned = [[stream for stream in sorted_stream_meta
+                             if stream[3] == pinned_stream]
+                            for pinned_stream in (True, False)]
+        self.streams = pinned + unpinned
 
     def append_message(self, response: Dict[str, Any]) -> None:
         """
