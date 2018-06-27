@@ -215,8 +215,9 @@ class Model:
         self.muted_streams = [stream['stream_id'] for stream in subscriptions
                               if stream['in_home_view'] is False]
 
-        # Limited stream info ('name', 'stream_id', 'color') sorted by name
-        stream_names = [[stream[key] for key in ('name', 'stream_id', 'color')]
+        # Limited stream info sorted by name
+        keys = ('name', 'stream_id', 'color', 'pin_to_top')
+        stream_names = [[stream[key] for key in keys]
                         for stream in subscriptions]
         self.streams = sorted(stream_names, key=lambda s: s[0].lower())
 

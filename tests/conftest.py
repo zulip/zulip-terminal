@@ -192,7 +192,7 @@ def initial_data():
             'stream_id': 86,
             'is_old_stream': True,
             'desktop_notifications': False,
-            'pin_to_top': False,
+            'pin_to_top': True,
             'stream_weekly_traffic': 0,
             'invite_only': False,
             'name': 'Django',
@@ -682,6 +682,6 @@ def streams():
     `initial_data` fixture.
     """
     return [
-        ['Django', 86, '#94c849'],
-        ['GSoC', 14, '#c2c2c2']
+        ['Django', 86, '#94c849', True],
+        ['GSoC', 14, '#c2c2c2', False]
     ]
