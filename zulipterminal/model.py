@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 import time
 from typing import Any, Dict, List, FrozenSet, Set, Union, Optional
 
@@ -33,14 +34,35 @@ class Model:
         self.stream_dict = {}  # type: Dict[int, Any]
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
-        self.get_messages(first_anchor=True)
-        self.initial_data = self.fetch_initial_data()
-        self.user_id = self.client.get_profile()['user_id']
+        self.user_id = -1  # type: int
+        self._update_user_id()
+        # Thread Processes to reduces start time.
+        get_messages = Thread(target=self.get_messages,
+                              kwargs={'first_anchor': True})
+        get_messages.start()
+        self.initial_data = {}  # type: Dict[str, Any]
+        update_realm_users = Thread(target=self._update_realm_users)
+        update_realm_users.start()
+        self._update_initial_data()
+        # Join process to ensure they are completed
+        update_realm_users.join()
+        get_messages.join()
         self.users = self.get_all_users()
         self.muted_streams = list()  # type: List[int]
         self.streams = self.get_subscribed_streams()
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
+
+    @async
+    def _update_user_id(self) -> None:
+        self.user_id = self.client.get_profile()['user_id']
+
+    def _update_realm_users(self) -> None:
+        self.initial_data['realm_users'] = self.client.get_members(
+            request={
+                'client_gravatar': True,
+            }
+        )['members']
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -119,7 +141,7 @@ class Model:
                 self.update = True
             return self.index
 
-    def fetch_initial_data(self) -> Dict[str, Any]:
+    def _update_initial_data(self) -> None:
         try:
             result = self.client.register(
                 fetch_event_types=[
@@ -131,12 +153,7 @@ class Model:
                 ],
                 client_gravatar=True,
             )
-            result['realm_users'] = self.client.get_members(
-                request={
-                    'client_gravatar': True,
-                }
-            )['members']
-            return result
+            self.initial_data.update(result)
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
