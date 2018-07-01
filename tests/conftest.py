@@ -13,6 +13,15 @@ def no_requests(monkeypatch):
     Forces all the tests to work offline.
     """
     monkeypatch.delattr("requests.sessions.Session.request")
+
+
+@pytest.fixture(autouse=True)
+def no_async(mocker):
+    """
+    Make all function calls synchronous.
+    """
+    mocker.patch('zulipterminal.helper.async')
+
 # --------------- Controller Fixtures -----------------------------------------
 
 
