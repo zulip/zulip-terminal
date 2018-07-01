@@ -90,7 +90,8 @@ class TestView:
         col.assert_has_calls(expected_column_calls)
 
         assert view.body == col()
-        frame.assert_called_once_with(view.body, col(), focus_part='body')
+        frame.assert_called_once_with(view.body, col(), footer=text(),
+                                      focus_part='body')
 
     def test_keypress(self, view, mocker):
         view.users_view = mocker.Mock()
