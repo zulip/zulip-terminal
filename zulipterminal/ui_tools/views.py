@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Any, List, Tuple
 import threading
 
@@ -125,11 +126,28 @@ class MessageView(urwid.ListBox):
         key = super(MessageView, self).keypress(size, key)
         return key
 
+    def update_current_footer(self, message_view: Any) -> None:
+        if not hasattr(self.model.controller, 'view'):
+            return
+        # if view is ready display current narrow
+        # at the bottom of the view.
+        message_view.last_message = defaultdict(dict)
+        is_stream = message_view.message['type'] == 'stream'
+        if is_stream:
+            footer = message_view.stream_view()
+        else:
+            footer = message_view.private_view()
+        footer.contents[1] = (urwid.Text("Press ? to view Help.",
+                                         align='right'),
+                              footer.options())
+        self.model.controller.view._w.set_footer(footer)
+
     def read_message(self) -> None:
         # Message currently in focus
         msg_w, curr_pos = self.body.get_focus()
         if msg_w is None:
             return
+        self.update_current_footer(msg_w.original_widget)
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
