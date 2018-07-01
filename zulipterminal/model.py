@@ -35,18 +35,9 @@ class Model:
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
         self.user_id = -1  # type: int
-        self._update_user_id()
-        # Thread Processes to reduces start time.
-        get_messages = Thread(target=self.get_messages,
-                              kwargs={'first_anchor': True})
-        get_messages.start()
         self.initial_data = {}  # type: Dict[str, Any]
-        update_realm_users = Thread(target=self._update_realm_users)
-        update_realm_users.start()
+        self._update_user_id()
         self._update_initial_data()
-        # Join process to ensure they are completed
-        update_realm_users.join()
-        get_messages.join()
         self.users = self.get_all_users()
         self.muted_streams = list()  # type: List[int]
         self.streams = self.get_subscribed_streams()
@@ -143,6 +134,12 @@ class Model:
 
     def _update_initial_data(self) -> None:
         try:
+            # Thread Processes to reduces start time.
+            get_messages = Thread(target=self.get_messages,
+                                  kwargs={'first_anchor': True})
+            get_messages.start()
+            update_realm_users = Thread(target=self._update_realm_users)
+            update_realm_users.start()
             result = self.client.register(
                 fetch_event_types=[
                     'presence',
@@ -154,6 +151,9 @@ class Model:
                 client_gravatar=True,
             )
             self.initial_data.update(result)
+            # Join process to ensure they are completed
+            update_realm_users.join()
+            get_messages.join()
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()

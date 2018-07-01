@@ -19,8 +19,8 @@ class TestModel:
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile):
         mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
@@ -30,7 +30,8 @@ class TestModel:
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
         self.client.get_profile.return_value = user_profile
-        return Model(self.controller)
+        model = Model(self.controller)
+        return model
 
     def test_init(self, model, initial_data, user_profile):
         assert hasattr(model, 'controller')
@@ -47,7 +48,6 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index is None
         model.get_messages.assert_called_once_with(first_anchor=True)
-        model.fetch_initial_data.assert_called_once_with()
         assert model.initial_data == initial_data
         model.client.get_profile.assert_called_once_with()
         assert model.user_id == user_profile['user_id']
@@ -164,9 +164,8 @@ class TestModel:
 
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data):
-        # Initialize Model
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
@@ -203,8 +202,8 @@ class TestModel:
         # TEST FOR get_messages() with first_anchor=False
 
         # Initialize Model
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
@@ -236,8 +235,8 @@ class TestModel:
     def test_fail_get_messages(self, mocker, error_response,
                                initial_data):
         # Initialize Model
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
@@ -262,27 +261,13 @@ class TestModel:
             request, '/json/messages', method="GET")
         assert model.index is None
 
-    def test_fetch_initial_data(self, mocker, initial_data):
-        # Initialize Model
-        mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
-        self.classify_unread_counts = mocker.patch(
-            'zulipterminal.model.classify_unread_counts',
-            return_value=[])
-
-        # Setup mocks before calling get_messages
-        self.client.register.return_value = initial_data
-        self.client.get_members.return_value = {
-            'members': initial_data['realm_users']}
-        model = Model(self.controller)
+    def test__update_initial_data(self, model, initial_data):
         assert model.initial_data == initial_data
 
-    def test_fetch_initial_data_raises_exception(self, mocker, initial_data):
+    def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
         mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
@@ -300,12 +285,12 @@ class TestModel:
         # Test if raises Exception
         self.client.register.side_effect = Exception()
         with pytest.raises(Exception):
-            model.fetch_initial_data()
+            model._update_initial_data()
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict):
         mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
                      return_value=[])
         self.classify_unread_counts = mocker.patch(
@@ -317,8 +302,8 @@ class TestModel:
 
     def test_get_subscribed_streams(self, mocker, initial_data, streams):
         mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model.fetch_initial_data',
-                     return_value=initial_data)
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         self.classify_unread_counts = mocker.patch(
@@ -518,3 +503,21 @@ class TestModel:
         response['op'] = 'remove'
         model.update_reaction(response)
         assert len(model.index['messages'][1]['reactions']) == 1
+
+    def test_update_realm_users(self, mocker, initial_data, user_profile):
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
+                     return_value=[])
+        # NOTE: PATCH WHERE USED NOT WHERE DEFINED
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+        self.client.get_profile.return_value = user_profile
+        members = ["FOO", "BOO"]
+        self.client.get_members.return_value = {"members": members}
+        model = Model(self.controller)
+        model._update_realm_users()
+        assert model.initial_data['realm_users'] == members
