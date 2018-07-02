@@ -79,6 +79,6 @@ setup(
         'urwid==2.0.1',
         'zulip==0.4.7',
         'emoji==0.5.0',
-        'urwid_readline==0.6'
+        'urwid_readline==0.7'
     ],
 )
