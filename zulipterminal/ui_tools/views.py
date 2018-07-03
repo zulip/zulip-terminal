@@ -3,6 +3,8 @@ from typing import Any, List, Tuple
 import threading
 
 import urwid
+
+from zulipterminal.config import KEY_BINDINGS, is_command_key
 from zulipterminal.helper import async, update_flag, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
@@ -87,7 +89,7 @@ class MessageView(urwid.ListBox):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'down' and not self.new_loading:
+        if is_command_key('NEXT_MESSAGE', key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -98,7 +100,7 @@ class MessageView(urwid.ListBox):
                     self.load_new_messages(id)
                 return key
 
-        elif key == 'up' and not self.old_loading:
+        elif is_command_key('PREVIOUS_MESSAGE', key) and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
@@ -111,13 +113,13 @@ class MessageView(urwid.ListBox):
                     self.load_old_messages()
                 return key
 
-        elif key == 'page up' and not self.old_loading:
+        elif is_command_key('SCROLL_TO_TOP', key) and not self.old_loading:
             if self.focus_position == 0:
                 return self.keypress(size, 'up')
             else:
                 return super(MessageView, self).keypress(size, 'page up')
 
-        elif key == 'page down' and not self.old_loading:
+        elif is_command_key('SCROLL_TO_BOTTOM', key) and not self.old_loading:
             if self.focus_position == len(self.log) - 1:
                 return self.keypress(size, 'down')
             else:
@@ -210,10 +212,10 @@ class StreamsView(urwid.Frame):
                                                     row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'q':
+        if is_command_key('SEARCH_STREAMS', key):
             self.set_focus('header')
             return key
-        elif key == 'esc':
+        elif is_command_key('GO_BACK', key):
             self.search_box.set_edit_text("Search streams")
             self.log.clear()
             self.log.extend(self.streams_btn_list)
@@ -285,7 +287,7 @@ class MiddleColumnView(urwid.Frame):
         return
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'esc':
+        if is_command_key('GO_BACK', key):
             self.header.keypress(size, 'esc')
             self.footer.keypress(size, 'esc')
             self.set_focus('body')
@@ -293,31 +295,31 @@ class MiddleColumnView(urwid.Frame):
         elif self.focus_position in ['footer', 'header']:
             return super(MiddleColumnView, self).keypress(size, key)
 
-        elif key == '/':
+        elif is_command_key('SEARCH_MESSAGES', key):
             self.controller.editor_mode = True
             self.controller.editor = self.search_box
             self.set_focus('header')
             return key
 
-        elif key == 'r':
+        elif is_command_key('REPLY_MESSAGE', key):
             self.body.keypress(size, 'enter')
             self.set_focus('footer')
             self.footer.focus_position = 1
             return key
 
-        elif key == 'c':
+        elif is_command_key('STREAM_MESSAGE', key):
             self.body.keypress(size, 'c')
             self.set_focus('footer')
             self.footer.focus_position = 0
             return key
 
-        elif key == 'R':
+        elif is_command_key('REPLY_AUTHOR', key):
             self.body.keypress(size, 'R')
             self.set_focus('footer')
             self.footer.focus_position = 1
             return key
 
-        elif key == 'n':
+        elif is_command_key('NEXT_UNREAD_TOPIC', key):
             # narrow to next unread topic
             stream_topic = self.get_next_unread_topic()
             if stream_topic is None:
@@ -326,7 +328,7 @@ class MiddleColumnView(urwid.Frame):
             self.controller.narrow_to_topic(TopicButton(stream, topic,
                                                         self.model))
             return key
-        elif key == 'p':
+        elif is_command_key('NEXT_UNREAD_PM', key):
             # narrow to next unread pm
             pm = self.get_next_unread_pm()
             if pm is None:
@@ -395,10 +397,10 @@ class RightColumnView(urwid.Frame):
         return self.user_w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'w':
+        if is_command_key('SEARCH_PEOPLE', key):
             self.set_focus('header')
             return key
-        elif key == 'esc':
+        elif is_command_key('GO_BACK', key):
             self.user_search.set_edit_text("Search People")
             self.body = UsersView(
                 urwid.SimpleFocusListWalker(self.users_btn_list))
@@ -453,7 +455,7 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'q':
+        if is_command_key('SEARCH_STREAMS', key):
             self.focus_position = 1
             self.view.stream_w.keypress(size, key)
             return key
