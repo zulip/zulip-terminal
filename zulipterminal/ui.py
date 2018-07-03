@@ -5,7 +5,7 @@ from typing import Any, Tuple
 
 import urwid
 
-from zulipterminal.config import get_key
+from zulipterminal.config import is_command_key
 from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
     RightColumnView,
@@ -109,7 +109,7 @@ class View(urwid.WidgetWrap):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if self.controller.editor_mode:
             return self.controller.editor.keypress((size[1],), key)
-        elif key == "w":
+        elif is_command_key('SEARCH_PEOPLE', key):
             # Start User Search if not in editor_mode
             self.users_view.keypress(size, 'w')
             self.body.focus_col = 2
@@ -117,7 +117,7 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
-        elif key == "q":
+        elif is_command_key('SEARCH_STREAMS', key):
             # jump stream search
             self.left_col_w.keypress(size, 'q')
             self.body.focus_col = 0
@@ -125,8 +125,28 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.stream_w.search_box
             return key
-        else:
-            return super(View, self).keypress(size, get_key(key))
+        elif is_command_key('HELP', key):
+            # Show help menu
+            self.controller.show_help()
+            return key
+        # replace alternate keys with arrow/functional keys
+        # This is needed for navigating in widgets
+        # other than message_view.
+        elif is_command_key('PREVIOUS_MESSAGE', key):
+            key = 'up'
+        elif is_command_key('NEXT_MESSAGE', key):
+            key = 'down'
+        elif is_command_key('GO_LEFT', key):
+            key = 'left'
+        elif is_command_key('GO_RIGHT', key):
+            key = 'right'
+        elif is_command_key('SCROLL_TO_TOP', key):
+            key = 'page up'
+        elif is_command_key('SCROLL_TO_BOTTOM', key):
+            key = 'page down'
+        elif is_command_key('END_MESSAGE', key):
+            key = 'end'
+        return super(View, self).keypress(size, key)
 
 
 class Screen(urwid.raw_display.Screen):

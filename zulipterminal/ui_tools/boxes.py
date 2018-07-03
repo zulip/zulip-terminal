@@ -8,6 +8,7 @@ import urwid
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.ui_tools.buttons import MenuButton
+from zulipterminal.config import is_command_key
 
 
 class WriteBox(urwid.Pile):
@@ -73,7 +74,7 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'meta enter':
+        if is_command_key('SEND_MESSAGE', key):
             if not self.to_write_box:
                 request = {
                     'type': 'stream',
@@ -91,13 +92,13 @@ class WriteBox(urwid.Pile):
                 response = self.client.send_message(request)
             if response['result'] == 'success':
                 self.msg_write_box.edit_text = ''
-        elif key == 'esc':
+        elif is_command_key('GO_BACK', key):
             self.view.controller.editor_mode = False
             self.main_view(False)
             self.view.middle_column.set_focus('body')
-        elif key == 'right' and self.to_write_box is None:
+        elif is_command_key('GO_RIGHT', key) and self.to_write_box is None:
             self.contents[0][0].focus_col = 1
-        elif key == 'left' and self.to_write_box is None:
+        elif is_command_key('GO_LEFT', key) and self.to_write_box is None:
             self.contents[0][0].focus_col = 0
         key = super(WriteBox, self).keypress(size, key)
         return key
@@ -254,7 +255,7 @@ class MessageBox(urwid.Pile):
         return ', '.join(emails)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'enter':
+        if is_command_key('ENTER', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
@@ -264,7 +265,7 @@ class MessageBox(urwid.Pile):
                     caption=self.message['display_recipient'],
                     title=self.message['subject']
                 )
-        elif key == 'c':
+        elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
@@ -273,23 +274,23 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient']
                 )
-        elif key == 'S':
+        elif is_command_key('STREAM_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
-        elif key == 's':
+        elif is_command_key('TOPIC_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_topic(self)
-        elif key == 'esc':
+        elif is_command_key('GO_BACK', key):
             self.model.controller.show_all_messages(self)
-        elif key == 'R':
+        elif is_command_key('REPLY_AUTHOR', key):
             self.model.controller.view.write_box.private_box_view(
                 email=self.message['sender_email']
             )
-        elif key == 'P':
+        elif is_command_key('ALL_PM', key):
             self.model.controller.show_all_pm(self)
         return key
 
@@ -305,13 +306,13 @@ class SearchBox(urwid.Pile):
         return [self.w]
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'esc':
+        if key == is_command_key('GO_BACK', key):
             self.text_box.set_edit_text("")
             self.controller.editor_mode = False
             self.controller.view.middle_column.set_focus('body')
             return key
 
-        elif key == 'enter':
+        elif is_command_key('ENTER', key):
             self.controller.editor_mode = False
             self.controller.model.index['search'] = set()
             self.controller.search_messages(self.text_box.edit_text)
@@ -332,10 +333,10 @@ class UserSearchBox(urwid.Edit):
         super(UserSearchBox, self).__init__(edit_text="Search people")
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'enter':
+        if is_command_key('ENTER', key):
             self.user_view.view.controller.editor_mode = False
             self.user_view.set_focus("body")
-        if key == 'esc':
+        if is_command_key('GO_BACK', key):
             self.user_view.view.controller.editor_mode = False
             self.set_edit_text("Search people")
             self.user_view.set_focus("body")
@@ -354,11 +355,11 @@ class StreamSearchBox(urwid.Edit):
         super(StreamSearchBox, self).__init__(edit_text="Search streams")
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'enter':
+        if is_command_key('ENTER', key):
             self.stream_view.view.controller.editor_mode = False
             self.stream_view.set_focus("body")
             self.stream_view.body.set_focus(0)
-        if key == 'esc':
+        if is_command_key('GO_BACK', key):
             self.stream_view.view.controller.editor_mode = False
             self.set_edit_text("Search streams")
             self.stream_view.set_focus("body")

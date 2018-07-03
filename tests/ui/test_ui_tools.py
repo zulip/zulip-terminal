@@ -7,6 +7,7 @@ from zulipterminal.ui_tools.views import (
     UsersView,
     RightColumnView,
     LeftColumnView,
+    HelpView,
 )
 
 VIEWS = "zulipterminal.ui_tools.views"
