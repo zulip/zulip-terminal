@@ -8,6 +8,7 @@ from zulipterminal.helper import async
 from zulipterminal.model import Model
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.ui_tools.views import HelpView
 
 
 class Controller:

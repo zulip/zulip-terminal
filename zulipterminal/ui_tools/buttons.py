@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Tuple
 
 import urwid
 
+from zulipterminal.config import is_command_key
+
 
 class MenuButton(urwid.Button):
     def __init__(self, caption: Any, email: str='') -> None:
@@ -111,7 +113,7 @@ class UserButton(urwid.Button):
             'selected')
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == 'enter':
+        if is_command_key('ENTER', key):
             self.controller.narrow_to_user(self)
             self.view.body.focus_col = 1
             self.view.body.focus.original_widget.set_focus('footer')
