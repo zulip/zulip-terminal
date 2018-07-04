@@ -9,6 +9,8 @@ from zulipterminal.model import Model
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
+from zulipterminal.muv import muv
+
 
 class Controller:
     """
@@ -29,6 +31,30 @@ class Controller:
         self.theme = theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+
+    def show_help(self) -> None:
+        text = []
+        with open('README.md') as readme:
+            copy = False
+            for line in readme:
+                if line.strip() == '## Hot Keys':
+                    copy = True
+                elif line.strip() == '## Development':
+                    copy = False
+                elif copy:
+                    text.append(line)
+        text = '\n'.join(text)
+        self.loop.widget = urwid.Overlay(
+            muv.preview(text, self, is_message=False),
+            self.view,
+            align='center',
+            width=('relative', 90),
+            valign='middle',
+            height=('relative', 90)
+        )
+
+    def exit_help(self) -> None:
+        self.loop.widget = self.view
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -83,7 +109,7 @@ class Controller:
         self.update = False
         self.model.stream_id = button.stream_id
         msg_id_list = self.model.index['stream'][button.stream_id].get(
-                                                    button.title, [])
+            button.title, [])
         if len(msg_id_list) == 0:
             first_anchor = True
             if hasattr(button, 'message'):
@@ -93,7 +119,7 @@ class Controller:
             self.model.num_before = 30
             self.model.get_messages(first_anchor)
             msg_id_list = self.model.index['stream'][button.stream_id].get(
-                                                    button.title, [])
+                button.title, [])
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_id_list, button.message['id'])
@@ -197,8 +223,9 @@ class Controller:
         try:
             screen = Screen()
             screen.set_terminal_properties(colors=256)
+            palette = self.view.palette[self.theme] + muv.load_palette(None)
             self.loop = urwid.MainLoop(self.view,
-                                       self.view.palette[self.theme],
+                                       palette,
                                        screen=screen)
         except KeyError:
             print('Following are the themes available:')

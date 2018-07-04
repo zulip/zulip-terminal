@@ -36,9 +36,9 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
         if msg['id'] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
         w_list.append(urwid.AttrMap(
-                    MessageBox(msg, model, last_message),
-                    msg_flag,
-                    'msg_selected'
+            MessageBox(msg, model, last_message),
+            msg_flag,
+            'msg_selected'
         ))
         last_message = msg
     if focus_msg is not None:

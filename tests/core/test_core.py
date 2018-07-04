@@ -154,7 +154,7 @@ class TestController:
         ret_mock = mocker.Mock()
         mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
         controller.view.palette = {
-            'default': 'theme_properties'
+            'default': ['theme_properties']
         }
         controller.main()
         assert mock_loop.call_count == 1

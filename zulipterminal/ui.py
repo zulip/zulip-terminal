@@ -137,6 +137,10 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
+        elif key == '?':
+            # Show help dialog
+            self.controller.show_help()
+            return ''
 
         else:
             return super(View, self).keypress(size, get_key(key))

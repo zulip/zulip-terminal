@@ -1,0 +1,252 @@
+{
+    "description": {
+        "purpose": "palette used to render different file contents",
+        "key_description":{
+            "name": "tag or code highlight class name",
+            "description": "detail on name",
+            "fg": [
+                "source: http://urwid.org/reference/display_modules.html?highlight=palette#urwid.BaseScreen.register_palette_entry",
+                "a string containing a comma-separated foreground color and settings", 
+                "Color values: ‘default’ (use the terminal’s default foreground), ",
+                "‘black’, ‘dark red’, ‘dark green’, ‘brown’, ‘dark blue’, ‘dark magenta’, ‘dark cyan’, ",
+                "‘light gray’, ‘dark gray’, ‘light red’, ‘light green’, ‘yellow’, ‘light blue’, ‘light magenta’, ‘light cyan’, ‘white’",
+                "Settings: ‘bold’, ‘underline’, ‘blink’, ‘standout’",
+                "Some terminals use ‘bold’ for bright colors. Most terminals ignore the ‘blink’ setting. ",
+                "If the color is not given then ‘default’ will be assumed."
+            ],
+            "bg": [
+                "a string containing the background color",
+                "Background color values: ‘default’ (use the terminal’s default background), ‘black’, ‘dark red’, ",
+                "‘dark green’, ‘brown’, ‘dark blue’, ‘dark magenta’, ‘dark cyan’, ‘light gray’"
+            ],
+            "mono":[
+                "a comma-separated string containing monochrome terminal settings (see “Settings” above.)",
+                "None = no terminal settings (same as ‘default’)"
+            ],
+            "fgh": [
+                "foreground_high – a string containing a comma-separated foreground color and settings, ",
+                "standard foreground colors (see “Color values” above) or high-colors may be used",
+                "High-color example values: ‘#009’ (0% red, 0% green, 60% red, like HTML colors) ",
+                "‘#fcc’ (100% red, 80% green, 80% blue) ‘g40’ (40% gray, decimal), ",
+                "‘g#cc’ (80% gray, hex), ‘#000’, ‘g0’, ‘g#00’ (black), ‘#fff’, ‘g100’, ‘g#ff’ (white) ",
+                "‘h8’ (color number 8), ‘h255’ (color number 255)",
+                "None = use foreground parameter value"
+            ],
+            "bgh": [
+                "background_high – a string containing the background color, ",
+                "standard background colors (see “Background colors” above) or high-colors ",
+                "(see “High-color example values” above) may be used",
+                "None = use background parameter value"
+            ]
+
+
+        }
+        
+        
+    },
+    "palette":[
+        {
+            "name": "header",
+            "description":"used to span the header's background to full screen width",
+            "fg": "",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": ""
+        },
+        {
+            "name": "h1",
+            "description":"h1",
+            "fg": "dark red,bold",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "g#cc",
+            "bgh": ""
+        },
+        {
+            "name": "h2",
+            "description":"h2",
+            "fg": "dark magenta,bold",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": "#60d"
+        },
+        {
+            "name": "h3",
+            "description":"h3",
+            "fg": "dark cyan,bold",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": "#60d"
+        },
+        {
+            "name": "h4",
+            "description":"h4",
+            "fg": "light red",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": "#60d"
+        },
+        {
+            "name": "h5",
+            "description":"h5",
+            "fg": "light green",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": "#60d"
+        },
+        {
+            "name": "h6",
+            "description":"h6",
+            "fg": "light blue",
+            "bg": "light gray",
+            "mono": "",
+            "fgh": "#fcc",
+            "bgh": "#60d"
+        }
+        ,{
+            "name": "strong",
+            "description":"same as html strong tag",
+            "fg": "brown",
+            "bg": "",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "code",
+            "description":"same as html code tag",
+            "fg": "light cyan",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "url",
+            "description":"url",
+            "fg": "underline",
+            "bg": "",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "em",
+            "description":"italic text, some version of urwid doesn't support this, use bold instead",
+            "fg": "dark green,bold",
+            "bg": "",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "th",
+            "description":"table header",
+            "fg": "dark green,bold",
+            "bg": "",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_kd",
+            "description": "javascript keyword",
+            "fg": "light blue",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_nx",
+            "description": "variables",
+            "fg": "dark gray",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_nf",
+            "fg": "light blue",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_p",
+            "fg": "light cyan",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_ne",
+            "fg": "light cyan",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_s1",
+            "description":"string",
+            "fg": "light green",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_s2",
+            "fg": "light cyan",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_k",
+            "description":"keyword",
+            "fg": "light red",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        
+        {
+            "name": "code_block",
+            "description":"expand the whole code area to full screen width",
+            "fg": "",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "blockquote",
+            "description":"expand the whole quote area to full screen width",
+            "fg": "light gray",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        },
+        {
+            "name": "class_code_space",
+            "fg": "",
+            "bg": "black",
+            "mono": "",
+            "fgh": "",
+            "bgh": ""
+        }
+    ]
+}

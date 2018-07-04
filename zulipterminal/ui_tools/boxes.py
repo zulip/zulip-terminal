@@ -7,6 +7,7 @@ import urwid
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.ui_tools.buttons import MenuButton
+from zulipterminal.muv import muv
 
 
 class WriteBox(urwid.Pile):
@@ -57,7 +58,7 @@ class WriteBox(urwid.Pile):
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
-            )
+        )
         self.title_write_box = ReadlineEdit(caption=u"Title:  ",
                                             edit_text=title)
 
@@ -160,7 +161,7 @@ class MessageBox(urwid.Pile):
             ('custom', 'Private Message'),
             ('selected', ": "),
             ('custom', self.recipients)
-            ])
+        ])
         title = urwid.Text(title)
         time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
                           align='right')
@@ -198,12 +199,13 @@ class MessageBox(urwid.Pile):
         else:
             header = self.private_view()
         reactions = self.reactions_view(self.message['reactions'])
-        content = [('name', self.message['sender_full_name']), "\n" +
-                   emoji.demojize(self.message['content'])]
-        content = urwid.Text(content)
-        view = [header, content, reactions]
-        if reactions == '':
-            view.remove(reactions)
+        sender = urwid.Text(('name', self.message['sender_full_name']))
+        content = muv.preview(emoji.demojize(self.message['content']),
+                              controller=self.model.controller)
+        view = [header, sender]
+        view.extend(content)
+        if reactions != '':
+            view.append(reactions)
         return view
 
     def selectable(self) -> bool:
@@ -232,21 +234,21 @@ class MessageBox(urwid.Pile):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
-                    )
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     title=self.message['subject']
-                    )
+                )
         elif key == 'c':
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
                     email=self.get_recipients()
-                    )
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient']
-                    )
+                )
         elif key == 'S':
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
@@ -262,7 +264,7 @@ class MessageBox(urwid.Pile):
         elif key == 'R':
             self.model.controller.view.write_box.private_box_view(
                 email=self.message['sender_email']
-                )
+            )
         elif key == 'P':
             self.model.controller.show_all_pm(self)
         return key
@@ -300,6 +302,7 @@ class UserSearchBox(urwid.Edit):
     """
     Search Box to search users in real-time.
     """
+
     def __init__(self, user_view: Any) -> None:
         self.user_view = user_view
         super(UserSearchBox, self).__init__(edit_text="Search people")
