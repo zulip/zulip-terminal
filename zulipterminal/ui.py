@@ -98,12 +98,31 @@ class View(urwid.WidgetWrap):
         return w
 
     def left_column_view(self) -> Any:
+        if not self.pinned_streams:
+            pinned_weight = 0
+            unpinned_title = "Streams"
+        else:
+            pinned_weight = 1
+            unpinned_title = "Other Streams"
+
+        if not self.unpinned_streams:
+            unpinned_weight = 0
+        else:
+            unpinned_weight = 1
+
+        pinned = self.streams_view(stream_list=self.pinned_streams,
+                                   title="Pinned Streams")
+        unpinned = self.streams_view(stream_list=self.unpinned_streams,
+                                     title=unpinned_title)
+        if pinned_weight == 0:
+            pinned = urwid.WidgetDisable(pinned)
+        if unpinned_weight == 0:
+            unpinned = urwid.WidgetDisable(unpinned)
+
         left_column_structure = [
             (4, self.menu_view()),
-            self.streams_view(stream_list=self.pinned_streams,
-                              title="Pinned Streams"),
-            self.streams_view(stream_list=self.unpinned_streams,
-                              title="Other Streams"),
+            ('weight', pinned_weight, pinned),
+            ('weight', unpinned_weight, unpinned),
         ]
         w = urwid.Pile(left_column_structure)
         return w

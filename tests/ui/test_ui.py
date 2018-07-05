@@ -63,23 +63,42 @@ class TestView:
         line_box.assert_called_once_with(stream_view(), title="foo")
         assert return_value == line_box()
 
-    def test_left_column_view(self, view, mocker):
+    @pytest.mark.parametrize(
+        'pinned_streams, unpinned_streams, pinned_weight, unpinned_weight', [
+            [["stream1"], ["stream2"], 1, 1],
+            [[], ["stream"], 0, 1],
+            [["stream"], [], 1, 0],
+            [[], [], 0, 0],
+        ])  # Contents of [un]pinned_streams are unimportant, just if empty
+    def test_left_column_view(self, view, mocker,
+                              pinned_streams, unpinned_streams,
+                              pinned_weight, unpinned_weight):
         menu_view = mocker.patch('zulipterminal.ui.View.menu_view')
         streams_view = mocker.patch('zulipterminal.ui.View.streams_view')
         pile = mocker.patch('zulipterminal.ui.urwid.Pile')
+        widgetdisable = mocker.patch('urwid.WidgetDisable')
+        view.pinned_streams = pinned_streams
+        view.unpinned_streams = unpinned_streams
+
         return_value = view.left_column_view()
+
         menu_view.assert_called_once_with()
+
+        unpinned_title = "Other Streams" if pinned_streams else "Streams"
         expected_streams_view_calls = [
             mocker.call(stream_list=view.pinned_streams,
                         title="Pinned Streams"),
             mocker.call(stream_list=view.unpinned_streams,
-                        title="Other Streams"),
+                        title=unpinned_title),
         ]
         streams_view.assert_has_calls(expected_streams_view_calls)
+
         pile.assert_called_once_with([
             (4, menu_view()),
-            streams_view(),
-            streams_view(),
+            ('weight', pinned_weight,
+             streams_view() if pinned_weight else widgetdisable()),
+            ('weight', unpinned_weight,
+             streams_view() if unpinned_weight else widgetdisable()),
         ])
         assert return_value == pile()
 
