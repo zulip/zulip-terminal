@@ -118,9 +118,9 @@ class View(urwid.WidgetWrap):
         center_column = self.message_view()
         right_column = self.right_column_view()
         body = [
-            ('weight', 3, left_column),
+            (25, left_column),
             ('weight', 10, center_column),
-            ('weight', 3, right_column),
+            (25, right_column),
         ]
         self.body = urwid.Columns(body, focus_column=1)
         w = urwid.LineBox(self.body, title=u"Zulip")

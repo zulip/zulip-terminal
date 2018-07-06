@@ -105,9 +105,9 @@ class TestView:
         center.assert_called_once_with()
         right.assert_called_once_with()
         col.assert_called_once_with([
-            ('weight', 3, left()),
+            (25, left()),
             ('weight', 10, center()),
-            ('weight', 3, right()),
+            (25, right()),
         ], focus_column=1)
         assert view.body == col()
         line_box.assert_called_once_with(view.body, title=u"Zulip")
