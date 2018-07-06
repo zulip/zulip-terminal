@@ -9,7 +9,7 @@ class MenuButton(urwid.Button):
         self.email = email
         super(MenuButton, self).__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
-            [u'    ', self.caption], 0), None, 'selected')
+            [self.caption], 0), None, 'selected')
 
 
 class HomeButton(urwid.Button):
@@ -28,8 +28,8 @@ class HomeButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'  🏡 ', self.caption, ('idle', ' ' + str(count))],
-            len(self.caption) + 5),
+            [u' 🏡 ', self.caption, ('idle', ' ' + str(count))],
+            len(self.caption) + 4),
             None,
             'selected')
 
@@ -50,8 +50,8 @@ class PMButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'  💬 ', self.caption, ('idle', ' ' + str(count))],
-            len(self.caption) + 5),
+            [u' 💬 ', self.caption, ('idle', ' ' + str(count))],
+            len(self.caption) + 4),
             None,
             'selected')
 
@@ -80,8 +80,8 @@ class StreamButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [(self.color, u'  # '), self.caption, ('idle', ' ' + str(count))],
-            len(self.caption) + 4),
+            [(self.color, u'# '), self.caption, ('idle', ' ' + str(count))],
+            len(self.caption) + 2),
             None,
             'selected')
 
@@ -109,8 +109,8 @@ class UserButton(urwid.Button):
         if count <= 0:
             count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'  \N{BULLET}  ', self.caption, ('idle', ' ' + str(count))],
-            len(self.caption) + 5),
+            [u'\N{BULLET} ', self.caption, ('idle', ' ' + str(count))],
+            len(self.caption) + 2),
             self.color,
             'selected')
 
