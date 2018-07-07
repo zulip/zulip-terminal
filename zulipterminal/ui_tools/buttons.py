@@ -25,10 +25,9 @@ class HomeButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        if count <= 0:
-            count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' 🏡 ', self.caption, ('idle', ' ' + str(count))],
+            [u' 🏡 ', self.caption,
+             ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 4),
             None,
             'selected')
@@ -47,10 +46,9 @@ class PMButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        if count <= 0:
-            count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' 💬 ', self.caption, ('idle', ' ' + str(count))],
+            [u' 💬 ', self.caption,
+             ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 4),
             None,
             'selected')
@@ -77,10 +75,9 @@ class StreamButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        if count <= 0:
-            count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [(self.color, u'# '), self.caption, ('idle', ' ' + str(count))],
+            [(self.color, u'# '), self.caption,
+             ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 2),
             None,
             'selected')
@@ -106,10 +103,9 @@ class UserButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        if count <= 0:
-            count = ''  # type: ignore
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'\N{BULLET} ', self.caption, ('idle', ' ' + str(count))],
+            [u'\N{BULLET} ', self.caption,
+             ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 2),
             self.color,
             'selected')
