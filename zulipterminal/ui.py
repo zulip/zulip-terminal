@@ -123,7 +123,14 @@ class View(urwid.WidgetWrap):
             (25, right_column),
         ]
         self.body = urwid.Columns(body, focus_column=1)
-        w = urwid.LineBox(self.body, title=u"Zulip")
+
+        div_char = '═'
+        title_bar = urwid.Columns([
+            urwid.Divider(div_char=div_char),
+            (7, urwid.Text([u" Zulip "])),
+            urwid.Divider(div_char=div_char),
+        ])
+        w = urwid.Frame(self.body, title_bar, focus_part='body')
         return w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
