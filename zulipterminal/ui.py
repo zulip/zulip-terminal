@@ -1,5 +1,6 @@
 import platform
 import re
+from urllib.parse import urlparse
 from typing import Any, Tuple
 
 import urwid
@@ -125,11 +126,19 @@ class View(urwid.WidgetWrap):
         self.body = urwid.Columns(body, focus_column=1)
 
         div_char = '═'
+        profile = self.controller.client.get_profile()
+
+        base_url = '{uri.scheme}://{uri.netloc}/'.format(
+                uri=urlparse(self.controller.client.base_url))
+
+        title_text = " {full_name} ({email}) - {server} ".format(
+                server=base_url, **profile)
         title_bar = urwid.Columns([
             urwid.Divider(div_char=div_char),
-            (7, urwid.Text([u" Zulip "])),
+            (len(title_text), urwid.Text([title_text])),
             urwid.Divider(div_char=div_char),
         ])
+
         w = urwid.Frame(self.body, title_bar, focus_part='body')
         return w
 
