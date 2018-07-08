@@ -99,18 +99,31 @@ class TestView:
         center = mocker.patch('zulipterminal.ui.View.message_view')
         right = mocker.patch('zulipterminal.ui.View.right_column_view')
         col = mocker.patch("zulipterminal.ui.urwid.Columns")
-        line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
+        frame = mocker.patch('zulipterminal.ui.urwid.Frame')
+        title_divider = mocker.patch('zulipterminal.ui.urwid.Divider')
+        text = mocker.patch('zulipterminal.ui.urwid.Text')
+
         view = View(self.controller)
+
         left.assert_called_once_with()
         center.assert_called_once_with()
         right.assert_called_once_with()
-        col.assert_called_once_with([
-            (25, left()),
-            ('weight', 10, center()),
-            (25, right()),
-        ], focus_column=1)
+        expected_column_calls = [
+            mocker.call([
+                (25, left()),
+                ('weight', 10, center()),
+                (25, right()),
+                ], focus_column=1),
+            mocker.call([
+                title_divider(),
+                (7, text()),
+                title_divider(),
+                ])
+        ]
+        col.assert_has_calls(expected_column_calls)
+
         assert view.body == col()
-        line_box.assert_called_once_with(view.body, title=u"Zulip")
+        frame.assert_called_once_with(view.body, col(), focus_part='body')
 
     def test_keypress(self, view, mocker):
         view.users_view = mocker.Mock()
