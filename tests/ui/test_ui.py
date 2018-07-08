@@ -103,6 +103,15 @@ class TestView:
         title_divider = mocker.patch('zulipterminal.ui.urwid.Divider')
         text = mocker.patch('zulipterminal.ui.urwid.Text')
 
+        full_name = "Bob James"
+        email = "Bob@bob.com"
+        server = "https://chat.zulip.zulip"
+
+        mocker.patch('zulipterminal.core.Controller.client.get_profile',
+                     return_value=dict(full_name=full_name, email=email))
+        self.controller.client.base_url = server
+        title_length = (len(email) + len(full_name) + len(server) + 9)
+
         view = View(self.controller)
 
         left.assert_called_once_with()
@@ -116,7 +125,7 @@ class TestView:
                 ], focus_column=1),
             mocker.call([
                 title_divider(),
-                (7, text()),
+                (title_length, text()),
                 title_divider(),
                 ])
         ]
