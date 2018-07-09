@@ -128,7 +128,7 @@ class MessageBox(urwid.Pile):
         # as current message
         if self.title == self.last_message['subject'] and\
                 self.last_message['type'] == 'stream':
-            return urwid.Text((None, self._time_for_message()), align='right')
+            return None
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
         stream_title = (bar_color, [
@@ -137,12 +137,7 @@ class MessageBox(urwid.Pile):
             (bar_color, self.title)
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text((bar_color, self._time_for_message()), align='right')
-        header = urwid.Columns([
-            stream_title,
-            time,
-        ])
-        header = urwid.AttrWrap(header, bar_color)
+        header = urwid.AttrWrap(stream_title, bar_color)
         return header
 
     def private_view(self) -> Any:
@@ -157,7 +152,7 @@ class MessageBox(urwid.Pile):
         if len(recipient_ids) == 2 and\
                 recipient_ids[0] == recipient_ids[1] and\
                 self.last_message['type'] == 'private':
-            return urwid.Text((None, self._time_for_message()), align='right')
+            return None
         self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
@@ -169,12 +164,7 @@ class MessageBox(urwid.Pile):
             ('custom', self.recipients)
         ])
         title = urwid.Text(title)
-        time = urwid.Text(('custom', self._time_for_message()), align='right')
-        header = urwid.Columns([
-            title,
-            time,
-        ])
-        header = urwid.AttrWrap(header, "header")
+        header = urwid.AttrWrap(title, "header")
         return header
 
     def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
@@ -203,13 +193,21 @@ class MessageBox(urwid.Pile):
             header = self.stream_view()
         else:
             header = self.private_view()
+
         reactions = self.reactions_view(self.message['reactions'])
-        content = [('name', self.message['sender_full_name']), "\n" +
-                   emoji.demojize(self.message['content'])]
+
+        content = [emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
-        view = [header, content, reactions]
+
+        author = urwid.Text([('name', self.message['sender_full_name'])])
+        time = urwid.Text((self._time_for_message()), align='right')
+        author_and_time = urwid.Columns([author, time])
+
+        view = [header, author_and_time, content, reactions]
         if reactions == '':
             view.remove(reactions)
+        if header is None:
+            view.remove(header)
         return view
 
     def selectable(self) -> bool:
