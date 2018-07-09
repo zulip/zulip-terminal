@@ -93,6 +93,7 @@ class WriteBox(urwid.Pile):
         elif key == 'esc':
             self.view.controller.editor_mode = False
             self.main_view(False)
+            self.view.middle_column.set_focus('body')
         elif key == 'right' and self.to_write_box is None:
             self.contents[0][0].focus_col = 1
         elif key == 'left' and self.to_write_box is None:
