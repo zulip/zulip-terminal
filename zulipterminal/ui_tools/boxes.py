@@ -163,9 +163,10 @@ class MessageBox(urwid.Pile):
         self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
+            if recipient['email'] != self.model.client.email
         ))
         title = ('header', [
-            ('custom', 'Private Message'),
+            ('custom', 'Private Messages with'),
             ('selected', ": "),
             ('custom', self.recipients)
         ])
