@@ -490,6 +490,19 @@ class TestMiddleColumnView:
         return_value = mid_col_view.keypress(size, key)
         assert return_value == 'p'
 
+    def test_keypress_x(self, mid_col_view, mocker):
+        key = "x"
+        size = (20,)
+        mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
+        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
+        mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
+                     return_value=None)
+        mid_col_view.footer = mocker.Mock()
+        return_value = mid_col_view.keypress(size, key)
+        mid_col_view.footer.private_box_view.assert_called_once_with()
+        assert mid_col_view.footer.focus_position == 0
+        assert return_value == 'x'
+
 
 class TestRightColumnView:
 
