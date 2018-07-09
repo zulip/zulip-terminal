@@ -4,6 +4,8 @@ from functools import wraps
 from threading import Thread
 from typing import Any, Dict, List
 
+import os
+
 
 def async(func: Any) -> Any:
     """
@@ -11,6 +13,11 @@ def async(func: Any) -> Any:
     """
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
+        # If calling when pytest is running simply return the function
+        # to avoid running in async mode.
+        if os.environ.get("PYTEST_CURRENT_TEST"):
+            return func(*args, **kwargs)
+
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
         return thread.start()
