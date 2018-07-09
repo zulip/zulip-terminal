@@ -173,7 +173,7 @@ Troubleshooting: Common issues
 
 ##### Unable to render non-ASCII characters
 
-If you see `?` in places of emoji's or Zulip Terminal gives a `UnicodeError` / `CanvasError`, you haven't enabled utf-8
+If you see `?` in place of emojis or Zulip Terminal gives a `UnicodeError` / `CanvasError`, you haven't enabled utf-8
 encoding in your terminal. To enable it by default, add this to the end of you `~/.bashrc`:
 
 ```
