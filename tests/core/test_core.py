@@ -83,6 +83,7 @@ class TestController:
         assert {widget.original_widget.message['id']} == id_list
 
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):
+        controller.model.client = self.client
         controller.model.narrow = []
         controller.model.index = index_user
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
@@ -104,6 +105,7 @@ class TestController:
         assert {widget.original_widget.message['id']} == id_list
 
     def test_show_all_messages(self, mocker, controller, index_all_messages):
+        controller.model.client = self.client
         controller.model.narrow = [['stream', 'PTEST']]
         controller.model.index = index_all_messages
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
@@ -126,6 +128,7 @@ class TestController:
         assert msg_ids == id_list
 
     def test_show_all_pm(self, mocker, controller, index_user):
+        controller.model.client = self.client
         controller.model.narrow = []
         controller.model.index = index_user
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
