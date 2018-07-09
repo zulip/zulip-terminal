@@ -311,7 +311,12 @@ class MiddleColumnView(urwid.Frame):
                 return key
             email = self.model.user_id_email_dict[pm]
             self.controller.narrow_to_user(UnreadPMButton(pm, email))
-
+        elif key == 'x':
+            # Create new PM message
+            self.footer.private_box_view()
+            self.set_focus('footer')
+            self.footer.focus_position = 0
+            return key
         return super(MiddleColumnView, self).keypress(size, key)
 
 

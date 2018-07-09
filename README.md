@@ -63,6 +63,7 @@ theme=default
 | Reply to a message                                    | <kbd>r</kbd>                                  |
 | Reply to an author                                    | <kbd>R</kbd>                                  |
 | New stream message                                    | <kbd>c</kbd>                                  |
+| New private message                                   | <kbd>x</kbd>                                  |
 | Go Back                                               | <kbd>esc</kbd>                                |
 | Narrow to a stream                                    | <kbd>S</kbd>                                  |
 | Narrow to a topic                                     | <kbd>s</kbd>                                  |

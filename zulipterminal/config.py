@@ -13,6 +13,8 @@ KEY_BINDINGS = {
         ('page down', 'scroll to bottom'),
     'G':
         ('end', 'Go to last message in view'),
+    'x':
+        ('x', 'New private message'),
 }
 
 
