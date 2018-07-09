@@ -199,9 +199,15 @@ class MessageBox(urwid.Pile):
         content = [emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
 
-        author = urwid.Text([('name', self.message['sender_full_name'])])
         time = urwid.Text((self._time_for_message()), align='right')
-        author_and_time = urwid.Columns([author, time])
+        if header is not None or (
+                self.last_message['sender_full_name'] !=
+                self.message['sender_full_name']):
+            # Include (author) name if different stream/topic or author
+            author = urwid.Text([('name', self.message['sender_full_name'])])
+            author_and_time = urwid.Columns([author, time])
+        else:
+            author_and_time = time
 
         view = [header, author_and_time, content, reactions]
         if reactions == '':
