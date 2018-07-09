@@ -117,6 +117,9 @@ class MessageBox(urwid.Pile):
             self.last_message = defaultdict(dict)
         super(MessageBox, self).__init__(self.main_view())
 
+    def _time_for_message(self) -> str:
+        return ctime(self.message['timestamp'])[:-8]
+
     def stream_view(self) -> Any:
         self.caption = self.message['display_recipient']
         self.stream_id = self.message['stream_id']
@@ -125,9 +128,7 @@ class MessageBox(urwid.Pile):
         # as current message
         if self.title == self.last_message['subject'] and\
                 self.last_message['type'] == 'stream':
-            return urwid.Text(
-                (None, ctime(self.message['timestamp'])[:-8]),
-                align='right')
+            return urwid.Text((None, self._time_for_message()), align='right')
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
         stream_title = (bar_color, [
@@ -136,8 +137,7 @@ class MessageBox(urwid.Pile):
             (bar_color, self.title)
         ])
         stream_title = urwid.Text(stream_title)
-        time = urwid.Text((bar_color, ctime(self.message['timestamp'])[:-8]),
-                          align='right')
+        time = urwid.Text((bar_color, self._time_for_message()), align='right')
         header = urwid.Columns([
             stream_title,
             time,
@@ -157,9 +157,7 @@ class MessageBox(urwid.Pile):
         if len(recipient_ids) == 2 and\
                 recipient_ids[0] == recipient_ids[1] and\
                 self.last_message['type'] == 'private':
-            return urwid.Text(
-                ('time', ctime(self.message['timestamp'])[:-8]),
-                align='right')
+            return urwid.Text((None, self._time_for_message()), align='right')
         self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
@@ -171,8 +169,7 @@ class MessageBox(urwid.Pile):
             ('custom', self.recipients)
         ])
         title = urwid.Text(title)
-        time = urwid.Text(('custom', ctime(self.message['timestamp'])[:-8]),
-                          align='right')
+        time = urwid.Text(('custom', self._time_for_message()), align='right')
         header = urwid.Columns([
             title,
             time,
