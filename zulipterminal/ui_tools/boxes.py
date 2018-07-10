@@ -148,7 +148,14 @@ class MessageBox(urwid.Pile):
     def private_view(self) -> Any:
         self.email = self.message['sender_email']
         self.user_id = self.message['sender_id']
-        if self.user_id == self.last_message['sender_id'] and\
+
+        recipient_ids = [{recipient['id']
+                          for recipient in message['display_recipient']
+                          if 'id' in recipient}
+                         for message in (self.message, self.last_message)
+                         if 'display_recipient' in message]
+        if len(recipient_ids) == 2 and\
+                recipient_ids[0] == recipient_ids[1] and\
                 self.last_message['type'] == 'private':
             return urwid.Text(
                 ('time', ctime(self.message['timestamp'])[:-8]),
