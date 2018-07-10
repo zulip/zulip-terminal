@@ -681,3 +681,23 @@ class TestLeftColumnView:
             view=self.view,
             count=1)
         line_box.assert_called_once_with(stream_view(), title="Streams")
+
+
+class TestHelpMenu:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.help_view = HelpView(self.controller)
+
+    def test_keypress_any_key(self):
+        key = "a"
+        size = (200, 20)
+        self.help_view.keypress(size, key)
+        assert not self.controller.exit_help.called
+
+    def test_keypress_q(self):
+        key = "q"
+        size = (200, 20)
+        self.help_view.keypress(size, key)
+        assert self.controller.exit_help.called

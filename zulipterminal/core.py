@@ -31,6 +31,19 @@ class Controller:
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
+    def show_help(self) -> None:
+        self.loop.widget = urwid.LineBox(urwid.Overlay(
+            HelpView(self),
+            self.view,
+            align='center',
+            width=('relative', 100),
+            valign='middle',
+            height=('relative', 100)
+        ))
+
+    def exit_help(self) -> None:
+        self.loop.widget = self.view
+
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
         self.update = False
