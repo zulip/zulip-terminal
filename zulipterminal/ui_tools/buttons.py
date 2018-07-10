@@ -26,7 +26,7 @@ class HomeButton(urwid.Button):
 
     def widget(self, count: int) -> Any:
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' 🏡 ', self.caption,
+            [u' \N{BULLET} ', self.caption,
              ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 4),
             None,
@@ -47,7 +47,7 @@ class PMButton(urwid.Button):
 
     def widget(self, count: int) -> Any:
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' 💬 ', self.caption,
+            [u' \N{BULLET} ', self.caption,
              ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 4),
             None,
