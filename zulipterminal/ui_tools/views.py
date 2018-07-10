@@ -460,3 +460,33 @@ class LeftColumnView(urwid.Pile):
             self.view.stream_w.keypress(size, key)
             return key
         return super(LeftColumnView, self).keypress(size, key)
+
+
+class HelpView(urwid.ListBox):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        self.log = urwid.SimpleFocusListWalker([
+            urwid.Text("Press q to quit.", align='center')
+        ])
+        for _, binding in KEY_BINDINGS.items():
+            commands = ", ".join(binding['keys'])
+            self.log.append(
+                urwid.Columns([
+                    urwid.LineBox(
+                        urwid.Text(binding['help_text']),
+                        tlcorner=' ', tline=' ', lline=' ', trcorner=' ',
+                        blcorner=' ', rline=' ', bline='-', brcorner=' '
+                    ),
+                    urwid.LineBox(
+                        urwid.Text(commands),
+                        tlcorner=' ', tline=' ', lline=' ', trcorner=' ',
+                        blcorner=' ', rline=' ', bline='-', brcorner=' '
+                    )
+                ])
+            )
+        super(HelpView, self).__init__(self.log)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('QUIT_HELP', key):
+            self.controller.exit_help()
+        return super(HelpView, self).keypress(size, key)
