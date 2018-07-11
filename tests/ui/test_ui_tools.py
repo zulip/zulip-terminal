@@ -242,7 +242,7 @@ class TestStreamsView:
         new_text = "F"
         search_box = "SEARCH_BOX"
         stream_view.update_streams(search_box, new_text)
-        assert stream_view.log == self.streams_btn_list
+        assert not stream_view.log
 
     def test_mouse_event(self, mocker, stream_view):
         mocker.patch.object(stream_view, 'keypress')

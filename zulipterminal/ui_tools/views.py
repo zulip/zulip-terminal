@@ -186,7 +186,7 @@ class StreamsView(urwid.Frame):
         self.search_lock.acquire()
         streams_display = self.streams_btn_list.copy()
         for stream in self.streams_btn_list:
-            if not stream.caption.startswith(new_text):
+            if not stream.caption.lower().startswith(new_text):
                 streams_display.remove(stream)
         self.log.clear()
         self.log.extend(streams_display)
