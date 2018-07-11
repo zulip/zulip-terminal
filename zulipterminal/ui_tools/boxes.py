@@ -1,5 +1,6 @@
 from collections import defaultdict
 from time import ctime
+from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union
 
 import emoji
@@ -200,10 +201,16 @@ class MessageBox(urwid.Pile):
         content = urwid.Text(content)
 
         time = urwid.Text((self._time_for_message()), align='right')
-        if header is not None or (
-                self.last_message['sender_full_name'] !=
-                self.message['sender_full_name']):
-            # Include (author) name if different stream/topic or author
+        # Include (author) name with message time for various reasons:
+        include_author = (
+            header is not None or
+            (self.last_message['sender_full_name'] !=
+             self.message['sender_full_name']) or
+            ('timestamp' in self.last_message and
+                (datetime.fromtimestamp(self.message['timestamp']) -
+                 datetime.fromtimestamp(self.last_message['timestamp'])).days)
+        )
+        if include_author:
             author = urwid.Text([('name', self.message['sender_full_name'])])
             author_and_time = urwid.Columns([author, time])
         else:
