@@ -2,6 +2,7 @@ import argparse
 import configparser
 import traceback
 import sys
+import tempfile
 from typing import Dict, Any
 from os import path
 
@@ -59,6 +60,12 @@ def main() -> None:
     """
     Launch Zulip Terminal.
     """
+
+    # write print statements in a file.
+    orig_stdout = sys.stdout
+    log_file = open(tempfile.gettempdir() + '/debug.log', 'a')
+    sys.stdout = log_file
+
     args = parse_args()
     if args.config_file:
         zuliprc_path = args.config_file
@@ -90,6 +97,8 @@ def main() -> None:
         sys.stderr.flush()
 
     finally:
+        sys.stdout = orig_stdout
+        log_file.close()
         if args.profile:
             prof.disable()
             prof.dump_stats("/tmp/profile.data")
