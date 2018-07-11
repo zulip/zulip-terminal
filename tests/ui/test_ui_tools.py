@@ -166,15 +166,14 @@ class TestMessageView:
         view.message = {
             'type': msg_type,
         }
-        header = mocker.Mock()
-        header.contents = [("STREAM", "OPTIONS"),
+        footer = mocker.Mock()
+        footer.contents = [("STREAM", "OPTIONS"),
                            ("STREAM", "OPTIONS")]
-        header.options.return_value = "OPTIONS"
-        view.stream_view.return_value = header
-        view.private_view.return_value = header
+        footer.options.return_value = "OPTIONS"
+        view.stream_view.return_value = footer
+        view.private_view.return_value = footer
         msg_view.update_current_footer(view)
-        self.model.controller.view._w.set_footer.assert_called_once_with(
-            header)
+        assert self.model.controller.view._w.set_footer.called
 
     def test_read_message(self, mocker, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
