@@ -200,38 +200,36 @@ class MessageBox(urwid.Pile):
         content = [emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
 
-        # Include (author) name with message time for various reasons:
         message_author = self.message['sender_full_name']
-        include_author = (
-            header is not None or  # Different header to previous message
-            (self.last_message['sender_full_name'] != message_author) or
-            ('timestamp' in self.last_message and
-                (datetime.fromtimestamp(self.message['timestamp']) -
-                 datetime.fromtimestamp(self.last_message['timestamp'])).days)
-        )
-
         message_time = self._time_for_message(self.message)
-        include_time = (
-            header is not None or  # Different header to previous message
-            (self.last_message['sender_full_name'] != message_author) or
-            ('timestamp' in self.last_message and
-             message_time != self._time_for_message(self.last_message))
-        )
 
+        # Statements as to how the message varies from the previous one
+        different_topic = header is not None
+        different_author = (
+            self.last_message['sender_full_name'] != message_author)
+        more_than_24h_apart = (
+            'timestamp' in self.last_message and
+            (datetime.fromtimestamp(self.message['timestamp']) -
+             datetime.fromtimestamp(self.last_message['timestamp'])).days)
+        different_timestamp = (
+            'timestamp' in self.last_message and
+            message_time != self._time_for_message(self.last_message))
+
+        # Include author name/time under various conditions
         author_time_items = []
-        if include_author:
+        if different_topic or different_author or more_than_24h_apart:
             author_time_items.append(urwid.Text([('name', message_author)]))
-        if include_time:
+        if different_topic or different_author or different_timestamp:
             author_time_items.append(urwid.Text(message_time, align='right'))
         author_and_time = urwid.Columns(author_time_items)
 
         view = [header, author_and_time, content, reactions]
-        if reactions == '':
-            view.remove(reactions)
         if header is None:
             view.remove(header)
         if not author_time_items:
             view.remove(author_and_time)
+        if reactions == '':
+            view.remove(reactions)
         return view
 
     def selectable(self) -> bool:
