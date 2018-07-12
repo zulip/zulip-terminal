@@ -306,7 +306,7 @@ class SearchBox(urwid.Pile):
         return [self.w]
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if key == is_command_key('GO_BACK', key):
+        if is_command_key('GO_BACK', key):
             self.text_box.set_edit_text("")
             self.controller.editor_mode = False
             self.controller.view.middle_column.set_focus('body')
