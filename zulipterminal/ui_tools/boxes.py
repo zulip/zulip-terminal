@@ -118,8 +118,8 @@ class MessageBox(urwid.Pile):
             self.last_message = defaultdict(dict)
         super(MessageBox, self).__init__(self.main_view())
 
-    def _time_for_message(self) -> str:
-        return ctime(self.message['timestamp'])[:-8]
+    def _time_for_message(self, message: Dict[str, Any]) -> str:
+        return ctime(message['timestamp'])[:-8]
 
     def stream_view(self) -> Any:
         self.caption = self.message['display_recipient']
@@ -200,27 +200,38 @@ class MessageBox(urwid.Pile):
         content = [emoji.demojize(self.message['content'])]
         content = urwid.Text(content)
 
-        time = urwid.Text((self._time_for_message()), align='right')
         # Include (author) name with message time for various reasons:
+        message_author = self.message['sender_full_name']
         include_author = (
-            header is not None or
-            (self.last_message['sender_full_name'] !=
-             self.message['sender_full_name']) or
+            header is not None or  # Different header to previous message
+            (self.last_message['sender_full_name'] != message_author) or
             ('timestamp' in self.last_message and
                 (datetime.fromtimestamp(self.message['timestamp']) -
                  datetime.fromtimestamp(self.last_message['timestamp'])).days)
         )
+
+        message_time = self._time_for_message(self.message)
+        include_time = (
+            header is not None or  # Different header to previous message
+            (self.last_message['sender_full_name'] != message_author) or
+            ('timestamp' in self.last_message and
+             message_time != self._time_for_message(self.last_message))
+        )
+
+        author_time_items = []
         if include_author:
-            author = urwid.Text([('name', self.message['sender_full_name'])])
-            author_and_time = urwid.Columns([author, time])
-        else:
-            author_and_time = time
+            author_time_items.append(urwid.Text([('name', message_author)]))
+        if include_time:
+            author_time_items.append(urwid.Text(message_time, align='right'))
+        author_and_time = urwid.Columns(author_time_items)
 
         view = [header, author_and_time, content, reactions]
         if reactions == '':
             view.remove(reactions)
         if header is None:
             view.remove(header)
+        if not author_time_items:
+            view.remove(author_and_time)
         return view
 
     def selectable(self) -> bool:
