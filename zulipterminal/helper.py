@@ -78,6 +78,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     while not hasattr(controller, 'loop'):
         time.sleep(0.1)
     controller.loop.draw_screen()
+    controller.loop.screen.clear()
 
 
 @async
