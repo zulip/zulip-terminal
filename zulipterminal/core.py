@@ -1,5 +1,6 @@
 from platform import platform
 from typing import Any, List
+import os
 
 import urwid
 import zulip
@@ -30,6 +31,13 @@ class Controller:
         self.theme = theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+
+    def update_screen(self) -> None:
+        # Write something to update pipe to trigger draw_screen
+        os.write(self.update_pipe, b'1')
+
+    def draw_screen(self, *args: Any, **kwargs: Any) -> None:
+        self.loop.draw_screen()
 
     def show_help(self) -> None:
         self.loop.widget = urwid.LineBox(urwid.Overlay(
@@ -214,6 +222,7 @@ class Controller:
             self.loop = urwid.MainLoop(self.view,
                                        self.view.palette[self.theme],
                                        screen=screen)
+            self.update_pipe = self.loop.watch_pipe(self.draw_screen)
         except KeyError:
             print('Following are the themes available:')
             for theme in self.view.palette.keys():
