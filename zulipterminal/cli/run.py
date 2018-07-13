@@ -73,8 +73,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
                 '\nemail=' + email +
                 '\nkey=' + str(res.json()['api_key']) +
                 '\nsite=' + realm_url)
-    print('Generated API key saved at ' + zuliprc_path +
-          '\n\033[92mWelcome to Zulip.\033[0m')
+    print('Generated API key saved at ' + zuliprc_path)
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
@@ -115,11 +114,6 @@ def main() -> None:
 
     zterm = parse_zuliprc(zuliprc_path)
 
-    # write print statements in a file.
-    orig_stdout = sys.stdout
-    log_file = open(tempfile.gettempdir() + '/debug.log', 'a')
-    sys.stdout = log_file
-
     if args.profile:
         import cProfile
         prof = cProfile.Profile()
@@ -143,14 +137,13 @@ def main() -> None:
         sys.stderr.flush()
 
     finally:
-        sys.stdout = orig_stdout
-        log_file.close()
         if args.profile:
             prof.disable()
             prof.dump_stats("/tmp/profile.data")
             print("Profile data saved to /tmp/profile.data")
             print("You can visualize it using e.g."
                   "`snakeviz /tmp/profile.data`")
+
         sys.exit(1)
 
 
