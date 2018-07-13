@@ -16,6 +16,7 @@ class TestController:
                                  return_value=None)
         self.model.poll_for_events = mocker.patch('zulipterminal.model.Model'
                                                   '.poll_for_events')
+        mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
     def controller(self, mocker) -> None:

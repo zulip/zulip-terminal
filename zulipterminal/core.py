@@ -1,6 +1,8 @@
 from platform import platform
 from typing import Any, List
 import os
+import sys
+import time
 
 import urwid
 import zulip
@@ -19,6 +21,7 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: str) -> None:
+        self.show_loading()
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/0.1.0 ' + platform())
         # Register to the queue before initializing Model or View
@@ -31,6 +34,43 @@ class Controller:
         self.theme = theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+
+    @async
+    def show_loading(self) -> None:
+
+        def spinning_cursor() -> Any:
+            while True:
+                for cursor in '|/-\\':
+                    yield cursor
+
+        spinner = spinning_cursor()
+        sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
+        while not hasattr(self, 'view'):
+            next_spinner = "Loading " + next(spinner)
+            sys.stdout.write(next_spinner)
+            sys.stdout.flush()
+            time.sleep(0.1)
+            sys.stdout.write('\b'*len(next_spinner))
+
+        sys.stdout.write('\n')
+        self.capture_stdout()
+
+    def capture_stdout(self, path: str='debug.log') -> None:
+        if hasattr(self, '_stdout'):
+            return
+
+        self._stdout = sys.stdout
+        sys.stdout = open(path, 'a')
+
+    def restore_stdout(self) -> None:
+        if not hasattr(self, '_stdout'):
+            return
+
+        sys.stdout.flush()
+        sys.stdout.close()
+        sys.stdout = self._stdout
+        sys.stdout.write('\n')
+        del self._stdout
 
     def update_screen(self) -> None:
         # Write something to update pipe to trigger draw_screen
@@ -229,4 +269,12 @@ class Controller:
                 print(theme,)
             return
 
-        self.loop.run()
+        try:
+            self.loop.run()
+
+        except Exception:
+            self.restore_stdout()
+            raise
+
+        finally:
+            self.restore_stdout()
