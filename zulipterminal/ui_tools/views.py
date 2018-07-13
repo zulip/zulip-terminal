@@ -59,7 +59,7 @@ class MessageView(urwid.ListBox):
         message_list.reverse()
         for msg_w in message_list:
             self.log.insert(0, msg_w)
-        self.model.controller.loop.draw_screen()
+        self.model.controller.update_screen()
         self.old_loading = False
 
     @async
@@ -73,7 +73,7 @@ class MessageView(urwid.ListBox):
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         self.log.extend(message_list)
-        self.model.controller.loop.draw_screen()
+        self.model.controller.update_screen()
         self.new_loading = False
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
@@ -196,7 +196,7 @@ class StreamsView(urwid.Frame):
                 streams_display.remove(stream)
         self.log.clear()
         self.log.extend(streams_display)
-        self.view.controller.loop.draw_screen()
+        self.view.controller.update_screen()
         self.search_lock.release()
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
@@ -220,7 +220,7 @@ class StreamsView(urwid.Frame):
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus('body')
-            self.view.controller.loop.draw_screen()
+            self.view.controller.update_screen()
             return key
         return super(StreamsView, self).keypress(size, key)
 
@@ -374,7 +374,7 @@ class RightColumnView(urwid.Frame):
         self.body = UsersView(
             urwid.SimpleFocusListWalker(users_display))
         self.set_body(self.body)
-        self.view.controller.loop.draw_screen()
+        self.view.controller.update_screen()
         self.search_lock.release()
 
     def users_view(self) -> Any:
@@ -406,7 +406,7 @@ class RightColumnView(urwid.Frame):
                 urwid.SimpleFocusListWalker(self.users_btn_list))
             self.set_body(self.body)
             self.set_focus('body')
-            self.view.controller.loop.draw_screen()
+            self.view.controller.update_screen()
             return key
         return super(RightColumnView, self).keypress(size, key)
 
