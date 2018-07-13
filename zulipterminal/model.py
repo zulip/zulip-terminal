@@ -245,7 +245,7 @@ class Model:
                     self.msg_list.log.append(msg_w)
 
             set_count([response['id']], self.controller, 1)
-            self.controller.loop.draw_screen()
+            self.controller.update_screen()
 
     def update_message(self, response: Dict[str, Any]) -> None:
         """
@@ -297,7 +297,7 @@ class Model:
                     new_msg_w = msg_w_list[0]
                 msg_pos = self.msg_list.log.index(msg_w)
                 self.msg_list.log[msg_pos] = new_msg_w
-                self.controller.loop.draw_screen()
+                self.controller.update_screen()
 
     @async
     def poll_for_events(self) -> None:

@@ -64,7 +64,7 @@ class TestMessageView:
         assert msg_view.model.num_before == 30
         assert msg_view.index == {}
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
-        self.model.controller.loop.draw_screen.assert_called_once_with()
+        self.model.controller.update_screen.assert_called_once_with()
 
     def test_load_new_messages(self, mocker, msg_view):
         mocker.patch.object(msg_view.model,
@@ -81,7 +81,7 @@ class TestMessageView:
         assert msg_view.index == {}
         msg_view.log.extend.assert_called_once_with(['M1', 'M2'])
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
-        self.model.controller.loop.draw_screen.assert_called_once_with()
+        self.model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize("event, button, keypress", [
         ("mouse press", 4, "up"),

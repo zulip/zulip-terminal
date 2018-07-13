@@ -382,7 +382,7 @@ class TestModel:
         model.update_message(response)
         assert model.index['messages'][1]['content'] == response['content']
         assert model.msg_list.log[0] == mock_msg
-        self.controller.loop.draw_screen.assert_called_once_with()
+        self.controller.update_screen.assert_called_once_with()
 
         # TEST FOR FALSE CASES
         model.index['messages'][1] = {}
@@ -441,7 +441,7 @@ class TestModel:
         model.update_reaction(response)
         update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
         assert update_emoji == response['emoji_code']
-        self.controller.loop.draw_screen.assert_called_once_with()
+        self.controller.update_screen.assert_called_once_with()
 
         # TEST FOR FALSE CASES
         model.index['messages'][1] = {}
