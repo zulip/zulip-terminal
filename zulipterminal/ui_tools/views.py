@@ -139,6 +139,9 @@ class MessageView(urwid.ListBox):
             footer = message_view.stream_view()
         else:
             footer = message_view.private_view()
+        self.model.controller.view.search_box.msg_narrow.set_text(
+            footer.markup
+        )
         self.model.controller.view._w.set_footer(urwid.Columns(
             [
                 footer,
@@ -147,6 +150,7 @@ class MessageView(urwid.ListBox):
                               attr_map=footer.attr_map)
             ]
         ))
+        self.model.controller.update_screen()
 
     def read_message(self) -> None:
         # Message currently in focus
