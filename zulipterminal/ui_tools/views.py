@@ -142,14 +142,6 @@ class MessageView(urwid.ListBox):
         self.model.controller.view.search_box.msg_narrow.set_text(
             footer.markup
         )
-        self.model.controller.view._w.set_footer(urwid.Columns(
-            [
-                footer,
-                urwid.AttrMap(urwid.Text("Press ? to view Help.",
-                                         align='right'),
-                              attr_map=footer.attr_map)
-            ]
-        ))
         self.model.controller.update_screen()
 
     def read_message(self) -> None:
