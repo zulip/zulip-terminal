@@ -91,3 +91,4 @@ cov_html/*
 .mypy_cache
 Pipfile.lock
 zulipterminal.egg-info
+debug.log
