@@ -21,16 +21,18 @@ class View(urwid.WidgetWrap):
     """
     palette = {
         'default': [
-            (None,           'light gray',    'black'),
+            (None,           'white',    'black'),
             ('selected',     'light magenta', 'dark blue'),
             ('msg_selected', 'light red',     'black'),
             ('header',       'dark cyan',     'dark blue',  'bold'),
             ('custom',       'white',         'dark blue',  'underline'),
             ('content',      'white',         'black',      'standout'),
-            ('name',         'yellow',        'black'),
+            ('name',         'yellow, bold',  'black'),
             ('unread',       'black',         'light gray'),
             ('active',       'white',         'black'),
-            ('idle',         'yellow',        'black')
+            ('idle',         'yellow',        'black'),
+            ('title',        'white, bold',   'black'),
+            ('time',         'light gray',    'black'),
         ],
         'light': [
             (None,           'black',        'white'),
