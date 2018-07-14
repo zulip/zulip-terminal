@@ -138,13 +138,13 @@ class MessageBox(urwid.Pile):
             return None
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
-        stream_title_markup = (bar_color, [
+        stream_title_markup = (None, [
             (bar_color, self.caption),
-            (bar_color, ">"),
-            (bar_color, self.title)
+            (None, " "),
+            ('title', self.title)
         ])
         stream_title = urwid.Text(stream_title_markup)
-        header = urwid.AttrWrap(stream_title, bar_color)
+        header = urwid.AttrWrap(stream_title, None)
         header.markup = stream_title_markup
         return header
 
@@ -172,7 +172,7 @@ class MessageBox(urwid.Pile):
             ('custom', self.recipients)
         ])
         title = urwid.Text(title_markup)
-        header = urwid.AttrWrap(title, "header")
+        header = urwid.AttrWrap(title, None)
         header.markup = title_markup
         return header
 
@@ -228,7 +228,8 @@ class MessageBox(urwid.Pile):
         if different_topic or different_author or more_than_24h_apart:
             author_time_items.append(urwid.Text([('name', message_author)]))
         if different_topic or different_author or different_timestamp:
-            author_time_items.append(urwid.Text(message_time, align='right'))
+            author_time_items.append(urwid.Text([('time', message_time)],
+                                                align='right'))
         author_and_time = urwid.Columns(author_time_items)
 
         view = [header, author_and_time, content, reactions]
