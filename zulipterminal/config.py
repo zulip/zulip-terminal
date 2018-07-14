@@ -96,6 +96,10 @@ KEY_BINDINGS = {
         'keys': {'x'},
         'help_text': 'New private message',
     },
+    'TAB': {
+        'keys': {'tab'},
+        'help_text': 'Toggle focus box in compose box'
+    }
 }
 
 
