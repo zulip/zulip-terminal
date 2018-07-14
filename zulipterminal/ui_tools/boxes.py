@@ -143,13 +143,14 @@ class MessageBox(urwid.Pile):
             return None
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
-        stream_title = (bar_color, [
+        stream_title_markup = (bar_color, [
             (bar_color, self.caption),
             (bar_color, ">"),
             (bar_color, self.title)
         ])
-        stream_title = urwid.Text(stream_title)
+        stream_title = urwid.Text(stream_title_markup)
         header = urwid.AttrWrap(stream_title, bar_color)
+        header.markup = stream_title_markup
         return header
 
     def private_view(self) -> Any:
@@ -170,13 +171,14 @@ class MessageBox(urwid.Pile):
             for recipient in self.message['display_recipient']
             if recipient['email'] != self.model.client.email
         ))
-        title = ('header', [
+        title_markup = ('header', [
             ('custom', 'Private Messages with'),
             ('selected', ": "),
             ('custom', self.recipients)
         ])
-        title = urwid.Text(title)
+        title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, "header")
+        header.markup = title_markup
         return header
 
     def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
@@ -312,8 +314,16 @@ class SearchBox(urwid.Pile):
 
     def main_view(self) -> Any:
         self.text_box = ReadlineEdit(u"Search: ")
+        # Add some text so that when packing,
+        # urwid doesn't hide the widget.
+        self.msg_narrow = urwid.Text("DONT HIDE")
+        w = urwid.Columns([
+            ('pack', self.msg_narrow),
+            ('pack', urwid.Text("  ")),
+            self.text_box,
+        ])
         self.w = urwid.LineBox(
-            self.text_box, tlcorner=u'', tline=u'', lline=u'',
+            w, tlcorner=u'', tline=u'', lline=u'',
             trcorner=u'', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─')
         return [self.w]
