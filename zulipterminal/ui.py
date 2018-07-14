@@ -32,8 +32,9 @@ class View(urwid.WidgetWrap):
             ('active',       'white',         'black'),
             ('idle',         'yellow',        'black'),
             ('title',        'white, bold',   'black'),
-            ('time',         'light gray',    'black'),
+            ('time',         'light blue', 'black'),
             ('bar',          'white',         'black'),
+            ('emoji',        'light magenta', 'black'),
         ],
         'light': [
             (None,           'black',        'white'),

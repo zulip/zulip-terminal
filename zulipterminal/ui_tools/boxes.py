@@ -193,7 +193,10 @@ class MessageBox(urwid.Pile):
             emojis = ''.join(e.encode().decode('unicode-escape') for e in dis)
             custom_emojis = ''.join(
                 ['{} {}'.format(r, custom_reacts[r]) for r in custom_reacts])
-            return urwid.Text(emoji.demojize(emojis + custom_emojis))
+            return urwid.Padding(
+                urwid.Text(([
+                    ('emoji', emoji.demojize(emojis + custom_emojis))
+                ])), align='center', width=('relative', 80))
         except Exception:
             return ''
 
@@ -206,7 +209,8 @@ class MessageBox(urwid.Pile):
         reactions = self.reactions_view(self.message['reactions'])
 
         content = [emoji.demojize(self.message['content'])]
-        content = urwid.Text(content)
+        content = urwid.Padding(urwid.Text(content),
+                                align='center', width=('relative', 80))
 
         message_author = self.message['sender_full_name']
         message_time = self._time_for_message(self.message)
