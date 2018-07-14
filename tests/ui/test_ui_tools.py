@@ -545,7 +545,6 @@ class TestRightColumnView:
         assert right_col_view.view == self.view
         assert right_col_view.user_search == self.user_search(right_col_view)
         assert right_col_view.view.user_search == right_col_view.user_search
-        self.line_box.assert_called_once_with(right_col_view.user_search)
         self.thread.Lock.assert_called_with()
         assert right_col_view.search_lock == self.thread.Lock()
         self.super.assert_called_once_with(right_col_view.users_view(),
@@ -680,7 +679,6 @@ class TestLeftColumnView:
             controller=self.view.controller,
             view=self.view,
             count=1)
-        line_box.assert_called_once_with(stream_view(), title="Streams")
 
 
 class TestHelpMenu:

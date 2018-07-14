@@ -40,7 +40,6 @@ class TestView:
         middle_view.assert_called_once_with(view.model, view.write_box,
                                             view.search_box)
         assert view.middle_column == middle_view()
-        line_box.assert_called_once_with(view.middle_column)
         assert return_value == line_box()
 
     def test_right_column_view(self, view, mocker):
@@ -49,7 +48,6 @@ class TestView:
         return_value = view.right_column_view()
         right_view.assert_called_once_with(view)
         assert view.users_view == right_view()
-        line_box.assert_called_once_with(view.users_view, title=u"Users")
         assert return_value == line_box()
 
     def test_main_window(self, mocker):

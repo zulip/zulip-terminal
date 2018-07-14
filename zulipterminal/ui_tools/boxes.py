@@ -19,12 +19,22 @@ class WriteBox(urwid.Pile):
 
     def main_view(self, new: bool) -> Any:
         private_button = MenuButton(u"New Private Message")
+        private_button._w.original_widget.set_align_mode('center')
         urwid.connect_signal(private_button, 'click', self.private_box_view)
         stream_button = MenuButton(u"New Topic")
+        stream_button._w.original_widget.set_align_mode('center')
         urwid.connect_signal(stream_button, 'click', self.stream_box_view)
         w = urwid.Columns([
-            urwid.LineBox(private_button),
-            urwid.LineBox(stream_button),
+            urwid.LineBox(
+                private_button, tlcorner=u'─', tline=u'─', lline=u'',
+                trcorner=u'┐', blcorner=u'', rline=u'│',
+                bline=u'', brcorner=u''
+                ),
+            urwid.LineBox(
+                stream_button, tlcorner=u'─', tline=u'─', lline=u'',
+                trcorner=u'─', blcorner=u'', rline=u'',
+                bline=u'', brcorner=u''
+                ),
         ])
         if new:
             return [w]
@@ -302,7 +312,10 @@ class SearchBox(urwid.Pile):
 
     def main_view(self) -> Any:
         self.text_box = ReadlineEdit(u"Search: ")
-        self.w = urwid.LineBox(self.text_box)
+        self.w = urwid.LineBox(
+            self.text_box, tlcorner=u'', tline=u'', lline=u'',
+            trcorner=u'', blcorner=u'─', rline=u'',
+            bline=u'─', brcorner=u'─')
         return [self.w]
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
