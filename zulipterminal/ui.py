@@ -69,12 +69,17 @@ class View(urwid.WidgetWrap):
     def message_view(self) -> Any:
         self.middle_column = MiddleColumnView(self.model, self.write_box,
                                               self.search_box)
-        w = urwid.LineBox(self.middle_column)
+        w = urwid.LineBox(self.middle_column, bline="")
         return w
 
     def right_column_view(self) -> Any:
         self.users_view = RightColumnView(self)
-        w = urwid.LineBox(self.users_view, title=u"Users")
+        w = urwid.LineBox(
+            self.users_view, title=u"Users",
+            tlcorner=u'─', tline=u'─', lline=u'',
+            trcorner=u'─', blcorner=u'─', rline=u'',
+            bline=u'', brcorner=u''
+        )
         return w
 
     def main_window(self) -> Any:
