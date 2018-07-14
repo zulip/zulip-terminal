@@ -107,8 +107,7 @@ class View(urwid.WidgetWrap):
             urwid.Divider(div_char=div_char),
         ])
 
-        w = urwid.Frame(self.body, title_bar, footer=urwid.Text(""),
-                        focus_part='body')
+        w = urwid.Frame(self.body, title_bar, focus_part='body')
         return w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
