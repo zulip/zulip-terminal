@@ -179,7 +179,9 @@ class StreamsView(urwid.Frame):
         self.search_box = StreamSearchBox(self)
         urwid.connect_signal(self.search_box, 'change', self.update_streams)
         super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
-            self.search_box
+            self.search_box, tlcorner=u'─', tline=u'─', lline=u'',
+            trcorner=u'─', blcorner=u'─', rline=u'',
+            bline=u'─', brcorner=u'─'
         ))
         self.search_lock = threading.Lock()
 
@@ -355,7 +357,11 @@ class RightColumnView(urwid.Frame):
         urwid.connect_signal(self.user_search, 'change',
                              self.update_user_list)
         self.view.user_search = self.user_search
-        search_box = urwid.LineBox(self.user_search)
+        search_box = urwid.LineBox(
+            self.user_search, tlcorner=u'─', tline=u'─', lline=u'',
+            trcorner=u'─', blcorner=u'─', rline=u'',
+            bline=u'─', brcorner=u'─'
+            )
         self.search_lock = threading.Lock()
         super(RightColumnView, self).__init__(self.users_view(),
                                               header=search_box)
@@ -451,7 +457,12 @@ class LeftColumnView(urwid.Pile):
                 )
             )
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
-        w = urwid.LineBox(self.view.stream_w, title="Streams")
+        w = urwid.LineBox(
+            self.view.stream_w, title="Streams",
+            tlcorner=u'─', tline=u'─', lline=u'',
+            trcorner=u'─', blcorner=u'', rline=u'',
+            bline=u'', brcorner=u'─'
+            )
         return w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:

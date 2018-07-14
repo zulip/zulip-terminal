@@ -78,7 +78,7 @@ class StreamButton(urwid.Button):
 
     def widget(self, count: int) -> Any:
         return urwid.AttrMap(urwid.SelectableIcon(
-            [(self.color, u'# '), self.caption,
+            [(self.color, u' # '), self.caption,
              ('idle', '' if count <= 0 else ' ' + str(count))],
             len(self.caption) + 2),
             None,
