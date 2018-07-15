@@ -92,3 +92,7 @@ cov_html/*
 Pipfile.lock
 zulipterminal.egg-info
 debug.log
+dist/*
+build/*
+zulip_term.egg-info
+
