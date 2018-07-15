@@ -196,7 +196,8 @@ class MessageBox(urwid.Pile):
             return urwid.Padding(
                 urwid.Text(([
                     ('emoji', emoji.demojize(emojis + custom_emojis))
-                ])), align='center', width=('relative', 80))
+                ])), align='left', width=('relative', 50), left=35,
+                min_width=50)
         except Exception:
             return ''
 
@@ -210,7 +211,8 @@ class MessageBox(urwid.Pile):
 
         content = [emoji.demojize(self.message['content'])]
         content = urwid.Padding(urwid.Text(content),
-                                align='center', width=('relative', 80))
+                                align='left', width=('relative', 50), left=35,
+                                min_width=50)
 
         message_author = self.message['sender_full_name']
         message_time = self._time_for_message(self.message)
