@@ -28,7 +28,7 @@ class View(urwid.WidgetWrap):
             ('custom',       'white',         'dark blue',  'underline'),
             ('content',      'white',         'black',      'standout'),
             ('name',         'yellow, bold',  'black'),
-            ('unread',       'black',         'light gray'),
+            ('unread',       'light blue',    'black'),
             ('active',       'white',         'black'),
             ('idle',         'yellow',        'black'),
             ('title',        'white, bold',   'black'),
