@@ -41,8 +41,8 @@ dev_helper_deps = [
 ]
 
 setup(
-    name='zulipterminal',
-    version='0.1.0',
+    name='zulip-term',
+    version='0.2.0',
     description='A terminal-based interface to zulip chat',
     long_description=long_description(),
     url='https://github.com/zulip/zulip-terminal',
@@ -50,7 +50,7 @@ setup(
     author_email='zulip-devel@googlegroups.com',
     license='MIT',
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
 
         'Intended Audience :: End Users/Desktop',
         'Topic :: Communications :: Chat',
