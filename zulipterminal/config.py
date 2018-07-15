@@ -99,7 +99,11 @@ KEY_BINDINGS = {
     'TAB': {
         'keys': {'tab'},
         'help_text': 'Toggle focus box in compose box'
-    }
+    },
+    'THUMBS_UP': {
+        'keys': {'+'},
+        'help_text': 'Add/remove thumbs-up reaction on a message',
+    },
 }
 
 

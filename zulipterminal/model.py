@@ -111,6 +111,30 @@ class Model:
             current_ids = self.index['search']
         return current_ids.copy()
 
+    @async
+    def react_to_message(self,
+                         message: Dict[str, Any],
+                         reaction_to_toggle: str) -> None:
+        # FIXME Only support thumbs_up for now
+        assert reaction_to_toggle == 'thumbs_up'
+
+        endpoint = 'messages/{}/reactions'.format(message['id'])
+        reaction_to_toggle_spec = dict(
+            emoji_name='thumbs_up',
+            reaction_type='unicode_emoji',
+            emoji_code='1f44d')
+        existing_reactions = [reaction['emoji_code']
+                              for reaction in message['reactions']
+                              if ('user_id' in reaction['user'] and
+                                  reaction['user']['user_id'] == self.user_id)]
+        if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
+            method = 'DELETE'
+        else:
+            method = 'POST'
+        response = self.client.call_endpoint(url=endpoint,
+                                             method=method,
+                                             request=reaction_to_toggle_spec)
+
     def get_messages(self, first_anchor: bool) -> Any:
         request = {
             'anchor': self.anchor,
