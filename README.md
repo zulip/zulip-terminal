@@ -7,19 +7,15 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 https://codecov.io/gh/zulip/zulip-terminal)
 ## Setup:
 
-1. Download and install the prerequisite tools ([pipsi](https://github.com/mitsuhiko/pipsi))
+1. Install the package:
 ```
-$ curl -SsLo /tmp/get-pipsi.py https://raw.githubusercontent.com/mitsuhiko/pipsi/master/get-pipsi.py
-$ python3 /tmp/get-pipsi.py
-$ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
-```
-
-2. Install the package:
-```
-$ pipsi install --python python3 'git+https://github.com/zulip/zulip-terminal.git@master#egg=zulipterminal'
+[sudo] pip3 install virtualenv
+virtualenv /tmp/zt/
+. /tmp/zt/bin/activate
+pip3 install zulip-term
 ```
 
-3. Run Zulip Terminal:
+2. Run Zulip Terminal:
 ```
 $ zulip-term
 ```
