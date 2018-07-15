@@ -125,6 +125,11 @@ class MessageView(urwid.ListBox):
             else:
                 return super(MessageView, self).keypress(size, 'page down')
 
+        elif is_command_key('THUMBS_UP', key):
+            self.model.react_to_message(self.focus.original_widget.message,
+                                        reaction_to_toggle='thumbs_up')
+            return key
+
         key = super(MessageView, self).keypress(size, key)
         return key
 
