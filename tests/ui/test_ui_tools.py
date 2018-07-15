@@ -158,24 +158,6 @@ class TestMessageView:
         msg_view.load_old_messages.assert_called_with()
         assert return_value == key
 
-    @pytest.mark.parametrize('msg_type', [
-        ('stream',),
-        ('private',),
-    ])
-    def test_update_current_footer(self, msg_type, mocker, msg_view):
-        view = mocker.Mock()
-        view.message = {
-            'type': msg_type,
-        }
-        footer = mocker.Mock()
-        footer.contents = [("STREAM", "OPTIONS"),
-                           ("STREAM", "OPTIONS")]
-        footer.options.return_value = "OPTIONS"
-        view.stream_view.return_value = footer
-        view.private_view.return_value = footer
-        msg_view.update_current_footer(view)
-        assert self.model.controller.view._w.set_footer.called
-
     def test_read_message(self, mocker, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
