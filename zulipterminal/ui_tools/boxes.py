@@ -21,7 +21,7 @@ class WriteBox(urwid.Pile):
         if new:
             return []
         else:
-            self.contents = []
+            self.contents.clear()
 
     def set_editor_mode(self) -> None:
         # if not in the editor mode already set editor_mode to True.
