@@ -45,6 +45,7 @@ setup(
     version='0.2.0',
     description='A terminal-based interface to zulip chat',
     long_description=long_description(),
+    long_description_content_type='text/markdown',
     url='https://github.com/zulip/zulip-terminal',
     author='Zulip',
     author_email='zulip-devel@googlegroups.com',
