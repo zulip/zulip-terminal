@@ -250,7 +250,8 @@ class Controller:
             'update_message',
             'reaction',
         ]
-        response = self.client.register(event_types=event_types)
+        response = self.client.register(event_types=event_types,
+                                        apply_markdown=True)
         self.max_message_id = response['max_message_id']
         self.queue_id = response['queue_id']
         self.last_event_id = response['last_event_id']
