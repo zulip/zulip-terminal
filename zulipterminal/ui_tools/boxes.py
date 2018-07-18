@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Tuple, Union
 import emoji
 import urwid
 from urwid_readline import ReadlineEdit
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
 
 from zulipterminal.ui_tools.buttons import MenuButton
 from zulipterminal.config import is_command_key
@@ -209,6 +211,60 @@ class MessageBox(urwid.Pile):
         except Exception:
             return ''
 
+    def soup2markup(self, soup: Any) -> List[Any]:
+        markup = []
+        for element in soup:
+            if isinstance(element, NavigableString):
+                # NORMAL STRINGS
+                markup.append(element)
+            elif element.name == 'div' and\
+                    'message_embed' in element.attrs.get('class'):
+                # Do not display embedded content
+                # since Embedded content can be very dynamic
+                # TODO: Support Embedded content
+                continue
+            elif element.name == 'span' and\
+                    'user-mention' in element.attrs.get('class', []):
+                # USER MENTIONS
+                markup.append(('span', element.text))
+            elif element.name == 'a':
+                # LINKS
+                link = element.attrs['href']
+                text = element.text
+                if link == text:
+                    # If the link and text are same
+                    # usually the case when user just pastes
+                    # a link then just display the link
+                    markup.append(text)
+                else:
+                    if link.startswith('/user_uploads/'):
+                        # Append org url to before user_uploads to convert it
+                        # into a link.
+                        link = self.model.client.base_url + link
+                    markup.append(
+                        ('link', '[' + text + ']' + '(' + link + ')'))
+            elif element.name == 'blockquote':
+                # BLOCKQOTE TEXT
+                markup.append((
+                    'blockquote', self.soup2markup(element)
+                ))
+            elif element.name == 'code':
+                markup.append((
+                    'code', element.text
+                ))
+            elif element.name == 'div' and\
+                    'codehilite' in element.attrs.get('class', []):
+                markup.append((
+                    'code', element.text
+                ))
+            elif element.name == 'strong':
+                    markup.append(('bold', element.text))
+            # elif not element.find_all('span', 'user-mention'):
+            #     markup.append(element.text)
+            else:
+                markup.extend(self.soup2markup(element))
+        return markup
+
     def main_view(self) -> List[Any]:
         if self.message['type'] == 'stream':
             header = self.stream_view()
@@ -216,8 +272,8 @@ class MessageBox(urwid.Pile):
             header = self.private_view()
 
         reactions = self.reactions_view(self.message['reactions'])
-
-        content = [emoji.demojize(self.message['content'])]
+        soup = BeautifulSoup(self.message['content'], 'html.parser')
+        content = (None, self.soup2markup(soup))
         content = urwid.Padding(urwid.Text(content),
                                 align='left', width=('relative', 90), left=25,
                                 min_width=50)
