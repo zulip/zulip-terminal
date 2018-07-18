@@ -152,7 +152,8 @@ class TestController:
             'reaction'
         ]
         controller.client.register.assert_called_once_with(
-                                   event_types=event_types)
+                                   event_types=event_types,
+                                   apply_markdown=True)
 
     def test_main(self, mocker, controller):
         ret_mock = mocker.Mock()

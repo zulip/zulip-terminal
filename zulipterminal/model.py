@@ -140,13 +140,16 @@ class Model:
             'anchor': self.anchor,
             'num_before': self.num_before,
             'num_after': self.num_after,
-            'apply_markdown': False,
+            'apply_markdown': True,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
             'narrow': json.dumps(self.narrow),
         }
         response = self.client.do_api_query(request, '/json/messages',
                                             method="GET")
+        for msg in response['messages']:
+            with open('../res.txt', 'a') as f:
+                f.write(str(msg['content']) + "\n\n")
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
