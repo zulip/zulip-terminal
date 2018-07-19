@@ -259,8 +259,9 @@ class MessageBox(urwid.Pile):
                 ))
             elif element.name == 'strong':
                     markup.append(('bold', element.text))
-            # elif not element.find_all('span', 'user-mention'):
-            #     markup.append(element.text)
+            elif element.name == 'ul':
+                # TODO: Support nested lists.
+                markup.append(element.text)
             else:
                 markup.extend(self.soup2markup(element))
         return markup

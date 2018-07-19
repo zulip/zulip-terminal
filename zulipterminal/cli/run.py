@@ -60,8 +60,13 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
                       "\nPlease enter your credentials to login into your"
                       " Zulip organization."
                       "\n\033[94mZulip-Realm URL:\033[0m ")
-    if not realm_url.startswith('https://'):
-        realm_url = 'https://' + realm_url
+    if realm_url.startswith("localhost"):
+        realm_url = "http://" + realm_url
+    elif not realm_url.startswith("http"):
+        realm_url = "https://" + realm_url
+    # Remove trailing "/"s from realm_url to simplify the below logic
+    # for adding "/api"
+    realm_url = realm_url.rstrip("/")
     res, email = get_api_key(realm_url)
 
     while res.status_code != 200:
