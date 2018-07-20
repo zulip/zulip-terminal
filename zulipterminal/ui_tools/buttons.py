@@ -20,6 +20,7 @@ class HomeButton(urwid.Button):
         self.count = count
         super(HomeButton, self).__init__("")
         self._w = self.widget(count)
+        self.controller = controller
         urwid.connect_signal(self, 'click', controller.show_all_messages)
 
     def update_count(self, count: int) -> None:
@@ -34,6 +35,11 @@ class HomeButton(urwid.Button):
             None,
             'selected')
 
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('ENTER', key):
+            self.controller.view.toggle_left_panel()
+        return super(HomeButton, self).keypress(size, key)
+
 
 class PMButton(urwid.Button):
     def __init__(self, controller: Any, count: int=0) -> None:
@@ -41,6 +47,7 @@ class PMButton(urwid.Button):
         super(PMButton, self).__init__("")
         self.count = count
         self._w = self.widget(count)
+        self.controller = controller
         urwid.connect_signal(self, 'click', controller.show_all_pm)
 
     def update_count(self, count: int) -> None:
@@ -54,6 +61,11 @@ class PMButton(urwid.Button):
             len(self.caption) + 4),
             None,
             'selected')
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('ENTER', key):
+            self.controller.view.toggle_left_panel()
+        return super(PMButton, self).keypress(size, key)
 
 
 class StreamButton(urwid.Button):
@@ -70,6 +82,7 @@ class StreamButton(urwid.Button):
         self.count = count
         super(StreamButton, self).__init__("")
         self._w = self.widget(count)
+        self.controller = controller
         urwid.connect_signal(self, 'click', controller.narrow_to_stream)
 
     def update_count(self, count: int) -> None:
@@ -83,6 +96,11 @@ class StreamButton(urwid.Button):
             len(self.caption) + 2),
             None,
             'selected')
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('ENTER', key):
+            self.controller.view.toggle_left_panel()
+        return super(StreamButton, self).keypress(size, key)
 
 
 class UserButton(urwid.Button):
@@ -118,7 +136,7 @@ class UserButton(urwid.Button):
             self.view.body.focus_col = 1
             self.view.body.focus.original_widget.set_focus('footer')
             self.view.write_box.private_box_view(self)
-            return key
+            self.view.toggle_left_panel()
         return super(UserButton, self).keypress(size, key)
 
 
