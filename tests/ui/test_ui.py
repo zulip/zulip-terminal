@@ -75,9 +75,9 @@ class TestView:
         right.assert_called_once_with()
         expected_column_calls = [
             mocker.call([
-                (25, left()),
+                (0, left()),
                 ('weight', 10, center()),
-                (25, right()),
+                (0, right()),
                 ], focus_column=1),
             mocker.call([
                 title_divider(),
@@ -108,6 +108,9 @@ class TestView:
     def test_keypress_w(self, view, mocker):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
+        view.body.contents = [mocker.Mock()]
+        view.left_column = mocker.Mock()
+        view.right_column = mocker.Mock()
         view.user_search = mocker.Mock()
         size = (20,)
 
@@ -117,7 +120,7 @@ class TestView:
         # Test "w" keypress
         view.keypress(size, "w")
         view.users_view.keypress.assert_called_once_with(size, "w")
-        assert view.body.focus_col == 2
+        assert view.body.focus_col == 0
         view.user_search.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
@@ -127,6 +130,9 @@ class TestView:
         view.left_col_w = mocker.Mock()
         view.stream_w.search_box = mocker.Mock()
         view.body = mocker.Mock()
+        view.body.contents = [mocker.Mock()]
+        view.left_column = mocker.Mock()
+        view.right_column = mocker.Mock()
         size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
