@@ -139,9 +139,8 @@ class MessageBox(urwid.Pile):
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
         stream_title_markup = ('bar', [
-            (bar_color, self.caption),
-            (None, '>'),
-            ('title', self.title)
+            (bar_color, '{} >'.format(self.caption)),
+            ('title', ' {} '.format(self.title))
         ])
         stream_title = urwid.Text(stream_title_markup)
         header = urwid.AttrWrap(stream_title, 'bar')
