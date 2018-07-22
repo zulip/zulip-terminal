@@ -273,7 +273,7 @@ class MessageBox(urwid.Pile):
             header = self.private_view()
 
         reactions = self.reactions_view(self.message['reactions'])
-        soup = BeautifulSoup(self.message['content'], 'html.parser')
+        soup = BeautifulSoup(self.message['content'], 'lxml')
         content = (None, self.soup2markup(soup))
         content = urwid.Padding(urwid.Text(content),
                                 align='left', width=('relative', 90), left=25,

@@ -1,4 +1,5 @@
 import pytest
+from collections import defaultdict
 
 from zulipterminal.ui_tools.views import (
     MessageView,
@@ -9,6 +10,7 @@ from zulipterminal.ui_tools.views import (
     LeftColumnView,
     HelpView,
 )
+from zulipterminal.ui_tools.boxes import MessageBox
 
 VIEWS = "zulipterminal.ui_tools.views"
 
@@ -630,13 +632,6 @@ class TestLeftColumnView:
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
 
-    @pytest.fixture
-    def left_col_view(self, mocker):
-        self.menu_view = mocker.patch(VIEWS + ".LeftColumnView.menu_view")
-        self.streams_view = mocker.patch(
-            VIEWS + ".LeftColumnView.streams_view")
-        return LeftColumnView(self.view)
-
     def test_menu_view(self, mocker):
         self.streams_view = mocker.patch(
             VIEWS + ".LeftColumnView.streams_view")
@@ -681,3 +676,80 @@ class TestHelpMenu:
         size = (200, 20)
         self.help_view.keypress(size, key)
         assert self.controller.exit_help.called
+
+
+class TestMessageBox:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.model = mocker.Mock()
+
+    def test_init(self, mocker):
+        mocker.patch.object(MessageBox, 'main_view')
+        msg_box = MessageBox({}, self.model, None)
+        assert msg_box.last_message == defaultdict(dict)
+
+    @pytest.mark.parametrize('message, last_message', [
+        ({
+            'sender_id': 1,
+            'display_recipient': 'Verona',
+            'sender_full_name': 'aaron',
+            'submessages': [],
+            'stream_id': 5,
+            'subject': 'Verona2',
+            'id': 37,
+            'subject_links': [],
+            'recipient_id': 20,
+            'content': "<p>It's nice and it feels more modern, but I think"
+                       " this will take some time to get used to</p>",
+            'timestamp': 1531716583,
+            'sender_realm_str': 'zulip',
+            'client': 'populate_db',
+            'content_type': 'text/html',
+            'reactions': [],
+            'type': 'stream',
+            'is_me_message': False,
+            'sender_short_name': 'aaron',
+            'flags': ['read'],
+            'sender_email': 'AARON@zulip.com'
+        }, None),
+        ({
+            'sender_id': 5,
+            'display_recipient': [{
+                'is_mirror_dummy': False,
+                'short_name': 'aaron',
+                'email': 'AARON@zulip.com',
+                'id': 1,
+                'full_name': 'aaron'
+            }, {
+                'is_mirror_dummy': False,
+                'short_name': 'iago',
+                'email': 'iago@zulip.com',
+                'id': 5,
+                'full_name': 'Iago'
+            }],
+            'sender_full_name': 'Iago',
+            'submessages': [],
+            'subject': '',
+            'id': 107,
+            'subject_links': [],
+            'recipient_id': 1,
+            'content': '<p>what are you planning to do this week</p>',
+            'timestamp': 1532103879,
+            'sender_realm_str': 'zulip',
+            'client': 'ZulipTerminal',
+            'content_type': 'text/html',
+            'reactions': [],
+            'type': 'private',
+            'is_me_message': False,
+            'sender_short_name': 'iago',
+            'flags': ['read'],
+            'sender_email': 'iago@zulip.com'
+        }, None)
+    ])
+    def test_main_view(self, mocker, message, last_message):
+        self.model.stream_dict = {
+            5: {
+                'color': '#bfd56f',
+            },
+        }
+        msg_box = MessageBox(message, self.model, last_message)
