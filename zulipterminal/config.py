@@ -29,7 +29,7 @@ KEY_BINDINGS = {
         'help_text': 'Go to last message in view',
     },
     'REPLY_MESSAGE': {
-        'keys': {'r'},
+        'keys': {'r', 'enter'},
         'help_text': 'Reply to a message',
     },
     'REPLY_AUTHOR': {
