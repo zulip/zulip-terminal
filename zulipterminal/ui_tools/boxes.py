@@ -34,7 +34,7 @@ class WriteBox(urwid.Pile):
         if email == '' and button is not None:
             email = button.email
         self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
-        self.msg_write_box = ReadlineEdit(u"> ", multiline=True)
+        self.msg_write_box = ReadlineEdit(multiline=True)
         self.contents = [
             (urwid.LineBox(self.to_write_box), self.options()),
             (self.msg_write_box, self.options()),
@@ -47,7 +47,7 @@ class WriteBox(urwid.Pile):
         self.to_write_box = None
         if caption == '' and button is not None:
             caption = button.caption
-        self.msg_write_box = ReadlineEdit(u"> ", multiline=True)
+        self.msg_write_box = ReadlineEdit(multiline=True)
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
