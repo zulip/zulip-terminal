@@ -107,7 +107,11 @@ KEY_BINDINGS = {
     'MENTION_REPLY': {
         'keys': {'@'},
         'help_text': 'Reply mentioning the sender of the message'
-    }
+    },
+    'QUOTE_REPLY': {
+        'keys': {'>'},
+        'help_text': 'Reply quoting message text',
+    },
 }
 
 

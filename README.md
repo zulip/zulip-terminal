@@ -50,6 +50,8 @@ theme=default
 | Scroll up                                             | <kbd>PgUp</kbd> / <kbd>K</kbd>                |
 | Reply to a message                                    | <kbd>r</kbd>                                  |
 | Reply to an author                                    | <kbd>R</kbd>                                  |
+| Reply mentioning sender of the message                | <kbd>@</kbd>                                  |
+| Reply quoting the message text                        | <kbd>></kbd>                                  |
 | New stream message                                    | <kbd>c</kbd>                                  |
 | New private message                                   | <kbd>x</kbd>                                  |
 | Go Back                                               | <kbd>esc</kbd>                                |
