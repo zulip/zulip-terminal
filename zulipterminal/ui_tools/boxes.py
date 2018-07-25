@@ -301,6 +301,14 @@ class MessageBox(urwid.Pile):
             )
         elif is_command_key('ALL_PM', key):
             self.model.controller.show_all_pm(self)
+        elif is_command_key('MENTION_REPLY', key):
+            self.keypress(size, 'enter')
+            mention = '@**' + self.message['sender_full_name'] + '** '
+            self.model.controller.view.write_box.msg_write_box.set_edit_text(
+                mention)
+            self.model.controller.view.write_box.msg_write_box.set_edit_pos(
+                len(mention))
+            self.model.controller.view.middle_column.set_focus('footer')
         return key
 
 

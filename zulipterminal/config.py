@@ -104,6 +104,10 @@ KEY_BINDINGS = {
         'keys': {'+'},
         'help_text': 'Add/remove thumbs-up reaction on a message',
     },
+    'MENTION_REPLY': {
+        'keys': {'@'},
+        'help_text': 'Reply mentioning the sender of the message'
+    }
 }
 
 
