@@ -35,8 +35,13 @@ class WriteBox(urwid.Pile):
             email = button.email
         self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
+        to_write_box = urwid.LineBox(
+            self.to_write_box, tlcorner=u'─', tline=u'─', lline=u'',
+            trcorner=u'─', blcorner=u'─', rline=u'',
+            bline=u'─', brcorner=u'─'
+        )
         self.contents = [
-            (urwid.LineBox(self.to_write_box), self.options()),
+            (to_write_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
         self.focus_position = 1
@@ -56,8 +61,16 @@ class WriteBox(urwid.Pile):
                                             edit_text=title)
 
         header_write_box = urwid.Columns([
-            urwid.LineBox(self.stream_write_box),
-            urwid.LineBox(self.title_write_box),
+            urwid.LineBox(
+                self.stream_write_box, tlcorner=u'─', tline=u'─', lline=u'',
+                trcorner=u'┐', blcorner=u'─', rline=u'│',
+                bline=u'─', brcorner=u'┘'
+            ),
+            urwid.LineBox(
+                self.title_write_box, tlcorner=u'─', tline=u'─', lline=u'',
+                trcorner=u'─', blcorner=u'─', rline=u'',
+                bline=u'─', brcorner=u'─'
+            ),
         ])
         write_box = [
             (header_write_box, self.options()),
