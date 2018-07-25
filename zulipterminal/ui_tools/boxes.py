@@ -88,10 +88,6 @@ class WriteBox(urwid.Pile):
             self.view.controller.editor_mode = False
             self.main_view(False)
             self.view.middle_column.set_focus('body')
-        elif is_command_key('GO_RIGHT', key) and self.to_write_box is None:
-            self.contents[0][0].focus_col = 1
-        elif is_command_key('GO_LEFT', key) and self.to_write_box is None:
-            self.contents[0][0].focus_col = 0
         elif is_command_key('TAB', key):
             if len(self.contents) == 0:
                 return key
