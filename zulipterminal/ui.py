@@ -1,7 +1,7 @@
 import platform
 import re
 from urllib.parse import urlparse
-from typing import Any, Tuple, List
+from typing import Any, Tuple, List, Dict
 import random
 
 import urwid
@@ -106,6 +106,23 @@ class View(urwid.WidgetWrap):
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), 'footer')
+
+    def handle_typing_event(self, event: Dict['str', Any]) -> None:
+        # If the user is in pm narrow with the person typing
+        if len(self.model.narrow) == 1 and\
+                self.model.narrow[0][0] == 'pm_with' and\
+                event['sender']['email'] in self.model.narrow[0][1].split(','):
+            if event['op'] == 'start':
+                user = self.model.user_dict[event['sender']['email']]
+                self._w.footer.set_text([
+                    ' ',
+                    ('code', user['full_name']),
+                    ' is typing...'
+                ])
+                self.controller.update_screen()
+            elif event['op'] == 'stop':
+                self._w.footer.set_text(self.get_random_help())
+                self.controller.update_screen()
 
     def main_window(self) -> Any:
         self.left_column = self.left_column_view()
