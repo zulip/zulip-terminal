@@ -136,7 +136,7 @@ class MessageView(urwid.ListBox):
         key = super(MessageView, self).keypress(size, key)
         return key
 
-    def update_current_footer(self, message_view: Any) -> None:
+    def update_search_box_narrow(self, message_view: Any) -> None:
         if not hasattr(self.model.controller, 'view'):
             return
         # if view is ready display current narrow
@@ -157,7 +157,7 @@ class MessageView(urwid.ListBox):
         msg_w, curr_pos = self.body.get_focus()
         if msg_w is None:
             return
-        self.update_current_footer(msg_w.original_widget)
+        self.update_search_box_narrow(msg_w.original_widget)
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
