@@ -100,17 +100,20 @@ class TestMessageView:
         key = "down"
         msg_view.new_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
+        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
         msg_view.log.next_position.return_value = 1
         msg_view.keypress(size, key)
         msg_view.log.next_position.assert_called_once_with(
             msg_view.focus_position)
         msg_view.set_focus.assert_called_with(1, 'above')
+        msg_view.set_focus_valign.assert_called_once_with('middle')
 
     def test_keypress_down_key_exception(self, mocker, msg_view):
         size = (20,)
         key = "down"
         msg_view.new_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
+        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
 
         # Raise exception
         msg_view.log.next_position = Exception()
@@ -131,17 +134,20 @@ class TestMessageView:
         key = "up"
         size = (20,)
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
+        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
         msg_view.old_loading = False
         msg_view.log.prev_position.return_value = 1
         msg_view.keypress(size, key)
         msg_view.log.prev_position.assert_called_once_with(
             msg_view.focus_position)
         msg_view.set_focus.assert_called_with(1, 'below')
+        msg_view.set_focus_valign.assert_called_once_with('middle')
 
     def test_keypress_up_raise_exception(self, mocker, msg_view):
         key = "up"
         size = (20,)
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
+        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
         msg_view.old_loading = False
 
         # Raise exception

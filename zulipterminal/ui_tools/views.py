@@ -93,6 +93,8 @@ class MessageView(urwid.ListBox):
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
+                self.set_focus_valign('middle')
+
                 return key
             except Exception:
                 if self.focus:
@@ -104,6 +106,7 @@ class MessageView(urwid.ListBox):
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
+                self.set_focus_valign('middle')
                 return key
             except Exception:
                 if self.focus:
