@@ -54,6 +54,81 @@ class TestView:
         footer = view.footer_view()
         assert isinstance(footer.text, str)
 
+    @pytest.mark.parametrize('narrow, event, called', [
+        # Not in PM Narrow
+        ([], {}, False),
+        # Not in PM Narrow with sender
+        (
+            [['pm_with', 'iago@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'start',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            False,
+        ),
+        # In PM narrow with the sender, OP - 'start'
+        (
+            [['pm_with', 'hamlet@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'start',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            True,
+        ),
+        # OP - 'stop'
+        (
+            [['pm_with', 'hamlet@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'stop',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            True,
+        )
+    ])
+    def test_handle_typing_event(self, mocker, view, narrow, event, called):
+        self.model.narrow = narrow
+
+        view.handle_typing_event(event)
+
+        assert view._w.footer.set_text.called == called
+        assert view.controller.update_screen.called == called
+
     def test_main_window(self, mocker):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')
         center = mocker.patch('zulipterminal.ui.View.message_view')

@@ -249,6 +249,7 @@ class Controller:
             'message',
             'update_message',
             'reaction',
+            'typing',
         ]
         response = self.client.register(event_types=event_types,
                                         apply_markdown=True)

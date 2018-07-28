@@ -375,11 +375,14 @@ class Model:
                 last_event_id = max(last_event_id, int(event['id']))
                 if event['type'] == 'message':
                     self.append_message(event['message'])
-                if event['type'] == 'update_message':
+                elif event['type'] == 'update_message':
                     # FIXME: Support Topic Editing
                     if 'subject' in event.keys():
                         continue
                     else:
                         self.update_message(event)
-                if event['type'] == 'reaction':
+                elif event['type'] == 'reaction':
                     self.update_reaction(event)
+                elif event['type'] == 'typing':
+                    if hasattr(self.controller, 'view'):
+                        self.controller.view.handle_typing_event(event)
