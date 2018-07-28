@@ -43,6 +43,8 @@ class Model:
         self.streams = self.get_subscribed_streams()
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
+        self.new_user_input = True
+        self.update_presence()
 
     @async
     def _update_user_id(self) -> None:
@@ -110,6 +112,20 @@ class Model:
         elif narrow[0][0] == 'search':
             current_ids = self.index['search']
         return current_ids.copy()
+
+    @async
+    def update_presence(self) -> None:
+        # TODO: update response in user list.
+        response = self.client.call_endpoint(
+            url='users/me/presence',
+            request={
+                'status': 'active',
+                'new_user_input': self.new_user_input,
+            }
+        )
+        self.new_user_input = False
+        time.sleep(60)
+        self.update_presence()
 
     @async
     def react_to_message(self,

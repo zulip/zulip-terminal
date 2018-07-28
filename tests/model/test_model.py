@@ -15,6 +15,7 @@ class TestModel:
                                        return_value=None)
         self.client = mocker.patch('zulipterminal.core.'
                                    'Controller.client')
+        mocker.patch('zulipterminal.model.Model.update_presence')
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile):
