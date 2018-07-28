@@ -170,7 +170,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(VIEWS + ".MessageView.set_focus")
-        mocker.patch(VIEWS + ".MessageView.update_current_footer")
+        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
         msg_view = MessageView(self.model)
         msg_w = mocker.MagicMock()
         msg_w.attr_map = {None: 'unread'}
@@ -193,7 +193,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.focus_position")
         msg_view.focus_position = 1
         msg_view.read_message()
-        assert msg_view.update_current_footer.called
+        assert msg_view.update_search_box_narrow.called
         assert msg_view.model.index['messages'][1]['flags'] == ['read']
         update_flag.assert_called_once_with([1], self.model.controller)
 
