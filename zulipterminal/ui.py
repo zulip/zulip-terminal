@@ -144,6 +144,7 @@ class View(urwid.WidgetWrap):
         self.body.focus_col = 1
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
+        self.model.new_user_input = True
         if self.controller.editor_mode:
             return self.controller.editor.keypress((size[1],), key)
         # Redirect commands to message_view.
