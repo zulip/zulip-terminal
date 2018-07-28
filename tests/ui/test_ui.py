@@ -50,6 +50,10 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == line_box()
 
+    def test_footer_view(self, mocker, view):
+        footer = view.footer_view()
+        assert isinstance(footer.text, str)
+
     def test_main_window(self, mocker):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')
         center = mocker.patch('zulipterminal.ui.View.message_view')
@@ -58,6 +62,7 @@ class TestView:
         frame = mocker.patch('zulipterminal.ui.urwid.Frame')
         title_divider = mocker.patch('zulipterminal.ui.urwid.Divider')
         text = mocker.patch('zulipterminal.ui.urwid.Text')
+        footer_view = mocker.patch('zulipterminal.ui.View.footer_view')
 
         full_name = "Bob James"
         email = "Bob@bob.com"
@@ -88,8 +93,8 @@ class TestView:
         col.assert_has_calls(expected_column_calls)
 
         assert view.body == col()
-        frame.assert_called_once_with(view.body, col(),
-                                      focus_part='body')
+        frame.assert_called_once_with(
+            view.body, col(), focus_part='body', footer=footer_view())
 
     def test_keypress(self, view, mocker):
         view.users_view = mocker.Mock()

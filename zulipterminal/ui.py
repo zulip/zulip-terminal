@@ -1,11 +1,12 @@
 import platform
 import re
 from urllib.parse import urlparse
-from typing import Any, Tuple
+from typing import Any, Tuple, List
+import random
 
 import urwid
 
-from zulipterminal.config import is_command_key
+from zulipterminal.config import is_command_key, KEY_BINDINGS
 from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
     RightColumnView,
@@ -39,7 +40,8 @@ class View(urwid.WidgetWrap):
             ('link',         'light blue',      'black'),
             ('blockquote',   'brown',           'black'),
             ('code',         'black',           'white'),
-            ('bold',         'white, bold',     'black')
+            ('bold',         'white, bold',     'black'),
+            ('footer',       'white',           'dark red',   'bold')
         ],
         'light': [
             (None,           'black',        'white'),
@@ -91,6 +93,20 @@ class View(urwid.WidgetWrap):
         )
         return w
 
+    def get_random_help(self) -> List[Any]:
+        # Get a hotkey randomly from KEY_BINDINGS
+        random_int = random.randint(0, len(KEY_BINDINGS))
+        hotkey = list(KEY_BINDINGS.items())[random_int]
+        return [
+            'Help(?): ',
+            ('code', ' ' + ', '.join(hotkey[1]['keys']) + ' '),
+            ' ' + hotkey[1]['help_text'],  # type: ignore
+        ]
+
+    def footer_view(self) -> Any:
+        text_header = self.get_random_help()
+        return urwid.AttrWrap(urwid.Text(text_header), 'footer')
+
     def main_window(self) -> Any:
         self.left_column = self.left_column_view()
         self.center_column = self.message_view()
@@ -116,7 +132,8 @@ class View(urwid.WidgetWrap):
             urwid.Divider(div_char=div_char),
         ])
 
-        w = urwid.Frame(self.body, title_bar, focus_part='body')
+        w = urwid.Frame(self.body, title_bar, focus_part='body',
+                        footer=self.footer_view())
         return w
 
     def toggle_left_panel(self) -> None:
