@@ -95,7 +95,7 @@ class View(urwid.WidgetWrap):
 
     def get_random_help(self) -> List[Any]:
         # Get a hotkey randomly from KEY_BINDINGS
-        random_int = random.randint(0, len(KEY_BINDINGS))
+        random_int = random.randint(0, len(KEY_BINDINGS) - 1)
         hotkey = list(KEY_BINDINGS.items())[random_int]
         return [
             'Help(?): ',
