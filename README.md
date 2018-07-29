@@ -156,6 +156,10 @@ To be a part of it and to contribute to the code, feel free to work on any [issu
 Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
 [git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
 
+A simple tutorial for implementing `typing` indicator is available
+in the [wiki](https://github.com/zulip/zulip-terminal/wiki/Developer-Documentation). Follow
+it to understand the how to implement a new feature for zulip-terminal.
+
 ### Debugging Tips
 
 The stdout for zulip-terminal is set to `/tmp/debug.log` by default. 
