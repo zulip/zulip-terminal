@@ -16,11 +16,11 @@ def no_requests(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def no_async(mocker):
+def no_asynch(mocker):
     """
     Make all function calls synchronous.
     """
-    mocker.patch('zulipterminal.helper.async')
+    mocker.patch('zulipterminal.helper.asynch')
 
 # --------------- Controller Fixtures -----------------------------------------
 
