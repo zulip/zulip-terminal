@@ -7,14 +7,14 @@ from typing import Any, Dict, List
 import os
 
 
-def async(func: Any) -> Any:
+def asynch(func: Any) -> Any:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         # If calling when pytest is running simply return the function
-        # to avoid running in async mode.
+        # to avoid running in asynch mode.
         if os.environ.get("PYTEST_CURRENT_TEST"):
             return func(*args, **kwargs)
 
@@ -80,7 +80,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     controller.update_screen()
 
 
-@async
+@asynch
 def update_flag(id_list: List[int], controller: Any) -> None:
     if not id_list:
         return

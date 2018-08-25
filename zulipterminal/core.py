@@ -7,7 +7,7 @@ import time
 import urwid
 import zulip
 
-from zulipterminal.helper import async
+from zulipterminal.helper import asynch
 from zulipterminal.model import Model
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -35,7 +35,7 @@ class Controller:
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
-    @async
+    @asynch
     def show_loading(self) -> None:
 
         def spinning_cursor() -> Any:
@@ -243,7 +243,7 @@ class Controller:
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
-    @async
+    @asynch
     def register_initial_desired_events(self) -> None:
         event_types = [
             'message',

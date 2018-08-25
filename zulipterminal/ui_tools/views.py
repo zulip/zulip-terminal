@@ -5,7 +5,7 @@ import threading
 import urwid
 
 from zulipterminal.config import KEY_BINDINGS, is_command_key
-from zulipterminal.helper import async, update_flag, match_user
+from zulipterminal.helper import asynch, update_flag, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UnreadPMButton,
@@ -44,7 +44,7 @@ class MessageView(urwid.ListBox):
         self.focus_msg = focus_msg
         return msg_btn_list
 
-    @async
+    @asynch
     def load_old_messages(self, anchor: int=10000000000) -> None:
         self.old_loading = True
         # Use the currently focused image as anchor
@@ -62,7 +62,7 @@ class MessageView(urwid.ListBox):
         self.model.controller.update_screen()
         self.old_loading = False
 
-    @async
+    @asynch
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
         self.model.anchor = anchor
@@ -189,7 +189,7 @@ class StreamsView(urwid.Frame):
         ))
         self.search_lock = threading.Lock()
 
-    @async
+    @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
         if not self.view.controller.editor_mode:
             return
@@ -370,7 +370,7 @@ class RightColumnView(urwid.Frame):
         super(RightColumnView, self).__init__(self.users_view(),
                                               header=search_box)
 
-    @async
+    @asynch
     def update_user_list(self, search_box: Any, new_text: str) -> None:
         if not self.view.controller.editor_mode:
             return
