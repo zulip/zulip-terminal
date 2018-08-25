@@ -6,7 +6,7 @@ from typing import Any, Dict, List, FrozenSet, Set, Union, Optional
 import urwid
 
 from zulipterminal.helper import (
-    async,
+    asynch,
     classify_unread_counts,
     index_messages,
     set_count
@@ -46,7 +46,7 @@ class Model:
         self.new_user_input = True
         self.update_presence()
 
-    @async
+    @asynch
     def _update_user_id(self) -> None:
         self.user_id = self.client.get_profile()['user_id']
 
@@ -113,7 +113,7 @@ class Model:
             current_ids = self.index['search']
         return current_ids.copy()
 
-    @async
+    @asynch
     def update_presence(self) -> None:
         # TODO: update response in user list.
         response = self.client.call_endpoint(
@@ -127,7 +127,7 @@ class Model:
         time.sleep(60)
         self.update_presence()
 
-    @async
+    @asynch
     def react_to_message(self,
                          message: Dict[str, Any],
                          reaction_to_toggle: str) -> None:
@@ -342,7 +342,7 @@ class Model:
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
 
-    @async
+    @asynch
     def poll_for_events(self) -> None:
         queue_id = self.controller.queue_id
         last_event_id = self.controller.last_event_id
