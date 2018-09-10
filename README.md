@@ -19,6 +19,8 @@ pip3 install zulip-term
 ```
 $ zulip-term
 ```
+**NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
+
 Alternatively, you can specify the location of `zuliprc` using the -c option
 ```
 $ zulip-term -c /path/to/zuliprc
