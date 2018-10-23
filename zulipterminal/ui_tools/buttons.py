@@ -38,7 +38,8 @@ class TopButton(urwid.Button):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
-            self.controller.view.toggle_left_panel()
+            self.controller.view.show_left_panel(visible=False)
+            self.controller.view.body.focus_col = 1
         return super().keypress(size, key)
 
 
@@ -99,7 +100,8 @@ class StreamButton(urwid.Button):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
-            self.controller.view.toggle_left_panel()
+            self.controller.view.show_left_panel(visible=False)
+            self.controller.view.body.focus_col = 1
         return super(StreamButton, self).keypress(size, key)
 
 
@@ -136,7 +138,7 @@ class UserButton(urwid.Button):
             self.view.body.focus_col = 1
             self.view.body.focus.original_widget.set_focus('footer')
             self.view.write_box.private_box_view(self)
-            self.view.toggle_left_panel()
+            return key
         return super(UserButton, self).keypress(size, key)
 
 

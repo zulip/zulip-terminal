@@ -38,8 +38,8 @@ class TestView:
         middle_view = mocker.patch('zulipterminal.ui.MiddleColumnView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
         return_value = view.message_view()
-        middle_view.assert_called_once_with(view.model, view.write_box,
-                                            view.search_box)
+        middle_view.assert_called_once_with(view, view.model,
+                                            view.write_box, view.search_box)
         assert view.middle_column == middle_view()
         assert return_value == line_box()
 
@@ -156,10 +156,10 @@ class TestView:
         right.assert_called_once_with()
         expected_column_calls = [
             mocker.call([
-                (0, left()),
+                (25, left()),
                 ('weight', 10, center()),
                 (0, right()),
-                ], focus_column=1),
+                ], focus_column=0),
             mocker.call([
                 title_divider(),
                 (title_length, text()),
@@ -189,7 +189,7 @@ class TestView:
     def test_keypress_w(self, view, mocker):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock()]
+        view.body.contents = ['streams', 'messages', mocker.Mock()]
         view.left_column = mocker.Mock()
         view.right_column = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -201,7 +201,7 @@ class TestView:
         # Test "w" keypress
         view.keypress(size, "w")
         view.users_view.keypress.assert_called_once_with(size, "w")
-        assert view.body.focus_col == 0
+        assert view.body.focus_col == 2
         view.user_search.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
@@ -211,7 +211,7 @@ class TestView:
         view.left_col_w = mocker.Mock()
         view.stream_w.search_box = mocker.Mock()
         view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock()]
+        view.body.contents = [mocker.Mock(), 'messages', 'users']
         view.left_column = mocker.Mock()
         view.right_column = mocker.Mock()
         size = (20,)
