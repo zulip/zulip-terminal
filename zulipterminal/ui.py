@@ -39,7 +39,7 @@ class View(urwid.WidgetWrap):
         return self.left_col_w
 
     def message_view(self) -> Any:
-        self.middle_column = MiddleColumnView(self.model, self.write_box,
+        self.middle_column = MiddleColumnView(self, self.model, self.write_box,
                                               self.search_box)
         w = urwid.LineBox(self.middle_column, bline="")
         return w
@@ -90,11 +90,11 @@ class View(urwid.WidgetWrap):
         self.center_column = self.message_view()
         self.right_column = self.right_column_view()
         body = [
-            (0, self.left_column),
+            (25, self.left_column),
             ('weight', 10, self.center_column),
             (0, self.right_column),
         ]
-        self.body = urwid.Columns(body, focus_column=1)
+        self.body = urwid.Columns(body, focus_column=0)
 
         div_char = '═'
         profile = self.controller.client.get_profile()
@@ -114,20 +114,29 @@ class View(urwid.WidgetWrap):
                         footer=self.footer_view())
         return w
 
-    def toggle_left_panel(self) -> None:
+    def show_left_panel(self, *, visible: bool) -> None:
+        width = 25 if visible else 0
         self.body.contents[0] = (
             self.left_column,
-            self.body.options(width_type='given', width_amount=0),
+            self.body.options(width_type='given', width_amount=width),
         )
-        self.body.focus_col = 1
+        if visible:
+            self.body.focus_col = 0
+
+    def show_right_panel(self, *, visible: bool) -> None:
+        width = 25 if visible else 0
+        self.body.contents[2] = (
+            self.right_column,
+            self.body.options(width_type='given', width_amount=width),
+        )
+        if visible:
+            self.body.focus_col = 2
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         self.model.new_user_input = True
         if self.controller.editor_mode:
             return self.controller.editor.keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif is_command_key('GO_BACK', key):
-            self.toggle_left_panel()
         elif is_command_key('SEARCH_MESSAGES', key) or\
                 is_command_key('NEXT_UNREAD_TOPIC', key) or\
                 is_command_key('NEXT_UNREAD_PM', key) or\
@@ -136,25 +145,19 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key('SEARCH_PEOPLE', key):
-            self.body.contents[0] = (
-                self.right_column,
-                self.body.options(width_type='given', width_amount=25),
-            )
             # Start User Search if not in editor_mode
             self.users_view.keypress(size, 'w')
-            self.body.focus_col = 0
+            self.show_left_panel(visible=False)
+            self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
         elif is_command_key('SEARCH_STREAMS', key):
-            self.body.contents[0] = (
-                self.left_column,
-                self.body.options(width_type='given', width_amount=25),
-            )
             # jump stream search
             self.left_col_w.keypress(size, 'q')
-            self.body.focus_col = 0
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=True)
             self.stream_w.search_box.set_edit_text("")
             self.controller.editor_mode = True
             self.controller.editor = self.stream_w.search_box
