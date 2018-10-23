@@ -274,10 +274,12 @@ class UsersView(urwid.ListBox):
 
 
 class MiddleColumnView(urwid.Frame):
-    def __init__(self, model: Any, write_box: Any, search_box: Any) -> None:
+    def __init__(self, view: Any, model: Any,
+                 write_box: Any, search_box: Any) -> None:
         msg_list = MessageView(model)
         self.model = model
         self.controller = model.controller
+        self.view = view
         self.last_unread_topic = None
         self.last_unread_pm = None
         self.search_box = search_box
@@ -370,6 +372,10 @@ class MiddleColumnView(urwid.Frame):
             self.set_focus('footer')
             self.footer.focus_position = 0
             return key
+        elif is_command_key('GO_LEFT', key):
+            self.view.show_left_panel(visible=True)
+        elif is_command_key('GO_RIGHT', key):
+            self.view.show_right_panel(visible=True)
         return super(MiddleColumnView, self).keypress(size, key)
 
 
@@ -441,6 +447,8 @@ class RightColumnView(urwid.Frame):
             self.set_focus('body')
             self.view.controller.update_screen()
             return key
+        elif is_command_key('GO_LEFT', key):
+            self.view.show_right_panel(visible=False)
         return super(RightColumnView, self).keypress(size, key)
 
 
@@ -517,6 +525,8 @@ class LeftColumnView(urwid.Pile):
             self.focus_position = 1
             self.view.stream_w.keypress(size, key)
             return key
+        elif is_command_key('GO_RIGHT', key):
+            self.view.show_left_panel(visible=False)
         return super(LeftColumnView, self).keypress(size, key)
 
 

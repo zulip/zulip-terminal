@@ -425,6 +425,7 @@ class TestMiddleColumnView:
     def mock_external_classes(self, mocker):
         mocker.patch(VIEWS + ".MessageView", return_value="MSG_LIST")
         self.model = mocker.Mock()
+        self.view = mocker.Mock()
         self.write_box = mocker.Mock()
         self.search_box = mocker.Mock()
         self.super = mocker.patch(VIEWS + '.urwid.Frame.__init__')
@@ -433,7 +434,8 @@ class TestMiddleColumnView:
 
     @pytest.fixture
     def mid_col_view(self):
-        return MiddleColumnView(self.model, self.write_box, self.search_box)
+        return MiddleColumnView(self.view, self.model,
+                                self.write_box, self.search_box)
 
     def test_init(self, mid_col_view):
         assert mid_col_view.model == self.model
