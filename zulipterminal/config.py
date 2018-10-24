@@ -2,7 +2,6 @@ KEY_BINDINGS = {
     'PREVIOUS_MESSAGE': {
         'keys': {'k', 'up'},
         'help_text': 'Previous message',
-
     },
     'NEXT_MESSAGE': {
         'keys': {'j', 'down'},
@@ -34,7 +33,7 @@ KEY_BINDINGS = {
     },
     'REPLY_AUTHOR': {
         'keys': {'R'},
-        'help_text': 'Reply to a author',
+        'help_text': 'Reply to an author',
     },
     'STREAM_MESSAGE': {
         'keys': {'c'},
@@ -86,7 +85,7 @@ KEY_BINDINGS = {
     },
     'ALL_PM': {
         'keys': {'P'},
-        'help_text': 'Show all private messgaes',
+        'help_text': 'Show all private messages',
     },
     'QUIT_HELP': {
         'keys': {'q', 'esc'},
