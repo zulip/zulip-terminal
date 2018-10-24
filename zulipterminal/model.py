@@ -250,6 +250,7 @@ class Model:
             stream['name'],
             stream['stream_id'],
             stream['color'],
+            stream['invite_only'],
         ] for stream in subscriptions
         ]
         return sorted(stream_names, key=lambda s: s[0].lower())
