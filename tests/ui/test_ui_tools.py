@@ -634,6 +634,7 @@ class TestLeftColumnView:
             'all_pms': 0,
             86: 1,
             14: 1,
+            99: 1,
         }
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
@@ -657,11 +658,12 @@ class TestLeftColumnView:
         stream_view = mocker.patch(VIEWS + '.StreamsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
         left_col_view = LeftColumnView(self.view)
-        stream_button.assert_called_with(
-            streams[1],
-            controller=self.view.controller,
-            view=self.view,
-            count=1)
+        stream_button.assert_has_calls(
+            [mocker.call(stream,
+                         controller=self.view.controller,
+                         view=self.view,
+                         count=1)
+             for stream in streams])
 
 
 class TestHelpMenu:
