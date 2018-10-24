@@ -214,6 +214,22 @@ def initial_data():
             'email_address': '',
             'color': '#c2c2c2',
             'in_home_view': True
+        }, {
+            # This is a private stream;
+            # only description/stream_id/invite_only/name/color vary from above
+            'audible_notifications': False,
+            'description': 'Some private stream',
+            'stream_id': 99,
+            'is_old_stream': True,
+            'desktop_notifications': False,
+            'pin_to_top': False,
+            'stream_weekly_traffic': 53,
+            'invite_only': True,
+            'name': 'Secret stream',
+            'push_notifications': False,
+            'email_address': '',
+            'color': '#c3c3c3',
+            'in_home_view': True
         }],
         'msg': '',
         'max_message_id': 552761,
@@ -683,5 +699,6 @@ def streams():
     """
     return [
         ['Django', 86, '#94c849', False],
-        ['GSoC', 14, '#c2c2c2', False]
+        ['GSoC', 14, '#c2c2c2', False],
+        ['Secret stream', 99, '#c3c3c3', True],
     ]
