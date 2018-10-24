@@ -31,7 +31,7 @@ def stream_button(mocker):
     Mocked stream button.
     """
     button = StreamButton(
-        properties=['PTEST', 205, '#bfd56f'],
+        properties=['PTEST', 205, '#bfd56f', False],
         controller=mocker.patch('zulipterminal.core.Controller'),
         view=mocker.patch('zulipterminal.ui.View')
     )
@@ -682,6 +682,6 @@ def streams():
     `initial_data` fixture.
     """
     return [
-        ['Django', 86, '#94c849'],
-        ['GSoC', 14, '#c2c2c2']
+        ['Django', 86, '#94c849', False],
+        ['GSoC', 14, '#c2c2c2', False]
     ]
