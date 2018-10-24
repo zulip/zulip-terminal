@@ -212,7 +212,9 @@ class MessageBox(urwid.Pile):
             return ''
 
     def soup2markup(self, soup: Any) -> List[Any]:
-        markup = []
+        # Ensure a string is provided, in case the soup finds none
+        # This could occur if eg. an image is removed or not shown
+        markup = ['']
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
