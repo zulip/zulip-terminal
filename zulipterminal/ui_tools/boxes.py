@@ -217,13 +217,13 @@ class MessageBox(urwid.Pile):
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
                 markup.append(element)
-            elif element.name == 'div' and\
+            elif element.name == 'div' and element.attrs and\
                     'message_embed' in element.attrs.get('class'):
                 # Do not display embedded content
                 # since Embedded content can be very dynamic
                 # TODO: Support Embedded content
                 continue
-            elif element.name == 'span' and\
+            elif element.name == 'span' and element.attrs and\
                     'user-mention' in element.attrs.get('class', []):
                 # USER MENTIONS
                 markup.append(('span', element.text))
@@ -252,7 +252,7 @@ class MessageBox(urwid.Pile):
                 markup.append((
                     'code', element.text
                 ))
-            elif element.name == 'div' and\
+            elif element.name == 'div' and element.attrs and\
                     'codehilite' in element.attrs.get('class', []):
                 markup.append((
                     'code', element.text
