@@ -244,7 +244,7 @@ class MessageBox(urwid.Pile):
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':
-                # BLOCKQOTE TEXT
+                # BLOCKQUOTE TEXT
                 markup.append((
                     'blockquote', self.soup2markup(element)
                 ))
