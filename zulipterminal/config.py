@@ -1,4 +1,8 @@
 KEY_BINDINGS = {
+    'GO_BACK': {
+        'keys': {'esc'},
+        'help_text': 'Go Back',
+    },
     'PREVIOUS_MESSAGE': {
         'keys': {'k', 'up'},
         'help_text': 'Previous message',
@@ -35,13 +39,29 @@ KEY_BINDINGS = {
         'keys': {'R'},
         'help_text': 'Reply to an author',
     },
+    'MENTION_REPLY': {
+        'keys': {'@'},
+        'help_text': 'Reply mentioning the sender of the message'
+    },
+    'QUOTE_REPLY': {
+        'keys': {'>'},
+        'help_text': 'Reply quoting message text',
+    },
     'STREAM_MESSAGE': {
         'keys': {'c'},
         'help_text': 'New stream message',
     },
-    'GO_BACK': {
-        'keys': {'esc'},
-        'help_text': 'Go Back',
+    'PRIVATE_MESSAGE': {
+        'keys': {'x'},
+        'help_text': 'New private message',
+    },
+    'TAB': {
+        'keys': {'tab'},
+        'help_text': 'Toggle focus box in compose box'
+    },
+    'SEND_MESSAGE': {
+        'keys': {'meta enter'},
+        'help_text': 'Send a message',
     },
     'STREAM_NARROW': {
         'keys': {'S'},
@@ -58,10 +78,6 @@ KEY_BINDINGS = {
     'NEXT_UNREAD_PM': {
         'keys': {'p'},
         'help_text': 'Next unread private message',
-    },
-    'SEND_MESSAGE': {
-        'keys': {'meta enter'},
-        'help_text': 'Send a message',
     },
     'SEARCH_PEOPLE': {
         'keys': {'w'},
@@ -91,25 +107,9 @@ KEY_BINDINGS = {
         'keys': {'q', 'esc'},
         'help_text': 'Quit help menu',
     },
-    'PRIVATE_MESSAGE': {
-        'keys': {'x'},
-        'help_text': 'New private message',
-    },
-    'TAB': {
-        'keys': {'tab'},
-        'help_text': 'Toggle focus box in compose box'
-    },
     'THUMBS_UP': {
         'keys': {'+'},
         'help_text': 'Add/remove thumbs-up reaction on a message',
-    },
-    'MENTION_REPLY': {
-        'keys': {'@'},
-        'help_text': 'Reply mentioning the sender of the message'
-    },
-    'QUOTE_REPLY': {
-        'keys': {'>'},
-        'help_text': 'Reply quoting message text',
     },
 }
 
