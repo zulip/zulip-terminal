@@ -164,12 +164,12 @@ it to understand the how to implement a new feature for zulip-terminal.
 
 ### Debugging Tips
 
-The stdout for zulip-terminal is set to `/tmp/debug.log` by default. 
+The stdout for zulip-terminal is set to `./debug.log` by default.
 If you want to check the value of a variable, you can simply write
 ```
 print(variable)
 ```
-and the value of the variable will be printed to `/tmp/debug.log`.
+and the value of the variable will be printed to `./debug.log`.
 
 If you want to debug zulip-terminal while it is running, or in a specific state, you can insert
 ```
@@ -177,11 +177,11 @@ from pudb.remote import set_trace
 set_trace()
 ```
 in the part of the code you want to debug. This will start a telnet connection for you. You can find the IP address and
-port of the telnet connection in `/tmp/debug.log`. Then simply run
+port of the telnet connection in `./debug.log`. Then simply run
 ```
 $ telnet 127.0.0.1 6899
 ```
-in another terminal, where `127.0.0.1` is the IP address and `6899` is port you find in `/tmp/debug.log`.
+in another terminal, where `127.0.0.1` is the IP address and `6899` is port you find in `./debug.log`.
 
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
