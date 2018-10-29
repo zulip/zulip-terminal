@@ -186,6 +186,8 @@ def initial_data():
             'user_id': 6085,
             'is_active': True
         }],
+        'cross_realm_bots': [
+        ],
         'subscriptions': [{
             'audible_notifications': False,
             'description': '',

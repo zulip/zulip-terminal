@@ -190,6 +190,7 @@ class Model:
                     'message',
                     'update_message_flags',
                     'muted_topics',
+                    'realm_user',  # Enables cross_realm_bots
                 ],
                 client_gravatar=True,
             )
@@ -197,6 +198,7 @@ class Model:
             # Join process to ensure they are completed
             update_realm_users.join()
             get_messages.join()
+
         except Exception:
             print("Invalid API key")
             raise urwid.ExitMainLoop()
@@ -224,6 +226,17 @@ class Model:
                 'status': status,
             }
             self.user_id_email_dict[user['user_id']] = email
+
+        # Add internal (cross-realm) bots to dicts
+        for bot in self.initial_data['cross_realm_bots']:
+            email = bot['email']
+            self.user_dict[email] = {
+                'full_name': bot['full_name'],
+                'email': email,
+                'user_id': bot['user_id'],
+                'status': 'idle',
+            }
+            self.user_id_email_dict[bot['user_id']] = email
 
         # Generate filtered lists for active & idle users
         active = [properties for properties in self.user_dict.values()
