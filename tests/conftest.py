@@ -186,8 +186,51 @@ def initial_data():
             'user_id': 6085,
             'is_active': True
         }],
-        'cross_realm_bots': [
-        ],
+        'cross_realm_bots': [{
+            'full_name': 'Notification Bot',
+            'timezone': '',
+            'is_bot': True,
+            'date_joined': '2015-12-28T19:58:29.035543+00:00',
+            'email': 'notification-bot@zulip.com',
+            'user_id': 5,
+            'is_admin': False,
+            'avatar_url': 'https://secure.gravatar.com/avatar/'
+                          '0fc5476bdf03fe8640cc8fbc27a47549'
+                          '?d=identicon&version=1'
+        }, {
+            'full_name': 'Email Gateway',
+            'timezone': '',
+            'is_bot': True,
+            'date_joined': '2015-12-28T19:58:29.037658+00:00',
+            'email': 'emailgateway@zulip.com',
+            'user_id': 6,
+            'is_admin': False,
+            'avatar_url': 'https://secure.gravatar.com/avatar/'
+                          '99ac4226a594fca879bb598c1b36fb42'
+                          '?d=identicon&version=1'
+        }, {
+            'full_name': 'Welcome Bot',
+            'timezone': '',
+            'is_bot': True,
+            'date_joined': '2015-12-28T19:58:29.033231+00:00',
+            'email': 'welcome-bot@zulip.com',
+            'user_id': 4,
+            'is_admin': False,
+            'avatar_url': 'https://secure.gravatar.com/avatar/'
+                          '6a4e22d220487fb7ceb295fa706f39d5'
+                          '?d=identicon&version=1'
+        }, {
+            'full_name': 'Zulip Feedback Bot',
+            'timezone': '',
+            'is_bot': True,
+            'date_joined': '2015-12-28T19:58:28.972281+00:00',
+            'email': 'feedback@zulip.com',
+            'user_id': 1,
+            'is_admin': False,
+            'avatar_url': 'https://secure.gravatar.com/avatar/'
+                          '78eecc367eedd27e6ac9292dc966beb6'
+                          '?d=identicon&version=1'
+        }],
         'subscriptions': [{
             'audible_notifications': False,
             'description': '',
@@ -665,7 +708,31 @@ def user_dict():
             'email': 'cloudserver2@hotmail.de',
             'status': 'idle',
             'user_id': 6085
-        }
+        },
+        'emailgateway@zulip.com': {
+            'email': 'emailgateway@zulip.com',
+            'full_name': 'Email Gateway',
+            'status': 'idle',
+            'user_id': 6
+        },
+        'feedback@zulip.com': {
+            'email': 'feedback@zulip.com',
+            'full_name': 'Zulip Feedback Bot',
+            'status': 'idle',
+            'user_id': 1
+        },
+        'notification-bot@zulip.com': {
+            'email': 'notification-bot@zulip.com',
+            'full_name': 'Notification Bot',
+            'status': 'idle',
+            'user_id': 5
+        },
+        'welcome-bot@zulip.com': {
+            'email': 'welcome-bot@zulip.com',
+            'full_name': 'Welcome Bot',
+            'status': 'idle',
+            'user_id': 4
+        },
     }
 
 
@@ -675,21 +742,42 @@ def user_list():
     List of users created corresponding to
     `initial_data` fixture.
     """
+    # NOTE These are sorted active > idle, then according to full_name
     return [{
         'full_name': 'Tomás Farías',
         'email': 'FOOBOO@gmail.com',
         'status': 'active',
         'user_id': 5827
     }, {
+        'email': 'emailgateway@zulip.com',
+        'full_name': 'Email Gateway',
+        'status': 'idle',
+        'user_id': 6
+    }, {
         'full_name': 'Jari Winberg',
         'email': 'nyan.salmon+sns@gmail.com',
         'status': 'idle',
         'user_id': 6086
     }, {
+        'email': 'notification-bot@zulip.com',
+        'full_name': 'Notification Bot',
+        'status': 'idle',
+        'user_id': 5
+    }, {
         'full_name': 'Test Account',
         'email': 'cloudserver2@hotmail.de',
         'status': 'idle',
         'user_id': 6085
+    }, {
+        'email': 'welcome-bot@zulip.com',
+        'full_name': 'Welcome Bot',
+        'status': 'idle',
+        'user_id': 4
+    }, {
+        'email': 'feedback@zulip.com',
+        'full_name': 'Zulip Feedback Bot',
+        'status': 'idle',
+        'user_id': 1
     }]
 
 
