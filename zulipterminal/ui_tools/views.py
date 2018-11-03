@@ -50,9 +50,9 @@ class MessageView(urwid.ListBox):
         # Use the currently focused image as anchor
         self.model.anchor = anchor
         # We don't want message after the current message
-        self.model.num_before = 30
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(first_anchor=False, num_after=0)
+        self.index = self.model.get_messages(first_anchor=False,
+                                             num_before=30, num_after=0)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         message_list.reverse()
@@ -65,9 +65,9 @@ class MessageView(urwid.ListBox):
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
         self.model.anchor = anchor
-        self.model.num_before = 0
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(first_anchor=False, num_after=30)
+        self.index = self.model.get_messages(first_anchor=False,
+                                             num_before=0, num_after=30)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
         self.log.extend(message_list)
