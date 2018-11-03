@@ -97,9 +97,8 @@ class Controller:
         self.update = False
         self.model.set_narrow(search=text)
         self.model.anchor = 10000000000
-        self.model.num_after = 0
         self.model.num_before = 30
-        self.model.get_messages(first_anchor=False)
+        self.model.get_messages(first_anchor=False, num_after=0)
         msg_id_list = self.model.index['search']
         w_list = create_msg_box_list(self.model, msg_id_list)
         self.model.msg_view.clear()
@@ -120,13 +119,12 @@ class Controller:
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
-            self.model.num_after = 10
             self.model.num_before = 30
             if hasattr(button, 'message'):
                 self.model.anchor = button.message['id']
-                self.model.get_messages(first_anchor=False)
+                self.model.get_messages(first_anchor=False, num_after=10)
             else:
-                self.model.get_messages(first_anchor=True)
+                self.model.get_messages(first_anchor=True, num_after=10)
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
@@ -151,9 +149,8 @@ class Controller:
             if hasattr(button, 'message'):
                 self.model.anchor = button.message['id']
                 first_anchor = False
-            self.model.num_after = 10
             self.model.num_before = 30
-            self.model.get_messages(first_anchor=first_anchor)
+            self.model.get_messages(first_anchor=first_anchor, num_after=10)
             msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
         if hasattr(button, 'message'):
@@ -183,13 +180,12 @@ class Controller:
         msg_id_list = self.model.index['private'].get(frozenset(
             [self.model.user_id, button.user_id]), [])
 
-        self.model.num_after = 10
         self.model.num_before = 30
         if hasattr(button, 'message'):
             self.model.anchor = button.message['id']
-            self.model.get_messages(first_anchor=False)
+            self.model.get_messages(first_anchor=False, num_after=10)
         elif len(msg_id_list) == 0:
-            self.model.get_messages(first_anchor=True)
+            self.model.get_messages(first_anchor=True, num_after=10)
         recipients = frozenset([self.model.user_id, button.user_id])
         self.model.recipients = recipients
         msg_id_list = self.model.index['private'].get(recipients, [])
@@ -224,9 +220,8 @@ class Controller:
         self.update = False
         msg_list = self.model.index['all_private']
         if len(msg_list) == 0:
-            self.model.num_after = 10
             self.model.num_before = 30
-            self.model.get_messages(first_anchor=True)
+            self.model.get_messages(first_anchor=True, num_after=10)
             msg_list = self.model.index['all_private']
         w_list = create_msg_box_list(self.model, msg_list)
 
