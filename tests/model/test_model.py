@@ -39,7 +39,6 @@ class TestModel:
         assert hasattr(model, 'client')
         assert model.msg_view is None
         assert model.anchor == 0
-        assert model.num_before == 30
         assert model.msg_list is None
         assert model.narrow == []
         assert model.update is False
@@ -48,6 +47,7 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index is None
         model.get_messages.assert_called_once_with(first_anchor=True,
+                                                   num_before=30,
                                                    num_after=10)
         assert model.initial_data == initial_data
         model.client.get_profile.assert_called_once_with()
@@ -197,7 +197,7 @@ class TestModel:
 
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data,
-                                  num_after=10):
+                                  num_before=30, num_after=10):
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
@@ -215,7 +215,7 @@ class TestModel:
         model = Model(self.controller)
         request = {
             'anchor': model.anchor,
-            'num_before': model.num_before,
+            'num_before': num_before,
             'num_after': num_after,
             'apply_markdown': True,
             'use_first_unread_anchor': True,
@@ -231,7 +231,7 @@ class TestModel:
 
     def test_get_message_false_first_anchor(
             self, mocker, messages_successful_response, index_all_messages,
-            initial_data, num_after=10
+            initial_data, num_before=30, num_after=10
             ):
         # TEST FOR get_messages() with first_anchor=False
 
@@ -253,7 +253,8 @@ class TestModel:
                      return_value=index_all_messages)
 
         model = Model(self.controller)
-        model.get_messages(first_anchor=False, num_after=num_after)
+        model.get_messages(first_anchor=False,
+                           num_before=num_before, num_after=num_after)
         self.client.do_api_query.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
@@ -261,12 +262,11 @@ class TestModel:
 
         # TEST `query_range` < no of messages received
         model.update = False  # RESET model.update value
-        model.num_before = 0
-        model.get_messages(first_anchor=False, num_after=0)
+        model.get_messages(first_anchor=False, num_after=0, num_before=0)
         assert model.update is False
 
     def test_fail_get_messages(self, mocker, error_response,
-                               initial_data, num_after=10):
+                               initial_data, num_before=30, num_after=10):
         # Initialize Model
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model._update_realm_users')
@@ -283,7 +283,7 @@ class TestModel:
         model = Model(self.controller)
         request = {
             'anchor': model.anchor,
-            'num_before': model.num_before,
+            'num_before': num_before,
             'num_after': num_after,
             'apply_markdown': True,
             'use_first_unread_anchor': True,
