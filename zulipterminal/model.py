@@ -26,7 +26,6 @@ class Model:
         self.msg_view = None  # type: Any
         self.anchor = 0
         self.num_before = 30
-        self.num_after = 10
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
         self.update = False
@@ -151,11 +150,11 @@ class Model:
                                              method=method,
                                              request=reaction_to_toggle_spec)
 
-    def get_messages(self, *, first_anchor: bool) -> Any:
+    def get_messages(self, *, first_anchor: bool, num_after: int) -> Any:
         request = {
             'anchor': self.anchor,
             'num_before': self.num_before,
-            'num_after': self.num_after,
+            'num_after': num_after,
             'apply_markdown': True,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': False,
@@ -170,7 +169,7 @@ class Model:
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
                 self.index[str(self.narrow)] = response['anchor']
-            query_range = self.num_after + self.num_before + 1
+            query_range = num_after + self.num_before + 1
             if len(response['messages']) < (query_range):
                 self.update = True
             return self.index
@@ -179,7 +178,8 @@ class Model:
         try:
             # Thread Processes to reduces start time.
             get_messages = Thread(target=self.get_messages,
-                                  kwargs={'first_anchor': True})
+                                  kwargs={'first_anchor': True,
+                                          'num_after': 10})
             get_messages.start()
             update_realm_users = Thread(target=self._update_realm_users)
             update_realm_users.start()

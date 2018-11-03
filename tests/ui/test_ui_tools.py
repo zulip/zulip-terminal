@@ -63,12 +63,12 @@ class TestMessageView:
 
         assert msg_view.old_loading is False
         assert msg_view.model.anchor == 0
-        assert msg_view.model.num_after == 0
         assert msg_view.model.num_before == 30
         assert msg_view.index == {}
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.update_screen.assert_called_once_with()
-        self.model.get_messages.assert_called_once_with(first_anchor=False)
+        self.model.get_messages.assert_called_once_with(first_anchor=False,
+                                                        num_after=0)
 
     def test_load_new_messages(self, mocker, msg_view):
         mocker.patch.object(msg_view.model,
@@ -81,13 +81,13 @@ class TestMessageView:
 
         assert msg_view.new_loading is False
         assert msg_view.model.anchor == 0
-        assert msg_view.model.num_after == 30
         assert msg_view.model.num_before == 0
         assert msg_view.index == {}
         msg_view.log.extend.assert_called_once_with(['M1', 'M2'])
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.update_screen.assert_called_once_with()
-        self.model.get_messages.assert_called_once_with(first_anchor=False)
+        self.model.get_messages.assert_called_once_with(first_anchor=False,
+                                                        num_after=30)
 
     @pytest.mark.parametrize("event, button, keypress", [
         ("mouse press", 4, "up"),
