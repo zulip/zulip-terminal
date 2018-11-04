@@ -17,8 +17,7 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 GetMessagesArgs = TypedDict('GetMessagesArgs', {
      'num_before': int,
      'num_after': int,
-     'first_anchor': bool,
-     'anchor': int
+     'anchor': Optional[int]
     })
 
 
@@ -157,10 +156,14 @@ class Model:
                                              request=reaction_to_toggle_spec)
 
     def get_messages(self, *,
-                     first_anchor: bool,
-                     num_after: int, num_before: int, anchor: int) -> Any:
+                     num_after: int, num_before: int,
+                     anchor: Optional[int]) -> Any:
+        # anchor value may be specific message (int) or next unread (None)
+        first_anchor = anchor is None
+        anchor_value = anchor if anchor is not None else 0
+
         request = {
-            'anchor': anchor,
+            'anchor': anchor_value,
             'num_before': num_before,
             'num_after': num_after,
             'apply_markdown': True,
@@ -187,10 +190,9 @@ class Model:
             # Thread Processes to reduces start time.
             # NOTE: first_anchor is True, so anchor value is ignored
             get_messages = Thread(target=self.get_messages,
-                                  kwargs={'first_anchor': True,
-                                          'num_after': 10,
+                                  kwargs={'num_after': 10,
                                           'num_before': 30,
-                                          'anchor': 0})
+                                          'anchor': None})
             get_messages.start()
             update_realm_users = Thread(target=self._update_realm_users)
             update_realm_users.start()

@@ -45,10 +45,9 @@ class TestModel:
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
         assert model.index is None
-        model.get_messages.assert_called_once_with(first_anchor=True,
-                                                   num_before=30,
+        model.get_messages.assert_called_once_with(num_before=30,
                                                    num_after=10,
-                                                   anchor=0)
+                                                   anchor=None)
         assert model.initial_data == initial_data
         model.client.get_profile.assert_called_once_with()
         assert model.user_id == user_profile['user_id']
@@ -255,8 +254,7 @@ class TestModel:
                      return_value=index_all_messages)
 
         model = Model(self.controller)
-        model.get_messages(first_anchor=False,
-                           num_before=num_before, num_after=num_after,
+        model.get_messages(num_before=num_before, num_after=num_after,
                            anchor=0)
         self.client.do_api_query.return_value = messages_successful_response
         # anchor should have remained the same
@@ -265,8 +263,7 @@ class TestModel:
 
         # TEST `query_range` < no of messages received
         model.update = False  # RESET model.update value
-        model.get_messages(first_anchor=False, num_after=0, num_before=0,
-                           anchor=0)
+        model.get_messages(num_after=0, num_before=0, anchor=0)
         assert model.update is False
 
     def test_fail_get_messages(self, mocker, error_response,

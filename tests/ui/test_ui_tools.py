@@ -65,8 +65,7 @@ class TestMessageView:
         assert msg_view.index == {}
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.update_screen.assert_called_once_with()
-        self.model.get_messages.assert_called_once_with(first_anchor=False,
-                                                        num_before=30,
+        self.model.get_messages.assert_called_once_with(num_before=30,
                                                         num_after=0,
                                                         anchor=0)
 
@@ -84,8 +83,7 @@ class TestMessageView:
         msg_view.log.extend.assert_called_once_with(['M1', 'M2'])
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
         self.model.controller.update_screen.assert_called_once_with()
-        self.model.get_messages.assert_called_once_with(first_anchor=False,
-                                                        num_before=0,
+        self.model.get_messages.assert_called_once_with(num_before=0,
                                                         num_after=30,
                                                         anchor=0)
 

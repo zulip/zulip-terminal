@@ -49,8 +49,7 @@ class MessageView(urwid.ListBox):
         self.old_loading = True
         # We don't want message after the current message
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(first_anchor=False,
-                                             num_before=30, num_after=0,
+        self.index = self.model.get_messages(num_before=30, num_after=0,
                                              anchor=anchor)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
@@ -64,8 +63,7 @@ class MessageView(urwid.ListBox):
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(first_anchor=False,
-                                             num_before=0, num_after=30,
+        self.index = self.model.get_messages(num_before=0, num_after=30,
                                              anchor=anchor)
         msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         message_list = create_msg_box_list(self.model, msg_ids)
