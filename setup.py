@@ -35,7 +35,7 @@ testing_deps = [
 ]
 
 dev_helper_deps = [
-    'mypy==0.560',
+    'mypy==0.641',
     'pudb==2017.1.4',
     'snakeviz==0.4.2',
 ]
