@@ -7,7 +7,7 @@ pytest-pep8==1.0.6
 pytest-mock==1.7.1
 pudb==2017.1.4
 snakeviz==0.4.2
-mypy==0.560
+mypy==0.641
 emoji==0.5.0
 urwid_readline==0.7
 beautifulsoup4==4.6.0
