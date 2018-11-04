@@ -96,8 +96,7 @@ class Controller:
         # Search for a text in messages
         self.update = False
         self.model.set_narrow(search=text)
-        self.model.get_messages(first_anchor=False, num_after=0, num_before=30,
-                                anchor=10000000000)
+        self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
         msg_id_list = self.model.index['search']
         w_list = create_msg_box_list(self.model, msg_id_list)
         self.model.msg_view.clear()
@@ -118,11 +117,10 @@ class Controller:
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
-            get_msg_opts = dict(num_before=30, num_after=10, anchor=0,
-                                first_anchor=True)  # type: GetMessagesArgs
+            get_msg_opts = dict(num_before=30, num_after=10,
+                                anchor=None)  # type: GetMessagesArgs
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
-                get_msg_opts['first_anchor'] = False
             self.model.get_messages(**get_msg_opts)
         msg_id_list = self.model.index['all_stream'][button.stream_id]
         if hasattr(button, 'message'):
@@ -144,11 +142,10 @@ class Controller:
         msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
         if len(msg_id_list) == 0:
-            get_msg_opts = dict(num_before=30, num_after=10, anchor=0,
-                                first_anchor=True)  # type: GetMessagesArgs
+            get_msg_opts = dict(num_before=30, num_after=10,
+                                anchor=None)  # type: GetMessagesArgs
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
-                get_msg_opts['first_anchor'] = False
             self.model.get_messages(**get_msg_opts)
             msg_id_list = self.model.index['stream'][button.stream_id].get(
                                                     button.title, [])
@@ -179,14 +176,12 @@ class Controller:
         msg_id_list = self.model.index['private'].get(frozenset(
             [self.model.user_id, button.user_id]), [])
 
-        get_msg_opts = dict(num_before=30, num_after=10, anchor=0,
-                            first_anchor=True)  # type: GetMessagesArgs
+        get_msg_opts = dict(num_before=30, num_after=10,
+                            anchor=None)  # type: GetMessagesArgs
         if hasattr(button, 'message'):
             get_msg_opts['anchor'] = button.message['id']
-            get_msg_opts['first_anchor'] = False
             self.model.get_messages(**get_msg_opts)
         elif len(msg_id_list) == 0:
-            get_msg_opts['first_anchor'] = True
             self.model.get_messages(**get_msg_opts)
         # TODO: Should there be a note or code here for the else clause?
 
@@ -224,9 +219,7 @@ class Controller:
         self.update = False
         msg_list = self.model.index['all_private']
         if len(msg_list) == 0:
-            self.model.get_messages(first_anchor=True,
-                                    num_before=30, num_after=10,
-                                    anchor=0)
+            self.model.get_messages(num_before=30, num_after=10, anchor=None)
             msg_list = self.model.index['all_private']
         w_list = create_msg_box_list(self.model, msg_list)
 
