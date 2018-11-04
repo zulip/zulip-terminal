@@ -38,7 +38,6 @@ class TestModel:
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.msg_view is None
-        assert model.anchor == 0
         assert model.msg_list is None
         assert model.narrow == []
         assert model.update is False
@@ -48,7 +47,8 @@ class TestModel:
         assert model.index is None
         model.get_messages.assert_called_once_with(first_anchor=True,
                                                    num_before=30,
-                                                   num_after=10)
+                                                   num_after=10,
+                                                   anchor=0)
         assert model.initial_data == initial_data
         model.client.get_profile.assert_called_once_with()
         assert model.user_id == user_profile['user_id']
@@ -195,6 +195,7 @@ class TestModel:
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), 'x')
 
+    # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data,
                                   num_before=30, num_after=10):
@@ -214,7 +215,7 @@ class TestModel:
                      return_value=index_all_messages)
         model = Model(self.controller)
         request = {
-            'anchor': model.anchor,
+            'anchor': 0,
             'num_before': num_before,
             'num_after': num_after,
             'apply_markdown': True,
@@ -234,6 +235,7 @@ class TestModel:
             initial_data, num_before=30, num_after=10
             ):
         # TEST FOR get_messages() with first_anchor=False
+        # and anchor=0
 
         # Initialize Model
         self.client.register.return_value = initial_data
@@ -254,7 +256,8 @@ class TestModel:
 
         model = Model(self.controller)
         model.get_messages(first_anchor=False,
-                           num_before=num_before, num_after=num_after)
+                           num_before=num_before, num_after=num_after,
+                           anchor=0)
         self.client.do_api_query.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
@@ -262,7 +265,8 @@ class TestModel:
 
         # TEST `query_range` < no of messages received
         model.update = False  # RESET model.update value
-        model.get_messages(first_anchor=False, num_after=0, num_before=0)
+        model.get_messages(first_anchor=False, num_after=0, num_before=0,
+                           anchor=0)
         assert model.update is False
 
     def test_fail_get_messages(self, mocker, error_response,
@@ -282,7 +286,7 @@ class TestModel:
         self.client.do_api_query.return_value = error_response
         model = Model(self.controller)
         request = {
-            'anchor': model.anchor,
+            'anchor': 0,  # for case of first-unread-anchor
             'num_before': num_before,
             'num_after': num_after,
             'apply_markdown': True,
