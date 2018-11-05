@@ -1,7 +1,7 @@
 from collections import defaultdict
 from time import ctime
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union, Optional
 
 import emoji
 import urwid
@@ -282,6 +282,7 @@ class MessageBox(urwid.Pile):
                                 align='left', width=('relative', 90), left=25,
                                 min_width=50)
 
+        message_is_starred = 'starred' in self.message['flags']
         message_author = self.message['sender_full_name']
         message_time = self._time_for_message(self.message)
 
@@ -296,21 +297,36 @@ class MessageBox(urwid.Pile):
         different_timestamp = (
             'timestamp' in self.last_message and
             message_time != self._time_for_message(self.last_message))
+        different_star_status = (
+            message_is_starred != ('starred' in self.last_message['flags']))
+        no_differences = (not different_topic and
+                          not different_author and
+                          not more_than_24h_apart and
+                          not different_timestamp and
+                          not different_star_status)
 
-        # Include author name/time under various conditions
-        author_time_items = []
+        # Include author name/star/time under various conditions
+        TextType = Dict[str, Tuple[Optional[str], str]]
+        text = {key: (None, ' ')
+                for key in ('author', 'star', 'time')}  # type: TextType
         if different_topic or different_author or more_than_24h_apart:
-            author_time_items.append(urwid.Text([('name', message_author)]))
+            text['author'] = ('name', message_author)
+        if message_is_starred:
+            text['star'] = ('starred', "*")
         if different_topic or different_author or different_timestamp:
-            author_time_items.append(urwid.Text([('time', message_time)],
-                                                align='right'))
-        author_and_time = urwid.Columns(author_time_items)
+            text['time'] = ('time', message_time)
 
-        view = [header, author_and_time, content, reactions]
+        content_header = urwid.Columns([
+            ('weight', 10, urwid.Text(text['author'])),
+            (1, urwid.Text(text['star'], align='right')),
+            (16, urwid.Text(text['time'], align='right')),
+            ], dividechars=1)
+
+        view = [header, content_header, content, reactions]
         if header is None:
             view.remove(header)
-        if not author_time_items:
-            view.remove(author_and_time)
+        if no_differences:
+            view.remove(content_header)
         if reactions == '':
             view.remove(reactions)
         return view
