@@ -41,7 +41,8 @@ class View(urwid.WidgetWrap):
             ('blockquote',   'brown',           'black'),
             ('code',         'black',           'white'),
             ('bold',         'white, bold',     'black'),
-            ('footer',       'white',           'dark red',   'bold')
+            ('footer',       'white',           'dark red',   'bold'),
+            ('starred',      'light red, bold', 'black'),
         ],
         'light': [
             (None,           'black',        'white'),

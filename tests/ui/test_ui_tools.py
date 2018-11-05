@@ -867,9 +867,9 @@ class TestMessageBox:
         }
     ])
     @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
-        (['alice', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
-        (['DAYDATETIME'], {'timestamp': 1532103779}),  # 100 earlier
-        (['alice', 'DAYDATETIME'], {'timestamp': 0}),  # much earlier!
+        (['alice', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
+        ([' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),  # 100 earlier
+        (['alice', ' ', 'DAYDATETIME'], {'timestamp': 0}),  # much earlier!
     ], ids=['author_different', 'earlier_message', 'much_earlier_message'])
     def test_main_view_content_header_without_header(self, mocker, message,
                                                      expected_header,
