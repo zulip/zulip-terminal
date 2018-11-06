@@ -287,33 +287,33 @@ class MessageBox(urwid.Pile):
         message_time = self._time_for_message(self.message)
 
         # Statements as to how the message varies from the previous one
-        different_topic = header is not None
-        different_author = (
-            self.last_message['sender_full_name'] != message_author)
-        more_than_24h_apart = (
-            'timestamp' in self.last_message and
-            (datetime.fromtimestamp(self.message['timestamp']) -
-             datetime.fromtimestamp(self.last_message['timestamp'])).days)
-        different_timestamp = (
-            'timestamp' in self.last_message and
-            message_time != self._time_for_message(self.last_message))
-        different_star_status = (
-            message_is_starred != ('starred' in self.last_message['flags']))
-        no_differences = (not different_topic and
-                          not different_author and
-                          not more_than_24h_apart and
-                          not different_timestamp and
-                          not different_star_status)
+        different = {
+            'topic': header is not None,
+            'author': self.last_message['sender_full_name'] != message_author,
+            '24h': 'timestamp' in self.last_message and
+                   (datetime.fromtimestamp(self.message['timestamp']) -
+                    datetime.fromtimestamp(self.last_message['timestamp']))
+                   .days,
+            'timestamp': 'timestamp' in self.last_message and
+                   message_time != self._time_for_message(self.last_message),
+            'star_status': (message_is_starred !=
+                            ('starred' in self.last_message['flags'])),
+        }
+        no_differences = (not different['topic'] and
+                          not different['author'] and
+                          not different['24h'] and
+                          not different['timestamp'] and
+                          not different['star_status'])
 
         # Include author name/star/time under various conditions
         TextType = Dict[str, Tuple[Optional[str], str]]
         text = {key: (None, ' ')
                 for key in ('author', 'star', 'time')}  # type: TextType
-        if different_topic or different_author or more_than_24h_apart:
+        if different['topic'] or different['author'] or different['24h']:
             text['author'] = ('name', message_author)
         if message_is_starred:
             text['star'] = ('starred', "*")
-        if different_topic or different_author or different_timestamp:
+        if different['topic'] or different['author'] or different['timestamp']:
             text['time'] = ('time', message_time)
 
         content_header = urwid.Columns([
