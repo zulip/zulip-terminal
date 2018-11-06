@@ -299,21 +299,17 @@ class MessageBox(urwid.Pile):
             'star_status': (message_is_starred !=
                             ('starred' in self.last_message['flags'])),
         }
-        no_differences = (not different['topic'] and
-                          not different['author'] and
-                          not different['24h'] and
-                          not different['timestamp'] and
-                          not different['star_status'])
+        no_differences = not any(different.values())
 
         # Include author name/star/time under various conditions
         TextType = Dict[str, Tuple[Optional[str], str]]
         text = {key: (None, ' ')
                 for key in ('author', 'star', 'time')}  # type: TextType
-        if different['topic'] or different['author'] or different['24h']:
+        if any(different[key] for key in ('topic', 'author', '24h')):
             text['author'] = ('name', message_author)
         if message_is_starred:
             text['star'] = ('starred', "*")
-        if different['topic'] or different['author'] or different['timestamp']:
+        if any(different[key] for key in ('topic', 'author', 'timestamp')):
             text['time'] = ('time', message_time)
 
         content_header = urwid.Columns([
