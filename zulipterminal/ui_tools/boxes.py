@@ -282,22 +282,32 @@ class MessageBox(urwid.Pile):
                                 align='left', width=('relative', 90), left=25,
                                 min_width=50)
 
-        message_is_starred = 'starred' in self.message['flags']
-        message_author = self.message['sender_full_name']
-        message_time = self._time_for_message(self.message)
+        message = {
+            key: {
+                'is_starred': 'starred' in msg['flags'],
+                'author': (msg['sender_full_name']
+                           if 'sender_full_name' in msg else None),
+                'time': (self._time_for_message(msg)
+                         if 'timestamp' in msg else None),
+                'datetime': (datetime.fromtimestamp(msg['timestamp'])
+                             if 'timestamp' in msg else None),
+            }
+            for key, msg in dict(this=self.message,
+                                 last=self.last_message).items()
+        }
 
         # Statements as to how the message varies from the previous one
         different = {
             'topic': header is not None,
-            'author': self.last_message['sender_full_name'] != message_author,
-            '24h': 'timestamp' in self.last_message and
-                   (datetime.fromtimestamp(self.message['timestamp']) -
-                    datetime.fromtimestamp(self.last_message['timestamp']))
-                   .days,
-            'timestamp': 'timestamp' in self.last_message and
-                   message_time != self._time_for_message(self.last_message),
-            'star_status': (message_is_starred !=
-                            ('starred' in self.last_message['flags'])),
+            'author': message['last']['author'] != message['this']['author'],
+            '24h': (message['last']['datetime'] is not None and
+                    ((message['this']['datetime'] -
+                      message['last']['datetime'])
+                     .days)),
+            'timestamp': (message['last']['time'] is not None and
+                          message['this']['time'] != message['last']['time']),
+            'star_status': (message['this']['is_starred'] !=
+                            message['last']['is_starred']),
         }
         no_differences = not any(different.values())
 
@@ -306,11 +316,11 @@ class MessageBox(urwid.Pile):
         text = {key: (None, ' ')
                 for key in ('author', 'star', 'time')}  # type: TextType
         if any(different[key] for key in ('topic', 'author', '24h')):
-            text['author'] = ('name', message_author)
-        if message_is_starred:
+            text['author'] = ('name', message['this']['author'])
+        if message['this']['is_starred']:
             text['star'] = ('starred', "*")
         if any(different[key] for key in ('topic', 'author', 'timestamp')):
-            text['time'] = ('time', message_time)
+            text['time'] = ('time', message['this']['time'])
 
         content_header = urwid.Columns([
             ('weight', 10, urwid.Text(text['author'])),
