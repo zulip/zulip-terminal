@@ -270,18 +270,14 @@ class MessageBox(urwid.Pile):
         return markup
 
     def main_view(self) -> List[Any]:
+
+        # Header
         if self.message['type'] == 'stream':
             header = self.stream_view()
         else:
             header = self.private_view()
 
-        reactions = self.reactions_view(self.message['reactions'])
-        soup = BeautifulSoup(self.message['content'], 'lxml')
-        content = (None, self.soup2markup(soup))
-        content = urwid.Padding(urwid.Text(content),
-                                align='left', width=('relative', 90), left=25,
-                                min_width=50)
-
+        # Content Header
         message = {
             key: {
                 'is_starred': 'starred' in msg['flags'],
@@ -295,9 +291,7 @@ class MessageBox(urwid.Pile):
             for key, msg in dict(this=self.message,
                                  last=self.last_message).items()
         }
-
-        # Statements as to how the message varies from the previous one
-        different = {
+        different = {  # How this message differs from the previous one
             'topic': header is not None,
             'author': message['last']['author'] != message['this']['author'],
             '24h': (message['last']['datetime'] is not None and
@@ -330,6 +324,17 @@ class MessageBox(urwid.Pile):
         else:
             content_header = None
 
+        # Content
+        soup = BeautifulSoup(self.message['content'], 'lxml')
+        content = (None, self.soup2markup(soup))
+        content = urwid.Padding(urwid.Text(content),
+                                align='left', width=('relative', 90), left=25,
+                                min_width=50)
+
+        # Reactions
+        reactions = self.reactions_view(self.message['reactions'])
+
+        # Build parts together and return
         parts = {
             header: header is not None,
             content_header: any_differences,
