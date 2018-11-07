@@ -309,29 +309,31 @@ class MessageBox(urwid.Pile):
             'star_status': (message['this']['is_starred'] !=
                             message['last']['is_starred']),
         }
-        no_differences = not any(different.values())
+        any_differences = any(different.values())
 
-        # Include author name/star/time under various conditions
-        TextType = Dict[str, Tuple[Optional[str], str]]
-        text = {key: (None, ' ')
-                for key in ('author', 'star', 'time')}  # type: TextType
-        if any(different[key] for key in ('topic', 'author', '24h')):
-            text['author'] = ('name', message['this']['author'])
-        if message['this']['is_starred']:
-            text['star'] = ('starred', "*")
-        if any(different[key] for key in ('topic', 'author', 'timestamp')):
-            text['time'] = ('time', message['this']['time'])
+        if any_differences:  # Construct content_header, if needed
+            TextType = Dict[str, Tuple[Optional[str], str]]
+            text = {key: (None, ' ')
+                    for key in ('author', 'star', 'time')}  # type: TextType
+            if any(different[key] for key in ('topic', 'author', '24h')):
+                text['author'] = ('name', message['this']['author'])
+            if message['this']['is_starred']:
+                text['star'] = ('starred', "*")
+            if any(different[key] for key in ('topic', 'author', 'timestamp')):
+                text['time'] = ('time', message['this']['time'])
 
-        content_header = urwid.Columns([
-            ('weight', 10, urwid.Text(text['author'])),
-            (1, urwid.Text(text['star'], align='right')),
-            (16, urwid.Text(text['time'], align='right')),
-            ], dividechars=1)
+            content_header = urwid.Columns([
+                ('weight', 10, urwid.Text(text['author'])),
+                (1, urwid.Text(text['star'], align='right')),
+                (16, urwid.Text(text['time'], align='right')),
+                ], dividechars=1)
+        else:
+            content_header = None
 
         view = [header, content_header, content, reactions]
         if header is None:
             view.remove(header)
-        if no_differences:
+        if not any_differences:
             view.remove(content_header)
         if reactions == '':
             view.remove(reactions)
