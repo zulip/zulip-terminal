@@ -144,8 +144,9 @@ class MessageBox(urwid.Pile):
         self.title = self.message['subject']
         # If the topic of last message is same
         # as current message
-        if self.title == self.last_message['subject'] and\
-                self.last_message['type'] == 'stream':
+        if (self.last_message['type'] == 'stream' and
+                self.title == self.last_message['subject'] and
+                self.caption == self.last_message['display_recipient']):
             return None
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
