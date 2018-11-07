@@ -800,3 +800,54 @@ class TestMessageBox:
         assert view_components[0].get_attr() == 'bar'
         assert isinstance(view_components[1], Columns)
         assert isinstance(view_components[2], Padding)
+
+    @pytest.mark.parametrize('message', [
+        {
+            'type': 'private',
+            'sender_email': 'iago@zulip.com',
+            'sender_id': 5,
+            'display_recipient': [{
+                'email': 'AARON@zulip.com',
+                'id': 1,
+                'full_name': 'aaron'
+            }, {
+                'email': 'iago@zulip.com',
+                'id': 5,
+                'full_name': 'Iago'
+            }],
+            'flags': [],
+            'content': '<div>what are you planning to do this week</div>',
+            'reactions': [],
+            'sender_full_name': 'Alice',
+            'timestamp': 1532103879,
+        },
+    ])
+    @pytest.mark.parametrize('to_vary_in_last_message', [
+            {
+                'display_recipient': [{
+                    'email': 'AARON@zulip.com',
+                    'id': 1,
+                    'full_name': 'aaron'
+                }, {
+                    'email': 'iago@zulip.com',
+                    'id': 5,
+                    'full_name': 'Iago'
+                }, {
+                    'email': 'SE@zulip.com',
+                    'id': 6,
+                    'full_name': 'Someone Else'
+                }],
+            },
+            {'type': 'stream'},
+    ], ids=['larger_pm_group', 'stream_before'])
+    def test_main_view_generates_PM_header(self, mocker, message,
+                                           to_vary_in_last_message):
+        mocker.patch(VIEWS + ".urwid.Text")
+        last_message = dict(message, **to_vary_in_last_message)
+        msg_box = MessageBox(message, self.model, last_message)
+        view_components = msg_box.main_view()
+        assert len(view_components) == 3
+        assert isinstance(view_components[0], AttrWrap)
+        assert view_components[0].get_attr() == 'bar'
+        assert isinstance(view_components[1], Columns)
+        assert isinstance(view_components[2], Padding)
