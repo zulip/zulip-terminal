@@ -12,6 +12,8 @@ from zulipterminal.ui_tools.views import (
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 
+from urwid import AttrWrap, Columns, Padding
+
 VIEWS = "zulipterminal.ui_tools.views"
 
 
@@ -763,3 +765,38 @@ class TestMessageBox:
             },
         }
         msg_box = MessageBox(message, self.model, last_message)
+
+    @pytest.mark.parametrize('message', [
+        {
+            'type': 'stream',
+            'display_recipient': 'Verona',
+            'stream_id': 5,
+            'subject': 'Test topic',
+            'flags': [],
+            'content': '<div>what are you planning to do this week</div>',
+            'reactions': [],
+            'sender_full_name': 'Alice',
+            'timestamp': 1532103879,
+        }
+    ])
+    @pytest.mark.parametrize('to_vary_in_last_message', [
+            {'display_recipient': 'Verona offtopic'},
+            {'subject': 'Test topic (previous)'},
+            {'type': 'private'},
+    ], ids=['different_stream_before', 'different_topic_before', 'PM_before'])
+    def test_main_view_generates_stream_header(self, mocker, message,
+                                               to_vary_in_last_message):
+        mocker.patch(VIEWS + ".urwid.Text")
+        self.model.stream_dict = {
+            5: {
+                'color': '#bfd56f',
+            },
+        }
+        last_message = dict(message, **to_vary_in_last_message)
+        msg_box = MessageBox(message, self.model, last_message)
+        view_components = msg_box.main_view()
+        assert len(view_components) == 3
+        assert isinstance(view_components[0], AttrWrap)
+        assert view_components[0].get_attr() == 'bar'
+        assert isinstance(view_components[1], Columns)
+        assert isinstance(view_components[2], Padding)
