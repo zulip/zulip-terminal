@@ -12,7 +12,7 @@ from zulipterminal.ui_tools.views import (
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 
-from urwid import AttrWrap, Columns, Padding
+from urwid import AttrWrap, Columns, Padding, Text
 
 VIEWS = "zulipterminal.ui_tools.views"
 
@@ -851,3 +851,37 @@ class TestMessageBox:
         assert view_components[0].get_attr() == 'bar'
         assert isinstance(view_components[1], Columns)
         assert isinstance(view_components[2], Padding)
+
+    # Assume recipient (PM/stream/topic) header is unchanged below
+    @pytest.mark.parametrize('message', [
+        {
+            'type': 'stream',
+            'display_recipient': 'Verona',
+            'stream_id': 5,
+            'subject': 'Test topic',
+            'flags': [],
+            'content': '<div>what are you planning to do this week</div>',
+            'reactions': [],
+            'sender_full_name': 'alice',
+            'timestamp': 1532103879,
+        }
+    ])
+    @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
+        (['alice', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
+        (['DAYDATETIME'], {'timestamp': 1532103779}),  # 100 earlier
+        (['alice', 'DAYDATETIME'], {'timestamp': 0}),  # much earlier!
+    ], ids=['author_different', 'earlier_message', 'much_earlier_message'])
+    def test_main_view_content_header_without_header(self, mocker, message,
+                                                     expected_header,
+                                                     to_vary_in_last_message):
+        last_message = dict(message, **to_vary_in_last_message)
+        msg_box = MessageBox(message, self.model, last_message)
+        expected_header_dated = list(
+            msg_box._time_for_message(message) if elt == 'DAYDATETIME' else elt
+            for elt in expected_header)
+        view_components = msg_box.main_view()
+        assert len(view_components) == 2
+        assert isinstance(view_components[0], Columns)
+        assert ([w.text for w in view_components[0].widget_list] ==
+                expected_header_dated)
+        assert isinstance(view_components[1], Padding)
