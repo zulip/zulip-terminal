@@ -866,6 +866,8 @@ class TestMessageBox:
             'timestamp': 1532103879,
         }
     ])
+    @pytest.mark.parametrize('starred_msg', ['this', 'last', 'neither'],
+                             ids=['this_starred', 'last_starred', 'no_stars'])
     @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
         (['alice', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
         ([' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),  # 100 earlier
@@ -873,17 +875,21 @@ class TestMessageBox:
     ], ids=['author_different', 'earlier_message', 'much_earlier_message'])
     def test_main_view_content_header_without_header(self, mocker, message,
                                                      expected_header,
+                                                     starred_msg,
                                                      to_vary_in_last_message):
-        last_message = dict(message, **to_vary_in_last_message)
-        msg_box = MessageBox(message, self.model, last_message)
-        expected_header_dated = list(
-            msg_box._time_for_message(message) if elt == 'DAYDATETIME' else elt
-            for elt in expected_header)
+        stars = {msg: ({'flags': ['starred']} if msg == starred_msg else {})
+                 for msg in ('this', 'last')}
+        this_msg = dict(message, **stars['this'])
+        last_msg = dict(message, **to_vary_in_last_message, **stars['last'])
+        msg_box = MessageBox(this_msg, self.model, last_msg)
+        expected_header[1] = '*' if starred_msg == 'this' else ' '
+        expected_header[2] = msg_box._time_for_message(message)
+
         view_components = msg_box.main_view()
         assert len(view_components) == 2
         assert isinstance(view_components[0], Columns)
         assert ([w.text for w in view_components[0].widget_list] ==
-                expected_header_dated)
+                expected_header)
         assert isinstance(view_components[1], Padding)
 
     @pytest.mark.parametrize('message', [
@@ -922,9 +928,10 @@ class TestMessageBox:
         {'sender_full_name': 'bob'},
         {'timestamp': 1532103779},
         {'timestamp': 0},
-        {}
+        {},
+        {'flags': ['starred']},
     ], ids=['common_author', 'common_timestamp', 'common_early_timestamp',
-            'common_unchanged_message'])
+            'common_unchanged_message', 'both_starred'])
     def test_main_view_compact_output(self, mocker, message,
                                       to_vary_in_each_message):
         varied_message = dict(message, **to_vary_in_each_message)
