@@ -1,3 +1,5 @@
+from typing import Set
+
 KEY_BINDINGS = {
     'GO_BACK': {
         'keys': {'esc'},
@@ -114,6 +116,10 @@ KEY_BINDINGS = {
 }
 
 
+class InvalidCommand(Exception):
+    pass
+
+
 def is_command_key(command: str, key: str) -> bool:
     """
     Returns the mapped binding for a key if mapped
@@ -123,3 +129,13 @@ def is_command_key(command: str, key: str) -> bool:
         return True
     else:
         return False
+
+
+def keys_for_command(command: str) -> Set[str]:
+    """
+    Returns the actual keys for a given mapped command
+    """
+    try:
+        return set(KEY_BINDINGS[command]['keys'])
+    except KeyError as exception:
+        raise InvalidCommand(command)
