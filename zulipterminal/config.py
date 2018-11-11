@@ -126,10 +126,7 @@ def is_command_key(command: str, key: str) -> bool:
     or the key otherwise.
     """
     try:
-        if key in KEY_BINDINGS[command]['keys']:
-            return True
-        else:
-            return False
+        return key in KEY_BINDINGS[command]['keys']
     except KeyError as exception:
         raise InvalidCommand(command)
 
