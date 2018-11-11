@@ -32,3 +32,9 @@ def test_is_command_key_nonmatching_keys(command):
     keys_to_test = USED_KEYS - config.keys_for_command(command)
     for key in keys_to_test:
         assert not config.is_command_key(command, key)
+
+
+@pytest.mark.parametrize('command', ['BLAH'*10])
+def test_is_command_key_invalid_command(command):
+    with pytest.raises(config.InvalidCommand):
+        config.is_command_key(command, 'esc')  # specific key doesn't matter
