@@ -125,10 +125,13 @@ def is_command_key(command: str, key: str) -> bool:
     Returns the mapped binding for a key if mapped
     or the key otherwise.
     """
-    if key in KEY_BINDINGS[command]['keys']:
-        return True
-    else:
-        return False
+    try:
+        if key in KEY_BINDINGS[command]['keys']:
+            return True
+        else:
+            return False
+    except KeyError as exception:
+        raise InvalidCommand(command)
 
 
 def keys_for_command(command: str) -> Set[str]:
