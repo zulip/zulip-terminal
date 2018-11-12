@@ -9,32 +9,37 @@ USED_KEYS = {key
              for key in values['keys']}
 
 
-@pytest.mark.parametrize('command', AVAILABLE_COMMANDS)
-def test_keys_for_command(command):
-    assert (config.KEY_BINDINGS[command]['keys'] ==
-            config.keys_for_command(command))
+@pytest.fixture(params=config.KEY_BINDINGS.keys())
+def valid_command(request):
+    return request.param
 
 
-@pytest.mark.parametrize('command', ['BLAH'*10])
-def test_keys_for_command_invalid_command(command):
+@pytest.fixture(params=['BLAH*10'])
+def invalid_command(request):
+    return request.param
+
+
+def test_keys_for_command(valid_command):
+    assert (config.KEY_BINDINGS[valid_command]['keys'] ==
+            config.keys_for_command(valid_command))
+
+
+def test_keys_for_command_invalid_command(invalid_command):
     with pytest.raises(config.InvalidCommand):
-        config.keys_for_command(command)
+        config.keys_for_command(invalid_command)
 
 
-@pytest.mark.parametrize('command', AVAILABLE_COMMANDS)
-def test_is_command_key_matching_keys(command):
-    for key in config.keys_for_command(command):
-        assert config.is_command_key(command, key)
+def test_is_command_key_matching_keys(valid_command):
+    for key in config.keys_for_command(valid_command):
+        assert config.is_command_key(valid_command, key)
 
 
-@pytest.mark.parametrize('command', AVAILABLE_COMMANDS)
-def test_is_command_key_nonmatching_keys(command):
-    keys_to_test = USED_KEYS - config.keys_for_command(command)
+def test_is_command_key_nonmatching_keys(valid_command):
+    keys_to_test = USED_KEYS - config.keys_for_command(valid_command)
     for key in keys_to_test:
-        assert not config.is_command_key(command, key)
+        assert not config.is_command_key(valid_command, key)
 
 
-@pytest.mark.parametrize('command', ['BLAH'*10])
-def test_is_command_key_invalid_command(command):
+def test_is_command_key_invalid_command(invalid_command):
     with pytest.raises(config.InvalidCommand):
-        config.is_command_key(command, 'esc')  # specific key doesn't matter
+        config.is_command_key(invalid_command, 'esc')  # key doesn't matter
