@@ -356,6 +356,24 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
+    def update_star_status(self, event: Dict[str, Any]) -> None:
+        assert len(event['messages']) == 1  # FIXME: Can be multiple?
+        message_id = event['messages'][0]
+
+        if self.index['messages'][message_id] != {}:
+            msg = self.index['messages'][message_id]
+            if event['operation'] == 'add':
+                if 'starred' not in msg['flags']:
+                    msg['flags'].append('starred')
+            elif event['operation'] == 'remove':
+                if 'starred' in msg['flags']:
+                    msg['flags'].remove('starred')
+            else:
+                raise RuntimeError(event, msg['flags'])
+
+            self.index['messages'][message_id] = msg
+            self.update_rendered_view(message_id)
+
     def update_rendered_view(self, msg_id: int) -> None:
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
@@ -413,3 +431,7 @@ class Model:
                 elif event['type'] == 'typing':
                     if hasattr(self.controller, 'view'):
                         self.controller.view.handle_typing_event(event)
+                elif event['type'] == 'update_message_flags':
+                    # TODO: Should also support 'read' flag changes?
+                    if event['flag'] == 'starred':
+                        self.update_star_status(event)
