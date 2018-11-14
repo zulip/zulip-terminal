@@ -236,10 +236,12 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
                     recipient['id'] for recipient in msg['display_recipient']
                 ))
 
-                if narrow[0][0] == 'pm_with' and recipients == frozenset({
-                        model.user_id, model.user_dict[narrow[0][1]]['user_id']
-                }):
-                    index['private'][recipients].add(msg['id'])
+                if narrow[0][0] == 'pm_with':
+                    narrow_emails = ([model.user_dict[email]['user_id']
+                                      for email in narrow[0][1].split(', ')] +
+                                     [model.user_id])
+                    if recipients == frozenset(narrow_emails):
+                        index['private'][recipients].add(msg['id'])
 
             if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
                 index['all_stream'][msg['stream_id']].add(msg['id'])

@@ -163,31 +163,29 @@ class Controller:
                       for recipient in button.message['display_recipient']
                       if recipient['email'] != self.model.client.email]
             user_emails = ', '.join(emails)
+            user_ids = {user['id']
+                        for user in button.message['display_recipient']}
         else:
             user_emails = button.email
+            user_ids = {self.model.user_id, button.user_id}
 
         already_narrowed = self.model.set_narrow(pm_with=user_emails)
         if already_narrowed:
             return
 
-        button.user_id = self.model.user_dict[user_emails]['user_id']
-
         self.update = False
-        msg_id_list = self.model.index['private'].get(frozenset(
-            [self.model.user_id, button.user_id]), [])
-
-        get_msg_opts = dict(num_before=30, num_after=10,
-                            anchor=None)  # type: GetMessagesArgs
-        if hasattr(button, 'message'):
-            get_msg_opts['anchor'] = button.message['id']
-            self.model.get_messages(**get_msg_opts)
-        elif len(msg_id_list) == 0:
-            self.model.get_messages(**get_msg_opts)
-        # TODO: Should there be a note or code here for the else clause?
-
-        recipients = frozenset([self.model.user_id, button.user_id])
+        recipients = frozenset(user_ids)
         self.model.recipients = recipients
         msg_id_list = self.model.index['private'].get(recipients, [])
+
+        if len(msg_id_list) == 0:
+            get_msg_opts = dict(num_before=30, num_after=10,
+                                anchor=None)  # type: GetMessagesArgs
+            if hasattr(button, 'message'):
+                get_msg_opts['anchor'] = button.message['id']
+            self.model.get_messages(**get_msg_opts)
+            msg_id_list = self.model.index['private'].get(recipients, [])
+
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_id_list, button.message['id'])
