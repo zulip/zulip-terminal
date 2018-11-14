@@ -241,6 +241,7 @@ class Controller:
             'update_message',
             'reaction',
             'typing',
+            'update_message_flags',
         ]
         response = self.client.register(event_types=event_types,
                                         apply_markdown=True)

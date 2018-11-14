@@ -153,6 +153,7 @@ class TestController:
             'update_message',
             'reaction',
             'typing',
+            'update_message_flags',
         ]
         controller.client.register.assert_called_once_with(
                                    event_types=event_types,
