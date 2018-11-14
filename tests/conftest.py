@@ -129,6 +129,44 @@ def messages_successful_response() -> Dict[str, Any]:
                 'full_name': 'Foo Foo',
                 'email': 'foo@zulip.com',
             }],
+        }, {
+            'id': 537288,
+            'sender_full_name': 'Foo Foo',
+            'timestamp': 1520918737,
+            'client': 'website',
+            'recipient_id': 5780,  # FIXME Unsure
+            'is_me_message': False,
+            'sender_email': 'foo@zulip.com',
+            'flags': ['read'],
+            'sender_id': 5140,
+            'content_type': 'text/x-markdown',
+            'sender_realm_str': '',
+            'subject': '',
+            'reactions': [],
+            'type': 'private',
+            'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+            'subject_links': [],
+            'sender_short_name': 'foo',
+            'content': 'Hey PM content here again.',
+            'display_recipient': [{
+                'id': 5179,
+                'is_mirror_dummy': False,
+                'full_name': 'Boo Boo',
+                'short_name': 'boo',
+                'email': 'boo@zulip.com',
+            }, {
+                'short_name': 'foo',
+                'id': 5140,
+                'is_mirror_dummy': False,
+                'full_name': 'Foo Foo',
+                'email': 'foo@zulip.com',
+            }, {
+                'short_name': 'bar',
+                'id': 5180,
+                'is_mirror_dummy': False,
+                'full_name': 'Bar Bar',
+                'email': 'bar@zulip.com',
+            }],
         }],
         'result': 'success',
         'msg': '',
@@ -353,7 +391,7 @@ def index_all_messages():
     return {
         'pointer': defaultdict(set, {}),
         'private': defaultdict(set, {}),
-        'all_messages':  {537286, 537287},
+        'all_messages':  {537286, 537287, 537288},
         'all_private': set(),
         'messages': defaultdict(dict, {
             537286: {
@@ -410,6 +448,45 @@ def index_all_messages():
                 'sender_id': 5140,
                 'sender_full_name': 'Foo Foo',
                 'subject_links': []
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
             }
         }),
         'all_stream': defaultdict(set, {}),
@@ -427,7 +504,8 @@ def index_stream():
         'private': defaultdict(set, {}),
         'all_messages': set(),
         'all_private': {
-            537287
+            537287,
+            537288
         },
         'all_stream': defaultdict(set, {
             205: {
@@ -492,6 +570,45 @@ def index_stream():
                 'subject_links': [],
                 'id': 537287,
                 'is_me_message': False
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
             }
         })
     }
@@ -567,6 +684,45 @@ def index_topic():
                 'flags': ['read'],
                 'type': 'private',
                 'sender_email': 'foo@zulip.com'
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
             }
         }),
         'pointer': defaultdict(set, {}),
@@ -586,10 +742,7 @@ def index_user():
     return {
         'stream': defaultdict(dict, {}),
         'private': defaultdict(set, {
-            frozenset({
-                5179,
-                5140
-            }): {
+            frozenset({5179, 5140}): {
                 537287
             }
         }),
@@ -650,10 +803,170 @@ def index_user():
                     'is_mirror_dummy': False,
                     'email': 'foo@zulip.com'
                 }]
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
             }
         }),
         'all_private': {
-            537287
+            537287,
+            537288
+        },
+        'all_stream': defaultdict(set, {}),
+        'search': set(),
+    }
+
+
+@pytest.fixture(scope="module")
+def index_user_multiple():
+    """
+    Expected index of initial_data when model.narrow = [['pm_with',
+                                            'boo@zulip.com, bar@zulip.com'],
+    """
+    return {
+        'stream': defaultdict(dict, {}),
+        'private': defaultdict(set, {
+            frozenset({5179, 5140, 5180}): {
+                537288
+            }
+        }),
+        'all_messages': set(),
+        'pointer': defaultdict(set, {}),
+        'messages': defaultdict(dict, {
+            537286: {
+                'subject': 'Test',
+                'sender_full_name': 'Foo Foo',
+                'sender_short_name': 'foo',
+                'sender_email': 'foo@zulip.com',
+                'is_me_message': False,
+                'content_type': 'text/x-markdown',
+                'type': 'stream',
+                'id': 537286,
+                'sender_id': 5140,
+                'sender_realm_str': '',
+                'stream_id': 205,
+                'content': 'Stream content here.',
+                'reactions': [],
+                'subject_links': [],
+                'client': 'website',
+                'flags': ['read'],
+                'timestamp': 1520918722,
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'recipient_id': 6076,
+                'display_recipient': 'PTEST'
+            },
+            537287: {
+                'subject': '',
+                'sender_full_name': 'Foo Foo',
+                'sender_short_name': 'foo',
+                'sender_email': 'foo@zulip.com',
+                'is_me_message': False,
+                'content_type': 'text/x-markdown',
+                'reactions': [],
+                'id': 537287,
+                'sender_id': 5140,
+                'sender_realm_str': '',
+                'type': 'private',
+                'content': 'Hey PM content here.',
+                'subject_links': [],
+                'client': 'website',
+                'flags': ['read'],
+                'timestamp': 1520918736,
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'recipient_id': 5780,
+                'display_recipient': [{
+                    'short_name': 'boo',
+                    'id': 5179,
+                    'full_name': 'Boo Boo',
+                    'is_mirror_dummy': False,
+                    'email': 'boo@zulip.com'
+                }, {
+                    'id': 5140,
+                    'short_name': 'foo',
+                    'full_name': 'Foo Foo',
+                    'is_mirror_dummy': False,
+                    'email': 'foo@zulip.com'
+                }]
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
+            }
+        }),
+        'all_private': {
+            537287,
+            537288
         },
         'all_stream': defaultdict(set, {}),
         'search': set(),
