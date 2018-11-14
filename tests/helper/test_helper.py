@@ -68,3 +68,22 @@ def test_index_messages_narrow_user(mocker,
         }
     }
     assert index_messages(messages, model) == index_user
+
+
+def test_index_messages_narrow_user_multiple(mocker,
+                                             messages_successful_response,
+                                             index_user_multiple):
+    messages = messages_successful_response['messages']
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.narrow = [['pm_with', 'boo@zulip.com, bar@zulip.com']]
+    model.user_id = 5140
+    model.user_dict = {
+        'boo@zulip.com': {
+            'user_id': 5179,
+        },
+        'bar@zulip.com': {
+            'user_id': 5180
+        }
+    }
+    assert index_messages(messages, model) == index_user_multiple
