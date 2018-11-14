@@ -126,7 +126,10 @@ class MessageView(urwid.ListBox):
         elif is_command_key('THUMBS_UP', key):
             self.model.react_to_message(self.focus.original_widget.message,
                                         reaction_to_toggle='thumbs_up')
-            return key
+
+        elif is_command_key('TOGGLE_STAR_STATUS', key):
+            message = self.focus.original_widget.message
+            self.model.toggle_message_star_status(message)
 
         key = super(MessageView, self).keypress(size, key)
         return key
