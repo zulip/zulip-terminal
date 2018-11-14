@@ -155,6 +155,17 @@ class Model:
                                              method=method,
                                              request=reaction_to_toggle_spec)
 
+    @asynch
+    def toggle_message_star_status(self, message: Dict[str, Any]) -> None:
+        base_request = dict(flag='starred', messages=[message['id']])
+        if 'starred' in message['flags']:
+            request = dict(base_request, op='remove')
+        else:
+            request = dict(base_request, op='add')
+        response = self.client.call_endpoint(url='messages/flags',
+                                             method='POST',
+                                             request=request)
+
     def get_messages(self, *,
                      num_after: int, num_before: int,
                      anchor: Optional[int]) -> Any:

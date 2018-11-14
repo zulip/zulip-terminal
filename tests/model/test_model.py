@@ -295,6 +295,33 @@ class TestModel:
             request, '/json/messages', method="GET")
         assert model.index is None
 
+    @pytest.mark.parametrize('flags_before, expected_operator', [
+        ([], 'add'),
+        (['starred'], 'remove'),
+        (['read'], 'add'),
+        (['read', 'starred'], 'remove'),
+        (['starred', 'read'], 'remove'),
+    ])
+    def test_toggle_message_star_status(self, mocker, model, flags_before,
+                                        expected_operator):
+        mocker.patch('zulip.Client')
+        message = {
+            'id': 99,
+            'flags': flags_before,
+        }
+        model.toggle_message_star_status(message)
+
+        request = {
+            'flag': 'starred',
+            'messages': [99],
+            'op': expected_operator
+        }
+        model.client.call_endpoint.assert_called_once_with(
+            url="messages/flags",
+            method="POST",
+            request=request
+        )
+
     def test__update_initial_data(self, model, initial_data):
         assert model.initial_data == initial_data
 
