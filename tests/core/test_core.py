@@ -121,11 +121,11 @@ class TestController:
         controller.show_all_messages('')
         assert controller.model.narrow == []
         controller.model.msg_view.clear.assert_called_once_with()
-        controller.model.msg_list.set_focus.assert_called_once_with(1)
+        num_am = len(index_all_messages['all_messages'])
+        controller.model.msg_list.set_focus.assert_called_once_with(num_am - 1)
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         id_list = index_all_messages['all_messages']
-        msg_ids = set(widget.original_widget.message['id']
-                      for widget in widgets)
+        msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
     def test_show_all_pm(self, mocker, controller, index_user):
@@ -137,10 +137,12 @@ class TestController:
         controller.show_all_pm('')
         assert controller.model.narrow == [['is', 'private']]
         controller.model.msg_view.clear.assert_called_once_with()
-        controller.model.msg_list.set_focus.assert_called_once_with(0)
+        num_pm = len(index_user['all_private'])
+        controller.model.msg_list.set_focus.assert_called_once_with(num_pm - 1)
+        widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         id_list = index_user['all_private']
-        widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
-        assert {widget.original_widget.message['id']} == id_list
+        msg_ids = {widget.original_widget.message['id'] for widget in widgets}
+        assert msg_ids == id_list
 
     def test_register_initial_desired_events(self, mocker):
         self.config_file = 'path/to/zuliprc'
