@@ -538,6 +538,56 @@ class TestModel:
         model.update_reaction(response)
         assert len(model.index['messages'][1]['reactions']) == 1
 
+    def test_update_star_status_no_index(self, mocker, model):
+        model.index = dict(messages={1: {}})  # Not indexed
+        event = dict(messages=[1])
+        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+
+        model.update_star_status(event)
+
+        assert model.index == dict(messages={1: {}})
+        model.update_rendered_view.assert_not_called()
+
+    def test_update_star_status_invalid_operation(self, mocker, model):
+        model.index = dict(messages={1: {'flags': None}})  # Minimal
+        event = {
+            'messages': [1],
+            'type': 'update_message_flags',
+            'flag': 'starred',
+            'operation': 'OTHER'  # not 'add' or 'remove'
+        }
+        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        with pytest.raises(RuntimeError):
+            model.update_star_status(event)
+        model.update_rendered_view.assert_not_called()
+
+    @pytest.mark.parametrize('event_op, flags_before, flags_after', [
+        ('add', [], ['starred']),
+        ('add', ['read'], ['read', 'starred']),
+        ('add', ['starred'], ['starred']),
+        ('add', ['read', 'starred'], ['read', 'starred']),
+        ('remove', [], []),
+        ('remove', ['read'], ['read']),
+        ('remove', ['starred'], []),
+        ('remove', ['read', 'starred'], ['read']),
+        ('remove', ['starred', 'read'], ['read']),
+    ])
+    def test_update_star_status(self, mocker, model, event_op,
+                                flags_before, flags_after):
+        model.index = dict(messages={1: {'flags': flags_before}})
+        event = {
+            'messages': [1],
+            'type': 'update_message_flags',
+            'flag': 'starred',
+            'operation': event_op
+        }
+        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+
+        model.update_star_status(event)
+
+        assert model.index['messages'][1]['flags'] == flags_after
+        model.update_rendered_view.assert_called_once_with(1)
+
     def test_update_realm_users(self, mocker, initial_data, user_profile):
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
