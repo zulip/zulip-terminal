@@ -46,29 +46,33 @@ theme=default
 ## Hot Keys
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
+| Go Back                                               | <kbd>esc</kbd>                                |
 | Previous message                                      | <kbd>Up</kbd> / <kbd>k</kbd>                  |
 | Next message                                          | <kbd>Down</kbd> / <kbd>j</kbd>                |
 | Go left                                               | <kbd>left</kbd> / <kbd>h</kbd>                |
 | Go right                                              | <kbd>right</kbd> / <kbd>l</kbd>               |
-| Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
-| Narrow to private messages                            | <kbd>P</kbd>                                  |
-| Scroll down                                           | <kbd>PgDn</kbd> / <kbd>J</kbd>                |
 | Scroll up                                             | <kbd>PgUp</kbd> / <kbd>K</kbd>                |
+| Scroll down                                           | <kbd>PgDn</kbd> / <kbd>J</kbd>                |
+| Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
 | Reply to a message                                    | <kbd>r</kbd>                                  |
 | Reply to an author                                    | <kbd>R</kbd>                                  |
 | Reply mentioning sender of the message                | <kbd>@</kbd>                                  |
 | Reply quoting the message text                        | <kbd>></kbd>                                  |
 | New stream message                                    | <kbd>c</kbd>                                  |
 | New private message                                   | <kbd>x</kbd>                                  |
-| Go Back                                               | <kbd>esc</kbd>                                |
+| Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
+| Send a message                                        | <kbd>Alt Enter</kbd>                          |
 | Narrow to a stream                                    | <kbd>S</kbd>                                  |
 | Narrow to a topic                                     | <kbd>s</kbd>                                  |
+| Narrow to private messages                            | <kbd>P</kbd>                                  |
 | Next Unread Topic                                     | <kbd>n</kbd>                                  |
 | Next Unread PM                                        | <kbd>p</kbd>                                  |
-| Send a message                                        | <kbd>Alt Enter</kbd>                          |
 | Search People                                         | <kbd>w</kbd>                                  |
 | Search Messages                                       | <kbd>/</kbd>                                  |
+| Search Streams                                        | <kbd>q</kbd>                                  |
+| Add/remove thumbs-up reaction on a message            | <kbd>+</kbd>                                  |
 | Add/remove star status of a message                   | <kbd>*</kbd>                                  |
+| Display help menu                                     | <kbd>?</kbd>                                  |
 | Jump to the Beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
 | Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |
