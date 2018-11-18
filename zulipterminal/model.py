@@ -388,8 +388,11 @@ class Model:
     def update_rendered_view(self, msg_id: int) -> None:
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
-            if msg_w.original_widget.message['id'] == msg_id:
-                msg_w_list = create_msg_box_list(self, [msg_id])
+            msg_box = msg_w.original_widget
+            if msg_box.message['id'] == msg_id:
+                msg_w_list = create_msg_box_list(
+                                self, [msg_id],
+                                last_message=msg_box.last_message)
                 if not msg_w_list:
                     return
                 else:
