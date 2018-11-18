@@ -139,7 +139,6 @@ class MessageView(urwid.ListBox):
             return
         # if view is ready display current narrow
         # at the bottom of the view.
-        message_view.last_message = defaultdict(dict)
         is_stream = message_view.message['type'] == 'stream'
         if is_stream:
             footer = message_view.stream_header()
