@@ -6,7 +6,8 @@ from zulipterminal.ui_tools.boxes import MessageBox
 
 
 def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
-                        focus_msg_id: Union[None, int]=None) -> List[Any]:
+                        focus_msg_id: Union[None, int]=None,
+                        last_message: Union[None, Any]=None) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
     """
@@ -17,7 +18,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
     message_list.sort(key=lambda msg: msg['timestamp'])
     w_list = []
     focus_msg = None
-    last_message = None
+    last_msg = last_message
     muted_msgs = 0  # No of messages that are muted.
     for msg in message_list:
         # Remove messages of muted topics / streams.
@@ -36,11 +37,11 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
         if msg['id'] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
         w_list.append(urwid.AttrMap(
-                    MessageBox(msg, model, last_message),
+                    MessageBox(msg, model, last_msg),
                     msg_flag,
                     'msg_selected'
         ))
-        last_message = msg
+        last_msg = msg
     if focus_msg is not None:
         model.set_focus_in_current_narrow(focus_msg)
     return w_list
