@@ -142,9 +142,9 @@ class MessageView(urwid.ListBox):
         message_view.last_message = defaultdict(dict)
         is_stream = message_view.message['type'] == 'stream'
         if is_stream:
-            footer = message_view.stream_view()
+            footer = message_view.stream_header()
         else:
-            footer = message_view.private_view()
+            footer = message_view.private_header()
         self.model.controller.view.search_box.msg_narrow.set_text(
             footer.markup
         )
