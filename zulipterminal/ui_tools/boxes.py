@@ -129,25 +129,50 @@ class MessageBox(urwid.Pile):
         self.stream_id = None  # type: Union[int, None]
         self.title = ''
         self.email = ''
+        self.user_id = None  # type: Union[int, None]
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
             self.last_message = defaultdict(dict)
+
+        if self.message['type'] == 'stream':
+            self.caption = self.message['display_recipient']
+            self.stream_id = self.message['stream_id']
+            self.title = self.message['subject']
+        elif self.message['type'] == 'private':
+            self.email = self.message['sender_email']
+            self.user_id = self.message['sender_id']
+        else:
+            raise RuntimeError("Invalid message type")
+
         super(MessageBox, self).__init__(self.main_view())
 
     def _time_for_message(self, message: Dict[str, Any]) -> str:
         return ctime(message['timestamp'])[:-8]
 
-    def stream_view(self) -> Any:
-        self.caption = self.message['display_recipient']
-        self.stream_id = self.message['stream_id']
-        self.title = self.message['subject']
-        # If the topic of last message is same
-        # as current message
-        if (self.last_message['type'] == 'stream' and
-                self.title == self.last_message['subject'] and
-                self.caption == self.last_message['display_recipient']):
-            return None
+    def need_header(self) -> bool:
+        last_msg = self.last_message
+        if self.message['type'] == 'stream':
+            if (last_msg['type'] == 'stream' and
+                    self.title == last_msg['subject'] and
+                    self.caption == last_msg['display_recipient']):
+                return False
+            return True
+        elif self.message['type'] == 'private':
+            recipient_ids = [{recipient['id']
+                              for recipient in message['display_recipient']
+                              if 'id' in recipient}
+                             for message in (self.message, last_msg)
+                             if 'display_recipient' in message]
+            if (len(recipient_ids) == 2 and
+                    recipient_ids[0] == recipient_ids[1] and
+                    last_msg['type'] == 'private'):
+                return False
+            return True
+        else:
+            raise RuntimeError("Invalid message type")
+
+    def stream_header(self) -> Any:
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
         stream_title_markup = ('bar', [
@@ -159,19 +184,7 @@ class MessageBox(urwid.Pile):
         header.markup = stream_title_markup
         return header
 
-    def private_view(self) -> Any:
-        self.email = self.message['sender_email']
-        self.user_id = self.message['sender_id']
-
-        recipient_ids = [{recipient['id']
-                          for recipient in message['display_recipient']
-                          if 'id' in recipient}
-                         for message in (self.message, self.last_message)
-                         if 'display_recipient' in message]
-        if len(recipient_ids) == 2 and\
-                recipient_ids[0] == recipient_ids[1] and\
-                self.last_message['type'] == 'private':
-            return None
+    def private_header(self) -> Any:
         self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
@@ -272,10 +285,13 @@ class MessageBox(urwid.Pile):
     def main_view(self) -> List[Any]:
 
         # Header
-        if self.message['type'] == 'stream':
-            header = self.stream_view()
+        if self.need_header():
+            if self.message['type'] == 'stream':
+                header = self.stream_header()
+            else:
+                header = self.private_header()
         else:
-            header = self.private_view()
+            header = None
 
         # Content Header
         message = {
