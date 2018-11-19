@@ -695,10 +695,27 @@ class TestMessageBox:
     def mock_external_classes(self, mocker):
         self.model = mocker.Mock()
 
-    def test_init(self, mocker):
+    @pytest.mark.parametrize('message_type, set_fields', [
+        ('stream', [('caption', ''), ('stream_id', None), ('title', '')]),
+        ('private', [('email', ''), ('user_id', None)]),
+    ])
+    def test_init(self, mocker, message_type, set_fields):
         mocker.patch.object(MessageBox, 'main_view')
-        msg_box = MessageBox({}, self.model, None)
+        message = dict(display_recipient=['x'], stream_id=5, subject='hi',
+                       sender_email='foo@zulip.com', sender_id=4209,
+                       type=message_type)
+
+        msg_box = MessageBox(message, self.model, None)
+
         assert msg_box.last_message == defaultdict(dict)
+        for field, invalid_default in set_fields:
+            assert getattr(msg_box, field) != invalid_default
+
+    def test_init_fails_with_bad_message_type(self):
+        message = dict(type='BLAH')
+
+        with pytest.raises(RuntimeError):
+            msg_box = MessageBox(message, self.model, None)
 
     @pytest.mark.parametrize('message, last_message', [
         ({
