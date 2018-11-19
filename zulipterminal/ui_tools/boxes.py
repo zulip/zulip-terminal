@@ -335,13 +335,13 @@ class MessageBox(urwid.Pile):
         reactions = self.reactions_view(self.message['reactions'])
 
         # Build parts together and return
-        parts = {
-            header: header is not None,
-            content_header: any_differences,
-            content: True,
-            reactions: reactions != ''
-        }
-        return [part for part, condition in parts.items() if condition]
+        parts = [
+            (header, header is not None),
+            (content_header, any_differences),
+            (content, True),
+            (reactions, reactions != ''),
+        ]
+        return [part for part, condition in parts if condition]
 
     def selectable(self) -> bool:
         return True
