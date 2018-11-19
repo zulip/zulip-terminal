@@ -880,7 +880,8 @@ class TestMessageBox:
         stars = {msg: ({'flags': ['starred']} if msg == starred_msg else {})
                  for msg in ('this', 'last')}
         this_msg = dict(message, **stars['this'])
-        last_msg = dict(message, **to_vary_in_last_message, **stars['last'])
+        all_to_vary = dict(to_vary_in_last_message, **stars['last'])
+        last_msg = dict(message, **all_to_vary)
         msg_box = MessageBox(this_msg, self.model, last_msg)
         expected_header[1] = '*' if starred_msg == 'this' else ' '
         expected_header[2] = msg_box._time_for_message(message)
