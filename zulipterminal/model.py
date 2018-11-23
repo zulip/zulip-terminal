@@ -77,18 +77,21 @@ class Model:
     def set_narrow(self, *,
                    stream: Optional[str]=None, topic: Optional[str]=None,
                    search: Optional[str]=None,
-                   pm_with: Optional[str]=None) -> bool:
-        if search and not(stream or topic or pm_with):
+                   pm_with: Optional[str]=None,
+                   starred: bool=False) -> bool:
+        if search and not(stream or topic or pm_with or starred):
             new_narrow = [['search', search]]
-        elif stream and topic and not(search or pm_with):
+        elif stream and topic and not(search or pm_with or starred):
             new_narrow = [["stream", stream],
                           ["topic", topic]]
-        elif stream and not(topic or search or pm_with):
+        elif stream and not(topic or search or pm_with or starred):
             new_narrow = [['stream', stream]]
-        elif pm_with == '' and not(stream or topic or search):
+        elif pm_with == '' and not(stream or topic or search or starred):
             new_narrow = [['is', 'private']]
-        elif pm_with and not(stream or topic or search):
+        elif pm_with and not(stream or topic or search or starred):
             new_narrow = [['pm_with', pm_with]]
+        elif starred and not(stream or topic or search or pm_with):
+            new_narrow = [['is', 'starred']]
         elif not stream and not topic and not search and not pm_with:
             new_narrow = []
         else:
@@ -118,6 +121,8 @@ class Model:
             current_ids = self.index['private'][recipients]
         elif narrow[0][0] == 'search':
             current_ids = self.index['search']
+        elif narrow[0][1] == 'starred':
+            current_ids = self.index['all_starred']
         return current_ids.copy()
 
     @asynch

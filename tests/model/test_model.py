@@ -69,6 +69,7 @@ class TestModel:
         [['pm_with', 'FOO@zulip.com']],
         [['pm_with', 'Foo@zulip.com, Bar@zulip.com']],
         [['is', 'private']],
+        [['is', 'starred']],
     ])
     def test_get_focus_in_current_narrow_individually(self,
                                                       model, msg_id, narrow):
@@ -84,6 +85,7 @@ class TestModel:
         [['pm_with', 'FOO@zulip.com']],
         [['pm_with', 'Foo@zulip.com, Bar@zulip.com']],
         [['is', 'private']],
+        [['is', 'starred']],
     ])
     def test_set_focus_in_current_narrow(self, mocker, model, narrow, msg_id):
         from collections import defaultdict
@@ -109,6 +111,7 @@ class TestModel:
          dict(stream='some stream', topic='some topic')),
         ([['search', 'something interesting']],
          dict(search='something interesting')),
+        ([['is', 'starred']], dict(starred=True)),
     ])
     def test_set_narrow_already_set(self, model, narrow, good_args):
         model.narrow = narrow
@@ -120,6 +123,7 @@ class TestModel:
         ([], [['stream', 'some stream']], dict(stream='some stream')),
         ([], [['stream', 'some stream'], ['topic', 'some topic']],
          dict(stream='some stream', topic='some topic')),
+        ([], [['is', 'starred']], dict(starred=True)),
     ])
     def test_set_narrow_not_already_set(self, model, initial_narrow, narrow,
                                         good_args):
@@ -155,6 +159,9 @@ class TestModel:
         }, {0, 1}),
         ([['search', 'FOO']], {
             'search': {0, 1}
+        }, {0, 1}),
+        ([['is', 'starred']], {
+            'all_starred': {0, 1}
         }, {0, 1})
     ])
     def test_get_message_ids_in_current_narrow(self, mocker, model,
