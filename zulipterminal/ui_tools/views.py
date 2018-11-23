@@ -12,6 +12,7 @@ from zulipterminal.ui_tools.buttons import (
     UserButton,
     HomeButton,
     PMButton,
+    StarredButton,
     StreamButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -461,11 +462,17 @@ class LeftColumnView(urwid.Pile):
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
         self.view.home_button = HomeButton(self.controller, count=count)
+
         count = self.model.unread_counts.get('all_pms', 0)
         self.view.pm_button = PMButton(self.controller, count=count)
+
+        # Starred messages are by definition read already
+        self.view.starred_button = StarredButton(self.controller)
+
         menu_btn_list = [
             self.view.home_button,
             self.view.pm_button,
+            self.view.starred_button,
         ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
