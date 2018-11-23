@@ -393,6 +393,7 @@ def empty_index():
         'all_stream': defaultdict(set, {}),
         'stream': defaultdict(dict, {}),
         'search': set(),
+        'all_starred': set(),
         'messages': defaultdict(dict, {
             537286: {
                 'type': 'stream',
