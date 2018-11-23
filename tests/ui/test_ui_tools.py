@@ -1,5 +1,6 @@
 import pytest
 from collections import defaultdict
+from bs4 import BeautifulSoup
 
 from zulipterminal.ui_tools.views import (
     MessageView,
@@ -716,6 +717,39 @@ class TestMessageBox:
 
         with pytest.raises(RuntimeError):
             msg_box = MessageBox(message, self.model, None)
+
+    @pytest.mark.parametrize('content, markup', [
+        ('<p>hi</p>', ['', 'hi']),
+        ('<span class="user-mention">@Bob Smith', [('span', '@Bob Smith')]),
+        ('<code>some code', [('code', 'some code')]),
+        ('<div class="codehilite">some code', [('code', 'some code')]),
+        ('<strong>Something', [('bold', 'Something')]),
+        ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
+        ('<div class="message_embed">', []),  # FIXME Unsupported
+        ('<a href="foo">foo</a>', ['foo']),  # FIXME? Render with link style?
+        ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
+        ('<a href="/user_uploads/blah"',
+            [('link', '[](SOME_BASE_URL/user_uploads/blah)')]),
+    ], ids=['p', 'mention', 'code', 'codehilite', 'strong', 'blockquote',
+            'embedded_content', 'link_sametext', 'link_differenttext',
+            'link_userupload'])
+    def test_soup2markup(self, content, markup):
+        message = dict(display_recipient=['x'], stream_id=5, subject='hi',
+                       sender_email='foo@zulip.com', sender_id=4209,
+                       type='stream',  # NOTE Output should not vary with PM
+                       flags=[], content=content, sender_full_name='bob smith',
+                       timestamp=99, reactions=[])
+        self.model.stream_dict = {
+            5: {  # matches stream_id above
+                'color': '#bfd56f',
+            },
+        }
+        self.model.client.base_url = "SOME_BASE_URL"
+        # NOTE Absence of previous (last) message should not affect markup
+        msg_box = MessageBox(message, self.model, None)
+
+        soup = BeautifulSoup(message['content'], 'lxml')
+        assert msg_box.soup2markup(soup) == 3*[''] + markup
 
     @pytest.mark.parametrize('message, last_message', [
         ({
