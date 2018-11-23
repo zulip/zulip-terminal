@@ -730,9 +730,12 @@ class TestMessageBox:
         ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
         ('<a href="/user_uploads/blah"',
             [('link', '[](SOME_BASE_URL/user_uploads/blah)')]),
+        ('<li>Something', ['  * ', '', 'Something']),
+        ('<li>Something<li>else',  # NOTE Real items are newline-separated?
+            ['  * ', '', 'Something', '  * ', '', 'else']),
     ], ids=['p', 'mention', 'code', 'codehilite', 'strong', 'blockquote',
             'embedded_content', 'link_sametext', 'link_differenttext',
-            'link_userupload'])
+            'link_userupload', 'listitem', 'listitems'])
     def test_soup2markup(self, content, markup):
         message = dict(display_recipient=['x'], stream_id=5, subject='hi',
                        sender_email='foo@zulip.com', sender_id=4209,
