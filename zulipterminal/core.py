@@ -226,6 +226,20 @@ class Controller:
 
         self._finalize_show(w_list)
 
+    def show_all_starred(self, button: Any) -> None:
+        already_narrowed = self.model.set_narrow(starred=True)
+        if already_narrowed:
+            return
+
+        self.update = False
+        msg_list = self.model.index['all_starred']
+        if len(msg_list) == 0:
+            self.model.get_messages(num_before=30, num_after=10, anchor=None)
+            msg_list = self.model.index['all_starred']
+        w_list = create_msg_box_list(self.model, msg_list)
+
+        self._finalize_show(w_list)
+
     def _finalize_show(self, w_list: List[Any]) -> None:
         focus_position = self.model.get_focus_in_current_narrow()
 
