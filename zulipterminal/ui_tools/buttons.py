@@ -68,6 +68,27 @@ class PMButton(urwid.Button):
         return super(PMButton, self).keypress(size, key)
 
 
+class StarredButton(urwid.Button):
+    def __init__(self, controller: Any) -> None:
+        self.caption = 'Starred messages'
+        super(StarredButton, self).__init__("")
+        self.count = 0  # Starred messages are already marked read
+        self._w = self.widget(0)
+        urwid.connect_signal(self, 'click', controller.show_all_starred)
+
+    def update_count(self, count: int) -> None:
+        self.count = count
+        self._w = self.widget(count)
+
+    def widget(self, count: int) -> Any:
+        return urwid.AttrMap(urwid.SelectableIcon(
+            [u' \N{BULLET} ', self.caption,
+             ('idle', '' if count <= 0 else ' ' + str(count))],
+            len(self.caption) + 4),
+            None,
+            'selected')
+
+
 class StreamButton(urwid.Button):
     def __init__(self, properties: List[Any],
                  controller: Any, view: Any, count: int=0) -> None:
