@@ -274,10 +274,11 @@ class MessageBox(urwid.Pile):
                     'code', element.text
                 ))
             elif element.name == 'strong':
-                    markup.append(('bold', element.text))
-            elif element.name == 'ul':
-                # TODO: Support nested lists.
-                markup.append(element.text)
+                markup.append(('bold', element.text))
+            elif element.name == 'li':
+                # TODO: Support nested lists
+                markup.append('  * ')
+                markup.extend(self.soup2markup(element))
             else:
                 markup.extend(self.soup2markup(element))
         return markup
