@@ -219,6 +219,7 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
             'all_stream': defaultdict(set),
             'messages': defaultdict(dict),
             'search': set(),
+            'all_starred': set(),
         }
     narrow = model.narrow
     for msg in messages:
@@ -232,6 +233,10 @@ def index_messages(messages: List[Any], model: Any, index: Any=None)\
             continue
 
         if len(narrow) == 1:
+
+            if narrow[0][1] == 'starred':
+                if 'starred' in msg['flags']:
+                    index['all_starred'].add(msg['id'])
 
             if msg['type'] == 'private':
                 index['all_private'].add(msg['id'])
