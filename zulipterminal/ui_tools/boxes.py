@@ -239,9 +239,37 @@ class MessageBox(urwid.Pile):
                 # since Embedded content can be very dynamic
                 # TODO: Support Embedded content
                 continue
+            elif element.name in ('br', 'hr', 'img'):
+                # Skip line-break, image, horizontal-rule
+                # FIXME: Some of these could be implemented
+                continue
+            elif element.name in ('p', 'ul', 'del'):
+                # PARAGRAPH, LISTS, STRIKE-THROUGH
+                markup.extend(self.soup2markup(element))
+            elif (element.name == 'div' and element.attrs and
+                    'message_inline_image' in element.attrs.get('class', [])):
+                        # INLINE IMAGES
+                        continue
+            elif (element.name == 'div' and element.attrs and
+                    'message_inline_ref' in element.attrs.get('class', [])):
+                        # INLINE NON-IMAGE (eg. dropbox)
+                        continue
+            elif (element.name == 'span' and element.attrs and
+                  'emoji' in element.attrs.get('class', [])):
+                # EMOJI
+                markup.append(element.text)
+            elif (element.name == 'span' and element.attrs and
+                  ('katex-display' in element.attrs.get('class', []) or
+                   'katex' in element.attrs.get('class', []))):
+                # MATH TEXT
+                markup.append(element.text)
+            elif element.name == 'table':
+                # TABLE
+                continue
             elif element.name == 'span' and element.attrs and\
-                    'user-mention' in element.attrs.get('class', []):
-                # USER MENTIONS
+                    ('user-mention' in element.attrs.get('class', []) or
+                     'user-group-mention' in element.attrs.get('class', [])):
+                # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('span', element.text))
             elif element.name == 'a':
                 # LINKS
@@ -265,20 +293,29 @@ class MessageBox(urwid.Pile):
                     'blockquote', self.soup2markup(element)
                 ))
             elif element.name == 'code':
+                # CODE (INLINE?)
                 markup.append((
                     'code', element.text
                 ))
             elif element.name == 'div' and element.attrs and\
                     'codehilite' in element.attrs.get('class', []):
+                # CODE (BLOCK?)
                 markup.append((
                     'code', element.text
                 ))
-            elif element.name == 'strong':
+            elif element.name in ('strong', 'em'):
+                # BOLD & ITALIC
                 markup.append(('bold', element.text))
             elif element.name == 'li':
+                # LISTS
                 # TODO: Support nested lists
                 markup.append('  * ')
                 markup.extend(self.soup2markup(element))
+            elif (element.name == 'div' and element.attrs and
+                    ('inline-preview-twitter' in
+                     element.attrs.get('class', []))):
+                # TWITTER PREVIEW
+                continue
             else:
                 markup.extend(self.soup2markup(element))
         return markup

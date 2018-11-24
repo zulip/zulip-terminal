@@ -721,9 +721,11 @@ class TestMessageBox:
     @pytest.mark.parametrize('content, markup', [
         ('<p>hi</p>', ['', 'hi']),
         ('<span class="user-mention">@Bob Smith', [('span', '@Bob Smith')]),
+        ('<span class="user-group-mention">@A Group', [('span', '@A Group')]),
         ('<code>some code', [('code', 'some code')]),
         ('<div class="codehilite">some code', [('code', 'some code')]),
         ('<strong>Something', [('bold', 'Something')]),
+        ('<em>Something', [('bold', 'Something')]),
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
         ('<div class="message_embed">', []),  # FIXME Unsupported
         ('<a href="foo">foo</a>', ['foo']),  # FIXME? Render with link style?
@@ -733,9 +735,27 @@ class TestMessageBox:
         ('<li>Something', ['  * ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  * ', '', 'Something', '  * ', '', 'else']),
-    ], ids=['p', 'mention', 'code', 'codehilite', 'strong', 'blockquote',
-            'embedded_content', 'link_sametext', 'link_differenttext',
-            'link_userupload', 'listitem', 'listitems'])
+        ('<br>', []), ('<br/>', []),
+        ('<hr>', []), ('<hr/>', []),
+        ('<img>', []), ('<img/>', []),
+        ('<table>stuff</table>', []),
+        ('<span class="katex-display">some-math</span>', ['some-math']),
+        ('<span class="katex">some-math</span>', ['some-math']),
+        ('<ul><li>text</li></ul>', ['', '  * ', '', 'text']),
+        ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
+        ('<div class="message_inline_image">blah</div>', []),
+        ('<div class="message_inline_ref">blah</div>', []),
+        ('<span class="emoji">:smile:</span>', [':smile:']),
+        ('<div class="inline-preview-twitter"', []),
+    ], ids=[
+        'p', 'user-mention', 'group-mention', 'code', 'codehilite',
+        'strong', 'em', 'blockquote',
+        'embedded_content', 'link_sametext', 'link_differenttext',
+        'link_userupload', 'listitem', 'listitems',
+        'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
+        'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
+        'emoji', 'preview-twitter'
+    ])
     def test_soup2markup(self, content, markup):
         message = dict(display_recipient=['x'], stream_id=5, subject='hi',
                        sender_email='foo@zulip.com', sender_id=4209,
