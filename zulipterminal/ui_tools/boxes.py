@@ -229,6 +229,13 @@ class MessageBox(urwid.Pile):
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup = ['']
+        unrendered_tags = {  # In pairs of 'tag_name': 'text'
+            # TODO: Some of these could be implemented
+            'br': '',  # No indicator of absence
+            'hr': 'RULER',
+            'img': 'IMAGE',
+            'table': 'TABLE'
+        }
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
@@ -239,10 +246,11 @@ class MessageBox(urwid.Pile):
                 # since Embedded content can be very dynamic
                 # TODO: Support Embedded content
                 continue
-            elif element.name in ('br', 'hr', 'img'):
-                # Skip line-break, image, horizontal-rule
-                # FIXME: Some of these could be implemented
-                continue
+            elif element.name in unrendered_tags:
+                # UNRENDERED SIMPLE TAGS
+                text = unrendered_tags[element.name]
+                if text:
+                    markup.append("[{} NOT RENDERED]".format(text))
             elif element.name in ('p', 'ul', 'del'):
                 # PARAGRAPH, LISTS, STRIKE-THROUGH
                 markup.extend(self.soup2markup(element))
@@ -263,9 +271,6 @@ class MessageBox(urwid.Pile):
                    'katex' in element.attrs.get('class', []))):
                 # MATH TEXT
                 markup.append(element.text)
-            elif element.name == 'table':
-                # TABLE
-                continue
             elif element.name == 'span' and element.attrs and\
                     ('user-mention' in element.attrs.get('class', []) or
                      'user-group-mention' in element.attrs.get('class', [])):
