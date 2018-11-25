@@ -343,9 +343,16 @@ class MessageBox(urwid.Pile):
         # Content
         soup = BeautifulSoup(self.message['content'], 'lxml')
         content = (None, self.soup2markup(soup))
-        content = urwid.Padding(urwid.Text(content),
-                                align='left', width=('relative', 90), left=25,
-                                min_width=50)
+        active_char = '▒'  # Options are '█', '▓', '▒', '░'
+        content = urwid.Padding(
+            urwid.LineBox(
+                urwid.Columns([
+                    (1, urwid.Text('')),
+                    urwid.Text(content),
+                ]), tline='', bline='', rline='', lline=active_char
+            ),
+            align='left', left=15, width=('relative', 100),
+            min_width=50, right=8)
 
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])
