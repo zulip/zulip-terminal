@@ -727,7 +727,8 @@ class TestMessageBox:
         ('<strong>Something', [('bold', 'Something')]),
         ('<em>Something', [('bold', 'Something')]),
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
-        ('<div class="message_embed">', []),  # FIXME Unsupported
+        ('<div class="message_embed">',
+            ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
         ('<a href="foo">foo</a>', ['foo']),  # FIXME? Render with link style?
         ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
         ('<a href="/user_uploads/blah"',
@@ -748,7 +749,8 @@ class TestMessageBox:
         ('<div class="message_inline_image">blah</div>', []),
         ('<div class="message_inline_ref">blah</div>', []),
         ('<span class="emoji">:smile:</span>', [':smile:']),
-        ('<div class="inline-preview-twitter"', []),
+        ('<div class="inline-preview-twitter"',
+            ['[TWITTER PREVIEW NOT RENDERED]']),
     ], ids=[
         'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
