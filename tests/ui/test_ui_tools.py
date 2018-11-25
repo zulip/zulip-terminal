@@ -751,8 +751,8 @@ class TestMessageBox:
         # NOTE Absence of previous (last) message should not affect markup
         msg_box = MessageBox(message, self.model, None)
 
-        soup = BeautifulSoup(message['content'], 'lxml')
-        assert msg_box.soup2markup(soup) == 3*[''] + markup
+        soup = BeautifulSoup(message['content'], 'lxml').find(name='body')
+        assert msg_box.soup2markup(soup) == [''] + markup
 
     @pytest.mark.parametrize('message, last_message', [
         ({
