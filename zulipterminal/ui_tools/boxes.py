@@ -236,32 +236,35 @@ class MessageBox(urwid.Pile):
             'img': 'IMAGE',
             'table': 'TABLE'
         }
+        unrendered_div_classes = {  # In pairs of 'div_class': 'text'
+            # TODO: Support embedded content & twitter preview?
+            'message_embed': 'EMBEDDED CONTENT',
+            'inline-preview-twitter': 'TWITTER PREVIEW',
+            'message_inline_image': '',
+            'message_inline_ref': '',
+        }
+        unrendered_template = '[{} NOT RENDERED]'
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
                 markup.append(element)
-            elif element.name == 'div' and element.attrs and\
-                    'message_embed' in element.attrs.get('class'):
-                # Do not display embedded content
-                # since Embedded content can be very dynamic
-                # TODO: Support Embedded content
-                continue
+            elif (element.name == 'div' and element.attrs and
+                    any(cls in element.attrs.get('class', [])
+                        for cls in unrendered_div_classes)):
+                # UNRENDERED DIV CLASSES
+                matching_class = (set(unrendered_div_classes) &
+                                  set(element.attrs.get('class')))
+                text = unrendered_div_classes[matching_class.pop()]
+                if text:
+                    markup.append(unrendered_template.format(text))
             elif element.name in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
                 text = unrendered_tags[element.name]
                 if text:
-                    markup.append("[{} NOT RENDERED]".format(text))
+                    markup.append(unrendered_template.format(text))
             elif element.name in ('p', 'ul', 'del'):
                 # PARAGRAPH, LISTS, STRIKE-THROUGH
                 markup.extend(self.soup2markup(element))
-            elif (element.name == 'div' and element.attrs and
-                    'message_inline_image' in element.attrs.get('class', [])):
-                        # INLINE IMAGES
-                        continue
-            elif (element.name == 'div' and element.attrs and
-                    'message_inline_ref' in element.attrs.get('class', [])):
-                        # INLINE NON-IMAGE (eg. dropbox)
-                        continue
             elif (element.name == 'span' and element.attrs and
                   'emoji' in element.attrs.get('class', [])):
                 # EMOJI
@@ -316,11 +319,6 @@ class MessageBox(urwid.Pile):
                 # TODO: Support nested lists
                 markup.append('  * ')
                 markup.extend(self.soup2markup(element))
-            elif (element.name == 'div' and element.attrs and
-                    ('inline-preview-twitter' in
-                     element.attrs.get('class', []))):
-                # TWITTER PREVIEW
-                continue
             else:
                 markup.extend(self.soup2markup(element))
         return markup
