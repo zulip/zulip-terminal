@@ -344,7 +344,7 @@ class MessageBox(urwid.Pile):
 
         # Content
         soup = BeautifulSoup(self.message['content'], 'lxml')
-        content = (None, self.soup2markup(soup))
+        content = (None, self.soup2markup(soup.find(name='body')))
         active_char = '▒'  # Options are '█', '▓', '▒', '░'
         content = urwid.Padding(
             urwid.LineBox(
