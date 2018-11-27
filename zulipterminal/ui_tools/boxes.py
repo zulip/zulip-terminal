@@ -150,7 +150,7 @@ class MessageBox(urwid.Pile):
     def _time_for_message(self, message: Dict[str, Any]) -> str:
         return ctime(message['timestamp'])[:-8]
 
-    def need_header(self) -> bool:
+    def need_recipient_header(self) -> bool:
         last_msg = self.last_message
         if self.message['type'] == 'stream':
             if (last_msg['type'] == 'stream' and
@@ -284,14 +284,14 @@ class MessageBox(urwid.Pile):
 
     def main_view(self) -> List[Any]:
 
-        # Header
-        if self.need_header():
+        # Recipient Header
+        if self.need_recipient_header():
             if self.message['type'] == 'stream':
-                header = self.stream_header()
+                recipient_header = self.stream_header()
             else:
-                header = self.private_header()
+                recipient_header = self.private_header()
         else:
-            header = None
+            recipient_header = None
 
         # Content Header
         message = {
@@ -308,7 +308,7 @@ class MessageBox(urwid.Pile):
                                  last=self.last_message).items()
         }
         different = {  # How this message differs from the previous one
-            'topic': header is not None,
+            'recipients': recipient_header is not None,
             'author': message['last']['author'] != message['this']['author'],
             '24h': (message['last']['datetime'] is not None and
                     ((message['this']['datetime'] -
@@ -325,11 +325,12 @@ class MessageBox(urwid.Pile):
             TextType = Dict[str, Tuple[Optional[str], str]]
             text = {key: (None, ' ')
                     for key in ('author', 'star', 'time')}  # type: TextType
-            if any(different[key] for key in ('topic', 'author', '24h')):
+            if any(different[key] for key in ('recipients', 'author', '24h')):
                 text['author'] = ('name', message['this']['author'])
             if message['this']['is_starred']:
                 text['star'] = ('starred', "*")
-            if any(different[key] for key in ('topic', 'author', 'timestamp')):
+            if any(different[key]
+                   for key in ('recipients', 'author', 'timestamp')):
                 text['time'] = ('time', message['this']['time'])
 
             content_header = urwid.Columns([
@@ -359,7 +360,7 @@ class MessageBox(urwid.Pile):
 
         # Build parts together and return
         parts = [
-            (header, header is not None),
+            (recipient_header, recipient_header is not None),
             (content_header, any_differences),
             (content, True),
             (reactions, reactions != ''),
