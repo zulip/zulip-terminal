@@ -384,11 +384,120 @@ def initial_data():
 
 
 @pytest.fixture(scope="module")
-def index_all_messages():
+def empty_index():
+    return {
+        'pointer': defaultdict(set, {}),
+        'private': defaultdict(set, {}),
+        'all_messages':  set(),
+        'all_private': set(),
+        'all_stream': defaultdict(set, {}),
+        'stream': defaultdict(dict, {}),
+        'search': set(),
+        'messages': defaultdict(dict, {
+            537286: {
+                'type': 'stream',
+                'sender_realm_str': '',
+                'is_me_message': False,
+                'content': 'Stream content here.',
+                'recipient_id': 6076,
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'client': 'website',
+                'stream_id': 205,
+                'subject_links': [],
+                'content_type': 'text/x-markdown',
+                'display_recipient': 'PTEST',
+                'reactions': [],
+                'sender_short_name': 'foo',
+                'id': 537286,
+                'flags': ['read'],
+                'sender_email': 'foo@zulip.com',
+                'timestamp': 1520918722,
+                'subject': 'Test',
+                'sender_id': 5140,
+                'sender_full_name': 'Foo Foo'
+            },
+            537287: {
+                'type': 'private',
+                'sender_realm_str': '',
+                'is_me_message': False,
+                'content': 'Hey PM content here.',
+                'recipient_id': 5780,
+                'client': 'website',
+                'subject': '',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'content_type': 'text/x-markdown',
+                'display_recipient': [{
+                    'id': 5179,
+                    'full_name': 'Boo Boo',
+                    'email': 'boo@zulip.com',
+                    'short_name': 'boo',
+                    'is_mirror_dummy': False
+                }, {
+                    'id': 5140,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                    'short_name': 'foo',
+                    'is_mirror_dummy': False
+                }],
+                'sender_short_name': 'foo',
+                'id': 537287,
+                'flags': ['read'],
+                'sender_email': 'foo@zulip.com',
+                'timestamp': 1520918736,
+                'reactions': [],
+                'sender_id': 5140,
+                'sender_full_name': 'Foo Foo',
+                'subject_links': []
+            },
+            537288: {
+                'id': 537288,
+                'sender_full_name': 'Foo Foo',
+                'timestamp': 1520918737,
+                'client': 'website',
+                'recipient_id': 5780,  # FIXME Unsure
+                'is_me_message': False,
+                'sender_email': 'foo@zulip.com',
+                'flags': ['read'],
+                'sender_id': 5140,
+                'content_type': 'text/x-markdown',
+                'sender_realm_str': '',
+                'subject': '',
+                'reactions': [],
+                'type': 'private',
+                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+                'subject_links': [],
+                'sender_short_name': 'foo',
+                'content': 'Hey PM content here again.',
+                'display_recipient': [{
+                    'id': 5179,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Boo Boo',
+                    'short_name': 'boo',
+                    'email': 'boo@zulip.com',
+                }, {
+                    'short_name': 'foo',
+                    'id': 5140,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Foo Foo',
+                    'email': 'foo@zulip.com',
+                }, {
+                    'short_name': 'bar',
+                    'id': 5180,
+                    'is_mirror_dummy': False,
+                    'full_name': 'Bar Bar',
+                    'email': 'bar@zulip.com',
+                }],
+            }
+        }),
+    }
+
+
+@pytest.fixture(scope="module")
+def index_all_messages(empty_index):
     """
     Expected index of `initial_data` fixture when model.narrow = []
     """
-    return {
+    old_index = {
         'pointer': defaultdict(set, {}),
         'private': defaultdict(set, {}),
         'all_messages':  {537286, 537287, 537288},
@@ -493,14 +602,18 @@ def index_all_messages():
         'stream': defaultdict(dict, {}),
         'search': set(),
     }
+    diff = {'all_messages': {537286, 537287, 537288}}
+    new_index = dict(empty_index, **diff)
+    assert old_index == new_index
+    return old_index
 
 
 @pytest.fixture(scope="module")
-def index_stream():
+def index_stream(empty_index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
-    return {
+    old_index = {
         'private': defaultdict(set, {}),
         'all_messages': set(),
         'all_private': {
@@ -612,15 +725,20 @@ def index_stream():
             }
         })
     }
+    diff = {'all_stream': defaultdict(set, {205: {537286}}),
+            'all_private': {537287, 537288}}
+    new_index = dict(empty_index, **diff)
+    assert new_index == old_index
+    return old_index
 
 
 @pytest.fixture(scope="module")
-def index_topic():
+def index_topic(empty_index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
     """
-    return {
+    old_index = {
         'stream': defaultdict(dict, {
             205: {
                 'Test': {
@@ -731,15 +849,19 @@ def index_topic():
         'all_messages': set(),
         'search': set(),
     }
+    diff = {'stream': defaultdict(dict, {205: {'Test': {537286}}})}
+    new_index = dict(empty_index, **diff)
+    assert new_index == old_index
+    return old_index
 
 
 @pytest.fixture(scope="module")
-def index_user():
+def index_user(empty_index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                                          'boo@zulip.com'],
     """
-    return {
+    old_index = {
         'stream': defaultdict(dict, {}),
         'private': defaultdict(set, {
             frozenset({5179, 5140}): {
@@ -851,15 +973,20 @@ def index_user():
         'all_stream': defaultdict(set, {}),
         'search': set(),
     }
+    diff = {'private': defaultdict(set, {frozenset({5179, 5140}): {537287}}),
+            'all_private': {537287, 537288}}
+    new_index = dict(empty_index, **diff)
+    assert new_index == old_index
+    return old_index
 
 
 @pytest.fixture(scope="module")
-def index_user_multiple():
+def index_user_multiple(empty_index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
-    return {
+    old_index = {
         'stream': defaultdict(dict, {}),
         'private': defaultdict(set, {
             frozenset({5179, 5140, 5180}): {
@@ -971,6 +1098,12 @@ def index_user_multiple():
         'all_stream': defaultdict(set, {}),
         'search': set(),
     }
+    diff = {'private': defaultdict(set,
+                                   {frozenset({5179, 5140, 5180}): {537288}}),
+            'all_private': {537287, 537288}}
+    new_index = dict(empty_index, **diff)
+    assert new_index == old_index
+    return old_index
 
 
 @pytest.fixture(scope="module")
