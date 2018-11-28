@@ -69,7 +69,7 @@ def msg_box(mocker, messages_successful_response):
 # --------------- Model Fixtures ----------------------------------------------
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def messages_successful_response() -> Dict[str, Any]:
     """
     A successful response from a /messages API query.
@@ -383,7 +383,7 @@ def initial_data():
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def empty_index():
     return {
         'pointer': defaultdict(set, {}),
@@ -493,7 +493,7 @@ def empty_index():
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def index_all_messages(empty_index):
     """
     Expected index of `initial_data` fixture when model.narrow = []
@@ -501,7 +501,7 @@ def index_all_messages(empty_index):
     return dict(empty_index, **{'all_messages': {537286, 537287, 537288}})
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def index_stream(empty_index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
@@ -511,7 +511,7 @@ def index_stream(empty_index):
     return dict(empty_index, **diff)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def index_topic(empty_index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7'],
@@ -521,7 +521,7 @@ def index_topic(empty_index):
     return dict(empty_index, **diff)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def index_user(empty_index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
@@ -532,7 +532,7 @@ def index_user(empty_index):
     return dict(empty_index, **diff)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def index_user_multiple(empty_index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
