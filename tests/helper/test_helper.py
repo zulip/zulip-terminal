@@ -1,3 +1,5 @@
+import pytest
+
 from zulipterminal.helper import (
     update_flag,
     index_messages,
@@ -87,3 +89,30 @@ def test_index_messages_narrow_user_multiple(mocker,
         }
     }
     assert index_messages(messages, model) == index_user_multiple
+
+
+@pytest.mark.parametrize('msgs_with_stars', [
+    {537286, 537287, 537288},
+    {537286}, {537287}, {537288},
+    {537286, 537287}, {537286, 537288}, {537287, 537288},
+])
+def test_index_starred(mocker,
+                       messages_successful_response,
+                       empty_index,
+                       msgs_with_stars):
+    messages = messages_successful_response['messages']
+    for msg in messages:
+        if msg['id'] in msgs_with_stars and 'starred' not in msg['flags']:
+            msg['flags'].append('starred')
+
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.narrow = [['is', 'starred']]
+
+    expected_index = dict(empty_index, all_private={537287, 537288},
+                          all_starred=msgs_with_stars)
+    for msg_id, msg in expected_index['messages'].items():
+        if msg_id in msgs_with_stars and 'starred' not in msg['flags']:
+            msg['flags'].append('starred')
+
+    assert index_messages(messages, model) == expected_index
