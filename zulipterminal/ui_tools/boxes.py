@@ -59,14 +59,14 @@ class WriteBox(urwid.Pile):
             caption=u"Stream:  ",
             edit_text=caption
         )
-        self.title_write_box = ReadlineEdit(caption=u"Title:  ",
+        self.title_write_box = ReadlineEdit(caption=u"Topic:  ",
                                             edit_text=title)
 
         header_write_box = urwid.Columns([
             urwid.LineBox(
                 self.stream_write_box, tlcorner=u'─', tline=u'─', lline=u'',
-                trcorner=u'┐', blcorner=u'─', rline=u'│',
-                bline=u'─', brcorner=u'┘'
+                trcorner=u'┬', blcorner=u'─', rline=u'│',
+                bline=u'─', brcorner=u'┴'
             ),
             urwid.LineBox(
                 self.title_write_box, tlcorner=u'─', tline=u'─', lline=u'',
@@ -89,14 +89,13 @@ class WriteBox(urwid.Pile):
                     'subject': self.title_write_box.edit_text,
                     'content': self.msg_write_box.edit_text,
                 }
-                response = self.client.send_message(request)
             else:
                 request = {
                     'type': 'private',
                     'to': self.to_write_box.edit_text,
                     'content': self.msg_write_box.edit_text,
                 }
-                response = self.client.send_message(request)
+            response = self.client.send_message(request)
             if response['result'] == 'success':
                 self.msg_write_box.edit_text = ''
         elif is_command_key('GO_BACK', key):
