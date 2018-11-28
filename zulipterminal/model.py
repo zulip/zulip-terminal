@@ -299,11 +299,17 @@ class Model:
         response['flags'] = []
         if hasattr(self.controller, 'view') and self.update:
             self.index = index_messages([response], self, self.index)
-            msg_w_list = create_msg_box_list(self, [response['id']])
+            if self.msg_list.log:
+                last_message = self.msg_list.log[-1].original_widget.message
+            else:
+                last_message = None
+            msg_w_list = create_msg_box_list(self, [response['id']],
+                                             last_message=last_message)
             if not msg_w_list:
                 return
             else:
                 msg_w = msg_w_list[0]
+
             if not self.narrow:
                 self.msg_list.log.append(msg_w)
 
