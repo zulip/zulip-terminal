@@ -72,19 +72,55 @@ class TestMessageView:
                                                         num_after=0,
                                                         anchor=0)
 
-    def test_load_new_messages(self, mocker, msg_view):
+    # FIXME: Improve this test by covering more parameters
+    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
+        ({0}, {}),
+    ])
+    def test_load_new_messages_empty_log(self, mocker, msg_view,
+                                         ids_in_narrow, get_messages_return):
         mocker.patch.object(msg_view.model,
                             "get_message_ids_in_current_narrow",
-                            return_value={0})
-        self.model.get_messages.return_value = {}
+                            return_value=ids_in_narrow)
+        self.model.get_messages.return_value = get_messages_return
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
+        msg_view.log = []
+
         msg_view.load_new_messages(0)
 
         assert msg_view.new_loading is False
         assert msg_view.index == {}
-        msg_view.log.extend.assert_called_once_with(['M1', 'M2'])
-        create_msg_box_list.assert_called_once_with(msg_view.model, set())
+        assert msg_view.log == ['M1', 'M2']
+        create_msg_box_list.assert_called_once_with(msg_view.model, set(),
+                                                    last_message=None)
+        self.model.controller.update_screen.assert_called_once_with()
+        self.model.get_messages.assert_called_once_with(num_before=0,
+                                                        num_after=30,
+                                                        anchor=0)
+
+    # FIXME: Improve this test by covering more parameters
+    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
+        ({0}, {}),
+    ])
+    def test_load_new_messages_mocked_log(self, mocker, msg_view,
+                                          ids_in_narrow, get_messages_return):
+        mocker.patch.object(msg_view.model,
+                            "get_message_ids_in_current_narrow",
+                            return_value=ids_in_narrow)
+        self.model.get_messages.return_value = get_messages_return
+        create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
+                                           return_value=["M1", "M2"])
+        msg_view.log = [mocker.Mock()]
+
+        msg_view.load_new_messages(0)
+
+        assert msg_view.new_loading is False
+        assert msg_view.index == {}
+        assert msg_view.log[-2:] == ['M1', 'M2']
+        expected_last_msg = msg_view.log[0].original_widget.message
+        (create_msg_box_list.
+         assert_called_once_with(msg_view.model, set(),
+                                 last_message=expected_last_msg))
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(num_before=0,
                                                         num_after=30,

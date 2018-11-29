@@ -65,9 +65,16 @@ class MessageView(urwid.ListBox):
         current_ids = self.model.get_message_ids_in_current_narrow()
         self.index = self.model.get_messages(num_before=0, num_after=30,
                                              anchor=anchor)
-        msg_ids = self.model.get_message_ids_in_current_narrow() - current_ids
-        message_list = create_msg_box_list(self.model, msg_ids)
+        new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
+        if self.log:
+            last_message = self.log[-1].original_widget.message
+        else:
+            last_message = None
+
+        message_list = create_msg_box_list(self.model, new_ids,
+                                           last_message=last_message)
         self.log.extend(message_list)
+
         self.model.controller.update_screen()
         self.new_loading = False
 
