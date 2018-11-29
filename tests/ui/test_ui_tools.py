@@ -55,18 +55,76 @@ class TestMessageView:
         msg_view = MessageView(self.model)
         assert msg_view.focus_msg == focus_msg
 
-    def test_load_old_messages(self, mocker, msg_view):
+    # FIXME: Improve this test by covering more parameters
+    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
+        ({0}, {}),
+    ])
+    def test_load_old_messages_empty_log(self, mocker, msg_view,
+                                         ids_in_narrow, get_messages_return):
         mocker.patch.object(msg_view.model,
                             "get_message_ids_in_current_narrow",
-                            return_value={0})
-        self.model.get_messages.return_value = {}
+                            return_value=ids_in_narrow)
+        self.model.get_messages.return_value = get_messages_return
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
+        msg_view.log = []
+
         msg_view.load_old_messages(0)
 
         assert msg_view.old_loading is False
         assert msg_view.index == {}
+        assert msg_view.log == ['M1', 'M2']
         create_msg_box_list.assert_called_once_with(msg_view.model, set())
+        self.model.controller.update_screen.assert_called_once_with()
+        self.model.get_messages.assert_called_once_with(num_before=30,
+                                                        num_after=0,
+                                                        anchor=0)
+
+    @pytest.mark.parametrize('messages_fetched', [
+        {201: "M1"},
+        {201: "M1", 202: "M2"},
+    ])
+    @pytest.mark.parametrize('top_id_in_narrow, other_ids_in_narrow', [
+        (99, set()),
+        (99, {101}),
+        (99, {101, 103}),
+    ])
+    def test_load_old_messages_mocked_log(self, mocker, msg_view,
+                                          top_id_in_narrow,
+                                          other_ids_in_narrow,
+                                          messages_fetched):
+        # Expand parameters
+        new_msg_ids = set(messages_fetched.keys())
+        new_msg_widgets = list(messages_fetched.values())
+
+        # Parameter constraints
+        assert top_id_in_narrow not in other_ids_in_narrow
+        assert top_id_in_narrow not in new_msg_ids
+        assert other_ids_in_narrow & new_msg_ids == set()
+
+        top_widget = mocker.Mock()
+        top_widget.original_widget.message = {'id': top_id_in_narrow}
+
+        ids_in_narrow = {top_id_in_narrow} | other_ids_in_narrow
+        mocker.patch.object(msg_view.model,
+                            "get_message_ids_in_current_narrow",
+                            side_effect=[ids_in_narrow,
+                                         ids_in_narrow | new_msg_ids])
+        self.model.get_messages.return_value = {}
+        create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
+                                           return_value=(new_msg_widgets +
+                                                         [top_widget]))
+        initial_log = [top_widget] + len(other_ids_in_narrow)*["existing"]
+        msg_view.log = initial_log[:]
+
+        msg_view.load_old_messages(0)
+
+        assert msg_view.old_loading is False
+        assert msg_view.index == {}
+        assert msg_view.log == new_msg_widgets + initial_log
+        create_msg_box_list.assert_called_once_with(msg_view.model,
+                                                    {top_id_in_narrow} |
+                                                    new_msg_ids)
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(num_before=30,
                                                         num_after=0,
