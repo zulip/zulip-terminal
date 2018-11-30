@@ -389,6 +389,24 @@ class TestModel:
         (create_msg_box_list.
          assert_called_once_with(model, [0], last_message=None))
 
+    def test_append_message_with_valid_log(self, mocker, model):
+        model.update = True
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value={})
+        model.msg_list = mocker.Mock()
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        model.msg_list.log = [mocker.Mock()]
+
+        model.append_message({'id': 0})
+
+        assert len(model.msg_list.log) == 2  # Added "msg_w" element
+        # NOTE: So we expect the first element *was* the last_message parameter
+        expected_last_msg = model.msg_list.log[0].original_widget.message
+        (create_msg_box_list.
+         assert_called_once_with(model, [0], last_message=expected_last_msg))
+
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
