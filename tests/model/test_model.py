@@ -373,6 +373,22 @@ class TestModel:
         model = Model(self.controller)
         assert model.streams == streams
 
+    def test_append_message_with_Falsey_log(self, mocker, model):
+        model.update = True
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value={})
+        model.msg_list = mocker.Mock()
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        model.msg_list.log = []
+
+        model.append_message({'id': 0})
+
+        assert len(model.msg_list.log) == 1  # Added "msg_w" element
+        (create_msg_box_list.
+         assert_called_once_with(model, [0], last_message=None))
+
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
@@ -405,7 +421,9 @@ class TestModel:
         model.recipients = recipients
         model.user_id = user_profile['user_id']
         model.user_dict = user_dict
+
         model.append_message(response)
+
         assert model.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
         model.update = False
