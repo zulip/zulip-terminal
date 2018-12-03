@@ -544,6 +544,21 @@ def index_user_multiple(empty_index):
     return dict(empty_index, **diff)
 
 
+@pytest.fixture(params=[
+    {537286, 537287, 537288},
+    {537286}, {537287}, {537288},
+    {537286, 537287}, {537286, 537288}, {537287, 537288},
+])
+def index_all_starred(empty_index, request):
+    msgs_with_stars = request.param
+    index = dict(empty_index, all_starred=msgs_with_stars,
+                 all_private={537287, 537288})
+    for msg_id, msg in index['messages'].items():
+        if msg_id in msgs_with_stars and 'starred' not in msg['flags']:
+            msg['flags'].append('starred')
+    return index
+
+
 @pytest.fixture(scope="module")
 def user_profile():
     return {
