@@ -145,6 +145,34 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
+    def test_show_all_starred(self, mocker, controller, index_all_starred):
+        controller.model.client = self.client
+        controller.model.narrow = []
+        controller.model.index = index_all_starred
+        controller.model.muted_streams = set()  # FIXME Expand upon this
+        controller.model.muted_topics = []  # FIXME Expand upon this
+        controller.model.stream_dict = {
+            205: {
+                'color': '#ffffff',
+            }
+        }
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+
+        controller.show_all_starred('')
+
+        assert controller.model.narrow == [['is', 'starred']]
+
+        controller.model.msg_view.clear.assert_called_once_with()
+
+        num_sm = len(index_all_starred['all_starred'])
+        controller.model.msg_list.set_focus.assert_called_once_with(num_sm - 1)
+
+        id_list = index_all_starred['all_starred']
+        widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
+        msg_ids = {widget.original_widget.message['id'] for widget in widgets}
+        assert msg_ids == id_list
+
     def test_register_initial_desired_events(self, mocker):
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
