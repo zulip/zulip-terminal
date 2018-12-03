@@ -112,19 +112,19 @@ def main() -> None:
     """
 
     args = parse_args()
-    if args.config_file:
-        zuliprc_path = args.config_file
-    else:
-        zuliprc_path = '~/zuliprc'
-
-    zterm = parse_zuliprc(zuliprc_path)
 
     if args.profile:
         import cProfile
         prof = cProfile.Profile()
         prof.enable()
 
+    if args.config_file:
+        zuliprc_path = args.config_file
+    else:
+        zuliprc_path = '~/zuliprc'
+
     try:
+        zterm = parse_zuliprc(zuliprc_path)
         Controller(zuliprc_path, zterm['theme']).main()
     except Exception as e:
         if args.debug:
