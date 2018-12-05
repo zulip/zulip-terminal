@@ -65,6 +65,7 @@ theme=default
 | Narrow to a stream                                    | <kbd>S</kbd>                                  |
 | Narrow to a topic                                     | <kbd>s</kbd>                                  |
 | Narrow to private messages                            | <kbd>P</kbd>                                  |
+| Narrow to starred messages                            | <kbd>f</kbd>                                  |
 | Next Unread Topic                                     | <kbd>n</kbd>                                  |
 | Next Unread PM                                        | <kbd>p</kbd>                                  |
 | Search People                                         | <kbd>w</kbd>                                  |
