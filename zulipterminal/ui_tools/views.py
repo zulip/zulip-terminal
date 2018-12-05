@@ -500,18 +500,13 @@ class HelpView(urwid.ListBox):
         for _, binding in KEY_BINDINGS.items():
             commands = ", ".join(binding['keys'])
             self.log.append(
-                urwid.Columns([
-                    urwid.LineBox(
-                        urwid.Text(binding['help_text']),
-                        tlcorner=' ', tline=' ', lline=' ', trcorner=' ',
-                        blcorner=' ', rline=' ', bline='-', brcorner=' '
-                    ),
-                    urwid.LineBox(
-                        urwid.Text(commands),
-                        tlcorner=' ', tline=' ', lline=' ', trcorner=' ',
-                        blcorner=' ', rline=' ', bline='-', brcorner=' '
-                    )
-                ])
+                urwid.Columns([urwid.LineBox(
+                                   urwid.Text(text),
+                                   tlcorner=' ', brcorner=' ',
+                                   trcorner=' ', blcorner=' ',
+                                   rline=' ', lline=' ',
+                                   bline='-', tline=' ',
+                               ) for text in (binding['help_text'], commands)])
             )
         super(HelpView, self).__init__(self.log)
 
