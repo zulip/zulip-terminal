@@ -9,7 +9,6 @@ from urwid_readline import ReadlineEdit
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from zulipterminal.ui_tools.buttons import MenuButton
 from zulipterminal.config import is_command_key
 
 
