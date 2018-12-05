@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Callable
 
 import urwid
 
@@ -14,14 +14,15 @@ class MenuButton(urwid.Button):
             [self.caption], 0), None, 'selected')
 
 
-class HomeButton(urwid.Button):
-    def __init__(self, controller: Any, count: int=0) -> None:
-        self.caption = 'All messages'
+class TopButton(urwid.Button):
+    def __init__(self, controller: Any, caption: str,
+                 show_function: Callable[..., Any], count: int=0) -> None:
+        self.caption = caption
         self.count = count
-        super(HomeButton, self).__init__("")
+        super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
-        urwid.connect_signal(self, 'click', controller.show_all_messages)
+        urwid.connect_signal(self, 'click', show_function)
 
     def update_count(self, count: int) -> None:
         self.count = count
@@ -38,55 +39,26 @@ class HomeButton(urwid.Button):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
             self.controller.view.toggle_left_panel()
-        return super(HomeButton, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
-class PMButton(urwid.Button):
+class HomeButton(TopButton):
     def __init__(self, controller: Any, count: int=0) -> None:
-        self.caption = 'Private messages'
-        super(PMButton, self).__init__("")
-        self.count = count
-        self._w = self.widget(count)
-        self.controller = controller
-        urwid.connect_signal(self, 'click', controller.show_all_pm)
-
-    def update_count(self, count: int) -> None:
-        self.count = count
-        self._w = self.widget(count)
-
-    def widget(self, count: int) -> Any:
-        return urwid.AttrMap(urwid.SelectableIcon(
-            [u' \N{BULLET} ', self.caption,
-             ('idle', '' if count <= 0 else ' ' + str(count))],
-            len(self.caption) + 4),
-            None,
-            'selected')
-
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('ENTER', key):
-            self.controller.view.toggle_left_panel()
-        return super(PMButton, self).keypress(size, key)
+        super().__init__(controller, 'All messages',
+                         controller.show_all_messages, count=count)
 
 
-class StarredButton(urwid.Button):
+class PMButton(TopButton):
+    def __init__(self, controller: Any, count: int=0) -> None:
+        super().__init__(controller, 'Private messages',
+                         controller.show_all_pm, count=count)
+
+
+class StarredButton(TopButton):
     def __init__(self, controller: Any) -> None:
-        self.caption = 'Starred messages'
-        super(StarredButton, self).__init__("")
-        self.count = 0  # Starred messages are already marked read
-        self._w = self.widget(0)
-        urwid.connect_signal(self, 'click', controller.show_all_starred)
-
-    def update_count(self, count: int) -> None:
-        self.count = count
-        self._w = self.widget(count)
-
-    def widget(self, count: int) -> Any:
-        return urwid.AttrMap(urwid.SelectableIcon(
-            [u' \N{BULLET} ', self.caption,
-             ('idle', '' if count <= 0 else ' ' + str(count))],
-            len(self.caption) + 4),
-            None,
-            'selected')
+        super().__init__(controller, 'Starred messages',
+                         controller.show_all_starred,
+                         count=0)  # Starred messages are already marked read
 
 
 class StreamButton(urwid.Button):
