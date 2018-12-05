@@ -80,14 +80,15 @@ class Controller:
         self.loop.draw_screen()
 
     def show_help(self) -> None:
-        self.loop.widget = urwid.LineBox(urwid.Overlay(
-            HelpView(self),
+        self.loop.widget = urwid.Overlay(
+            urwid.LineBox(HelpView(self),
+                          title="Help Menu ('q' quits, up/down scrolls)"),
             self.view,
             align='center',
             width=('relative', 100),
             valign='middle',
             height=('relative', 100)
-        ))
+        )
 
     def exit_help(self) -> None:
         self.loop.widget = self.view

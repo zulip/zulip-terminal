@@ -494,9 +494,7 @@ class LeftColumnView(urwid.Pile):
 class HelpView(urwid.ListBox):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
-        self.log = urwid.SimpleFocusListWalker([
-            urwid.Text("Press q to quit.", align='center')
-        ])
+        self.log = urwid.SimpleFocusListWalker([urwid.Text('')])
         for _, binding in KEY_BINDINGS.items():
             commands = ", ".join(binding['keys'])
             self.log.append(
