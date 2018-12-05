@@ -73,6 +73,14 @@ KEY_BINDINGS = {
         'keys': {'S'},
         'help_text': 'Narrow to a topic',
     },
+    'ALL_PM': {
+        'keys': {'P'},
+        'help_text': 'Narrow to all private messages',
+    },
+    'ALL_STARRED': {
+        'keys': {'f'},
+        'help_text': 'Narrow to all starred messages',
+    },
     'NEXT_UNREAD_TOPIC': {
         'keys': {'n'},
         'help_text': 'Next unread topic',
@@ -100,10 +108,6 @@ KEY_BINDINGS = {
     'ENTER': {
         'keys': {'enter'},
         'help_text': 'Perform current action',
-    },
-    'ALL_PM': {
-        'keys': {'P'},
-        'help_text': 'Show all private messages',
     },
     'QUIT_HELP': {
         'keys': {'q', 'esc'},
