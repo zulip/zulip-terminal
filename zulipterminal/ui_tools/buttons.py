@@ -92,9 +92,14 @@ class StreamButton(urwid.Button):
 
     def widget(self, count: int) -> Any:
         stream_prefix = ' ' + ('P' if self.is_private else '#') + ' '
+        if count < 0:
+            count_text = ' M'  # Muted
+        elif count == 0:
+            count_text = ''
+        else:
+            count_text = ' ' + str(count)
         return urwid.AttrMap(urwid.SelectableIcon(
-            [(self.color, stream_prefix), self.caption,
-             ('idle', '' if count <= 0 else ' ' + str(count))],
+            [(self.color, stream_prefix), self.caption, ('idle', count_text)],
             len(self.caption) + 2),
             None,
             'selected')
