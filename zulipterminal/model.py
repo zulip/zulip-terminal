@@ -44,7 +44,7 @@ class Model:
         self.users = self.get_all_users()
 
         subscriptions = self.initial_data['subscriptions']
-        stream_data = self.get_subscribed_streams(subscriptions)
+        stream_data = Model._stream_info_from_subscriptions(subscriptions)
         self.stream_dict, self.muted_streams, self.streams = stream_data
 
         self.muted_topics = self.initial_data['muted_topics']
@@ -276,8 +276,8 @@ class Model:
 
         return user_list
 
-    def get_subscribed_streams(
-            self,
+    @staticmethod
+    def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
     ) -> Tuple[Dict[int, Any], List[int], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
