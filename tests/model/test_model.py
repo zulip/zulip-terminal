@@ -25,7 +25,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
@@ -53,7 +53,8 @@ class TestModel:
         assert model.user_id == user_profile['user_id']
         model.get_all_users.assert_called_once_with()
         assert model.users == []
-        model.get_subscribed_streams.assert_called_once_with()
+        subscriptions = initial_data['subscriptions']
+        model.get_subscribed_streams.assert_called_once_with(subscriptions)
         assert model.streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
@@ -203,7 +204,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -242,7 +243,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -274,7 +275,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -332,7 +333,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -353,7 +354,7 @@ class TestModel:
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -657,7 +658,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.get_subscribed_streams',
-                     return_value=[])
+                     return_value=({}, set(), []))
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
