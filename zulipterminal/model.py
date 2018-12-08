@@ -1,7 +1,7 @@
 import json
 from threading import Thread
 import time
-from typing import Any, Dict, List, FrozenSet, Set, Union, Optional
+from typing import Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple
 from mypy_extensions import TypedDict
 
 import urwid
@@ -35,7 +35,6 @@ class Model:
         self.narrow = []  # type: List[Any]
         self.update = False
         self.stream_id = -1
-        self.stream_dict = {}  # type: Dict[int, Any]
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = None  # type: Any
         self.user_id = -1  # type: int
@@ -43,8 +42,11 @@ class Model:
         self._update_user_id()
         self._update_initial_data()
         self.users = self.get_all_users()
-        self.muted_streams = list()  # type: List[int]
-        self.streams = self.get_subscribed_streams()
+
+        subscriptions = self.initial_data['subscriptions']
+        stream_data = self.get_subscribed_streams(subscriptions)
+        self.stream_dict, self.muted_streams, self.streams = stream_data
+
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
         self.new_user_input = True
@@ -274,22 +276,22 @@ class Model:
 
         return user_list
 
-    def get_subscribed_streams(self) -> List[List[str]]:
-        subscriptions = self.initial_data['subscriptions']
-
-        # Mapping of stream-id to all available stream info
-        self.stream_dict = {stream['stream_id']: stream
-                            for stream in subscriptions}
-
-        # Stream IDs for muted streams
-        self.muted_streams = [stream['stream_id'] for stream in subscriptions
-                              if stream['in_home_view'] is False]
-
-        # Limited stream info sorted by name (used in display)
+    def get_subscribed_streams(
+            self,
+            subscriptions: List[Dict[str, Any]]
+    ) -> Tuple[Dict[int, Any], List[int], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
-        stream_names = [[stream[key] for key in stream_keys]
-                        for stream in subscriptions]
-        return sorted(stream_names, key=lambda s: s[0].lower())
+        # Mapping of stream-id to all available stream info
+        # Stream IDs for muted streams
+        # Limited stream info sorted by name (used in display)
+        return (
+            {stream['stream_id']: stream for stream in subscriptions},
+            [stream['stream_id'] for stream in subscriptions
+             if stream['in_home_view'] is False],
+            sorted([[stream[key] for key in stream_keys]
+                    for stream in subscriptions],
+                   key=lambda s: s[0].lower()),
+        )
 
     def append_message(self, response: Dict[str, Any]) -> None:
         """
