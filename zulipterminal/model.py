@@ -289,8 +289,11 @@ class Model:
             {stream['stream_id'] for stream in subscriptions
              if stream['in_home_view'] is False},
             sorted([[stream[key] for key in stream_keys]
-                    for stream in subscriptions],
-                   key=lambda s: s[0].lower()),
+                    for stream in subscriptions if stream['pin_to_top']],
+                   key=lambda s: s[0].lower()) +
+            sorted([[stream[key] for key in stream_keys]
+                    for stream in subscriptions if not stream['pin_to_top']],
+                   key=lambda s: s[0].lower())
         )
 
     def append_message(self, response: Dict[str, Any]) -> None:
