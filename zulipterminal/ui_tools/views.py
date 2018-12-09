@@ -463,17 +463,27 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def streams_view(self) -> Any:
-        streams_btn_list = list()
-        for stream in self.view.streams:
-            unread_count = self.model.unread_counts.get(stream[1], 0)
-            streams_btn_list.append(
+        streams_btn_list = [
                 StreamButton(
                     stream,
                     controller=self.controller,
                     view=self.view,
-                    count=unread_count,
-                )
-            )
+                    count=self.model.unread_counts.get(stream[1], 0)
+                ) for stream in self.view.pinned_streams]
+
+        if len(streams_btn_list):
+            unpinned_divider = urwid.Divider("-")
+            unpinned_divider.stream_id = -1  # FIXME
+            streams_btn_list += [unpinned_divider]
+
+        streams_btn_list += [
+                StreamButton(
+                    stream,
+                    controller=self.controller,
+                    view=self.view,
+                    count=self.model.unread_counts.get(stream[1], 0)
+                ) for stream in self.view.unpinned_streams]
+
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
