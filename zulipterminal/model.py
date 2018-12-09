@@ -279,15 +279,15 @@ class Model:
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], List[int], List[List[str]]]:
+    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
         # Mapping of stream-id to all available stream info
         # Stream IDs for muted streams
         # Limited stream info sorted by name (used in display)
         return (
             {stream['stream_id']: stream for stream in subscriptions},
-            [stream['stream_id'] for stream in subscriptions
-             if stream['in_home_view'] is False],
+            {stream['stream_id'] for stream in subscriptions
+             if stream['in_home_view'] is False},
             sorted([[stream[key] for key in stream_keys]
                     for stream in subscriptions],
                    key=lambda s: s[0].lower()),
