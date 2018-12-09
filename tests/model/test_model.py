@@ -368,13 +368,18 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
-    def test__stream_info_from_subscriptions(self, initial_data, streams):
-        subscriptions = initial_data['subscriptions']
-        by_id, muted, specialized = (
-                Model._stream_info_from_subscriptions(subscriptions))
+    @pytest.mark.parametrize('muted', [
+        set(), {86}, {14}, {99}, {99, 14}, {14, 86, 99}
+    ])
+    def test__stream_info_from_subscriptions(self, initial_data, streams,
+                                             muted):
+        subs = [dict(entry, in_home_view=entry['stream_id'] not in muted)
+                for entry in initial_data['subscriptions']]
+        by_id, muted_streams, specialized = (
+                Model._stream_info_from_subscriptions(subs))
         assert len(by_id)
         assert all(msg_id == msg['stream_id'] for msg_id, msg in by_id.items())
-        assert muted == []  # FIXME generalize/parametrize
+        assert muted_streams == muted
         assert specialized == streams  # FIXME generalize/parametrize
 
     def test_append_message_with_Falsey_log(self, mocker, model):
