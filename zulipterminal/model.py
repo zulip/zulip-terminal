@@ -45,7 +45,8 @@ class Model:
 
         subscriptions = self.initial_data['subscriptions']
         stream_data = Model._stream_info_from_subscriptions(subscriptions)
-        self.stream_dict, self.muted_streams, self.streams = stream_data
+        (self.stream_dict, self.muted_streams,
+         self.pinned_streams, self.unpinned_streams) = stream_data
 
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
@@ -279,7 +280,7 @@ class Model:
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]]]:
+    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
         # Mapping of stream-id to all available stream info
         # Stream IDs for muted streams
@@ -290,7 +291,7 @@ class Model:
              if stream['in_home_view'] is False},
             sorted([[stream[key] for key in stream_keys]
                     for stream in subscriptions if stream['pin_to_top']],
-                   key=lambda s: s[0].lower()) +
+                   key=lambda s: s[0].lower()),
             sorted([[stream[key] for key in stream_keys]
                     for stream in subscriptions if not stream['pin_to_top']],
                    key=lambda s: s[0].lower())

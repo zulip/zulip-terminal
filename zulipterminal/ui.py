@@ -69,7 +69,8 @@ class View(urwid.WidgetWrap):
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.users
-        self.streams = self.model.streams
+        self.pinned_streams = self.model.pinned_streams
+        self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
         super(View, self).__init__(self.main_window())

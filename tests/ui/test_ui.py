@@ -23,7 +23,8 @@ class TestView:
         assert view.controller == self.controller
         assert view.model == self.model
         assert view.client == self.client
-        assert view.streams == self.model.streams
+        assert view.pinned_streams == self.model.pinned_streams
+        assert view.unpinned_streams == self.model.unpinned_streams
         self.write_box.assert_called_once_with(view)
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()

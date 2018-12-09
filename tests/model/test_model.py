@@ -26,7 +26,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
@@ -56,7 +56,8 @@ class TestModel:
         assert model.users == []
         (model._stream_info_from_subscriptions.
          assert_called_once_with(initial_data['subscriptions']))
-        assert model.streams == []
+        assert model.pinned_streams == []
+        assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
@@ -206,7 +207,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -246,7 +247,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -279,7 +280,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -338,7 +339,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -360,7 +361,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -375,12 +376,13 @@ class TestModel:
                                              muted):
         subs = [dict(entry, in_home_view=entry['stream_id'] not in muted)
                 for entry in initial_data['subscriptions']]
-        by_id, muted_streams, specialized = (
+        by_id, muted_streams, pinned, unpinned = (
                 Model._stream_info_from_subscriptions(subs))
         assert len(by_id)
         assert all(msg_id == msg['stream_id'] for msg_id, msg in by_id.items())
         assert muted_streams == muted
-        assert specialized == streams  # FIXME generalize/parametrize
+        assert pinned == []  # FIXME generalize/parametrize
+        assert unpinned == streams  # FIXME generalize/parametrize
 
     def test_append_message_with_Falsey_log(self, mocker, model):
         model.update = True
@@ -667,7 +669,7 @@ class TestModel:
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
-                     return_value=({}, set(), []))
+                     return_value=({}, set(), [], []))
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
