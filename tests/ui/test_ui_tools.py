@@ -751,18 +751,31 @@ class TestLeftColumnView:
         pm_button.assert_called_once_with(left_col_view.controller,
                                           count=0)
 
-    def test_streams_view(self, mocker, streams):
-        self.view.streams = streams
+    @pytest.mark.parametrize('pinned', [
+        set(), {86}, {14}, {99}, {14, 99}, {99, 86}, {14, 86}, {14, 99, 86}
+    ])
+    def test_streams_view(self, mocker, streams, pinned):
+        self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
+        self.view.pinned_streams = [s for s in streams if s[1] in pinned]
         stream_button = mocker.patch(VIEWS + '.StreamButton')
         stream_view = mocker.patch(VIEWS + '.StreamsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
+        divider = mocker.patch(VIEWS + '.urwid.Divider')
+
         left_col_view = LeftColumnView(self.view)
+
+        if pinned:
+            divider.assert_called_once_with('-')
+        else:
+            divider.assert_not_called()
+
         stream_button.assert_has_calls(
             [mocker.call(stream,
                          controller=self.view.controller,
                          view=self.view,
                          count=1)
-             for stream in streams])
+             for stream in (self.view.pinned_streams +
+                            self.view.unpinned_streams)])
 
 
 class TestHelpMenu:
