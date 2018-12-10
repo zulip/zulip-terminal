@@ -3,6 +3,7 @@ import sys
 import codecs
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+from zulipterminal.version import ZT_VERSION
 
 
 class PyTest(TestCommand):
@@ -42,7 +43,7 @@ dev_helper_deps = [
 
 setup(
     name='zulip-term',
-    version='0.2.0',
+    version=ZT_VERSION,
     description='A terminal-based interface to zulip chat',
     long_description=long_description(),
     long_description_content_type='text/markdown',
