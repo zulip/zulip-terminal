@@ -7,6 +7,7 @@ import time
 import urwid
 import zulip
 
+from zulipterminal.version import ZT_VERSION
 from zulipterminal.helper import asynch
 from zulipterminal.model import Model, GetMessagesArgs
 from zulipterminal.ui import View, Screen
@@ -23,7 +24,8 @@ class Controller:
     def __init__(self, config_file: str, theme: str) -> None:
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
-                                   client='ZulipTerminal/0.1.0 ' + platform())
+                                   client='ZulipTerminal/{} {}'.
+                                          format(ZT_VERSION, platform()))
         # Register to the queue before initializing Model or View
         # so that we don't lose any updates while messages are being fetched.
         self.register_initial_desired_events()

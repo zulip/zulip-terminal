@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 
 from zulipterminal.core import Controller
+from zulipterminal.version import ZT_VERSION
 
 
 class TestController:
@@ -29,7 +30,7 @@ class TestController:
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
             config_file=self.config_file,
-            client='ZulipTerminal/0.1.0 ' + platform(),
+            client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
