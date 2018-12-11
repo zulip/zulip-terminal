@@ -1,14 +1,19 @@
 language: python
-python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
 cache:
+  pip: true
   directories:
     - $HOME/.cache/pipenv
 matrix:
   include:
+    - python: 3.4
+      name: "Python 3.4 pytest (default linux)"
+    - python: 3.5
+      name: "Python 3.5 pytest (default linux)"
+    - python: 3.6
+      name: "Python 3.6 pytest & mypy type-checking (default linux)"
+      env: RUN_MYPY=yes
     - python: 3.7
+      name: "Python 3.7 pytest (ubuntu xenial)"
       dist: xenial
       sudo: true
     - os: osx
@@ -25,8 +30,7 @@ install:
   - pipenv install --dev Pipfile
 script:
   - pipenv run pytest
-  - pipenv run pytest --pep8
-  - pipenv run ./tools/run-mypy
+  - if [[ "$RUN_MYPY" == "yes" ]]; then pipenv run ./tools/run-mypy; fi
 after_success:
   - pip install codecov
   - codecov
