@@ -114,7 +114,7 @@ KEY_BINDINGS = {
         'help_text': 'Add/remove thumbs-up reaction on a message',
     },
     'TOGGLE_STAR_STATUS': {
-        'keys': {'*'},  # FIXME 'ctrl s' should work according to urwid
+        'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of a message',
     },
 }
