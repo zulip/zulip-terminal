@@ -270,6 +270,7 @@ class Controller:
             # TODO: Enable resuming? (in which case, remove ^Z below)
             disabled_keys = {
                 'susp': 'undefined',  # Disable ^Z for suspending
+                'stop': 'undefined',  # Disable ^S, enabling shortcut key use
             }
             old_signal_list = screen.tty_signal_keys(**disabled_keys)
             self.loop.run()
