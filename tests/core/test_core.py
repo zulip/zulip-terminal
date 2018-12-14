@@ -166,5 +166,6 @@ class TestController:
         controller.view.palette = {
             'default': 'theme_properties'
         }
+        mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
         controller.main()
         assert mock_loop.call_count == 1

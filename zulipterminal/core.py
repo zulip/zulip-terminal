@@ -267,11 +267,18 @@ class Controller:
             return
 
         try:
+            # TODO: Enable resuming? (in which case, remove ^Z below)
+            disabled_keys = {
+                'susp': 'undefined',  # Disable ^Z for suspending
+            }
+            old_signal_list = screen.tty_signal_keys(**disabled_keys)
             self.loop.run()
 
         except Exception:
             self.restore_stdout()
+            screen.tty_signal_keys(*old_signal_list)
             raise
 
         finally:
             self.restore_stdout()
+            screen.tty_signal_keys(*old_signal_list)
