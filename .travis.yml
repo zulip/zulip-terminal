@@ -8,6 +8,15 @@ matrix:
     - python: 3.7
       dist: xenial
       sudo: true
+    - os: osx
+      cache:
+      - $HOME/Library/Caches/pip
+      osx_image: xcode10
+      sudo: required
+      language: generic
+      install:
+      - pip install pipenv==11.10
+      - pipenv install --three --dev Pipfile
 install:
   - pip install pipenv==11.10
   - pipenv install --dev Pipfile
