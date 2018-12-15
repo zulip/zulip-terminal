@@ -1,4 +1,6 @@
 language: python
+git:
+  depth: 20
 cache:
   pip: true
   directories:
