@@ -56,6 +56,7 @@ class TestMessageView:
         assert msg_view.focus_msg == focus_msg
 
     @pytest.mark.parametrize('messages_fetched', [
+        {},
         {201: "M1"},
         OrderedDict([(201, "M1"), (202, "M2")]),
     ])
@@ -85,14 +86,19 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.index == {}
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
-        (create_msg_box_list.
-         assert_called_once_with(msg_view.model, new_msg_ids))
-        self.model.controller.update_screen.assert_called_once_with()
+        if messages_fetched:
+            (create_msg_box_list.
+             assert_called_once_with(msg_view.model, new_msg_ids))
+            self.model.controller.update_screen.assert_called_once_with()
+        else:
+            create_msg_box_list.assert_not_called()
+            self.model.controller.update_screen.assert_not_called()
         self.model.get_messages.assert_called_once_with(num_before=30,
                                                         num_after=0,
                                                         anchor=0)
 
     @pytest.mark.parametrize('messages_fetched', [
+        {},
         {201: "M1"},
         OrderedDict([(201, "M1"), (202, "M2")]),
     ])
@@ -134,10 +140,14 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.index == {}
         assert msg_view.log == new_msg_widgets + initial_log
-        create_msg_box_list.assert_called_once_with(msg_view.model,
-                                                    {top_id_in_narrow} |
-                                                    new_msg_ids)
-        self.model.controller.update_screen.assert_called_once_with()
+        if messages_fetched:
+            create_msg_box_list.assert_called_once_with(msg_view.model,
+                                                        {top_id_in_narrow} |
+                                                        new_msg_ids)
+            self.model.controller.update_screen.assert_called_once_with()
+        else:
+            create_msg_box_list.assert_not_called()
+            self.model.controller.update_screen.assert_not_called()
         self.model.get_messages.assert_called_once_with(num_before=30,
                                                         num_after=0,
                                                         anchor=0)
