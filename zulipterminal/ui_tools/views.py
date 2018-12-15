@@ -52,21 +52,29 @@ class MessageView(urwid.ListBox):
         if self.log:
             top_message_id = self.log[0].original_widget.message['id']
             ids_to_keep.remove(top_message_id)  # update this id
-            self.log.remove(self.log[0])  # avoid duplication when updating
+            no_update_baseline = {top_message_id}
+        else:
+            no_update_baseline = set()
 
         self.index = self.model.get_messages(num_before=30, num_after=0,
                                              anchor=anchor)
         ids_to_process = (self.model.get_message_ids_in_current_narrow() -
                           ids_to_keep)
 
-        message_list = create_msg_box_list(self.model, ids_to_process)
-        message_list.reverse()
-        for msg_w in message_list:
-            self.log.insert(0, msg_w)
+        # Only update if more messages are provided
+        if ids_to_process != no_update_baseline:
+            if self.log:
+                self.log.remove(self.log[0])  # avoid duplication when updating
 
-        self.set_focus(self.focus_msg)  # Return focus to original message
+            message_list = create_msg_box_list(self.model, ids_to_process)
+            message_list.reverse()
+            for msg_w in message_list:
+                self.log.insert(0, msg_w)
 
-        self.model.controller.update_screen()
+            self.set_focus(self.focus_msg)  # Return focus to original message
+
+            self.model.controller.update_screen()
+
         self.old_loading = False
 
     @asynch

@@ -1,5 +1,5 @@
 import pytest
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from bs4 import BeautifulSoup
 
 from zulipterminal.ui_tools.views import (
@@ -55,26 +55,38 @@ class TestMessageView:
         msg_view = MessageView(self.model)
         assert msg_view.focus_msg == focus_msg
 
-    # FIXME: Improve this test by covering more parameters
-    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
-        ({0}, {}),
+    @pytest.mark.parametrize('messages_fetched', [
+        {201: "M1"},
+        OrderedDict([(201, "M1"), (202, "M2")]),
+    ])
+    @pytest.mark.parametrize('ids_in_narrow', [
+        set(),
+        {0},  # Shouldn't apply to empty log case?
     ])
     def test_load_old_messages_empty_log(self, mocker, msg_view,
-                                         ids_in_narrow, get_messages_return):
+                                         ids_in_narrow, messages_fetched):
+        # Expand parameters to use in test
+        new_msg_ids = set(messages_fetched.keys())
+        new_msg_widgets = list(messages_fetched.values())
+
         mocker.patch.object(msg_view.model,
                             "get_message_ids_in_current_narrow",
-                            return_value=ids_in_narrow)
-        self.model.get_messages.return_value = get_messages_return
+                            side_effect=[ids_in_narrow,
+                                         ids_in_narrow | new_msg_ids])
+        self.model.get_messages.return_value = {}
+
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
-                                           return_value=["M1", "M2"])
+                                           return_value=new_msg_widgets)
+        # Specific to this version of the test
         msg_view.log = []
 
         msg_view.load_old_messages(0)
 
         assert msg_view.old_loading is False
         assert msg_view.index == {}
-        assert msg_view.log == ['M1', 'M2']
-        create_msg_box_list.assert_called_once_with(msg_view.model, set())
+        assert msg_view.log == list(messages_fetched.values())  # code vs orig
+        (create_msg_box_list.
+         assert_called_once_with(msg_view.model, new_msg_ids))
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(num_before=30,
                                                         num_after=0,
@@ -82,7 +94,7 @@ class TestMessageView:
 
     @pytest.mark.parametrize('messages_fetched', [
         {201: "M1"},
-        {201: "M1", 202: "M2"},
+        OrderedDict([(201, "M1"), (202, "M2")]),
     ])
     @pytest.mark.parametrize('top_id_in_narrow, other_ids_in_narrow', [
         (99, set()),
@@ -93,7 +105,7 @@ class TestMessageView:
                                           top_id_in_narrow,
                                           other_ids_in_narrow,
                                           messages_fetched):
-        # Expand parameters
+        # Expand parameters to use in test
         new_msg_ids = set(messages_fetched.keys())
         new_msg_widgets = list(messages_fetched.values())
 
