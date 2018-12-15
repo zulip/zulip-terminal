@@ -81,7 +81,7 @@ setup(
     },
     tests_require=testing_deps,
     install_requires=[
-        'typing==3.6.4',
+        "typing==3.6.4; python_version < '3.5'",
         'urwid==2.0.1',
         'zulip==0.4.7',
         'emoji==0.5.0',

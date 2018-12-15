@@ -4,7 +4,7 @@ url = "https://pypi.python.org/simple"
 name = "pypi"
 
 [packages]
-typing = "==3.6.4"
+typing = {version="==3.6.4", markers="python_version < '3.5'"}
 urwid = "==2.0.1"
 zulip = "==0.4.7"
 emoji = "==0.5.0"
