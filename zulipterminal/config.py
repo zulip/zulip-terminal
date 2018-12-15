@@ -66,11 +66,11 @@ KEY_BINDINGS = {
         'help_text': 'Send a message',
     },
     'STREAM_NARROW': {
-        'keys': {'S'},
+        'keys': {'s'},
         'help_text': 'Narrow to a stream',
     },
     'TOPIC_NARROW': {
-        'keys': {'s'},
+        'keys': {'S'},
         'help_text': 'Narrow to a topic',
     },
     'NEXT_UNREAD_TOPIC': {
