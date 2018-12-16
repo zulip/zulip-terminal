@@ -4,7 +4,7 @@ import threading
 
 import urwid
 
-from zulipterminal.config import KEY_BINDINGS, is_command_key
+from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
 from zulipterminal.helper import asynch, update_flag, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,

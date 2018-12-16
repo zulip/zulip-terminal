@@ -6,7 +6,7 @@ import random
 
 import urwid
 
-from zulipterminal.config import is_command_key, KEY_BINDINGS
+from zulipterminal.config.keys import is_command_key, KEY_BINDINGS
 from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
     RightColumnView,
