@@ -85,7 +85,7 @@ setup(
         'urwid==2.0.1',
         'zulip==0.4.7',
         'emoji==0.5.0',
-        'urwid_readline==0.7',
+        'urwid_readline==0.8',
         'beautifulsoup4==4.6.0',
         'lxml==4.2.3',
         'mypy_extensions>=0.4',
