@@ -7,6 +7,7 @@ import random
 import urwid
 
 from zulipterminal.config.keys import is_command_key, KEY_BINDINGS
+from zulipterminal.config.themes import THEMES
 from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
     RightColumnView,
@@ -20,49 +21,7 @@ class View(urwid.WidgetWrap):
     """
     A class responsible for providing the application's interface.
     """
-    palette = {
-        'default': [
-            (None,           'white',           'black'),
-            ('selected',     'light magenta',   'dark blue'),
-            ('msg_selected', 'light green',     'black'),
-            ('header',       'dark cyan',       'dark blue',  'bold'),
-            ('custom',       'white',           'dark blue',  'underline'),
-            ('content',      'white',           'black',      'standout'),
-            ('name',         'yellow, bold',    'black'),
-            ('unread',       'light blue',      'black'),
-            ('active',       'white',           'black'),
-            ('idle',         'yellow',          'black'),
-            ('title',        'white, bold',     'black'),
-            ('time',         'light blue',      'black'),
-            ('bar',          'white',           'dark gray'),
-            ('emoji',        'light magenta',   'black'),
-            ('span',         'light red, bold', 'black'),
-            ('link',         'light blue',      'black'),
-            ('blockquote',   'brown',           'black'),
-            ('code',         'black',           'white'),
-            ('bold',         'white, bold',     'black'),
-            ('footer',       'white',           'dark red',   'bold'),
-            ('starred',      'light red, bold', 'black'),
-        ],
-        'light': [
-            (None,           'black',        'white'),
-            ('selected',     'white',        'dark blue'),
-            ('msg_selected', 'dark blue',    'light gray'),
-            ('header',       'white',        'dark blue',  'bold'),
-            ('custom',       'white',        'dark blue',  'underline'),
-            ('content',      'black',        'light gray', 'standout'),
-            ('name',         'dark magenta', 'light gray', 'bold'),
-        ],
-        'blue': [
-            (None,           'black',        'light blue'),
-            ('selected',     'white',        'dark blue'),
-            ('msg_selected', 'black',        'light gray'),
-            ('header',       'black',        'dark blue',  'bold'),
-            ('custom',       'white',        'dark blue',  'underline'),
-            ('content',      'black',        'light gray', 'standout'),
-            ('name',         'dark red',     'light gray', 'bold'),
-        ]
-    }
+    palette = THEMES
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
