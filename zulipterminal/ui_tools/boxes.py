@@ -9,7 +9,7 @@ from urwid_readline import ReadlineEdit
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from zulipterminal.config import is_command_key
+from zulipterminal.config.keys import is_command_key
 
 
 class WriteBox(urwid.Pile):

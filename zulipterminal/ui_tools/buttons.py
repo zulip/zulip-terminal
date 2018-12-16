@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Tuple, Callable
 
 import urwid
 
-from zulipterminal.config import is_command_key
+from zulipterminal.config.keys import is_command_key
 
 
 class MenuButton(urwid.Button):
