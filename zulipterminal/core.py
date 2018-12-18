@@ -34,6 +34,7 @@ class Controller:
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
         self.theme = theme
+        assert self.theme in self.view.palette  # assumed valid theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
@@ -267,18 +268,12 @@ class Controller:
         self.last_event_id = response['last_event_id']
 
     def main(self) -> None:
-        try:
-            screen = Screen()
-            screen.set_terminal_properties(colors=256)
-            self.loop = urwid.MainLoop(self.view,
-                                       self.view.palette[self.theme],
-                                       screen=screen)
-            self.update_pipe = self.loop.watch_pipe(self.draw_screen)
-        except KeyError:
-            print('Following are the themes available:')
-            for theme in self.view.palette.keys():
-                print(theme,)
-            return
+        screen = Screen()
+        screen.set_terminal_properties(colors=256)
+        self.loop = urwid.MainLoop(self.view,
+                                   self.view.palette[self.theme],
+                                   screen=screen)
+        self.update_pipe = self.loop.watch_pipe(self.draw_screen)
 
         try:
             # TODO: Enable resuming? (in which case, remove ^Z below)
