@@ -7,6 +7,7 @@ from typing import Dict, Any
 from os import path, remove
 
 from zulipterminal.core import Controller
+from zulipterminal.config.themes import THEMES
 
 
 def parse_args() -> argparse.Namespace:
@@ -22,7 +23,6 @@ def parse_args() -> argparse.Namespace:
                         help='config file downloaded from your zulip\
                              organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
-                        default='default',
                         help='choose color theme. (e.g. blue, light)')
     # debug mode
     parser.add_argument("-d",
@@ -97,11 +97,11 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     zuliprc.read(zuliprc_path)
 
     # default settings
-    settings = {'theme': 'default'}
+    settings = {'theme': ('default', 'with no config')}
 
     if 'zterm' in zuliprc:
         if 'theme' in zuliprc['zterm']:
-            settings['theme'] = zuliprc['zterm']['theme']
+            settings['theme'] = (zuliprc['zterm']['theme'], 'in zuliprc file')
 
     return settings
 
@@ -125,7 +125,25 @@ def main() -> None:
 
     try:
         zterm = parse_zuliprc(zuliprc_path)
-        Controller(zuliprc_path, zterm['theme']).main()
+
+        if args.theme:
+            theme_to_use = (args.theme, 'on command line')
+        else:
+            theme_to_use = zterm['theme']
+        valid_themes = THEMES.keys()
+        if theme_to_use[0] not in valid_themes:
+            print("Invalid theme '{}' was specified {}."
+                  .format(*theme_to_use))
+            print("The following themes are available:")
+            for theme in valid_themes:
+                print("  ", theme)
+            print("Specify theme in zuliprc file or override "
+                  "using -t/--theme options on command line.")
+            sys.exit(1)
+
+        print("Loading with '{}' theme specified {}..."
+              .format(*theme_to_use))
+        Controller(zuliprc_path, theme_to_use[0]).main()
     except Exception as e:
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode
