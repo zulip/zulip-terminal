@@ -1,5 +1,5 @@
 from platform import platform
-from typing import Any, List
+from typing import Any, List, Tuple
 import os
 import sys
 import time
@@ -21,7 +21,9 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: str) -> None:
+    def __init__(self, config_file: str, theme: List[Tuple[str, ...]]) -> None:
+        self.theme = theme
+
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
@@ -33,8 +35,6 @@ class Controller:
         self.view = View(self)
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
-        self.theme = theme
-        assert self.theme in self.view.palette  # assumed valid theme
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
@@ -271,7 +271,7 @@ class Controller:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
         self.loop = urwid.MainLoop(self.view,
-                                   self.view.palette[self.theme],
+                                   self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
 
