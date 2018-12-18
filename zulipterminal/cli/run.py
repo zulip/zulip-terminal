@@ -143,7 +143,7 @@ def main() -> None:
 
         print("Loading with '{}' theme specified {}..."
               .format(*theme_to_use))
-        Controller(zuliprc_path, theme_to_use[0]).main()
+        Controller(zuliprc_path, THEMES[theme_to_use[0]]).main()
     except Exception as e:
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode

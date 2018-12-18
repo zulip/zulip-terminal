@@ -21,10 +21,10 @@ class View(urwid.WidgetWrap):
     """
     A class responsible for providing the application's interface.
     """
-    palette = THEMES
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
+        self.palette = controller.theme
         self.model = controller.model
         self.client = controller.client
         self.users = self.model.users

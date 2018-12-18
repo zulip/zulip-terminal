@@ -68,10 +68,9 @@ class StreamButton(urwid.Button):
         self.stream_id = properties[1]
         color = properties[2]
         self.color = color[:2] + color[3] + color[5]
-        view.palette['default'].append((self.color, '', '', '', self.color,
-                                       'black'))
-        view.palette['default'].append(('s' + self.color, '', '', '',
-                                       'black', self.color))
+        view.palette.append((self.color, '', '', '', self.color, 'black'))
+        view.palette.append(('s' + self.color, '', '', '', 'black',
+                             self.color))
         self.is_private = properties[3]
         self.count = count
         super(StreamButton, self).__init__("")
@@ -84,7 +83,7 @@ class StreamButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        stream_prefix = ' ' + ('P' if self.is_private else '#') + ' '
+        stream_prefix = 'P' if self.is_private else '#'
         if count < 0:
             count_text = ' M'  # Muted
         elif count == 0:
@@ -92,7 +91,8 @@ class StreamButton(urwid.Button):
         else:
             count_text = ' ' + str(count)
         return urwid.AttrMap(urwid.SelectableIcon(
-            [(self.color, stream_prefix), self.caption, ('idle', count_text)],
+            [' ', (self.color, stream_prefix), ' ', self.caption,
+             ('idle', count_text)],
             len(self.caption) + 2),
             None,
             'selected')
