@@ -413,10 +413,11 @@ class Model:
                   -1*len(messages_to_mark_read))
 
     def update_star_status(self, event: Dict[str, Any]) -> None:
-        assert len(event['messages']) == 1  # FIXME: Can be multiple?
-        message_id = event['messages'][0]
+        assert not event['all']  # FIXME Should handle
+        indexed_messages = set(self.index['messages'])
+        messages_to_mark_starred = set(event['messages'])
 
-        if self.index['messages'][message_id] != {}:
+        for message_id in messages_to_mark_starred & indexed_messages:
             msg = self.index['messages'][message_id]
             if event['operation'] == 'add':
                 if 'starred' not in msg['flags']:

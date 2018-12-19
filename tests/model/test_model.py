@@ -619,14 +619,14 @@ class TestModel:
         model.update_reaction(response)
         assert len(model.index['messages'][1]['reactions']) == 1
 
-    def test_update_star_status_no_index(self, mocker, model):
-        model.index = dict(messages={1: {}})  # Not indexed
-        event = dict(messages=[1])
+    def test_update_star_status_not_indexed(self, mocker, model):
+        model.index = dict(messages={2: {}})  # Not indexed
+        event = dict(messages=[1], all=False)
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
         model.update_star_status(event)
 
-        assert model.index == dict(messages={1: {}})
+        assert model.index == dict(messages={2: {}})
         model.update_rendered_view.assert_not_called()
 
     def test_update_star_status_invalid_operation(self, mocker, model):
@@ -635,7 +635,8 @@ class TestModel:
             'messages': [1],
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': 'OTHER'  # not 'add' or 'remove'
+            'operation': 'OTHER',  # not 'add' or 'remove'
+            'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         with pytest.raises(RuntimeError):
@@ -660,7 +661,8 @@ class TestModel:
             'messages': [1],
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': event_op
+            'operation': event_op,
+            'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
