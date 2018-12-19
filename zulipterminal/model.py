@@ -383,6 +383,35 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
+    def update_read_status(self, event: Dict[str, Any]) -> None:
+        assert not event['all']  # FIXME Should handle
+        indexed_messages = set(self.index['messages'])
+        messages_to_mark_read = set(event['messages'])
+
+        for message_id in messages_to_mark_read & indexed_messages:
+            msg = self.index['messages'][message_id]
+            if event['operation'] == 'add':
+                if 'read' not in msg['flags']:
+                    msg['flags'].append('read')
+            elif event['operation'] == 'remove':
+                if 'read' in msg['flags']:
+                    msg['flags'].remove('read')
+            else:
+                raise RuntimeError(event, msg['flags'])
+
+            self.index['messages'][message_id] = msg
+            self.update_rendered_view(message_id)
+
+        # set_count depends on message being in the index
+        for message_id in messages_to_mark_read - indexed_messages:
+            self.get_messages(num_after=0, num_before=0, anchor=message_id)
+
+        assert all(msg_id in self.index['messages']
+                   for msg_id in messages_to_mark_read)
+
+        set_count(event['messages'], self.controller,
+                  -1*len(messages_to_mark_read))
+
     def update_star_status(self, event: Dict[str, Any]) -> None:
         assert len(event['messages']) == 1  # FIXME: Can be multiple?
         message_id = event['messages'][0]
@@ -462,6 +491,7 @@ class Model:
                     if hasattr(self.controller, 'view'):
                         self.controller.view.handle_typing_event(event)
                 elif event['type'] == 'update_message_flags':
-                    # TODO: Should also support 'read' flag changes?
                     if event['flag'] == 'starred':
                         self.update_star_status(event)
+                    elif event['flag'] == 'read':
+                        self.update_read_status(event)
