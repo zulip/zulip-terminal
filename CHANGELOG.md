@@ -11,6 +11,7 @@
 - Use enter to reply to a message
 - Disable responding to suspend (<kbd>ctrl</kbd>+<kbd>z</kbd>), since cannot resume (yet)
 - Disable responding to <kbd>ctrl</kbd>+<kbd>s</kbd> for flow control, enabling use with starring
+- Improved synchronizing of read and starred message status with server (and so webapp)
 
 ### Visual improvements
 - Reorder streams into pinned and unpinned groups
