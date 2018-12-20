@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, Callable
+from typing import Any, Dict, List, Tuple, Callable, Optional
 
 import urwid
 
@@ -105,7 +105,7 @@ class StreamButton(urwid.Button):
 
 class UserButton(urwid.Button):
     def __init__(self, user: Dict[str, Any], controller: Any,
-                 view: Any, color: str=None, count: int=0) -> None:
+                 view: Any, color: Optional[str]=None, count: int=0) -> None:
         self.caption = user['full_name']  # str
         self.email = user['email']
         self.user_id = user['user_id']
