@@ -7,6 +7,8 @@ import lister
 from typing import cast, Dict, List
 from pathlib import PurePath
 
+EXCLUDE_FILES = ['tools/fetch-pull-request', 'tools/fetch-rebase-pull-request']
+
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
 
@@ -126,6 +128,7 @@ files_dict = cast(Dict[str, List[str]],
                                     use_shebang=True,
                                     modified_only=args.modified,
                                     group_by_ftype=True,
+                                    exclude=EXCLUDE_FILES,
                                     ))
 
 
