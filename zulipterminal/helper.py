@@ -2,9 +2,28 @@ import time
 from collections import defaultdict
 from functools import wraps
 from threading import Thread
-from typing import Any, Dict, List
+from typing import (
+    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union
+)
+from mypy_extensions import TypedDict
 
 import os
+
+Message = Dict[str, Any]
+
+Index = TypedDict('Index', {
+    'pointer': Dict[str, Union[int, Set[None]]],  # narrow_str, message_id
+    # stream_id: topic_str: {message_id, ...}
+    'stream': Dict[int, Dict[str, Set[int]]],
+    # {user_id, ...}: {message_id, ...}
+    'private': Dict[FrozenSet[int], Set[int]],
+    'all_messages': Set[int],  # {message_id, ...}
+    'all_starred': Set[int],  # {message_id, ...}
+    'all_private': Set[int],  # {message_id, ...}
+    'all_stream': Dict[int, Set[int]],  # stream_id: {message_id, ...}
+    'search': Set[int],  # {message_id, ...}
+    'messages': Dict[int, Message],  # message_id: Message
+})
 
 
 def asynch(func: Any) -> Any:
@@ -97,8 +116,9 @@ def update_flag(id_list: List[int], controller: Any) -> None:
     set_count(id_list, controller, -1)
 
 
-def index_messages(messages: List[Any], model: Any, index: Any=None)\
-        -> Dict[str, Any]:
+def index_messages(messages: List[Any],
+                   model: Any,
+                   index: Optional[Index]=None) -> Index:
     """
     STRUCTURE OF INDEX
     {
