@@ -1,5 +1,5 @@
 from platform import platform
-from typing import Any, List, Tuple
+from typing import Any, List
 import os
 import sys
 import time
@@ -13,6 +13,7 @@ from zulipterminal.model import Model, GetMessagesArgs
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import HelpView
+from zulipterminal.config.themes import ThemeSpec
 
 
 class Controller:
@@ -21,7 +22,7 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: List[Tuple[str, ...]]) -> None:
+    def __init__(self, config_file: str, theme: ThemeSpec) -> None:
         self.theme = theme
 
         self.show_loading()
