@@ -1,3 +1,7 @@
+from typing import Dict, List, Tuple, Optional
+
+ThemeSpec = List[Tuple[Optional[str], ...]]
+
 THEMES = {
     'default': [
         (None,           'white',           'black'),
@@ -40,4 +44,4 @@ THEMES = {
         ('content',      'black',        'light gray', 'standout'),
         ('name',         'dark red',     'light gray', 'bold'),
     ]
-}
+}  # type: Dict[str, ThemeSpec]
