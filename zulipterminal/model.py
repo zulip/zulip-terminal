@@ -192,9 +192,6 @@ class Model:
         }
         response = self.client.do_api_query(request, '/json/messages',
                                             method="GET")
-        for msg in response['messages']:
-            with open('../res.txt', 'a') as f:
-                f.write(str(msg['content']) + "\n\n")
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
