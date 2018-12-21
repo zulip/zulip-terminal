@@ -195,7 +195,7 @@ class Model:
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor:
-                self.index[str(self.narrow)] = response['anchor']
+                self.index['pointer'][str(self.narrow)] = response['anchor']
             query_range = num_after + num_before + 1
             if len(response['messages']) < (query_range):
                 self.update = True

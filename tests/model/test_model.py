@@ -237,7 +237,7 @@ class TestModel:
             request, '/json/messages', method="GET")
         assert model.index == index_all_messages
         anchor = messages_successful_response['anchor']
-        assert model.index[str(model.narrow)] == anchor
+        assert model.index['pointer'][str(model.narrow)] == anchor
         assert model.update is True
 
     def test_get_message_false_first_anchor(
@@ -271,7 +271,7 @@ class TestModel:
         self.client.do_api_query.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
-        assert model.index[str(model.narrow)] == 0
+        assert model.index['pointer'][str(model.narrow)] == 0
 
         # TEST `query_range` < no of messages received
         model.update = False  # RESET model.update value
