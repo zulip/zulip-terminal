@@ -22,7 +22,6 @@ from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
 class MessageView(urwid.ListBox):
     def __init__(self, model: Any) -> None:
         self.model = model
-        self.index = model.index
         # Initialize for reference
         self.focus_msg = 0
         self.log = urwid.SimpleFocusListWalker(self.main_view())
