@@ -77,14 +77,12 @@ class TestMessageView:
 
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=new_msg_widgets)
-        msg_view.index = {}
         # Specific to this version of the test
         msg_view.log = []
 
         msg_view.load_old_messages(0)
 
         assert msg_view.old_loading is False
-        assert msg_view.index == {}
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
         if messages_fetched:
             (create_msg_box_list.
@@ -132,13 +130,11 @@ class TestMessageView:
                                            return_value=(new_msg_widgets +
                                                          [top_widget]))
         initial_log = [top_widget] + len(other_ids_in_narrow)*["existing"]
-        msg_view.index = {}
         msg_view.log = initial_log[:]
 
         msg_view.load_old_messages(0)
 
         assert msg_view.old_loading is False
-        assert msg_view.index == {}
         assert msg_view.log == new_msg_widgets + initial_log
         if messages_fetched:
             create_msg_box_list.assert_called_once_with(msg_view.model,
@@ -163,13 +159,11 @@ class TestMessageView:
                             return_value=ids_in_narrow)
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
-        msg_view.index = {}
         msg_view.log = []
 
         msg_view.load_new_messages(0)
 
         assert msg_view.new_loading is False
-        assert msg_view.index == {}
         assert msg_view.log == ['M1', 'M2']
         create_msg_box_list.assert_called_once_with(msg_view.model, set(),
                                                     last_message=None)
@@ -189,13 +183,11 @@ class TestMessageView:
                             return_value=ids_in_narrow)
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
-        msg_view.index = {}
         msg_view.log = [mocker.Mock()]
 
         msg_view.load_new_messages(0)
 
         assert msg_view.new_loading is False
-        assert msg_view.index == {}
         assert msg_view.log[-2:] == ['M1', 'M2']
         expected_last_msg = msg_view.log[0].original_widget.message
         (create_msg_box_list.
