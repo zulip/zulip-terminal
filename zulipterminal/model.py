@@ -1,5 +1,6 @@
 import json
 from threading import Thread
+from concurrent.futures import ThreadPoolExecutor, wait
 import time
 from typing import Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple
 from mypy_extensions import TypedDict
@@ -197,32 +198,34 @@ class Model:
                 self.update = True
 
     def _update_initial_data(self) -> None:
-        try:
-            # Thread Processes to reduces start time.
-            # NOTE: first_anchor is True, so anchor value is ignored
-            get_messages = Thread(target=self.get_messages,
-                                  kwargs={'num_after': 10,
-                                          'num_before': 30,
-                                          'anchor': None})
-            get_messages.start()
-            result = self.client.register(
-                fetch_event_types=[
-                    'presence',
-                    'subscription',
-                    'message',
-                    'update_message_flags',
-                    'muted_topics',
-                    'realm_user',  # Enables cross_realm_bots
-                ],
-                client_gravatar=True,
-            )
-            self.initial_data.update(result)
-            # Join process to ensure they are completed
-            get_messages.join()
+        # Thread Processes to reduce start time.
+        # NOTE: Exceptions do not work well with threads
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            get_messages_f = executor.submit(self.get_messages,
+                                             num_after=10,
+                                             num_before=30,
+                                             anchor=None)
 
-        except Exception:
-            print("Invalid API key")
-            raise urwid.ExitMainLoop()
+            try:
+                result = self.client.register(
+                    fetch_event_types=[
+                        'presence',
+                        'subscription',
+                        'message',
+                        'update_message_flags',
+                        'muted_topics',
+                        'realm_user',  # Enables cross_realm_bots
+                    ],
+                    client_gravatar=True,
+                )
+            except Exception:
+                print("Invalid API key")
+                raise urwid.ExitMainLoop()
+            else:
+                self.initial_data.update(result)
+
+            # Wait for threads to complete
+            wait([get_messages_f])  # type: ignore
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
