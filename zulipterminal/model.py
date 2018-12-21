@@ -10,7 +10,8 @@ from zulipterminal.helper import (
     asynch,
     classify_unread_counts,
     index_messages,
-    set_count
+    set_count,
+    initial_index,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -36,7 +37,7 @@ class Model:
         self.update = False
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
-        self.index = None  # type: Any
+        self.index = initial_index
         self.user_id = -1  # type: int
         self.initial_data = {}  # type: Dict[str, Any]
         self._update_user_id()

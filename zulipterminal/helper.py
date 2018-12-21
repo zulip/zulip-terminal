@@ -25,6 +25,18 @@ Index = TypedDict('Index', {
     'messages': Dict[int, Message],  # message_id: Message
 })
 
+initial_index = Index(
+    pointer=defaultdict(set),
+    stream=defaultdict(dict),
+    private=defaultdict(set),
+    all_messages=set(),
+    all_private=set(),
+    all_stream=defaultdict(set),
+    messages=defaultdict(dict),
+    search=set(),
+    all_starred=set(),
+)
+
 
 def asynch(func: Any) -> Any:
     """

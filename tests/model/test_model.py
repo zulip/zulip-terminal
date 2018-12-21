@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from zulipterminal.model import Model
+from zulipterminal.helper import initial_index
 
 
 class TestModel:
@@ -45,7 +46,7 @@ class TestModel:
         assert model.stream_id == -1
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
-        assert model.index is None
+        assert model.index == initial_index
         model.get_messages.assert_called_once_with(num_before=30,
                                                    num_after=10,
                                                    anchor=None)
@@ -307,7 +308,7 @@ class TestModel:
         }
         model.client.do_api_query.assert_called_once_with(
             request, '/json/messages', method="GET")
-        assert model.index is None
+        assert model.index == initial_index
 
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
