@@ -177,7 +177,7 @@ class Model:
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
-                     anchor: Optional[int]) -> Any:
+                     anchor: Optional[int]) -> None:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
@@ -200,7 +200,6 @@ class Model:
             query_range = num_after + num_before + 1
             if len(response['messages']) < (query_range):
                 self.update = True
-            return self.index
 
     def _update_initial_data(self) -> None:
         try:

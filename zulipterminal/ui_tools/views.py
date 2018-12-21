@@ -57,8 +57,7 @@ class MessageView(urwid.ListBox):
         else:
             no_update_baseline = set()
 
-        self.index = self.model.get_messages(num_before=30, num_after=0,
-                                             anchor=anchor)
+        self.model.get_messages(num_before=30, num_after=0, anchor=anchor)
         ids_to_process = (self.model.get_message_ids_in_current_narrow() -
                           ids_to_keep)
 
@@ -82,8 +81,7 @@ class MessageView(urwid.ListBox):
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
         current_ids = self.model.get_message_ids_in_current_narrow()
-        self.index = self.model.get_messages(num_before=0, num_after=30,
-                                             anchor=anchor)
+        self.model.get_messages(num_before=0, num_after=30, anchor=anchor)
         new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
         if self.log:
             last_message = self.log[-1].original_widget.message

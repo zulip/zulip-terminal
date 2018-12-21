@@ -74,10 +74,10 @@ class TestMessageView:
                             "get_message_ids_in_current_narrow",
                             side_effect=[ids_in_narrow,
                                          ids_in_narrow | new_msg_ids])
-        self.model.get_messages.return_value = {}
 
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=new_msg_widgets)
+        msg_view.index = {}
         # Specific to this version of the test
         msg_view.log = []
 
@@ -128,11 +128,11 @@ class TestMessageView:
                             "get_message_ids_in_current_narrow",
                             side_effect=[ids_in_narrow,
                                          ids_in_narrow | new_msg_ids])
-        self.model.get_messages.return_value = {}
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=(new_msg_widgets +
                                                          [top_widget]))
         initial_log = [top_widget] + len(other_ids_in_narrow)*["existing"]
+        msg_view.index = {}
         msg_view.log = initial_log[:]
 
         msg_view.load_old_messages(0)
@@ -153,17 +153,17 @@ class TestMessageView:
                                                         anchor=0)
 
     # FIXME: Improve this test by covering more parameters
-    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
-        ({0}, {}),
+    @pytest.mark.parametrize('ids_in_narrow', [
+        ({0}),
     ])
     def test_load_new_messages_empty_log(self, mocker, msg_view,
-                                         ids_in_narrow, get_messages_return):
+                                         ids_in_narrow):
         mocker.patch.object(msg_view.model,
                             "get_message_ids_in_current_narrow",
                             return_value=ids_in_narrow)
-        self.model.get_messages.return_value = get_messages_return
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
+        msg_view.index = {}
         msg_view.log = []
 
         msg_view.load_new_messages(0)
@@ -179,17 +179,17 @@ class TestMessageView:
                                                         anchor=0)
 
     # FIXME: Improve this test by covering more parameters
-    @pytest.mark.parametrize('ids_in_narrow, get_messages_return', [
-        ({0}, {}),
+    @pytest.mark.parametrize('ids_in_narrow', [
+        ({0}),
     ])
     def test_load_new_messages_mocked_log(self, mocker, msg_view,
-                                          ids_in_narrow, get_messages_return):
+                                          ids_in_narrow):
         mocker.patch.object(msg_view.model,
                             "get_message_ids_in_current_narrow",
                             return_value=ids_in_narrow)
-        self.model.get_messages.return_value = get_messages_return
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=["M1", "M2"])
+        msg_view.index = {}
         msg_view.log = [mocker.Mock()]
 
         msg_view.load_new_messages(0)
