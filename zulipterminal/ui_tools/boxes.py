@@ -516,7 +516,6 @@ class SearchBox(urwid.Pile):
 
         elif is_command_key('ENTER', key):
             self.controller.editor_mode = False
-            self.controller.model.index['search'] = set()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus('body')
             return key
