@@ -130,7 +130,7 @@ def update_flag(id_list: List[int], controller: Any) -> None:
 
 def index_messages(messages: List[Any],
                    model: Any,
-                   index: Optional[Index]=None) -> Index:
+                   index: Index) -> Index:
     """
     STRUCTURE OF INDEX
     {
@@ -241,18 +241,6 @@ def index_messages(messages: List[Any],
         },
     }
     """
-    if index is None:
-        index = {
-            'pointer': defaultdict(set),
-            'stream': defaultdict(dict),
-            'private': defaultdict(set),
-            'all_messages': set(),
-            'all_private': set(),
-            'all_stream': defaultdict(set),
-            'messages': defaultdict(dict),
-            'search': set(),
-            'all_starred': set(),
-        }
     narrow = model.narrow
     for msg in messages:
 
