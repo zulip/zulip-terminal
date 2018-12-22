@@ -1,10 +1,12 @@
 from collections import defaultdict
+from copy import deepcopy
 from typing import Any, Dict
 
 import pytest
 
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, UserButton
+from zulipterminal.helper import initial_index as helper_initial_index
 
 
 @pytest.fixture(autouse=True)
@@ -381,6 +383,11 @@ def initial_data():
         'last_event_id': -1,
         'muted_topics': [],
     }
+
+
+@pytest.fixture
+def initial_index():
+    return deepcopy(helper_initial_index)
 
 
 @pytest.fixture
