@@ -113,6 +113,8 @@ class TestModel:
         ([['search', 'something interesting']],
          dict(search='something interesting')),
         ([['is', 'starred']], dict(starred=True)),
+        ([['is', 'private']], dict(pms=True)),
+        ([['pm_with', 'FOO@zulip.com']], dict(pm_with='FOO@zulip.com')),
     ])
     def test_set_narrow_already_set(self, model, narrow, good_args):
         model.narrow = narrow
@@ -125,6 +127,8 @@ class TestModel:
         ([], [['stream', 'some stream'], ['topic', 'some topic']],
          dict(stream='some stream', topic='some topic')),
         ([], [['is', 'starred']], dict(starred=True)),
+        ([], [['is', 'private']], dict(pms=True)),
+        ([], [['pm_with', 'FOO@zulip.com']], dict(pm_with='FOO@zulip.com')),
     ])
     def test_set_narrow_not_already_set(self, model, initial_narrow, narrow,
                                         good_args):
