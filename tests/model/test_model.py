@@ -237,7 +237,8 @@ class TestModel:
             request, '/json/messages', method="GET")
         assert model.index == index_all_messages
         anchor = messages_successful_response['anchor']
-        assert model.index['pointer'][str(model.narrow)] == anchor
+        if anchor < 10000000000000000:
+            assert model.index['pointer'][str(model.narrow)] == anchor
         assert model.update is True
 
     def test_get_message_false_first_anchor(
