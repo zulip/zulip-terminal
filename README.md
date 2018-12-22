@@ -9,6 +9,10 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
+## Changes
+
+Please see the [CHANGELOG](CHANGELOG.md) for released & recent changes.
+
 ## Setup:
 
 1. Install the package:
