@@ -76,25 +76,27 @@ class Model:
         self.index['pointer'][str(self.narrow)] = focus_message
 
     def set_narrow(self, *,
-                   stream: Optional[str]=None, topic: Optional[str]=None,
+                   stream: Optional[str]=None,
+                   topic: Optional[str]=None,
                    search: Optional[str]=None,
+                   pms: bool=False,
                    pm_with: Optional[str]=None,
                    starred: bool=False) -> bool:
-        if search and not(stream or topic or pm_with or starred):
-            new_narrow = [['search', search]]
-        elif stream and topic and not(search or pm_with or starred):
-            new_narrow = [["stream", stream],
-                          ["topic", topic]]
-        elif stream and not(topic or search or pm_with or starred):
-            new_narrow = [['stream', stream]]
-        elif pm_with == '' and not(stream or topic or search or starred):
-            new_narrow = [['is', 'private']]
-        elif pm_with and not(stream or topic or search or starred):
-            new_narrow = [['pm_with', pm_with]]
-        elif starred and not(stream or topic or search or pm_with):
-            new_narrow = [['is', 'starred']]
-        elif not stream and not topic and not search and not pm_with:
-            new_narrow = []
+        selected_params = {k for k, v in locals().items() if k != 'self' and v}
+        valid_narrows = {
+            frozenset(): [],
+            frozenset(['search']): [['search', search]],
+            frozenset(['stream']): [['stream', stream]],
+            frozenset(['stream', 'topic']): [['stream', stream],
+                                             ['topic', topic]],
+            frozenset(['pms']): [['is', 'private']],
+            frozenset(['pm_with']): [['pm_with', pm_with]],
+            frozenset(['starred']): [['is', 'starred']],
+        }  # type: Dict[FrozenSet[str], List[Any]]
+        for narrow_param, narrow in valid_narrows.items():
+            if narrow_param == selected_params:
+                new_narrow = narrow
+                break
         else:
             raise RuntimeError("Model.set_narrow parameters used incorrectly.")
 

@@ -217,7 +217,7 @@ class Controller:
         self._finalize_show(w_list)
 
     def show_all_pm(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(pm_with='')
+        already_narrowed = self.model.set_narrow(pms=True)
         if already_narrowed:
             return
 
