@@ -154,6 +154,14 @@ class TestModel:
                  }
              }
          }, {0, 1}),
+        ([['stream', 'FOO'],  # Covers one empty-set case
+         ['topic', 'BOOBOO']], {
+             'stream': {
+                 1: {
+                     'BOO': {0, 1}
+                 }
+             }
+         }, set()),
         ([['is', 'private']], {
             'all_private': {0, 1}
         }, {0, 1}),
@@ -162,6 +170,11 @@ class TestModel:
                 frozenset({1, 2}): {0, 1}
             }
         }, {0, 1}),
+        ([['pm_with', 'FOO@zulip.com']], {  # Covers recipient empty-set case
+            'private': {
+                frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
+            }
+        }, set()),
         ([['search', 'FOO']], {
             'search': {0, 1}
         }, {0, 1}),

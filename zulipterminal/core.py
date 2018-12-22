@@ -99,10 +99,12 @@ class Controller:
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
-        self.update = False
         self.model.set_narrow(search=text)
+
+        self.update = False
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
-        msg_id_list = self.model.index['search']
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         w_list = create_msg_box_list(self.model, msg_id_list)
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
@@ -116,10 +118,10 @@ class Controller:
             return
 
         self.update = False
-        # store the steam id in the model
+        # store the steam id in the model (required for get_message_ids...)
         self.model.stream_id = button.stream_id
-        # get the message ids of the current narrow
-        msg_id_list = self.model.index['all_stream'][button.stream_id]
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
             get_msg_opts = dict(num_before=30, num_after=10,
@@ -127,7 +129,8 @@ class Controller:
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
             self.model.get_messages(**get_msg_opts)
-        msg_id_list = self.model.index['all_stream'][button.stream_id]
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_id_list, button.message['id'])
@@ -143,17 +146,18 @@ class Controller:
             return
 
         self.update = False
+        # store the steam id in the model (required for get_message_ids...)
         self.model.stream_id = button.stream_id
-        msg_id_list = self.model.index['stream'][button.stream_id].get(
-                                                    button.title, [])
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         if len(msg_id_list) == 0:
             get_msg_opts = dict(num_before=30, num_after=10,
                                 anchor=None)  # type: GetMessagesArgs
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
             self.model.get_messages(**get_msg_opts)
-            msg_id_list = self.model.index['stream'][button.stream_id].get(
-                                                    button.title, [])
+            msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
                 self.model, msg_id_list, button.message['id'])
@@ -180,8 +184,9 @@ class Controller:
 
         self.update = False
         recipients = frozenset(user_ids)
+        # store the recipients in the model (required for get_message_ids...)
         self.model.recipients = recipients
-        msg_id_list = self.model.index['private'].get(recipients, [])
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         if len(msg_id_list) == 0:
             get_msg_opts = dict(num_before=30, num_after=10,
@@ -189,7 +194,7 @@ class Controller:
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
             self.model.get_messages(**get_msg_opts)
-            msg_id_list = self.model.index['private'].get(recipients, [])
+            msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
@@ -205,12 +210,13 @@ class Controller:
             return
 
         self.update = False
-        msg_list = self.model.index['all_messages']
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_list, button.message['id'])
+                self.model, msg_id_list, button.message['id'])
         else:
-            w_list = create_msg_box_list(self.model, msg_list)
+            w_list = create_msg_box_list(self.model, msg_id_list)
 
         self._finalize_show(w_list)
 
@@ -220,11 +226,13 @@ class Controller:
             return
 
         self.update = False
-        msg_list = self.model.index['all_private']
-        if len(msg_list) == 0:
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
+        if len(msg_id_list) == 0:
             self.model.get_messages(num_before=30, num_after=10, anchor=None)
-            msg_list = self.model.index['all_private']
-        w_list = create_msg_box_list(self.model, msg_list)
+            msg_id_list = self.model.get_message_ids_in_current_narrow()
+
+        w_list = create_msg_box_list(self.model, msg_id_list)
 
         self._finalize_show(w_list)
 
@@ -234,11 +242,13 @@ class Controller:
             return
 
         self.update = False
-        msg_list = self.model.index['all_starred']
-        if len(msg_list) == 0:
+        msg_id_list = self.model.get_message_ids_in_current_narrow()
+
+        if len(msg_id_list) == 0:
             self.model.get_messages(num_before=30, num_after=10, anchor=None)
-            msg_list = self.model.index['all_starred']
-        w_list = create_msg_box_list(self.model, msg_list)
+            msg_id_list = self.model.get_message_ids_in_current_narrow()
+
+        w_list = create_msg_box_list(self.model, msg_id_list)
 
         self._finalize_show(w_list)
 
