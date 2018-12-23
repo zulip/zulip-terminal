@@ -89,11 +89,18 @@ class View(urwid.WidgetWrap):
         self.left_column = self.left_column_view()
         self.center_column = self.message_view()
         self.right_column = self.right_column_view()
-        body = [
-            (25, self.left_column),
-            ('weight', 10, self.center_column),
-            (0, self.right_column),
-        ]
+        if self.controller.autohide:
+            body = [
+                (25, self.left_column),
+                ('weight', 10, self.center_column),
+                (0, self.right_column),
+            ]
+        else:
+            body = [
+                (25, self.left_column),
+                ('weight', 10, self.center_column),
+                (25, self.right_column),
+            ]
         self.body = urwid.Columns(body, focus_column=0)
 
         div_char = '═'
@@ -115,6 +122,8 @@ class View(urwid.WidgetWrap):
         return w
 
     def show_left_panel(self, *, visible: bool) -> None:
+        if not self.controller.autohide:
+            return
         width = 25 if visible else 0
         self.body.contents[0] = (
             self.left_column,
@@ -124,6 +133,8 @@ class View(urwid.WidgetWrap):
             self.body.focus_col = 0
 
     def show_right_panel(self, *, visible: bool) -> None:
+        if not self.controller.autohide:
+            return
         width = 25 if visible else 0
         self.body.contents[2] = (
             self.right_column,
