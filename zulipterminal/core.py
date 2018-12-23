@@ -22,8 +22,10 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: ThemeSpec) -> None:
+    def __init__(self, config_file: str, theme: ThemeSpec,
+                 autohide: bool) -> None:
         self.theme = theme
+        self.autohide = autohide
 
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
