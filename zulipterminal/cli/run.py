@@ -97,11 +97,19 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     zuliprc.read(zuliprc_path)
 
     # default settings
-    settings = {'theme': ('default', 'with no config')}
+    NO_CONFIG = 'with no config'
+    settings = {
+        'theme': ('default', NO_CONFIG),
+        'autohide': ('autohide', NO_CONFIG),
+    }
 
     if 'zterm' in zuliprc:
-        if 'theme' in zuliprc['zterm']:
-            settings['theme'] = (zuliprc['zterm']['theme'], 'in zuliprc file')
+        config = zuliprc['zterm']
+        ZULIPRC_CONFIG = 'in zuliprc file'
+        if 'theme' in config:
+            settings['theme'] = (config['theme'], ZULIPRC_CONFIG)
+        if 'autohide' in config:
+            settings['autohide'] = (config['autohide'], ZULIPRC_CONFIG)
 
     return settings
 
@@ -141,9 +149,24 @@ def main() -> None:
                   "using -t/--theme options on command line.")
             sys.exit(1)
 
-        print("Loading with '{}' theme specified {}..."
-              .format(*theme_to_use))
-        Controller(zuliprc_path, THEMES[theme_to_use[0]]).main()
+        valid_autohide_settings = {'autohide', 'no_autohide'}
+        if zterm['autohide'][0] not in valid_autohide_settings:
+            print("Invalid autohide setting '{}' was specified {}."
+                  .format(*zterm['autohide']))
+            print("The following options are available:")
+            for option in valid_autohide_settings:
+                print("  ", option)
+            print("Specify the autohide option in zuliprc file.")
+            sys.exit(1)
+        autohide_setting = (zterm['autohide'][0] == 'autohide')
+
+        print("Loading with:")
+        print("   theme '{}' specified {}.".format(*theme_to_use))
+        print("   autohide setting '{}' specified {}."
+              .format(*zterm['autohide']))
+        Controller(zuliprc_path,
+                   THEMES[theme_to_use[0]],
+                   autohide_setting).main()
     except Exception as e:
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode

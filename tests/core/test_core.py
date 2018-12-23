@@ -23,9 +23,10 @@ class TestController:
     def controller(self, mocker) -> None:
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
+        self.autohide = True  # FIXME Add tests for no-autohide
         mocker.patch('zulipterminal.core.Controller.'
                      'register_initial_desired_events')
-        return Controller(self.config_file, self.theme)
+        return Controller(self.config_file, self.theme, self.autohide)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
@@ -176,7 +177,8 @@ class TestController:
     def test_register_initial_desired_events(self, mocker):
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
-        controller = Controller(self.config_file, self.theme)
+        self.autohide = True  # FIXME Test with both options
+        controller = Controller(self.config_file, self.theme, self.autohide)
         event_types = [
             'message',
             'update_message',
