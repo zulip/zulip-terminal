@@ -1,6 +1,6 @@
 # Zulip-terminal Changelog
 
-## 0.3.0
+## 0.3.1
 
 ### Interactivity improvements
 - Much improved (& configurable on/off) autohide behavior for streams/users panels
