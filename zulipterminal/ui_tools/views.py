@@ -418,6 +418,8 @@ class RightColumnView(urwid.Frame):
         for user in self.view.users:
             unread_count = self.view.model.unread_counts.get(user['user_id'],
                                                              0)
+            if unread_count <= 0:
+                continue
             self.users_btn_list.append(
                 UserButton(
                     user,
