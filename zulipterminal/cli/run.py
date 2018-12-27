@@ -6,7 +6,7 @@ import tempfile
 from typing import Dict, Any
 from os import path, remove
 
-from zulipterminal.core import Controller
+from zulipterminal.core import Controller, ZulipServerConnectionFailure
 from zulipterminal.config.themes import THEMES
 
 
@@ -167,6 +167,9 @@ def main() -> None:
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
                    autohide_setting).main()
+    except ZulipServerConnectionFailure as e:
+        print("\n\033[91mZulip Error: {}.".format(e))
+        sys.exit(1)
     except Exception as e:
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode
