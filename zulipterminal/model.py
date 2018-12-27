@@ -6,6 +6,7 @@ from typing import Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple
 from mypy_extensions import TypedDict
 
 import urwid
+import zulip
 
 from zulipterminal.helper import (
     asynch,
@@ -35,6 +36,11 @@ class Model:
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
+
+        # Register to the queue before initializing further so that we don't
+        # lose any updates while messages are being fetched.
+        self._register_initial_desired_events()
+
         # Get message after registering to the queue.
         self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
@@ -428,15 +434,32 @@ class Model:
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
 
+    def _register_initial_desired_events(self) -> None:
+        event_types = [
+            'message',
+            'update_message',
+            'reaction',
+            'typing',
+            'update_message_flags',
+        ]
+        try:
+            response = self.client.register(event_types=event_types,
+                                            apply_markdown=True)
+        except zulip.ZulipError as e:
+            raise ServerConnectionFailure(e)
+        self.max_message_id = response['max_message_id']
+        self.queue_id = response['queue_id']
+        self.last_event_id = response['last_event_id']
+
     @asynch
     def poll_for_events(self) -> None:
-        queue_id = self.controller.queue_id
-        last_event_id = self.controller.last_event_id
+        queue_id = self.queue_id
+        last_event_id = self.last_event_id
         while True:
             if queue_id is None:
-                self.controller.register_initial_desired_events()
-                queue_id = self.controller.queue_id
-                last_event_id = self.controller.last_event_id
+                self._register_initial_desired_events()
+                queue_id = self.queue_id
+                last_event_id = self.last_event_id
 
             response = self.client.get_events(
                 queue_id=queue_id,
