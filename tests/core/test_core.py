@@ -24,8 +24,6 @@ class TestController:
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
-        mocker.patch('zulipterminal.core.Controller.'
-                     'register_initial_desired_events')
         return Controller(self.config_file, self.theme, self.autohide)
 
     def test_initialize_controller(self, controller, mocker) -> None:
@@ -36,7 +34,6 @@ class TestController:
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
-        controller.register_initial_desired_events.assert_called_once_with()
         assert controller.theme == self.theme
 
     def test_narrow_to_stream(self, mocker, controller,
@@ -173,22 +170,6 @@ class TestController:
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
-
-    def test_register_initial_desired_events(self, mocker):
-        self.config_file = 'path/to/zuliprc'
-        self.theme = 'default'
-        self.autohide = True  # FIXME Test with both options
-        controller = Controller(self.config_file, self.theme, self.autohide)
-        event_types = [
-            'message',
-            'update_message',
-            'reaction',
-            'typing',
-            'update_message_flags',
-        ]
-        controller.client.register.assert_called_once_with(
-                                   event_types=event_types,
-                                   apply_markdown=True)
 
     def test_main(self, mocker, controller):
         ret_mock = mocker.Mock()

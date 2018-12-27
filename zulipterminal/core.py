@@ -31,9 +31,6 @@ class Controller:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
-        # Register to the queue before initializing Model or View
-        # so that we don't lose any updates while messages are being fetched.
-        self.register_initial_desired_events()
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -264,23 +261,6 @@ class Controller:
         self.model.msg_view.extend(w_list)
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
-
-    def register_initial_desired_events(self) -> None:
-        event_types = [
-            'message',
-            'update_message',
-            'reaction',
-            'typing',
-            'update_message_flags',
-        ]
-        try:
-            response = self.client.register(event_types=event_types,
-                                            apply_markdown=True)
-        except zulip.ZulipError as e:
-            raise ServerConnectionFailure(e)
-        self.max_message_id = response['max_message_id']
-        self.queue_id = response['queue_id']
-        self.last_event_id = response['last_event_id']
 
     def main(self) -> None:
         screen = Screen()

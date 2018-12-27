@@ -61,6 +61,34 @@ class TestModel:
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
+    def test_register_initial_desired_events(self, mocker, initial_data):
+        mocker.patch('zulipterminal.model.Model._update_user_id')
+        mocker.patch('zulipterminal.model.Model.get_messages')
+        self.client.register.return_value = initial_data
+
+        model = Model(self.controller)
+
+        event_types = [
+            'message',
+            'update_message',
+            'reaction',
+            'typing',
+            'update_message_flags',
+        ]
+        fetch_event_types = [
+            'presence',
+            'subscription',
+            'message',
+            'update_message_flags',
+            'muted_topics',
+            'realm_user',
+        ]
+        model.client.register.assert_has_calls(
+                [mocker.call(event_types=event_types,
+                             apply_markdown=True),
+                 mocker.call(fetch_event_types=fetch_event_types,
+                             client_gravatar=True)])
+
     @pytest.mark.parametrize('msg_id', [1, 5, set()])
     @pytest.mark.parametrize('narrow', [
         [],
