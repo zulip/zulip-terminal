@@ -41,7 +41,6 @@ class Model:
         self.index = initial_index
         self.user_id = -1  # type: int
         self.initial_data = {}  # type: Dict[str, Any]
-        self._update_user_id()
         self._update_initial_data()
         self.users = self.get_all_users()
 
@@ -55,9 +54,12 @@ class Model:
         self.new_user_input = True
         self.update_presence()
 
-    @asynch
-    def _update_user_id(self) -> None:
-        self.user_id = self.client.get_profile()['user_id']
+    def _update_user_id(self) -> Optional[int]:
+        profile_json = self.client.get_profile()
+        if profile_json['result'] == 'success':
+            return profile_json['user_id']
+        else:
+            return None
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -200,11 +202,13 @@ class Model:
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             get_messages_f = executor.submit(self.get_messages,
                                              num_after=10,
                                              num_before=30,
                                              anchor=None)
+
+            update_user_id_f = executor.submit(self._update_user_id)
 
             try:
                 result = self.client.register(
@@ -225,7 +229,13 @@ class Model:
                 self.initial_data.update(result)
 
             # Wait for threads to complete
-            wait([get_messages_f])  # type: ignore
+            wait([get_messages_f, update_user_id_f])  # type: ignore
+
+        new_user_id = update_user_id_f.result()
+        if new_user_id is not None:
+            self.user_id = new_user_id
+        else:
+            pass  # FIXME Implement error-handling here
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
