@@ -1,6 +1,6 @@
 import json
 from threading import Thread
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor, wait, Future
 import time
 from typing import Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple
 from mypy_extensions import TypedDict
@@ -175,7 +175,7 @@ class Model:
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
-                     anchor: Optional[int]) -> None:
+                     anchor: Optional[int]) -> bool:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
@@ -198,17 +198,20 @@ class Model:
             query_range = num_after + num_before + 1
             if len(response['messages']) < (query_range):
                 self.update = True
+            return True
+        return False
 
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
         with ThreadPoolExecutor(max_workers=2) as executor:
-            get_messages_f = executor.submit(self.get_messages,
-                                             num_after=10,
-                                             num_before=30,
-                                             anchor=None)
-
-            update_user_id_f = executor.submit(self._update_user_id)
+            futures = {
+                'get_messages': executor.submit(self.get_messages,
+                                                num_after=10,
+                                                num_before=30,
+                                                anchor=None),
+                'user_id': executor.submit(self._update_user_id),
+            }  # Dict[str, Future[Any]]
 
             try:
                 result = self.client.register(
@@ -229,11 +232,12 @@ class Model:
                 self.initial_data.update(result)
 
             # Wait for threads to complete
-            wait([get_messages_f, update_user_id_f])  # type: ignore
+            wait(futures.values())  # type: ignore
 
-        new_user_id = update_user_id_f.result()
-        if new_user_id is not None:
-            self.user_id = new_user_id
+        results = {name: future.result()  # type: ignore
+                   for name, future in futures.items()}
+        if all(results.values()):
+            self.user_id = results['user_id']
         else:
             pass  # FIXME Implement error-handling here
 
