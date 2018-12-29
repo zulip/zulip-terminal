@@ -7,6 +7,7 @@ from typing import Dict, Any
 from os import path, remove
 
 from zulipterminal.core import Controller
+from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import THEMES
 
 
@@ -167,6 +168,9 @@ def main() -> None:
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
                    autohide_setting).main()
+    except ServerConnectionFailure as e:
+        print("\n\033[91mError connecting to Zulip server: {}.".format(e))
+        sys.exit(1)
     except Exception as e:
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode
