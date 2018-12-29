@@ -22,7 +22,6 @@ class TestModel:
     def model(self, mocker, initial_data, user_profile):
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -227,7 +226,6 @@ class TestModel:
                                   index_all_messages, initial_data,
                                   num_before=30, num_after=10):
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -268,7 +266,6 @@ class TestModel:
 
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -301,7 +298,6 @@ class TestModel:
                                initial_data, num_before=30, num_after=10):
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -360,7 +356,6 @@ class TestModel:
     def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
         mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -384,7 +379,6 @@ class TestModel:
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict):
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_realm_users')
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
                      return_value=({}, set(), [], []))
@@ -687,22 +681,3 @@ class TestModel:
 
         assert model.index['messages'][1]['flags'] == flags_after
         model.update_rendered_view.assert_called_once_with(1)
-
-    def test_update_realm_users(self, mocker, initial_data, user_profile):
-        mocker.patch('zulipterminal.model.Model.get_messages')
-        self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
-        # NOTE: PATCH WHERE USED NOT WHERE DEFINED
-        self.classify_unread_counts = mocker.patch(
-            'zulipterminal.model.classify_unread_counts',
-            return_value=[])
-        self.client.get_profile.return_value = user_profile
-        members = ["FOO", "BOO"]
-        self.client.get_members.return_value = {"members": members}
-        model = Model(self.controller)
-        model._update_realm_users()
-        assert model.initial_data['realm_users'] == members
