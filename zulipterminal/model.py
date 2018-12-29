@@ -23,6 +23,10 @@ GetMessagesArgs = TypedDict('GetMessagesArgs', {
     })
 
 
+class ServerConnectionFailure(Exception):
+    pass
+
+
 class Model:
     """
     A class responsible for storing the data to be displayed.
@@ -239,7 +243,8 @@ class Model:
         if all(results.values()):
             self.user_id = results['user_id']
         else:
-            pass  # FIXME Implement error-handling here
+            failures = [name for name, result in results.items() if not result]
+            raise ServerConnectionFailure(", ".join(failures))
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
