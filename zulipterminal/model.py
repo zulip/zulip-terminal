@@ -58,13 +58,6 @@ class Model:
     def _update_user_id(self) -> None:
         self.user_id = self.client.get_profile()['user_id']
 
-    def _update_realm_users(self) -> None:
-        self.initial_data['realm_users'] = self.client.get_members(
-            request={
-                'client_gravatar': True,
-            }
-        )['members']
-
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
         Returns the focus in the current narrow.
@@ -212,8 +205,6 @@ class Model:
                                           'num_before': 30,
                                           'anchor': None})
             get_messages.start()
-            update_realm_users = Thread(target=self._update_realm_users)
-            update_realm_users.start()
             result = self.client.register(
                 fetch_event_types=[
                     'presence',
@@ -227,7 +218,6 @@ class Model:
             )
             self.initial_data.update(result)
             # Join process to ensure they are completed
-            update_realm_users.join()
             get_messages.join()
 
         except Exception:
