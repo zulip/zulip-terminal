@@ -9,7 +9,7 @@ import zulip
 
 from zulipterminal.version import ZT_VERSION
 from zulipterminal.helper import asynch
-from zulipterminal.model import Model, GetMessagesArgs
+from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import HelpView
@@ -265,7 +265,6 @@ class Controller:
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
-    @asynch
     def register_initial_desired_events(self) -> None:
         event_types = [
             'message',
@@ -274,8 +273,11 @@ class Controller:
             'typing',
             'update_message_flags',
         ]
-        response = self.client.register(event_types=event_types,
-                                        apply_markdown=True)
+        try:
+            response = self.client.register(event_types=event_types,
+                                            apply_markdown=True)
+        except zulip.ZulipError as e:
+            raise ServerConnectionFailure(e)
         self.max_message_id = response['max_message_id']
         self.queue_id = response['queue_id']
         self.last_event_id = response['last_event_id']
