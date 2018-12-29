@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.model import Model
+from zulipterminal.model import Model, ServerConnectionFailure
 from zulipterminal.helper import initial_index
 
 
@@ -226,6 +226,7 @@ class TestModel:
                                   index_all_messages, initial_data,
                                   num_before=30, num_after=10):
         self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -266,6 +267,7 @@ class TestModel:
 
         # Initialize Model
         self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -294,10 +296,12 @@ class TestModel:
         model.get_messages(num_after=0, num_before=0, anchor=0)
         assert model.update is False
 
+    # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(self, mocker, error_response,
                                initial_data, num_before=30, num_after=10):
         # Initialize Model
         self.client.register.return_value = initial_data
+        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -307,21 +311,11 @@ class TestModel:
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
 
-        # Setup mocks before calling get_messages
+        # Setup mock before calling get_messages
         self.client.do_api_query.return_value = error_response
-        model = Model(self.controller)
-        request = {
-            'anchor': 0,  # for case of first-unread-anchor
-            'num_before': num_before,
-            'num_after': num_after,
-            'apply_markdown': True,
-            'use_first_unread_anchor': True,
-            'client_gravatar': False,
-            'narrow': json.dumps(model.narrow),
-        }
-        model.client.do_api_query.assert_called_once_with(
-            request, '/json/messages', method="GET")
-        assert model.index == initial_index
+
+        with pytest.raises(ServerConnectionFailure):
+            model = Model(self.controller)
 
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
@@ -356,6 +350,7 @@ class TestModel:
     def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
         mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -377,6 +372,7 @@ class TestModel:
             model._update_initial_data()
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict):
+        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'
