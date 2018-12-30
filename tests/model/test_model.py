@@ -275,7 +275,7 @@ class TestModel:
             'num_after': num_after,
             'apply_markdown': True,
             'use_first_unread_anchor': True,
-            'client_gravatar': False,
+            'client_gravatar': True,
             'narrow': json.dumps(model.narrow),
         }
         model.client.do_api_query.assert_called_once_with(
