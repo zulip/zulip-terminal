@@ -33,15 +33,18 @@ class Model:
     A class responsible for storing the data to be displayed.
     """
 
+    event_types = [
+        'message',
+        'update_message',
+        'reaction',
+        'typing',
+        'update_message_flags',
+    ]
+
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
 
-        # Register to the queue before initializing further so that we don't
-        # lose any updates while messages are being fetched.
-        self._register_initial_desired_events()
-
-        # Get message after registering to the queue.
         self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
@@ -51,7 +54,11 @@ class Model:
         self.index = initial_index
         self.user_id = -1  # type: int
         self.initial_data = {}  # type: Dict[str, Any]
+
+        # Register to the queue before initializing further so that we don't
+        # lose any updates while messages are being fetched.
         self._update_initial_data()
+
         self.users = self.get_all_users()
 
         subscriptions = self.initial_data['subscriptions']
@@ -222,9 +229,9 @@ class Model:
                                                 anchor=None),
                 'user_id': executor.submit(self._update_user_id),
             }  # Dict[str, Future[Any]]
-
             try:
-                result = self.client.register(
+                response = self.client.register(
+                    event_types=Model.event_types,
                     fetch_event_types=[
                         'presence',
                         'subscription',
@@ -234,12 +241,18 @@ class Model:
                         'realm_user',  # Enables cross_realm_bots
                     ],
                     client_gravatar=True,
+                    apply_markdown=True,
                 )
+            except zulip.ZulipError as e:
+                raise ServerConnectionFailure(e)
             except Exception:
                 print("Invalid API key")
                 raise urwid.ExitMainLoop()
             else:
-                self.initial_data.update(result)
+                self.initial_data.update(response)
+                self.max_message_id = response['max_message_id']
+                self.queue_id = response['queue_id']
+                self.last_event_id = response['last_event_id']
 
             # Wait for threads to complete
             wait(futures.values())  # type: ignore
@@ -434,7 +447,7 @@ class Model:
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
 
-    def _register_initial_desired_events(self) -> None:
+    def _register_desired_events(self) -> None:
         event_types = [
             'message',
             'update_message',
@@ -457,7 +470,7 @@ class Model:
         last_event_id = self.last_event_id
         while True:
             if queue_id is None:
-                self._register_initial_desired_events()
+                self._register_desired_events()
                 queue_id = self.queue_id
                 last_event_id = self.last_event_id
 

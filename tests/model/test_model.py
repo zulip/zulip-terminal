@@ -83,11 +83,11 @@ class TestModel:
             'muted_topics',
             'realm_user',
         ]
-        model.client.register.assert_has_calls(
-                [mocker.call(event_types=event_types,
-                             apply_markdown=True),
-                 mocker.call(fetch_event_types=fetch_event_types,
-                             client_gravatar=True)])
+        model.client.register.assert_called_once_with(
+                event_types=event_types,
+                fetch_event_types=fetch_event_types,
+                apply_markdown=True,
+                client_gravatar=True)
 
     @pytest.mark.parametrize('msg_id', [1, 5, set()])
     @pytest.mark.parametrize('narrow', [
