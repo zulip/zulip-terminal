@@ -23,6 +23,8 @@ GetMessagesArgs = TypedDict('GetMessagesArgs', {
      'anchor': Optional[int]
     })
 
+OFFLINE_THRESHOLD_SECS = 140
+
 
 class ServerConnectionFailure(Exception):
     pass
@@ -147,7 +149,8 @@ class Model:
         response = self.client.call_endpoint(
             url='users/me/presence',
             request={
-                'status': 'active',
+                # TODO: Determinal `status` from terminal tab focus.
+                'status': 'active' if self.new_user_input else 'idle',
                 'new_user_input': self.new_user_input,
             }
         )
@@ -274,13 +277,61 @@ class Model:
         self.user_dict = dict()  # type: Dict[str, Dict[str, Any]]
         self.user_id_email_dict = dict()  # type: Dict[int, str]
         for user in self.initial_data['realm_users']:
+            if self.user_id == user['user_id']:
+                current_user = {
+                    'full_name': user['full_name'],
+                    'email': user['email'],
+                    'user_id': user['user_id'],
+                    'status': 'active',
+                }
+                continue
             email = user['email']
             if email in presences:  # presences currently subset of all users
-                status = presences[email]['aggregated']['status']
+                """
+                * Aggregate our information on a user's presence across their
+                * clients.
+                *
+                * For an explanation of the Zulip presence model this helps
+                * implement, see the subsystem doc:
+                https://zulip.readthedocs.io/en/latest/subsystems/presence.html
+                *
+                * This logic should match `status_from_timestamp` in the web
+                * app's
+                * `static/js/presence.js`.
+                *
+                * Out of the ClientPresence objects found in `presence`, we
+                * consider only those with a timestamp newer than
+                * OFFLINE_THRESHOLD_SECS; then of
+                * those, return the one that has the greatest UserStatus, where
+                * `active` > `idle` > `offline`.
+                *
+                * If there are several ClientPresence objects with the greatest
+                * UserStatus, an arbitrary one is chosen.
+                """
+                aggregate_status = 'offline'
+                for client in presences[email].items():
+                    client_name = client[0]
+                    status = client[1]['status']
+                    timestamp = client[1]['timestamp']
+                    if client_name == 'aggregated':
+                        continue
+                    elif (time.time() - timestamp) < OFFLINE_THRESHOLD_SECS:
+                        if status == 'active':
+                            aggregate_status = 'active'
+                        if status == 'idle':
+                            if aggregate_status != 'active':
+                                aggregate_status = status
+                        if status == 'offline':
+                            if aggregate_status != 'active' and\
+                                    aggregate_status != 'idle':
+                                aggregate_status = status
+
+                status = aggregate_status
             else:
-                # TODO: Consider if bots & other no-presence results should
-                # also really be treated as 'idle' and adjust accordingly
-                status = 'idle'
+                # Set status of users not in the  `presence` list
+                # as 'inactive'. They will not be displayed in the
+                # user's list by default (only in the search list).
+                status = 'inactive'
             self.user_dict[email] = {
                 'full_name': user['full_name'],
                 'email': email,
@@ -296,7 +347,7 @@ class Model:
                 'full_name': bot['full_name'],
                 'email': email,
                 'user_id': bot['user_id'],
-                'status': 'idle',
+                'status': 'inactive',
             }
             self.user_id_email_dict[bot['user_id']] = email
 
@@ -305,10 +356,20 @@ class Model:
                   if properties['status'] == 'active']
         idle = [properties for properties in self.user_dict.values()
                 if properties['status'] == 'idle']
+        offline = [properties for properties in self.user_dict.values()
+                   if properties['status'] == 'offline']
+        inactive = [properties for properties in self.user_dict.values()
+                    if properties['status'] == 'inactive']
 
         # Construct user_list from sorted components of each list
         user_list = sorted(active, key=lambda u: u['full_name'])
         user_list += sorted(idle, key=lambda u: u['full_name'])
+        user_list += sorted(offline, key=lambda u: u['full_name'])
+        user_list += sorted(inactive, key=lambda u: u['full_name'])
+        # Add current user to the top of the list
+        user_list.insert(0, current_user)
+        self.user_dict[current_user['email']] = current_user
+        self.user_id_email_dict[self.user_id] = current_user['email']
 
         return user_list
 

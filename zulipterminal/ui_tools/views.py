@@ -403,22 +403,30 @@ class RightColumnView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
         self.search_lock.acquire()
-        users_display = self.users_btn_list.copy()
-        for user in self.users_btn_list:
+        users = self.view.users.copy()
+        users_display = users.copy()
+        for user in users:
             if not match_user(user, new_text):
                 users_display.remove(user)
-        self.body = UsersView(
-            urwid.SimpleFocusListWalker(users_display))
+        self.body = self.users_view(users_display)
         self.set_body(self.body)
         self.view.controller.update_screen()
         self.search_lock.release()
 
-    def users_view(self) -> Any:
-        self.users_btn_list = list()  # type: List[Any]
-        for user in self.view.users:
+    def users_view(self, users: Any=None) -> Any:
+        reset_default_view_users = False
+        if users is None:
+            users = self.view.users.copy()
+            reset_default_view_users = True
+        users_btn_list = list()  # type: List[Any]
+        for user in users:
+            # Only include `inactive` users in search result.
+            if user['status'] == 'inactive' and\
+                    not self.view.controller.editor_mode:
+                continue
             unread_count = self.view.model.unread_counts.get(user['user_id'],
                                                              0)
-            self.users_btn_list.append(
+            users_btn_list.append(
                 UserButton(
                     user,
                     controller=self.view.controller,
@@ -427,10 +435,13 @@ class RightColumnView(urwid.Frame):
                     count=unread_count
                 )
             )
-        self.user_w = UsersView(
-            urwid.SimpleFocusListWalker(self.users_btn_list))
-        self.view.user_w = self.user_w
-        return self.user_w
+        user_w = UsersView(
+            urwid.SimpleFocusListWalker(users_btn_list))
+        # Donot reset them while searching.
+        if reset_default_view_users:
+            self.users_btn_list = users_btn_list
+            self.view.user_w = user_w
+        return user_w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEARCH_PEOPLE', key):

@@ -64,6 +64,7 @@ class TestModel:
     def test_register_initial_desired_events(self, mocker, initial_data):
         mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_all_users')
         self.client.register.return_value = initial_data
 
         model = Model(self.controller)
@@ -399,8 +400,10 @@ class TestModel:
         with pytest.raises(Exception):
             model._update_initial_data()
 
-    def test_get_all_users(self, mocker, initial_data, user_list, user_dict):
-        mocker.patch('zulipterminal.model.Model._update_user_id')
+    def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
+                           user_id):
+        mocker.patch('zulipterminal.model.Model._update_user_id',
+                     return_value=user_id)
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'

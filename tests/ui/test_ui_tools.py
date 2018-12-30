@@ -664,21 +664,21 @@ class TestRightColumnView:
 
     def test_update_user_list_user_match(self, right_col_view, mocker):
         right_col_view.view.controller.editor_mode = True
-        right_col_view.users_btn_list = ["USER1", "USER2"]
+        self.view.users = ["USER1", "USER2"]
         mocker.patch(VIEWS + ".match_user", return_value=True)
         mocker.patch(VIEWS + ".UsersView")
         list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
 
-        right_col_view.update_user_list("SEARCH_BOX", "F")
+        right_col_view.update_user_list("SEARCH_BOX", "U")
 
         right_col_view.search_lock.acquire.assert_called_once_with()
-        list_w.assert_called_once_with(["USER1", "USER2"])
+        right_col_view.users_view.assert_called_with(["USER1", "USER2"])
         set_body.assert_called_once_with(right_col_view.body)
 
     def test_update_user_list_no_user_match(self, right_col_view, mocker):
         right_col_view.view.controller.editor_mode = True
-        right_col_view.users_btn_list = ["USER1", "USER2"]
+        self.view.users = ["USER1", "USER2"]
         mocker.patch(VIEWS + ".match_user", return_value=False)
         mocker.patch(VIEWS + ".UsersView")
         list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
@@ -687,14 +687,24 @@ class TestRightColumnView:
         right_col_view.update_user_list("SEARCH_BOX", "F")
 
         right_col_view.search_lock.acquire.assert_called_once_with()
-        list_w.assert_called_once_with([])
+        right_col_view.users_view.assert_called_with([])
         set_body.assert_called_once_with(right_col_view.body)
 
-    def test_users_view(self, mocker):
+    @pytest.mark.parametrize('users, users_btn_len, editor_mode, status', [
+        (None, 1, False, 'active'),
+        ([{
+            'user_id': 2,
+            'status': 'inactive',
+        }], 1, True, 'active'),
+        (None, 0, False, 'inactive'),
+    ])
+    def test_users_view(self, users, users_btn_len, editor_mode, status,
+                        mocker):
         self.view.users = [{
             'user_id': 1,
-            'status': 'active'
+            'status': status
         }]
+        self.view.controller.editor_mode = editor_mode
         self.view.model.unread_counts.get.return_value = 1
         user_btn = mocker.patch(VIEWS + ".UserButton")
         mocker.patch(VIEWS + ".UsersView")
@@ -702,16 +712,18 @@ class TestRightColumnView:
 
         right_col_view = RightColumnView(self.view)
 
-        right_col_view.view.model.unread_counts.get.assert_called_once_with(1,
-                                                                            0)
-        user_btn.assert_called_once_with(
-            self.view.users[0],
-            controller=self.view.controller,
-            view=self.view,
-            color=self.view.users[0]['status'],
-            count=1
-        )
+        if status != 'inactive':
+            unread_counts = right_col_view.view.model.unread_counts
+            unread_counts.get.assert_called_once_with(1, 0)
+            user_btn.assert_called_once_with(
+                self.view.users[0],
+                controller=self.view.controller,
+                view=self.view,
+                color=self.view.users[0]['status'],
+                count=1
+            )
         list_w.assert_called_once_with(right_col_view.users_btn_list)
+        assert len(right_col_view.users_btn_list) == users_btn_len
 
     def test_keypress_w(self, right_col_view, mocker):
         key = 'w'

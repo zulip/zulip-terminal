@@ -607,37 +607,37 @@ def user_dict():
         'nyan.salmon+sns@gmail.com': {
             'full_name': 'Jari Winberg',
             'email': 'nyan.salmon+sns@gmail.com',
-            'status': 'idle',
+            'status': 'offline',
             'user_id': 6086
         },
         'cloudserver2@hotmail.de': {
             'full_name': 'Test Account',
             'email': 'cloudserver2@hotmail.de',
-            'status': 'idle',
+            'status': 'inactive',
             'user_id': 6085
         },
         'emailgateway@zulip.com': {
             'email': 'emailgateway@zulip.com',
             'full_name': 'Email Gateway',
-            'status': 'idle',
+            'status': 'inactive',
             'user_id': 6
         },
         'feedback@zulip.com': {
             'email': 'feedback@zulip.com',
             'full_name': 'Zulip Feedback Bot',
-            'status': 'idle',
+            'status': 'inactive',
             'user_id': 1
         },
         'notification-bot@zulip.com': {
             'email': 'notification-bot@zulip.com',
             'full_name': 'Notification Bot',
-            'status': 'idle',
+            'status': 'inactive',
             'user_id': 5
         },
         'welcome-bot@zulip.com': {
             'email': 'welcome-bot@zulip.com',
             'full_name': 'Welcome Bot',
-            'status': 'idle',
+            'status': 'inactive',
             'user_id': 4
         },
     }
@@ -656,34 +656,34 @@ def user_list():
         'status': 'active',
         'user_id': 5827
     }, {
-        'email': 'emailgateway@zulip.com',
-        'full_name': 'Email Gateway',
-        'status': 'idle',
-        'user_id': 6
-    }, {
         'full_name': 'Jari Winberg',
         'email': 'nyan.salmon+sns@gmail.com',
-        'status': 'idle',
+        'status': 'offline',
         'user_id': 6086
+    }, {
+        'email': 'emailgateway@zulip.com',
+        'full_name': 'Email Gateway',
+        'status': 'inactive',
+        'user_id': 6
     }, {
         'email': 'notification-bot@zulip.com',
         'full_name': 'Notification Bot',
-        'status': 'idle',
+        'status': 'inactive',
         'user_id': 5
     }, {
         'full_name': 'Test Account',
         'email': 'cloudserver2@hotmail.de',
-        'status': 'idle',
+        'status': 'inactive',
         'user_id': 6085
     }, {
         'email': 'welcome-bot@zulip.com',
         'full_name': 'Welcome Bot',
-        'status': 'idle',
+        'status': 'inactive',
         'user_id': 4
     }, {
         'email': 'feedback@zulip.com',
         'full_name': 'Zulip Feedback Bot',
-        'status': 'idle',
+        'status': 'inactive',
         'user_id': 1
     }]
 
@@ -699,3 +699,13 @@ def streams():
         ['GSoC', 14, '#c2c2c2', False],
         ['Secret stream', 99, '#c3c3c3', True],
     ]
+
+
+@pytest.fixture(scope="module")
+def user_id():
+    """
+    Default User id of the current
+    user, i.e., Tomás Farías
+    according to current Fixtures.
+    """
+    return 5827

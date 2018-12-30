@@ -26,6 +26,8 @@ class Controller:
                  autohide: bool) -> None:
         self.theme = theme
         self.autohide = autohide
+        self.editor_mode = False  # type: bool
+        self.editor = None  # type: Any
 
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
@@ -35,8 +37,6 @@ class Controller:
         self.view = View(self)
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
-        self.editor_mode = False  # type: bool
-        self.editor = None  # type: Any
 
     @asynch
     def show_loading(self) -> None:
