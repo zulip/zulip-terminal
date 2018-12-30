@@ -203,7 +203,7 @@ class Model:
             'num_after': num_after,
             'apply_markdown': True,
             'use_first_unread_anchor': first_anchor,
-            'client_gravatar': False,
+            'client_gravatar': True,
             'narrow': json.dumps(self.narrow),
         }
         response = self.client.do_api_query(request, '/json/messages',
@@ -457,6 +457,7 @@ class Model:
         ]
         try:
             response = self.client.register(event_types=event_types,
+                                            client_gravatar=True,
                                             apply_markdown=True)
         except zulip.ZulipError as e:
             raise ServerConnectionFailure(e)
