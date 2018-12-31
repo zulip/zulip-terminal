@@ -16,6 +16,7 @@ from zulipterminal.helper import (
     index_messages,
     set_count,
     initial_index,
+    Message,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -24,6 +25,26 @@ GetMessagesArgs = TypedDict('GetMessagesArgs', {
      'num_after': int,
      'anchor': Optional[int]
     })
+
+Event = TypedDict('Event', {
+    'type': str,
+    # reaction:
+    'op': str,
+    'user': Dict[str, Any],  # 'email', 'user_id', 'full_name'
+    'reaction_type': str,
+    'emoji_code': str,
+    'emoji_name': str,
+    # reaction & update_message:
+    'message_id': int,
+    # update_message:
+    'content': str,
+    # update_message_flags:
+    'messages': List[int],
+    'operation': str,
+    'flag': str,
+    # message:
+    'message': Message,
+}, total=False)  # Each Event will only have a subset of these
 
 OFFLINE_THRESHOLD_SECS = 140
 
@@ -81,7 +102,7 @@ class Model:
             'reaction': self.update_reaction,
             'typing': self.handle_typing_event,
             'update_message_flags': self.update_star_status,
-        }  # type: Dict[str, Callable[..., None]]
+        }  # type: Dict[str, Callable[[Event], None]]
 
     def _update_user_id(self) -> Optional[int]:
         profile_json = self.client.get_profile()
@@ -403,11 +424,11 @@ class Model:
                    key=lambda s: s[0].lower())
         )
 
-    def handle_typing_event(self, event: Dict[str, Any]) -> None:
+    def handle_typing_event(self, event: Event) -> None:
         if hasattr(self.controller, 'view'):
             self.controller.view.handle_typing_event(event)
 
-    def append_message(self, event: Dict[str, Any]) -> None:
+    def append_message(self, event: Event) -> None:
         """
         Adds message to the end of the view.
         """
@@ -450,7 +471,7 @@ class Model:
             set_count([response['id']], self.controller, 1)
             self.controller.update_screen()
 
-    def update_message(self, response: Dict[str, Any]) -> None:
+    def update_message(self, response: Event) -> None:
         """
         Updates previously rendered message.
         """
@@ -467,7 +488,7 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
-    def update_reaction(self, response: Dict[str, Any]) -> None:
+    def update_reaction(self, response: Event) -> None:
         message_id = response['message_id']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
@@ -493,7 +514,7 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
-    def update_star_status(self, event: Dict[str, Any]) -> None:
+    def update_star_status(self, event: Event) -> None:
         # TODO: Should also support 'read' flag changes?
         # In that case, should rename this function and adapt
         if event['flag'] != 'starred':
