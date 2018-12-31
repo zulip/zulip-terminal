@@ -754,23 +754,23 @@ class TestLeftColumnView:
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
 
-    def test_menu_view(self, mocker):
+    def test_menu_view(self, mocker, width=40):
         self.streams_view = mocker.patch(
             VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
-        left_col_view = LeftColumnView(self.view)
+        left_col_view = LeftColumnView(width, self.view)
         home_button.assert_called_once_with(left_col_view.controller,
-                                            count=2)
+                                            count=2, width=width)
         pm_button.assert_called_once_with(left_col_view.controller,
-                                          count=0)
+                                          count=0, width=width)
 
     @pytest.mark.parametrize('pinned', [
         set(), {86}, {14}, {99}, {14, 99}, {99, 86}, {14, 86}, {14, 99, 86}
     ])
-    def test_streams_view(self, mocker, streams, pinned):
+    def test_streams_view(self, mocker, streams, pinned, width=40):
         self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
         self.view.pinned_streams = [s for s in streams if s[1] in pinned]
         stream_button = mocker.patch(VIEWS + '.StreamButton')
@@ -778,7 +778,7 @@ class TestLeftColumnView:
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
         divider = mocker.patch(VIEWS + '.urwid.Divider')
 
-        left_col_view = LeftColumnView(self.view)
+        left_col_view = LeftColumnView(width, self.view)
 
         if pinned:
             divider.assert_called_once_with('-')
@@ -788,6 +788,7 @@ class TestLeftColumnView:
         stream_button.assert_has_calls(
             [mocker.call(stream,
                          controller=self.view.controller,
+                         width=width,
                          view=self.view,
                          count=1)
              for stream in (self.view.pinned_streams +

@@ -454,10 +454,12 @@ class LeftColumnView(urwid.Pile):
     Displays the buttons at the left column of the app.
     """
 
-    def __init__(self, view: Any) -> None:
+    def __init__(self, width: int, view: Any) -> None:
         self.model = view.model
         self.view = view
         self.controller = view.controller
+        self.width = width
+
         left_column_structure = [
             (4, self.menu_view()),
             self.streams_view(),
@@ -466,13 +468,18 @@ class LeftColumnView(urwid.Pile):
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
-        self.view.home_button = HomeButton(self.controller, count=count)
+        self.view.home_button = HomeButton(self.controller,
+                                           count=count,
+                                           width=self.width)
 
         count = self.model.unread_counts.get('all_pms', 0)
-        self.view.pm_button = PMButton(self.controller, count=count)
+        self.view.pm_button = PMButton(self.controller,
+                                       count=count,
+                                       width=self.width)
 
         # Starred messages are by definition read already
-        self.view.starred_button = StarredButton(self.controller)
+        self.view.starred_button = StarredButton(self.controller,
+                                                 width=self.width)
 
         menu_btn_list = [
             self.view.home_button,
@@ -488,6 +495,7 @@ class LeftColumnView(urwid.Pile):
                     stream,
                     controller=self.controller,
                     view=self.view,
+                    width=self.width,
                     count=self.model.unread_counts.get(stream[1], 0)
                 ) for stream in self.view.pinned_streams]
 
@@ -505,6 +513,7 @@ class LeftColumnView(urwid.Pile):
                     stream,
                     controller=self.controller,
                     view=self.view,
+                    width=self.width,
                     count=self.model.unread_counts.get(stream[1], 0)
                 ) for stream in self.view.unpinned_streams]
 
