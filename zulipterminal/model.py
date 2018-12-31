@@ -448,15 +448,8 @@ class Model:
                 self.controller.update_screen()
 
     def _register_desired_events(self) -> None:
-        event_types = [
-            'message',
-            'update_message',
-            'reaction',
-            'typing',
-            'update_message_flags',
-        ]
         try:
-            response = self.client.register(event_types=event_types,
+            response = self.client.register(event_types=Model.event_types,
                                             client_gravatar=True,
                                             apply_markdown=True)
         except zulip.ZulipError as e:
