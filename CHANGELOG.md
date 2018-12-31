@@ -4,6 +4,7 @@
 
 ### Visual improvements
 - Right-align unread-counts in left panel (as in webapp)
+- Move intrusive flashing cursor in left panel to far left side
 
 ## 0.3.1
 
