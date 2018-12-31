@@ -2,7 +2,9 @@ import json
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor, wait, Future
 import time
-from typing import Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple
+from typing import (
+        Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple, Callable
+)
 from mypy_extensions import TypedDict
 
 import urwid
@@ -72,6 +74,14 @@ class Model:
         self.unread_counts = classify_unread_counts(self)
         self.new_user_input = True
         self.update_presence()
+
+        self.event_actions = {
+            'message': self.append_message,
+            'update_message': self.update_message,
+            'reaction': self.update_reaction,
+            'typing': self.handle_typing_event,
+            'update_message_flags': self.update_star_status,
+        }  # type: Dict[str, Callable[..., None]]
 
     def _update_user_id(self) -> Optional[int]:
         profile_json = self.client.get_profile()
@@ -562,15 +572,9 @@ class Model:
                     queue_id = None
                 time.sleep(1)
                 continue
+
             for event in response['events']:
                 last_event_id = max(last_event_id, int(event['id']))
-                if event['type'] == 'message':
-                    self.append_message(event)
-                elif event['type'] == 'update_message':
-                    self.update_message(event)
-                elif event['type'] == 'reaction':
-                    self.update_reaction(event)
-                elif event['type'] == 'typing':
-                    self.handle_typing_event(event)
-                elif event['type'] == 'update_message_flags':
-                    self.update_star_status(event)
+                for event_type, do_action_for in self.event_actions.items():
+                    if event_type == event['type']:
+                        do_action_for(event)
