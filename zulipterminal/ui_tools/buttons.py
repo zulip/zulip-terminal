@@ -16,9 +16,11 @@ class MenuButton(urwid.Button):
 
 class TopButton(urwid.Button):
     def __init__(self, controller: Any, caption: str,
-                 show_function: Callable[..., Any], count: int=0) -> None:
+                 show_function: Callable[..., Any], width: int,
+                 count: int=0) -> None:
         self.caption = caption
         self.count = count
+        self.width = width
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -29,9 +31,10 @@ class TopButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
+        spaces = self.width - (3 + len(self.caption) + len(str(count)) + 1)
+        count_str = '' if count <= 0 else str(count)
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' \N{BULLET} ', self.caption,
-             ('idle', '' if count <= 0 else ' ' + str(count))],
+            [u' \N{BULLET} ', self.caption, spaces*' ', ('idle',  count_str)],
             len(self.caption) + 4),
             None,
             'selected')
@@ -44,27 +47,31 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, controller: Any, count: int=0) -> None:
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
         super().__init__(controller, 'All messages',
-                         controller.show_all_messages, count=count)
+                         controller.show_all_messages, count=count,
+                         width=width)
 
 
 class PMButton(TopButton):
-    def __init__(self, controller: Any, count: int=0) -> None:
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
         super().__init__(controller, 'Private messages',
-                         controller.show_all_pm, count=count)
+                         controller.show_all_pm, count=count,
+                         width=width)
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any) -> None:
+    def __init__(self, controller: Any, width: int) -> None:
         super().__init__(controller, 'Starred messages',
                          controller.show_all_starred,
+                         width=width,
                          count=0)  # Starred messages are already marked read
 
 
 class StreamButton(urwid.Button):
     def __init__(self, properties: List[Any],
-                 controller: Any, view: Any, count: int=0) -> None:
+                 controller: Any, view: Any, width: int,
+                 count: int=0) -> None:
         self.caption = properties[0]
         self.stream_id = properties[1]
         color = properties[2]
@@ -74,6 +81,7 @@ class StreamButton(urwid.Button):
                              self.color))
         self.is_private = properties[3]
         self.count = count
+        self.width = width
         super(StreamButton, self).__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -86,13 +94,14 @@ class StreamButton(urwid.Button):
     def widget(self, count: int) -> Any:
         stream_prefix = 'P' if self.is_private else '#'
         if count < 0:
-            count_text = ' M'  # Muted
+            count_text = 'M'  # Muted
         elif count == 0:
             count_text = ''
         else:
-            count_text = ' ' + str(count)
+            count_text = str(count)
+        spaces = self.width - 3 - len(self.caption) - len(str(count_text)) - 1
         return urwid.AttrMap(urwid.SelectableIcon(
-            [' ', (self.color, stream_prefix), ' ', self.caption,
+            [' ', (self.color, stream_prefix), ' ', self.caption, spaces*' ',
              ('idle', count_text)],
             len(self.caption) + 2),
             None,
