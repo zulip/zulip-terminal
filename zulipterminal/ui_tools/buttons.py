@@ -35,7 +35,7 @@ class TopButton(urwid.Button):
         count_str = '' if count <= 0 else str(count)
         return urwid.AttrMap(urwid.SelectableIcon(
             [u' \N{BULLET} ', self.caption, spaces*' ', ('idle',  count_str)],
-            len(self.caption) + 4),
+            0),  # cursor location
             None,
             'selected')
 
@@ -103,7 +103,7 @@ class StreamButton(urwid.Button):
         return urwid.AttrMap(urwid.SelectableIcon(
             [' ', (self.color, stream_prefix), ' ', self.caption, spaces*' ',
              ('idle', count_text)],
-            len(self.caption) + 2),
+            0),  # cursor position
             None,
             'selected')
 
