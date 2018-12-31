@@ -22,6 +22,8 @@ class View(urwid.WidgetWrap):
     A class responsible for providing the application's interface.
     """
 
+    LEFT_WIDTH = 25
+
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.palette = controller.theme
@@ -35,7 +37,7 @@ class View(urwid.WidgetWrap):
         super(View, self).__init__(self.main_window())
 
     def left_column_view(self) -> Any:
-        self.left_col_w = LeftColumnView(self)
+        self.left_col_w = LeftColumnView(View.LEFT_WIDTH, self)
         return self.left_col_w
 
     def message_view(self) -> Any:
@@ -91,13 +93,13 @@ class View(urwid.WidgetWrap):
         self.right_column = self.right_column_view()
         if self.controller.autohide:
             body = [
-                (25, self.left_column),
+                (View.LEFT_WIDTH, self.left_column),
                 ('weight', 10, self.center_column),
                 (0, self.right_column),
             ]
         else:
             body = [
-                (25, self.left_column),
+                (View.LEFT_WIDTH, self.left_column),
                 ('weight', 10, self.center_column),
                 (25, self.right_column),
             ]

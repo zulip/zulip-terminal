@@ -1,5 +1,10 @@
 # Zulip-terminal Changelog
 
+## Next Release
+
+### Visual improvements
+- Right-align unread-counts in left panel (as in webapp)
+
 ## 0.3.1
 
 ### Interactivity improvements
