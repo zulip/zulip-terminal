@@ -440,8 +440,9 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.msg_list.log = []
+        event = {'message': {'id': 0}}
 
-        model.append_message({'id': 0})
+        model.append_message(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
         (create_msg_box_list.
@@ -456,8 +457,9 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.msg_list.log = [mocker.Mock()]
+        event = {'message': {'id': 0}}
 
-        model.append_message({'id': 0})
+        model.append_message(event)
 
         assert len(model.msg_list.log) == 2  # Added "msg_w" element
         # NOTE: So we expect the first element *was* the last_message parameter
@@ -497,13 +499,15 @@ class TestModel:
         model.recipients = recipients
         model.user_id = user_profile['user_id']
         model.user_dict = user_dict
+        event = {'message': response}
 
-        model.append_message(response)
+        model.append_message(event)
 
         assert model.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
+
         model.update = False
-        model.append_message(response)
+        model.append_message(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
@@ -661,7 +665,7 @@ class TestModel:
 
     def test_update_star_status_no_index(self, mocker, model):
         model.index = dict(messages={1: {}})  # Not indexed
-        event = dict(messages=[1])
+        event = dict(messages=[1], flag='starred')
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
         model.update_star_status(event)
