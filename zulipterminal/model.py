@@ -393,10 +393,15 @@ class Model:
                    key=lambda s: s[0].lower())
         )
 
-    def append_message(self, response: Dict[str, Any]) -> None:
+    def handle_typing_event(self, event: Dict[str, Any]) -> None:
+        if hasattr(self.controller, 'view'):
+            self.controller.view.handle_typing_event(event)
+
+    def append_message(self, event: Dict[str, Any]) -> None:
         """
         Adds message to the end of the view.
         """
+        response = event['message']
         response['flags'] = []
         if hasattr(self.controller, 'view') and self.update:
             self.index = index_messages([response], self, self.index)
@@ -439,6 +444,10 @@ class Model:
         """
         Updates previously rendered message.
         """
+        # FIXME: Support Topic Editing
+        if 'subject' in response.keys():
+            return
+
         message_id = response['message_id']
         content = response['content']
         # If the message is indexed
@@ -475,6 +484,11 @@ class Model:
             self.update_rendered_view(message_id)
 
     def update_star_status(self, event: Dict[str, Any]) -> None:
+        # TODO: Should also support 'read' flag changes?
+        # In that case, should rename this function and adapt
+        if event['flag'] != 'starred':
+            return
+
         assert len(event['messages']) == 1  # FIXME: Can be multiple?
         message_id = event['messages'][0]
 
@@ -551,19 +565,12 @@ class Model:
             for event in response['events']:
                 last_event_id = max(last_event_id, int(event['id']))
                 if event['type'] == 'message':
-                    self.append_message(event['message'])
+                    self.append_message(event)
                 elif event['type'] == 'update_message':
-                    # FIXME: Support Topic Editing
-                    if 'subject' in event.keys():
-                        continue
-                    else:
-                        self.update_message(event)
+                    self.update_message(event)
                 elif event['type'] == 'reaction':
                     self.update_reaction(event)
                 elif event['type'] == 'typing':
-                    if hasattr(self.controller, 'view'):
-                        self.controller.view.handle_typing_event(event)
+                    self.handle_typing_event(event)
                 elif event['type'] == 'update_message_flags':
-                    # TODO: Should also support 'read' flag changes?
-                    if event['flag'] == 'starred':
-                        self.update_star_status(event)
+                    self.update_star_status(event)
