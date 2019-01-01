@@ -712,3 +712,81 @@ class TestModel:
 
         assert model.index['messages'][1]['flags'] == flags_after
         model.update_rendered_view.assert_called_once_with(1)
+
+    @pytest.mark.parametrize('narrow, event, called', [
+        # Not in PM Narrow
+        ([], {}, False),
+        # Not in PM Narrow with sender
+        (
+            [['pm_with', 'iago@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'start',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            False,
+        ),
+        # In PM narrow with the sender, OP - 'start'
+        (
+            [['pm_with', 'hamlet@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'start',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            True,
+        ),
+        # OP - 'stop'
+        (
+            [['pm_with', 'hamlet@zulip.com']],
+            {
+                'type': 'typing',
+                'op': 'stop',
+                'sender': {
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                },
+                'recipients': [{
+                    'user_id': 4,
+                    'email': 'hamlet@zulip.com'
+                }, {
+                    'user_id': 5,
+                    'email': 'iago@zulip.com'
+                }],
+                'id': 0
+            },
+            True,
+        )
+    ], ids=['not_in_pm_narrow', 'not_in_pm_narrow_with_sender',
+            'start', 'stop'])
+    def test_handle_typing_event(self, mocker, model,
+                                 narrow, event, called):
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
+        model.narrow = narrow
+        model.user_dict = {'hamlet@zulip.com': {'full_name': 'hamlet'}}
+
+        model.handle_typing_event(event)
+
+        assert model.controller.view.set_footer_text.called == called
