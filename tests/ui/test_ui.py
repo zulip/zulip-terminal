@@ -51,6 +51,21 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == line_box()
 
+    def test_set_footer_text_default(self, view, mocker):
+        mocker.patch('zulipterminal.ui.View.get_random_help',
+                     return_value=['some help text'])
+
+        view.set_footer_text()
+
+        view._w.footer.set_text.assert_called_once_with(['some help text'])
+        view.controller.update_screen.assert_called_once_with()
+
+    def test_set_footer_text_specific_text(self, view, text='blah'):
+        view.set_footer_text([text])
+
+        view._w.footer.set_text.assert_called_once_with([text])
+        view.controller.update_screen.assert_called_once_with()
+
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
         assert isinstance(footer.text, str)
@@ -121,14 +136,15 @@ class TestView:
             },
             True,
         )
-    ])
+    ], ids=['not_in_pm_narrow', 'not_in_pm_narrow_with_sender',
+            'start', 'stop'])
     def test_handle_typing_event(self, mocker, view, narrow, event, called):
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
         self.model.narrow = narrow
 
         view.handle_typing_event(event)
 
-        assert view._w.footer.set_text.called == called
-        assert view.controller.update_screen.called == called
+        assert view.set_footer_text.called == called
 
     def test_main_window(self, mocker):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')

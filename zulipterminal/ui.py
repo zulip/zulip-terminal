@@ -1,7 +1,7 @@
 import platform
 import re
 from urllib.parse import urlparse
-from typing import Any, Tuple, List, Dict
+from typing import Any, Tuple, List, Dict, Optional
 import random
 
 import urwid
@@ -66,6 +66,14 @@ class View(urwid.WidgetWrap):
             ' ' + hotkey[1]['help_text'],  # type: ignore
         ]
 
+    def set_footer_text(self, text_list: Optional[List[Any]]=None) -> None:
+        if text_list is None:
+            text = self.get_random_help()
+        else:
+            text = text_list
+        self._w.footer.set_text(text)
+        self.controller.update_screen()
+
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), 'footer')
@@ -77,15 +85,13 @@ class View(urwid.WidgetWrap):
                 event['sender']['email'] in self.model.narrow[0][1].split(','):
             if event['op'] == 'start':
                 user = self.model.user_dict[event['sender']['email']]
-                self._w.footer.set_text([
+                self.set_footer_text([
                     ' ',
                     ('code', user['full_name']),
                     ' is typing...'
                 ])
-                self.controller.update_screen()
             elif event['op'] == 'stop':
-                self._w.footer.set_text(self.get_random_help())
-                self.controller.update_screen()
+                self.set_footer_text()
 
     def main_window(self) -> Any:
         self.left_column = self.left_column_view()
