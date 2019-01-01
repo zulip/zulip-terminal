@@ -28,8 +28,11 @@ GetMessagesArgs = TypedDict('GetMessagesArgs', {
 
 Event = TypedDict('Event', {
     'type': str,
-    # reaction:
+    # typing:
+    'sender': Dict[str, Any],  # 'email', ...
+    # typing & reaction:
     'op': str,
+    # reaction:
     'user': Dict[str, Any],  # 'email', 'user_id', 'full_name'
     'reaction_type': str,
     'emoji_code': str,
@@ -426,7 +429,20 @@ class Model:
 
     def handle_typing_event(self, event: Event) -> None:
         if hasattr(self.controller, 'view'):
-            self.controller.view.handle_typing_event(event)
+            # If the user is in pm narrow with the person typing
+            if len(self.narrow) == 1 and self.narrow[0][0] == 'pm_with' and\
+                    event['sender']['email'] in self.narrow[0][1].split(','):
+                if event['op'] == 'start':
+                    user = self.user_dict[event['sender']['email']]
+                    self.controller.view.set_footer_text([
+                        ' ',
+                        ('code', user['full_name']),
+                        ' is typing...'
+                    ])
+                elif event['op'] == 'stop':
+                    self.controller.view.set_footer_text()
+                else:
+                    raise RuntimeError("Unknown typing event operation")
 
     def append_message(self, event: Event) -> None:
         """
