@@ -30,6 +30,7 @@
 - Add `gruvbox` theme
 - Internal help (<kbd>?</kbd>) more compact & reordered
 - Random shortcut keys are shown at the bottom of the screen
+- Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 
 ### Important bugfixes
 - Allow narrowing to cross-realm bots
