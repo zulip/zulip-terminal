@@ -23,6 +23,7 @@ class View(urwid.WidgetWrap):
     """
 
     LEFT_WIDTH = 25
+    RIGHT_WIDTH = 25
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
@@ -47,7 +48,7 @@ class View(urwid.WidgetWrap):
         return w
 
     def right_column_view(self) -> Any:
-        self.users_view = RightColumnView(self)
+        self.users_view = RightColumnView(View.RIGHT_WIDTH, self)
         w = urwid.LineBox(
             self.users_view, title=u"Users",
             tlcorner=u'─', tline=u'─', lline=u'',
@@ -92,7 +93,7 @@ class View(urwid.WidgetWrap):
             body = [
                 (View.LEFT_WIDTH, self.left_column),
                 ('weight', 10, self.center_column),
-                (25, self.right_column),
+                (View.RIGHT_WIDTH, self.right_column),
             ]
         self.body = urwid.Columns(body, focus_column=0)
 
