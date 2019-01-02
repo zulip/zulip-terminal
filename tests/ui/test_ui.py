@@ -130,9 +130,9 @@ class TestView:
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = ['streams', 'messages', mocker.Mock()]
-        view.left_column = mocker.Mock()
-        view.right_column = mocker.Mock()
         view.user_search = mocker.Mock()
+        view.left_panel = mocker.Mock()
+        view.right_panel = mocker.Mock()
         size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
@@ -152,8 +152,8 @@ class TestView:
         view.stream_w.search_box = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), 'messages', 'users']
-        view.left_column = mocker.Mock()
-        view.right_column = mocker.Mock()
+        view.left_panel = mocker.Mock()
+        view.right_panel = mocker.Mock()
         size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
@@ -161,7 +161,7 @@ class TestView:
 
         # Test "q" keypress
         view.keypress(size, "q")
-        view.left_col_w.keypress.assert_called_once_with(size, "q")
+        view.left_panel.keypress.assert_called_once_with(size, "q")
         assert view.body.focus_col == 0
         view.stream_w.search_box.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
