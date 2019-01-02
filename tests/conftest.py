@@ -42,7 +42,7 @@ def stream_button(mocker):
 
 
 @pytest.fixture
-def user_button(mocker):
+def user_button(mocker, width=38):
     """
     Mocked User Button.
     """
@@ -52,6 +52,7 @@ def user_button(mocker):
             'full_name': 'Boo Boo',
             'email': 'boo@zulip.com',
         },
+        width=width,
         controller=mocker.patch('zulipterminal.core.Controller'),
         view=mocker.patch('zulipterminal.ui.View')
     )

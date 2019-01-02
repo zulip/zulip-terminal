@@ -642,9 +642,9 @@ class TestRightColumnView:
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
 
     @pytest.fixture
-    def right_col_view(self, mocker):
+    def right_col_view(self, mocker, width=50):
         mocker.patch(VIEWS + ".RightColumnView.users_view")
-        return RightColumnView(self.view)
+        return RightColumnView(width, self.view)
 
     def test_init(self, right_col_view):
         assert right_col_view.view == self.view
@@ -699,7 +699,7 @@ class TestRightColumnView:
         (None, 0, False, 'inactive'),
     ])
     def test_users_view(self, users, users_btn_len, editor_mode, status,
-                        mocker):
+                        mocker, width=40):
         self.view.users = [{
             'user_id': 1,
             'status': status
@@ -710,7 +710,7 @@ class TestRightColumnView:
         mocker.patch(VIEWS + ".UsersView")
         list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
 
-        right_col_view = RightColumnView(self.view)
+        right_col_view = RightColumnView(width, self.view)
 
         if status != 'inactive':
             unread_counts = right_col_view.view.model.unread_counts
@@ -719,6 +719,7 @@ class TestRightColumnView:
                 self.view.users[0],
                 controller=self.view.controller,
                 view=self.view,
+                width=width,
                 color=self.view.users[0]['status'],
                 count=1
             )
