@@ -116,7 +116,9 @@ class StreamButton(urwid.Button):
 
 class UserButton(urwid.Button):
     def __init__(self, user: Dict[str, Any], controller: Any,
-                 view: Any, color: Optional[str]=None, count: int=0) -> None:
+                 view: Any, width: int,
+                 color: Optional[str]=None, count: int=0) -> None:
+        self.width = width
         self.caption = user['full_name']  # str
         self.email = user['email']
         self.user_id = user['user_id']
@@ -134,10 +136,11 @@ class UserButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
+        spaces = self.width - (3 + len(self.caption) + len(str(count)) + 1)
+        count_str = '' if count <= 0 else str(count)
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u'\N{BULLET} ', self.caption,
-             ('idle', '' if count <= 0 else ' ' + str(count))],
-            len(self.caption) + 2),
+            [u' \N{BULLET} ', self.caption, spaces*' ', ('idle',  count_str)],
+            0),  # cursor location
             self.color,
             'selected')
 

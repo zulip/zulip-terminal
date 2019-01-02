@@ -381,7 +381,8 @@ class RightColumnView(urwid.Frame):
     Displays the users list on the right side of the app.
     """
 
-    def __init__(self, view: Any) -> None:
+    def __init__(self, width: int, view: Any) -> None:
+        self.width = width
         self.view = view
         self.user_search = UserSearchBox(self)
         urwid.connect_signal(self.user_search, 'change',
@@ -431,6 +432,7 @@ class RightColumnView(urwid.Frame):
                     user,
                     controller=self.view.controller,
                     view=self.view,
+                    width=self.width,
                     color=user['status'],
                     count=unread_count
                 )

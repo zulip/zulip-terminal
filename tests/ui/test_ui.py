@@ -47,7 +47,7 @@ class TestView:
         right_view = mocker.patch('zulipterminal.ui.RightColumnView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
         return_value = view.right_column_view()
-        right_view.assert_called_once_with(view)
+        right_view.assert_called_once_with(View.RIGHT_WIDTH, view)
         assert view.users_view == right_view()
         assert return_value == line_box()
 
