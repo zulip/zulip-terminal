@@ -112,6 +112,50 @@ class TestView:
         frame.assert_called_once_with(
             view.body, col(), focus_part='body', footer=footer_view())
 
+    @pytest.mark.parametrize('autohide', [True, False])
+    @pytest.mark.parametrize('visible, width', [
+        (True, 25),
+        (False, 0)
+    ])
+    def test_show_left_panel(self, mocker, view,
+                             visible, width, autohide):
+        view.left_panel = mocker.Mock()
+        view.body = mocker.Mock()
+        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.controller.autohide = autohide
+
+        view.show_left_panel(visible=visible)
+
+        if autohide:
+            (view.body.options.
+             assert_called_once_with(width_type='given', width_amount=width))
+            if visible:
+                assert view.body.focus_col == 0
+        else:
+            view.body.options.assert_not_called()
+
+    @pytest.mark.parametrize('autohide', [True, False])
+    @pytest.mark.parametrize('visible, width', [
+        (True, 25),
+        (False, 0)
+    ])
+    def test_show_right_panel(self, mocker, view,
+                              visible, width, autohide):
+        view.right_panel = mocker.Mock()
+        view.body = mocker.Mock()
+        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.controller.autohide = autohide
+
+        view.show_right_panel(visible=visible)
+
+        if autohide:
+            (view.body.options.
+             assert_called_once_with(width_type='given', width_amount=width))
+            if visible:
+                assert view.body.focus_col == 2
+        else:
+            view.body.options.assert_not_called()
+
     def test_keypress(self, view, mocker):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
