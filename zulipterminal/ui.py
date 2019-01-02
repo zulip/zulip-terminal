@@ -38,24 +38,21 @@ class View(urwid.WidgetWrap):
         super(View, self).__init__(self.main_window())
 
     def left_column_view(self) -> Any:
-        self.left_col_w = LeftColumnView(View.LEFT_WIDTH, self)
-        return self.left_col_w
+        return LeftColumnView(View.LEFT_WIDTH, self)
 
     def message_view(self) -> Any:
         self.middle_column = MiddleColumnView(self, self.model, self.write_box,
                                               self.search_box)
-        w = urwid.LineBox(self.middle_column, bline="")
-        return w
+        return urwid.LineBox(self.middle_column, bline="")
 
     def right_column_view(self) -> Any:
         self.users_view = RightColumnView(View.RIGHT_WIDTH, self)
-        w = urwid.LineBox(
+        return urwid.LineBox(
             self.users_view, title=u"Users",
             tlcorner=u'─', tline=u'─', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'', brcorner=u''
         )
-        return w
 
     def get_random_help(self) -> List[Any]:
         # Get a hotkey randomly from KEY_BINDINGS
@@ -80,20 +77,20 @@ class View(urwid.WidgetWrap):
         return urwid.AttrWrap(urwid.Text(text_header), 'footer')
 
     def main_window(self) -> Any:
-        self.left_column = self.left_column_view()
-        self.center_column = self.message_view()
-        self.right_column = self.right_column_view()
+        self.left_panel = self.left_column_view()
+        self.center_panel = self.message_view()
+        self.right_panel = self.right_column_view()
         if self.controller.autohide:
             body = [
-                (View.LEFT_WIDTH, self.left_column),
-                ('weight', 10, self.center_column),
-                (0, self.right_column),
+                (View.LEFT_WIDTH, self.left_panel),
+                ('weight', 10, self.center_panel),
+                (0, self.right_panel),
             ]
         else:
             body = [
-                (View.LEFT_WIDTH, self.left_column),
-                ('weight', 10, self.center_column),
-                (View.RIGHT_WIDTH, self.right_column),
+                (View.LEFT_WIDTH, self.left_panel),
+                ('weight', 10, self.center_panel),
+                (View.RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
 
@@ -120,7 +117,7 @@ class View(urwid.WidgetWrap):
             return
         width = 25 if visible else 0
         self.body.contents[0] = (
-            self.left_column,
+            self.left_panel,
             self.body.options(width_type='given', width_amount=width),
         )
         if visible:
@@ -131,7 +128,7 @@ class View(urwid.WidgetWrap):
             return
         width = 25 if visible else 0
         self.body.contents[2] = (
-            self.right_column,
+            self.right_panel,
             self.body.options(width_type='given', width_amount=width),
         )
         if visible:
@@ -160,7 +157,7 @@ class View(urwid.WidgetWrap):
             return key
         elif is_command_key('SEARCH_STREAMS', key):
             # jump stream search
-            self.left_col_w.keypress(size, 'q')
+            self.left_panel.keypress(size, 'q')
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
             self.stream_w.search_box.set_edit_text("")
