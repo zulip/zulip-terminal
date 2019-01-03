@@ -5,6 +5,7 @@
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
 - Move intrusive flashing cursor in left panel to far left side
+- Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 
 ## 0.3.1
 
@@ -30,7 +31,6 @@
 - Add `gruvbox` theme
 - Internal help (<kbd>?</kbd>) more compact & reordered
 - Random shortcut keys are shown at the bottom of the screen
-- Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 
 ### Important bugfixes
 - Allow narrowing to cross-realm bots
