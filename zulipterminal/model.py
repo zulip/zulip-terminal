@@ -68,6 +68,7 @@ class Model:
         'reaction',
         'typing',
         'update_message_flags',
+        # Don't need to ask for heartbeat messages; these are automatic
     ]
 
     def __init__(self, controller: Any) -> None:
@@ -112,7 +113,11 @@ class Model:
             'reaction': self.update_reaction,
             'typing': self.handle_typing_event,
             'update_message_flags': self.update_message_flag_status,
+            'heartbeat': self.respond_to_heartbeat,
         }  # type: Dict[str, Callable[[Event], None]]
+
+    def respond_to_heartbeat(self, event: Event) -> None:
+        self.controller.view.update_last_connection_time()
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
