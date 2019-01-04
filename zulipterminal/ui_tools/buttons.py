@@ -81,7 +81,7 @@ class StreamButton(urwid.Button):
                              self.color))
         self.is_private = properties[3]
         self.count = count
-        self.width = width
+        self.width_for_text_space_count = width - 4
         super(StreamButton, self).__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -93,15 +93,25 @@ class StreamButton(urwid.Button):
 
     def widget(self, count: int) -> Any:
         stream_prefix = 'P' if self.is_private else '#'
+
         if count < 0:
             count_text = 'M'  # Muted
         elif count == 0:
             count_text = ''
         else:
             count_text = str(count)
-        spaces = self.width - 3 - len(self.caption) - len(str(count_text)) - 1
+
+        # Shrink text, but always require at least one space
+        max_caption_length = (self.width_for_text_space_count -
+                              len(str(count_text)) - 1)
+        if len(self.caption) > max_caption_length:
+            caption = self.caption[:max_caption_length-2] + '..'
+        else:
+            caption = self.caption
+        num_spaces = max_caption_length - len(caption) + 1
+
         return urwid.AttrMap(urwid.SelectableIcon(
-            [' ', (self.color, stream_prefix), ' ', self.caption, spaces*' ',
+            [' ', (self.color, stream_prefix), ' ', caption, num_spaces*' ',
              ('idle', count_text)],
             0),  # cursor position
             None,
