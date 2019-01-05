@@ -1159,48 +1159,73 @@ class TestMessageBox:
 
 
 class TestTopButton:
+    @pytest.mark.parametrize('prefix', [
+        None, '\N{BULLET}', '-', ('blue', 'o'),
+    ])
     @pytest.mark.parametrize('width, count, short_text', [
         (8, 0, 'c..'),
         (9, 0, 'ca..'),
+        (9, -1, 'c..'),
         (9, 1, 'c..'),
         (10, 0, 'cap..'),
+        (10, -1, 'ca..'),
         (10, 1, 'ca..'),
         (11, 0, 'capt..'),
+        (11, -1, 'cap..'),
         (11, 1, 'cap..'),
         (11, 10, 'ca..'),
         (12, 0, 'caption'),
+        (12, -1, 'capt..'),
         (12, 1, 'capt..'),
         (12, 10, 'cap..'),
         (12, 100, 'ca..'),
         (13, 0, 'caption'),
+        (13, -1, 'caption'),
         (13, 10, 'capt..'),
         (13, 100, 'cap..'),
         (13, 1000, 'ca..'),
         (15, 0, 'caption'),
+        (15, -1, 'caption'),
         (15, 1, 'caption'),
         (15, 10, 'caption'),
         (15, 100, 'caption'),
         (15, 1000, 'capt..'),
         (25, 0, 'caption'),
+        (25, -1, 'caption'),
         (25, 1, 'caption'),
         (25, 19, 'caption'),
         (25, 199, 'caption'),
         (25, 1999, 'caption'),
     ])
     def test_text_content(self, mocker,
+                          prefix,
                           width, count, short_text, caption='caption'):
         show_function = mocker.Mock()
 
-        top_button = TopButton(controller=mocker.Mock(),
-                               caption=caption,
-                               show_function=show_function,
-                               width=width,
-                               count=count)
+        if isinstance(prefix, tuple):
+            prefix = prefix[1]  # just checking text, not color
+
+        if prefix is None:
+            top_button = TopButton(controller=mocker.Mock(),
+                                   caption=caption,
+                                   show_function=show_function,
+                                   width=width,
+                                   count=count)
+            prefix = '\N{BULLET}'
+        else:
+            top_button = TopButton(controller=mocker.Mock(),
+                                   caption=caption,
+                                   show_function=show_function,
+                                   prefix_character=prefix,
+                                   width=width,
+                                   count=count)
 
         text = top_button._w._original_widget.get_text()
         count_str = '' if count == 0 else str(count)
-        expected_text = ' \N{BULLET} {}{}{}'.format(
-                short_text,
+        if count < 0:
+            count_str = 'M'
+        expected_text = ' {} {}{}{}'.format(
+                prefix, short_text,
                 (width - 4 - len(short_text) - len(count_str))*' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)

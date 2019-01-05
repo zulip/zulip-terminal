@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, Callable, Optional
+from typing import Any, Dict, List, Tuple, Callable, Optional, Union
 
 import urwid
 
@@ -17,8 +17,10 @@ class MenuButton(urwid.Button):
 class TopButton(urwid.Button):
     def __init__(self, controller: Any, caption: str,
                  show_function: Callable[..., Any], width: int,
+                 prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  count: int=0) -> None:
         self.caption = caption
+        self.prefix_character = prefix_character
         self.count = count
         self.width_for_text_space_count = width - 4
         super().__init__("")
@@ -31,7 +33,12 @@ class TopButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        count_text = '' if count <= 0 else str(count)
+        if count < 0:
+            count_text = 'M'  # Muted
+        elif count == 0:
+            count_text = ''
+        else:
+            count_text = str(count)
 
         # Shrink text, but always require at least one space
         max_caption_length = (self.width_for_text_space_count -
@@ -43,7 +50,9 @@ class TopButton(urwid.Button):
         num_spaces = max_caption_length - len(caption) + 1
 
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' \N{BULLET} ', caption, num_spaces*' ', ('idle',  count_text)],
+            [' ', self.prefix_character,
+             ' {}{}'.format(caption, num_spaces*' '),
+             ('idle',  count_text)],
             0),  # cursor location
             None,
             'selected')
