@@ -86,60 +86,26 @@ class StarredButton(TopButton):
                          count=0)  # Starred messages are already marked read
 
 
-class StreamButton(urwid.Button):
+class StreamButton(TopButton):
     def __init__(self, properties: List[Any],
                  controller: Any, view: Any, width: int,
                  count: int=0) -> None:
-        self.caption = properties[0]
-        self.stream_id = properties[1]
-        color = properties[2]
-        self.color = color[:2] + color[3] + color[5]
-        view.palette.append((self.color, '', '', '', self.color, 'black'))
-        view.palette.append(('s' + self.color, '', '', '', 'black',
-                             self.color))
-        self.is_private = properties[3]
-        self.count = count
-        self.width_for_text_space_count = width - 4
-        super(StreamButton, self).__init__("")
-        self._w = self.widget(count)
-        self.controller = controller
-        urwid.connect_signal(self, 'click', controller.narrow_to_stream)
+        # FIXME Is having self.stream_id the best way to do this?
+        # (self.stream_id is used elsewhere)
+        caption, self.stream_id, orig_color, is_private = properties
 
-    def update_count(self, count: int) -> None:
-        self.count = count
-        self._w = self.widget(count)
+        # Simplify the color from the original version & add to palette
+        # TODO Should this occur elsewhere and more intelligently?
+        color = ''.join(orig_color[i] for i in (0, 1, 3, 5))  # 0 -> '#'
+        view.palette.append((color, '', '', '', color, 'black'))
+        view.palette.append(('s' + color, '', '', '', 'black', color))
 
-    def widget(self, count: int) -> Any:
-        stream_prefix = 'P' if self.is_private else '#'
-
-        if count < 0:
-            count_text = 'M'  # Muted
-        elif count == 0:
-            count_text = ''
-        else:
-            count_text = str(count)
-
-        # Shrink text, but always require at least one space
-        max_caption_length = (self.width_for_text_space_count -
-                              len(str(count_text)) - 1)
-        if len(self.caption) > max_caption_length:
-            caption = self.caption[:max_caption_length-2] + '..'
-        else:
-            caption = self.caption
-        num_spaces = max_caption_length - len(caption) + 1
-
-        return urwid.AttrMap(urwid.SelectableIcon(
-            [' ', (self.color, stream_prefix), ' ', caption, num_spaces*' ',
-             ('idle', count_text)],
-            0),  # cursor position
-            None,
-            'selected')
-
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('ENTER', key):
-            self.controller.view.show_left_panel(visible=False)
-            self.controller.view.body.focus_col = 1
-        return super(StreamButton, self).keypress(size, key)
+        super().__init__(controller,
+                         caption=caption,
+                         show_function=controller.narrow_to_stream,
+                         prefix_character=(color, 'P' if is_private else '#'),
+                         width=width,
+                         count=count)
 
 
 class UserButton(urwid.Button):
