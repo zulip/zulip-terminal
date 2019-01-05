@@ -12,6 +12,7 @@ from zulipterminal.ui_tools.views import (
     HelpView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
+from zulipterminal.ui_tools.buttons import StreamButton
 
 from urwid import AttrWrap, Columns, Padding, Text
 
@@ -1155,3 +1156,41 @@ class TestMessageBox:
         view_components = msg_box.main_view()
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
+
+
+class TestStreamButton:
+    @pytest.mark.parametrize('is_private, expected_prefix', [
+        (True, 'P'),
+        (False, '#'),
+    ], ids=['private', 'not_private'])
+    @pytest.mark.parametrize('width, count, short_text', [
+        (12, 0, 'caption'),
+        (13, 0, 'caption'),
+        (15, 0, 'caption'),
+        (15, 1, 'caption'),
+        (15, 10, 'caption'),
+        (15, 100, 'caption'),
+        (25, 0, 'caption'),
+        (25, 1, 'caption'),
+        (25, 19, 'caption'),
+        (25, 199, 'caption'),
+        (25, 1999, 'caption'),
+    ])
+    def test_text_content(self, mocker,
+                          is_private, expected_prefix,
+                          width, count, short_text, caption='caption'):
+        properties = [caption, 5, '#ffffff', is_private]
+        stream_button = StreamButton(properties,
+                                     controller=mocker.Mock(),
+                                     view=mocker.Mock(),
+                                     width=width,
+                                     count=count)
+
+        text = stream_button._w._original_widget.get_text()
+        count_str = '' if count == 0 else str(count)
+        expected_text = ' {} {}{}{}'.format(
+                expected_prefix, short_text,
+                (width - 4 - len(short_text) - len(count_str))*' ',
+                count_str)
+        assert len(text[0]) == len(expected_text) == (width - 1)
+        assert text[0] == expected_text
