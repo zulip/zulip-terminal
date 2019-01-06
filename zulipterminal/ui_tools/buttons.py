@@ -18,11 +18,14 @@ class TopButton(urwid.Button):
     def __init__(self, controller: Any, caption: str,
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
+                 text_color: Optional[str]=None,
                  count: int=0) -> None:
         self.caption = caption
         self.prefix_character = prefix_character
         self.count = count
         self.width_for_text_space_count = width - 4
+        self.text_color = text_color
+        self.show_function = show_function
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -54,13 +57,15 @@ class TopButton(urwid.Button):
              ' {}{}'.format(caption, num_spaces*' '),
              ('idle',  count_text)],
             0),  # cursor location
-            None,
+            self.text_color,
             'selected')
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
             self.controller.view.show_left_panel(visible=False)
+            self.controller.view.show_right_panel(visible=False)
             self.controller.view.body.focus_col = 1
+            self.show_function(self)
         return super().keypress(size, key)
 
 
