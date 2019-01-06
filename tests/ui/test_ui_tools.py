@@ -12,7 +12,7 @@ from zulipterminal.ui_tools.views import (
     HelpView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import StreamButton, UserButton
+from zulipterminal.ui_tools.buttons import TopButton, StreamButton, UserButton
 
 from urwid import AttrWrap, Columns, Padding, Text
 
@@ -1156,6 +1156,40 @@ class TestMessageBox:
         view_components = msg_box.main_view()
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
+
+
+class TestTopButton:
+    @pytest.mark.parametrize('width, count, short_text', [
+        (12, 0, 'caption'),
+        (13, 0, 'caption'),
+        (15, 0, 'caption'),
+        (15, 1, 'caption'),
+        (15, 10, 'caption'),
+        (15, 100, 'caption'),
+        (25, 0, 'caption'),
+        (25, 1, 'caption'),
+        (25, 19, 'caption'),
+        (25, 199, 'caption'),
+        (25, 1999, 'caption'),
+    ])
+    def test_text_content(self, mocker,
+                          width, count, short_text, caption='caption'):
+        show_function = mocker.Mock()
+
+        top_button = TopButton(controller=mocker.Mock(),
+                               caption=caption,
+                               show_function=show_function,
+                               width=width,
+                               count=count)
+
+        text = top_button._w._original_widget.get_text()
+        count_str = '' if count == 0 else str(count)
+        expected_text = ' \N{BULLET} {}{}{}'.format(
+                short_text,
+                (width - 4 - len(short_text) - len(count_str))*' ',
+                count_str)
+        assert len(text[0]) == len(expected_text) == (width - 1)
+        assert text[0] == expected_text
 
 
 class TestStreamButton:

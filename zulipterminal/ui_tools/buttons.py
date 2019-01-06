@@ -31,8 +31,8 @@ class TopButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        spaces = self.width - (3 + len(self.caption) + len(str(count)) + 1)
         count_str = '' if count <= 0 else str(count)
+        spaces = self.width - (3 + len(self.caption) + len(count_str) + 1)
         return urwid.AttrMap(urwid.SelectableIcon(
             [u' \N{BULLET} ', self.caption, spaces*' ', ('idle',  count_str)],
             0),  # cursor location
