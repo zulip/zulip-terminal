@@ -29,7 +29,7 @@ class TopButton(urwid.Button):
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
-        urwid.connect_signal(self, 'click', show_function)
+        urwid.connect_signal(self, 'click', self.activate)
 
     def update_count(self, count: int) -> None:
         self.count = count
@@ -60,12 +60,15 @@ class TopButton(urwid.Button):
             self.text_color,
             'selected')
 
+    def activate(self, key: Any) -> None:
+        self.controller.view.show_left_panel(visible=False)
+        self.controller.view.show_right_panel(visible=False)
+        self.controller.view.body.focus_col = 1
+        self.show_function(self)
+
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
-            self.controller.view.show_left_panel(visible=False)
-            self.controller.view.show_right_panel(visible=False)
-            self.controller.view.body.focus_col = 1
-            self.show_function(self)
+            self.activate(key)
         return super().keypress(size, key)
 
 
