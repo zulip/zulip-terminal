@@ -128,7 +128,7 @@ class UserButton(urwid.Button):
     def __init__(self, user: Dict[str, Any], controller: Any,
                  view: Any, width: int,
                  color: Optional[str]=None, count: int=0) -> None:
-        self.width = width
+        self.width_for_text_space_count = width - 4
         self.caption = user['full_name']  # str
         self.email = user['email']
         self.user_id = user['user_id']
@@ -146,10 +146,19 @@ class UserButton(urwid.Button):
         self._w = self.widget(count)
 
     def widget(self, count: int) -> Any:
-        count_str = '' if count <= 0 else str(count)
-        spaces = self.width - (3 + len(self.caption) + len(count_str) + 1)
+        count_text = '' if count <= 0 else str(count)
+
+        # Shrink text, but always require at least one space
+        max_caption_length = (self.width_for_text_space_count -
+                              len(str(count_text)) - 1)
+        if len(self.caption) > max_caption_length:
+            caption = self.caption[:max_caption_length-2] + '..'
+        else:
+            caption = self.caption
+        num_spaces = max_caption_length - len(caption) + 1
+
         return urwid.AttrMap(urwid.SelectableIcon(
-            [u' \N{BULLET} ', self.caption, spaces*' ', ('idle',  count_str)],
+            [u' \N{BULLET} ', caption, num_spaces*' ', ('idle',  count_text)],
             0),  # cursor location
             self.color,
             'selected')
