@@ -96,7 +96,7 @@ class TestView:
         right.assert_called_once_with()
         expected_column_calls = [
             mocker.call([
-                (25, left()),
+                (View.LEFT_WIDTH, left()),
                 ('weight', 10, center()),
                 (0, right()),
                 ], focus_column=0),
@@ -114,7 +114,7 @@ class TestView:
 
     @pytest.mark.parametrize('autohide', [True, False])
     @pytest.mark.parametrize('visible, width', [
-        (True, 25),
+        (True, View.LEFT_WIDTH),
         (False, 0)
     ])
     def test_show_left_panel(self, mocker, view,
@@ -136,7 +136,7 @@ class TestView:
 
     @pytest.mark.parametrize('autohide', [True, False])
     @pytest.mark.parametrize('visible, width', [
-        (True, 25),
+        (True, View.RIGHT_WIDTH),
         (False, 0)
     ])
     def test_show_right_panel(self, mocker, view,
