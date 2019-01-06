@@ -12,7 +12,7 @@ from zulipterminal.ui_tools.views import (
     HelpView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import StreamButton
+from zulipterminal.ui_tools.buttons import StreamButton, UserButton
 
 from urwid import AttrWrap, Columns, Padding, Text
 
@@ -1190,6 +1190,44 @@ class TestStreamButton:
         count_str = '' if count == 0 else str(count)
         expected_text = ' {} {}{}{}'.format(
                 expected_prefix, short_text,
+                (width - 4 - len(short_text) - len(count_str))*' ',
+                count_str)
+        assert len(text[0]) == len(expected_text) == (width - 1)
+        assert text[0] == expected_text
+
+
+class TestUserButton:
+    @pytest.mark.parametrize('width, count, short_text', [
+        (12, 0, 'caption'),
+        (13, 0, 'caption'),
+        (15, 0, 'caption'),
+        (15, 1, 'caption'),
+        (15, 10, 'caption'),
+        (15, 100, 'caption'),
+        (25, 0, 'caption'),
+        (25, 1, 'caption'),
+        (25, 19, 'caption'),
+        (25, 199, 'caption'),
+        (25, 1999, 'caption'),
+    ])
+    def test_text_content(self, mocker,
+                          width, count, short_text, caption='caption'):
+        user = {
+            'email': 'some_email',  # value unimportant
+            'user_id': 5,           # value unimportant
+            'full_name': caption,
+        }  # type: Dict[str, Any]
+        user_button = UserButton(user,
+                                 controller=mocker.Mock(),
+                                 view=mocker.Mock(),
+                                 width=width,
+                                 color=None,  # FIXME test elsewhere?
+                                 count=count)
+
+        text = user_button._w._original_widget.get_text()
+        count_str = '' if count == 0 else str(count)
+        expected_text = ' \N{BULLET} {}{}{}'.format(
+                short_text,
                 (width - 4 - len(short_text) - len(count_str))*' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
