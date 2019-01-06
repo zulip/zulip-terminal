@@ -115,7 +115,7 @@ class View(urwid.WidgetWrap):
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-        width = 25 if visible else 0
+        width = View.LEFT_WIDTH if visible else 0
         self.body.contents[0] = (
             self.left_panel,
             self.body.options(width_type='given', width_amount=width),
@@ -126,7 +126,7 @@ class View(urwid.WidgetWrap):
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-        width = 25 if visible else 0
+        width = View.RIGHT_WIDTH if visible else 0
         self.body.contents[2] = (
             self.right_panel,
             self.body.options(width_type='given', width_amount=width),
