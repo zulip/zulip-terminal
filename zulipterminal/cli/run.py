@@ -3,7 +3,7 @@ import configparser
 import traceback
 import sys
 import tempfile
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from os import path, remove
 
 from zulipterminal.core import Controller
@@ -11,7 +11,7 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import THEMES
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: List[str]) -> argparse.Namespace:
     description = '''
         Starts Zulip-Terminal.
         '''
@@ -35,8 +35,7 @@ def parse_args() -> argparse.Namespace:
                         action="store_true",
                         default=False, help='Profile runtime.')
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args(argv)
 
 
 def get_api_key(realm_url: str) -> Any:
@@ -115,12 +114,13 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     return settings
 
 
-def main() -> None:
+def main(options: Optional[List[str]]=None) -> None:
     """
     Launch Zulip Terminal.
     """
 
-    args = parse_args()
+    argv = options if options is not None else sys.argv[1:]
+    args = parse_args(argv)
 
     if args.profile:
         import cProfile
