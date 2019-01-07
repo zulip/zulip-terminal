@@ -1,4 +1,4 @@
-# Zulip Terminal
+# Zulip Terminal (zulip-term)
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
@@ -13,9 +13,9 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 
 Please see the [CHANGELOG](CHANGELOG.md) for released & recent changes.
 
-## Setup:
+## Installation & Running
 
-1. Install the package:
+We recommend installing `zulip-term` in a python virtual environment, something like the following:
 ```
 [sudo] pip3 install virtualenv
 virtualenv /tmp/zt/
@@ -23,18 +23,40 @@ virtualenv /tmp/zt/
 pip3 install zulip-term
 ```
 
-2. Run Zulip Terminal:
+Zulip Terminal installs as `zulip-term`, so just run:
 ```
 $ zulip-term
 ```
-**NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
 
-Alternatively, you can specify the location of `zuliprc` using the -c option
+If you see further text, like the following, `zulip-term` should be loading!
+```
+Loading with:
+   theme 'default' specified with no config.
+   autohide setting 'autohide' specified with no config.
+Welcome to Zulip.
+```
+
+### NOTE: The zuliprc file
+
+Upon first running, `zulip-term` looks for a `zuliprc` file, by default in your home directory.
+
+If it doesn't find one, you have two options:
+
+1. `zulip-term` will prompt you for your server, email and password, and create a `zuliprc` file for you in that location
+
+2. You can specify the path to an existing `zuliprc` file using the `-c` or `--config-file` options, eg.
 ```
 $ zulip-term -c /path/to/zuliprc
 ```
 
-## Example zuliprc file
+You can obtain a personal zuliprc file from Zulip servers in your account settings, which gives you all the permissions you have in the web app. Bot zuliprc files can be downloaded from the area for each bot, and will have more limited permissions.
+
+**NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
+
+### Example zuliprc file
+
+The `[api]` section of a `zuliprc` file is relatively standard; `zulip-term` also reads extra options from the `[zterm]` section, if they are added:
+
 ```
 [api]
 email=example@example.com
@@ -42,8 +64,10 @@ key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 site=https://realm.zulipchat.com
 
 [zterm]
-# Theme can also be set to 'blue' and 'light'
+# Theme can also be set to 'gruvbox' ('blue' & 'light' are older themes needing work)
 theme=default
+# Autohide can also be set to 'no_autohide', to always show the left and right panels
+autohide=autohide
 ```
 
 
