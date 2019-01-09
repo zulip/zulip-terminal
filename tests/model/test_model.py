@@ -665,7 +665,7 @@ class TestModel:
 
     def test_update_star_status_no_index(self, mocker, model):
         model.index = dict(messages={})  # Not indexed
-        event = dict(messages=[1], flag='starred')
+        event = dict(messages=[1], flag='starred', all=False)
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
         model.update_message_flag_status(event)
@@ -679,7 +679,8 @@ class TestModel:
             'messages': [1],
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': 'OTHER'  # not 'add' or 'remove'
+            'operation': 'OTHER',  # not 'add' or 'remove'
+            'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         with pytest.raises(RuntimeError):
@@ -714,7 +715,8 @@ class TestModel:
             'messages': event_message_ids,
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': event_op
+            'operation': event_op,
+            'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
