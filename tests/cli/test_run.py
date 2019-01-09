@@ -1,5 +1,5 @@
 import pytest
-from zulipterminal.cli.run import main, in_color
+from zulipterminal.cli.run import main, in_color, THEMES
 from zulipterminal.model import ServerConnectionFailure
 
 
@@ -60,6 +60,48 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, tmpdir,
     expected_lines = [
         "Loading with:",
         "   theme 'default' specified with no config.",
+        "   autohide setting 'autohide' specified with no config.",
+        "\x1b[91m",
+        ("Error connecting to Zulip server: {}.\x1b[0m".
+            format(server_connection_error)),
+    ]
+    assert lines == expected_lines
+
+    assert captured.err == ""
+
+
+@pytest.mark.parametrize('bad_theme', ['c', 'd'])
+def test_warning_regarding_incomplete_theme(capsys, mocker, tmpdir,
+                                            monkeypatch,
+                                            bad_theme,
+                                            server_connection_error="sce"):
+    mocker.patch('zulipterminal.core.Controller.__init__',
+                 side_effect=ServerConnectionFailure(server_connection_error))
+
+    monkeypatch.setitem(THEMES, bad_theme, [])
+    mocker.patch('zulipterminal.cli.run.all_themes',
+                 return_value=('a', 'b', 'c', 'd'))
+    mocker.patch('zulipterminal.cli.run.complete_and_incomplete_themes',
+                 return_value=(['a', 'b'], ['c', 'd']))
+
+    zuliprc_path = str(tmpdir) + "/zuliprc"
+    with open(zuliprc_path, "w") as f:
+        f.write("[api]")  # minimal to avoid Exception
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc_path, "-t", bad_theme])
+        assert str(e.value) == '1'
+
+    captured = capsys.readouterr()
+
+    lines = captured.out.strip().split("\n")
+    expected_lines = [
+        "Loading with:",
+        "   theme '{}' specified on command line.".format(bad_theme),
+        "\x1b[93m"
+        "   WARNING: Incomplete theme; results may vary!",
+        "      (you could try: {}, {})"
+        "\x1b[0m".format('a', 'b'),
         "   autohide setting 'autohide' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: {}.\x1b[0m".
