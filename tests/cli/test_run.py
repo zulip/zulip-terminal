@@ -49,8 +49,8 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, tmpdir,
         "Loading with:",
         "   theme 'default' specified with no config.",
         "   autohide setting 'autohide' specified with no config.",
-        "",
-        ("\x1b[91mError connecting to Zulip server: {}.".
+        "\x1b[91m",
+        ("Error connecting to Zulip server: {}.\x1b[0m".
             format(server_connection_error)),
     ]
     assert lines == expected_lines
