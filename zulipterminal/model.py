@@ -45,6 +45,7 @@ Event = TypedDict('Event', {
     'messages': List[int],
     'operation': str,
     'flag': str,
+    'all': bool,
     # message:
     'message': Message,
 }, total=False)  # Each Event will only have a subset of these
@@ -531,6 +532,9 @@ class Model:
             self.update_rendered_view(message_id)
 
     def update_message_flag_status(self, event: Event) -> None:
+        if event['all']:  # FIXME Should handle eventually
+            return
+
         # TODO: Expand from 'starred' to also support 'read' flag changes?
         flag_to_change = event['flag']
         if flag_to_change != 'starred':
