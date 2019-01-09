@@ -138,3 +138,10 @@ THEMES = {
         ('name',         'dark red',     'light gray', 'bold'),
     ]
 }  # type: Dict[str, ThemeSpec]
+
+
+def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
+    complete = {name for name, styles in THEMES.items()
+                if set(s[0] for s in styles).issuperset(required_styles)}
+    incomplete = list(set(THEMES) - complete)
+    return sorted(list(complete)), sorted(incomplete)
