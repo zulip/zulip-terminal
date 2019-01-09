@@ -104,7 +104,7 @@ class Model:
             'update_message': self.update_message,
             'reaction': self.update_reaction,
             'typing': self.handle_typing_event,
-            'update_message_flags': self.update_star_status,
+            'update_message_flags': self.update_message_flag_status,
         }  # type: Dict[str, Callable[[Event], None]]
 
     def _update_user_id(self) -> Optional[int]:
@@ -530,10 +530,10 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
-    def update_star_status(self, event: Event) -> None:
-        # TODO: Should also support 'read' flag changes?
-        # In that case, should rename this function and adapt
-        if event['flag'] != 'starred':
+    def update_message_flag_status(self, event: Event) -> None:
+        # TODO: Expand from 'starred' to also support 'read' flag changes?
+        flag_to_change = event['flag']
+        if flag_to_change != 'starred':
             return
 
         assert len(event['messages']) == 1  # FIXME: Can be multiple?
@@ -542,11 +542,11 @@ class Model:
         if self.index['messages'][message_id] != {}:
             msg = self.index['messages'][message_id]
             if event['operation'] == 'add':
-                if 'starred' not in msg['flags']:
-                    msg['flags'].append('starred')
+                if flag_to_change not in msg['flags']:
+                    msg['flags'].append(flag_to_change)
             elif event['operation'] == 'remove':
-                if 'starred' in msg['flags']:
-                    msg['flags'].remove('starred')
+                if flag_to_change in msg['flags']:
+                    msg['flags'].remove(flag_to_change)
             else:
                 raise RuntimeError(event, msg['flags'])
 

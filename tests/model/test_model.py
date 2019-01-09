@@ -668,7 +668,7 @@ class TestModel:
         event = dict(messages=[1], flag='starred')
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
-        model.update_star_status(event)
+        model.update_message_flag_status(event)
 
         assert model.index == dict(messages={1: {}})
         model.update_rendered_view.assert_not_called()
@@ -683,7 +683,7 @@ class TestModel:
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         with pytest.raises(RuntimeError):
-            model.update_star_status(event)
+            model.update_message_flag_status(event)
         model.update_rendered_view.assert_not_called()
 
     @pytest.mark.parametrize('event_op, flags_before, flags_after', [
@@ -708,7 +708,7 @@ class TestModel:
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
-        model.update_star_status(event)
+        model.update_message_flag_status(event)
 
         assert model.index['messages'][1]['flags'] == flags_after
         model.update_rendered_view.assert_called_once_with(1)
