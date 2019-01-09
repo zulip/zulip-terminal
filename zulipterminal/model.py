@@ -536,10 +536,10 @@ class Model:
         if flag_to_change != 'starred':
             return
 
-        assert len(event['messages']) == 1  # FIXME: Can be multiple?
-        message_id = event['messages'][0]
+        indexed_message_ids = set(self.index['messages'])
+        message_ids_to_mark = set(event['messages'])
 
-        if self.index['messages'][message_id] != {}:
+        for message_id in message_ids_to_mark & indexed_message_ids:
             msg = self.index['messages'][message_id]
             if event['operation'] == 'add':
                 if flag_to_change not in msg['flags']:
