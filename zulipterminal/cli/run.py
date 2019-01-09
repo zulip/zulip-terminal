@@ -11,6 +11,14 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import THEMES
 
 
+def in_color(color: str, text: str) -> str:
+    color_for_str = {
+        'red': '\033[91m',
+        'blue': '\033[94m',
+    }
+    return "{}{}{}".format(color_for_str[color], text, "\033[0m")
+
+
 def parse_args(argv: List[str]) -> argparse.Namespace:
     description = '''
         Starts Zulip-Terminal.
@@ -42,8 +50,8 @@ def get_api_key(realm_url: str) -> Any:
     from getpass import getpass
     import requests
 
-    email = input("\033[94mEmail:\033[0m ")
-    password = getpass("\033[94mPassword:\033[0m ")
+    email = input(in_color('blue', "Email: "))
+    password = getpass(in_color('blue', "Password: "))
     response = requests.post(
         url=realm_url + '/api/v1/fetch_api_key',
         data={
@@ -55,11 +63,12 @@ def get_api_key(realm_url: str) -> Any:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
-    realm_url = input("\033[91mzuliprc file was not found"
-                      " at " + zuliprc_path + "\033[0m"
+    realm_url = input(in_color('red', "zuliprc file was not found at " +
+                                      zuliprc_path) +
                       "\nPlease enter your credentials to login into your"
                       " Zulip organization."
-                      "\n\033[94mZulip-Realm URL:\033[0m ")
+                      "\n" +
+                      in_color('blue', "Zulip-Realm URL: "))
     if realm_url.startswith("localhost"):
         realm_url = "http://" + realm_url
     elif not realm_url.startswith("http"):
@@ -70,7 +79,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     res, email = get_api_key(realm_url)
 
     while res.status_code != 200:
-        print("\n\033[91mUsername or Password Incorrect!\033[0m\n")
+        print(in_color('red', "\nUsername or Password Incorrect!\n"))
         res = get_api_key(realm_url)
 
     with open(zuliprc_path, 'w') as f:
@@ -87,7 +96,8 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         try:
             fetch_zuliprc(zuliprc_path)
         except Exception:
-            print('\n\033[91mInvalid Credentials, Please try again!\033[0m\n')
+            print(in_color('red',
+                           "\nInvalid Credentials, Please try again!\n"))
             # Remove zuliprc file if created.
             if path.exists(zuliprc_path):
                 remove(zuliprc_path)
@@ -169,7 +179,8 @@ def main(options: Optional[List[str]]=None) -> None:
                    THEMES[theme_to_use[0]],
                    autohide_setting).main()
     except ServerConnectionFailure as e:
-        print("\n\033[91mError connecting to Zulip server: {}.".format(e))
+        print(in_color('red',
+                       "\nError connecting to Zulip server: {}.".format(e)))
         sys.exit(1)
     except Exception as e:
         if args.debug:
