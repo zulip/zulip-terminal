@@ -1,0 +1,22 @@
+import pytest
+
+from zulipterminal.config.themes import THEMES, required_styles
+
+expected_complete_themes = {
+    'default', 'gruvbox',
+}
+
+
+# Check built-in themes are complete for quality-control purposes
+@pytest.mark.parametrize('theme_name', [
+    theme if theme in expected_complete_themes
+    else pytest.param(theme, marks=pytest.mark.xfail(reason="incomplete"))
+    for theme in THEMES
+])
+def test_builtin_theme_completeness(theme_name):
+    theme = THEMES[theme_name]
+    styles_in_theme = {style[0] for style in theme}
+
+    assert len(styles_in_theme) >= len(required_styles)
+    assert all(required_style in styles_in_theme
+               for required_style in required_styles)
