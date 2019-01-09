@@ -2,6 +2,32 @@ from typing import Dict, List, Tuple, Optional
 
 ThemeSpec = List[Tuple[Optional[str], ...]]
 
+required_styles = {
+    None,
+    'selected',
+    'msg_selected',
+    'header',
+    'custom',
+    'content',
+    'name',
+    'unread',
+    'active',
+    'idle',
+    'offline',
+    'inactive',
+    'title',
+    'time',
+    'bar',
+    'emoji',
+    'span',
+    'link',
+    'blockquote',
+    'code',
+    'bold',
+    'footer',
+    'starred',
+}
+
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = 'h234'  # dark0_hard
