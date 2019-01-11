@@ -1,6 +1,14 @@
 import pytest
-from zulipterminal.cli.run import main
+from zulipterminal.cli.run import main, in_color
 from zulipterminal.model import ServerConnectionFailure
+
+
+@pytest.mark.parametrize('color, code', [
+    ('red', '\x1b[91m'),
+    ('blue', '\x1b[94m'),
+])
+def test_in_color(color, code, text="some text"):
+    assert in_color(color, text) == code + text + "\x1b[0m"
 
 
 @pytest.mark.parametrize('options', ['-h', '--help'])
