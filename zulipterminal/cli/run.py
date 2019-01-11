@@ -8,7 +8,7 @@ from os import path, remove
 
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.config.themes import THEMES
+from zulipterminal.config.themes import THEMES, all_themes
 
 
 def in_color(color: str, text: str) -> str:
@@ -154,12 +154,12 @@ def main(options: Optional[List[str]]=None) -> None:
             theme_to_use = (args.theme, 'on command line')
         else:
             theme_to_use = zterm['theme']
-        valid_themes = THEMES.keys()
-        if theme_to_use[0] not in valid_themes:
+        available_themes = all_themes()
+        if theme_to_use[0] not in available_themes:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
             print("The following themes are available:")
-            for theme in valid_themes:
+            for theme in available_themes:
                 print("  ", theme)
             print("Specify theme in zuliprc file or override "
                   "using -t/--theme options on command line.")

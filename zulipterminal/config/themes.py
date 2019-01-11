@@ -140,6 +140,10 @@ THEMES = {
 }  # type: Dict[str, ThemeSpec]
 
 
+def all_themes() -> List[str]:
+    return list(THEMES.keys())
+
+
 def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     complete = {name for name, styles in THEMES.items()
                 if set(s[0] for s in styles).issuperset(required_styles)}
