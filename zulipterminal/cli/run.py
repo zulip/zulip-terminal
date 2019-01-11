@@ -13,10 +13,15 @@ from zulipterminal.config.themes import THEMES
 
 def in_color(color: str, text: str) -> str:
     color_for_str = {
-        'red': '\033[91m',
-        'blue': '\033[94m',
+        'red': '1',
+        'green': '2',
+        'yellow': '3',
+        'blue': '4',
+        'purple': '5',
+        'cyan': '6',
     }
-    return "{}{}{}".format(color_for_str[color], text, "\033[0m")
+    # We can use 3 instead of 9 if high-contrast is eg. less compatible?
+    return "\033[9{}m{}\033[0m".format(color_for_str[color], text)
 
 
 def parse_args(argv: List[str]) -> argparse.Namespace:

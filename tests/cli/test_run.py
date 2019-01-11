@@ -5,7 +5,11 @@ from zulipterminal.model import ServerConnectionFailure
 
 @pytest.mark.parametrize('color, code', [
     ('red', '\x1b[91m'),
+    ('green', '\x1b[92m'),
+    ('yellow', '\x1b[93m'),
     ('blue', '\x1b[94m'),
+    ('purple', '\x1b[95m'),
+    ('cyan', '\x1b[96m'),
 ])
 def test_in_color(color, code, text="some text"):
     assert in_color(color, text) == code + text + "\x1b[0m"
