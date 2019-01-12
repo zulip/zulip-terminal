@@ -3,6 +3,7 @@ import configparser
 import traceback
 import sys
 import tempfile
+import logging
 from typing import Dict, Any, List, Optional
 from os import path, remove
 
@@ -13,6 +14,9 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes
 )
+
+LOG_FILENAME = 'zulip-terminal-tracebacks.log'
+logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 
 
 def in_color(color: str, text: str) -> str:
@@ -199,8 +203,13 @@ def main(options: Optional[List[str]]=None) -> None:
     except ServerConnectionFailure as e:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))
+        # Acts as separator between logs
+        logging.info("\n\n" + str(e) + "\n\n")
+        logging.exception(e)
         sys.exit(1)
     except Exception as e:
+        logging.info("\n\n" + str(e) + "\n\n")
+        logging.exception(e)
         if args.debug:
             # A unexpected exception occurred, open the debugger in debug mode
             import pudb
@@ -211,7 +220,10 @@ def main(options: Optional[List[str]]=None) -> None:
         if hasattr(e, 'extra_info'):
             print("\n" + in_color("red", e.extra_info),    # type: ignore
                   file=sys.stderr)
-        print("Zulip Terminal has crashed!", file=sys.stderr)
+
+        print(in_color("red", "\nZulip Terminal has crashed!"
+                       "\nPlease refer to " + LOG_FILENAME + " for full log of"
+                       " the error."), file=sys.stderr)
         print("You can ask for help at:", file=sys.stderr)
         print("https://chat.zulip.org/#narrow/stream/206-zulip-terminal",
               file=sys.stderr)
