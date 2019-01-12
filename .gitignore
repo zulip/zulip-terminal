@@ -12,3 +12,4 @@ build/*
 zulip_term.egg-info
 zulip-terminal-tracebacks.log
 
+.vscode/*
