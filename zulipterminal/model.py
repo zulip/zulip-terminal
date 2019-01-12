@@ -7,7 +7,6 @@ from typing import (
 )
 from mypy_extensions import TypedDict
 
-import urwid
 import zulip
 
 from zulipterminal.helper import (
@@ -281,16 +280,17 @@ class Model:
                     client_gravatar=True,
                     apply_markdown=True,
                 )
-            except zulip.ZulipError as e:
-                raise ServerConnectionFailure(e)
-            except Exception:
-                print("Invalid API key")
-                raise urwid.ExitMainLoop()
-            else:
                 self.initial_data.update(response)
                 self.max_message_id = response['max_message_id']
                 self.queue_id = response['queue_id']
                 self.last_event_id = response['last_event_id']
+            except zulip.ZulipError as e:
+                raise ServerConnectionFailure(e)
+            except Exception as e:
+                # There was some error in the request sent.
+                if response['result'] == 'error':
+                    e.extra_info = response['msg']  # type: ignore
+                raise e
 
             # Wait for threads to complete
             wait(futures.values())  # type: ignore
