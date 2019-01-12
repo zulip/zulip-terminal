@@ -41,17 +41,21 @@ def test_main_help(capsys, options):
     assert captured.err == ""
 
 
-def test_valid_zuliprc_but_no_connection(capsys, mocker, tmpdir,
+@pytest.fixture
+def minimal_zuliprc(tmpdir):
+    zuliprc_path = str(tmpdir) + "/zuliprc"
+    with open(zuliprc_path, "w") as f:
+        f.write("[api]")  # minimal to avoid Exception
+    return zuliprc_path
+
+
+def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
                                          server_connection_error="some_error"):
     mocker.patch('zulipterminal.core.Controller.__init__',
                  side_effect=ServerConnectionFailure(server_connection_error))
 
-    zuliprc_path = str(tmpdir) + "/zuliprc"
-    with open(zuliprc_path, "w") as f:
-        f.write("[api]")  # minimal to avoid Exception
-
     with pytest.raises(SystemExit) as e:
-        main(["-c", zuliprc_path])
+        main(["-c", minimal_zuliprc])
         assert str(e.value) == '1'
 
     captured = capsys.readouterr()
@@ -71,9 +75,8 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, tmpdir,
 
 
 @pytest.mark.parametrize('bad_theme', ['c', 'd'])
-def test_warning_regarding_incomplete_theme(capsys, mocker, tmpdir,
-                                            monkeypatch,
-                                            bad_theme,
+def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
+                                            minimal_zuliprc, bad_theme,
                                             server_connection_error="sce"):
     mocker.patch('zulipterminal.core.Controller.__init__',
                  side_effect=ServerConnectionFailure(server_connection_error))
@@ -84,12 +87,8 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, tmpdir,
     mocker.patch('zulipterminal.cli.run.complete_and_incomplete_themes',
                  return_value=(['a', 'b'], ['c', 'd']))
 
-    zuliprc_path = str(tmpdir) + "/zuliprc"
-    with open(zuliprc_path, "w") as f:
-        f.write("[api]")  # minimal to avoid Exception
-
     with pytest.raises(SystemExit) as e:
-        main(["-c", zuliprc_path, "-t", bad_theme])
+        main(["-c", minimal_zuliprc, "-t", bad_theme])
         assert str(e.value) == '1'
 
     captured = capsys.readouterr()
