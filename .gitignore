@@ -95,4 +95,5 @@ debug.log
 dist/*
 build/*
 zulip_term.egg-info
+zulip-terminal-tracebacks.log
 
