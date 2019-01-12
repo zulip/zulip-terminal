@@ -135,24 +135,29 @@ class MessageView(urwid.ListBox):
                 return key
 
         elif is_command_key('SCROLL_TO_TOP', key) and not self.old_loading:
-            if self.focus_position == 0:
+            if self.focus is not None and \
+               self.focus_position == 0:
                 return self.keypress(size, 'up')
             else:
                 return super(MessageView, self).keypress(size, 'page up')
 
         elif is_command_key('SCROLL_TO_BOTTOM', key) and not self.old_loading:
-            if self.focus_position == len(self.log) - 1:
+            if self.focus is not None and \
+               self.focus_position == len(self.log) - 1:
                 return self.keypress(size, 'down')
             else:
                 return super(MessageView, self).keypress(size, 'page down')
 
         elif is_command_key('THUMBS_UP', key):
-            self.model.react_to_message(self.focus.original_widget.message,
-                                        reaction_to_toggle='thumbs_up')
+            if self.focus is not None:
+                self.model.react_to_message(
+                    self.focus.original_widget.message,
+                    reaction_to_toggle='thumbs_up')
 
         elif is_command_key('TOGGLE_STAR_STATUS', key):
-            message = self.focus.original_widget.message
-            self.model.toggle_message_star_status(message)
+            if self.focus is not None:
+                message = self.focus.original_widget.message
+                self.model.toggle_message_star_status(message)
 
         key = super(MessageView, self).keypress(size, key)
         return key
@@ -331,20 +336,28 @@ class MiddleColumnView(urwid.Frame):
 
         elif is_command_key('REPLY_MESSAGE', key):
             self.body.keypress(size, 'enter')
-            self.set_focus('footer')
-            self.footer.focus_position = 1
+            if self.footer.focus is not None:
+                self.set_focus('footer')
+                self.footer.focus_position = 1
             return key
 
         elif is_command_key('STREAM_MESSAGE', key):
             self.body.keypress(size, 'c')
+            # For new streams with no previous conversation.
+            if self.footer.focus is None:
+                stream_id = self.model.stream_id
+                stream_dict = self.model.stream_dict
+                self.footer.stream_box_view(
+                    caption=stream_dict[stream_id]['name'])
             self.set_focus('footer')
             self.footer.focus_position = 0
             return key
 
         elif is_command_key('REPLY_AUTHOR', key):
             self.body.keypress(size, 'R')
-            self.set_focus('footer')
-            self.footer.focus_position = 1
+            if self.footer.focus is not None:
+                self.set_focus('footer')
+                self.footer.focus_position = 1
             return key
 
         elif is_command_key('NEXT_UNREAD_TOPIC', key):
