@@ -3,6 +3,7 @@ from typing import Any, List
 import os
 import sys
 import time
+import signal
 
 import urwid
 import zulip
@@ -263,6 +264,14 @@ class Controller:
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
+    def deregister_client(self) -> None:
+        queue_id = self.model.queue_id
+        self.client.deregister(queue_id, 1.0)
+
+    def exit_handler(self, signum: int, frame: Any) -> None:
+        self.deregister_client()
+        sys.exit(0)
+
     def main(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
@@ -270,6 +279,9 @@ class Controller:
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
+
+        # Register new ^C handler
+        signal.signal(signal.SIGINT, self.exit_handler)
 
         try:
             # TODO: Enable resuming? (in which case, remove ^Z below)
