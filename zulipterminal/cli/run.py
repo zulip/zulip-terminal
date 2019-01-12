@@ -208,6 +208,9 @@ def main(options: Optional[List[str]]=None) -> None:
 
         sys.stdout.flush()
         traceback.print_exc(file=sys.stderr)
+        if hasattr(e, 'extra_info'):
+            print("\n" + in_color("red", e.extra_info),    # type: ignore
+                  file=sys.stderr)
         print("Zulip Terminal has crashed!", file=sys.stderr)
         print("You can ask for help at:", file=sys.stderr)
         print("https://chat.zulip.org/#narrow/stream/206-zulip-terminal",
