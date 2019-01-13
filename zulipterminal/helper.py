@@ -114,20 +114,6 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     controller.update_screen()
 
 
-@asynch
-def update_flag(id_list: List[int], controller: Any) -> None:
-    if not id_list:
-        return
-    request = {
-        'messages': id_list,
-        'flag': 'read',
-        'op': 'add',
-    }
-    client = controller.client
-    client.do_api_query(request, '/json/messages/flags', method="POST")
-    set_count(id_list, controller, -1)
-
-
 def index_messages(messages: List[Any],
                    model: Any,
                    index: Index) -> Index:
