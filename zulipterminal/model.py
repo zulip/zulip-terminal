@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor, wait, Future
 import time
@@ -84,6 +85,8 @@ class Model:
         self.user_id = -1  # type: int
         self.user_email = ""
         self.user_full_name = ""
+        self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
+                          uri=urlparse(self.client.base_url))
 
         self.initial_data = {}  # type: Dict[str, Any]
 
