@@ -7,6 +7,9 @@
 - Move intrusive flashing cursor in left panel to far left side
 - Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 
+### Important bugfixes
+- Avoid crash in rare care of empty message content
+
 ## 0.3.1
 
 ### Interactivity improvements
