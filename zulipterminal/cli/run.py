@@ -105,7 +105,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     zuliprc_path = path.expanduser(zuliprc_str)
-    if not path.exists(zuliprc_path):
+    while not path.exists(zuliprc_path):
         try:
             fetch_zuliprc(zuliprc_path)
         except Exception:
@@ -114,7 +114,6 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
             # Remove zuliprc file if created.
             if path.exists(zuliprc_path):
                 remove(zuliprc_path)
-            parse_zuliprc(zuliprc_str)
 
     zuliprc = configparser.ConfigParser()
     zuliprc.read(zuliprc_path)
