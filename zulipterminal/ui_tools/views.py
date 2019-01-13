@@ -5,7 +5,7 @@ import threading
 import urwid
 
 from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
-from zulipterminal.helper import asynch, update_flag, match_user
+from zulipterminal.helper import asynch, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UnreadPMButton,
@@ -196,7 +196,7 @@ class MessageView(urwid.ListBox):
             msg_w, curr_pos = self.body.get_prev(curr_pos)
             if msg_w is None:
                 break
-        update_flag(read_msg_ids, self.model.controller)
+        self.model.update_flag(read_msg_ids)
 
 
 class StreamsView(urwid.Frame):

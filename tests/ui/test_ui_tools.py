@@ -293,7 +293,6 @@ class TestMessageView:
         msg_w.set_attr_map.return_value = None
         msg_view.body.get_focus.return_value = (msg_w, 0)
         msg_view.body.get_prev.return_value = (None, 1)
-        update_flag = mocker.patch(VIEWS + ".update_flag")
         msg_view.model.narrow = []
         msg_view.model.index = {
             'messages': {
@@ -310,14 +309,15 @@ class TestMessageView:
         msg_view.read_message()
         assert msg_view.update_search_box_narrow.called
         assert msg_view.model.index['messages'][1]['flags'] == ['read']
-        update_flag.assert_called_once_with([1], self.model.controller)
+        self.model.update_flag.assert_called_once_with([1])
 
     def test_read_message_no_msgw(self, mocker, msg_view):
         # MSG_W is NONE CASE
         msg_view.body.get_focus.return_value = (None, 0)
-        update_flag = mocker.patch(VIEWS + ".update_flag")
+
         msg_view.read_message()
-        update_flag.assert_not_called()
+
+        self.model.update_flag.assert_not_called()
 
 
 class TestStreamsView:
