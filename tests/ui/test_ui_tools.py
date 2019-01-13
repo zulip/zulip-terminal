@@ -857,6 +857,7 @@ class TestMessageBox:
             msg_box = MessageBox(message, self.model, None)
 
     @pytest.mark.parametrize('content, markup', [
+        ('', []),
         ('<p>hi</p>', ['', 'hi']),
         ('<span class="user-mention">@Bob Smith', [('span', '@Bob Smith')]),
         ('<span class="user-group-mention">@A Group', [('span', '@A Group')]),
@@ -890,7 +891,7 @@ class TestMessageBox:
         ('<div class="inline-preview-twitter"',
             ['[TWITTER PREVIEW NOT RENDERED]']),
     ], ids=[
-        'p', 'user-mention', 'group-mention', 'code', 'codehilite',
+        'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
         'embedded_content', 'link_sametext', 'link_differenttext',
         'link_userupload', 'listitem', 'listitems',
