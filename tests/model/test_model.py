@@ -11,11 +11,13 @@ from zulipterminal.helper import initial_index
 class TestModel:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: Any) -> None:
+        self.urlparse = mocker.patch('urllib.parse.urlparse')
         self.controller = mocker.patch('zulipterminal.core.'
                                        'Controller',
                                        return_value=None)
         self.client = mocker.patch('zulipterminal.core.'
                                    'Controller.client')
+        self.client.base_url = 'chat.zulip.zulip'
         mocker.patch('zulipterminal.model.Model.update_presence')
 
     @pytest.fixture
@@ -54,6 +56,7 @@ class TestModel:
         assert model.user_id == user_profile['user_id']
         assert model.user_full_name == user_profile['full_name']
         assert model.user_email == user_profile['email']
+        # FIXME Add test here for model.server_url
         model.get_all_users.assert_called_once_with()
         assert model.users == []
         (model._stream_info_from_subscriptions.
