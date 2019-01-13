@@ -4,7 +4,8 @@ import traceback
 import sys
 import tempfile
 import logging
-from typing import Dict, Any, List, Optional
+import requests
+from typing import Dict, Any, List, Optional, Tuple
 from os import path, remove
 
 from urwid import set_encoding
@@ -59,9 +60,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def get_api_key(realm_url: str) -> Any:
+def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
     from getpass import getpass
-    import requests
 
     email = input(in_color('blue', "Email: "))
     password = getpass(in_color('blue', "Password: "))
@@ -93,7 +93,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
 
     while res.status_code != 200:
         print(in_color('red', "\nUsername or Password Incorrect!\n"))
-        res = get_api_key(realm_url)
+        res, email = get_api_key(realm_url)
 
     with open(zuliprc_path, 'w') as f:
         f.write('[api]' +
