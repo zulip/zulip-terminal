@@ -227,6 +227,19 @@ class Model:
                                              method='POST',
                                              request=request)
 
+    @asynch
+    def update_flag(self, id_list: List[int]) -> None:
+        if not id_list:
+            return
+        request = {
+            'messages': id_list,
+            'flag': 'read',
+            'op': 'add',
+        }
+        self.client.do_api_query(request, '/json/messages/flags',
+                                 method="POST")
+        set_count(id_list, self.controller, -1)  # FIXME Update?
+
     def get_messages(self, *,
                      num_after: int, num_before: int,
                      anchor: Optional[int]) -> bool:
