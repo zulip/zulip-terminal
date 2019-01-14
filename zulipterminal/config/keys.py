@@ -121,6 +121,11 @@ KEY_BINDINGS = {
         'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of a message',
     },
+    
+    'QUIT': {
+        'keys': {'ctrl c'},
+        'help_text': 'To quit the terminal',
+    },
 }
 
 
