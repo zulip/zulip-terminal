@@ -52,6 +52,8 @@ class TestModel:
         assert model.initial_data == initial_data
         model.client.get_profile.assert_called_once_with()
         assert model.user_id == user_profile['user_id']
+        assert model.user_full_name == user_profile['full_name']
+        assert model.user_email == user_profile['email']
         model.get_all_users.assert_called_once_with()
         assert model.users == []
         (model._stream_info_from_subscriptions.
