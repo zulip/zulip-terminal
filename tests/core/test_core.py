@@ -83,12 +83,12 @@ class TestController:
         assert {widget.original_widget.message['id']} == id_list
 
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):
-        controller.model.client = self.client
         controller.model.narrow = []
         controller.model.index = index_user
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
         controller.model.user_id = 5140
+        controller.model.user_email = "some@email"
         controller.model.user_dict = {
             user_button.email: {
                 'user_id': user_button.user_id
@@ -105,11 +105,11 @@ class TestController:
         assert {widget.original_widget.message['id']} == id_list
 
     def test_show_all_messages(self, mocker, controller, index_all_messages):
-        controller.model.client = self.client
         controller.model.narrow = [['stream', 'PTEST']]
         controller.model.index = index_all_messages
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.user_email = "some@email"
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
@@ -128,12 +128,14 @@ class TestController:
         assert msg_ids == id_list
 
     def test_show_all_pm(self, mocker, controller, index_user):
-        controller.model.client = self.client
         controller.model.narrow = []
         controller.model.index = index_user
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
         controller.model.msg_list = mocker.patch('urwid.ListBox')
+        controller.model.user_email = "some@email"
+
         controller.show_all_pm('')
+
         assert controller.model.narrow == [['is', 'private']]
         controller.model.msg_view.clear.assert_called_once_with()
         num_pm = len(index_user['all_private'])
@@ -144,11 +146,11 @@ class TestController:
         assert msg_ids == id_list
 
     def test_show_all_starred(self, mocker, controller, index_all_starred):
-        controller.model.client = self.client
         controller.model.narrow = []
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
         controller.model.muted_topics = []  # FIXME Expand upon this
+        controller.model.user_email = "some@email"
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',

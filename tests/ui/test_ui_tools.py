@@ -911,7 +911,7 @@ class TestMessageBox:
                 'color': '#bfd56f',
             },
         }
-        self.model.client.base_url = "SOME_BASE_URL"
+        self.model.server_url = "SOME_BASE_URL"
         # NOTE Absence of previous (last) message should not affect markup
         msg_box = MessageBox(message, self.model, None)
 
