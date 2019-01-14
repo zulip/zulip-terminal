@@ -123,7 +123,7 @@ KEY_BINDINGS = {
     },
     
     'QUIT': {
-        'keys': {'ctrl c'},
+        'keys': {'ctrl', 'c'},
         'help_text': 'To quit the terminal',
     },
 }
