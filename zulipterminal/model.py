@@ -240,6 +240,27 @@ class Model:
                                  method="POST")
         set_count(id_list, self.controller, -1)  # FIXME Update?
 
+    def send_private_message(self, recipients: str,
+                             content: str) -> bool:
+        request = {
+            'type': 'private',
+            'to': recipients,
+            'content': content,
+        }
+        response = self.client.send_message(request)
+        return response['result'] == 'success'
+
+    def send_stream_message(self, stream: str, topic: str,
+                            content: str) -> bool:
+        request = {
+            'type': 'stream',
+            'to': stream,
+            'subject': topic,
+            'content': content,
+        }
+        response = self.client.send_message(request)
+        return response['result'] == 'success'
+
     def get_messages(self, *,
                      num_after: int, num_before: int,
                      anchor: Optional[int]) -> bool:
