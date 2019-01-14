@@ -250,6 +250,40 @@ class TestModel:
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), 'x')
 
+    @pytest.mark.parametrize('response, return_value', [
+        ({'result': 'success'}, True),
+        ({'result': 'some_failure'}, False),
+    ])
+    def test_send_private_message(self, mocker, model,
+                                  response, return_value,
+                                  content="hi!",
+                                  recipients="notification-bot@zulip.com"):
+        self.client.send_message = mocker.Mock(return_value=response)
+
+        result = model.send_private_message(recipients, content)
+
+        req = dict(type='private', to=recipients, content=content)
+        self.client.send_message.assert_called_once_with(req)
+
+        assert result == return_value
+
+    @pytest.mark.parametrize('response, return_value', [
+        ({'result': 'success'}, True),
+        ({'result': 'some_failure'}, False),
+    ])
+    def test_send_stream_message(self, mocker, model,
+                                 response, return_value,
+                                 content="hi!",
+                                 stream="foo", topic="bar"):
+        self.client.send_message = mocker.Mock(return_value=response)
+
+        result = model.send_stream_message(stream, topic, content)
+
+        req = dict(type='stream', to=stream, subject=topic, content=content)
+        self.client.send_message.assert_called_once_with(req)
+
+        assert result == return_value
+
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data,

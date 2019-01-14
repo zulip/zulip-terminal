@@ -15,7 +15,7 @@ from zulipterminal.config.keys import is_command_key
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super(WriteBox, self).__init__(self.main_view(True))
-        self.client = view.client
+        self.model = view.model
         self.view = view
 
     def main_view(self, new: bool) -> Any:
@@ -82,20 +82,17 @@ class WriteBox(urwid.Pile):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
             if not self.to_write_box:
-                request = {
-                    'type': 'stream',
-                    'to': self.stream_write_box.edit_text,
-                    'subject': self.title_write_box.edit_text,
-                    'content': self.msg_write_box.edit_text,
-                }
+                success = self.model.send_stream_message(
+                    stream=self.stream_write_box.edit_text,
+                    topic=self.title_write_box.edit_text,
+                    content=self.msg_write_box.edit_text
+                )
             else:
-                request = {
-                    'type': 'private',
-                    'to': self.to_write_box.edit_text,
-                    'content': self.msg_write_box.edit_text,
-                }
-            response = self.client.send_message(request)
-            if response['result'] == 'success':
+                success = self.model.send_private_message(
+                    recipients=self.to_write_box.edit_text,
+                    content=self.msg_write_box.edit_text
+                )
+            if success:
                 self.msg_write_box.edit_text = ''
         elif is_command_key('GO_BACK', key):
             self.view.controller.editor_mode = False
