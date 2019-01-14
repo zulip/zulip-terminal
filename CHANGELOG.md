@@ -9,6 +9,7 @@
 
 ### Important bugfixes
 - Avoid crash in rare care of empty message content
+- Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
 
 ## 0.3.1
 
