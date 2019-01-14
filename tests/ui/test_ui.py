@@ -7,7 +7,6 @@ class TestView:
     def mock_external_classes(self, mocker):
         self.controller = mocker.patch('zulipterminal.core.Controller',
                                        return_value=None)
-        self.client = mocker.patch('zulipterminal.core.Controller.client')
         self.model = mocker.patch('zulipterminal.core.Controller.model')
         self.write_box = mocker.patch('zulipterminal.ui.WriteBox')
         self.search_box = mocker.patch('zulipterminal.ui.SearchBox')
@@ -22,7 +21,6 @@ class TestView:
         view = View(self.controller)
         assert view.controller == self.controller
         assert view.model == self.model
-        assert view.client == self.client
         assert view.pinned_streams == self.model.pinned_streams
         assert view.unpinned_streams == self.model.unpinned_streams
         self.write_box.assert_called_once_with(view)
@@ -82,18 +80,21 @@ class TestView:
 
         full_name = "Bob James"
         email = "Bob@bob.com"
-        server = "https://chat.zulip.zulip"
+        server = "https://chat.zulip.zulip/"
 
-        mocker.patch('zulipterminal.core.Controller.client.get_profile',
-                     return_value=dict(full_name=full_name, email=email))
-        self.controller.client.base_url = server
-        title_length = (len(email) + len(full_name) + len(server) + 9)
+        self.controller.model = self.model
+        self.model.user_full_name = full_name
+        self.model.user_email = email
+        self.model.server_url = server
+
+        title_length = (len(email) + len(full_name) + len(server) + 8)
 
         view = View(self.controller)
 
         left.assert_called_once_with()
         center.assert_called_once_with()
         right.assert_called_once_with()
+
         expected_column_calls = [
             mocker.call([
                 (View.LEFT_WIDTH, left()),

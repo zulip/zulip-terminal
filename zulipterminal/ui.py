@@ -1,6 +1,5 @@
 import platform
 import re
-from urllib.parse import urlparse
 from typing import Any, Tuple, List, Dict, Optional
 import random
 
@@ -29,7 +28,6 @@ class View(urwid.WidgetWrap):
         self.controller = controller
         self.palette = controller.theme
         self.model = controller.model
-        self.client = controller.client
         self.users = self.model.users
         self.pinned_streams = self.model.pinned_streams
         self.unpinned_streams = self.model.unpinned_streams
@@ -95,13 +93,12 @@ class View(urwid.WidgetWrap):
         self.body = urwid.Columns(body, focus_column=0)
 
         div_char = '═'
-        profile = self.controller.client.get_profile()
-
-        base_url = '{uri.scheme}://{uri.netloc}/'.format(
-                uri=urlparse(self.controller.client.base_url))
 
         title_text = " {full_name} ({email}) - {server} ".format(
-                server=base_url, **profile)
+                     full_name=self.model.user_full_name,
+                     email=self.model.user_email,
+                     server=self.model.server_url)
+
         title_bar = urwid.Columns([
             urwid.Divider(div_char=div_char),
             (len(title_text), urwid.Text([title_text])),
