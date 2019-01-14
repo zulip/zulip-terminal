@@ -1,6 +1,14 @@
 from typing import Set
 
 KEY_BINDINGS = {
+    'HELP': {
+        'keys': {'?'},
+        'help_text': 'Display help menu',
+    },
+    'QUIT_HELP': {
+        'keys': {'q', 'esc'},
+        'help_text': 'Quit help menu',
+    },
     'GO_BACK': {
         'keys': {'esc'},
         'help_text': 'Go Back',
@@ -35,27 +43,27 @@ KEY_BINDINGS = {
     },
     'REPLY_MESSAGE': {
         'keys': {'r', 'enter'},
-        'help_text': 'Reply to a message',
-    },
-    'REPLY_AUTHOR': {
-        'keys': {'R'},
-        'help_text': 'Reply to an author',
+        'help_text': 'Reply to the current message',
     },
     'MENTION_REPLY': {
         'keys': {'@'},
-        'help_text': 'Reply mentioning the sender of the message'
+        'help_text': 'Reply mentioning the sender of the current message'
     },
     'QUOTE_REPLY': {
         'keys': {'>'},
-        'help_text': 'Reply quoting message text',
+        'help_text': 'Reply quoting the current message text',
+    },
+    'REPLY_AUTHOR': {
+        'keys': {'R'},
+        'help_text': 'Reply privately to the sender of the current message',
     },
     'STREAM_MESSAGE': {
         'keys': {'c'},
-        'help_text': 'New stream message',
+        'help_text': 'New message to a stream',
     },
     'PRIVATE_MESSAGE': {
         'keys': {'x'},
-        'help_text': 'New private message',
+        'help_text': 'New message to a person or group of people',
     },
     'TAB': {
         'keys': {'tab'},
@@ -67,11 +75,11 @@ KEY_BINDINGS = {
     },
     'STREAM_NARROW': {
         'keys': {'s'},
-        'help_text': 'Narrow to a stream',
+        'help_text': 'Narrow to the stream of the current message',
     },
     'TOPIC_NARROW': {
         'keys': {'S'},
-        'help_text': 'Narrow to a topic',
+        'help_text': 'Narrow to the topic of the current message',
     },
     'ALL_PM': {
         'keys': {'P'},
@@ -101,25 +109,17 @@ KEY_BINDINGS = {
         'keys': {'q'},
         'help_text': 'Search Streams',
     },
-    'HELP': {
-        'keys': {'?'},
-        'help_text': 'Display help menu',
-    },
     'ENTER': {
         'keys': {'enter'},
         'help_text': 'Perform current action',
     },
-    'QUIT_HELP': {
-        'keys': {'q', 'esc'},
-        'help_text': 'Quit help menu',
-    },
     'THUMBS_UP': {
         'keys': {'+'},
-        'help_text': 'Add/remove thumbs-up reaction on a message',
+        'help_text': 'Add/remove thumbs-up reaction to the current message',
     },
     'TOGGLE_STAR_STATUS': {
         'keys': {'ctrl s', '*'},
-        'help_text': 'Add/remove star status of a message',
+        'help_text': 'Add/remove star status of the current message',
     },
 }
 
