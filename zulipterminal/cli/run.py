@@ -6,6 +6,8 @@ import tempfile
 from typing import Dict, Any, List, Optional
 from os import path, remove
 
+from urwid import set_encoding
+
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
@@ -138,6 +140,8 @@ def main(options: Optional[List[str]]=None) -> None:
 
     argv = options if options is not None else sys.argv[1:]
     args = parse_args(argv)
+
+    set_encoding('utf-8')
 
     if args.profile:
         import cProfile
