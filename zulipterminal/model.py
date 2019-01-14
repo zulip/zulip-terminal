@@ -80,7 +80,11 @@ class Model:
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
+
         self.user_id = -1  # type: int
+        self.user_email = ""
+        self.user_full_name = ""
+
         self.initial_data = {}  # type: Dict[str, Any]
 
         # Register to the queue before initializing further so that we don't
@@ -333,6 +337,8 @@ class Model:
                    for name, future in futures.items()}
         if all(results.values()):
             self.user_id = results['user_id']
+            self.user_email = self.initial_data['email']
+            self.user_full_name = self.initial_data['full_name']
         else:
             failures = [name for name, result in results.items() if not result]
             raise ServerConnectionFailure(", ".join(failures))

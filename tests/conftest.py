@@ -193,6 +193,8 @@ def initial_data(logged_on_user):
     Response from /register API request.
     """
     return {
+        'full_name': logged_on_user['full_name'],
+        'email': logged_on_user['email'],
         'unsubscribed': [{
             'audible_notifications': False,
             'description': 'announce',
