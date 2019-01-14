@@ -183,7 +183,7 @@ class MessageBox(urwid.Pile):
         self.recipients = ', '.join(list(
             recipient['full_name']
             for recipient in self.message['display_recipient']
-            if recipient['email'] != self.model.client.email
+            if recipient['email'] != self.model.user_email
         ))
         title_markup = ('header', [
             ('custom', 'Private Messages with'),
@@ -289,7 +289,7 @@ class MessageBox(urwid.Pile):
                     if link.startswith('/user_uploads/'):
                         # Append org url to before user_uploads to convert it
                         # into a link.
-                        link = self.model.client.base_url + link
+                        link = self.model.server_url + link
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':
@@ -421,7 +421,7 @@ class MessageBox(urwid.Pile):
         emails = []
         for recipient in self.message['display_recipient']:
             email = recipient['email']
-            if email == self.model.client.email:
+            if email == self.model.user_email:
                 continue
             emails.append(recipient['email'])
         return ', '.join(emails)
