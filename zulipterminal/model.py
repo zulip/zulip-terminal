@@ -114,13 +114,6 @@ class Model:
             'update_message_flags': self.update_message_flag_status,
         }  # type: Dict[str, Callable[[Event], None]]
 
-    def _update_user_id(self) -> Optional[int]:
-        profile_json = self.client.get_profile()
-        if profile_json['result'] == 'success':
-            return profile_json['user_id']
-        else:
-            return None
-
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
         Returns the focus in the current narrow.
@@ -299,13 +292,12 @@ class Model:
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor(max_workers=1) as executor:
             futures = {
                 'get_messages': executor.submit(self.get_messages,
                                                 num_after=10,
                                                 num_before=30,
                                                 anchor=None),
-                'user_id': executor.submit(self._update_user_id),
             }  # Dict[str, Future[Any]]
             try:
                 response = self.client.register(
@@ -339,7 +331,7 @@ class Model:
         results = {name: future.result()  # type: ignore
                    for name, future in futures.items()}
         if all(results.values()):
-            self.user_id = results['user_id']
+            self.user_id = self.initial_data['user_id']
             self.user_email = self.initial_data['email']
             self.user_full_name = self.initial_data['full_name']
         else:

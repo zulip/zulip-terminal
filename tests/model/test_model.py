@@ -52,7 +52,6 @@ class TestModel:
                                                    num_after=10,
                                                    anchor=None)
         assert model.initial_data == initial_data
-        model.client.get_profile.assert_called_once_with()
         assert model.user_id == user_profile['user_id']
         assert model.user_full_name == user_profile['full_name']
         assert model.user_email == user_profile['email']
@@ -67,7 +66,6 @@ class TestModel:
         assert model.unread_counts == []
 
     def test_register_initial_desired_events(self, mocker, initial_data):
-        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_messages')
         mocker.patch('zulipterminal.model.Model.get_all_users')
         self.client.register.return_value = initial_data
@@ -294,7 +292,6 @@ class TestModel:
                                   index_all_messages, initial_data,
                                   num_before=30, num_after=10):
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -335,7 +332,6 @@ class TestModel:
 
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -369,7 +365,6 @@ class TestModel:
                                initial_data, num_before=30, num_after=10):
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -433,7 +428,6 @@ class TestModel:
     def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
         mocker.patch('zulipterminal.model.Model.get_messages')
-        mocker.patch('zulipterminal.model.Model._update_user_id')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -456,8 +450,6 @@ class TestModel:
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
                            user_id):
-        mocker.patch('zulipterminal.model.Model._update_user_id',
-                     return_value=user_id)
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'

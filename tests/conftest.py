@@ -195,6 +195,7 @@ def initial_data(logged_on_user):
     return {
         'full_name': logged_on_user['full_name'],
         'email': logged_on_user['email'],
+        'user_id': logged_on_user['user_id'],
         'unsubscribed': [{
             'audible_notifications': False,
             'description': 'announce',
@@ -581,7 +582,7 @@ def index_all_starred(empty_index, request):
 
 @pytest.fixture(scope="module")
 def user_profile(logged_on_user):
-    return {
+    return {  # FIXME These should all be self-consistent with others?
         'max_message_id': 589270,
         'short_name': logged_on_user['short_name'],
         'full_name': logged_on_user['full_name'],
