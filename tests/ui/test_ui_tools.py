@@ -13,6 +13,7 @@ from zulipterminal.ui_tools.views import (
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import TopButton, StreamButton, UserButton
+from zulipterminal.config.keys import keys_for_command
 
 from urwid import AttrWrap, Columns, Padding, Text
 
@@ -822,8 +823,8 @@ class TestHelpMenu:
         self.help_view.keypress(size, key)
         assert not self.controller.exit_help.called
 
-    def test_keypress_q(self):
-        key = "q"
+    @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
+    def test_keypress_goback(self, key):
         size = (200, 20)
         self.help_view.keypress(size, key)
         assert self.controller.exit_help.called

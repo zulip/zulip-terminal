@@ -5,10 +5,6 @@ KEY_BINDINGS = {
         'keys': {'?'},
         'help_text': 'Display help menu',
     },
-    'QUIT_HELP': {
-        'keys': {'q', 'esc'},
-        'help_text': 'Quit help menu',
-    },
     'GO_BACK': {
         'keys': {'esc'},
         'help_text': 'Go Back',

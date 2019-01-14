@@ -85,7 +85,7 @@ class Controller:
     def show_help(self) -> None:
         self.loop.widget = urwid.Overlay(
             urwid.LineBox(HelpView(self),
-                          title="Help Menu ('q' quits, up/down scrolls)"),
+                          title="Help Menu ('esc' quits, up/down scrolls)"),
             self.view,
             align='center',
             width=('relative', 100),
