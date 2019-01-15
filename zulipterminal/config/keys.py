@@ -62,7 +62,7 @@ KEY_BINDINGS = {
         'help_text': 'Toggle focus box in compose box'
     },
     'SEND_MESSAGE': {
-        'keys': {'meta enter'},
+        'keys': {'meta enter', 'ctrl d'},
         'help_text': 'Send a message',
     },
     'STREAM_NARROW': {
