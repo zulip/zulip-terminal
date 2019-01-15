@@ -89,7 +89,7 @@ autohide=autohide
 | New stream message                                    | <kbd>c</kbd>                                  |
 | New private message                                   | <kbd>x</kbd>                                  |
 | Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
-| Send a message                                        | <kbd>Alt Enter</kbd>                          |
+| Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>                         |
 | Narrow to a stream                                    | <kbd>S</kbd>                                  |
 | Narrow to a topic                                     | <kbd>s</kbd>                                  |
 | Narrow to private messages                            | <kbd>P</kbd>                                  |

@@ -2,6 +2,9 @@
 
 ## Next Release
 
+### Interactivity improvements
+- Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>)
+
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
 - Move intrusive flashing cursor in left panel to far left side
