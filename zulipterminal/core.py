@@ -83,12 +83,13 @@ class Controller:
         self.loop.draw_screen()
 
     def show_help(self) -> None:
+        help_view = HelpView(self)
         self.loop.widget = urwid.Overlay(
-            urwid.LineBox(HelpView(self),
+            urwid.LineBox(help_view,
                           title="Help Menu ('esc' quits, up/down scrolls)"),
             self.view,
             align='center',
-            width=('relative', 100),
+            width=help_view.width+2,  # +2 from LineBox
             valign='middle',
             height=('relative', 100)
         )
