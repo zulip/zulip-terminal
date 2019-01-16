@@ -565,17 +565,30 @@ class LeftColumnView(urwid.Pile):
 class HelpView(urwid.ListBox):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
+
+        widths = [(len(binding['help_text']), len(", ".join(binding['keys'])))
+                  for binding in KEY_BINDINGS.values()]
+        max_widths = [max(width)+2 for width in zip(*widths)]
+        self.width = sum(max_widths)
+
         self.log = urwid.SimpleFocusListWalker(
             [urwid.Text('')] +
-            [urwid.Columns([urwid.LineBox(
-                                   urwid.Text(text),
-                                   tlcorner='', brcorner='',
-                                   trcorner='', blcorner='',
-                                   rline=' ', lline=' ',
-                                   bline='-', tline='',
-                            ) for text in (binding['help_text'],
-                                           ", ".join(binding['keys']))])
+            [urwid.Columns([
+                urwid.LineBox(
+                    urwid.Text(binding['help_text']),
+                    tlcorner='', brcorner='',
+                    trcorner='', blcorner='',
+                    rline=' ', lline=' ',
+                    bline='-', tline=''),
+                (max_widths[1], urwid.LineBox(
+                    urwid.Text(", ".join(binding['keys'])),
+                    tlcorner='', brcorner='',
+                    trcorner='', blcorner='',
+                    rline=' ', lline=' ',
+                    bline='-', tline=''))
+             ])
              for binding in KEY_BINDINGS.values()])
+
         super(HelpView, self).__init__(self.log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
