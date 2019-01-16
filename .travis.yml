@@ -24,12 +24,9 @@ matrix:
       osx_image: xcode10
       sudo: required
       language: generic
-      install:
-      - pip install pipenv==11.10
-      - pipenv install --three --dev Pipfile
 install:
   - pip install pipenv==11.10
-  - pipenv install --dev Pipfile
+  - pipenv install --three --dev Pipfile
 script:
   - pipenv run pytest
   - if [[ "$RUN_MYPY" == "yes" ]]; then pipenv run ./tools/run-mypy; fi
