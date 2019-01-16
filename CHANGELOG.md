@@ -4,6 +4,7 @@
 
 ### Interactivity improvements
 - Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>)
+- Allow <kbd>f</kbd> and <kbd>P</kbd> shortcut keys to work from side panels (narrow starred & private messages)
 
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)

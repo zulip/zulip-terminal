@@ -465,10 +465,6 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.private_box_view(
                 email=self.message['sender_email']
             )
-        elif is_command_key('ALL_PM', key):
-            self.model.controller.show_all_pm(self)
-        elif is_command_key('ALL_STARRED', key):
-            self.model.controller.show_all_starred(self)
         elif is_command_key('MENTION_REPLY', key):
             self.keypress(size, 'enter')
             mention = '@**' + self.message['sender_full_name'] + '** '
