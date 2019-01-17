@@ -566,27 +566,22 @@ class HelpView(urwid.ListBox):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
 
-        widths = [(len(binding['help_text']), len(", ".join(binding['keys'])))
+        widths = [(len(binding['help_text'])+4,
+                   len(", ".join(binding['keys'])))
                   for binding in KEY_BINDINGS.values()]
-        max_widths = [max(width)+2 for width in zip(*widths)]
+        max_widths = [max(width) for width in zip(*widths)]
         self.width = sum(max_widths)
 
         self.log = urwid.SimpleFocusListWalker(
             [urwid.Text('')] +
-            [urwid.Columns([
-                urwid.LineBox(
+            [urwid.LineBox(
+                urwid.Columns([
                     urwid.Text(binding['help_text']),
-                    tlcorner='', brcorner='',
-                    trcorner='', blcorner='',
-                    rline=' ', lline=' ',
-                    bline='-', tline=''),
-                (max_widths[1], urwid.LineBox(
-                    urwid.Text(", ".join(binding['keys'])),
-                    tlcorner='', brcorner='',
-                    trcorner='', blcorner='',
-                    rline=' ', lline=' ',
-                    bline='-', tline=''))
-             ])
+                    (max_widths[1], urwid.Text(", ".join(binding['keys'])))
+                              ], dividechars=2),
+                tlcorner='', brcorner='', trcorner='', blcorner='',
+                rline=' ', lline=' ', bline='-', tline='',
+             )
              for binding in KEY_BINDINGS.values()])
 
         super(HelpView, self).__init__(self.log)
