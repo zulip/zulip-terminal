@@ -72,6 +72,15 @@ def msg_box(mocker, messages_successful_response):
 
 # --------------- Model Fixtures ----------------------------------------------
 
+@pytest.fixture(scope="module")
+def logged_on_user():
+    return {
+        'email': 'FOOBOO@gmail.com',
+        'full_name': 'Tomás Farías',
+        'user_id': 5827,
+        'short_name': 'FOO',
+    }
+
 
 @pytest.fixture
 def messages_successful_response() -> Dict[str, Any]:
@@ -179,7 +188,7 @@ def messages_successful_response() -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="module")
-def initial_data():
+def initial_data(logged_on_user):
     """
     Response from /register API request.
     """
@@ -205,9 +214,9 @@ def initial_data():
             'bot_type': None,
             'is_bot': False,
             'is_admin': False,
-            'email': 'FOOBOO@gmail.com',
-            'full_name': 'Tomás Farías',
-            'user_id': 5827,
+            'email': logged_on_user['email'],
+            'full_name': logged_on_user['full_name'],
+            'user_id': logged_on_user['user_id'],
             'avatar_url': None,
             'is_active': True
         }, {
@@ -362,7 +371,7 @@ def initial_data():
                     'status': 'idle'
                 }
             },
-            'FOOBOO@gmail.com': {
+            logged_on_user['email']: {
                 'website': {
                     'pushable': True,
                     'client': 'website',
@@ -569,14 +578,14 @@ def index_all_starred(empty_index, request):
 
 
 @pytest.fixture(scope="module")
-def user_profile():
+def user_profile(logged_on_user):
     return {
         'max_message_id': 589270,
-        'short_name': 'FOO',
-        'full_name': 'Tomás Farías',
-        'email': 'FOOBOO@gmail.com',
+        'short_name': logged_on_user['short_name'],
+        'full_name': logged_on_user['full_name'],
+        'email': logged_on_user['email'],
         'is_bot': False,
-        'user_id': 5827,
+        'user_id': logged_on_user['user_id'],
         'result': 'success',
         'client_id': 'abcd',
         'msg': '',
@@ -594,16 +603,16 @@ def error_response():
 
 
 @pytest.fixture(scope="module")
-def user_dict():
+def user_dict(logged_on_user):
     """
     User_dict created according to `initial_data` fixture.
     """
     return {
-        'FOOBOO@gmail.com': {
-            'full_name': 'Tomás Farías',
-            'email': 'FOOBOO@gmail.com',
+        logged_on_user['email']: {
+            'full_name': logged_on_user['full_name'],
+            'email': logged_on_user['email'],
             'status': 'active',
-            'user_id': 5827
+            'user_id': logged_on_user['user_id'],
         },
         'nyan.salmon+sns@gmail.com': {
             'full_name': 'Jari Winberg',
@@ -645,17 +654,17 @@ def user_dict():
 
 
 @pytest.fixture(scope="module")
-def user_list():
+def user_list(logged_on_user):
     """
     List of users created corresponding to
     `initial_data` fixture.
     """
     # NOTE These are sorted active > idle, then according to full_name
     return [{
-        'full_name': 'Tomás Farías',
-        'email': 'FOOBOO@gmail.com',
+        'full_name': logged_on_user['full_name'],
+        'email': logged_on_user['email'],
         'status': 'active',
-        'user_id': 5827
+        'user_id': logged_on_user['user_id'],
     }, {
         'full_name': 'Jari Winberg',
         'email': 'nyan.salmon+sns@gmail.com',
@@ -703,10 +712,10 @@ def streams():
 
 
 @pytest.fixture(scope="module")
-def user_id():
+def user_id(logged_on_user):
     """
     Default User id of the current
     user, i.e., Tomás Farías
     according to current Fixtures.
     """
-    return 5827
+    return logged_on_user['user_id']
