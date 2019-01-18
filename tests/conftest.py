@@ -573,10 +573,10 @@ def user_profile():
     return {
         'max_message_id': 589270,
         'short_name': 'FOO',
-        'full_name': 'FOO BOO',
-        'email': 'FOO@ZULIP.COM',
+        'full_name': 'Tomás Farías',
+        'email': 'FOOBOO@gmail.com',
         'is_bot': False,
-        'user_id': 5140,
+        'user_id': 5827,
         'result': 'success',
         'client_id': 'abcd',
         'msg': '',

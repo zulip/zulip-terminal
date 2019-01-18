@@ -475,15 +475,16 @@ class TestModel:
          [['stream', 'a'], ['topic', 'b']],
          frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
-         [['pm_with', 'FOOBOO@gmail.com']],
-         frozenset({5827, 5140}), ['msg_w']),  # User Ids taken from conftest
+         [['pm_with', 'notification-bot@zulip.com']],
+         frozenset({5827, 5}), ['msg_w']),
         ({'type': 'private', 'id': 1},
          [['is', 'search']],
          frozenset(), []),
         ({'type': 'private', 'id': 1},
-         [['pm_with', 'FOOBOO@gmail.com']],
+         [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 3212}), []),
-    ])
+    ], ids=['stream', 'all_private', 'topic', 'pm_existing_conv',
+            'search', 'pm_no_existing_conv'])
     def test_append_message(self, mocker, user_dict, user_profile, response,
                             narrow, recipients, model, log):
         model.update = True
