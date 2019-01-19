@@ -69,6 +69,24 @@ theme=default
 autohide=autohide
 ```
 
+### Notifications
+
+#### Linux
+
+The following command installs `notify-send` on Debian based systems, similar
+commands can be found for other linux systems as well.
+```
+sudo apt-get install libnotify-bin
+```
+
+#### WSL
+
+Run powershell as **admin** and run these commands to install dependencies for showing notifications:
+
+```
+set-executionpolicy remotesigned
+Install-Module -Name BurntToast
+```
 
 ## Hot Keys
 | Command                                               | Key Combination                               |

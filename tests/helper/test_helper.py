@@ -5,6 +5,7 @@ from zulipterminal.helper import (
     powerset,
     classify_unread_counts,
     canonicalize_color,
+    notify,
 )
 from typing import Any
 
@@ -199,3 +200,20 @@ def test_invalid_color_format(mocker, color):
     with pytest.raises(ValueError) as e:
         canon = canonicalize_color(color)
     assert str(e.value) == 'Unknown format for color "{}"'.format(color)
+
+
+@pytest.mark.parametrize('OS, is_notification_sent', [
+    ([True, False, False], True),  # OS: [WSL, MACOS, LINUX]
+    ([False, True, False], True),
+    ([False, False, True], True),
+    ([False, False, False], False),  # Unsupported OS
+])
+def test_notify(mocker, OS, is_notification_sent):
+    title = "Author"
+    text = "Hello!"
+    mocker.patch('zulipterminal.helper.WSL', OS[0])
+    mocker.patch('zulipterminal.helper.MACOS', OS[1])
+    mocker.patch('zulipterminal.helper.LINUX', OS[2])
+    subprocess = mocker.patch('zulipterminal.helper.subprocess')
+    notify(title, text)
+    assert subprocess.run.called == is_notification_sent
