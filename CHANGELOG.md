@@ -5,15 +5,28 @@
 ### Interactivity improvements
 - Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>)
 - Allow <kbd>f</kbd> and <kbd>P</kbd> shortcut keys to work from side panels (narrow starred & private messages)
+- Warn on startup, if specified theme is lacking current required styles
+- Upon unexpected crash, exit cleanly and log traceback to `zulip-terminal-tracebacks.log`
 
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
 - Move intrusive flashing cursor in left panel to far left side
+- Truncate text in left & right panels cleanly with '..', avoiding text overflow
 - Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
+- Further improvement/reordering of shortcut keys in README & help menu (<kbd>?</kbd>)
 
 ### Important bugfixes
-- Avoid crash in rare care of empty message content
+- Exit cleanly if cannot connect to zulip server
+- Avoid crash in rare case of empty message content
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
+- Avoid crash on receiving multiple starred-message events
+
+### Infrastructure changes
+- Minimized initial registration & communication with zulip server
+- Internal refactoring & centralization of code handling zulip server communication
+- Centralize server event callbacks into Model
+- Improve test coverage, including first tests for run.py
+- Simplify UI objects used in left & right panels
 
 ## 0.3.1
 
