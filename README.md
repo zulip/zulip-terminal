@@ -224,6 +224,25 @@ $ pipenv run pip3 install -e .[dev]
 $ pip3 install -e .[dev]
 ```
 
+### Notifications
+
+#### Linux
+
+The following command installs `notify-send` on Debian based systems, similar
+commands can be found for other linux systems as well.
+```
+sudo apt-get install libnotify-bin
+```
+
+#### WSL
+
+Run powershell as **admin** and run these commands to install dependencies for showing notifications:
+
+```
+set-executionpolicy remotesigned
+Install-Module -Name BurntToast
+```
+
 ### Development tasks
 
 Once you have a development environment set up, you might find the following useful, depending upon your type of environment:

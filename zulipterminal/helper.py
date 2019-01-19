@@ -11,6 +11,14 @@ from typing import (
 from mypy_extensions import TypedDict
 
 import os
+import platform
+import subprocess
+import shlex
+import lxml.html
+
+MACOS = platform.system() == "Darwin"
+LINUX = platform.system() == "Linux"
+WSL = 'Microsoft' in platform.release()
 
 Message = Dict[str, Any]
 
@@ -421,3 +429,21 @@ def canonicalize_color(color: str) -> str:
         return color.lower()
     else:
         raise ValueError('Unknown format for color "{}"'.format(color))
+
+
+@asynch
+def notify(title: str, html_text: str) -> None:
+    document = lxml.html.document_fromstring(html_text)
+    text = document.text_content()
+    command = ""
+    if WSL:
+        command = ('powershell.exe "New-BurntToastNotification'
+                   ' -Text \'{}\', \'{}\'"'.format(title, text))
+    elif MACOS:
+        command = ("osascript -e 'display notification \"{}\" with title"
+                   " \"{}\"'".format(text, title))
+    elif LINUX:
+        command = 'notify-send "{}" "{}"'.format(title, text)
+    if command:
+        res = subprocess.run(shlex.split(command), stdout=subprocess.DEVNULL,
+                             stderr=subprocess.STDOUT)
