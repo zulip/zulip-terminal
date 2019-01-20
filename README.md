@@ -182,32 +182,18 @@ $ pip3 install -e .[dev]
 $ zulip-term
 ```
 
-### Running tests
+## Development tasks
 
-* To run all tests (including the linter):
-```
-pipenv run pytest
-```
+Once you have a development environment set up, you might find the following useful, depending upon your type of environment:
 
-* To generate coverage report for tests:
-```
-pipenv run pytest --cov-report html:cov_html --cov=./
-```
+| Task | Pip | Pipenv |
+|-|-|-|
+| Run all tests (including linter) | `pytest` | `pipenv run pytest` |
+| Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
+| Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
+| Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
+| Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
 
-* To check the type annotations, run:
-```
-pipenv run ./tools/run-mypy
-```
-
-* To open in debug mode:
-```
-pipenv run zulip-term -d
-```
-
-* To profile runtime:
-```
-pipenv run zulip-term --profile
-```
 
 ## Contributor Guidelines
 
