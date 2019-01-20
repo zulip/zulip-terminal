@@ -2,7 +2,6 @@ import argparse
 import configparser
 import traceback
 import sys
-import tempfile
 import logging
 import requests
 from typing import Dict, Any, List, Optional, Tuple
