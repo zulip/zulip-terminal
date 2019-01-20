@@ -119,7 +119,19 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
             print("\n")
 
     zuliprc = configparser.ConfigParser()
-    zuliprc.read(zuliprc_path)
+
+    try:
+        res = zuliprc.read(zuliprc_path)
+        if len(res) == 0:
+            print(in_color('red',
+                           "\nZuliprc file could not be accessed at " +
+                           zuliprc_path + "\n"))
+            sys.exit(1)
+    except configparser.MissingSectionHeaderError:
+        print(in_color('red',
+                       "\nFailed to parse zuliprc file at " +
+                       zuliprc_path + "\n"))
+        sys.exit(1)
 
     # default settings
     NO_CONFIG = 'with no config'
