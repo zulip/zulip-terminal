@@ -157,7 +157,7 @@ $ pipenv run zulip-term
 
 ### Running tests
 
-* To run all tests:
+* To run all tests (including the linter):
 ```
 pipenv run pytest
 ```
@@ -165,11 +165,6 @@ pipenv run pytest
 * To generate coverage report for tests:
 ```
 pipenv run pytest --cov-report html:cov_html --cov=./
-```
-
-* To run the linter:
-```
-pipenv run pytest --pep8
 ```
 
 * To check the type annotations, run:
