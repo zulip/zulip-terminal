@@ -108,7 +108,8 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     while not path.exists(zuliprc_path):
         try:
             fetch_zuliprc(zuliprc_path)
-        except OSError:
+        # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
+        except (OSError, ValueError):
             # Remove zuliprc file if created.
             if path.exists(zuliprc_path):
                 remove(zuliprc_path)
