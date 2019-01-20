@@ -15,15 +15,12 @@ Please see the [CHANGELOG](CHANGELOG.md) for released & recent changes.
 
 ## Installation & Running
 
-We recommend installing `zulip-term` in a python virtual environment, something like the following:
-```
-[sudo] pip3 install virtualenv
-virtualenv /tmp/zt/
-. /tmp/zt/bin/activate
-pip3 install zulip-term
-```
+We recommend installing `zulip-term` in a new python virtual environment (venv); with the required python 3.4+, the following should work on most systems:
+1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
+2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+3. `pip3 install zulip-term` (downloads and installs the latest zulip-terminal release from PyPI)
 
-Zulip Terminal installs as `zulip-term`, so just run:
+Zulip Terminal installs as `zulip-term`, so you can then run:
 ```
 $ zulip-term
 ```
@@ -35,6 +32,10 @@ Loading with:
    autohide setting 'autohide' specified with no config.
 Welcome to Zulip.
 ```
+
+### NOTE: Running in subsequent/different sessions
+
+If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the installation again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
 
 ### NOTE: The zuliprc file
 
