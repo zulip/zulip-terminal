@@ -125,9 +125,13 @@ autohide=autohide
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
-## Development
+## Setting up a development environment
 
-For development, the setup process is a little different.
+Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
+
+Note that the tools used in each case are typically the same, but are called in different ways.
+
+### Pipenv
 
 1. Install pipenv
 ```
@@ -142,7 +146,7 @@ $ python3 -m pip install --user pipenv
 $ git clone git@github.com:zulip/zulip-terminal.git
 ```
 
-3. Install dev requirements
+3. Install zulip-term, with the development requirements
 ```
 $ cd zulip-terminal
 $ pipenv --three
@@ -153,6 +157,29 @@ $ pipenv run python setup.py develop
 4. Run the client
 ```
 $ pipenv run zulip-term
+```
+
+### Pip
+
+1. Manually create & activate a virtual environment; any method should work, such as that used in the above simple installation
+
+    1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
+    2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+
+2. Clone the zulip/zulip-terminal repository locally
+```
+$ git clone git@github.com:zulip/zulip-terminal.git
+```
+
+3. Install zulip-term, with the development requirements
+```
+$ cd zulip-terminal
+$ pip3 install -e .[dev]
+```
+
+4. Run the client
+```
+$ zulip-term
 ```
 
 ### Running tests
@@ -182,7 +209,7 @@ pipenv run zulip-term -d
 pipenv run zulip-term --profile
 ```
 
-### Contributor Guidelines
+## Contributor Guidelines
 
 Zulip Terminal is being build by an awesome community of [Zulip](https://zulipchat.com/team).
 
