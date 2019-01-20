@@ -108,12 +108,15 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     while not path.exists(zuliprc_path):
         try:
             fetch_zuliprc(zuliprc_path)
-        except Exception:
-            print(in_color('red',
-                           "\nInvalid Credentials, Please try again!\n"))
+        except OSError:
             # Remove zuliprc file if created.
             if path.exists(zuliprc_path):
                 remove(zuliprc_path)
+            print(in_color('red',
+                           "\nInvalid Credentials, Please try again!\n"))
+        except EOFError:
+            # Assume that the user pressed Ctrl+D and continue the loop
+            print("\n")
 
     zuliprc = configparser.ConfigParser()
     zuliprc.read(zuliprc_path)
