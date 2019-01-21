@@ -2,6 +2,7 @@ import platform
 import re
 from typing import Any, Tuple, List, Dict, Optional
 import random
+from datetime import datetime, date, time
 
 import urwid
 
@@ -70,11 +71,20 @@ class View(urwid.WidgetWrap):
         self._w.footer[0].set_text(text)
         self.controller.update_screen()
 
+    def _connection_text_now(self) -> str:
+        return ("  Last server contact: " +  # Leading spaces are gap from help
+                datetime.now().strftime("%H:%M (%d/%m/%Y)"))
+
+    def update_last_connection_time(self) -> None:
+        self._w.footer[1].set_text(self._connection_text_now())
+        self.controller.update_screen()
+
     def footer_view(self) -> Any:
-        footer_columns = urwid.Columns([
-            urwid.AttrWrap(urwid.Text(self.get_random_help()), 'footer')
+        server_datetime_text = self._connection_text_now()
+        return urwid.Columns([
+            urwid.AttrWrap(urwid.Text(self.get_random_help()), 'footer'),
+            (41, urwid.AttrWrap(urwid.Text(server_datetime_text), 'footer')),
         ])
-        return footer_columns
 
     def main_window(self) -> Any:
         self.left_panel = self.left_column_view()

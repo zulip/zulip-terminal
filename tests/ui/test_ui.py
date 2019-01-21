@@ -49,6 +49,24 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == line_box()
 
+    def test_update_last_connection_time(self, view, monkeypatch,
+                                         day=23, month=1, year=2019,
+                                         hour=12, minute=29, sec=35):
+        import datetime
+
+        class dt:
+            def now():
+                return datetime.datetime(year, month, day, hour, minute, sec)
+        monkeypatch.setattr('zulipterminal.ui.datetime', dt)
+
+        view.update_last_connection_time()
+
+        (view._w.footer[1].set_text.
+         assert_called_once_with("  Last server contact: {}:{} "
+                                 "({:0>2}/{:0>2}/{})".
+                                 format(hour, minute, day, month, year)))
+        view.controller.update_screen.assert_called_once_with()
+
     def test_set_footer_text_default(self, view, mocker):
         mocker.patch('zulipterminal.ui.View.get_random_help',
                      return_value=['some help text'])
