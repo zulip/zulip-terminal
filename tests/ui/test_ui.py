@@ -55,18 +55,18 @@ class TestView:
 
         view.set_footer_text()
 
-        view._w.footer.set_text.assert_called_once_with(['some help text'])
+        view._w.footer[0].set_text.assert_called_once_with(['some help text'])
         view.controller.update_screen.assert_called_once_with()
 
     def test_set_footer_text_specific_text(self, view, text='blah'):
         view.set_footer_text([text])
 
-        view._w.footer.set_text.assert_called_once_with([text])
+        view._w.footer[0].set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
 
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
-        assert isinstance(footer.text, str)
+        assert isinstance(footer[0].text, str)
 
     def test_main_window(self, mocker):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')

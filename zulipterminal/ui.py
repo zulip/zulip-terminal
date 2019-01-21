@@ -67,12 +67,14 @@ class View(urwid.WidgetWrap):
             text = self.get_random_help()
         else:
             text = text_list
-        self._w.footer.set_text(text)
+        self._w.footer[0].set_text(text)
         self.controller.update_screen()
 
     def footer_view(self) -> Any:
-        text_header = self.get_random_help()
-        return urwid.AttrWrap(urwid.Text(text_header), 'footer')
+        footer_columns = urwid.Columns([
+            urwid.AttrWrap(urwid.Text(self.get_random_help()), 'footer')
+        ])
+        return footer_columns
 
     def main_window(self) -> Any:
         self.left_panel = self.left_column_view()
