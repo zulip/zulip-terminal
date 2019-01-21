@@ -83,7 +83,7 @@ setup(
     install_requires=[
         "typing==3.6.4; python_version < '3.5'",
         'urwid==2.0.1',
-        'zulip==0.4.7',
+        'zulip==0.5.7',
         'emoji==0.5.0',
         'urwid_readline==0.8',
         'beautifulsoup4==4.6.0',
