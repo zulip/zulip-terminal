@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 typing = {version="==3.6.4", markers="python_version < '3.5'"}
 urwid = "==2.0.1"
-zulip = "==0.4.7"
+zulip = "==0.5.7"
 emoji = "==0.5.0"
 urwid-readline = "==0.8"
 beautifulsoup4 = "==4.6.0"
