@@ -117,6 +117,10 @@ KEY_BINDINGS = {
         'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of the current message',
     },
+    'AUTOCOMPLETE_A_USERNAME': {
+        'keys': {'@'},
+        'help_text': 'Press tab to autocomplete a username',
+    },
 }
 
 

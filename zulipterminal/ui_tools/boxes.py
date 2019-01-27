@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key
+import urwid_readline
 
 
 class WriteBox(urwid.Pile):
@@ -78,6 +79,17 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
+    
+    def unhandled_input(self, txt, key):
+        pass
+
+    def list_words(self, text, state):
+        cmd = ["start", "stop", "next",]
+        tmp = [c for c in cmd if c and c.startswith(text)] if text else cmd
+        try:
+            return tmp[state]
+        except IndexError:
+            return None
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
@@ -94,6 +106,15 @@ class WriteBox(urwid.Pile):
                 )
             if success:
                 self.msg_write_box.edit_text = ''
+        elif is_command_key('AUTOCOMPLETE_A_USERNAME',key):
+            self.msg_write_box.edit_text = urwid_readline.ReadlineEdit(multiline=True)  
+            self.msg_write_box.edit_text.enable_autocomplete(self.list_words)
+            fill = urwid.Filler(self.msg_write_box.edit_text, "top")
+            loop = urwid.MainLoop(
+               fill,
+                   unhandled_input=lambda key: self.unhandled_input(self.msg_write_box.edit_text, key)
+            )
+            loop.run()
         elif is_command_key('GO_BACK', key):
             self.view.controller.editor_mode = False
             self.main_view(False)
