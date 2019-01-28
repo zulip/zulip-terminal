@@ -46,7 +46,7 @@ GRAY = 'h244'  # gray_244
 THEMES = {
     'default': [
         (None,           'white',           'black'),
-        ('selected',     'light magenta',   'dark blue'),
+        ('selected',     'white',           'dark blue'),
         ('msg_selected', 'light green',     'black'),
         ('header',       'dark cyan',       'dark blue',  'bold'),
         ('custom',       'white',           'dark blue',  'underline'),
@@ -74,8 +74,8 @@ THEMES = {
         # on 256 colors
         (None,           'white',           'black',
          None,           WHITE,             BLACK),
-        ('selected',     'light magenta',   'dark blue',
-         None,           'light magenta',   DARKBLUE),
+        ('selected',     'white',           'dark blue',
+         None,           WHITE,             DARKBLUE),
         ('msg_selected', 'light green',     'black',
          None,           LIGHTGREEN,        BLACK),
         ('header',       'dark cyan',       'dark blue',
