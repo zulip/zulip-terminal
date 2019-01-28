@@ -105,8 +105,12 @@ class StreamButton(TopButton):
         # Simplify the color from the original version & add to palette
         # TODO Should this occur elsewhere and more intelligently?
         color = ''.join(orig_color[i] for i in (0, 1, 3, 5))  # 0 -> '#'
-        view.palette.append((color, '', '', '', color, 'black'))
-        view.palette.append(('s' + color, '', '', '', 'black', color))
+        for entry in view.palette:
+            if entry[0] is None:
+                background = entry[5] if len(entry) > 4 else entry[2]
+                break
+        view.palette.append((color, '', '', '', color+', bold', background))
+        view.palette.append(('s' + color, '', '', '', background, color))
 
         super().__init__(controller,
                          caption=caption,

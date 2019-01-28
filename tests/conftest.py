@@ -32,11 +32,13 @@ def stream_button(mocker):
     """
     Mocked stream button.
     """
+    view_mock = mocker.Mock()
+    view_mock.palette = [(None, 'black', 'white')]
     button = StreamButton(
         properties=['PTEST', 205, '#bfd56f', False],
         controller=mocker.patch('zulipterminal.core.Controller'),
         width=40,
-        view=mocker.patch('zulipterminal.ui.View')
+        view=view_mock,
     )
     return button
 

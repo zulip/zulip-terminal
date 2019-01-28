@@ -1271,9 +1271,11 @@ class TestStreamButton:
                           is_private, expected_prefix,
                           width, count, short_text, caption='caption'):
         properties = [caption, 5, '#ffffff', is_private]
+        view_mock = mocker.Mock()
+        view_mock.palette = [(None, 'black', 'white')]
         stream_button = StreamButton(properties,
                                      controller=mocker.Mock(),
-                                     view=mocker.Mock(),
+                                     view=view_mock,
                                      width=width,
                                      count=count)
 
