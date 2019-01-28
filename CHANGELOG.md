@@ -15,6 +15,7 @@
 - Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 - Further improvement/reordering of shortcut keys in README & help menu (<kbd>?</kbd>)
 - Improve styling of help menu, and how the menu scales with application width
+- Make stream icons bold and correct background color
 
 ### Important bugfixes
 - Exit cleanly if cannot connect to zulip server
