@@ -10,7 +10,7 @@
 
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
-- Move intrusive flashing cursor in left panel to far left side
+- Remove intrusive flashing cursor in side panels
 - Truncate text in left & right panels cleanly with '..', avoiding text overflow
 - Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
 - Further improvement/reordering of shortcut keys in README & help menu (<kbd>?</kbd>)
