@@ -56,7 +56,7 @@ class TopButton(urwid.Button):
             [' ', self.prefix_character,
              ' {}{}'.format(caption, num_spaces*' '),
              ('idle',  count_text)],
-            0),  # cursor location
+            self.width_for_text_space_count+4),  # cursor location
             self.text_color,
             'selected')
 
