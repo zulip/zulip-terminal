@@ -14,6 +14,7 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes
 )
+from zulipterminal.version import ZT_VERSION
 
 LOG_FILENAME = 'zulip-terminal-tracebacks.log'
 logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
@@ -55,6 +56,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument('--profile', dest='profile',
                         action="store_true",
                         default=False, help='Profile runtime.')
+
+    parser.add_argument('-v',
+                        '--version',
+                        action='store_true',
+                        default=False,
+                        help='Print zulip-terminal version and exit')
 
     return parser.parse_args(argv)
 
@@ -165,6 +172,10 @@ def main(options: Optional[List[str]]=None) -> None:
         import cProfile
         prof = cProfile.Profile()
         prof.enable()
+
+    if args.version:
+        print('Zulip Terminal ' + ZT_VERSION)
+        sys.exit(0)
 
     if args.config_file:
         zuliprc_path = args.config_file
