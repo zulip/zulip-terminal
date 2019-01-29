@@ -4,6 +4,7 @@ import traceback
 import sys
 import tempfile
 import logging
+import subprocess
 from typing import Dict, Any, List, Optional
 from os import path, remove
 
@@ -14,6 +15,7 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes
 )
+from zulipterminal.version import ZT_VERSION
 
 LOG_FILENAME = 'zulip-terminal-tracebacks.log'
 logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
@@ -55,6 +57,10 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument('--profile', dest='profile',
                         action="store_true",
                         default=False, help='Profile runtime.')
+
+    parser.add_argument('--version',
+                        action='store_true',
+                        help='Print zulip-terminal version and exit')
 
     return parser.parse_args(argv)
 
@@ -151,6 +157,36 @@ def main(options: Optional[List[str]]=None) -> None:
         import cProfile
         prof = cProfile.Profile()
         prof.enable()
+
+    if args.version:
+        msg = 'zulip-terminal ' + ZT_VERSION
+        cmd = [
+               'git',
+               'rev-parse',
+               '--short',
+               'HEAD'
+            ]
+        try:
+            check = subprocess.run(cmd,
+                                   stdout=subprocess.PIPE,
+                                   encoding='utf-8',
+                                   timeout=3,
+                                   check=True)
+            # Add git short hash and remove trailing newline.
+            msg += ' ' + check.stdout.strip('\n')
+        # Called when process exits with non zero return code.
+        except subprocess.CalledProcessError as e:
+            logging.info("\n\n" + str(e) + "\n\n")
+            logging.exception(e)
+        # Called when process exceeds the timeout.
+        except subprocess.TimeoutExpired as e:
+            logging.info("\n\n" + str(e) + "\n\n")
+            logging.exception(e)
+        except Exception as e:
+            logging.info("\n\n" + str(e) + "\n\n")
+            logging.exception(e)
+        print(msg)
+        sys.exit(0)
 
     if args.config_file:
         zuliprc_path = args.config_file
