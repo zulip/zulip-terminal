@@ -1,6 +1,7 @@
 import pytest
 from zulipterminal.cli.run import main, in_color, THEMES
 from zulipterminal.model import ServerConnectionFailure
+from zulipterminal.version import ZT_VERSION
 
 
 @pytest.mark.parametrize('color, code', [
@@ -31,7 +32,8 @@ def test_main_help(capsys, options):
         '-h, --help',
         '-d, --debug',
         '--profile',
-        '--config-file CONFIG_FILE, -c CONFIG_FILE'
+        '--config-file CONFIG_FILE, -c CONFIG_FILE',
+        '-v, --version'
     }
     optional_argument_lines = {line[2:] for line in lines
                                if len(line) > 2 and line[2] == '-'}
@@ -107,5 +109,20 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
             format(server_connection_error)),
     ]
     assert lines == expected_lines
+
+    assert captured.err == ""
+
+
+@pytest.mark.parametrize('options', ['-v', '--version'])
+def test_zt_version(capsys, options):
+    with pytest.raises(SystemExit) as e:
+        main([options])
+        assert str(e.value) == "0"
+
+    captured = capsys.readouterr()
+
+    lines = captured.out.strip('\n')
+    expected = 'Zulip Terminal ' + ZT_VERSION
+    assert lines == expected
 
     assert captured.err == ""
