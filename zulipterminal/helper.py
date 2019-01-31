@@ -305,6 +305,11 @@ def classify_unread_counts(model: Any) -> Dict[str, Any]:
     return unread_counts
 
 
+def check_submessage_syntax(submessage: object):
+    if submessage:
+        return True  # Trust server's code checks.
+    return False
+
 def match_user(user: Any, text: str) -> bool:
     """
     Matches if the user full name, last name or email matches

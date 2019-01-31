@@ -159,6 +159,18 @@ class MessageView(urwid.ListBox):
                 message = self.focus.original_widget.message
                 self.model.toggle_message_star_status(message)
 
+        elif key in ['1', '2', '3', '4']:
+            if self.focus is not None:
+                message = self.focus.original_widget.message
+                self.model.toggle_message_star_status(message)
+                reply_info = self.focus.original_widget.get_reply_info()
+                content = self.focus.original_widget.get_zform_reply(key)
+                if content:
+                    content = reply_info['mention'] + ' ' + content
+                    response = self.model.send_stream_message(stream=reply_info['stream'],
+                                                              topic=reply_info['topic'],
+                                                              content=content)
+
         key = super(MessageView, self).keypress(size, key)
         return key
 
