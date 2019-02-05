@@ -242,12 +242,17 @@ class TestModel:
         reaction_spec = dict(
             emoji_name='thumbs_up',
             reaction_type='unicode_emoji',
-            emoji_code='1f44d')
+            emoji_code='1f44d',
+            message_id=str(msg_id))
+
         model.react_to_message(message, 'thumbs_up')
-        model.client.call_endpoint.assert_called_once_with(
-            url='messages/{}/reactions'.format(msg_id),
-            method=expected_method,
-            request=reaction_spec)
+
+        if expected_method == 'POST':
+            model.client.add_reaction.assert_called_once_with(reaction_spec)
+            model.client.delete_reaction.assert_not_called()
+        elif expected_method == 'DELETE':
+            model.client.remove_reaction.assert_called_once_with(reaction_spec)
+            model.client.add_reaction.assert_not_called()
 
     def test_react_to_message_for_not_thumbs_up(self, model):
         with pytest.raises(AssertionError):
