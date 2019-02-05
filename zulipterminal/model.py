@@ -205,22 +205,19 @@ class Model:
         # FIXME Only support thumbs_up for now
         assert reaction_to_toggle == 'thumbs_up'
 
-        endpoint = 'messages/{}/reactions'.format(message['id'])
         reaction_to_toggle_spec = dict(
             emoji_name='thumbs_up',
+            emoji_code='1f44d',
             reaction_type='unicode_emoji',
-            emoji_code='1f44d')
+            message_id=str(message['id']))
         existing_reactions = [reaction['emoji_code']
                               for reaction in message['reactions']
                               if ('user_id' in reaction['user'] and
                                   reaction['user']['user_id'] == self.user_id)]
         if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
-            method = 'DELETE'
+            response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
-            method = 'POST'
-        response = self.client.call_endpoint(url=endpoint,
-                                             method=method,
-                                             request=reaction_to_toggle_spec)
+            response = self.client.add_reaction(reaction_to_toggle_spec)
 
     @asynch
     def toggle_message_star_status(self, message: Dict[str, Any]) -> None:
