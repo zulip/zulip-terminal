@@ -307,7 +307,7 @@ class TestModel:
             return_value=[])
 
         # Setup mocks before calling get_messages
-        self.client.do_api_query.return_value = messages_successful_response
+        self.client.get_messages.return_value = messages_successful_response
         mocker.patch('zulipterminal.model.index_messages',
                      return_value=index_all_messages)
         model = Model(self.controller)
@@ -320,8 +320,8 @@ class TestModel:
             'client_gravatar': True,
             'narrow': json.dumps(model.narrow),
         }
-        model.client.do_api_query.assert_called_once_with(
-            request, '/json/messages', method="GET")
+        (model.client.get_messages.
+         assert_called_once_with(message_filters=request))
         assert model.index == index_all_messages
         anchor = messages_successful_response['anchor']
         if anchor < 10000000000000000:
@@ -348,14 +348,14 @@ class TestModel:
 
         # Setup mocks before calling get_messages
         messages_successful_response['anchor'] = 0
-        self.client.do_api_query.return_value = messages_successful_response
+        self.client.get_messages.return_value = messages_successful_response
         mocker.patch('zulipterminal.model.index_messages',
                      return_value=index_all_messages)
 
         model = Model(self.controller)
         model.get_messages(num_before=num_before, num_after=num_after,
                            anchor=0)
-        self.client.do_api_query.return_value = messages_successful_response
+        self.client.get_messages.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
         assert model.index['pointer'][str(model.narrow)] == 0
@@ -380,7 +380,8 @@ class TestModel:
             return_value=[])
 
         # Setup mock before calling get_messages
-        self.client.do_api_query.return_value = error_response
+        # FIXME This has no influence on the result
+        # self.client.do_api_query.return_value = error_response
 
         with pytest.raises(ServerConnectionFailure):
             model = Model(self.controller)

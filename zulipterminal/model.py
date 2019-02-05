@@ -276,8 +276,7 @@ class Model:
             'client_gravatar': True,
             'narrow': json.dumps(self.narrow),
         }
-        response = self.client.do_api_query(request, '/json/messages',
-                                            method="GET")
+        response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor and response['anchor'] != 10000000000000000:
