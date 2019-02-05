@@ -131,6 +131,12 @@ Various options are available; we are exploring the benefits of each and would a
 
 Note that the tools used in each case are typically the same, but are called in different ways.
 
+With any option, you first need to clone the zulip/zulip-terminal repository locally (the following will place the repository in the current directory):
+```
+$ git clone git@github.com:zulip/zulip-terminal.git
+```
+The following commands should be run in the repository directory, which can be achieved with `cd zulip-terminal`.
+
 ### Pipenv
 
 1. Install pipenv
@@ -141,22 +147,11 @@ $ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
 $ python3 -m pip install --user pipenv
 ```
 
-2. Clone the zulip/zulip-terminal repository locally
+2. Install zulip-term, with the development requirements
 ```
-$ git clone git@github.com:zulip/zulip-terminal.git
-```
-
-3. Install zulip-term, with the development requirements
-```
-$ cd zulip-terminal
 $ pipenv --three
 $ pipenv install --dev
 $ pipenv run python setup.py develop
-```
-
-4. Run the client
-```
-$ pipenv run zulip-term
 ```
 
 ### Pip
@@ -166,20 +161,9 @@ $ pipenv run zulip-term
     1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
     2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
 
-2. Clone the zulip/zulip-terminal repository locally
+2. Install zulip-term, with the development requirements
 ```
-$ git clone git@github.com:zulip/zulip-terminal.git
-```
-
-3. Install zulip-term, with the development requirements
-```
-$ cd zulip-terminal
 $ pip3 install -e .[dev]
-```
-
-4. Run the client
-```
-$ zulip-term
 ```
 
 ## Development tasks
@@ -188,11 +172,12 @@ Once you have a development environment set up, you might find the following use
 
 | Task | Pip | Pipenv |
 |-|-|-|
+| Run normally | `zulip-term` | `pipenv run zulip-term` |
+| Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
+| Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
 | Run all tests (including linter) | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 | Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
-| Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
-| Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
 
 
 ## Contributor Guidelines
