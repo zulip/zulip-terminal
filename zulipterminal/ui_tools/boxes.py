@@ -472,7 +472,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('QUOTE_REPLY', key):
             self.keypress(size, 'enter')
-            quote = '```quote\n' + self.message['content'] + '\n```\n'
+            quote = '```quote\n' + self.model.client.get_raw_message(
+                self.message['id'])['raw_content'] + '\n```\n'
             self.model.controller.view.write_box.msg_write_box.set_edit_text(
                 quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(

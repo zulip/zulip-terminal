@@ -22,6 +22,7 @@
 - Avoid crash in rare case of empty message content
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
 - Avoid crash on receiving multiple starred-message events
+- Fix quoting original message, not rendered version 
 
 ### Infrastructure changes
 - Minimized initial registration & communication with zulip server
