@@ -18,6 +18,7 @@
 - Make stream icons bold and correct background color
 
 ### Important bugfixes
+- Fix bug potentially mixing unread counts for messages from users & streams
 - Exit cleanly if cannot connect to zulip server
 - Avoid crash in rare case of empty message content
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.

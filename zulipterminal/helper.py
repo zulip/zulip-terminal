@@ -38,6 +38,15 @@ initial_index = Index(
 )
 
 
+UnreadCounts = TypedDict('UnreadCounts', {
+    'all_msg': int,
+    'all_pms': int,
+    'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
+    'unread_pms': Dict[int, int],  # sender_id
+    'streams': Dict[int, int],  # stream_id
+})
+
+
 def asynch(func: Any) -> Any:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
@@ -62,8 +71,9 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         msg_type = msg['type']
         if msg_type == 'stream':
             unread_id = messages[id]['stream_id']
-            stream_topic = (unread_id, msg['subject'])
-            unread_counts = controller.model.unread_counts
+            stream_topic = (unread_id, msg['subject'])  # type: Tuple[int, str]
+            unread_counts = (controller.model.
+                             unread_counts)  # type: UnreadCounts
             if stream_topic in unread_counts['unread_topics'].keys():
                 unread_counts['unread_topics'][stream_topic] += new_count
                 if unread_counts['unread_topics'][stream_topic] == 0:
@@ -270,18 +280,20 @@ def index_messages(messages: List[Any],
     return index
 
 
-def classify_unread_counts(model: Any) -> Dict[str, Any]:
+def classify_unread_counts(model: Any) -> UnreadCounts:
     # TODO: support group pms
     unread_msg_counts = model.initial_data['unread_msgs']
-    unread_counts = dict()  # type: Dict[Any, Any]
-    unread_counts['all_msg'] = 0
-    unread_counts['all_pms'] = 0
-    unread_counts['unread_topics'] = dict()
-    unread_counts['unread_pms'] = dict()
+
+    unread_counts = UnreadCounts(
+        all_msg=0,
+        all_pms=0,
+        unread_topics=dict(),
+        unread_pms=dict(),
+        streams=dict(),
+    )
 
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
-        unread_counts[pm['sender_id']] = count
         unread_counts['unread_pms'][pm['sender_id']] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
@@ -296,10 +308,10 @@ def classify_unread_counts(model: Any) -> Dict[str, Any]:
             continue
         stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count
-        if not unread_counts.get(stream_id):
-            unread_counts[stream_id] = count
+        if not unread_counts['streams'].get(stream_id):
+            unread_counts['streams'][stream_id] = count
         else:
-            unread_counts[stream_id] += count
+            unread_counts['streams'][stream_id] += count
         unread_counts['all_msg'] += count
 
     return unread_counts

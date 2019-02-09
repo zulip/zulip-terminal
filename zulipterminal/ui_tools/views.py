@@ -438,8 +438,8 @@ class RightColumnView(urwid.Frame):
             if user['status'] == 'inactive' and\
                     not self.view.controller.editor_mode:
                 continue
-            unread_count = self.view.model.unread_counts.get(user['user_id'],
-                                                             0)
+            unread_count = (self.view.model.unread_counts['unread_pms'].
+                            get(user['user_id'], 0))
             users_btn_list.append(
                 UserButton(
                     user,
@@ -522,7 +522,7 @@ class LeftColumnView(urwid.Pile):
                     controller=self.controller,
                     view=self.view,
                     width=self.width,
-                    count=self.model.unread_counts.get(stream[1], 0)
+                    count=self.model.unread_counts['streams'].get(stream[1], 0)
                 ) for stream in self.view.pinned_streams]
 
         if len(streams_btn_list):
@@ -540,7 +540,7 @@ class LeftColumnView(urwid.Pile):
                     controller=self.controller,
                     view=self.view,
                     width=self.width,
-                    count=self.model.unread_counts.get(stream[1], 0)
+                    count=self.model.unread_counts['streams'].get(stream[1], 0)
                 ) for stream in self.view.unpinned_streams]
 
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
