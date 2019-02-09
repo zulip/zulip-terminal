@@ -99,6 +99,12 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     for id in id_list:
+        user_id = messages[id]['sender_id']
+
+        # If we sent this message, don't increase the count
+        if user_id == controller.model.user_id:
+            continue
+
         msg_type = messages[id]['type']
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
@@ -109,9 +115,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                 if stream.stream_id == stream_id:
                     stream.update_count(stream.count + new_count)
                     break
-
         else:
-            user_id = messages[id]['sender_id']
             for user in users:
                 if user.user_id == user_id:
                     user.update_count(user.count + new_count)

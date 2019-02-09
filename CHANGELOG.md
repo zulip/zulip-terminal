@@ -19,6 +19,7 @@
 
 ### Important bugfixes
 - Fix bug potentially mixing unread counts for messages from users & streams
+- Don't increase the unread counts if we sent the message
 - Exit cleanly if cannot connect to zulip server
 - Avoid crash in rare case of empty message content
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
