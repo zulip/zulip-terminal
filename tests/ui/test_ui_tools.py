@@ -642,6 +642,12 @@ class TestRightColumnView:
         self.line_box = mocker.patch(VIEWS + ".urwid.LineBox")
         self.thread = mocker.patch(VIEWS + ".threading")
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
+        self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
+            'unread_pms': {
+                1: 1,
+                2: 1,
+            }
+        }
 
     @pytest.fixture
     def right_col_view(self, mocker, width=50):
@@ -707,7 +713,6 @@ class TestRightColumnView:
             'status': status
         }]
         self.view.controller.editor_mode = editor_mode
-        self.view.model.unread_counts.get.return_value = 1
         user_btn = mocker.patch(VIEWS + ".UserButton")
         mocker.patch(VIEWS + ".UsersView")
         list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
@@ -716,7 +721,6 @@ class TestRightColumnView:
 
         if status != 'inactive':
             unread_counts = right_col_view.view.model.unread_counts
-            unread_counts.get.assert_called_once_with(1, 0)
             user_btn.assert_called_once_with(
                 self.view.users[0],
                 controller=self.view.controller,
@@ -759,12 +763,14 @@ class TestLeftColumnView:
     def mock_external_classes(self, mocker):
         self.view = mocker.Mock()
         self.view.model = mocker.Mock()
-        self.view.model.unread_counts = {
+        self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
             'all_msg': 2,
             'all_pms': 0,
-            86: 1,
-            14: 1,
-            99: 1,
+            'streams': {
+                86: 1,
+                14: 1,
+                99: 1,
+            },
         }
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
