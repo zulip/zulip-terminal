@@ -3,6 +3,7 @@
 ## Next Release
 
 ### Interactivity improvements
+- Use <kbd>?</kbd> to show *and* hide help menu (<kbd>esc</kbd> continues to exit)
 - Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>)
 - Allow <kbd>f</kbd> and <kbd>P</kbd> shortcut keys to work from side panels (narrow starred & private messages)
 - Warn on startup, if specified theme is lacking current required styles
