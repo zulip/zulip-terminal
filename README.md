@@ -74,7 +74,7 @@ autohide=autohide
 ## Hot Keys
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
-| Display help menu                                     | <kbd>?</kbd>                                  |
+| Show/hide help menu                                   | <kbd>?</kbd>                                  |
 | Go Back                                               | <kbd>esc</kbd>                                |
 | Previous message                                      | <kbd>Up</kbd> / <kbd>k</kbd>                  |
 | Next message                                          | <kbd>Down</kbd> / <kbd>j</kbd>                |

@@ -3,7 +3,7 @@ from typing import Set
 KEY_BINDINGS = {
     'HELP': {
         'keys': {'?'},
-        'help_text': 'Display help menu',
+        'help_text': 'Show/hide help menu',
     },
     'GO_BACK': {
         'keys': {'esc'},

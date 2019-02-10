@@ -587,6 +587,6 @@ class HelpView(urwid.ListBox):
         super(HelpView, self).__init__(self.log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('GO_BACK', key):
+        if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_help()
         return super(HelpView, self).keypress(size, key)
