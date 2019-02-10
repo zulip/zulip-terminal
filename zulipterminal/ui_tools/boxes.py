@@ -237,7 +237,7 @@ class MessageBox(urwid.Pile):
             # TODO: Support embedded content & twitter preview?
             'message_embed': 'EMBEDDED CONTENT',
             'inline-preview-twitter': 'TWITTER PREVIEW',
-            'message_inline_ref': '',
+            'message_inline_ref': 'MESSAGE INLINE REF',
         }
         unrendered_template = '[{} NOT RENDERED]'
         for element in soup:
