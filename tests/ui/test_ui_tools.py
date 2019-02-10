@@ -886,7 +886,8 @@ class TestMessageBox:
         ('<span class="katex">some-math</span>', ['some-math']),
         ('<ul><li>text</li></ul>', ['', '  * ', '', 'text']),
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
-        ('<div class="message_inline_image">blah</div>', []),
+        ('<div class="message_inline_image">'
+         '<a href="x"><img src="x"></a></div>', ['', 'x']),
         ('<div class="message_inline_ref">blah</div>', []),
         ('<span class="emoji">:smile:</span>', [':smile:']),
         ('<div class="inline-preview-twitter"',
