@@ -237,7 +237,6 @@ class MessageBox(urwid.Pile):
             # TODO: Support embedded content & twitter preview?
             'message_embed': 'EMBEDDED CONTENT',
             'inline-preview-twitter': 'TWITTER PREVIEW',
-            'message_inline_image': '',
             'message_inline_ref': '',
         }
         unrendered_template = '[{} NOT RENDERED]'
@@ -279,7 +278,7 @@ class MessageBox(urwid.Pile):
             elif element.name == 'a':
                 # LINKS
                 link = element.attrs['href']
-                text = element.text
+                text = element.img['src'] if element.img else element.text
                 if link == text:
                     # If the link and text are same
                     # usually the case when user just pastes
