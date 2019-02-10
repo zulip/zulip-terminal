@@ -888,7 +888,8 @@ class TestMessageBox:
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
         ('<div class="message_inline_image">'
          '<a href="x"><img src="x"></a></div>', ['', 'x']),
-        ('<div class="message_inline_ref">blah</div>', []),
+        ('<div class="message_inline_ref">blah</div>',
+            ['[MESSAGE INLINE REF NOT RENDERED]']),
         ('<span class="emoji">:smile:</span>', [':smile:']),
         ('<div class="inline-preview-twitter"',
             ['[TWITTER PREVIEW NOT RENDERED]']),
