@@ -580,7 +580,7 @@ class HelpView(urwid.ListBox):
                     (max_widths[1], urwid.Text(", ".join(binding['keys'])))
                               ], dividechars=2),
                 tlcorner='', brcorner='', trcorner='', blcorner='',
-                rline=' ', lline=' ', bline='-', tline='',
+                rline=' ', lline=' ', bline='', tline='',
              )
              for binding in KEY_BINDINGS.values()])
 
