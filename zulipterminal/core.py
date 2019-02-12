@@ -84,6 +84,7 @@ class Controller:
         self.loop.draw_screen()
 
     def show_help(self) -> None:
+        cols, rows = self.loop.screen.get_cols_rows()
         help_view = HelpView(self)
         self.loop.widget = urwid.Overlay(
             urwid.LineBox(help_view,
@@ -92,7 +93,7 @@ class Controller:
             align='center',
             width=help_view.width+2,  # +2 from LineBox
             valign='middle',
-            height=('relative', 100)
+            height=rows//2
         )
 
     def exit_help(self) -> None:
