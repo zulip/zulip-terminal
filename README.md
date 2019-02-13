@@ -156,8 +156,21 @@ If any of the above mentioned hotkeys don't work for you, feel free to open an i
 ### Something looks wrong! Where's this feature? There's a bug!
 Come meet us on the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream on *chat.zulip.org*.
 
+## Contributor Guidelines
 
-## Setting up a development environment
+Zulip Terminal is being built by the awesome [Zulip](https://zulipchat.com/team) community.
+
+To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+Please read our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
+[git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
+
+A simple tutorial for implementing the `typing` indicator is available
+in the [wiki](https://github.com/zulip/zulip-terminal/wiki/Developer-Documentation). Follow
+it to understand the how to implement a new feature for zulip-terminal.
+
+### Setting up a development environment
 
 Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
 
@@ -169,7 +182,7 @@ $ git clone git@github.com:zulip/zulip-terminal.git
 ```
 The following commands should be run in the repository directory, which can be achieved with `cd zulip-terminal`.
 
-### Pipenv
+#### Pipenv
 
 1. Install pipenv (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/install/#pragmatic-installation-of-pipenv); pipenv can be installed in a virtual environment, if you wish)
 ```
@@ -188,7 +201,7 @@ $ pipenv install --dev
 $ pipenv run pip3 install -e .[dev]
 ```
 
-### Pip
+#### Pip
 
 1. Manually create & activate a virtual environment; any method should work, such as that used in the above simple installation
 
@@ -200,7 +213,7 @@ $ pipenv run pip3 install -e .[dev]
 $ pip3 install -e .[dev]
 ```
 
-## Development tasks
+### Development tasks
 
 Once you have a development environment set up, you might find the following useful, depending upon your type of environment:
 
@@ -213,20 +226,6 @@ Once you have a development environment set up, you might find the following use
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 | Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
 
-
-## Contributor Guidelines
-
-Zulip Terminal is being build by an awesome community of [Zulip](https://zulipchat.com/team).
-
-To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
-[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
-
-Do checkout our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
-[git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
-
-A simple tutorial for implementing `typing` indicator is available
-in the [wiki](https://github.com/zulip/zulip-terminal/wiki/Developer-Documentation). Follow
-it to understand the how to implement a new feature for zulip-terminal.
 
 ### Debugging Tips
 
