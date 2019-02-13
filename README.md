@@ -227,6 +227,15 @@ $ telnet 127.0.0.1 6899
 ```
 in another terminal, where `127.0.0.1` is the IP address and `6899` is port you find in `./debug.log`.
 
+#### There's no effect in Zulip Terminal after making local changes!
+
+This likely means that you have installed both normal and development versions of zulip-terminal.
+
+To ensure you run the development version:
+* If using pipenv, call `pipenv run zulip-term` from the cloned/downloaded `zulip-terminal` directory;
+* If using pip (pip3), ensure you have activated the correct virtual environment (venv); depending on how your shell is configured, the name of the venv may appear in the command prompt. Note that not including the `-e` in the pip3 command will also cause this problem.
+
+
 ### **Need Help?**
 Come meet us at [Zulip](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
@@ -248,11 +257,6 @@ If you are unable to open links in messages, then try double right-click on the 
 If you are still facing problems, please discuss it at
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
 for it mentioning your terminal name, version, and OS.
-
-##### [DEV] No effect on Zulip Terminal on making local changes
-
-This means that you have installed both Normal and development versions of zulip-terminal. For running the development version, call
-`pipenv run zulip-term` from the cloned / downloaded `zulip-terminal` directory.
 
 ##### Above mentioned hotkeys don't work as described
 
