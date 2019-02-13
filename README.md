@@ -140,19 +140,21 @@ The following commands should be run in the repository directory, which can be a
 
 ### Pipenv
 
-1. Install pipenv
+1. Install pipenv (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/install/#pragmatic-installation-of-pipenv); pipenv can be installed in a virtual environment, if you wish)
 ```
-$ curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
-$ python3 /tmp/get-pip.py --user
-$ printf '\nexport PATH="%s:$PATH"\n' '${HOME}/.local/bin' | tee -a ~/.bashrc
-$ python3 -m pip install --user pipenv
+$ pip3 install --user pipenv
 ```
+2. Initialize the pipenv virtual environment for zulip-term (using the default python 3; use eg. `--python 3.6` to be more specific)
 
-2. Install zulip-term, with the development requirements
 ```
 $ pipenv --three
+```
+
+3. Install zulip-term, with the development requirements
+
+```
 $ pipenv install --dev
-$ pipenv run python setup.py develop
+$ pipenv run pip3 install -e .[dev]
 ```
 
 ### Pip
