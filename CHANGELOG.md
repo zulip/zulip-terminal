@@ -28,6 +28,7 @@
 - Fix quoting original message, not rendered version 
 
 ### Infrastructure changes
+- Improve installation, development & troubleshooting notes in README
 - Minimized initial registration & communication with zulip server
 - Internal refactoring & centralization of code handling zulip server communication
 - Centralize server event callbacks into Model
