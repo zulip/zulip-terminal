@@ -197,15 +197,24 @@ it to understand the how to implement a new feature for zulip-terminal.
 
 ### Debugging Tips
 
-The stdout for zulip-terminal is set to `./debug.log` by default.
-If you want to check the value of a variable, you can simply write
-```
-print(variable)
+#### Output using `print`
+
+The stdout for zulip-terminal is redirected to `./debug.log` by default.
+
+If you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply write
+```python3
+print(variable, flush=True)
 ```
 and the value of the variable will be printed to `./debug.log`.
 
+We suggest the `flush=True` to ensure it prints straight away.
+
+If you have a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
+
+#### Interactive debugging using pudb & telnet
+
 If you want to debug zulip-terminal while it is running, or in a specific state, you can insert
-```
+```python3
 from pudb.remote import set_trace
 set_trace()
 ```
