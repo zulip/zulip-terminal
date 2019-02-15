@@ -91,9 +91,10 @@ class Controller:
                           title="Help Menu (up/down scrolls)"),
             self.view,
             align='center',
-            width=help_view.width+2,  # +2 from LineBox
             valign='middle',
-            height=rows//2
+            # +2 to both of the following, due to LineBox
+            width=help_view.width+2,
+            height=min(3*rows//4, help_view.number_of_actions)+2
         )
 
     def exit_help(self) -> None:
