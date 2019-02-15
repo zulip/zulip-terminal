@@ -573,15 +573,10 @@ class HelpView(urwid.ListBox):
         self.width = sum(max_widths)
 
         self.log = urwid.SimpleFocusListWalker(
-            [urwid.Text('')] +
-            [urwid.LineBox(
-                urwid.Columns([
-                    urwid.Text(binding['help_text']),
-                    (max_widths[1], urwid.Text(", ".join(binding['keys'])))
-                              ], dividechars=2),
-                tlcorner='', brcorner='', trcorner='', blcorner='',
-                rline=' ', lline=' ', bline='', tline='',
-             )
+            [urwid.Columns([
+                urwid.Text(binding['help_text']),
+                (max_widths[1], urwid.Text(", ".join(binding['keys'])))
+                          ], dividechars=2)
              for binding in KEY_BINDINGS.values()])
 
         super(HelpView, self).__init__(self.log)
