@@ -8,6 +8,7 @@
 - Allow <kbd>f</kbd> and <kbd>P</kbd> shortcut keys to work from side panels (narrow starred & private messages)
 - Warn on startup, if specified theme is lacking current required styles
 - Upon unexpected crash, exit cleanly and log traceback to `zulip-terminal-tracebacks.log`
+- Add the <kbd>z</kbd> shortcut to toggle between stream/topic narrow.
 
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
