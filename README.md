@@ -153,6 +153,14 @@ for it mentioning your terminal name, version, and OS.
 
 If any of the above mentioned hotkeys don't work for you, feel free to open an issue or discuss it on [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
+### Zulip-term crashed!
+
+We hope this doesn't happen, but would love to hear about this in order to fix it, since the application should be increasingly stable! Please let us know the problem, and if you're able to duplicate the issue, on the github issue-tracker or at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+This process would be helped if you could send us the 'traceback' showing the cause of the error, which should be output in such cases:
+* version 0.3.1 and earlier: the error is shown on the terminal;
+* versions 0.3.2+: the error is present/appended to the file `zulip-terminal-tracebacks.log`.
+
 ### Something looks wrong! Where's this feature? There's a bug!
 Come meet us on the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream on *chat.zulip.org*.
 
