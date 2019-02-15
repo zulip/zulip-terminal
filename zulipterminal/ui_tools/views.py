@@ -581,6 +581,8 @@ class HelpView(urwid.ListBox):
                 None if index % 2 else 'bar')
              for index, binding in enumerate(KEY_BINDINGS.values())])
 
+        self.number_of_actions = len(self.log)
+
         super(HelpView, self).__init__(self.log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
