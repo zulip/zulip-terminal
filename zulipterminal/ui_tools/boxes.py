@@ -450,6 +450,18 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
+        elif is_command_key('TOGGLE_NARROW', key):
+            if self.message['type'] == 'private':
+                if (len(self.model.narrow) == 1 and
+                        self.model.narrow[0][0] == 'pm_with'):
+                    self.model.controller.show_all_pm(self)
+                else:
+                    self.model.controller.narrow_to_user(self)
+            elif self.message['type'] == 'stream':
+                if len(self.model.narrow) > 1:  # in a topic
+                    self.model.controller.narrow_to_stream(self)
+                else:
+                    self.model.controller.narrow_to_topic(self)
         elif is_command_key('TOPIC_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
