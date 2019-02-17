@@ -513,6 +513,31 @@ class TestModel:
         (create_msg_box_list.
          assert_called_once_with(model, [0], last_message=expected_last_msg))
 
+    def test_append_message_event_flags(self, mocker, model):
+        model.update = True
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value={})
+        model.msg_list = mocker.Mock()
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        model.msg_list.log = [mocker.Mock()]
+        set_count = mocker.patch('zulipterminal.model.set_count')
+
+        # Test event with flags
+        event = {'message': {'id': 0}, 'flags': ['read', 'mentioned']}
+        model.append_message(event)
+        # set count not called since 'read' flag present.
+        set_count.assert_not_called()
+
+        # Test event without flags
+        model.msg_list.log = [mocker.Mock()]
+        event = {'message': {'id': 0}}
+        model.append_message(event)
+        # set count called since the message is unread.
+        set_count.assert_called_once_with([event['message']['id']],
+                                          self.controller, 1)
+
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
