@@ -48,6 +48,7 @@ Event = TypedDict('Event', {
     'all': bool,
     # message:
     'message': Message,
+    'flags': List[str],
 }, total=False)  # Each Event will only have a subset of these
 
 OFFLINE_THRESHOLD_SECS = 140
@@ -485,7 +486,9 @@ class Model:
         Adds message to the end of the view.
         """
         response = event['message']
-        response['flags'] = []
+        # sometimes `flags` are missing in `event` so initialize
+        # an empty list of flags in that case.
+        response['flags'] = event.get('flags', [])
         if hasattr(self.controller, 'view') and self.update:
             self.index = index_messages([response], self, self.index)
             if self.msg_list.log:
@@ -519,8 +522,8 @@ class Model:
                 ])
                 if recipients == msg_recipients:
                     self.msg_list.log.append(msg_w)
-
-            set_count([response['id']], self.controller, 1)
+            if 'read' not in response['flags']:
+                set_count([response['id']], self.controller, 1)
             self.controller.update_screen()
 
     def update_message(self, response: Event) -> None:
