@@ -2,16 +2,14 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
+[Recent changes](CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
+
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Build Status](https://travis-ci.org/zulip/zulip-terminal.svg?branch=master)](https://travis-ci.org/zulip/zulip-terminal)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
-
-## Changes
-
-Please see the [CHANGELOG](CHANGELOG.md) for released & recent changes.
 
 ## Installation & Running
 
