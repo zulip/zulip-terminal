@@ -43,3 +43,37 @@ def test_is_command_key_nonmatching_keys(valid_command):
 def test_is_command_key_invalid_command(invalid_command):
     with pytest.raises(keys.InvalidCommand):
         keys.is_command_key(invalid_command, 'esc')  # key doesn't matter
+
+
+def test_HELP_is_not_allowed_as_tip():
+    assert (keys.KEY_BINDINGS['HELP']['excluded_from_random_tips'] is True)
+    assert (keys.KEY_BINDINGS['HELP'] not in keys.commands_for_random_tips())
+
+
+def test_commands_for_random_tips(mocker):
+    new_key_bindings = {
+        'ALPHA': {
+            'keys': {'a'},
+            'help_text': 'alpha',
+            'excluded_from_random_tips': True,
+            },
+        'BETA': {
+            'keys': {'b'},
+            'help_text': 'beta',
+            'excluded_from_random_tips': False,
+            },
+        'GAMMA': {
+            'keys': {'g'},
+            'help_text': 'gamma',
+            },
+        'DELTA': {
+            'keys': {'d'},
+            'help_text': 'delta',
+            'excluded_from_random_tips': True,
+            },
+    }  # type: Dict[str, KeyBinding]
+    mocker.patch.dict(keys.KEY_BINDINGS, new_key_bindings, clear=True)
+    result = keys.commands_for_random_tips()
+    assert len(result) == 2
+    assert new_key_bindings['BETA'] in result
+    assert new_key_bindings['GAMMA'] in result

@@ -1,14 +1,23 @@
-from typing import Set
+from typing import Set, Dict, List
 from collections import OrderedDict
+from mypy_extensions import TypedDict
+
+KeyBinding = TypedDict('KeyBinding', {
+    'keys': Set[str],
+    'help_text': str,
+    'excluded_from_random_tips': bool,
+}, total=False)
 
 KEY_BINDINGS = OrderedDict([
     ('HELP', {
         'keys': {'?'},
         'help_text': 'Show/hide help menu',
+        'excluded_from_random_tips': True,
     }),
     ('GO_BACK', {
         'keys': {'esc'},
         'help_text': 'Go Back',
+        'excluded_from_random_tips': False,
     }),
     ('PREVIOUS_MESSAGE', {
         'keys': {'k', 'up'},
@@ -127,7 +136,7 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl c'},
         'help_text': 'Quit',
     }),
-])
+])  # type: OrderedDict[str, KeyBinding]
 
 
 class InvalidCommand(Exception):
@@ -153,3 +162,11 @@ def keys_for_command(command: str) -> Set[str]:
         return set(KEY_BINDINGS[command]['keys'])
     except KeyError as exception:
         raise InvalidCommand(command)
+
+
+def commands_for_random_tips() -> List[KeyBinding]:
+    """
+    Return list of commands which may be displayed as a random tip
+    """
+    return [key_binding for key_binding in KEY_BINDINGS.values()
+            if not key_binding.get('excluded_from_random_tips', False)]
