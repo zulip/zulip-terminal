@@ -117,6 +117,10 @@ KEY_BINDINGS = {
         'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of the current message',
     },
+    'QUIT': {
+        'keys': {'ctrl c'},
+        'help_text': 'Quit',
+    },
 }
 
 
