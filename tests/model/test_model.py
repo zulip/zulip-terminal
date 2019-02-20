@@ -18,7 +18,7 @@ class TestModel:
         self.client = mocker.patch('zulipterminal.core.'
                                    'Controller.client')
         self.client.base_url = 'chat.zulip.zulip'
-        mocker.patch('zulipterminal.model.Model.update_presence')
+        mocker.patch('zulipterminal.model.Model._start_presence_updates')
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile):

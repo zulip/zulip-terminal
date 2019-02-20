@@ -104,8 +104,9 @@ class Model:
 
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
+
         self.new_user_input = True
-        self.update_presence()
+        self._start_presence_updates()
 
         self.event_actions = {
             'message': self.append_message,
@@ -179,19 +180,23 @@ class Model:
         return current_ids.copy()
 
     @asynch
-    def update_presence(self) -> None:
-        # TODO: update response in user list.
-        response = self.client.call_endpoint(
-            url='users/me/presence',
-            request={
-                # TODO: Determinal `status` from terminal tab focus.
-                'status': 'active' if self.new_user_input else 'idle',
-                'new_user_input': self.new_user_input,
-            }
-        )
-        self.new_user_input = False
-        time.sleep(60)
-        self.update_presence()
+    def _start_presence_updates(self) -> None:
+        """
+        Notify server of user's presence each minute (version 1a)
+        """
+        # FIXME: version 1b: Also use 'response' to update user list
+        # FIXME: Version 2: call endpoint with ping_only=True only when
+        #        needed, and rely on presence events to update
+        while True:
+            response = self.client.update_presence(
+                request={
+                    # TODO: Determinal `status` from terminal tab focus.
+                    'status': 'active' if self.new_user_input else 'idle',
+                    'new_user_input': self.new_user_input,
+                }
+            )
+            self.new_user_input = False
+            time.sleep(60)
 
     @asynch
     def react_to_message(self,
