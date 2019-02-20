@@ -401,11 +401,7 @@ class TestModel:
             'messages': [99],
             'op': expected_operator
         }
-        model.client.call_endpoint.assert_called_once_with(
-            url="messages/flags",
-            method="POST",
-            request=request
-        )
+        model.client.update_message_flags.assert_called_once_with(request)
 
     def test_update_flag(self, model, mocker: Any) -> None:
         mock_api_query = mocker.patch('zulipterminal.core.Controller'
