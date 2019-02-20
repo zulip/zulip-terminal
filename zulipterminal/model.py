@@ -229,9 +229,7 @@ class Model:
             request = dict(base_request, op='remove')
         else:
             request = dict(base_request, op='add')
-        response = self.client.call_endpoint(url='messages/flags',
-                                             method='POST',
-                                             request=request)
+        response = self.client.update_message_flags(request)
 
     @asynch
     def update_flag(self, id_list: List[int]) -> None:
