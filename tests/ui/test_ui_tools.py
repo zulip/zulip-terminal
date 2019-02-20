@@ -309,7 +309,7 @@ class TestMessageView:
         msg_view.read_message()
         assert msg_view.update_search_box_narrow.called
         assert msg_view.model.index['messages'][1]['flags'] == ['read']
-        self.model.update_flag.assert_called_once_with([1])
+        self.model.mark_message_ids_as_read.assert_called_once_with([1])
 
     def test_read_message_no_msgw(self, mocker, msg_view):
         # MSG_W is NONE CASE
@@ -317,7 +317,7 @@ class TestMessageView:
 
         msg_view.read_message()
 
-        self.model.update_flag.assert_not_called()
+        self.model.mark_message_ids_as_read.assert_not_called()
 
 
 class TestStreamsView:
