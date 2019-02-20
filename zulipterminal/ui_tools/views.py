@@ -196,7 +196,7 @@ class MessageView(urwid.ListBox):
             msg_w, curr_pos = self.body.get_prev(curr_pos)
             if msg_w is None:
                 break
-        self.model.update_flag(read_msg_ids)
+        self.model.mark_message_ids_as_read(read_msg_ids)
 
 
 class StreamsView(urwid.Frame):

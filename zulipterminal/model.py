@@ -232,16 +232,14 @@ class Model:
         response = self.client.update_message_flags(request)
 
     @asynch
-    def update_flag(self, id_list: List[int]) -> None:
+    def mark_message_ids_as_read(self, id_list: List[int]) -> None:
         if not id_list:
             return
-        request = {
+        self.client.update_message_flags({
             'messages': id_list,
             'flag': 'read',
             'op': 'add',
-        }
-        self.client.do_api_query(request, '/json/messages/flags',
-                                 method="POST")
+        })
         set_count(id_list, self.controller, -1)  # FIXME Update?
 
     def send_private_message(self, recipients: str,
