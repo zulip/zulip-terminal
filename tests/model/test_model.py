@@ -403,20 +403,18 @@ class TestModel:
         }
         model.client.update_message_flags.assert_called_once_with(request)
 
-    def test_update_flag(self, model, mocker: Any) -> None:
+    def test_mark_message_ids_as_read(self, model, mocker: Any) -> None:
         mock_api_query = mocker.patch('zulipterminal.core.Controller'
-                                      '.client.do_api_query')
+                                      '.client.update_message_flags')
 
-        model.update_flag([1, 2])
+        model.mark_message_ids_as_read([1, 2])
 
         mock_api_query.assert_called_once_with(
             {'flag': 'read', 'messages': [1, 2], 'op': 'add'},
-            '/json/messages/flags',
-            method='POST'
         )
 
-    def test_update_flag_empty_msg_list(self, model) -> None:
-        assert model.update_flag([]) is None
+    def test_mark_message_ids_as_read_empty_msg_list(self, model) -> None:
+        assert model.mark_message_ids_as_read([]) is None
 
     def test__update_initial_data(self, model, initial_data):
         assert model.initial_data == initial_data
