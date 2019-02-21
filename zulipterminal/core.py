@@ -144,6 +144,11 @@ class Controller:
                                                  mute_this_stream)
 
     def narrow_to_stream(self, button: Any) -> None:
+        stream_details = {
+                    'caption': button.stream_name,
+                    'description': self.model.stream_dict[button.stream_id]
+                    .get('description')
+                    }
         already_narrowed = self.model.set_narrow(stream=button.stream_name)
         if already_narrowed:
             return
@@ -164,9 +169,11 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, button.message['id'],
+                stream_details=stream_details)
         else:
-            w_list = create_msg_box_list(self.model, msg_id_list)
+            w_list = create_msg_box_list(self.model, msg_id_list,
+                                         stream_details=stream_details)
 
         self._finalize_show(w_list)
 
@@ -198,6 +205,11 @@ class Controller:
         self._finalize_show(w_list)
 
     def narrow_to_user(self, button: Any) -> None:
+        pm_details = {
+                    'caption': button.user_name,
+                    'recipient_email': button.email,
+                    'sender_id': self.model.user_id
+                    }
         if hasattr(button, 'message'):
             emails = [recipient['email']
                       for recipient in button.message['display_recipient']
@@ -225,9 +237,11 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, button.message['id'],
+                pm_details=pm_details)
         else:
-            w_list = create_msg_box_list(self.model, msg_id_list)
+            w_list = create_msg_box_list(
+                self.model, msg_id_list, pm_details=pm_details)
 
         self._finalize_show(w_list)
 
