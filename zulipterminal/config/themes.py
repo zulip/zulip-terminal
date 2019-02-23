@@ -28,6 +28,11 @@ required_styles = {
     'starred',
 }
 
+
+C256 = dict(
+    black='#000',
+)
+
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = 'h234'  # dark0_hard
@@ -45,29 +50,45 @@ GRAY = 'h244'  # gray_244
 
 THEMES = {
     'default': [
-        (None,           'white',           'black'),
+        (None,           'white',           'black',
+         None,           None,              C256['black']),
         ('selected',     'white',           'dark blue'),
-        ('msg_selected', 'light green',     'black'),
+        ('msg_selected', 'light green',     'black',
+         None,           None,              C256['black']),
         ('header',       'dark cyan',       'dark blue',  'bold'),
         ('custom',       'white',           'dark blue',  'underline'),
         ('content',      'white',           'black',      'standout'),
-        ('name',         'yellow, bold',    'black'),
-        ('unread',       'light blue',      'black'),
-        ('active',       'light green',     'black'),
-        ('idle',         'yellow',          'black'),
-        ('offline',      'white',           'black'),
-        ('inactive',     'white',           'black'),
-        ('title',        'white, bold',     'black'),
-        ('time',         'light blue',      'black'),
+        ('name',         'yellow, bold',    'black',
+         None,           None,              C256['black']),
+        ('unread',       'light blue',      'black',
+         None,           None,              C256['black']),
+        ('active',       'light green',     'black',
+         None,           None,              C256['black']),
+        ('idle',         'yellow',          'black',
+         None,           None,              C256['black']),
+        ('offline',      'white',           'black',
+         None,           None,              C256['black']),
+        ('inactive',     'white',           'black',
+         None,           None,              C256['black']),
+        ('title',        'white, bold',     'black',
+         None,           None,              C256['black']),
+        ('time',         'light blue',      'black',
+         None,           None,              C256['black']),
         ('bar',          'white',           'dark gray'),
-        ('emoji',        'light magenta',   'black'),
-        ('span',         'light red, bold', 'black'),
-        ('link',         'light blue',      'black'),
-        ('blockquote',   'brown',           'black'),
+        ('emoji',        'light magenta',   'black',
+         None,           None,              C256['black']),
+        ('span',         'light red, bold', 'black',
+         None,           None,              C256['black']),
+        ('link',         'light blue',      'black',
+         None,           None,              C256['black']),
+        ('blockquote',   'brown',           'black',
+         None,           None,              C256['black']),
         ('code',         'black',           'white'),
-        ('bold',         'white, bold',     'black'),
+        ('bold',         'white, bold',     'black',
+         None,           None,              C256['black']),
         ('footer',       'white',           'dark red',   'bold'),
-        ('starred',      'light red, bold', 'black'),
+        ('starred',      'light red, bold', 'black',
+         None,           None,              C256['black']),
     ],
     'gruvbox': [
         # default colorscheme on 16 colors, gruvbox colorscheme
