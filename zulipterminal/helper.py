@@ -76,21 +76,18 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         msg = messages[id]
 
         if msg['type'] == 'stream':
-            key_topic = (messages[id]['stream_id'], msg['subject'])
-            if key_topic in unread_counts['unread_topics']:
-                unread_counts['unread_topics'][key_topic] += new_count
-                if unread_counts['unread_topics'][key_topic] == 0:
-                    unread_counts['unread_topics'].pop(key_topic)
-            elif new_count == 1:
-                unread_counts['unread_topics'][key_topic] = new_count
+            key = (messages[id]['stream_id'], msg['subject'])
+            unreads = unread_counts['unread_topics']
         else:
-            key_pm = messages[id]['sender_id']
-            if key_pm in unread_counts['unread_pms']:
-                unread_counts['unread_pms'][key_pm] += new_count
-                if unread_counts['unread_pms'][key_pm] == 0:
-                    unread_counts['unread_pms'].pop(key_pm)
-            elif new_count == 1:
-                unread_counts['unread_pms'][key_pm] = new_count
+            key = messages[id]['sender_id']
+            unreads = unread_counts['unread_pms']  # type: ignore
+
+        if key in unreads:
+            unreads[key] += new_count
+            if unreads[key] == 0:
+                unreads.pop(key)
+        elif new_count == 1:
+            unreads[key] = new_count
 
     # if view is not yet loaded. Usually the case when first message is read.
     while not hasattr(controller, 'view'):
