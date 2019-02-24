@@ -65,6 +65,10 @@ def asynch(func: Any) -> Any:
 
 
 def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
+    # This method applies new_count for 'new message' (1) or 'read' (-1)
+    # (we could ensure this in a different way by a different type)
+    assert new_count == 1 or new_count == -1
+
     messages = controller.model.index['messages']
     for id in id_list:
         msg = messages[id]
