@@ -105,11 +105,13 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
             continue
 
         msg_type = messages[id]['type']
+        add_to_counts = True
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
             for stream in streams:
                 if stream.stream_id in controller.model.muted_streams:
                     stream.update_count(-1)
+                    add_to_counts = False  # if muted, don't add to eg. all_msg
                     break
                 if stream.stream_id == stream_id:
                     stream.update_count(stream.count + new_count)
@@ -120,7 +122,9 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                     user.update_count(user.count + new_count)
                     break
             all_pm.update_count(all_pm.count + new_count)
-        all_msg.update_count(all_msg.count + new_count)
+
+        if add_to_counts:
+            all_msg.update_count(all_msg.count + new_count)
 
     while not hasattr(controller, 'loop'):
         time.sleep(0.1)
