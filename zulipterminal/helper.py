@@ -70,15 +70,15 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     assert new_count == 1 or new_count == -1
 
     messages = controller.model.index['messages']
+    unread_counts = controller.model.unread_counts  # type: UnreadCounts
+
     for id in id_list:
         msg = messages[id]
-        msg_type = msg['type']
-        if msg_type == 'stream':
+
+        if msg['type'] == 'stream':
             unread_id = messages[id]['stream_id']
             stream_topic = (unread_id, msg['subject'])  # type: Tuple[int, str]
-            unread_counts = (controller.model.
-                             unread_counts)  # type: UnreadCounts
-            if stream_topic in unread_counts['unread_topics'].keys():
+            if stream_topic in unread_counts['unread_topics']:
                 unread_counts['unread_topics'][stream_topic] += new_count
                 if unread_counts['unread_topics'][stream_topic] == 0:
                     unread_counts['unread_topics'].pop(stream_topic)
@@ -86,8 +86,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                 unread_counts['unread_topics'][stream_topic] = new_count
         else:
             unread_id = messages[id]['sender_id']
-            unread_counts = controller.model.unread_counts
-            if unread_id in unread_counts['unread_pms'].keys():
+            if unread_id in unread_counts['unread_pms']:
                 unread_counts['unread_pms'][unread_id] += new_count
                 if unread_counts['unread_pms'][unread_id] == 0:
                     unread_counts['unread_pms'].pop(unread_id)
