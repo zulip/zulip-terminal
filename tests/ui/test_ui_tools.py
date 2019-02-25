@@ -1296,6 +1296,43 @@ class TestStreamButton:
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
 
+    @pytest.mark.parametrize('color', [
+        '#ffffff', '#f0f0f0', '#f0f1f2', '#fff'
+    ])
+    def test_color_formats(self, mocker, color):
+        properties = ["", 1, color, False]  # only color is important
+        view_mock = mocker.Mock()
+        background = (None, 'white', 'black')
+        view_mock.palette = [background]
+
+        stream_button = StreamButton(properties,
+                                     controller=mocker.Mock(),
+                                     view=view_mock,
+                                     width=10,
+                                     count=5)
+
+        expected_palette = ([background] +
+                            [('#fff', '', '', '', '#fff, bold', 'black')] +
+                            [('s#fff', '', '', '', 'black', '#fff')])
+        assert view_mock.palette == expected_palette
+
+    @pytest.mark.parametrize('color', [
+        '#', '#f', '#ff', '#ffff', '#fffff', '#fffffff'
+    ])
+    def test_invalid_color_format(self, mocker, color):
+        properties = ["", 1, color, False]  # only color is important
+        view_mock = mocker.Mock()
+        background = (None, 'white', 'black')
+        view_mock.palette = [background]
+
+        with pytest.raises(RuntimeError) as e:
+            StreamButton(properties,
+                         controller=mocker.Mock(),
+                         view=view_mock,
+                         width=10,
+                         count=5)
+        assert str(e.value) == "Unknown color format: '{}'".format(color)
+
 
 class TestUserButton:
     @pytest.mark.parametrize('width, count, short_text', [
