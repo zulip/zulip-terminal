@@ -27,6 +27,7 @@
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
 - Avoid crash on receiving multiple starred-message events
 - Fix quoting original message, not rendered version 
+- Avoid crash by supporting short color format for streams from older Zulip servers
 
 ### Infrastructure changes
 - Improve installation, development & troubleshooting notes in README

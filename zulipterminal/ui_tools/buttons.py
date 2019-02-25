@@ -104,7 +104,13 @@ class StreamButton(TopButton):
 
         # Simplify the color from the original version & add to palette
         # TODO Should this occur elsewhere and more intelligently?
-        color = ''.join(orig_color[i] for i in (0, 1, 3, 5))  # 0 -> '#'
+        if len(orig_color) == 7:  # modern zulip server format
+            color = ''.join(orig_color[i] for i in (0, 1, 3, 5))
+        elif len(orig_color) == 4:  # possible with zulip servers <=1.9.0 ?
+            color = orig_color
+        else:
+            raise RuntimeError("Unknown color format: '{}'".format(orig_color))
+
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
