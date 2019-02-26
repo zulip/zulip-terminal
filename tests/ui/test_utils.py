@@ -109,6 +109,14 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         [1],
         None,
         True,
+        1,
+    ),
+    (
+        # Don't show in 'All messages'
+        [],
+        [1],
+        None,
+        True,
         0,
     )
 ])

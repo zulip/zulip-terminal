@@ -24,7 +24,8 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
         # Remove messages of muted topics / streams.
         if is_muted(msg, model):
             muted_msgs += 1
-            continue
+            if model.narrow == []:  # Don't show in 'All messages'.
+                continue
 
         msg_flag = 'unread'  # type: Union[str, None]
         flags = msg.get('flags')
