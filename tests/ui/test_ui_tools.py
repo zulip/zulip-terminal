@@ -18,6 +18,7 @@ from zulipterminal.config.keys import keys_for_command
 from urwid import AttrWrap, Columns, Padding, Text
 
 VIEWS = "zulipterminal.ui_tools.views"
+TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
 
 
 class TestMessageView:
@@ -782,6 +783,7 @@ class TestLeftColumnView:
         pm_button = mocker.patch(VIEWS + ".PMButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
         left_col_view = LeftColumnView(width, self.view)
         home_button.assert_called_once_with(left_col_view.controller,
                                             count=2, width=width)
@@ -798,6 +800,7 @@ class TestLeftColumnView:
         stream_view = mocker.patch(VIEWS + '.StreamsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
         divider = mocker.patch(VIEWS + '.urwid.Divider')
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
 
         left_col_view = LeftColumnView(width, self.view)
 
@@ -1210,6 +1213,7 @@ class TestTopButton:
     def test_text_content(self, mocker,
                           prefix,
                           width, count, short_text, caption='caption'):
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
         show_function = mocker.Mock()
 
         if isinstance(prefix, tuple):
@@ -1278,6 +1282,7 @@ class TestStreamButton:
     def test_text_content(self, mocker,
                           is_private, expected_prefix,
                           width, count, short_text, caption='caption'):
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
         properties = [caption, 5, '#ffffff', is_private]
         view_mock = mocker.Mock()
         view_mock.palette = [(None, 'black', 'white')]
@@ -1300,6 +1305,7 @@ class TestStreamButton:
         '#ffffff', '#f0f0f0', '#f0f1f2', '#fff'
     ])
     def test_color_formats(self, mocker, color):
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
         properties = ["", 1, color, False]  # only color is important
         view_mock = mocker.Mock()
         background = (None, 'white', 'black')
@@ -1365,6 +1371,7 @@ class TestUserButton:
     ])
     def test_text_content(self, mocker,
                           width, count, short_text, caption='caption'):
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
         user = {
             'email': 'some_email',  # value unimportant
             'user_id': 5,           # value unimportant

@@ -29,7 +29,13 @@ class TopButton(urwid.Button):
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
+        self.set_muted_streams()
         urwid.connect_signal(self, 'click', self.activate)
+
+    def set_muted_streams(self) -> None:
+        if self.caption in [self.controller.model.stream_dict[ele]['name']
+                            for ele in self.controller.model.muted_streams]:
+            self.update_count(-1)
 
     def update_count(self, count: int) -> None:
         self.count = count
