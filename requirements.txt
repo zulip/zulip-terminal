@@ -8,6 +8,7 @@ pytest-mock==1.7.1
 pudb==2017.1.4
 tornado~=5.1
 snakeviz==0.4.2
+gitlint==0.10.0
 mypy==0.641
 emoji==0.5.0
 urwid_readline==0.8
