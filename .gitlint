@@ -1,13 +1,54 @@
 [general]
-ignore=title-trailing-punctuation, body-min-length, body-is-missing, title-imperative-mood
+ignore=title-trailing-punctuation, body-is-missing, body-min-length, title-must-not-contain-word
 
-extra-path=tools/lib/gitlint-rules.py
+# ZT: These are custom rules written for Zulip-Terminal, included by default
+extra-path=tools/gitlint-extra-rules.py
 
-[title-match-regex-allow-exception]
-regex=^(.+:\ )?[A-Z].+\.$
+# verbosity should be a value between 1 and 3, the commandline -v flags take precedence over this
+# verbosity = 2
+
+# By default gitlint will ignore merge commits. Set to 'false' to disable.
+# ignore-merge-commits=true
+
+# By default gitlint will ignore fixup commits. Set to 'false' to disable.
+# ignore-fixup-commits=true
+
+# By default gitlint will ignore squash commits. Set to 'false' to disable.
+# ignore-squash-commits=true
+
+# Enable debug mode (prints more output). Disabled by default.
+# debug=true
 
 [title-max-length]
-line-length=76
+# ZT: Keep this at 72 (Zulip has 76)
+line-length=72
 
 [body-max-line-length]
+# ZT: This matches the Zulip preference for short body line lengths
 line-length=76
+
+[area-constraints]
+# This is a ZT custom rule; these are excluded from the lower-case area rule
+exclusions=WIP, DEBUG
+
+[ignore-by-title]
+# Ignore all rules for commits of which the title matches below
+# ZT: FIXME Do we need this?
+regex=^DEBUG(.*)
+ignore=all
+
+# [body-changed-file-mention]
+# List of files that need to be explicitly mentioned in the body when they are changed
+# This is useful for when developers often erroneously edit certain files or git submodules.
+# By specifying this rule, developers can only change the file when they explicitly reference
+# it in the commit message.
+# files=gitlint/rules.py,README.md
+
+# [ignore-by-body]
+# Ignore certain rules for commits of which the body has a line that matches a regex
+# E.g. Match bodies that have a line that that contain "release"
+# regex=(.*)release(.*)
+#
+# Ignore certain rules, you can reference them by their id or by their full name
+# Use 'all' to ignore all rules
+# ignore=T1,body-min-length
