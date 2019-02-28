@@ -23,6 +23,7 @@ Index = TypedDict('Index', {
     'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
     'stream_msg_ids_by_stream_id': Dict[int, Set[int]],
     'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
+    'pm_recipients': Dict[FrozenSet[int], int],
     # Extra cached information
     'edited_messages': Set[int],  # {message_ids, ...}
     'topics': Dict[int, List[str]],  # {topic names, ...}
@@ -39,6 +40,12 @@ initial_index = Index(
     private_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
+    pm_recipients=dict(),
+    stream=defaultdict(dict),
+    private=defaultdict(set),
+    all_messages=set(),
+    all_private=set(),
+    all_stream=defaultdict(set),
     edited_messages=set(),
     topics=defaultdict(list),
     search=set(),
@@ -197,6 +204,11 @@ def index_messages(messages: List[Any],
                 ....
             ]
         },
+        'pm_recipients':{  # all the reciepents in PMs
+            {3, 7} : 123, # Timestamp of most recent message
+            {1, 2, 3, 4}: 123,
+            ...
+        }
         'all_msg_ids': {
             14231,
             23423,
@@ -292,6 +304,20 @@ def index_messages(messages: List[Any],
             index['edited_messages'].add(msg['id'])
 
         index['messages'][msg['id']] = msg
+        # Update pm_recipients if message type is private regardless of narrow
+        # Store timestamp of most recent msg to use for sorting later.
+        if msg['type'] == 'private':
+            recipients = frozenset(set(
+                recipient['id'] for recipient in msg['display_recipient']
+            ))
+            if recipients not in index['pm_recipients'].keys():
+                index['pm_recipients'][recipients] = msg['timestamp']
+            else:
+                stored_timestamp = index['pm_recipients'][recipients]
+                msg_timestamp = msg['timestamp']
+                if msg_timestamp > stored_timestamp:
+                    index['pm_recipients'][recipients] = msg_timestamp
+
         if not narrow:
             index['all_msg_ids'].add(msg['id'])
 
