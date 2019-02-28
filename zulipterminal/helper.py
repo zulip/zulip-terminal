@@ -361,7 +361,6 @@ def index_messages(messages: List[Any],
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:
-    # TODO: support group pms
     unread_msg_counts = model.initial_data['unread_msgs']
 
     unread_counts = UnreadCounts(
