@@ -66,13 +66,14 @@ class TopButton(urwid.Button):
         )
 
         # NOTE: Generated text does not include space at end
-        return urwid.AttrMap(urwid.SelectableIcon(
+        button = urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces*' '),
              ' ', ('idle',  count_text)],
-            self.width_for_text_and_count+5),  # cursor location
-            self.text_color,
-            'selected')
+            self.width_for_text_and_count+5)  # cursor location
+        button.set_layout('left', 'any', None)
+
+        return urwid.AttrMap(button, self.text_color, 'selected')
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)

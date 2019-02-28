@@ -1676,6 +1676,7 @@ class TestTopButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
+        assert top_button._w._original_widget._wrap_mode == 'any'
 
 
 class TestStreamButton:
