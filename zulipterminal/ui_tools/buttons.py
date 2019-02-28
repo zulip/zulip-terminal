@@ -20,13 +20,15 @@ class TopButton(urwid.Button):
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
-                 count: int=0) -> None:
+                 count: int=0,
+                 shrink: bool=True) -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
         else:
             prefix = prefix_character
         assert len(prefix) in (0, 1)
         self._caption = caption
+        self.caption = caption
         self.prefix_character = prefix_character
         self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
@@ -37,6 +39,7 @@ class TopButton(urwid.Button):
 
         self.text_color = text_color
         self.show_function = show_function
+        self.shrink = shrink
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -57,7 +60,7 @@ class TopButton(urwid.Button):
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
-        if len(self._caption) > max_caption_length:
+        if len(self._caption) > max_caption_length and self.shrink:
             caption = (self._caption[:max_caption_length-1] +
                        '\N{HORIZONTAL ELLIPSIS}')
         else:
