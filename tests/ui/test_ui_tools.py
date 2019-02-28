@@ -21,6 +21,7 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton,
     UserButton,
     TopicButton,
+    GroupPMButton,
 )
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import powerset
@@ -1873,3 +1874,39 @@ class TestTopicButton:
         assert topic_button.stream_name == stream_name
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
+
+class TestGroupPMButton:
+    @pytest.mark.parametrize('width, count, expected_text', [
+        (20, 0, ' • Foo Surname, Boo Surname            '),
+        (20, 10, ' • Foo Surname, Boo Surname          10'),
+        (20, 999, ' • Foo Surname, Boo Surname         999'),
+        (40, 0, ' • Foo Surname, Boo Surname            '),
+        (40, 10, ' • Foo Surname, Boo Surname          10'),
+        (40, 999, ' • Foo Surname, Boo Surname         999'),
+    ])
+    def test_text_content(self, mocker, width, count, expected_text):
+        users = [{
+            'email': 'some_email',
+            'user_id': 5,
+            'full_name': "Foo Surname",
+        }, {
+            'email': 'some_other_email',
+            'user_id': 6,
+            'full_name': "Boo Surname",
+        }]
+        controller = mocker.Mock()
+        controller.model.user_id = 1
+        controller.model.unread_counts = {
+            'unread_pms': {
+                frozenset({1, 5, 6}): count,
+            }
+        }
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
+        group_pm_btn = GroupPMButton(users,
+                                     controller=controller,
+                                     bw_width=width,
+                                     view=mocker.Mock(),
+                                     color=None)
+
+        text = group_pm_btn._w._original_widget.get_text()
+        assert text[0] == expected_text

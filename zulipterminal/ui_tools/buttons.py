@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Tuple, Callable, Optional, Union
+import math
 
 import urwid
 
@@ -229,3 +230,31 @@ class UnreadPMButton(urwid.Button):
     def __init__(self, user_id: int, email: str) -> None:
         self.user_id = user_id
         self.email = email
+
+
+class GroupPMButton(TopButton):
+    def __init__(self, users: List[Dict[str, Any]], controller: Any,
+                 bw_width: int, view: Any, color: Optional[str]=None) -> None:
+        # Properties accessed externally
+        self.emails = ', '.join([user['email'] for user in users])
+        self.user_ids = {user['user_id'] for user in users}
+        self.user_ids.add(controller.model.user_id)
+        count = controller.model.unread_counts['unread_pms'].get(frozenset(
+            self.user_ids), 0)
+        self._view = view  # Used in _narrow_with_compose
+        caption = ', '.join(user['full_name'] for user in users)
+        text_rows = math.ceil(len(caption)/bw_width)
+        width = text_rows*bw_width
+        super().__init__(controller,
+                         caption=caption,
+                         show_function=self._narrow_with_compose,
+                         prefix_character=(color, '\N{BULLET}'),
+                         text_color=color,
+                         width=width,
+                         count=count,
+                         shrink=False)
+
+    def _narrow_with_compose(self, button: Any) -> None:
+        self.controller.narrow_to_user(self)
+        self._view.body.focus.original_widget.set_focus('footer')
+        self._view.write_box.private_box_view(email=self.emails)
