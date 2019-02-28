@@ -99,7 +99,8 @@ autohide=autohide
 | Narrow to all starred messages                        | <kbd>f</kbd>                                  |
 | Next Unread Topic                                     | <kbd>n</kbd>                                  |
 | Next Unread private message                           | <kbd>p</kbd>                                  |
-| Search Users                                          | <kbd>w</kbd>                                  |
+| Toggle Buddy List (includes Recent PMs and Group PMs) | <kbd>b</kbd>                                  |
+| Search People                                         | <kbd>w</kbd>                                  |
 | Search Messages                                       | <kbd>/</kbd>                                  |
 | Search Streams                                        | <kbd>q</kbd>                                  |
 | Mute/unmute Streams                                   | <kbd>m</kbd>                                  |

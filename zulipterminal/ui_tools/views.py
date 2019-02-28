@@ -1,12 +1,13 @@
 from collections import defaultdict, OrderedDict
-from typing import Any, List, Tuple, Optional, Callable
+from typing import Any, List, Tuple, Union, Dict, Optional, Callable
 import threading
+import json
 
 import urwid
 import time
 
 from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
-from zulipterminal.helper import asynch, match_user
+from zulipterminal.helper import asynch, match_user, index_messages
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UnreadPMButton,
@@ -15,9 +16,15 @@ from zulipterminal.ui_tools.buttons import (
     PMButton,
     StarredButton,
     StreamButton,
+    GroupPMButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
+
+OFFLINE = 'offline'
+IDLE = 'idle'
+ACTIVE = 'active'
+BUDDY_VIEW_WIDTH = 40
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -799,3 +806,103 @@ class MsgInfoView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super(MsgInfoView, self).keypress(size, key)
+
+class BuddyView(urwid.ListBox):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        self.model = controller.model
+        self.users_to_display = []  # type: List[List[Dict[str, Any]]]
+        self.group_pms_to_display = []  # type: List[List[Dict[str, Any]]]
+        self.update_users_to_display()
+        log = [urwid.AttrMap(urwid.Text("Recent PMs"), 'code'),
+               urwid.Divider(" ")]
+        log += [
+            self.get_button(users)
+            for index, users in enumerate(self.users_to_display)
+        ]
+        # Only show Group PMs if present
+        if self.group_pms_to_display:
+            log += [urwid.Divider(" "),
+                    urwid.AttrMap(urwid.Text("Group PMs"), 'code'),
+                    urwid.Divider(" ")]
+            log += [self.get_button(users)
+                    for index, users in enumerate(self.group_pms_to_display)]
+
+        self.log = urwid.SimpleFocusListWalker(log)
+        super(BuddyView, self).__init__(self.log)
+
+    def fetch_more_pms(self) -> None:
+        request = {
+            'num_before': 20,
+            'num_after': 0,
+            'apply_markdown': True,
+            'use_first_unread_anchor': True,
+            'client_gravatar': True,
+            'narrow': json.dumps([['is', 'private']]),
+        }
+        response = self.controller.client.do_api_query(request,
+                                                       '/json/messages',
+                                                       method="GET")
+        if response['result'] == 'success':
+            self.model.index = index_messages(response['messages'], self.model,
+                                              self.model.index)
+
+    def update_users_to_display(self) -> None:
+        # Get set of all the users in fetched pms
+        # Includes group pms too.
+        all_pms_users_dict = self.model.index['pm_recipients']
+        if len(all_pms_users_dict) < 20:
+            self.fetch_more_pms()
+            all_pms_users_dict = self.model.index['pm_recipients']
+        pms = list(all_pms_users_dict.keys())
+        pms.sort(key=lambda x: all_pms_users_dict[x], reverse=True)
+        for users in pms:
+            # Remove the current user from the frozenset
+            ids_to_display = users.difference({self.model.user_id, })
+            recipients = [self.model.user_dict[
+                          self.model.user_id_email_dict[ID]]
+                          for ID in ids_to_display]
+            # Ignore empty recipients (present because of self-messages)
+            if len(recipients) == 1:
+                self.users_to_display.append(recipients)
+            elif len(recipients) > 1:
+                self.group_pms_to_display.append(recipients)
+
+    def get_button(self, users: List[Dict[str, Any]]
+                   ) -> Union[GroupPMButton, UserButton]:
+        if len(users) == 1:
+            user = users[0]
+            unread_count = (self.model.unread_counts['unread_pms'].
+                            get(user['user_id'], 0))
+            return UserButton(
+                user,
+                controller=self.controller,
+                view=self.controller.view,
+                width=BUDDY_VIEW_WIDTH - 2,
+                color=user['status'],
+                count=unread_count
+            )
+        else:
+            # Set status as ACTIVE even if one user is ACTIVE
+            # Same rule for IDLE users.
+            status = OFFLINE
+            for user in users:
+                if user['status'] == IDLE and status == OFFLINE:
+                    status = IDLE
+                if user['status'] == ACTIVE and\
+                        (status == IDLE or status == OFFLINE):
+                    status = ACTIVE
+            return GroupPMButton(
+                users,
+                controller=self.controller,
+                view=self.controller.view,
+                bw_width=BUDDY_VIEW_WIDTH - 2,
+                color=status,
+            )
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('GO_BACK', key) or is_command_key('BUDDY_LIST', key)\
+                or is_command_key('ENTER', key):
+            # Hide the buddy view.
+            self.controller.loop.widget = self.controller.view
+        return super(BuddyView, self).keypress(size, key)
