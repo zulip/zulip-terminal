@@ -87,7 +87,18 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
                       "\nPlease enter your credentials to login into your"
                       " Zulip organization."
                       "\n" +
-                      in_color('blue', "Zulip-Realm URL: "))
+                      "\nNOTE: The " + in_color('blue', "Zulip URL") +
+                      " is where you would go in a "
+                      "web browser to log in to Zulip." +
+                      "\nIt often looks like one of the following:" +
+                      in_color('green', "\n   your-org.zulipchat.com") +
+                      " (Zulip-hosted servers)" +
+                      in_color('green', "\n   zulip.your-org.com") +
+                      " (self-hosted servers)" +
+                      in_color('green', "\n   chat.zulip.org") +
+                      " (the Zulip community server)"
+                      "\n" +
+                      in_color('blue', "Zulip URL: "))
     if realm_url.startswith("localhost"):
         realm_url = "http://" + realm_url
     elif not realm_url.startswith("http"):
