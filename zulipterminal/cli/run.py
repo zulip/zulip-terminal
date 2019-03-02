@@ -263,7 +263,8 @@ def main(options: Optional[List[str]]=None) -> None:
             prof.dump_stats("/tmp/profile.data")
             print("Profile data saved to /tmp/profile.data")
             print("You can visualize it using e.g."
-                  "`snakeviz /tmp/profile.data`")
+                  "`snakeviz /tmp/profile.data`"
+                  "NOTE: Use `pip install snakeviz` to install snakeviz")
 
         sys.exit(1)
 
