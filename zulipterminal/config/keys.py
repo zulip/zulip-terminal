@@ -1,132 +1,133 @@
 from typing import Set
+from collections import OrderedDict
 
-KEY_BINDINGS = {
-    'HELP': {
+KEY_BINDINGS = OrderedDict([
+    ('HELP', {
         'keys': {'?'},
         'help_text': 'Show/hide help menu',
-    },
-    'GO_BACK': {
+    }),
+    ('GO_BACK', {
         'keys': {'esc'},
         'help_text': 'Go Back',
-    },
-    'PREVIOUS_MESSAGE': {
+    }),
+    ('PREVIOUS_MESSAGE', {
         'keys': {'k', 'up'},
         'help_text': 'Previous message',
-    },
-    'NEXT_MESSAGE': {
+    }),
+    ('NEXT_MESSAGE', {
         'keys': {'j', 'down'},
         'help_text': 'Next message',
-    },
-    'GO_LEFT': {
+    }),
+    ('GO_LEFT', {
         'keys': {'h', 'left'},
         'help_text': 'Go left',
-    },
-    'GO_RIGHT': {
+    }),
+    ('GO_RIGHT', {
         'keys': {'l', 'right'},
         'help_text': 'Go right',
-    },
-    'SCROLL_TO_TOP': {
+    }),
+    ('SCROLL_TO_TOP', {
         'keys': {'K', 'page up'},
         'help_text': 'Scroll to top',
-    },
-    'SCROLL_TO_BOTTOM': {
+    }),
+    ('SCROLL_TO_BOTTOM', {
         'keys': {'J', 'page down'},
         'help_text': 'Scroll to bottom',
-    },
-    'END_MESSAGE': {
+    }),
+    ('END_MESSAGE', {
         'keys': {'G', 'end'},
         'help_text': 'Go to last message in view',
-    },
-    'REPLY_MESSAGE': {
+    }),
+    ('REPLY_MESSAGE', {
         'keys': {'r', 'enter'},
         'help_text': 'Reply to the current message',
-    },
-    'MENTION_REPLY': {
+    }),
+    ('MENTION_REPLY', {
         'keys': {'@'},
         'help_text': 'Reply mentioning the sender of the current message'
-    },
-    'QUOTE_REPLY': {
+    }),
+    ('QUOTE_REPLY', {
         'keys': {'>'},
         'help_text': 'Reply quoting the current message text',
-    },
-    'REPLY_AUTHOR': {
+    }),
+    ('REPLY_AUTHOR', {
         'keys': {'R'},
         'help_text': 'Reply privately to the sender of the current message',
-    },
-    'STREAM_MESSAGE': {
+    }),
+    ('STREAM_MESSAGE', {
         'keys': {'c'},
         'help_text': 'New message to a stream',
-    },
-    'PRIVATE_MESSAGE': {
+    }),
+    ('PRIVATE_MESSAGE', {
         'keys': {'x'},
         'help_text': 'New message to a person or group of people',
-    },
-    'TAB': {
+    }),
+    ('TAB', {
         'keys': {'tab'},
         'help_text': 'Toggle focus box in compose box'
-    },
-    'SEND_MESSAGE': {
+    }),
+    ('SEND_MESSAGE', {
         'keys': {'meta enter', 'ctrl d'},
         'help_text': 'Send a message',
-    },
-    'STREAM_NARROW': {
+    }),
+    ('STREAM_NARROW', {
         'keys': {'s'},
         'help_text': 'Narrow to the stream of the current message',
-    },
-    'TOPIC_NARROW': {
+    }),
+    ('TOPIC_NARROW', {
         'keys': {'S'},
         'help_text': 'Narrow to the topic of the current message',
-    },
-    'TOGGLE_NARROW': {
+    }),
+    ('TOGGLE_NARROW', {
         'keys': {'z'},
         'help_text':
             'Narrow to a topic/private-chat, or stream/all-private-messages',
-    },
-    'ALL_PM': {
+    }),
+    ('ALL_PM', {
         'keys': {'P'},
         'help_text': 'Narrow to all private messages',
-    },
-    'ALL_STARRED': {
+    }),
+    ('ALL_STARRED', {
         'keys': {'f'},
         'help_text': 'Narrow to all starred messages',
-    },
-    'NEXT_UNREAD_TOPIC': {
+    }),
+    ('NEXT_UNREAD_TOPIC', {
         'keys': {'n'},
         'help_text': 'Next unread topic',
-    },
-    'NEXT_UNREAD_PM': {
+    }),
+    ('NEXT_UNREAD_PM', {
         'keys': {'p'},
         'help_text': 'Next unread private message',
-    },
-    'SEARCH_PEOPLE': {
+    }),
+    ('SEARCH_PEOPLE', {
         'keys': {'w'},
         'help_text': 'Search People',
-    },
-    'SEARCH_MESSAGES': {
+    }),
+    ('SEARCH_MESSAGES', {
         'keys': {'/'},
         'help_text': 'Search Messages',
-    },
-    'SEARCH_STREAMS': {
+    }),
+    ('SEARCH_STREAMS', {
         'keys': {'q'},
         'help_text': 'Search Streams',
-    },
-    'ENTER': {
+    }),
+    ('ENTER', {
         'keys': {'enter'},
         'help_text': 'Perform current action',
-    },
-    'THUMBS_UP': {
+    }),
+    ('THUMBS_UP', {
         'keys': {'+'},
         'help_text': 'Add/remove thumbs-up reaction to the current message',
-    },
-    'TOGGLE_STAR_STATUS': {
+    }),
+    ('TOGGLE_STAR_STATUS', {
         'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of the current message',
-    },
-    'QUIT': {
+    }),
+    ('QUIT', {
         'keys': {'ctrl c'},
         'help_text': 'Quit',
-    },
-}
+    }),
+])
 
 
 class InvalidCommand(Exception):
