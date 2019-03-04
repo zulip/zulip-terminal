@@ -86,27 +86,10 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     assert return_value is muted
 
 
-@pytest.mark.parametrize('narrow, index, messages, focus_msg_id, muted,\
-                         len_w_list', [
+@pytest.mark.parametrize('narrow, messages, focus_msg_id, muted, len_w_list', [
     (
         # No muted messages
         [],
-        {
-            'all_messages': {1, 2},
-            'messages': {
-                1: {
-                    'id': 1,
-                    'flags': ['read'],
-                    'timestamp': 10,
-                },
-                2: {
-                    'id': 2,
-                    'flags': [],
-                    'timestamp': 10,
-                }
-            },
-            'pointer': {},
-        },
         None,
         None,
         False,
@@ -115,22 +98,6 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     (
         # No muted messages
         [['stream', 'foo']],
-        {
-            'all_messages': {1, 2},
-            'messages': {
-                1: {
-                    'id': 1,
-                    'flags': ['read'],
-                    'timestamp': 10,
-                },
-                2: {
-                    'id': 2,
-                    'flags': [],
-                    'timestamp': 10,
-                }
-            },
-            'pointer': {},
-        },
         [1],
         None,
         False,
@@ -139,33 +106,32 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     (
         # No muted messages
         [['stream', 'foo']],
-        {
-            'all_messages': {1, 2},
-            'messages': {
-                1: {
-                    'id': 1,
-                    'flags': ['read'],
-                    'timestamp': 10,
-                },
-                2: {
-                    'id': 2,
-                    'flags': [],
-                    'timestamp': 10,
-                }
-            },
-            'pointer': {},
-        },
         [1],
         None,
         True,
         0,
     )
 ])
-def test_create_msg_box_list(mocker, narrow, index,  messages, focus_msg_id,
+def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
                              muted, len_w_list):
     model = mocker.Mock()
     model.narrow = narrow
-    model.index = index
+    model.index = {
+        'all_messages': {1, 2},
+        'messages': {
+            1: {
+                'id': 1,
+                'flags': ['read'],
+                'timestamp': 10,
+            },
+            2: {
+                'id': 2,
+                'flags': [],
+                'timestamp': 10,
+            }
+        },
+        'pointer': {},
+        }
     msg_box = mocker.patch('zulipterminal.ui_tools.utils.MessageBox')
     mocker.patch('zulipterminal.ui_tools.utils.urwid.AttrMap',
                  return_value='MSG')
