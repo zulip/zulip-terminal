@@ -141,16 +141,21 @@ class MessageBox(urwid.Pile):
             raise RuntimeError("Invalid message type")
 
         if self.message['type'] == 'private':
-            self.recipients_names = ', '.join(list(
-                        recipient['full_name']
-                        for recipient in self.message['display_recipient']
-                        if recipient['email'] != self.model.user_email
-                    ))
-            self.recipients_emails = ', '.join(list(
-                        recipient['email']
-                        for recipient in self.message['display_recipient']
-                        if recipient['email'] != self.model.user_email
-                    ))
+            if self._is_private_message_to_self():
+                self.recipients_names = \
+                    self.message['display_recipient'][0]['full_name']
+                self.recipients_emails = self.model.user_email
+            else:
+                self.recipients_names = ', '.join(list(
+                            recipient['full_name']
+                            for recipient in self.message['display_recipient']
+                            if recipient['email'] != self.model.user_email
+                        ))
+                self.recipients_emails = ', '.join(list(
+                            recipient['email']
+                            for recipient in self.message['display_recipient']
+                            if recipient['email'] != self.model.user_email
+                        ))
 
         super(MessageBox, self).__init__(self.main_view())
 
@@ -179,6 +184,11 @@ class MessageBox(urwid.Pile):
         else:
             raise RuntimeError("Invalid message type")
 
+    def _is_private_message_to_self(self) -> bool:
+        recipient_list = self.message['display_recipient']
+        return len(recipient_list) == 1 and \
+            recipient_list[0]['email'] == self.model.user_email
+
     def stream_header(self) -> Any:
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
@@ -192,6 +202,9 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
+        if self._is_private_message_to_self():
+            self.recipients_names = \
+                self.message['display_recipient'][0]['full_name']
         title_markup = ('header', [
             ('custom', 'Private Messages with'),
             ('selected', ": "),

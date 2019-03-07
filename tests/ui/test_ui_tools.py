@@ -19,6 +19,7 @@ from urwid import AttrWrap, Columns, Padding, Text
 
 VIEWS = "zulipterminal.ui_tools.views"
 TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
+MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
 
 
 class TestMessageView:
@@ -873,6 +874,27 @@ class TestMessageBox:
 
         with pytest.raises(RuntimeError):
             msg_box = MessageBox(message, self.model, None)
+
+    def test_private_message_to_self(self, mocker):
+        message = dict(
+            type='private',
+            display_recipient=[{'full_name': 'Foo Foo',
+                                'email': 'foo@zulip.com',
+                                'id': None}],
+            sender_id=9,
+            content="<p> self message. </p>",
+            sender_full_name='Foo Foo',
+            sender_email='foo@zulip.com',
+            timestamp=150989984,
+        )
+        self.model.user_email = 'foo@zulip.com'
+        mocker.patch(MESSAGEBOX + '._is_private_message_to_self',
+                     return_value=True)
+        mocker.patch.object(MessageBox, 'main_view')
+        msg_box = MessageBox(message, self.model, None)
+
+        assert msg_box.recipients_emails == 'foo@zulip.com'
+        msg_box._is_private_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize('content, markup', [
         ('', []),
