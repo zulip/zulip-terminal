@@ -40,7 +40,7 @@ Event = TypedDict('Event', {
     # reaction & update_message:
     'message_id': int,
     # update_message:
-    'content': str,
+    'rendered_content': str,
     # update_message_flags:
     'messages': List[int],
     'operation': str,
@@ -532,7 +532,7 @@ class Model:
             return
 
         message_id = response['message_id']
-        content = response['content']
+        content = response['rendered_content']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
             message = self.index['messages'][message_id]
