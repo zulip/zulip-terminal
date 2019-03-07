@@ -587,11 +587,12 @@ class TestModel:
         ({
             'message_id': 1,
             'content': 'Foo is Boo',
+            'rendered_content': '<p>Foo is Boo</p>'
         }, {
             'messages': {
                 1: {
                     'id': 1,
-                    'content': 'Boo is Foo',
+                    'content': 'Boo is Foo'
                 },
                 2: {
                     'id': 2,
@@ -611,7 +612,8 @@ class TestModel:
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
         model.update_message(response)
-        assert model.index['messages'][1]['content'] == response['content']
+        assert model.index['messages'][1]['content'] == \
+            response['rendered_content']
         assert model.msg_list.log[0] == mock_msg
         self.controller.update_screen.assert_called_once_with()
 
