@@ -3,6 +3,7 @@ from time import ctime
 from datetime import datetime
 from typing import Any, Dict, List, Tuple, Union, Optional
 
+import json
 import emoji
 import urwid
 from urwid_readline import ReadlineEdit
@@ -10,6 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key
+from zulipterminal.helper import check_submessage_syntax
 
 
 class WriteBox(urwid.Pile):
@@ -194,6 +196,28 @@ class MessageBox(urwid.Pile):
         header = urwid.AttrWrap(title, 'bar')
         header.markup = title_markup
         return header
+
+    def submessages_view(self, submessages: List[Dict[str, Any]], active_char) -> Any:
+        if not check_submessage_syntax(submessages):
+            return ''
+        content = json.loads(submessages[0]['content'])['extra_data']
+
+        pile_widgets = []
+        pile_widgets.append(urwid.Text(content['heading']))
+        count = 1
+        for choice in content['choices']:
+            string = '- ({}) {}. {}'.format(count, choice['short_name'], choice['long_name'])
+            count = count + 1
+            # choice_widget = urwid.Button(urwid.Text(string))
+            pile_widgets.append(urwid.Text(string))
+
+        widget = urwid.Padding(urwid.LineBox(urwid.Columns([
+                                            (1, urwid.Text('')),
+                                            urwid.Pile(pile_widgets),
+                                            ]),tline='', bline='', rline='', lline=active_char),
+                               align='left', left=15, width=('relative', 100),
+                               min_width=50, right=8)
+        return widget
 
     def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
         if not reactions:
@@ -392,6 +416,9 @@ class MessageBox(urwid.Pile):
             align='left', left=15, width=('relative', 100),
             min_width=50, right=8)
 
+        # Submessages
+        submessages = self.submessages_view(self.message.get('submessages', []), active_char)
+
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])
 
@@ -399,7 +426,8 @@ class MessageBox(urwid.Pile):
         parts = [
             (recipient_header, recipient_header is not None),
             (content_header, any_differences),
-            (content, True),
+            (content, submessages == ''),
+            (submessages, submessages != ''),
             (reactions, reactions != ''),
         ]
         return [part for part, condition in parts if condition]
@@ -424,6 +452,28 @@ class MessageBox(urwid.Pile):
                 continue
             emails.append(recipient['email'])
         return ', '.join(emails)
+
+    def get_zform_reply(self, key):
+        data = json.loads(self.message['submessages'][0]['content'])
+        return data['extra_data']['choices'][int(key)-1]['reply']
+        try:
+           return json.loads(self.message['submessages'][0]['content'])['extra_data']['choices'][key-1]['reply']
+        except Exception:
+            return False
+
+
+    def get_reply_info(self):
+        reply_info = {
+            type: self.message['type'],
+        }
+        reply_info['mention'] = '@**' + self.message['sender_full_name'] + '** '
+        if self.message['type'] == 'private':
+            reply_info['to'] = self.get_recipients()
+        else:
+            reply_info['stream'] = self.message['display_recipient']
+            reply_info['to'] = self.message['display_recipient']
+            reply_info['topic'] = self.message['subject']
+        return reply_info
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
