@@ -140,6 +140,18 @@ class MessageBox(urwid.Pile):
         else:
             raise RuntimeError("Invalid message type")
 
+        if self.message['type'] == 'private':
+            self.recipients_names = ', '.join(list(
+                        recipient['full_name']
+                        for recipient in self.message['display_recipient']
+                        if recipient['email'] != self.model.user_email
+                    ))
+            self.recipients_emails = ', '.join(list(
+                        recipient['email']
+                        for recipient in self.message['display_recipient']
+                        if recipient['email'] != self.model.user_email
+                    ))
+
         super(MessageBox, self).__init__(self.main_view())
 
     def _time_for_message(self, message: Dict[str, Any]) -> str:
@@ -180,15 +192,10 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
-        self.recipients = ', '.join(list(
-            recipient['full_name']
-            for recipient in self.message['display_recipient']
-            if recipient['email'] != self.model.user_email
-        ))
         title_markup = ('header', [
             ('custom', 'Private Messages with'),
             ('selected', ": "),
-            ('custom', self.recipients)
+            ('custom', self.recipients_names)
         ])
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, 'bar')
@@ -416,20 +423,11 @@ class MessageBox(urwid.Pile):
         return super(MessageBox, self).mouse_event(size, event, button, col,
                                                    row, focus)
 
-    def get_recipients(self) -> str:
-        emails = []
-        for recipient in self.message['display_recipient']:
-            email = recipient['email']
-            if email == self.model.user_email:
-                continue
-            emails.append(recipient['email'])
-        return ', '.join(emails)
-
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.get_recipients()
+                    email=self.recipients_emails
                 )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
@@ -439,7 +437,7 @@ class MessageBox(urwid.Pile):
         elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.get_recipients()
+                    email=self.recipients_emails
                 )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(

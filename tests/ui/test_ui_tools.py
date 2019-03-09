@@ -850,9 +850,17 @@ class TestMessageBox:
     ])
     def test_init(self, mocker, message_type, set_fields):
         mocker.patch.object(MessageBox, 'main_view')
-        message = dict(display_recipient=['x'], stream_id=5, subject='hi',
-                       sender_email='foo@zulip.com', sender_id=4209,
-                       type=message_type)
+        message = dict(display_recipient=[
+            {
+                'id': 7,
+                'email': 'boo@zulip.com',
+                'full_name': 'Boo is awesome'
+            }],
+            stream_id=5,
+            subject='hi',
+            sender_email='foo@zulip.com',
+            sender_id=4209,
+            type=message_type)
 
         msg_box = MessageBox(message, self.model, None)
 
