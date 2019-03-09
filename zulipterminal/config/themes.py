@@ -28,6 +28,79 @@ required_styles = {
     'starred',
 }
 
+SOLAR_BASE = dict(
+    # Base03='#002b36',
+    # Base02='#073642',
+    # Base01='#586e75',
+    # Base00='#657b83',
+    # Base0='#839496',
+    # Base1='#93a1a1',
+    # Base2='#eee8d5',
+    # Base3='#fdf6e3',
+    # Yellow='#b58900',
+    # Orange='#cb4b16',
+    # Red='#dc322f',
+    # Magenta='#d33682',
+    # Violet='#6c71c4',
+    # Blue='#268bd2',
+    # Cyan='#2aa198',
+    # Green='#859900',
+
+    # Base03='#023',
+    # Base02='#034',
+    # Base01='#567',
+    # Base00='#678',
+    # Base0='#899',
+    # Base1='#9aa',
+    # Base2='#eed',
+    # Base3='#ffe',
+    # Yellow='#b80',
+    # Orange='#c41',
+    # Red='#d32',
+    # Magenta='#d38',
+    # Violet='#67c',
+    # Blue='#28d',
+    # Cyan='#2a9',
+    # Green='#890',
+# base03='#1c1c1c',
+# base02='#262626',
+# base01='#585858',
+# base00='#626262',
+# base0='#808080',
+# base1='#8a8a8a',
+# base2='#e4e4e4',
+# base3='#ffffd7',
+# yellow='#af8700',
+# orange='#d75f00',
+# red='#d70000',
+# magenta='#af005f',
+# violet=	'#5f5faf',
+# blue='#0087ff',
+# cyan='#00afaf',
+# green='#5f8700',
+
+Base03='#111',
+Base02='#222',
+Base01='#555',
+Base00='#666',
+Base0='#888',
+Base1='#888',
+Base2='#eee',
+Base3='#ffd',
+Yellow='#a80',
+Orange='#d50',
+Red='#d00',
+Magenta='#a05',
+Violet=	'#55a',
+Blue='#08f',
+Cyan='#0aa',
+Green='#580',
+)
+
+SOLAR = dict(SOLAR_BASE,
+             **{color + ':bold': code + ', bold'
+                for color, code in SOLAR_BASE.items()})
+
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = 'h234'  # dark0_hard
@@ -68,6 +141,66 @@ THEMES = {
         ('bold',         'white, bold',     'black'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'black'),
+    ],
+# white -> Base0
+# black -> Base03
+# dark blue -> Blue
+# light green -> Green
+# dark cyan -> Base0 FIXME?
+# yellow -> Yellow
+# light blue -> Cyan
+# dark gray -> Base01
+# light magenta -> Magenta
+# light red -> Red
+# dark red -> Violet FIXME?
+# brown -> Orange
+    'solar_dark': [
+        (None,           'white',                'black',
+         None,           SOLAR['Base0'],          SOLAR['Base03']),
+        ('selected',     'white',                'dark blue',
+         None,           SOLAR['Base03'],          SOLAR['Blue']),  # black/blue
+        ('msg_selected', 'light green',          'black',
+         None,           SOLAR['Blue:bold'],    SOLAR['Base03']),  # blue/black
+        ('header',       'dark cyan',            'dark blue',
+         'bold',         SOLAR['Base0'],      SOLAR['Blue']),  # FIXME dark cyan?
+        ('custom',       'white',                'dark blue',
+         'underline',    SOLAR['Base03'],          SOLAR['Blue']),  # black/blue
+        ('content',      'white',                'black',
+         'standout',     SOLAR['Base0'],          SOLAR['Base03']),
+        ('name',         'yellow, bold',         'black',
+         None,           SOLAR['Yellow:bold'],    SOLAR['Base03']),
+        ('unread',       'light blue',           'black',
+         None,           SOLAR['Green:bold'],     SOLAR['Base03']),
+        ('active',       'light green',          'black',
+         None,           SOLAR['Green'],    SOLAR['Base03']),
+        ('idle',         'yellow',               'black',
+         None,           SOLAR['Yellow'],         SOLAR['Base03']),
+        ('offline',      'white',                'black',
+         None,           SOLAR['Base0'],          SOLAR['Base03']),
+        ('inactive',     'white',                'black',
+         None,           SOLAR['Base0'],          SOLAR['Base03']),
+        ('title',        'white, bold',          'black',
+         None,           SOLAR['Base0:bold'],     SOLAR['Base03']),
+        ('time',         'light blue',           'black',
+         None,           SOLAR['Cyan'],     SOLAR['Base03']),
+        ('bar',          'white',                'dark gray',
+         None,           SOLAR['Base0'],          SOLAR['Base01']),
+        ('emoji',        'light magenta',        'black',
+         None,           SOLAR['Magenta'],  SOLAR['Base03']),
+        ('span',         'light red, bold',      'black',
+         None,           SOLAR['Red:bold'], SOLAR['Base03']),
+        ('link',         'light blue',           'black',
+         None,           SOLAR['Cyan'],     SOLAR['Base03']),
+        ('blockquote',   'brown',                'black',
+         None,           SOLAR['Orange'],          SOLAR['Base03']),
+        ('code',         'black',                'white',
+         None,           SOLAR['Base03'],          SOLAR['Base0']),
+        ('bold',         'white, bold',          'black',
+         None,           SOLAR['Base0:bold'],     SOLAR['Base03']),
+        ('footer',       'white',                'dark red',
+         'bold',         SOLAR['Base03'],          SOLAR['Violet']),  # black/violet
+        ('starred',      'light red, bold',      'black',
+         None,           SOLAR['Red:bold'], SOLAR['Base03']),
     ],
     'gruvbox': [
         # default colorscheme on 16 colors, gruvbox colorscheme
