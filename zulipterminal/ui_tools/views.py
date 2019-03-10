@@ -192,12 +192,14 @@ class MessageView(urwid.ListBox):
                 return super(MessageView, self).keypress(size, 'page down')
 
         elif is_command_key('THUMBS_UP', key):
+            # FIXME: Improve reactions for dummy messages.
             if self.focus is not None:
                 self.model.react_to_message(
                     self.focus.original_widget.message,
                     reaction_to_toggle='thumbs_up')
 
         elif is_command_key('TOGGLE_STAR_STATUS', key):
+            # FIXME: Improve reactions for dummy messages.
             if self.focus is not None:
                 message = self.focus.original_widget.message
                 self.model.toggle_message_star_status(message)
@@ -446,6 +448,7 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key('REPLY_MESSAGE', key):
+            # TODO: Prevent 'r' for dummy stream message.
             self.body.keypress(size, 'enter')
             if self.footer.focus is not None:
                 self.set_focus('footer')
