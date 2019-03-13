@@ -608,16 +608,20 @@ class Model:
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
 
-    def _register_desired_events(self) -> None:
+    def _register_desired_events(self) -> bool:
         try:
             response = self.client.register(event_types=Model.event_types,
                                             client_gravatar=True,
                                             apply_markdown=True)
-        except zulip.ZulipError as e:
-            raise ServerConnectionFailure(e)
-        self.max_message_id = response['max_message_id']
-        self.queue_id = response['queue_id']
-        self.last_event_id = response['last_event_id']
+        except zulip.ZulipError:
+            return False
+
+        if response['result'] == 'success':
+            self.max_message_id = response['max_message_id']
+            self.queue_id = response['queue_id']
+            self.last_event_id = response['last_event_id']
+            return True
+        return False
 
     @asynch
     def poll_for_events(self) -> None:
@@ -625,7 +629,8 @@ class Model:
         last_event_id = self.last_event_id
         while True:
             if queue_id is None:
-                self._register_desired_events()
+                if not self._register_desired_events():
+                    raise ServerConnectionFailure("register desired events")
                 queue_id = self.queue_id
                 last_event_id = self.last_event_id
 
