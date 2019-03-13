@@ -296,32 +296,9 @@ class Model:
                                                 num_after=10,
                                                 num_before=30,
                                                 anchor=None),
+                'register': executor.submit(self._register_desired_events,
+                                            fetch_data=True),
             }  # Dict[str, Future[Any]]
-            try:
-                response = self.client.register(
-                    event_types=Model.event_types,
-                    fetch_event_types=[
-                        'presence',
-                        'subscription',
-                        'message',
-                        'update_message_flags',
-                        'muted_topics',
-                        'realm_user',  # Enables cross_realm_bots
-                    ],
-                    client_gravatar=True,
-                    apply_markdown=True,
-                )
-                self.initial_data.update(response)
-                self.max_message_id = response['max_message_id']
-                self.queue_id = response['queue_id']
-                self.last_event_id = response['last_event_id']
-            except zulip.ZulipError as e:
-                raise ServerConnectionFailure(e)
-            except Exception as e:
-                # There was some error in the request sent.
-                if response['result'] == 'error':
-                    e.extra_info = response['msg']  # type: ignore
-                raise e
 
             # Wait for threads to complete
             wait(futures.values())  # type: ignore
