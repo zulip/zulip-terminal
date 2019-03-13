@@ -608,15 +608,26 @@ class Model:
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
 
-    def _register_desired_events(self) -> bool:
+    def _register_desired_events(self, *, fetch_data: bool=False) -> bool:
+        fetch_types = None if not fetch_data else [
+            'presence',
+            'subscription',
+            'message',
+            'update_message_flags',
+            'muted_topics',
+            'realm_user',  # Enables cross_realm_bots
+        ]
         try:
             response = self.client.register(event_types=Model.event_types,
+                                            fetch_event_types=fetch_types,
                                             client_gravatar=True,
                                             apply_markdown=True)
         except zulip.ZulipError:
             return False
 
         if response['result'] == 'success':
+            if fetch_data:
+                self.initial_data.update(response)
             self.max_message_id = response['max_message_id']
             self.queue_id = response['queue_id']
             self.last_event_id = response['last_event_id']
