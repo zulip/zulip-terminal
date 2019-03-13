@@ -625,14 +625,17 @@ class Model:
 
     @asynch
     def poll_for_events(self) -> None:
+        reregister_timeout = 10
         queue_id = self.queue_id
         last_event_id = self.last_event_id
         while True:
             if queue_id is None:
-                if not self._register_desired_events():
-                    raise ServerConnectionFailure("register desired events")
-                queue_id = self.queue_id
-                last_event_id = self.last_event_id
+                while True:
+                    if self._register_desired_events():
+                        queue_id = self.queue_id
+                        last_event_id = self.last_event_id
+                        break
+                    time.sleep(reregister_timeout)
 
             response = self.client.get_events(
                 queue_id=queue_id,
