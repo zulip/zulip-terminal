@@ -163,12 +163,12 @@ def test_powerset(iterable, map_func, expected_powerset):
 
 @pytest.mark.parametrize('muted_streams, muted_topics, vary_in_unreads', [
     ([99], [['Some general stream', 'Some general unread topic']], {
-        'all_msg': 4,
+        'all_msg': 9,
         'streams': {99: 1},
         'unread_topics': {(99, 'Some private unread topic'): 1},
     }),
     ([1000], [['Secret stream', 'Some private unread topic']], {
-        'all_msg': 6,
+        'all_msg': 11,
         'streams': {1000: 3},
         'unread_topics': {(1000, 'Some general unread topic'): 3},
     }),

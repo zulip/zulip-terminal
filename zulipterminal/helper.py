@@ -6,7 +6,7 @@ from re import match, ASCII
 from threading import Thread
 from typing import (
     Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
-    Iterable, Callable
+    Iterable, Callable, FrozenSet
 )
 from mypy_extensions import TypedDict
 
@@ -59,6 +59,7 @@ UnreadCounts = TypedDict('UnreadCounts', {
     'all_pms': int,
     'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
     'unread_pms': Dict[int, int],  # sender_id
+    'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
     'streams': Dict[int, int],  # stream_id
 })
 
@@ -353,6 +354,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         all_pms=0,
         unread_topics=dict(),
         unread_pms=dict(),
+        unread_huddles=dict(),
         streams=dict(),
     )
 
@@ -375,6 +377,15 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         else:
             unread_counts['streams'][stream_id] += count
         unread_counts['all_msg'] += count
+
+    # store unread count of group pms in `unread_huddles`
+    for group_pm in unread_msg_counts['huddles']:
+        count = len(group_pm['unread_message_ids'])
+        user_ids = group_pm['user_ids_string'].split(',')
+        user_ids = frozenset(map(int, user_ids))
+        unread_counts['unread_huddles'][user_ids] = count
+        unread_counts['all_msg'] += count
+        unread_counts['all_pms'] += count
 
     return unread_counts
 
