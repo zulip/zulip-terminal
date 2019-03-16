@@ -403,7 +403,13 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
                 'unread_message_ids': [7],
                 'sender_ids': [1, 2]
             }],
-            'huddles': []
+            'huddles': [{
+              'user_ids_string': '1001,11,12',
+              'unread_message_ids': [11, 12, 13]
+                }, {
+              'user_ids_string': '1001,11,12,13',
+              'unread_message_ids': [101, 102],
+            }]
         },
         'presences': {
             'nyan.salmon+sns@gmail.com': {
@@ -701,15 +707,19 @@ def classified_unread_counts():
     helper.classify_unread_counts function.
     """
     return {
-        'all_msg': 7,
-        'all_pms': 3,
+        'all_msg': 12,
+        'all_pms': 8,
         'unread_topics': {
             (1000, 'Some general unread topic'): 3,
             (99, 'Some private unread topic'): 1
         },
         'unread_pms': {
             1: 2,
-            2: 1
+            2: 1,
+        },
+        'unread_huddles': {
+            frozenset({1001, 11, 12}): 3,
+            frozenset({1001, 11, 12, 13}): 2
         },
         'streams': {
             1000: 3,
