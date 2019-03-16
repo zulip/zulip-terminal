@@ -391,6 +391,14 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
             unread_counts['streams'][stream_id] += count
         unread_counts['all_msg'] += count
 
+    for group_pm in unread_msg_counts['huddles']:
+        count = len(group_pm['unread_message_ids'])
+        user_ids = group_pm['user_ids_string'].split(',')
+        user_ids = frozenset(map(int, user_ids))
+        unread_counts['unread_pms'][user_ids] = count
+        unread_counts['all_msg'] += count
+        unread_counts['all_pms'] += count
+
     return unread_counts
 
 
