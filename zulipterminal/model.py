@@ -519,6 +519,7 @@ class Model:
             message = self.index['messages'][message_id]
             message['content'] = content
             self.index['messages'][message_id] = message
+            self.index['edited_messages'].add(message_id)
             self.update_rendered_view(message_id)
 
     def update_reaction(self, response: Event) -> None:
