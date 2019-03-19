@@ -597,7 +597,8 @@ class TestModel:
                     'id': 2,
                     'content': "Boo is not Foo"
                 }
-            }
+            },
+            'edited_messages': set()
         })
     ])
     def test_update_message(self, mocker, model, response, index):
@@ -614,6 +615,8 @@ class TestModel:
         assert model.index['messages'][1]['content'] == \
             response['rendered_content']
         assert model.msg_list.log[0] == mock_msg
+        # Test for updation of edited_message in index
+        assert model.index['edited_messages'] == {1}
         self.controller.update_screen.assert_called_once_with()
 
         # TEST FOR FALSE CASES
