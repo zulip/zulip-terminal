@@ -402,15 +402,27 @@ class MessageBox(urwid.Pile):
         soup = BeautifulSoup(self.message['content'], 'lxml')
         content = (None, self.soup2markup(soup.find(name='body')))
         active_char = '▒'  # Options are '█', '▓', '▒', '░'
+
+        if self.message['id'] in self.model.index['edited_messages']:
+            edited_label_size = 11
+            left_padding = 1
+        else:
+            edited_label_size = 0
+            left_padding = 12
+
         content = urwid.Padding(
-            urwid.LineBox(
-                urwid.Columns([
-                    (1, urwid.Text('')),
-                    urwid.Text(content),
-                ]), tline='', bline='', rline='', lline=active_char
-            ),
-            align='left', left=15, width=('relative', 100),
-            min_width=50, right=8)
+            urwid.Columns([
+                (edited_label_size,
+                 urwid.Text('(EDITED)')),
+                urwid.LineBox(
+                    urwid.Columns([
+                        (1, urwid.Text('')),
+                        urwid.Text(content),
+                    ]), tline='', bline='', rline='', lline=active_char
+                )
+            ]),
+            align='left', left=left_padding,
+            width=('relative', 100), min_width=10, right=8)
 
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])

@@ -842,8 +842,9 @@ class TestHelpMenu:
 
 class TestMessageBox:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker, initial_index):
         self.model = mocker.Mock()
+        self.model.index = initial_index
 
     @pytest.mark.parametrize('message_type, set_fields', [
         ('stream', [('caption', ''), ('stream_id', None), ('title', '')]),
@@ -943,7 +944,7 @@ class TestMessageBox:
     ])
     def test_soup2markup(self, content, markup):
         message = dict(display_recipient=['x'], stream_id=5, subject='hi',
-                       sender_email='foo@zulip.com', sender_id=4209,
+                       sender_email='foo@zulip.com', id=4, sender_id=4209,
                        type='stream',  # NOTE Output should not vary with PM
                        flags=[], content=content, sender_full_name='bob smith',
                        timestamp=99, reactions=[])
@@ -1027,6 +1028,7 @@ class TestMessageBox:
 
     @pytest.mark.parametrize('message', [
         {
+            'id': 4,
             'type': 'stream',
             'display_recipient': 'Verona',
             'stream_id': 5,
@@ -1062,6 +1064,7 @@ class TestMessageBox:
 
     @pytest.mark.parametrize('message', [
         {
+            'id': 4,
             'type': 'private',
             'sender_email': 'iago@zulip.com',
             'sender_id': 5,
@@ -1114,6 +1117,7 @@ class TestMessageBox:
     # Assume recipient (PM/stream/topic) header is unchanged below
     @pytest.mark.parametrize('message', [
         {
+            'id': 4,
             'type': 'stream',
             'display_recipient': 'Verona',
             'stream_id': 5,
@@ -1194,11 +1198,24 @@ class TestMessageBox:
             'common_unchanged_message', 'both_starred'])
     def test_main_view_compact_output(self, mocker, message,
                                       to_vary_in_each_message):
+        message.update({'id': 4})
         varied_message = dict(message, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, varied_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
+
+    def test_main_view_generates_EDITED_label(self, mocker,
+                                              messages_successful_response):
+        messages = messages_successful_response['messages']
+        for message in messages:
+            self.model.index['edited_messages'].add(message['id'])
+            msg_box = MessageBox(message, self.model, message)
+            view_components = msg_box.main_view()
+
+            label = view_components[0].original_widget.contents[0]
+            assert label[0].text == '(EDITED)'
+            assert label[1][1] == 11
 
 
 class TestTopButton:
