@@ -94,6 +94,9 @@ class MessageView(urwid.ListBox):
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
         if self.log:
             top_message_id = self.log[0].original_widget.message['id']
+            # This for the dummy message
+            if top_message_id is None:
+                return
             ids_to_keep.remove(top_message_id)  # update this id
             no_update_baseline = {top_message_id}
         else:
@@ -130,6 +133,11 @@ class MessageView(urwid.ListBox):
         else:
             last_message = None
 
+        if self.log:
+            top_message_id = self.log[0].original_widget.message.get('id')
+            # This for the dummy message
+            if top_message_id is None:
+                return
         message_list = create_msg_box_list(self.model, new_ids,
                                            last_message=last_message)
         self.log.extend(message_list)
