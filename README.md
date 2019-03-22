@@ -2,6 +2,10 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
+<img src="all-messages-zulip-terminal.png" width=800 alt="screenshot: all messages">
+<img src="private-messages-zulip-terminal.png" width=800 alt="screenshot: private messages">
+<img src="users-zulip-terminal.png" width=800 alt="screenshot: users">
+
 [Recent changes](CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
