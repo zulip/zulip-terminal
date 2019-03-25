@@ -2,9 +2,7 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
-<img src="all-messages-zulip-terminal.png" width=800 alt="screenshot: all messages">
-<img src="private-messages-zulip-terminal.png" width=800 alt="screenshot: private messages">
-<img src="users-zulip-terminal.png" width=800 alt="screenshot: users">
+<img src="zulip-terminal.gif" width=1000 alt="zulip terminal demo">
 
 [Recent changes](CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
