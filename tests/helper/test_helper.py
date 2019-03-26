@@ -84,6 +84,34 @@ def test_index_messages_narrow_user_multiple(mocker,
     assert index_messages(messages, model, model.index) == index_user_multiple
 
 
+@pytest.mark.parametrize('edited_msgs', [
+    {537286, 537287, 537288},
+    {537286}, {537287}, {537288},
+    {537286, 537287}, {537286, 537288}, {537287, 537288},
+])
+def test_index_edited_message(mocker,
+                              messages_successful_response,
+                              empty_index,
+                              edited_msgs,
+                              initial_index):
+    messages = messages_successful_response['messages']
+    for msg in messages:
+        if msg['id'] in edited_msgs:
+            msg['edit_history'] = []
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.index = initial_index
+    model.narrow = []
+
+    expected_index = dict(empty_index, edited_messages=edited_msgs,
+                          all_messages={537286, 537287, 537288})
+    for msg_id, msg in expected_index['messages'].items():
+        if msg_id in edited_msgs:
+            msg['edit_history'] = []
+
+    assert index_messages(messages, model, model.index) == expected_index
+
+
 @pytest.mark.parametrize('msgs_with_stars', [
     {537286, 537287, 537288},
     {537286}, {537287}, {537288},
