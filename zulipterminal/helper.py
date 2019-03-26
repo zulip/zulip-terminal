@@ -21,6 +21,7 @@ Index = TypedDict('Index', {
     'all_starred': Set[int],  # {message_id, ...}
     'all_private': Set[int],  # {message_id, ...}
     'all_stream': Dict[int, Set[int]],  # stream_id: {message_id, ...}
+    'edited_messages': Set[int],  # {message_ids, ...}
     'search': Set[int],  # {message_id, ...}
     'messages': Dict[int, Message],  # message_id: Message
 })
@@ -32,6 +33,7 @@ initial_index = Index(
     all_messages=set(),
     all_private=set(),
     all_stream=defaultdict(set),
+    edited_messages=set(),
     messages=defaultdict(dict),
     search=set(),
     all_starred=set(),
@@ -181,7 +183,12 @@ def index_messages(messages: List[Any],
                 23423,
                 ...
             }
-        }
+        },
+        'edited_messages':{
+            51234,
+            23423,
+            ...
+        },
         'search': {
             13242,
             23423,
@@ -245,6 +252,9 @@ def index_messages(messages: List[Any],
     """
     narrow = model.narrow
     for msg in messages:
+
+        if 'edit_history' in msg.keys():
+            index['edited_messages'].add(msg['id'])
 
         index['messages'][msg['id']] = msg
         if not narrow:
