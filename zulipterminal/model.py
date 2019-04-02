@@ -210,10 +210,14 @@ class Model:
             emoji_code='1f44d',
             reaction_type='unicode_emoji',
             message_id=str(message['id']))
-        existing_reactions = [reaction['emoji_code']
-                              for reaction in message['reactions']
-                              if ('user_id' in reaction['user'] and
-                                  reaction['user']['user_id'] == self.user_id)]
+        existing_reactions = [
+            reaction['emoji_code']
+            for reaction in message['reactions']
+            if (('user_id' in reaction['user'] and
+                reaction['user']['user_id'] == self.user_id)) or
+               (('id' in reaction['user'] and
+                reaction['user']['id'] == self.user_id))
+        ]
         if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
