@@ -411,17 +411,27 @@ class RightColumnView(urwid.Frame):
                                               header=search_box)
 
     @asynch
-    def update_user_list(self, search_box: Any, new_text: str) -> None:
-        if not self.view.controller.editor_mode:
+    def update_user_list(self, search_box: Any=None,
+                         new_text: str="",
+                         user_list: Any=None) -> None:
+
+        assert ((user_list is None and search_box is not None) or
+                (user_list is not None and search_box is None and
+                 new_text == ""))
+
+        if not self.view.controller.editor_mode and not user_list:
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
         self.search_lock.acquire()
+        if user_list:
+            self.view.users = user_list
         users = self.view.users.copy()
         users_display = users.copy()
-        for user in users:
-            if not match_user(user, new_text):
-                users_display.remove(user)
+        if new_text:
+            for user in users:
+                if not match_user(user, new_text):
+                    users_display.remove(user)
         self.body = self.users_view(users_display)
         self.set_body(self.body)
         self.view.controller.update_screen()

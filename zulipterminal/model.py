@@ -189,7 +189,7 @@ class Model:
             current_ids = self.index['all_starred']
         return current_ids.copy()
 
-    def _notify_server_of_presence(self) -> None:
+    def _notify_server_of_presence(self) -> Dict[str, Any]:
         response = self.client.update_presence(
                 request={
                     # TODO: Determine `status` from terminal tab focus.
@@ -198,17 +198,24 @@ class Model:
                 }
             )
         self.new_user_input = False
+        return response
 
     @asynch
     def _start_presence_updates(self) -> None:
         """
-        Notify server of user's presence each minute (version 1a)
+        Call `_notify_server_of_presence` every minute (version 1a).
+        Use 'response' to update user list (version 1b).
         """
-        # FIXME: version 1b: Also use 'response' to update user list
         # FIXME: Version 2: call endpoint with ping_only=True only when
         #        needed, and rely on presence events to update
         while True:
-            self._notify_server_of_presence()
+            response = self._notify_server_of_presence()
+            if response['result'] == 'success':
+                self.initial_data['presences'] = response['presences']
+                self.users = self.get_all_users()
+                if hasattr(self.controller, 'view'):
+                    self.controller.view.users_view.update_user_list(
+                        user_list=self.users)
             time.sleep(60)
 
     @asynch
