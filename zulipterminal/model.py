@@ -189,6 +189,16 @@ class Model:
             current_ids = self.index['all_starred']
         return current_ids.copy()
 
+    def _notify_server_of_presence(self) -> None:
+        response = self.client.update_presence(
+                request={
+                    # TODO: Determine `status` from terminal tab focus.
+                    'status': 'active' if self.new_user_input else 'idle',
+                    'new_user_input': self.new_user_input,
+                }
+            )
+        self.new_user_input = False
+
     @asynch
     def _start_presence_updates(self) -> None:
         """
@@ -198,14 +208,7 @@ class Model:
         # FIXME: Version 2: call endpoint with ping_only=True only when
         #        needed, and rely on presence events to update
         while True:
-            response = self.client.update_presence(
-                request={
-                    # TODO: Determinal `status` from terminal tab focus.
-                    'status': 'active' if self.new_user_input else 'idle',
-                    'new_user_input': self.new_user_input,
-                }
-            )
-            self.new_user_input = False
+            self._notify_server_of_presence()
             time.sleep(60)
 
     @asynch
