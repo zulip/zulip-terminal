@@ -694,6 +694,16 @@ class TestRightColumnView:
         right_col_view.users_view.assert_called_with(assert_list)
         set_body.assert_called_once_with(right_col_view.body)
 
+    def test_update_user_presence(self, right_col_view, mocker,
+                                  user_list):
+        set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
+
+        right_col_view.update_user_list(user_list=user_list)
+
+        right_col_view.search_lock.acquire.assert_called_once_with()
+        right_col_view.users_view.assert_called_with(user_list)
+        set_body.assert_called_once_with(right_col_view.body)
+
     @pytest.mark.parametrize('users, users_btn_len, editor_mode, status', [
         (None, 1, False, 'active'),
         ([{
