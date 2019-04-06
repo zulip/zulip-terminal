@@ -63,6 +63,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'R'},
         'help_text': 'Reply privately to the sender of the current message',
     }),
+    ('EDIT_MESSAGE', {
+        'keys': {'e'},
+        'help_text': "Edit current message's text or topic",
+    }),
     ('STREAM_MESSAGE', {
         'keys': {'c'},
         'help_text': 'New message to a stream',

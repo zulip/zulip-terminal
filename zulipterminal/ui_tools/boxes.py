@@ -1,5 +1,5 @@
 from collections import defaultdict
-from time import ctime
+from time import ctime, time
 from datetime import datetime
 from sys import platform
 from typing import Any, Dict, List, Tuple, Union, Optional
@@ -18,6 +18,7 @@ class WriteBox(urwid.Pile):
         super(WriteBox, self).__init__(self.main_view(True))
         self.model = view.model
         self.view = view
+        self.msg_edit_id = None  # type: Optional[int]
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -82,19 +83,35 @@ class WriteBox(urwid.Pile):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
-            if not self.to_write_box:
-                success = self.model.send_stream_message(
-                    stream=self.stream_write_box.edit_text,
-                    topic=self.title_write_box.edit_text,
-                    content=self.msg_write_box.edit_text
-                )
+            if self.msg_edit_id:
+                if not self.to_write_box:
+                    success = self.model.update_stream_message(
+                        topic=self.title_write_box.edit_text,
+                        content=self.msg_write_box.edit_text,
+                        msg_id=self.msg_edit_id,
+                    )
+                else:
+                    success = self.model.update_private_message(
+                        content=self.msg_write_box.edit_text,
+                        msg_id=self.msg_edit_id,
+                    )
             else:
-                success = self.model.send_private_message(
-                    recipients=self.to_write_box.edit_text,
-                    content=self.msg_write_box.edit_text
-                )
+                if not self.to_write_box:
+                    success = self.model.send_stream_message(
+                        stream=self.stream_write_box.edit_text,
+                        topic=self.title_write_box.edit_text,
+                        content=self.msg_write_box.edit_text
+                    )
+                else:
+                    success = self.model.send_private_message(
+                        recipients=self.to_write_box.edit_text,
+                        content=self.msg_write_box.edit_text
+                    )
             if success:
                 self.msg_write_box.edit_text = ''
+                if self.msg_edit_id:
+                    self.msg_edit_id = None
+                    self.keypress(size, 'esc')
         elif is_command_key('GO_BACK', key):
             self.view.controller.editor_mode = False
             self.main_view(False)
@@ -624,6 +641,34 @@ class MessageBox(urwid.Pile):
                 quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(quote))
+            self.model.controller.view.middle_column.set_focus('footer')
+        elif is_command_key('EDIT_MESSAGE', key):
+            if self.message['sender_id'] != self.model.user_id:
+                self.model.controller.view.set_footer_text(
+                        " You can't edit messages sent by other users.", 3)
+                return key
+            # Check if editing is allowed in the realm
+            elif not self.model.initial_data['realm_allow_message_editing']:
+                self.model.controller.view.set_footer_text(
+                    " Editing sent message is disabled.", 3)
+                return key
+            # Check if message is still editable, i.e. within
+            # the time limit.
+            time_since_msg_sent = time() - self.message['timestamp']
+            edit_time_limit = self.model.initial_data[
+                    'realm_message_content_edit_limit_seconds']
+            if time_since_msg_sent >= edit_time_limit:
+                self.model.controller.view.set_footer_text(
+                        " Time Limit for editing the message has"
+                        " been exceeded.", 3)
+                return key
+            self.keypress(size, 'enter')
+            msg_id = self.message['id']
+            msg = self.model.client.get_raw_message(msg_id)['raw_content']
+            write_box = self.model.controller.view.write_box
+            write_box.msg_edit_id = msg_id
+            write_box.msg_write_box.set_edit_text(msg)
+            write_box.msg_write_box.set_edit_pos(len(msg))
             self.model.controller.view.middle_column.set_focus('footer')
         return key
 
