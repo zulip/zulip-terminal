@@ -298,6 +298,42 @@ class TestModel:
 
         assert result == return_value
 
+    @pytest.mark.parametrize('response, return_value', [
+        ({'result': 'success'}, True),
+        ({'result': 'some_failure'}, False),
+    ])
+    def test_update_private_message(self, mocker, model,
+                                    response, return_value,
+                                    content="hi!",
+                                    msg_id=1):
+        self.client.update_message = mocker.Mock(return_value=response)
+
+        result = model.update_private_message(msg_id, content)
+
+        req = dict(message_id=msg_id, content=content)
+        self.client.update_message.assert_called_once_with(req)
+
+        assert result == return_value
+
+    @pytest.mark.parametrize('response, return_value', [
+        ({'result': 'success'}, True),
+        ({'result': 'some_failure'}, False),
+    ])
+    def test_update_stream_message(self, mocker, model,
+                                   response, return_value,
+                                   content="hi!",
+                                   subject='Hello',
+                                   msg_id=1):
+        self.client.update_message = mocker.Mock(return_value=response)
+
+        result = model.update_stream_message(subject, msg_id, content)
+
+        req = dict(subject=subject, propagate_mode="change_one",
+                   message_id=msg_id, content=content)
+        self.client.update_message.assert_called_once_with(req)
+
+        assert result == return_value
+
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(self, mocker, messages_successful_response,
                                   index_all_messages, initial_data,
