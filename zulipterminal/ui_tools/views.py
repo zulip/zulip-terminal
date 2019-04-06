@@ -38,11 +38,29 @@ class MessageView(urwid.ListBox):
 
     def main_view(self) -> List[Any]:
         msg_btn_list = create_msg_box_list(self.model)
+        new_ids_to_process = self.model.get_message_ids_in_current_narrow()
+        msg_btn_list_without_muted_msgs = []  # type: List[Any]
+        while len(msg_btn_list_without_muted_msgs) < 30:
+            if (len(msg_btn_list_without_muted_msgs) +
+                    len(msg_btn_list) > 30):
+                msg_btn_list_without_muted_msgs[0:0] = msg_btn_list[len(
+                    msg_btn_list_without_muted_msgs):]
+            else:
+                msg_btn_list_without_muted_msgs[0:0] = msg_btn_list
+
+            old_ids_to_process = self.model.get_message_ids_in_current_narrow()
+            self.model.get_messages(
+                num_before=30, num_after=0, anchor=self.model.last_msg_id)
+            new_ids_to_process = (
+                self.model.get_message_ids_in_current_narrow() -
+                old_ids_to_process)
+            msg_btn_list = create_msg_box_list(self.model, new_ids_to_process)
+
         focus_msg = self.model.get_focus_in_current_narrow()
         if focus_msg == set():
             focus_msg = len(msg_btn_list) - 1
         self.focus_msg = focus_msg
-        return msg_btn_list
+        return msg_btn_list_without_muted_msgs
 
     @asynch
     def load_old_messages(self, anchor: int=10000000000) -> None:
