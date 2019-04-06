@@ -49,6 +49,7 @@ Event = TypedDict('Event', {
     # message:
     'message': Message,
     'flags': List[str],
+    'subject': str,
 }, total=False)  # Each Event will only have a subset of these
 
 OFFLINE_THRESHOLD_SECS = 140
@@ -509,16 +510,19 @@ class Model:
         """
         Updates previously rendered message.
         """
-        # FIXME: Support Topic Editing
-        if 'subject' in response.keys():
-            return
-
         message_id = response['message_id']
-        content = response['rendered_content']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
             message = self.index['messages'][message_id]
-            message['content'] = content
+
+            if 'rendered_content' in response:
+                message['content'] = response['rendered_content']
+
+            # 'subject' is not present in update event if
+            # the response didn't have a 'subject' update.
+            if 'subject' in response:
+                message['subject'] = response['subject']
+
             self.index['messages'][message_id] = message
             self.index['edited_messages'].add(message_id)
             self.update_rendered_view(message_id)
