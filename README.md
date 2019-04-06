@@ -90,6 +90,7 @@ autohide=autohide
 | New message to a person or group of people            | <kbd>x</kbd>                                  |
 | Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
 | Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>                         |
+| Edit a sent message                                   | <kbd>e</kbd>                                  |
 | Narrow to the stream of the current message           | <kbd>s</kbd>                                  |
 | Narrow to the topic of the current message            | <kbd>S</kbd>                                  |
 | Narrow to a topic/private-chat, or stream/all-private-messages| <kbd>z</kbd>                                  |

@@ -80,6 +80,7 @@ class TestModel:
             'update_message_flags',
         ]
         fetch_event_types = [
+            'realm',
             'presence',
             'subscription',
             'message',

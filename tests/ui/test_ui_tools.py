@@ -1235,6 +1235,45 @@ class TestMessageBox:
             assert label[0].text == 'EDITED'
             assert label[1][1] == 7
 
+    @pytest.mark.parametrize('to_vary_in_each_message, realm_editing_allowed,\
+                             expect_editing_to_succeed', [
+        ({'sender_id': 2, 'timestamp': 45}, True, False),
+        ({'sender_id': 1, 'timestamp': 1}, True, False),
+        ({'sender_id': 1, 'timestamp': 45}, False, False),
+        ({'sender_id': 1, 'timestamp': 45}, True, True),
+    ], ids=['msg_sent_by_other_user',
+            'time_limit_esceeded',
+            'editing_not_allowed',
+            'all_conditions_met'])
+    def test_keypress_edit_message(self, mocker, message_fixture,
+                                   expect_editing_to_succeed,
+                                   to_vary_in_each_message,
+                                   realm_editing_allowed):
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        key = 'e'
+        size = (20,)
+        msg_box = MessageBox(varied_message, self.model, message_fixture)
+        msg_box.model.user_id = 1
+        msg_box.model.initial_data = {
+            'realm_allow_message_editing': realm_editing_allowed,
+            'realm_message_content_edit_limit_seconds': 60,
+        }
+        msg_box.model.client.get_raw_message.return_value = {
+            'raw_content': "Edit this message"
+        }
+        write_box = msg_box.model.controller.view.write_box
+        write_box.msg_edit_id = None
+        mocker.patch("zulipterminal.ui_tools.boxes.time", return_value=100)
+        msg_box.keypress(size, key)
+
+        if expect_editing_to_succeed:
+            assert write_box.msg_edit_id == varied_message['id']
+            write_box.msg_write_box.set_edit_text.assert_called_once_with(
+                "Edit this message")
+        else:
+            assert write_box.msg_edit_id is None
+            write_box.msg_write_box.set_edit_text.assert_not_called()
+
 
 class TestTopButton:
     @pytest.mark.parametrize('prefix', [
