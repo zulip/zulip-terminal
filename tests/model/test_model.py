@@ -221,6 +221,7 @@ class TestModel:
         model.index = index
         assert current_ids == model.get_message_ids_in_current_narrow()
 
+    @pytest.mark.parametrize("user_key", ['user_id', 'id'])
     @pytest.mark.parametrize("msg_id, existing_reactions, expected_method", [
         (5, [], 'POST'),
         (5, [dict(user='me', emoji_code='1f44d')], 'DELETE'),
@@ -229,13 +230,15 @@ class TestModel:
         (5, [dict(user='not me', emoji_code='1f614')], 'POST'),
     ])
     def test_react_to_message_with_thumbs_up(self, model,
+                                             user_key,
                                              msg_id,
                                              existing_reactions,
                                              expected_method):
-        full_existing_reactions = [dict(er, user=dict(user_id=model.user_id
-                                                      if er['user'] == 'me'
-                                                      else model.user_id+1))
-                                   for er in existing_reactions]
+        full_existing_reactions = [
+            dict(er, user={user_key: (model.user_id if er['user'] == 'me'
+                                      else model.user_id+1)})  # non-match
+            for er in existing_reactions
+        ]
         message = dict(
             id=msg_id,
             reactions=full_existing_reactions)
