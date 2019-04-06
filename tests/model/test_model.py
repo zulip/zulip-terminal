@@ -625,16 +625,19 @@ class TestModel:
     @pytest.mark.parametrize('response, index', [
         ({
             'message_id': 1,
-            'rendered_content': '<p>Foo is Boo</p>'
+            'rendered_content': '<p>Foo is Boo</p>',
+            'subject': 'Test',
         }, {
             'messages': {
                 1: {
                     'id': 1,
                     'content': 'Boo is Foo',
+                    'subject': 'Test',
                 },
                 2: {
                     'id': 2,
-                    'content': "Boo is not Foo"
+                    'content': "Boo is not Foo",
+                    'subject': 'Test'
                 }
             },
             'edited_messages': set()
@@ -653,6 +656,8 @@ class TestModel:
         model.update_message(response)
         assert model.index['messages'][1]['content'] == \
             response['rendered_content']
+        assert model.index['messages'][1]['subject'] == \
+            response['subject']
         assert model.msg_list.log[0] == mock_msg
         # Ensure the index shows the message has been updated (edited)
         assert model.index['edited_messages'] == {1}
