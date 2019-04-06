@@ -45,6 +45,9 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
         last_msg = msg
     if focus_msg is not None:
         model.set_focus_in_current_narrow(focus_msg)
+    model.muted_msg_count = muted_msgs
+    if message_list:
+        model.last_msg_id = message_list[0]['id']
     return w_list
 
 
