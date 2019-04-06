@@ -649,6 +649,7 @@ class Model:
 
     def _register_desired_events(self, *, fetch_data: bool=False) -> bool:
         fetch_types = None if not fetch_data else [
+            'realm',
             'presence',
             'subscription',
             'message',
