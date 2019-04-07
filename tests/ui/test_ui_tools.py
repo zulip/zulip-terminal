@@ -1232,8 +1232,8 @@ class TestMessageBox:
             view_components = msg_box.main_view()
 
             label = view_components[0].original_widget.contents[0]
-            assert label[0].text == '(EDITED)'
-            assert label[1][1] == 11
+            assert label[0].text == 'EDITED'
+            assert label[1][1] == 7
 
 
 class TestTopButton:
