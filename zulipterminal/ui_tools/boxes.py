@@ -463,16 +463,16 @@ class MessageBox(urwid.Pile):
         content = (None, self.soup2markup(body))
 
         if self.message['id'] in self.model.index['edited_messages']:
-            edited_label_size = 11
+            edited_label_size = 7
             left_padding = 1
         else:
             edited_label_size = 0
-            left_padding = 12
+            left_padding = 8
 
         content = urwid.Padding(
             urwid.Columns([
                 (edited_label_size,
-                 urwid.Text('(EDITED)')),
+                 urwid.Text('EDITED')),
                 urwid.LineBox(
                     urwid.Columns([
                         (1, urwid.Text('')),
@@ -481,7 +481,7 @@ class MessageBox(urwid.Pile):
                 )
             ]),
             align='left', left=left_padding,
-            width=('relative', 100), min_width=10, right=8)
+            width=('relative', 100), min_width=10, right=5)
 
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])
