@@ -28,6 +28,7 @@
 - Avoid crash on receiving multiple starred-message events
 - Fix quoting original message, not rendered version 
 - Avoid crash by supporting short color format for streams from older Zulip servers
+- Avoid traceback on sending to multiple private recipients when narrowed to that conversation
 
 ### Infrastructure changes
 - Improve installation, development & troubleshooting notes in README
