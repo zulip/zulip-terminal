@@ -240,6 +240,7 @@ class TestModel:
             for er in existing_reactions
         ]
         message = dict(
+            sender_id=5,  # any
             id=msg_id,
             reactions=full_existing_reactions)
         reaction_spec = dict(

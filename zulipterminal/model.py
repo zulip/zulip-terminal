@@ -205,6 +205,8 @@ class Model:
         # FIXME Only support thumbs_up for now
         assert reaction_to_toggle == 'thumbs_up'
 
+        if message['sender_id'] == self.user_id:
+            return
         reaction_to_toggle_spec = dict(
             emoji_name='thumbs_up',
             emoji_code='1f44d',
