@@ -494,10 +494,11 @@ class Model:
             elif response['type'] == 'private' and len(self.narrow) == 1 and\
                     self.narrow[0][0] == "pm_with":
                 recipients = self.recipients
-                msg_recipients = frozenset([
-                    self.user_id,
-                    self.user_dict[self.narrow[0][1]]['user_id']
-                ])
+                users = self.narrow[0][1].split(", ")
+                msg_recipients = frozenset(
+                    [self.user_dict[user]['user_id'] for user in users] +
+                    [self.user_id]
+                )
                 if recipients == msg_recipients:
                     self.msg_list.log.append(msg_w)
             if 'read' not in response['flags']:
