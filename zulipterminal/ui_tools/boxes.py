@@ -1,6 +1,7 @@
 from collections import defaultdict
 from time import ctime
 from datetime import datetime
+from sys import platform
 from typing import Any, Dict, List, Tuple, Union, Optional
 
 import emoji
@@ -156,6 +157,9 @@ class MessageBox(urwid.Pile):
                             for recipient in self.message['display_recipient']
                             if recipient['email'] != self.model.user_email
                         ))
+
+        # mouse_event helper variable
+        self.displaying_selection_hint = False
 
         super(MessageBox, self).__init__(self.main_view())
 
@@ -445,6 +449,18 @@ class MessageBox(urwid.Pile):
             if button == 1:
                 self.keypress(size, 'enter')
                 return True
+        elif event == 'mouse drag':
+            selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
+            self.model.controller.view.set_footer_text([
+                'Try pressing ',
+                ('code', ' ' + selection_key + ' '),
+                ' and dragging to select text.'
+            ])
+            self.displaying_selection_hint = True
+        elif event == 'mouse release' and self.displaying_selection_hint:
+            self.model.controller.view.set_footer_text()
+            self.displaying_selection_hint = False
+
         return super(MessageBox, self).mouse_event(size, event, button, col,
                                                    row, focus)
 
