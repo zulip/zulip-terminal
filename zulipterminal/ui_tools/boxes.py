@@ -541,17 +541,15 @@ class SearchBox(urwid.Pile):
         self.text_box = ReadlineEdit(u"Search: ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
-        self.msg_narrow = urwid.Text("DONT HIDE")
-        w = urwid.Columns([
-            ('pack', self.msg_narrow),
-            ('pack', urwid.Text("  ")),
+        self.search_bar = urwid.Columns([
             self.text_box,
         ])
-        self.w = urwid.LineBox(
-            w, tlcorner=u'', tline=u'', lline=u'',
-            trcorner=u'', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─')
-        return [self.w]
+        self.msg_narrow = urwid.Text("DONT HIDE")
+        self.recipient_bar = urwid.LineBox(
+            self.msg_narrow, title=u"Current message recipients",
+            tline=u'─', lline=u'', trcorner=u'─', tlcorner=u'─',
+            blcorner=u'─', rline=u'', bline=u'─', brcorner=u'─')
+        return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key):
