@@ -855,7 +855,7 @@ class TestHelpMenu:
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
-        self.model = mocker.Mock()
+        self.model = mocker.MagicMock()
         self.model.index = initial_index
 
     @pytest.mark.parametrize('message_type, set_fields', [
