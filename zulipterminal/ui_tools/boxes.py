@@ -167,6 +167,14 @@ class MessageBox(urwid.Pile):
         return ctime(message['timestamp'])[:-8]
 
     def need_recipient_header(self) -> bool:
+        # Prevent redundant information in recipient bar
+        if len(self.model.narrow) == 1 and \
+                self.model.narrow[0][0] == 'pm_with':
+            return False
+        if len(self.model.narrow) == 2 and \
+                self.model.narrow[1][0] == 'topic':
+            return False
+
         last_msg = self.last_message
         if self.message['type'] == 'stream':
             if (last_msg['type'] == 'stream' and
