@@ -98,3 +98,4 @@ zulip_term.egg-info
 zulip-terminal-tracebacks.log
 
 .vscode/*
+.DS_Store
