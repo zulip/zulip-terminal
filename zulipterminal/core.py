@@ -174,6 +174,8 @@ class Controller:
             emails = [recipient['email']
                       for recipient in button.message['display_recipient']
                       if recipient['email'] != self.model.client.email]
+            if not emails and len(button.message['display_recipient']) == 1:
+                emails = [self.model.user_email]
             user_emails = ', '.join(emails)
             user_ids = {user['id']
                         for user in button.message['display_recipient']}
