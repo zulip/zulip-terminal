@@ -586,47 +586,67 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
-    @pytest.mark.parametrize('response, index', [
+    @pytest.mark.parametrize('response, expected_message', [
         ({
-            'message_id': 1,
-            'rendered_content': '<p>Foo is Boo</p>'
+            'subject': 'new subject',
         }, {
+            'content': 'old content',
+            'subject': 'new subject',
+        }),
+        ({
+            'rendered_content': '<p>new content</p>',
+        }, {
+            'subject': 'old subject',
+            'content': '<p>new content</p>',
+        }),
+        ({
+            'rendered_content': '<p>new content</p>',
+            'subject': 'new subject',
+        }, {
+            'subject': 'new subject',
+            'content': '<p>new content</p>',
+        }),
+        ({}, {
+            'subject': 'old subject',
+            'content': 'old content',
+        }),
+    ])
+    def test_update_message(self, mocker, model, response, expected_message,
+                            msg_id=1):
+        model.index = {
             'messages': {
-                1: {
-                    'id': 1,
-                    'content': 'Boo is Foo',
+                msg_id: {
+                    'id': msg_id,
+                    'content': 'old content',
+                    'subject': 'old subject',
                 },
-                2: {
-                    'id': 2,
-                    'content': "Boo is not Foo"
-                }
             },
             'edited_messages': set()
-        })
-    ])
-    def test_update_message(self, mocker, model, response, index):
-        model.index = index
+        }
         model.msg_list = mocker.Mock()
         mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        model.msg_list.log = [mock_msg, another_msg]
-        mock_msg.original_widget.message = index['messages'][1]
-        another_msg.original_widget.message = index['messages'][2]
+        model.msg_list.log = [mock_msg]
+        mock_msg.original_widget.message = model.index['messages'][msg_id]
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
+        response['message_id'] = msg_id
+
         model.update_message(response)
-        assert model.index['messages'][1]['content'] == \
-            response['rendered_content']
+
+        assert model.index['messages'][msg_id]['content'] == \
+            expected_message['content']
+        assert model.index['messages'][msg_id]['subject'] == \
+            expected_message['subject']
         assert model.msg_list.log[0] == mock_msg
         # Ensure the index shows the message has been updated (edited)
-        assert model.index['edited_messages'] == {1}
+        assert model.index['edited_messages'] == {msg_id}
         self.controller.update_screen.assert_called_once_with()
 
         # TEST FOR FALSE CASES
-        model.index['messages'][1] = {}
+        model.index['messages'][msg_id] = {}
         model.update_message(response)
         # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
+        assert model.index['messages'][msg_id] == {}
 
     @pytest.mark.parametrize('response, index', [
         ({'emoji_code': '1f44d',
