@@ -406,6 +406,7 @@ class RightColumnView(urwid.Frame):
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
             )
+        self.allow_update_user_list = True
         self.search_lock = threading.Lock()
         super(RightColumnView, self).__init__(self.users_view(),
                                               header=search_box)
@@ -420,6 +421,8 @@ class RightColumnView(urwid.Frame):
                  new_text == ""))
 
         if not self.view.controller.editor_mode and not user_list:
+            return
+        if not self.allow_update_user_list and new_text == "":
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
@@ -470,9 +473,11 @@ class RightColumnView(urwid.Frame):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEARCH_PEOPLE', key):
+            self.allow_update_user_list = False
             self.set_focus('header')
             return key
         elif is_command_key('GO_BACK', key):
+            self.allow_update_user_list = True
             self.user_search.set_edit_text("Search People")
             self.body = UsersView(
                 urwid.SimpleFocusListWalker(self.users_btn_list))
