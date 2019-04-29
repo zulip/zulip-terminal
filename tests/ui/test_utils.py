@@ -140,7 +140,7 @@ def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
     model = mocker.Mock()
     model.narrow = narrow
     model.index = {
-        'all_messages': {1, 2},
+        'all_msg_ids': {1, 2},
         'messages': {
             1: {
                 'id': 1,
