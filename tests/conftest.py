@@ -430,15 +430,15 @@ def initial_index():
 def empty_index():
     return deepcopy({
         'pointer': defaultdict(set, {}),
-        'private_msg_ids_by_user_ids': defaultdict(set, {}),
         'all_msg_ids':  set(),
+        'starred_msg_ids': set(),
         'private_msg_ids': set(),
+        'private_msg_ids_by_user_ids': defaultdict(set, {}),
         'stream_msg_ids_by_stream_id': defaultdict(set, {}),
         'topic_msg_ids': defaultdict(dict, {}),
-        'topics': defaultdict(list),
         'edited_messages': set(),
+        'topics': defaultdict(list),
         'search': set(),
-        'starred_msg_ids': set(),
         'messages': defaultdict(dict, {
             stream_msg_template['id']: stream_msg_template,
             pm_template['id']: pm_template,
