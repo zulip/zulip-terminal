@@ -13,32 +13,33 @@ Message = Dict[str, Any]
 
 Index = TypedDict('Index', {
     'pointer': Dict[str, Union[int, Set[None]]],  # narrow_str, message_id
-    # stream_id: topic_str: {message_id, ...}
-    'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
-    # {user_id, ...}: {message_id, ...}
+    # Various sets of downloaded message ids (all, starred, ...)
+    'all_msg_ids': Set[int],
+    'starred_msg_ids': Set[int],
+    'private_msg_ids': Set[int],
     'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
-    'topics': Dict[int, List[str]],  # {topic names, ...}
-    'all_msg_ids': Set[int],  # {message_id, ...}
-    'starred_msg_ids': Set[int],  # {message_id, ...}
-    'private_msg_ids': Set[int],  # {message_id, ...}
     'stream_msg_ids_by_stream_id': Dict[int, Set[int]],
+    'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
+    # Extra cached information
     'edited_messages': Set[int],  # {message_ids, ...}
+    'topics': Dict[int, List[str]],  # {topic names, ...}
     'search': Set[int],  # {message_id, ...}
+    # Downloaded message data
     'messages': Dict[int, Message],  # message_id: Message
 })
 
 initial_index = Index(
     pointer=defaultdict(set),
-    topic_msg_ids=defaultdict(dict),
-    private_msg_ids_by_user_ids=defaultdict(set),
-    topics=defaultdict(list),
     all_msg_ids=set(),
     starred_msg_ids=set(),
     private_msg_ids=set(),
+    private_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
+    topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
-    messages=defaultdict(dict),
+    topics=defaultdict(list),
     search=set(),
+    messages=defaultdict(dict),
 )
 
 
