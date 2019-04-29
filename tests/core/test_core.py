@@ -116,12 +116,14 @@ class TestController:
         }
         controller.model.muted_streams = []
         controller.model.muted_topics = []
+
         controller.show_all_messages('')
+
         assert controller.model.narrow == []
         controller.model.msg_view.clear.assert_called_once_with()
-        num_am = len(index_all_messages['all_messages'])
+
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
-        id_list = index_all_messages['all_messages']
+        id_list = index_all_messages['all_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
@@ -136,9 +138,9 @@ class TestController:
 
         assert controller.model.narrow == [['is', 'private']]
         controller.model.msg_view.clear.assert_called_once_with()
-        num_pm = len(index_user['all_private'])
+
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
-        id_list = index_user['all_private']
+        id_list = index_user['private_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
@@ -159,12 +161,9 @@ class TestController:
         controller.show_all_starred('')
 
         assert controller.model.narrow == [['is', 'starred']]
-
         controller.model.msg_view.clear.assert_called_once_with()
 
-        num_sm = len(index_all_starred['all_starred'])
-
-        id_list = index_all_starred['all_starred']
+        id_list = index_all_starred['starred_msg_ids']
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list

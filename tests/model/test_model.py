@@ -176,7 +176,7 @@ class TestModel:
 
     @pytest.mark.parametrize("narrow, index, current_ids", [
         ([], {
-            "all_messages": {0, 1}
+            "all_msg_ids": {0, 1}
         }, {0, 1}),
         ([['stream', 'FOO']], {
             "all_stream": {
@@ -200,7 +200,7 @@ class TestModel:
              }
          }, set()),
         ([['is', 'private']], {
-            'all_private': {0, 1}
+            'private_msg_ids': {0, 1}
         }, {0, 1}),
         ([['pm_with', 'FOO@zulip.com']], {
             'private': {
@@ -216,7 +216,7 @@ class TestModel:
             'search': {0, 1}
         }, {0, 1}),
         ([['is', 'starred']], {
-            'all_starred': {0, 1}
+            'starred_msg_ids': {0, 1}
         }, {0, 1})
     ])
     def test_get_message_ids_in_current_narrow(self, mocker, model,

@@ -104,7 +104,7 @@ def test_index_edited_message(mocker,
     model.narrow = []
 
     expected_index = dict(empty_index, edited_messages=edited_msgs,
-                          all_messages={537286, 537287, 537288})
+                          all_msg_ids={537286, 537287, 537288})
     for msg_id, msg in expected_index['messages'].items():
         if msg_id in edited_msgs:
             msg['edit_history'] = []
@@ -132,8 +132,8 @@ def test_index_starred(mocker,
     model.index = initial_index
     model.narrow = [['is', 'starred']]
 
-    expected_index = dict(empty_index, all_private={537287, 537288},
-                          all_starred=msgs_with_stars)
+    expected_index = dict(empty_index, private_msg_ids={537287, 537288},
+                          starred_msg_ids=msgs_with_stars)
     for msg_id, msg in expected_index['messages'].items():
         if msg_id in msgs_with_stars and 'starred' not in msg['flags']:
             msg['flags'].append('starred')

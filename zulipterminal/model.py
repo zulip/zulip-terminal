@@ -172,7 +172,7 @@ class Model:
     def get_message_ids_in_current_narrow(self) -> Set[int]:
         narrow = self.narrow
         if narrow == []:
-            current_ids = self.index['all_messages']
+            current_ids = self.index['all_msg_ids']
         elif narrow[0][0] == 'stream':
             stream_id = self.stream_id
             if len(narrow) == 1:
@@ -181,14 +181,14 @@ class Model:
                 topic = narrow[1][1]
                 current_ids = self.index['stream'][stream_id].get(topic, set())
         elif narrow[0][1] == 'private':
-            current_ids = self.index['all_private']
+            current_ids = self.index['private_msg_ids']
         elif narrow[0][0] == 'pm_with':
             recipients = self.recipients
             current_ids = self.index['private'].get(recipients, set())
         elif narrow[0][0] == 'search':
             current_ids = self.index['search']
         elif narrow[0][1] == 'starred':
-            current_ids = self.index['all_starred']
+            current_ids = self.index['starred_msg_ids']
         return current_ids.copy()
 
     def _notify_server_of_presence(self) -> Dict[str, Any]:
