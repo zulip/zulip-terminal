@@ -1119,10 +1119,10 @@ class TestMessageBox:
     @pytest.mark.parametrize('msg_narrow, msg_type, assert_header_bar,\
                               assert_search_bar', [
         ([['stream', 'PTEST']], 0, 'PTEST >', ('bar', [('s#bd6', 'PTEST')])),
-        ([['pm_with', 'boo@zulip.com']], 1, 'Private Messages with: ',
+        ([['pm_with', 'boo@zulip.com']], 1, 'You and ',
          'Private conversation'),
         ([['pm_with', 'boo@zulip.com, bar@zulip.com']], 2,
-         'Private Messages with: ', 'Group private conversation')
+         'You and ', 'Group private conversation')
     ])
     def test_msg_generates_search_and_header_bar(self, mocker,
                                                  messages_successful_response,
