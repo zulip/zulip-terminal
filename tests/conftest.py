@@ -430,11 +430,11 @@ def initial_index():
 def empty_index():
     return deepcopy({
         'pointer': defaultdict(set, {}),
-        'private': defaultdict(set, {}),
+        'private_msg_ids_by_user_ids': defaultdict(set, {}),
         'all_msg_ids':  set(),
         'private_msg_ids': set(),
-        'all_stream': defaultdict(set, {}),
-        'stream': defaultdict(dict, {}),
+        'stream_msg_ids_by_stream_id': defaultdict(set, {}),
+        'topic_msg_ids': defaultdict(dict, {}),
         'topics': defaultdict(list),
         'edited_messages': set(),
         'search': set(),
@@ -460,7 +460,7 @@ def index_stream(empty_index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
-    diff = {'all_stream': defaultdict(set, {205: {537286}}),
+    diff = {'stream_msg_ids_by_stream_id': defaultdict(set, {205: {537286}}),
             'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
@@ -471,7 +471,7 @@ def index_topic(empty_index):
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
     """
-    diff = {'stream': defaultdict(dict, {205: {'Test': {537286}}})}
+    diff = {'topic_msg_ids': defaultdict(dict, {205: {'Test': {537286}}})}
     return dict(empty_index, **diff)
 
 
@@ -481,7 +481,9 @@ def index_user(empty_index):
     Expected index of initial_data when model.narrow = [['pm_with',
                                                          'boo@zulip.com'],
     """
-    diff = {'private': defaultdict(set, {frozenset({5179, 5140}): {537287}}),
+    user_ids = frozenset({5179, 5140})
+    diff = {'private_msg_ids_by_user_ids': defaultdict(set,
+                                                       {user_ids: {537287}}),
             'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
@@ -492,8 +494,9 @@ def index_user_multiple(empty_index):
     Expected index of initial_data when model.narrow = [['pm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
-    diff = {'private': defaultdict(set,
-                                   {frozenset({5179, 5140, 5180}): {537288}}),
+    user_ids = frozenset({5179, 5140, 5180})
+    diff = {'private_msg_ids_by_user_ids': defaultdict(set,
+                                                       {user_ids: {537288}}),
             'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
