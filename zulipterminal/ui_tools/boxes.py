@@ -218,8 +218,7 @@ class MessageBox(urwid.Pile):
             self.recipients_names = \
                 self.message['display_recipient'][0]['full_name']
         title_markup = ('header', [
-            ('custom', 'Private Messages with'),
-            ('selected', ": "),
+            ('custom', 'You and '),
             ('custom', self.recipients_names)
         ])
         title = urwid.Text(title_markup)
