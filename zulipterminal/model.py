@@ -177,15 +177,15 @@ class Model:
         elif narrow[0][0] == 'stream':
             stream_id = self.stream_id
             if len(narrow) == 1:
-                ids = index['all_stream'][stream_id]
+                ids = index['stream_msg_ids_by_stream_id'][stream_id]
             elif len(narrow) == 2:
                 topic = narrow[1][1]
-                ids = index['stream'][stream_id].get(topic, set())
+                ids = index['topic_msg_ids'][stream_id].get(topic, set())
         elif narrow[0][1] == 'private':
             ids = index['private_msg_ids']
         elif narrow[0][0] == 'pm_with':
             recipients = self.recipients
-            ids = index['private'].get(recipients, set())
+            ids = index['private_msg_ids_by_user_ids'].get(recipients, set())
         elif narrow[0][0] == 'search':
             ids = index['search']
         elif narrow[0][1] == 'starred':
