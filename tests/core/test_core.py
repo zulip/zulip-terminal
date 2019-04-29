@@ -55,8 +55,10 @@ class TestController:
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream', stream_button.caption]]
         controller.model.msg_view.clear.assert_called_once_with()
+
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
-        id_list = index_stream['all_stream'][stream_button.stream_id]
+        stream_id = stream_button.stream_id
+        id_list = index_stream['stream_msg_ids_by_stream_id'][stream_id]
         assert {widget.original_widget.message['id']} == id_list
 
     def test_narrow_to_topic(self, mocker, controller,
@@ -78,8 +80,10 @@ class TestController:
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.model.msg_view.clear.assert_called_once_with()
+
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
-        id_list = index_topic['stream'][msg_box.stream_id][msg_box.title]
+        stream_id, topic_name = msg_box.stream_id, msg_box.title
+        id_list = index_topic['topic_msg_ids'][stream_id][topic_name]
         assert {widget.original_widget.message['id']} == id_list
 
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):
@@ -100,7 +104,7 @@ class TestController:
         recipients = frozenset([controller.model.user_id, user_button.user_id])
         assert controller.model.recipients == recipients
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
-        id_list = index_user['private'][recipients]
+        id_list = index_user['private_msg_ids_by_user_ids'][recipients]
         assert {widget.original_widget.message['id']} == id_list
 
     def test_show_all_messages(self, mocker, controller, index_all_messages):
