@@ -431,14 +431,14 @@ def empty_index():
     return deepcopy({
         'pointer': defaultdict(set, {}),
         'private': defaultdict(set, {}),
-        'all_messages':  set(),
-        'all_private': set(),
+        'all_msg_ids':  set(),
+        'private_msg_ids': set(),
         'all_stream': defaultdict(set, {}),
         'stream': defaultdict(dict, {}),
         'topics': defaultdict(list),
         'edited_messages': set(),
         'search': set(),
-        'all_starred': set(),
+        'starred_msg_ids': set(),
         'messages': defaultdict(dict, {
             stream_msg_template['id']: stream_msg_template,
             pm_template['id']: pm_template,
@@ -452,7 +452,7 @@ def index_all_messages(empty_index):
     """
     Expected index of `initial_data` fixture when model.narrow = []
     """
-    return dict(empty_index, **{'all_messages': {537286, 537287, 537288}})
+    return dict(empty_index, **{'all_msg_ids': {537286, 537287, 537288}})
 
 
 @pytest.fixture
@@ -461,7 +461,7 @@ def index_stream(empty_index):
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
     diff = {'all_stream': defaultdict(set, {205: {537286}}),
-            'all_private': {537287, 537288}}
+            'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
 
@@ -482,7 +482,7 @@ def index_user(empty_index):
                                                          'boo@zulip.com'],
     """
     diff = {'private': defaultdict(set, {frozenset({5179, 5140}): {537287}}),
-            'all_private': {537287, 537288}}
+            'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
 
@@ -494,7 +494,7 @@ def index_user_multiple(empty_index):
     """
     diff = {'private': defaultdict(set,
                                    {frozenset({5179, 5140, 5180}): {537288}}),
-            'all_private': {537287, 537288}}
+            'private_msg_ids': {537287, 537288}}
     return dict(empty_index, **diff)
 
 
@@ -505,8 +505,8 @@ def index_user_multiple(empty_index):
 ])
 def index_all_starred(empty_index, request):
     msgs_with_stars = request.param
-    index = dict(empty_index, all_starred=msgs_with_stars,
-                 all_private={537287, 537288})
+    index = dict(empty_index, starred_msg_ids=msgs_with_stars,
+                 private_msg_ids={537287, 537288})
     for msg_id, msg in index['messages'].items():
         if msg_id in msgs_with_stars and 'starred' not in msg['flags']:
             msg['flags'].append('starred')
