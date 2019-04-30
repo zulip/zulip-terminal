@@ -602,7 +602,7 @@ class StreamSearchBox(urwid.Edit):
         super(StreamSearchBox, self).__init__(edit_text="Search streams")
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('ENTER', key):
+        if is_command_key('ENTER', key) and len(self.stream_view.log):
             self.stream_view.view.controller.editor_mode = False
             self.stream_view.set_focus("body")
             self.stream_view.body.set_focus(0)
