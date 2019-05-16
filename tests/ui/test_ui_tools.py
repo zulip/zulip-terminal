@@ -959,7 +959,7 @@ class TestMessageBox:
                        sender_email='foo@zulip.com', id=4, sender_id=4209,
                        type='stream',  # NOTE Output should not vary with PM
                        flags=[], content=content, sender_full_name='bob smith',
-                       timestamp=99, reactions=[])
+                       is_me_message=False, timestamp=99, reactions=[])
         self.model.stream_dict = {
             5: {  # matches stream_id above
                 'color': '#bfd56f',
@@ -1046,6 +1046,7 @@ class TestMessageBox:
             'stream_id': 5,
             'subject': 'Test topic',
             'flags': [],
+            'is_me_message': False,
             'content': '<p>what are you planning to do this week</p>',
             'reactions': [],
             'sender_full_name': 'Alice',
@@ -1090,6 +1091,7 @@ class TestMessageBox:
                 'full_name': 'Iago'
             }],
             'flags': [],
+            'is_me_message': False,
             'content': '<p>what are you planning to do this week</p>',
             'reactions': [],
             'sender_full_name': 'Alice',
@@ -1173,6 +1175,7 @@ class TestMessageBox:
             'stream_id': 5,
             'subject': 'Test topic',
             'flags': [],
+            'is_me_message': False,
             'content': '<p>what are you planning to do this week</p>',
             'reactions': [],
             'sender_full_name': 'alice',
