@@ -1370,6 +1370,38 @@ class TestMessageBox:
             'display_recipient': 'Verona',
             'stream_id': 5,
             'subject': 'Test topic',
+            'is_me_message': True,  # will be overridden by test function.
+            'flags': [],
+            'content': '',  # will be overridden by test function.
+            'reactions': [],
+            'sender_full_name': 'Alice',
+            'timestamp': 1532103879,
+        }
+    ])
+    @pytest.mark.parametrize('content, is_me_message', [
+        ('<p>/me is excited!</p>', True),
+        ('<p>/me is excited! /me is not excited.</p>', True),
+        ('<p>This is /me not.</p>', False),
+        ('<p>/me is excited!</p>', False),
+    ])
+    def test_main_view_renders_slash_me(self, mocker, message, content,
+                                        is_me_message):
+        mocker.patch(VIEWS + ".urwid.Text")
+        message['content'] = content
+        message['is_me_message'] = is_me_message
+        msg_box = MessageBox(message, self.model, message)
+        msg_box.main_view()
+        name_index = 11 if is_me_message else -1  # 11 = len(<str><strong>)
+        assert msg_box.message['content'].find(
+            message['sender_full_name']) == name_index
+
+    @pytest.mark.parametrize('message', [
+        {
+            'id': 4,
+            'type': 'stream',
+            'display_recipient': 'Verona',
+            'stream_id': 5,
+            'subject': 'Test topic',
             'flags': [],
             'is_me_message': False,
             'content': '<p>what are you planning to do this week</p>',
