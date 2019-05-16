@@ -451,7 +451,12 @@ class MessageBox(urwid.Pile):
                 ], dividechars=1)
         else:
             content_header = None
-
+        # If the message contains '/me' emote then replace it with
+        # sender's full name and show it in bold.
+        if self.message['is_me_message']:
+            self.message['content'] = self.message['content'].replace(
+                '/me',
+                '<strong>' + self.message['sender_full_name'] + '</strong>', 1)
         # Content
         soup = BeautifulSoup(self.message['content'], 'lxml')
         active_char = '▒'  # Options are '█', '▓', '▒', '░'
