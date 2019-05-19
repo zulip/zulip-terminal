@@ -11,16 +11,19 @@ from zulipterminal.helper import (
     canonicalize_color,
     classify_unread_counts,
     display_error_if_present,
+    download_media,
     get_unused_fence,
     hash_util_decode,
     index_messages,
     notify_if_message_sent_outside_narrow,
+    open_media,
     powerset,
 )
 
 
 MODULE = "zulipterminal.helper"
 MODEL = "zulipterminal.model.Model"
+SERVER_URL = "https://chat.zulip.org"
 
 
 def test_index_messages_narrow_all_messages(
@@ -481,3 +484,73 @@ def test_get_unused_fence(message_content: str, expected_fence: str) -> None:
     generated_fence = get_unused_fence(message_content)
 
     assert generated_fence == expected_fence
+
+
+def test_download_media(
+    mocker: MockerFixture,
+    media_path: str = "/tmp/zt-somerandomtext-image.png",
+    url: str = SERVER_URL + "/user_uploads/path/image.png",
+) -> None:
+    mocker.patch(MODULE + ".requests")
+    mocker.patch(MODULE + ".open")
+    (
+        mocker.patch(
+            MODULE + ".NamedTemporaryFile"
+        ).return_value.__enter__.return_value.name
+    ) = media_path
+    controller = mocker.Mock()
+
+    assert media_path == download_media(controller, url)
+
+
+@pytest.mark.parametrize(
+    "returncode, error",
+    [
+        (0, []),
+        (
+            1,
+            [
+                " The tool ",
+                ("footer_contrast", "xdg-open"),
+                " did not run successfully" ". Exited with ",
+                ("footer_contrast", "1"),
+            ],
+        ),
+    ],
+)
+def test_open_media(
+    mocker: MockerFixture,
+    returncode: int,
+    error: List[Any],
+    tool: str = "xdg-open",
+    media_path: str = "/tmp/zt-somerandomtext-image.png",
+) -> None:
+    mocked_run = mocker.patch(MODULE + ".subprocess.run")
+    mocked_run.return_value.returncode = returncode
+    controller = mocker.Mock()
+
+    open_media(controller, tool, media_path)
+
+    assert mocked_run.called
+    if error:
+        controller.report_error.assert_called_once_with(error)
+    else:
+        controller.report_error.assert_not_called()
+
+
+def test_open_media_tool_exception(
+    mocker: MockerFixture,
+    media_path: str = "/tmp/zt-somerandomtext-image.png",
+    tool: str = "unsupported-tool",
+    error: List[Any] = [
+        " The tool ",
+        ("footer_contrast", "unsupported-tool"),
+        " could not be found",
+    ],
+) -> None:
+    mocker.patch(MODULE + ".subprocess.run", side_effect=FileNotFoundError())
+    controller = mocker.Mock()
+
+    open_media(controller, tool, media_path)
+
+    controller.report_error.assert_called_once_with(error)
