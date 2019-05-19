@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key
+from zulipterminal.helper import open_media
 
 
 class WriteBox(urwid.Pile):
@@ -127,6 +128,8 @@ class MessageBox(urwid.Pile):
         self.email = ''
         self.user_id = None  # type: Union[int, None]
         self.last_message = last_message
+        # collect all the media links with their name in one place.
+        self.media = list()  # type: List[str]
         # if this is the first message
         if self.last_message is None:
             self.last_message = defaultdict(dict)
@@ -302,6 +305,8 @@ class MessageBox(urwid.Pile):
             elif element.name == 'a':
                 # LINKS
                 link = element.attrs['href']
+                if element.img:
+                    self.media.append(element.img['src'])
                 text = element.img['src'] if element.img else element.text
                 if link == text:
                     # If the link and text are same
@@ -312,7 +317,7 @@ class MessageBox(urwid.Pile):
                     if link.startswith('/user_uploads/'):
                         # Append org url to before user_uploads to convert it
                         # into a link.
-                        link = self.model.server_url + link
+                        link = self.model.server_url + link[1:]
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':
@@ -529,6 +534,11 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(quote))
             self.model.controller.view.middle_column.set_focus('footer')
+        elif is_command_key('OPEN_MEDIA', key) and len(self.media):
+            # TODO: Block multiple pressing of this key
+            # TODO: Make this function async
+            # TODO: Show `Downloading/Loading...` msg in footer via #T339.
+            open_media(self.media, self.message['id'], self.model.server_url)
         return key
 
 

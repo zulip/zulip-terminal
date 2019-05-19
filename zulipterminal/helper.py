@@ -6,8 +6,11 @@ from typing import (
     Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union
 )
 from mypy_extensions import TypedDict
-
 import os
+import requests
+import tempfile
+import subprocess
+import sys
 
 Message = Dict[str, Any]
 
@@ -347,3 +350,37 @@ def match_user(user: Any, text: str) -> bool:
         if keyword.startswith(text.lower()):
             return True
     return False
+
+
+# Plan to open all the images/gifs in a msg
+# A message contains n images/gifs
+# download all the images/gifs first in /tmp/MSGID folder
+# Open the first image in the default viewer of the os.
+# user can click next in the viewer for viewing rest of the media
+def open_media(urls: List[str], msg_id: int, server_url: str):
+    first_media = None
+    for url in urls:
+        # Capture 2 different type of `user_upload` links
+        if url.startswith('user_uploads'):
+            url = server_url + url
+        if url.startswith('/user_uploads'):
+            url = server_url + url[1:]
+        img_name = url.split("/")[-1]
+        img_dir_path = os.path.join(tempfile.gettempdir(), str(msg_id))
+        img_path = os.path.join(img_dir_path, img_name)
+        if not first_media:
+            first_media = img_path
+        try:
+            os.mkdir(img_dir_path)
+        except FileExistsError:
+            pass
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(img_path, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+    imageViewerFromCommandLine = {'linux': 'xdg-open',
+                                  'win32': 'explorer',
+                                  'darwin': 'open'}[sys.platform]
+    subprocess.run([imageViewerFromCommandLine, img_path])

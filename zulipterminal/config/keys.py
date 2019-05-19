@@ -136,6 +136,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl c'},
         'help_text': 'Quit',
     }),
+    ('OPEN_MEDIA', {
+        'keys': {'v'},
+        'help_text': 'Open Media in the current highlighted message',
+    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 
