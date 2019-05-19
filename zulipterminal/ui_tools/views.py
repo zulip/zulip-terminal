@@ -167,14 +167,14 @@ class MessageView(urwid.ListBox):
             return
         # if view is ready display current narrow
         # at the bottom of the view.
-        is_stream = message_view.message['type'] == 'stream'
-        if is_stream:
-            footer = message_view.stream_header()
-        else:
-            footer = message_view.private_header()
+        recipient_bar = message_view.top_header_bar(message_view)
+        top_header = message_view.top_search_bar()
+        self.model.controller.view.search_box.conversation_focus.set_text(
+            top_header.markup
+            )
         self.model.controller.view.search_box.msg_narrow.set_text(
-            footer.markup
-        )
+            recipient_bar.markup
+            )
         self.model.controller.update_screen()
 
     def read_message(self) -> None:

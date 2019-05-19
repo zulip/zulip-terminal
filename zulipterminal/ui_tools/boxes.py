@@ -580,7 +580,10 @@ class SearchBox(urwid.Pile):
         self.text_box = ReadlineEdit(u"Search: ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
+        self.conversation_focus = urwid.Text(" ")
         self.search_bar = urwid.Columns([
+            ('pack', self.conversation_focus),
+            ('pack', urwid.Text("  ")),
             self.text_box,
         ])
         self.msg_narrow = urwid.Text("DONT HIDE")
