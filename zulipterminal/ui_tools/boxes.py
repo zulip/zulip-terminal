@@ -219,6 +219,45 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
+    def top_header_bar(self, message_view: Any) -> Any:
+        if self.message['type'] == 'stream':
+            return message_view.stream_header()
+        else:
+            return message_view.private_header()
+
+    def top_search_bar(self) -> Any:
+        curr_narrow = self.model.narrow
+        if curr_narrow == []:
+            text_to_fill = 'All messages'
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'private':
+            text_to_fill = 'All private messages'
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'starred':
+            text_to_fill = 'Starred messages'
+        elif self.message['type'] == 'stream':
+            bar_color = self.model.stream_dict[self.stream_id]['color']
+            bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
+            if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
+                text_to_fill = ('bar', [  # type: ignore
+                    (bar_color, '{}'.format(self.caption)),
+                    (bar_color, ': topic narrow')
+                ])
+            else:
+                text_to_fill = ('bar', [  # type: ignore
+                    (bar_color, '{}'.format(self.caption))
+                ])
+        elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
+            text_to_fill = 'Group private conversation'
+        else:
+            text_to_fill = 'Private conversation'
+        title_markup = ('header', [
+            ('custom', text_to_fill)
+            ])
+        title = urwid.Text(title_markup)
+        header = urwid.AttrWrap(title, 'bar')
+        header.text_to_fill = text_to_fill
+        header.markup = title_markup
+        return header
+
     def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
         if not reactions:
             return ''

@@ -1108,6 +1108,34 @@ class TestMessageBox:
         assert isinstance(view_components[1], Columns)
         assert isinstance(view_components[2], Padding)
 
+    @pytest.mark.parametrize('msg_narrow, msg_type, assert_header_bar,\
+                              assert_search_bar', [
+        ([['stream', 'PTEST']], 0, 'PTEST >', ('bar', [('s#bd6', 'PTEST')])),
+        ([['pm_with', 'boo@zulip.com']], 1, 'Private Messages with: ',
+         'Private conversation'),
+        ([['pm_with', 'boo@zulip.com, bar@zulip.com']], 2,
+         'Private Messages with: ', 'Group private conversation')
+    ])
+    def test_msg_generates_search_and_header_bar(self, mocker,
+                                                 messages_successful_response,
+                                                 msg_type, msg_narrow,
+                                                 assert_header_bar,
+                                                 assert_search_bar):
+        self.model.stream_dict = {
+            205: {
+                'color': '#bfd56f',
+            },
+        }
+        self.model.narrow = msg_narrow
+        messages = messages_successful_response['messages']
+        current_message = messages[msg_type]
+        msg_box = MessageBox(current_message, self.model, messages[0])
+        search_bar = msg_box.top_search_bar()
+        header_bar = msg_box.top_header_bar(msg_box)
+
+        assert header_bar.text.startswith(assert_header_bar)
+        assert search_bar.text_to_fill == assert_search_bar
+
     # Assume recipient (PM/stream/topic) header is unchanged below
     @pytest.mark.parametrize('message', [
         {
