@@ -313,6 +313,14 @@ class TestMessageView:
         assert msg_view.model.index['messages'][1]['flags'] == ['read']
         self.model.mark_message_ids_as_read.assert_called_once_with([1])
 
+    def test_message_calls_search_and_header_bar(self, mocker, msg_view):
+        msg_w = mocker.MagicMock()
+        msg_w.original_widget.message = {'id': 1}
+        msg_view.update_search_box_narrow(msg_w.original_widget)
+        msg_w.original_widget.top_header_bar.assert_called_once_with
+        (msg_w.original_widget)
+        msg_w.original_widget.top_search_bar.assert_called_once_with()
+
     def test_read_message_no_msgw(self, mocker, msg_view):
         # MSG_W is NONE CASE
         msg_view.body.get_focus.return_value = (None, 0)
