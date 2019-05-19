@@ -1,10 +1,12 @@
 import os
+import subprocess
 import time
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
 from functools import wraps
 from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
+from tempfile import NamedTemporaryFile
 from threading import Thread
 from typing import (
     Any,
@@ -23,6 +25,7 @@ from typing import (
 )
 from urllib.parse import unquote
 
+import requests
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
@@ -33,6 +36,7 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
+from zulipterminal.platform_code import normalized_file_path, successful_GUI_return_code
 
 
 class StreamData(TypedDict):
@@ -723,3 +727,52 @@ def suppress_output() -> Iterator[None]:
     finally:
         os.dup2(stdout, 1)
         os.dup2(stderr, 2)
+
+
+def download_media(controller: Any, url: str) -> str:
+    """
+    Helper to download media from given link. Returns the path to downloaded media.
+    """
+    media_name = url.split("/")[-1]
+    client = controller.client
+    auth = requests.auth.HTTPBasicAuth(client.email, client.api_key)
+
+    with requests.get(url, auth=auth, stream=True) as response:
+        response.raise_for_status()
+        local_path = ""
+        with NamedTemporaryFile(
+            mode="wb", delete=False, prefix="zt-", suffix=f"-{media_name}"
+        ) as file:
+            local_path = file.name
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:  # Filter out keep-alive new chunks.
+                    file.write(chunk)
+
+        return normalized_file_path(local_path)
+    return ""
+
+
+@asynch
+def open_media(controller: Any, tool: str, media_path: str) -> None:
+    """
+    Helper to open a media file given its path and tool.
+    """
+    error = []
+    command = [tool, media_path]
+    try:
+        process = subprocess.run(
+            command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        exit_status = process.returncode
+        if exit_status != successful_GUI_return_code():
+            error = [
+                " The tool ",
+                ("footer_contrast", tool),
+                " did not run successfully" ". Exited with ",
+                ("footer_contrast", str(exit_status)),
+            ]
+    except FileNotFoundError:
+        error = [" The tool ", ("footer_contrast", tool), " could not be found"]
+
+    if error:
+        controller.report_error(error)
