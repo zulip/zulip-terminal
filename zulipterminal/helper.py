@@ -6,6 +6,7 @@ from collections import OrderedDict, defaultdict
 from functools import wraps
 from itertools import chain, combinations
 from re import ASCII, match
+from tempfile import NamedTemporaryFile
 from threading import Thread
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Set, Tuple,
@@ -14,6 +15,7 @@ from typing import (
 from urllib.parse import unquote
 
 import lxml.html
+import requests
 from typing_extensions import TypedDict
 
 
@@ -647,3 +649,48 @@ def hash_util_decode(string: str) -> str:
     # Acknowledge custom string replacements in zulip/zulip's
     # zerver/lib/url_encoding.py before unquote.
     return unquote(string.replace('.', '%'))
+
+
+@asynch
+def process_media(controller: Any, media_link: str) -> None:
+    media_name = media_link.split('/')[-1]
+    client = controller.client
+    auth = requests.auth.HTTPBasicAuth(client.email, client.api_key)
+
+    with requests.get(media_link, auth=auth, stream=True) as r:
+        r.raise_for_status()
+        with NamedTemporaryFile(mode='wb', delete=False, prefix='zt-',
+                                suffix='-{}'.format(media_name)) as f:
+            media_path = f.name
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:  # Filter out keep-alive new chunks.
+                    f.write(chunk)
+
+    if LINUX:
+        command = 'xdg-open'
+    elif WSL:
+        command = 'explorer'  # Needs testing.
+    elif MACOS:
+        command = 'open'
+
+    open_media(controller, command, media_path)
+
+
+@asynch
+def open_media(controller: Any, command: str, media_path: str) -> None:
+    error = []
+    try:
+        process = subprocess.run([command, media_path],
+                                 stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL)
+        exit_status = process.returncode
+        if exit_status != 0:
+            error = [
+                ' The command ', ('bold', command), ' did not run successfully'
+                '. Exited with ', ('bold', str(exit_status)),
+            ]
+    except FileNotFoundError:
+        error = [' The command ', ('bold', command), ' could not be found']
+
+    if error:
+        controller.view.set_footer_text(error, duration=3)

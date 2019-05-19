@@ -3,8 +3,12 @@ import pytest
 import zulipterminal.helper
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, display_error_if_present,
-    hash_util_decode, index_messages, notify, powerset,
+    hash_util_decode, index_messages, notify, open_media, powerset,
+    process_media,
 )
+
+
+SERVER_URL = 'https://chat.zulip.zulip'
 
 
 def test_index_messages_narrow_all_messages(mocker,
@@ -314,3 +318,52 @@ def test_hash_util_decode(quoted_string, expected_unquoted_string):
     return_value = hash_util_decode(quoted_string)
 
     assert return_value == expected_unquoted_string
+
+
+def test_process_media(mocker, media_path='/tmp/zt-somerandomtext-image.png',
+                       media_link=SERVER_URL + '/user_uploads/path/image.png'):
+    mocker.patch('zulipterminal.helper.requests')
+    mocker.patch('zulipterminal.helper.open')
+    (mocker.patch('zulipterminal.helper.NamedTemporaryFile').return_value
+     .__enter__.return_value.name) = media_path
+    # The command, which is platform dependent, does not matter for the test.
+    mocker.patch('zulipterminal.helper.LINUX', True)
+    controller = mocker.Mock()
+    mocked_open_media = mocker.patch('zulipterminal.helper.open_media')
+
+    process_media(controller, media_link)
+
+    mocked_open_media.assert_called_once_with(controller, 'xdg-open',
+                                              media_path)
+
+
+@pytest.mark.parametrize('returncode, error', [
+    (0, []),
+    (1, [' The command ', ('bold', 'some_command'), ' did not run successfully'
+         '. Exited with ', ('bold', '1')]),
+])
+def test_open_media(mocker, returncode, error, command='some_command',
+                    media_path='/tmp/zt-somerandomtext-image.png'):
+    mocked_run = mocker.patch('zulipterminal.helper.subprocess.run')
+    mocked_run.return_value.returncode = returncode
+    controller = mocker.Mock()
+
+    open_media(controller, command, media_path)
+
+    assert mocked_run.called
+    if error:
+        controller.view.set_footer_text.assert_called_once_with(error,
+                                                                duration=3)
+
+
+def test_open_media_exception(mocker, command='some_command',
+                              media_path='/tmp/zt-somerandomtext-image.png',
+                              error=[' The command ', ('bold', 'some_command'),
+                                     ' could not be found']):
+    mocker.patch('zulipterminal.helper.subprocess.run',
+                 side_effect=FileNotFoundError())
+    controller = mocker.Mock()
+
+    open_media(controller, command, media_path)
+
+    controller.view.set_footer_text.assert_called_once_with(error, duration=3)
