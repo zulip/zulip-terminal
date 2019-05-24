@@ -488,9 +488,17 @@ class Model:
                     len(self.narrow) == 1:
                 self.msg_list.log.append(msg_w)
 
-            elif response['type'] == 'stream' and len(self.narrow) == 2 and\
-                    self.narrow[1][1] == response['subject']:
-                self.msg_list.log.append(msg_w)
+            elif response['type'] == 'stream' and \
+                    self.narrow[0][0] == "stream":
+                recipient_stream = response['display_recipient']
+                narrow_stream = self.narrow[0][1]
+                append_to_stream = recipient_stream == narrow_stream
+
+                if append_to_stream and (len(self.narrow) == 1 or
+                                         (len(self.narrow) == 2 and
+                                          self.narrow[1][1] ==
+                                          response['subject'])):
+                    self.msg_list.log.append(msg_w)
 
             elif response['type'] == 'private' and len(self.narrow) == 1 and\
                     self.narrow[0][0] == "pm_with":
