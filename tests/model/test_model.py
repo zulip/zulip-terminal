@@ -545,7 +545,10 @@ class TestModel:
         ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
          [['is', 'private']], frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'subject': 'b'},
+        ({'type': 'stream', 'id': 1, 'display_recipient': 'a'},
+         [['stream', 'a']], frozenset(), ['msg_w']),
+        ({'type': 'stream', 'id': 1, 'subject': 'b',
+          'display_recipient': 'a'},
          [['stream', 'a'], ['topic', 'b']],
          frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
@@ -557,8 +560,9 @@ class TestModel:
         ({'type': 'private', 'id': 1},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 3212}), []),
-    ], ids=['stream', 'all_private', 'topic', 'pm_existing_conv',
-            'search', 'pm_no_existing_conv'])
+    ], ids=['stream_to_all_messages', 'private_to_all_private',
+            'stream_to_stream', 'stream_to_topic',
+            'pm_existing_conv', 'search', 'pm_no_existing_conv'])
     def test_append_message(self, mocker, user_dict, user_profile, response,
                             narrow, recipients, model, log):
         model.update = True
