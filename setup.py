@@ -47,8 +47,15 @@ dev_helper_deps = [
 class UploadCommand(Command):
     """Support setup.py upload."""
 
-    description = 'Build and publish the package.'
-    user_options = []
+    description = "build and upload release to test/main server."
+    "Read Making a new release wiki of zt on github "
+    "for proper guidelines on making a new release."
+    user_options = [
+        # The format is (long option, short option, description).
+        ('final-release=', None,
+         'set it to "True" to push the release to the main PyPI server.'
+         'This also adds git tags and pushes them upstream.'),
+    ]
 
     @staticmethod
     def status(s):
@@ -56,7 +63,8 @@ class UploadCommand(Command):
         print('\033[1m{0}\033[0m'.format(s))
 
     def initialize_options(self):
-        pass
+        # Make release to test server by default.
+        self.final_release = None
 
     def finalize_options(self):
         pass
@@ -64,20 +72,26 @@ class UploadCommand(Command):
     def run(self):
         try:
             self.status('Removing previous builds…')
+            here = os.path.abspath(os.path.dirname(__file__))
             rmtree(os.path.join(here, 'dist'))
         except OSError:
             pass
 
-        self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(
-                  sys.executable))
+        self.status('Building Source and Wheel distribution…')
+        os.system('{0} setup.py sdist bdist_wheel --python-tag=py35.py36.py37'
+                  .format(sys.executable))
 
-        self.status('Uploading the package to PyPI via Twine…')
-        os.system('twine upload dist/*')
+        if self.final_release == 'True':
+            self.status('Uploading the package to PyPI via Twine…')
+            os.system('twine upload dist/*')
 
-        self.status('Pushing git tags…')
-        os.system('git tag v{0}'.format(about['__version__']))
-        os.system('git push --tags')
+            self.status('Pushing git tags…')
+            os.system('git tag v{0}'.format(ZT_VERSION))
+            os.system('git push --tags')
+        else:
+            self.status('Uploading the package to Test PyPI via Twine…')
+            os.system('twine upload --repository-url'
+                      ' https://test.pypi.org/legacy/ dist/*')
 
         sys.exit()
 
