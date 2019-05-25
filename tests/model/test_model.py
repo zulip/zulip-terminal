@@ -551,6 +551,10 @@ class TestModel:
           'display_recipient': 'a'},
          [['stream', 'a'], ['topic', 'b']],
          frozenset(), ['msg_w']),
+        ({'type': 'stream', 'id': 1, 'subject': 'b',
+          'display_recipient': 'a'},
+         [['stream', 'c'], ['topic', 'b']],
+         frozenset(), []),
         ({'type': 'private', 'id': 1},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), ['msg_w']),
@@ -562,7 +566,8 @@ class TestModel:
          frozenset({5827, 3212}), []),
     ], ids=['stream_to_all_messages', 'private_to_all_private',
             'stream_to_stream', 'stream_to_topic',
-            'pm_existing_conv', 'search', 'pm_no_existing_conv'])
+            'stream_to_different_stream_same_topic', 'pm_existing_conv',
+            'search', 'pm_no_existing_conv'])
     def test_append_message(self, mocker, user_dict, user_profile, response,
                             narrow, recipients, model, log):
         model.update = True
