@@ -13,7 +13,7 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 
 ## Installation & Running
 
-We recommend installing `zulip-term` in a new python virtual environment (venv); with the required python 3.4+, the following should work on most systems:
+We recommend installing `zulip-term` in a new python virtual environment (venv); with the required python 3.5+, the following should work on most systems:
 1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
 2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
 3. `pip3 install zulip-term` (downloads and installs the latest zulip-terminal release from PyPI)

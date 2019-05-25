@@ -31,6 +31,7 @@
 - Avoid traceback on sending to multiple private recipients when narrowed to that conversation
 
 ### Infrastructure changes
+- Remove support for python 3.4, which will have no further releases
 - Improve installation, development & troubleshooting notes in README
 - Minimized initial registration & communication with zulip server
 - Internal refactoring & centralization of code handling zulip server communication
