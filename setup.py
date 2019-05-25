@@ -37,9 +37,7 @@ testing_deps = [
 
 dev_helper_deps = [
     'mypy==0.641',
-    'pygments==2.3.1',
     'pudb==2017.1.4',
-    'tornado~=5.1',
     'snakeviz==0.4.2',
     'gitlint>=0.10',
 ]
@@ -63,12 +61,11 @@ setup(
         'License :: OSI Approved :: Apache Software License',
 
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    python_requires='>=3.4, <3.8',
+    python_requires='>=3.5, <3.8',
     keywords='',
     packages=find_packages(exclude=['test', 'test.*']),
     zip_safe=True,
@@ -84,7 +81,6 @@ setup(
     },
     tests_require=testing_deps,
     install_requires=[
-        "typing==3.6.4; python_version < '3.5'",
         'urwid==2.0.1',
         'zulip==0.5.9',
         'emoji==0.5.0',

@@ -1,13 +1,10 @@
-typing==3.6.4; python_version < '3.5'
 urwid==2.0.1
 zulip==0.5.9
 pytest==3.4.2
 pytest-cov==2.5.1
 pytest-pep8==1.0.6
 pytest-mock==1.7.1
-pygments==2.3.1
 pudb==2017.1.4
-tornado~=5.1
 snakeviz==0.4.2
 gitlint==0.10.0
 mypy==0.641

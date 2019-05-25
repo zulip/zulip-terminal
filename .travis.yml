@@ -7,8 +7,6 @@ cache:
     - $HOME/.cache/pipenv
 matrix:
   include:
-    - python: 3.4
-      name: "Python 3.4 pytest (default linux)"
     - python: 3.5
       name: "Python 3.5 pytest (default linux)"
     - python: 3.6
