@@ -154,6 +154,15 @@ class Model:
 
         if new_narrow != self.narrow:
             self.narrow = new_narrow
+
+            if pm_with is not None and new_narrow[0][0] == 'pm_with':
+                users = pm_with.split(', ')
+                self.recipients = frozenset(
+                    [self.user_dict[user]['user_id'] for user in users] +
+                    [self.user_id]
+                )
+            else:
+                self.recipients = frozenset()
             return False
         else:
             return True
