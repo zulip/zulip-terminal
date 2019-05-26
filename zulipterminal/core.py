@@ -177,20 +177,14 @@ class Controller:
             if not emails and len(button.message['display_recipient']) == 1:
                 emails = [self.model.user_email]
             user_emails = ', '.join(emails)
-            user_ids = {user['id']
-                        for user in button.message['display_recipient']}
         else:
             user_emails = button.email
-            user_ids = {self.model.user_id, button.user_id}
 
         already_narrowed = self.model.set_narrow(pm_with=user_emails)
         if already_narrowed:
             return
 
         self.update = False
-        recipients = frozenset(user_ids)
-        # store the recipients in the model (required for get_message_ids...)
-        self.model.recipients = recipients
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         if len(msg_id_list) == 0:

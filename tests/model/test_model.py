@@ -159,14 +159,17 @@ class TestModel:
          dict(stream='some stream', topic='some topic')),
         ([], [['is', 'starred']], dict(starred=True)),
         ([], [['is', 'private']], dict(pms=True)),
-        ([], [['pm_with', 'FOO@zulip.com']], dict(pm_with='FOO@zulip.com')),
+        ([], [['pm_with', 'FOOBOO@gmail.com']],
+         dict(pm_with='FOOBOO@gmail.com')),
     ])
     def test_set_narrow_not_already_set(self, model, initial_narrow, narrow,
-                                        good_args):
+                                        good_args, user_dict):
         model.narrow = initial_narrow
+        model.user_dict = user_dict
         assert not model.set_narrow(**good_args)
         assert model.narrow != initial_narrow
         assert model.narrow == narrow
+        # FIXME: Add assert for recipients being updated (other tests too?)
 
     @pytest.mark.parametrize("narrow, index, current_ids", [
         ([], {
