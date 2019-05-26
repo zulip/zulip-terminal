@@ -511,13 +511,10 @@ class Model:
 
             elif response['type'] == 'private' and len(self.narrow) == 1 and\
                     self.narrow[0][0] == "pm_with":
-                recipients = self.recipients
-                users = self.narrow[0][1].split(", ")
-                msg_recipients = frozenset(
-                    [self.user_dict[user]['user_id'] for user in users] +
-                    [self.user_id]
-                )
-                if recipients == msg_recipients:
+                narrow_recipients = self.recipients
+                message_recipients = frozenset(
+                    [user['id'] for user in response['display_recipient']])
+                if narrow_recipients == message_recipients:
                     self.msg_list.log.append(msg_w)
             if 'read' not in response['flags']:
                 set_count([response['id']], self.controller, 1)
