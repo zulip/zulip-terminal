@@ -574,7 +574,7 @@ class TestModel:
             'stream_to_different_stream_same_topic',
             'user_pm_x_appears_in_narrow_with_x', 'search',
             'user_pm_x_does_not_appear_in_narrow_without_x'])
-    def test_append_message(self, mocker, user_dict, user_profile, response,
+    def test_append_message(self, mocker, user_profile, response,
                             narrow, recipients, model, log):
         model.update = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
@@ -588,7 +588,6 @@ class TestModel:
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile['user_id']
-        model.user_dict = user_dict
         event = {'message': response}
 
         model.append_message(event)
