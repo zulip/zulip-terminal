@@ -14,7 +14,6 @@ from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
     RightColumnView,
     MiddleColumnView,
-    StreamsView,
     LeftColumnView,
 )
 
