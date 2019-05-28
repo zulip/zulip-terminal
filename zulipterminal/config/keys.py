@@ -96,6 +96,10 @@ KEY_BINDINGS = OrderedDict([
         'help_text':
             'Narrow to a topic/private-chat, or stream/all-private-messages',
     }),
+    ('TOGGLE_TOPIC', {
+        'keys': {'t'},
+        'help_text': 'Toggle topics in a stream',
+    }),
     ('ALL_PM', {
         'keys': {'P'},
         'help_text': 'Narrow to all private messages',
