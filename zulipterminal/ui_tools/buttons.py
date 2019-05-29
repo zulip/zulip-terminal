@@ -163,10 +163,10 @@ class UserButton(TopButton):
 
 
 class TopicButton(urwid.Button):
-    def __init__(self, stream_id: str, topic: str, model: Any) -> None:
-        self.caption = model.stream_dict[int(stream_id)]['name']  # stream name
+    def __init__(self, stream_id: int, topic: str, model: Any) -> None:
+        self.caption = model.stream_dict[stream_id]['name']  # stream name
         self.title = topic
-        self.stream_id = int(stream_id)
+        self.stream_id = stream_id
 
 
 class UnreadPMButton(urwid.Button):

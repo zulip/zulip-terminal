@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Optional
 import threading
 
 import urwid
@@ -289,7 +289,7 @@ class MiddleColumnView(urwid.Frame):
         super(MiddleColumnView, self).__init__(msg_list, header=search_box,
                                                footer=write_box)
 
-    def get_next_unread_topic(self) -> Any:
+    def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts['unread_topics'].keys())
         next_topic = False
         for topic in topics:
@@ -302,9 +302,9 @@ class MiddleColumnView(urwid.Frame):
             topic = topics[0]
             self.last_unread_topic = topic
             return topic
-        return
+        return None
 
-    def get_next_unread_pm(self) -> Any:
+    def get_next_unread_pm(self) -> Optional[int]:
         pms = list(self.model.unread_counts['unread_pms'].keys())
         next_pm = False
         for pm in pms:
@@ -317,7 +317,7 @@ class MiddleColumnView(urwid.Frame):
             pm = pms[0]
             self.last_unread_pm = pm
             return pm
-        return
+        return None
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key):
