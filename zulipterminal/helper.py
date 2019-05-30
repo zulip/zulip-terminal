@@ -317,8 +317,6 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
-        if stream_id in model.muted_streams:
-            continue
         if [model.stream_dict[stream_id]['name'],
                 stream['topic']] in model.muted_topics:
             continue
