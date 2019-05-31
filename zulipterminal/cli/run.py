@@ -155,7 +155,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     NO_CONFIG = 'with no config'
     settings = {
         'theme': ('default', NO_CONFIG),
-        'autohide': ('autohide', NO_CONFIG),
+        'autohide': ('no_autohide', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:

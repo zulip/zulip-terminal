@@ -27,7 +27,7 @@ If you see further text, like the following, `zulip-term` should be loading!
 ```
 Loading with:
    theme 'default' specified with no config.
-   autohide setting 'autohide' specified with no config.
+   autohide setting 'no_autohide' specified with no config.
 Welcome to Zulip.
 ```
 
@@ -65,7 +65,7 @@ site=https://realm.zulipchat.com
 [zterm]
 # Theme can also be set to 'gruvbox' ('blue' & 'light' are older themes needing work)
 theme=default
-# Autohide can also be set to 'no_autohide', to always show the left and right panels
+# Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
 autohide=autohide
 ```
 
