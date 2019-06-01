@@ -155,6 +155,7 @@ class View(urwid.WidgetWrap):
             self.model.controller.show_all_starred(self)
             self.body.focus_col = 1
         elif is_command_key('SEARCH_PEOPLE', key):
+            self.body.focus_col = 2
             # Start User Search if not in editor_mode
             self.users_view.keypress(size, 'w')
             self.show_left_panel(visible=False)
@@ -165,6 +166,7 @@ class View(urwid.WidgetWrap):
             return key
         elif is_command_key('SEARCH_STREAMS', key):
             # jump stream search
+            self.body.focus_col = 0
             self.left_panel.keypress(size, 'q')
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
