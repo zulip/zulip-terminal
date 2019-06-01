@@ -2,6 +2,7 @@ import platform
 import re
 from typing import Any, Tuple, List, Dict, Optional
 import random
+import time
 
 import urwid
 
@@ -9,6 +10,7 @@ from zulipterminal.config.keys import (
     is_command_key,
     commands_for_random_tips
 )
+from zulipterminal.helper import asynch
 from zulipterminal.config.themes import THEMES
 from zulipterminal.ui_tools.boxes import WriteBox, SearchBox
 from zulipterminal.ui_tools.views import (
@@ -67,13 +69,19 @@ class View(urwid.WidgetWrap):
             ' ' + random_command['help_text'],
         ]
 
-    def set_footer_text(self, text_list: Optional[List[Any]]=None) -> None:
+    @asynch
+    def set_footer_text(self, text_list: Optional[List[Any]]=None,
+                        duration: Optional[float]=None) -> None:
         if text_list is None:
             text = self.get_random_help()
         else:
             text = text_list
         self._w.footer.set_text(text)
         self.controller.update_screen()
+        if duration is not None:
+            assert duration > 0
+            time.sleep(duration)
+            self.set_footer_text()
 
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
