@@ -121,6 +121,7 @@ class WriteBox(urwid.Pile):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
+            self.view.set_footer_text('  Sending...')
             if self.msg_edit_id:
                 if not self.to_write_box:
                     success = self.model.update_stream_message(
@@ -146,10 +147,17 @@ class WriteBox(urwid.Pile):
                         content=self.msg_write_box.edit_text
                     )
             if success:
+                self.view.set_footer_text('  Message successfully sent!',
+                                          duration=3)
                 self.msg_write_box.edit_text = ''
                 if self.msg_edit_id:
                     self.msg_edit_id = None
                     self.keypress(size, 'esc')
+            else:
+                self.view.set_footer_text('  Failed to send message.'
+                                          ' Please make sure your compose'
+                                          ' box is not empty.',
+                                          duration=3)
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
             self.view.controller.editor_mode = False
