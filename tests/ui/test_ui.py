@@ -171,9 +171,11 @@ class TestView:
         view.keypress(size, 'down')
         super_view.assert_called_once_with(size, 'down')
 
-    def test_keypress_w(self, view, mocker):
+    @pytest.mark.parametrize('autohide', [True, False])
+    def test_keypress_w(self, view, mocker, autohide):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
+        view.autohide = autohide
         view.body.contents = ['streams', 'messages', mocker.Mock()]
         view.user_search = mocker.Mock()
         view.left_panel = mocker.Mock()
@@ -191,10 +193,12 @@ class TestView:
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
 
-    def test_keypress_q(self, view, mocker):
+    @pytest.mark.parametrize('autohide', [True, False])
+    def test_keypress_q(self, view, mocker, autohide):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.search_box = mocker.Mock()
+        view.autohide = autohide
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), 'messages', 'users']
         view.left_panel = mocker.Mock()
