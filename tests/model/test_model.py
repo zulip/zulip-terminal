@@ -284,39 +284,40 @@ class TestModel:
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), 'x')
 
-    @pytest.mark.parametrize('response, return_value', [
-        ({'result': 'success'}, True),
-        ({'result': 'some_failure'}, False),
+    @pytest.mark.parametrize('response, req', [
+        ({'result': 'success'}, {
+            'type': 'stream',
+            'to': 'Test Stream',
+            'subject': 'test',
+            'content': 'Hi'
+        }),
+        ({'result': 'success'}, {
+            'type': 'private',
+            'to': 'notification-bot@zulip.com',
+            'content': 'HI'
+        }),
+        ({'result': 'some_failure'}, {
+            'type': 'private',
+            'to': 'notification-bot@zulip.com',
+            'content': ''
+        }),
     ])
-    def test_send_private_message(self, mocker, model,
-                                  response, return_value,
-                                  content="hi!",
-                                  recipients="notification-bot@zulip.com"):
+    def test_send_message(self, mocker, model,
+                          response, req):
         self.client.send_message = mocker.Mock(return_value=response)
-
-        result = model.send_private_message(recipients, content)
-
-        req = dict(type='private', to=recipients, content=content)
+        model.controller.set_footer_text = mocker.Mock()
+        model.send_message(req)
         self.client.send_message.assert_called_once_with(req)
-
-        assert result == return_value
-
-    @pytest.mark.parametrize('response, return_value', [
-        ({'result': 'success'}, True),
-        ({'result': 'some_failure'}, False),
-    ])
-    def test_send_stream_message(self, mocker, model,
-                                 response, return_value,
-                                 content="hi!",
-                                 stream="foo", topic="bar"):
-        self.client.send_message = mocker.Mock(return_value=response)
-
-        result = model.send_stream_message(stream, topic, content)
-
-        req = dict(type='stream', to=stream, subject=topic, content=content)
-        self.client.send_message.assert_called_once_with(req)
-
-        assert result == return_value
+        assert model.controller.set_footer_text.called_with(
+            '  Sending...')
+        if response['result'] == 'success':
+            assert self.controller.view.write_box.msg_write_box.edit_text == ''
+            assert model.controller.set_footer_text.called_with(
+                '  Message successfully sent!', duration=3)
+        else:
+            assert model.controller.set_footer_text.called_with(
+                '  Failed to send message. Please make sure'
+                ' your compose box is not empty.', duration=3)
 
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
