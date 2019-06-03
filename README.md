@@ -256,6 +256,12 @@ $ pipenv install --dev
 $ pipenv run pip3 install -e .[dev]
 ```
 
+4. Install mypy manually (mypy is incompatible with pypy, so we don't have this enabled by default)
+
+```
+$ pipenv run pip3 install -r requirements.txt
+```
+
 #### Pip
 
 1. Manually create & activate a virtual environment; any method should work, such as that used in the above simple installation
