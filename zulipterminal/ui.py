@@ -105,7 +105,11 @@ class View(urwid.WidgetWrap):
                 (View.RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
-
+        # NOTE: set_focus_changed_callback is actually called before the
+        # focus is set, so the message is not read yet, it will be read when
+        # the focus is changed again either vertically or horizontally.
+        self.body._contents.set_focus_changed_callback(
+            self.model.msg_list.read_message)
         div_char = '═'
 
         title_text = " {full_name} ({email}) - {server} ".format(
