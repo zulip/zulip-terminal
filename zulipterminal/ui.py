@@ -123,7 +123,7 @@ class View(urwid.WidgetWrap):
             self.body.options(width_type='given', width_amount=width),
         )
         if visible:
-            self.body.focus_col = 0
+            self.body.focus_position = 0
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
@@ -134,7 +134,7 @@ class View(urwid.WidgetWrap):
             self.body.options(width_type='given', width_amount=width),
         )
         if visible:
-            self.body.focus_col = 2
+            self.body.focus_position = 2
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         self.model.new_user_input = True
@@ -155,8 +155,8 @@ class View(urwid.WidgetWrap):
             self.model.controller.show_all_starred(self)
             self.body.focus_col = 1
         elif is_command_key('SEARCH_PEOPLE', key):
-            self.body.focus_col = 2
             # Start User Search if not in editor_mode
+            self.body.focus_position = 2
             self.users_view.keypress(size, 'w')
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
@@ -166,7 +166,7 @@ class View(urwid.WidgetWrap):
             return key
         elif is_command_key('SEARCH_STREAMS', key):
             # jump stream search
-            self.body.focus_col = 0
+            self.body.focus_position = 0
             self.left_panel.keypress(size, 'q')
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
