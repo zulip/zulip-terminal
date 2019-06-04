@@ -309,6 +309,7 @@ class TestMessageView:
         }
         mocker.patch(VIEWS + ".MessageView.focus_position")
         msg_view.focus_position = 1
+        msg_view.model.controller.view.body.focus_col = 1
         msg_view.read_message()
         assert msg_view.update_search_box_narrow.called
         assert msg_view.model.index['messages'][1]['flags'] == ['read']

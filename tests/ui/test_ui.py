@@ -117,6 +117,8 @@ class TestView:
                 ('weight', 10, center()),
                 (0, right()),
                 ], focus_column=0),
+            mocker.call()._contents.set_focus_changed_callback(
+                view.model.msg_list.read_message),
             mocker.call([
                 title_divider(),
                 (title_length, text()),
