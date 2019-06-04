@@ -177,12 +177,21 @@ class MessageView(urwid.ListBox):
             )
         self.model.controller.update_screen()
 
-    def read_message(self) -> None:
+    def read_message(self, index: int=-1) -> None:
         # Message currently in focus
+        if hasattr(self.model.controller, "view"):
+            view = self.model.controller.view
+        else:
+            return
         msg_w, curr_pos = self.body.get_focus()
         if msg_w is None:
             return
         self.update_search_box_narrow(msg_w.original_widget)
+        # Only allow reading a message when middle column is
+        # in focus. Changing the contents of self.log also changes
+        # focus automatically.
+        if view.body.focus_col != 1:
+            return
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
