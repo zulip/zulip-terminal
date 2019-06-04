@@ -123,6 +123,7 @@ class TestView:
         view.left_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.body.focus_position = None
         view.controller.autohide = autohide
 
         view.show_left_panel(visible=visible)
@@ -131,7 +132,7 @@ class TestView:
             (view.body.options.
              assert_called_once_with(width_type='given', width_amount=width))
             if visible:
-                assert view.body.focus_col == 0
+                assert view.body.focus_position == 0
         else:
             view.body.options.assert_not_called()
 
@@ -145,6 +146,7 @@ class TestView:
         view.right_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.body.focus_position = None
         view.controller.autohide = autohide
 
         view.show_right_panel(visible=visible)
@@ -153,7 +155,7 @@ class TestView:
             (view.body.options.
              assert_called_once_with(width_type='given', width_amount=width))
             if visible:
-                assert view.body.focus_col == 2
+                assert view.body.focus_position == 2
         else:
             view.body.options.assert_not_called()
 
@@ -171,9 +173,12 @@ class TestView:
         view.keypress(size, 'down')
         super_view.assert_called_once_with(size, 'down')
 
-    def test_keypress_w(self, view, mocker):
+    @pytest.mark.parametrize('autohide', [True, False], ids=[
+        'autohide', 'no_autohide'])
+    def test_keypress_w(self, view, mocker, autohide):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
+        view.controller.autohide = autohide
         view.body.contents = ['streams', 'messages', mocker.Mock()]
         view.user_search = mocker.Mock()
         view.left_panel = mocker.Mock()
@@ -183,18 +188,23 @@ class TestView:
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.editor_mode = False
 
+        view.body.focus_position = None
+
         # Test "w" keypress
         view.keypress(size, "w")
         view.users_view.keypress.assert_called_once_with(size, "w")
-        assert view.body.focus_col == 2
+        assert view.body.focus_position == 2
         view.user_search.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
 
-    def test_keypress_q(self, view, mocker):
+    @pytest.mark.parametrize('autohide', [True, False], ids=[
+        'autohide', 'no_autohide'])
+    def test_keypress_q(self, view, mocker, autohide):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.search_box = mocker.Mock()
+        view.controller.autohide = autohide
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), 'messages', 'users']
         view.left_panel = mocker.Mock()
@@ -204,10 +214,13 @@ class TestView:
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.editor_mode = False
 
+        view.body.focus_position = None
+
         # Test "q" keypress
         view.keypress(size, "q")
+
         view.left_panel.keypress.assert_called_once_with(size, "q")
-        assert view.body.focus_col == 0
+        assert view.body.focus_position == 0
         view.stream_w.search_box.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.stream_w.search_box
