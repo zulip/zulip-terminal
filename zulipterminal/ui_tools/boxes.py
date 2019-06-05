@@ -564,6 +564,8 @@ class MessageBox(urwid.Pile):
             pad_count += 1
 
     def selectable(self) -> bool:
+        # Returning True, indicates that this widget
+        # is designed to take focus.
         return True
 
     def mouse_event(self, size: Tuple[int, int], event: Any, button: Any,
