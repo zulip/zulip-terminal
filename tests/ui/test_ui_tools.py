@@ -12,6 +12,7 @@ from zulipterminal.ui_tools.views import (
     LeftColumnView,
     HelpView,
     ModListWalker,
+    PopUpConfirmationView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -985,6 +986,47 @@ class TestHelpMenu:
     def test_keypress_goback(self, key):
         size = (200, 20)
         self.help_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+
+class TestPopUpConfirmationView:
+    @pytest.fixture
+    def popup_view(self, mocker, stream_button):
+        self.controller = mocker.Mock()
+        self.callback = mocker.Mock()
+        self.list_walker = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                        return_value=[])
+        self.divider = mocker.patch(VIEWS + '.urwid.Divider')
+        self.text = mocker.patch(VIEWS + '.urwid.Text')
+        self.wrapper_w = mocker.patch(VIEWS + '.urwid.WidgetWrap')
+        return PopUpConfirmationView(
+            self.controller,
+            self.text,
+            self.callback,
+        )
+
+    def test_init(self, popup_view):
+        assert popup_view.controller == self.controller
+        assert popup_view.success_callback == self.callback
+        self.divider.assert_called_once_with()
+        self.list_walker.assert_called_once_with(
+            [self.text, self.divider(), self.wrapper_w()])
+
+    def test_exit_popup_yes(self, mocker, popup_view):
+        popup_view.exit_popup_yes(mocker.Mock())
+        self.callback.assert_called_once_with()
+        assert self.controller.exit_popup.called
+
+    def test_exit_popup_no(self, mocker, popup_view):
+        popup_view.exit_popup_no(mocker.Mock())
+        self.callback.assert_not_called()
+        assert self.controller.exit_popup.called
+
+    def test_exit_popup_GO_BACK(self, mocker, popup_view):
+        key = 'esc'
+        size = (20, 20)
+        popup_view.keypress(size, key)
+        self.callback.assert_not_called()
         assert self.controller.exit_popup.called
 
 
