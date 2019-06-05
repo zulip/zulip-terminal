@@ -29,13 +29,7 @@ class TopButton(urwid.Button):
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
-        self.set_muted_streams()
         urwid.connect_signal(self, 'click', self.activate)
-
-    def set_muted_streams(self) -> None:
-        if self.caption in [self.controller.model.stream_dict[ele]['name']
-                            for ele in self.controller.model.muted_streams]:
-            self.update_count(-1)
 
     def update_count(self, count: int) -> None:
         self.count = count
@@ -107,6 +101,7 @@ class StreamButton(TopButton):
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
         caption, self.stream_id, orig_color, is_private = properties
+        self.model = controller.model
 
         # Simplify the color from the original version & add to palette
         # TODO Should this occur elsewhere and more intelligently?
@@ -131,6 +126,13 @@ class StreamButton(TopButton):
                          prefix_character=(color, 'P' if is_private else '#'),
                          width=width,
                          count=count)
+
+        # Mark muted streams 'M' during button creation.
+        self.mark_muted()
+
+    def mark_muted(self) -> None:
+        if self.stream_id in self.model.muted_streams:
+            self.update_count(-1)
 
 
 class UserButton(TopButton):
