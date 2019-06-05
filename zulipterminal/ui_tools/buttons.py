@@ -120,9 +120,10 @@ class StreamButton(TopButton):
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
+                inverse_text = background if background else 'black'
                 break
         view.palette.append((color, '', '', '', color+', bold', background))
-        view.palette.append(('s' + color, '', '', '', background, color))
+        view.palette.append(('s' + color, '', '', '', inverse_text, color))
 
         super().__init__(controller,
                          caption=caption,
