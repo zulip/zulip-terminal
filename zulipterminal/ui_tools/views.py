@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Tuple, Optional, Callable
 import threading
 
 import urwid
@@ -716,3 +716,38 @@ class HelpView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_popup()
         return super(HelpView, self).keypress(size, key)
+
+
+class PopUpConfirmationView(urwid.Overlay):
+    def __init__(self, controller: Any, question: Any,
+                 success_callback: Callable[[], bool]):
+        self.controller = controller
+        self.success_callback = success_callback
+        yes = urwid.Button(u'Yes', self.exit_popup_yes)
+        no = urwid.Button(u'No', self.exit_popup_no)
+        yes._w = urwid.AttrMap(urwid.SelectableIcon(
+            'Yes', 4), None, 'selected')
+        no._w = urwid.AttrMap(urwid.SelectableIcon(
+            'No', 4), None, 'selected')
+        display_widget = urwid.GridFlow([yes, no], 3, 5, 1, 'center')
+        wrapped_widget = urwid.WidgetWrap(display_widget)
+        prompt = urwid.LineBox(
+            urwid.ListBox(
+                urwid.SimpleFocusListWalker(
+                    [question, urwid.Divider(), wrapped_widget]
+                )))
+        urwid.Overlay.__init__(self, prompt, self.controller.view,
+                               align="left", valign="top", width=26,
+                               height=8)
+
+    def exit_popup_yes(self, args: Any) -> None:
+        self.success_callback()
+        self.controller.exit_popup()
+
+    def exit_popup_no(self, args: Any) -> None:
+        self.controller.exit_popup()
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('GO_BACK', key):
+            self.controller.exit_popup()
+        return super(PopUpConfirmationView, self).keypress(size, key)
