@@ -2,6 +2,8 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
+![Zulip Terminal screenshot](zt_preview.png)
+
 [Recent changes](CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
