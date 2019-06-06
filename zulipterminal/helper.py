@@ -94,7 +94,9 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         if msg['type'] == 'stream':
             key = (messages[id]['stream_id'], msg['subject'])
             unreads = unread_counts['unread_topics']
-        else:
+        # self-pm has only one display_recipient
+        # 1-1 pms have 2 display_recipient
+        elif len(msg['display_recipient']) <= 2:
             key = messages[id]['sender_id']
             unreads = unread_counts['unread_pms']  # type: ignore
 
