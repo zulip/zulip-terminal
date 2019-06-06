@@ -1252,8 +1252,12 @@ class TestMessageBox:
         varied_message = dict(message, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, varied_message)
         view_components = msg_box.main_view()
-        assert len(view_components) == 1
-        assert isinstance(view_components[0], Padding)
+        if to_vary_in_each_message == {'flags': ['starred']}:
+            assert len(view_components) == 2
+            assert isinstance(view_components[1], Padding)
+        else:
+            assert len(view_components) == 1
+            assert isinstance(view_components[0], Padding)
 
     def test_main_view_generates_EDITED_label(self, mocker,
                                               messages_successful_response):
