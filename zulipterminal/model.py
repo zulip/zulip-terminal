@@ -116,6 +116,8 @@ class Model:
             'typing': self.handle_typing_event,
             'update_message_flags': self.update_message_flag_status,
         }  # type: Dict[str, Callable[[Event], None]]
+        self.message_star_toggled = False
+        # True if message star status toggled
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -586,6 +588,7 @@ class Model:
         if flag_to_change != 'starred':
             return
 
+        self.message_star_toggled = True
         indexed_message_ids = set(self.index['messages'])
         message_ids_to_mark = set(event['messages'])
 
@@ -618,6 +621,25 @@ class Model:
                 msg_pos = self.msg_list.log.index(msg_w)
                 self.msg_list.log[msg_pos] = new_msg_w
                 self.controller.update_screen()
+
+                if self.message_star_toggled:  # Updates next content_header
+                    try:
+                        next_msg_box =\
+                                self.msg_list.log[msg_pos+1].original_widget
+                        next_msg_w_list = create_msg_box_list(
+                                        self, [next_msg_box.message['id']],
+                                        last_message=next_msg_box.last_message)
+                        if not next_msg_w_list:
+                            return
+                        else:
+                            next_new_msg_w = next_msg_w_list[0]
+                            next_msg_pos = self.msg_list.log.index(
+                                                self.msg_list.log[msg_pos+1])
+                            self.msg_list.log[next_msg_pos] = next_new_msg_w
+                            self.controller.update_screen()
+                            self.message_star_toggled = False
+                    except IndexError:
+                        self.message_star_toggled = False
 
     def _register_desired_events(self, *, fetch_data: bool=False) -> bool:
         fetch_types = None if not fetch_data else [
