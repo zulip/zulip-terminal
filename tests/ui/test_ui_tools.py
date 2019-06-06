@@ -1206,38 +1206,6 @@ class TestMessageBox:
                 expected_header)
         assert isinstance(view_components[1], Padding)
 
-    @pytest.mark.parametrize('message', [
-        {
-            'type': 'stream',
-            'display_recipient': 'Verona',
-            'stream_id': 5,
-            'subject': 'Test topic',
-            'flags': [],
-            'content': '<p>what are you planning to do this week</p>',
-            'reactions': [],
-            'sender_full_name': 'alice',
-            'timestamp': 1532103879,
-        },
-        {
-            'type': 'private',
-            'sender_email': 'iago@zulip.com',
-            'sender_id': 5,
-            'display_recipient': [{
-                'email': 'AARON@zulip.com',
-                'id': 1,
-                'full_name': 'aaron'
-            }, {
-                'email': 'iago@zulip.com',
-                'id': 5,
-                'full_name': 'Iago'
-            }],
-            'flags': [],
-            'content': '<p>what are you planning to do this week</p>',
-            'reactions': [],
-            'sender_full_name': 'Alice',
-            'timestamp': 1532103879,
-        }
-    ])
     @pytest.mark.parametrize('to_vary_in_each_message', [
         {'sender_full_name': 'bob'},
         {'timestamp': 1532103779},
@@ -1246,10 +1214,10 @@ class TestMessageBox:
         {'flags': ['starred']},
     ], ids=['common_author', 'common_timestamp', 'common_early_timestamp',
             'common_unchanged_message', 'both_starred'])
-    def test_main_view_compact_output(self, mocker, message,
+    def test_main_view_compact_output(self, mocker, message_fixture,
                                       to_vary_in_each_message):
-        message.update({'id': 4})
-        varied_message = dict(message, **to_vary_in_each_message)
+        message_fixture.update({'id': 4})
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, varied_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 1
