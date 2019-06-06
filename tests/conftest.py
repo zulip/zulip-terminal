@@ -417,7 +417,7 @@ def initial_index():
 
 @pytest.fixture
 def empty_index():
-    return {
+    return deepcopy({
         'pointer': defaultdict(set, {}),
         'private': defaultdict(set, {}),
         'all_messages':  set(),
@@ -428,102 +428,11 @@ def empty_index():
         'search': set(),
         'all_starred': set(),
         'messages': defaultdict(dict, {
-            537286: {
-                'type': 'stream',
-                'sender_realm_str': '',
-                'is_me_message': False,
-                'content': 'Stream content here.',
-                'recipient_id': 6076,
-                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
-                'client': 'website',
-                'stream_id': 205,
-                'subject_links': [],
-                'content_type': 'text/x-markdown',
-                'display_recipient': 'PTEST',
-                'reactions': [],
-                'sender_short_name': 'foo',
-                'id': 537286,
-                'flags': ['read'],
-                'sender_email': 'foo@zulip.com',
-                'timestamp': 1520918722,
-                'subject': 'Test',
-                'sender_id': 5140,
-                'sender_full_name': 'Foo Foo'
-            },
-            537287: {
-                'type': 'private',
-                'sender_realm_str': '',
-                'is_me_message': False,
-                'content': 'Hey PM content here.',
-                'recipient_id': 5780,
-                'client': 'website',
-                'subject': '',
-                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
-                'content_type': 'text/x-markdown',
-                'display_recipient': [{
-                    'id': 5179,
-                    'full_name': 'Boo Boo',
-                    'email': 'boo@zulip.com',
-                    'short_name': 'boo',
-                    'is_mirror_dummy': False
-                }, {
-                    'id': 5140,
-                    'full_name': 'Foo Foo',
-                    'email': 'foo@zulip.com',
-                    'short_name': 'foo',
-                    'is_mirror_dummy': False
-                }],
-                'sender_short_name': 'foo',
-                'id': 537287,
-                'flags': ['read'],
-                'sender_email': 'foo@zulip.com',
-                'timestamp': 1520918736,
-                'reactions': [],
-                'sender_id': 5140,
-                'sender_full_name': 'Foo Foo',
-                'subject_links': []
-            },
-            537288: {
-                'id': 537288,
-                'sender_full_name': 'Foo Foo',
-                'timestamp': 1520918737,
-                'client': 'website',
-                'recipient_id': 5780,  # FIXME Unsure
-                'is_me_message': False,
-                'sender_email': 'foo@zulip.com',
-                'flags': ['read'],
-                'sender_id': 5140,
-                'content_type': 'text/x-markdown',
-                'sender_realm_str': '',
-                'subject': '',
-                'reactions': [],
-                'type': 'private',
-                'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
-                'subject_links': [],
-                'sender_short_name': 'foo',
-                'content': 'Hey PM content here again.',
-                'display_recipient': [{
-                    'id': 5179,
-                    'is_mirror_dummy': False,
-                    'full_name': 'Boo Boo',
-                    'short_name': 'boo',
-                    'email': 'boo@zulip.com',
-                }, {
-                    'short_name': 'foo',
-                    'id': 5140,
-                    'is_mirror_dummy': False,
-                    'full_name': 'Foo Foo',
-                    'email': 'foo@zulip.com',
-                }, {
-                    'short_name': 'bar',
-                    'id': 5180,
-                    'is_mirror_dummy': False,
-                    'full_name': 'Bar Bar',
-                    'email': 'bar@zulip.com',
-                }],
-            }
-        }),
-    }
+            stream_msg_template['id']: stream_msg_template,
+            pm_template['id']: pm_template,
+            group_pm_template['id']: group_pm_template,
+        })
+    })
 
 
 @pytest.fixture
