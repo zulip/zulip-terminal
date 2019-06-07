@@ -450,8 +450,13 @@ class MessageBox(urwid.Pile):
 
         # Content
         soup = BeautifulSoup(self.message['content'], 'lxml')
-        content = (None, self.soup2markup(soup.find(name='body')))
         active_char = '▒'  # Options are '█', '▓', '▒', '░'
+        padding_char = '░'
+        body = soup.find(name='body')
+        if body and body.find(name='blockquote'):
+            self.indent_quoted_content(soup, padding_char)
+
+        content = (None, self.soup2markup(body))
 
         if self.message['id'] in self.model.index['edited_messages']:
             edited_label_size = 11
@@ -485,6 +490,45 @@ class MessageBox(urwid.Pile):
             (reactions, reactions != ''),
         ]
         return [part for part, condition in parts if condition]
+
+    def indent_quoted_content(self, soup: Any, padding_char: str) -> None:
+        '''
+        We indent quoted text by padding them.
+        The extent of indentation depends on their level of quoting.
+        For example:
+        [Before Padding]               [After Padding]
+
+        <blockquote>                    <blockquote>
+        <blockquote>                    <blockquote>
+        <p>Foo</p>                      <p>▒ ▒ </p><p>Foo</p>
+        </blockquote>       --->        </blockquote>
+        <p>Boo</p>                      <p>▒ </p><p>Boo</p>
+        </blockquote>                   </blockquote>
+        '''
+        pad_count = 1
+        blockquote_list = soup.find_all('blockquote')
+        for tag in blockquote_list:
+            child_list = tag.findChildren(recursive=False)
+            actual_padding = (padding_char + ' ')*pad_count
+            if len(child_list) == 1:
+                child_iterator = child_list
+            else:
+                child_iterator = child_list[1:]
+            for child in child_iterator:
+                new_tag = soup.new_tag('p')
+                new_tag.string = actual_padding
+                # If the quoted message is multi-line message
+                # we deconstruct it and pad it at break-points (<br/>)
+                if child.findAll('br'):
+                    for br in child.findAll('br'):
+                        next_s = br.nextSibling
+                        text = str(next_s).strip()
+                        if text:
+                            insert_tag = soup.new_tag('p')
+                            insert_tag.string = '\n' + actual_padding + text
+                            next_s.replace_with(insert_tag)
+                child.insert_before(new_tag)
+            pad_count += 1
 
     def selectable(self) -> bool:
         return True
