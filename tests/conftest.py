@@ -181,6 +181,16 @@ group_pm_template = {
 }
 
 
+@pytest.fixture(params=[
+    stream_msg_template, pm_template, group_pm_template
+], ids=["stream_message", "pm_message", "group_pm_message"])
+def message_fixture(request):
+    """
+    Acts as a parametrize fixture for stream msg, pms and group_pms.
+    """
+    return deepcopy(request.param)
+
+
 @pytest.fixture
 def messages_successful_response() -> Dict[str, Any]:
     """
