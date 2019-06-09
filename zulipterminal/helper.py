@@ -17,6 +17,7 @@ Index = TypedDict('Index', {
     'stream': Dict[int, Dict[str, Set[int]]],
     # {user_id, ...}: {message_id, ...}
     'private': Dict[FrozenSet[int], Set[int]],
+    'topics': Dict[int, List[str]],  # {topic names, ...}
     'all_messages': Set[int],  # {message_id, ...}
     'all_starred': Set[int],  # {message_id, ...}
     'all_private': Set[int],  # {message_id, ...}
@@ -30,6 +31,7 @@ initial_index = Index(
     pointer=defaultdict(set),
     stream=defaultdict(dict),
     private=defaultdict(set),
+    topics=defaultdict(list),
     all_messages=set(),
     all_private=set(),
     all_stream=defaultdict(set),
@@ -166,6 +168,13 @@ def index_messages(messages: List[Any],
                 12345,
                 32553,
             }
+        },
+        'topics': {
+            123: [    # stread_id
+                'Denmark2', # topic name
+                'Verona2',
+                ....
+            ]
         },
         'all_messages': {
             14231,

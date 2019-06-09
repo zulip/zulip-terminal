@@ -435,6 +435,7 @@ def empty_index():
         'all_private': set(),
         'all_stream': defaultdict(set, {}),
         'stream': defaultdict(dict, {}),
+        'topics': defaultdict(list),
         'edited_messages': set(),
         'search': set(),
         'all_starred': set(),
