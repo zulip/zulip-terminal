@@ -49,24 +49,42 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == line_box()
 
+    def test_update_last_connection_time(self, view, monkeypatch,
+                                         day=23, month=1, year=2019,
+                                         hour=12, minute=29, sec=35):
+        import datetime
+
+        class dt:
+            def now():
+                return datetime.datetime(year, month, day, hour, minute, sec)
+        monkeypatch.setattr('zulipterminal.ui.datetime', dt)
+
+        view.update_last_connection_time()
+
+        (view._w.footer[1].set_text.
+         assert_called_once_with("  Last server contact: {}:{} "
+                                 "({:0>2}/{:0>2}/{})".
+                                 format(hour, minute, day, month, year)))
+        view.controller.update_screen.assert_called_once_with()
+
     def test_set_footer_text_default(self, view, mocker):
         mocker.patch('zulipterminal.ui.View.get_random_help',
                      return_value=['some help text'])
 
         view.set_footer_text()
 
-        view._w.footer.set_text.assert_called_once_with(['some help text'])
+        view._w.footer[0].set_text.assert_called_once_with(['some help text'])
         view.controller.update_screen.assert_called_once_with()
 
     def test_set_footer_text_specific_text(self, view, text='blah'):
         view.set_footer_text([text])
 
-        view._w.footer.set_text.assert_called_once_with([text])
+        view._w.footer[0].set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
 
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
-        assert isinstance(footer.text, str)
+        assert isinstance(footer[0].text, str)
 
     def test_main_window(self, mocker):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')
