@@ -322,13 +322,21 @@ class Model:
                                                 anchor=None),
                 'register': executor.submit(self._register_desired_events,
                                             fetch_data=True),
-            }  # Dict[str, Future[Any]]
+            }  # Dict[str, Future[bool]]
 
             # Wait for threads to complete
-            wait(futures.values())  # type: ignore
+            wait(futures.values())
 
-        results = {name: future.result()  # type: ignore
-                   for name, future in futures.items()}
+        def exception_safe_result(future: 'Future[bool]') -> bool:
+            try:
+                return future.result()
+            except zulip.ZulipError:
+                return False
+
+        results = {
+            name: exception_safe_result(future)
+            for name, future in futures.items()
+        }  # type: Dict[str, bool]
         if all(results.values()):
             self.user_id = self.initial_data['user_id']
             self.user_email = self.initial_data['email']
