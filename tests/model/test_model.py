@@ -68,6 +68,7 @@ class TestModel:
     def test_register_initial_desired_events(self, mocker, initial_data):
         mocker.patch('zulipterminal.model.Model.get_messages')
         mocker.patch('zulipterminal.model.Model.get_all_users')
+        mocker.patch('zulipterminal.model.Model.fetch_all_topics')
         self.client.register.return_value = initial_data
 
         model = Model(self.controller)
