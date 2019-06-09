@@ -13,7 +13,12 @@ from zulipterminal.ui_tools.views import (
     ModListWalker,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import TopButton, StreamButton, UserButton
+from zulipterminal.ui_tools.buttons import (
+    TopButton,
+    StreamButton,
+    UserButton,
+    TopicButton,
+)
 from zulipterminal.config.keys import keys_for_command
 
 from urwid import AttrWrap, Columns, Padding, Text
@@ -1663,3 +1668,34 @@ class TestUserButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
+
+
+class TestTopicButton:
+    @pytest.mark.parametrize('width, count, stream_id, title, stream_name', [
+        (8, 2, 86, 'topic1', 'Django'),
+        (9, 1, 14, 'topic2', 'GSoC'),
+        (25, 1000, 205, 'topic3', 'PTEST'),
+    ])
+    def test_init_calls_top_button(self, mocker, width, count, title,
+                                   stream_id, stream_name):
+        controller = mocker.Mock()
+        controller.model.stream_dict = {
+            205: {'name': 'PTEST'},
+            86: {'name': 'Django'},
+            14: {'name': 'GSoC'},
+        }
+        top_button = mocker.patch(TOPBUTTON+'.__init__')
+        params = dict(controller=controller,
+                      width=width,
+                      count=count)
+
+        topic_button = TopicButton(stream_id=stream_id,
+                                   topic=title, **params)
+        top_button.assert_called_once_with(
+            caption=title,
+            prefix_character='',
+            show_function=controller.narrow_to_topic,
+            **params)
+        assert topic_button.stream_name == stream_name
+        assert topic_button.stream_id == stream_id
+        assert topic_button.topic_name == title

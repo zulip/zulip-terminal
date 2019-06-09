@@ -416,7 +416,7 @@ class MiddleColumnView(urwid.Frame):
                 return key
             stream, topic = stream_topic
             self.controller.narrow_to_topic(TopicButton(stream, topic,
-                                                        self.model))
+                                                        self.controller))
             return key
         elif is_command_key('NEXT_UNREAD_PM', key):
             # narrow to next unread pm
