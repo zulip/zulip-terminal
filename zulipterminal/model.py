@@ -114,6 +114,8 @@ class Model:
         self.muted_topics = self.initial_data['muted_topics']
         self.unread_counts = classify_unread_counts(self)
 
+        self.fetch_all_topics(workers=5)
+
         self.new_user_input = True
         self._start_presence_updates()
 
@@ -356,6 +358,30 @@ class Model:
             return future.result()
         except zulip.ZulipError:
             return False
+
+    def fetch_all_topics(self, workers: int) -> None:
+        """
+        Distribute stream ids across threads in order to fetch
+        topics concurrently.
+        """
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            list_of_streams = list(self.stream_dict.keys())
+            thread_objects = {
+                i: executor.submit(self.get_topics_in_stream,
+                                   list_of_streams[i::workers])
+                for i in range(workers)
+            }  # type: Dict[int, Future[bool]]
+            wait(thread_objects.values())
+
+        results = {
+            str(name): self.exception_safe_result(thread_object)
+            for name, thread_object in thread_objects.items()
+        }  # type: Dict[str, bool]
+        if not all(results.values()):
+            failures = ['fetch_topics[{}]'.format(name)
+                        for name, result in results.items()
+                        if not result]
+            raise ServerConnectionFailure(", ".join(failures))
 
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
