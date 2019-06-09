@@ -181,11 +181,19 @@ class UserButton(TopButton):
         self._view.write_box.private_box_view(self)
 
 
-class TopicButton(urwid.Button):
-    def __init__(self, stream_id: int, topic: str, model: Any) -> None:
-        self.stream_name = model.stream_dict[stream_id]['name']
+class TopicButton(TopButton):
+    def __init__(self, stream_id: int, topic: str,
+                 controller: Any, width: int=0, count: int=0) -> None:
+        self.stream_name = controller.model.stream_dict[stream_id]['name']
         self.topic_name = topic
         self.stream_id = stream_id
+
+        super().__init__(controller=controller,
+                         caption=self.topic_name,
+                         prefix_character='',
+                         show_function=controller.narrow_to_topic,
+                         width=width,
+                         count=count)
 
 
 class UnreadPMButton(urwid.Button):
