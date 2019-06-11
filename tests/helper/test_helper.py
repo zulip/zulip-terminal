@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.helper import (
     index_messages,
+    classify_unread_counts
 )
 from typing import Any
 
@@ -139,3 +140,25 @@ def test_index_starred(mocker,
             msg['flags'].append('starred')
 
     assert index_messages(messages, model, model.index) == expected_index
+
+
+def test_classify_unread_count(mocker, unread_msgs_template):
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.initial_data = unread_msgs_template
+    model.muted_streams = {99}
+    model.muted_topics = [['Django', 'commits']]
+    model.stream_dict = {
+        99: {'name': 'Secret stream'},
+        86: {'name': 'Django'},
+        14: {'name': 'GSoC'}
+    }
+    expected_unread_counts = dict(
+        all_msg=16,
+        all_pms=10,
+        unread_topics={(86, 'templates'): 3, (14, 'Facts'): 3},
+        unread_pms={6086: 5, 6087: 5},
+        streams={86: 3, 14: 3}
+    )
+    unread_counts = classify_unread_counts(model)
+    assert classify_unread_counts(model) == expected_unread_counts

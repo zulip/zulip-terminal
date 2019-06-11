@@ -512,6 +512,31 @@ def index_all_starred(empty_index, request):
 
 
 @pytest.fixture(scope="module")
+def unread_msgs_template():
+    return deepcopy({
+       'unread_msgs': {
+            'pms': [{'sender_id': 6086, 'unread_message_ids':
+                     [206, 207, 208, 209, 210]},
+                    {'sender_id': 6087, 'unread_message_ids':
+                     [306, 307, 308, 309, 310]}],
+            'mentions': [212],
+            'streams': [
+                {'stream_id': 86, 'unread_message_ids': [100, 101, 102, 103],
+                    'sender_ids': [7, 10], 'topic':'commits'},
+                {'stream_id': 86, 'unread_message_ids': [104, 105, 106],
+                    'sender_ids': [7, 10], 'topic':'templates'},
+                {'stream_id': 14, 'unread_message_ids': [301, 302, 303],
+                    'sender_ids': [7], 'topic': 'Facts'},
+                {'stream_id': 99, 'unread_message_ids': [400],
+                    'sender_ids': [10], 'topic': 'secret'}
+                ],
+            'huddles': [{'user_ids_string': '1,4,5',
+                        'unread_message_ids': [213, 214]}]
+        }
+    })
+
+
+@pytest.fixture(scope="module")
 def user_profile(logged_on_user):
     return {  # FIXME These should all be self-consistent with others?
         'max_message_id': 589270,
