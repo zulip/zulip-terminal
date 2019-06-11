@@ -313,6 +313,10 @@ class MessageBox(urwid.Pile):
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
+                if hasattr(self, 'bq_len') and element == '\n' and \
+                        self.bq_len > 0:
+                    self.bq_len -= 1
+                    continue
                 markup.append(element)
             elif (element.name == 'div' and element.attrs and
                     any(cls in element.attrs.get('class', [])
@@ -507,6 +511,7 @@ class MessageBox(urwid.Pile):
         '''
         pad_count = 1
         blockquote_list = soup.find_all('blockquote')
+        self.bq_len = len(blockquote_list)
         for tag in blockquote_list:
             child_list = tag.findChildren(recursive=False)
             actual_padding = (padding_char + ' ')*pad_count
