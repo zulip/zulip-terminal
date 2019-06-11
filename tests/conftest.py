@@ -209,7 +209,7 @@ def messages_successful_response() -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="module")
-def initial_data(logged_on_user):
+def initial_data(logged_on_user, unread_msgs_template):
     """
     Response from /register API request.
     """
@@ -368,13 +368,7 @@ def initial_data(logged_on_user):
             'is_old_stream': True,
             'stream_weekly_traffic': 0
         }],
-        'unread_msgs': {
-            'pms': [],
-            'count': 0,
-            'mentions': [],
-            'streams': [],
-            'huddles': []
-        },
+        'unread_msgs': unread_msgs_template['unread_msgs'],
         'presences': {
             'nyan.salmon+sns@gmail.com': {
                 'ZulipElectron': {
