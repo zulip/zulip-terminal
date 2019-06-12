@@ -136,6 +136,50 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl c'},
         'help_text': 'Quit',
     }),
+    ('BEGINNING_OF_LINE', {
+        'keys': {'ctrl a'},
+        'help_text': 'Jump to the beginning of the line',
+    }),
+    ('END_OF_LINE', {
+        'keys': {'ctrl e'},
+        'help_text': 'Jump to the end of the line',
+    }),
+    ('ONE_WORD_BACKWARD', {
+        'keys': {'meta b'},
+        'help_text': 'Jump backward one word',
+    }),
+    ('ONE_WORD_FORWARD', {
+        'keys': {'meta f'},
+        'help_text': 'Jump forward one word',
+    }),
+    ('CUT_TO_END_OF_LINE', {
+        'keys': {'ctrl k'},
+        'help_text': 'Cut forward to the end of the line',
+    }),
+    ('CUT_TO_START_OF_LINE', {
+        'keys': {'ctrl u'},
+        'help_text': 'Cut backward to the start of the line',
+    }),
+    ('CUT_TO_END_OF_WORD', {
+        'keys': {'meta d'},
+        'help_text': 'Cut forward to the end of the current word',
+    }),
+    ('CUT_TO_START_OF_WORD', {
+        'keys': {'ctrl w'},
+        'help_text': 'Cut backward to the start of the current word',
+    }),
+    ('PREV_LINE', {
+        'keys': {'ctrl p', 'up'},
+        'help_text': 'Jump to the previous line',
+    }),
+    ('NEXT_LINE', {
+        'keys': {'ctrl n', 'down'},
+        'help_text': 'Jump to the next line',
+    }),
+    ('CLEAR_MESSAGE', {
+        'keys': {'ctrl l'},
+        'help_text': 'Clear message',
+    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 
