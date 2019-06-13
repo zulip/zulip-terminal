@@ -593,7 +593,7 @@ class HelpView(urwid.ListBox):
                     urwid.Text(binding['help_text']),
                     (max_widths[1], urwid.Text(", ".join(binding['keys'])))
                 ], dividechars=2),
-                None if index % 2 else 'bar')
+                None if index % 2 else 'help')
              for index, binding in enumerate(KEY_BINDINGS.values())])
 
         self.number_of_actions = len(self.log)
