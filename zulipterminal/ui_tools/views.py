@@ -333,6 +333,7 @@ class TopicsView(urwid.Frame):
                 self.view.left_panel.stream_v,
                 self.view.left_panel.options(height_type="weight")
                 )
+            self.view.left_panel.is_in_topic_view = False
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)
             self.view.body.focus_col = 1
@@ -586,11 +587,12 @@ class LeftColumnView(urwid.Pile):
         self.menu_v = self.menu_view()
         self.stream_v = self.streams_view()
 
-        left_column_structure = [
+        self.is_in_topic_view = False
+        self.left_column_structure = [
             (4, self.menu_v),
             self.stream_v
         ]
-        super(LeftColumnView, self).__init__(left_column_structure)
+        super(LeftColumnView, self).__init__(self.left_column_structure)
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)

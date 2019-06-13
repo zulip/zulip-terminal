@@ -1683,6 +1683,18 @@ class TestStreamButton:
                 assert_called_once_with(updated_all_msgs)
         assert stream_button.model.unread_counts['all_msg'] == updated_all_msgs
 
+    def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button):
+        key = "t"
+        size = (200, 20)
+        stream_button.view.left_panel = mocker.Mock()
+        stream_button.view.left_panel.is_in_topic_view = None
+        stream_button.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
+        stream_button.keypress(size, key)
+
+        assert stream_button.view.left_panel.is_in_topic_view is True
+        (stream_button.view.left_panel.
+            options.assert_called_once_with(height_type="weight"))
+
 
 class TestUserButton:
     @pytest.mark.parametrize('width, count, short_text', [
