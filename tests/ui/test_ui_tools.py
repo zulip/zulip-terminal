@@ -6,6 +6,7 @@ from zulipterminal.ui_tools.views import (
     MessageView,
     MiddleColumnView,
     StreamsView,
+    TopicsView,
     UsersView,
     RightColumnView,
     LeftColumnView,
@@ -452,6 +453,44 @@ class TestStreamsView:
         stream_view.search_box.set_edit_text.assert_called_once_with(
             "Search streams")
         assert stream_view.log == self.streams_btn_list
+
+
+class TestTopicsView:
+
+    @pytest.fixture
+    def topic_view(self, mocker, stream_button):
+        self.log = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                return_value=[])
+        self.stream_button = stream_button
+        self.view = mocker.Mock()
+        topic_btn = mocker.Mock()
+        topic_btn.caption = "BOO"
+        self.topics_btn_list = [topic_btn]
+        return TopicsView(self.topics_btn_list, self.view, self.stream_button)
+
+    def test_init(self, mocker, topic_view):
+        assert topic_view.log == []  # topic_view patches this
+        assert topic_view.stream_button == self.stream_button
+        assert topic_view.view == self.view
+
+    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view):
+        key = "t"
+        size = (200, 20)
+        topic_view.view.left_panel = mocker.Mock()
+        topic_view.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
+        topic_view.keypress(size, key)
+        (topic_view.view.left_panel.
+            options.assert_called_once_with(height_type="weight"))
+
+    def test_keypress_GO_RIGHT(self, mocker, topic_view):
+        key = "l"
+        size = (200, 20)
+        topic_view.view.body.focus_col = None
+
+        topic_view.keypress(size, key)
+
+        assert topic_view.view.body.focus_col == 1
+        topic_view.view.show_left_panel.assert_called_once_with(visible=False)
 
 
 class TestUsersView:

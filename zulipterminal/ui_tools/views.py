@@ -305,6 +305,40 @@ class StreamsView(urwid.Frame):
         return super(StreamsView, self).keypress(size, key)
 
 
+class TopicsView(urwid.Frame):
+    def __init__(self, topics_btn_list: List[Any], view: Any,
+                 stream_button: Any) -> None:
+        self.view = view
+        self.log = urwid.SimpleFocusListWalker(topics_btn_list)
+        self.stream_button = stream_button
+        list_box = urwid.ListBox(self.log)
+        super(TopicsView, self).__init__(list_box)
+
+    def mouse_event(self, size: Any, event: str, button: int, col: int,
+                    row: int, focus: Any) -> Any:
+        if event == 'mouse press':
+            if button == 4:
+                self.keypress(size, 'up')
+                return True
+            elif button == 5:
+                self.keypress(size, 'down')
+                return True
+        return super(TopicsView, self).mouse_event(size, event, button, col,
+                                                   row, focus)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('TOGGLE_TOPIC', key):
+            # Exit topic view
+            self.view.left_panel.contents[1] = (
+                self.view.left_panel.stream_v,
+                self.view.left_panel.options(height_type="weight")
+                )
+        elif is_command_key('GO_RIGHT', key):
+            self.view.show_left_panel(visible=False)
+            self.view.body.focus_col = 1
+        return super(TopicsView, self).keypress(size, key)
+
+
 class UsersView(urwid.ListBox):
     def __init__(self, users_btn_list: List[Any]) -> None:
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
@@ -549,10 +583,12 @@ class LeftColumnView(urwid.Pile):
         self.view = view
         self.controller = view.controller
         self.width = width
+        self.menu_v = self.menu_view()
+        self.stream_v = self.streams_view()
 
         left_column_structure = [
-            (4, self.menu_view()),
-            self.streams_view(),
+            (4, self.menu_v),
+            self.stream_v
         ]
         super(LeftColumnView, self).__init__(left_column_structure)
 
