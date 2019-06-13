@@ -1,4 +1,5 @@
 import pytest
+
 from zulipterminal.ui import View
 
 
@@ -63,6 +64,21 @@ class TestView:
 
         view._w.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
+
+    def test_set_footer_text_with_duration(self, view, mocker,
+                                           custom_text="custom", duration=5.3):
+        mocker.patch('zulipterminal.ui.View.get_random_help',
+                     return_value=['some help text'])
+        mock_sleep = mocker.patch('time.sleep')
+
+        view.set_footer_text([custom_text], duration)
+
+        view._w.footer.set_text.assert_has_calls([
+            mocker.call([custom_text]),
+            mocker.call(['some help text'])
+        ])
+        mock_sleep.assert_called_once_with(duration)
+        assert view.controller.update_screen.call_count == 2
 
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
