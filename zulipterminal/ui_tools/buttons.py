@@ -151,6 +151,16 @@ class StreamButton(TopButton):
             # All messages in this stream are read.
             self.update_count(0)
 
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('TOGGLE_TOPIC', key):
+            topic_view = self.view.left_panel.topics_view(self)
+            self.view.left_panel.is_in_topic_view = True
+            self.view.left_panel.contents[1] = (
+                topic_view,
+                self.view.left_panel.options(height_type="weight")
+                )
+        return super().keypress(size, key)
+
 
 class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,
