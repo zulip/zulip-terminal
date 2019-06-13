@@ -52,6 +52,10 @@ Event = TypedDict('Event', {
     'message': Message,
     'flags': List[str],
     'subject': str,
+    # subscription:
+    'property': str,
+    'stream_id': int,
+    'value': bool,
 }, total=False)  # Each Event will only have a subset of these
 
 OFFLINE_THRESHOLD_SECS = 140
@@ -88,6 +92,7 @@ class Model:
             ('message', self.append_message),
             ('update_message', self.update_message),
             ('reaction', self.update_reaction),
+            ('subscription', self.update_subscription),
             ('typing', self.handle_typing_event),
             ('update_message_flags', self.update_message_flag_status),
         ])  # type: OrderedDict[str, Callable[[Event], None]]
@@ -487,6 +492,28 @@ class Model:
                     for stream in subscriptions if not stream['pin_to_top']],
                    key=lambda s: s[0].lower())
         )
+
+    def update_subscription(self, event: Event) -> None:
+        """
+        Handle changes in subscription (Eg: muting/unmuting streams)
+        """
+        if hasattr(self.controller, 'view'):
+            if ('property' in event and
+                    event['property'] == 'in_home_view'):
+                stream_id = event['stream_id']
+
+                # FIXME: Does this always contain the stream_id?
+                stream_button = self.controller.view.\
+                    stream_id_to_button[stream_id]
+
+                if event['value']:  # Unmuting streams
+                    self.muted_streams.remove(stream_id)
+                    stream_button.mark_unmuted()
+                else:  # Muting streams
+                    self.muted_streams.add(stream_id)
+                    stream_button.mark_muted()
+
+                self.controller.update_screen()
 
     def handle_typing_event(self, event: Event) -> None:
         if hasattr(self.controller, 'view'):
