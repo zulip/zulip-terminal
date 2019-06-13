@@ -656,6 +656,28 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
+    def topics_view(self, stream_button: Any) -> Any:
+        stream_id = stream_button.stream_id
+        topics_btn_list = [
+            TopicButton(
+                stream_id=stream_id,
+                topic=topic,
+                controller=self.controller,
+                width=self.width,
+                count=self.model.unread_counts['unread_topics'].
+                get((stream_id, topic), 0)
+            ) for topic in self.model.index['topics'][stream_id]]
+
+        self.view.topic_w = TopicsView(topics_btn_list, self.view,
+                                       stream_button)
+        w = urwid.LineBox(
+            self.view.topic_w, title="Topics",
+            tlcorner=u'━', tline=u'━', lline=u'',
+            trcorner=u'━', blcorner=u'', rline=u'',
+            bline=u'', brcorner=u'─'
+            )
+        return w
+
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEARCH_STREAMS', key):
             self.focus_position = 1

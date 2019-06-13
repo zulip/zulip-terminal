@@ -887,6 +887,10 @@ class TestLeftColumnView:
                 14: 1,
                 99: 1,
             },
+            'unread_topics': {
+                (205, 'TOPIC1'): 34,
+                (205, 'TOPIC2'): 100,
+            }
         }
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
@@ -932,6 +936,31 @@ class TestLeftColumnView:
                          count=1)
              for stream in (self.view.pinned_streams +
                             self.view.unpinned_streams)])
+
+    def test_topics_view(self, mocker, stream_button, width=40):
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        mocker.patch(VIEWS + ".LeftColumnView.menu_view")
+        topic_button = mocker.patch(VIEWS + '.TopicButton')
+        topics_view = mocker.patch(VIEWS + '.TopicsView')
+        line_box = mocker.patch(VIEWS + '.urwid.LineBox')
+        topic_list = ['TOPIC1', 'TOPIC2', 'TOPIC3']
+        unread_count_list = [34, 100, 0]
+        self.view.model.index = {
+            'topics': {
+                205: topic_list,
+            }
+        }
+        left_col_view = LeftColumnView(width, self.view)
+        left_col_view.topics_view(stream_button)
+
+        topic_button.assert_has_calls([
+            mocker.call(stream_id=205,
+                        topic=topic,
+                        controller=self.view.controller,
+                        width=40,
+                        count=count)
+            for topic, count in zip(topic_list, unread_count_list)
+        ])
 
 
 class TestHelpMenu:
