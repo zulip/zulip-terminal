@@ -76,6 +76,7 @@ class TestModel:
             'message',
             'update_message',
             'reaction',
+            'subscription',
             'typing',
             'update_message_flags',
         ]
@@ -959,3 +960,37 @@ class TestModel:
         model.handle_typing_event(event)
 
         assert model.controller.view.set_footer_text.called == called
+
+    @pytest.mark.parametrize('event, final_muted_streams, ', [
+        (
+            {'property': 'in_home_view',
+             'stream_id': 19,
+             'value': True},
+            {15}
+        ),
+        (
+            {'property': 'in_home_view',
+             'stream_id': 30,
+             'value': False},
+            {15, 19, 30}
+        )
+    ], ids=[
+        'remove_19', 'add_30'
+    ])
+    def test_update_subscription(self, model, mocker, event, stream_button,
+                                 final_muted_streams):
+        model.muted_streams = {15, 19}
+        model.controller.view.stream_id_to_button = {
+            event['stream_id']: stream_button  # stream id is known
+        }
+        mark_muted = mocker.patch(
+            'zulipterminal.ui_tools.buttons.StreamButton.mark_muted')
+        mark_unmuted = mocker.patch(
+            'zulipterminal.ui_tools.buttons.StreamButton.mark_unmuted')
+        model.update_subscription(event)
+        assert model.muted_streams == final_muted_streams
+        if event['value']:
+            mark_unmuted.assert_called_once_with()
+        else:
+            mark_muted.assert_called_once_with()
+        model.controller.update_screen.assert_called_once_with()
