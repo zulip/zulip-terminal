@@ -310,6 +310,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.focus_position")
         msg_view.focus_position = 1
         msg_view.model.controller.view.body.focus_col = 1
+        msg_view.log = list(msg_view.model.index['messages'])
         msg_view.read_message()
         assert msg_view.update_search_box_narrow.called
         assert msg_view.model.index['messages'][1]['flags'] == ['read']
@@ -330,6 +331,30 @@ class TestMessageView:
         msg_view.read_message()
 
         self.model.mark_message_ids_as_read.assert_not_called()
+
+    def test_read_message_last_unread_message_focused(self, mocker,
+                                                      message_fixture,
+                                                      empty_index, msg_box):
+        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
+        mocker.patch(VIEWS + ".MessageView.set_focus")
+        msg_view = MessageView(self.model)
+        msg_view.log = [0, 1]
+        msg_view.body = mocker.Mock()
+        msg_view.update_search_box_narrow = mocker.Mock()
+
+        self.model.controller.view = mocker.Mock()
+        self.model.controller.view.body.focus_col = 0
+        self.model.index = empty_index
+
+        msg_w = mocker.Mock()
+        msg_w.attr_map = {None: 'unread'}
+        msg_w.original_widget.message = message_fixture
+
+        msg_view.body.get_focus.return_value = (msg_w, 1)
+        msg_view.body.get_prev.return_value = (None, 0)
+        msg_view.read_message(1)
+        self.model.mark_message_ids_as_read.assert_called_once_with(
+            [message_fixture['id']])
 
 
 class TestStreamsView:
