@@ -187,10 +187,12 @@ class MessageView(urwid.ListBox):
         if msg_w is None:
             return
         self.update_search_box_narrow(msg_w.original_widget)
+        # If this the last message in the view and focus is set on this message
+        # then read the message.
+        last_message_focused = (curr_pos == len(self.log) - 1)
         # Only allow reading a message when middle column is
-        # in focus. Changing the contents of self.log also changes
-        # focus automatically.
-        if view.body.focus_col != 1:
+        # in focus.
+        if not(view.body.focus_col == 1 or last_message_focused):
             return
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
