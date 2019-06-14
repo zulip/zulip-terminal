@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.helper import match_user
 
 
 class WriteBox(urwid.Pile):
@@ -38,6 +39,10 @@ class WriteBox(urwid.Pile):
             email = button.email
         self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
+        self.msg_write_box.enable_autocomplete(
+            func=self.autocomplete,
+            key=keys_for_command('AUTOCOMPLETE').pop()
+        )
         to_write_box = urwid.LineBox(
             self.to_write_box, tlcorner=u'─', tline=u'─', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
@@ -53,6 +58,10 @@ class WriteBox(urwid.Pile):
         self.set_editor_mode()
         self.to_write_box = None
         self.msg_write_box = ReadlineEdit(multiline=True)
+        self.msg_write_box.enable_autocomplete(
+            func=self.autocomplete,
+            key=keys_for_command('AUTOCOMPLETE').pop()
+        )
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
@@ -77,6 +86,19 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
+
+    def autocomplete(self, text: Any, state: int) -> Optional[str]:
+        if text.startswith('@'):
+            users_list = self.view.users
+            user_typeahead = ['@**{}**'.format(user['full_name'])
+                              for user in users_list
+                              if match_user(user, text[1:])]
+            try:
+                return user_typeahead[state]
+            except IndexError:
+                return None
+        else:
+            return text
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
