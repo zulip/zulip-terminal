@@ -6,7 +6,8 @@ import time
 from collections import OrderedDict
 
 from typing import (
-        Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple, Callable
+        Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple, Callable,
+        Iterable
 )
 from mypy_extensions import TypedDict
 
@@ -333,6 +334,21 @@ class Model:
                 self.found_newest = len(response['messages']) < query_range
             return True
         return False
+
+    def get_topics_in_stream(self, stream_list: Iterable[int]) -> bool:
+        """
+        Fetch all topics with specified stream_id's and
+        index their names (Version 1)
+        """
+        # FIXME: Version 2: Fetch last 'n' recent topics for each stream.
+        for stream_id in stream_list:
+            response = self.client.get_stream_topics(stream_id)
+            if response['result'] == 'success':
+                self.index['topics'][stream_id] = [topic['name'] for
+                                                   topic in response['topics']]
+            else:
+                return False
+        return True
 
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
