@@ -7,10 +7,12 @@ from typing import Any, Dict, List, Tuple, Union, Optional
 import emoji
 import urwid
 from urwid_readline import ReadlineEdit
+import urwid_readline
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from zulipterminal.config.keys import is_command_key
+from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.helper import match_user
 
 
 class WriteBox(urwid.Pile):
@@ -55,6 +57,10 @@ class WriteBox(urwid.Pile):
         if caption == '' and button is not None:
             caption = button.caption
         self.msg_write_box = ReadlineEdit(multiline=True)
+        self.msg_write_box.enable_autocomplete(
+            func=self.autocomplete,
+            key=next(iter(keys_for_command('AUTOCOMPLETE')))
+        )
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
@@ -80,6 +86,42 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
+    def autocomplete(self, text: Any, state: int) -> Any:
+        if text.startswith('@'):
+            users = self.view.users.copy()
+            users_list = users.copy()
+            for user in users:
+                if not match_user(user, text[1:]):
+                    users_list.remove(user)
+            tmp = []
+<<<<<<< HEAD
+            for c in users_list:
+                    tmp.append('@**%s**' % c['full_name'])
+=======
+            if text:
+                for c in users_list:
+                    if c and c.get('full_name') \
+                            and c['full_name'].startswith(text[1:]):
+                        tmp.append('@**%s**' % c['full_name'])
+            else:
+                tmp = users_list
+>>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
+            try:
+                return tmp[state]
+            except IndexError:
+                return None
+        else:
+            return text
+
+<<<<<<< HEAD
+>>>>>>> 49b323f... fixes for autocomplete
+=======
+>>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
             if not self.to_write_box:
@@ -111,7 +153,6 @@ class WriteBox(urwid.Pile):
                     self.contents[0][0].focus_col = 0
             self.focus_position = self.focus_position == 0
             self.contents[0][0].focus_col = 0
-
         key = super(WriteBox, self).keypress(size, key)
         return key
 

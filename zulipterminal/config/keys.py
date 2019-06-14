@@ -136,6 +136,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl c'},
         'help_text': 'Quit',
     }),
+    ('AUTOCOMPLETE', {
+        'keys': {'shift tab'},
+        'help_text': 'Autocomplete Mention',
+    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 
