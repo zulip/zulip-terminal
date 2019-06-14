@@ -226,6 +226,23 @@ class TestModel:
         model.index = index
         assert current_ids == model.get_message_ids_in_current_narrow()
 
+    @pytest.mark.parametrize("response, expected_index, return_value", [
+        ({'result': 'success', 'topics': [{'name': 'Foo'}, {'name': 'Boo'}]},
+         {23: ['Foo', 'Boo']}, True),
+        ({'result': 'success', 'topics': []},
+         {23: []}, True),
+        ({'result': 'failure', 'topics': []}, {23: []}, False)
+    ])
+    def test_get_topics_in_streams(self, mocker, response, model, return_value,
+                                   expected_index) -> None:
+        self.client.get_stream_topics = mocker.Mock(return_value=response)
+
+        result = model.get_topics_in_stream([23])
+
+        self.client.get_stream_topics.assert_called_once_with(23)
+        assert model.index['topics'] == expected_index
+        assert result == return_value
+
     @pytest.mark.parametrize("user_key", ['user_id', 'id'])
     @pytest.mark.parametrize("msg_id, existing_reactions, expected_method", [
         (5, [], 'POST'),
