@@ -423,23 +423,31 @@ class MessageBox(urwid.Pile):
                      .days)),
             'timestamp': (message['last']['time'] is not None and
                           message['this']['time'] != message['last']['time']),
-            'star_status': (message['this']['is_starred'] !=
-                            message['last']['is_starred']),
         }
         any_differences = any(different.values())
 
-        if any_differences:  # Construct content_header, if needed
-            TextType = Dict[str, Tuple[Optional[str], str]]
-            text = {key: (None, ' ')
-                    for key in ('author', 'star', 'time')}  # type: TextType
+        add_content_header = False  # Construct content_header if == True
+
+        TextType = Dict[str, Tuple[Optional[str], str]]
+        text = {key: (None, ' ')
+                for key in ('author', 'star', 'time')}  # type: TextType
+        if any_differences:
+            add_content_header = True
             if any(different[key] for key in ('recipients', 'author', '24h')):
                 text['author'] = ('name', message['this']['author'])
-            if message['this']['is_starred']:
-                text['star'] = ('starred', "*")
             if any(different[key]
                    for key in ('recipients', 'author', 'timestamp')):
                 text['time'] = ('time', message['this']['time'])
+        if message['this']['is_starred']:
+            add_content_header = True
+            text['star'] = ('starred', "*")
+            text['time'] = ('time', message['this']['time'])
+        elif message['last']['is_starred'] and\
+                not message['this']['is_starred']:
+            add_content_header = True
+            text['time'] = ('time', message['this']['time'])
 
+        if add_content_header:
             content_header = urwid.Columns([
                 ('weight', 10, urwid.Text(text['author'])),
                 (1, urwid.Text(text['star'], align='right')),
@@ -480,7 +488,7 @@ class MessageBox(urwid.Pile):
         # Build parts together and return
         parts = [
             (recipient_header, recipient_header is not None),
-            (content_header, any_differences),
+            (content_header, add_content_header),
             (content, True),
             (reactions, reactions != ''),
         ]
