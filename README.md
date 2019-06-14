@@ -106,6 +106,7 @@ autohide=autohide
 | Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
+| Autocomplete @mentions                                | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
 | Jump to the Beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
 | Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |
