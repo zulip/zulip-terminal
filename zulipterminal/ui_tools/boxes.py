@@ -86,11 +86,6 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
     def autocomplete(self, text: Any, state: int) -> Any:
         if text.startswith('@'):
             users = self.view.users.copy()
@@ -99,18 +94,8 @@ class WriteBox(urwid.Pile):
                 if not match_user(user, text[1:]):
                     users_list.remove(user)
             tmp = []
-<<<<<<< HEAD
             for c in users_list:
                     tmp.append('@**%s**' % c['full_name'])
-=======
-            if text:
-                for c in users_list:
-                    if c and c.get('full_name') \
-                            and c['full_name'].startswith(text[1:]):
-                        tmp.append('@**%s**' % c['full_name'])
-            else:
-                tmp = users_list
->>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
             try:
                 return tmp[state]
             except IndexError:
@@ -118,10 +103,6 @@ class WriteBox(urwid.Pile):
         else:
             return text
 
-<<<<<<< HEAD
->>>>>>> 49b323f... fixes for autocomplete
-=======
->>>>>>> b88b74e...  boxes: Add support for autocomplete @mention
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
             if not self.to_write_box:

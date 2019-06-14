@@ -121,6 +121,7 @@ autohide=autohide
 | Jump to next line                                     | <kbd>Ctrl</kbd> + <kbd>N</kbd> / <kbd>↓</kbd> |
 | Quit                                                  | <kbd>Ctrl</kbd> + <kbd>C</kbd>                |
 | Clear screen                                          | <kbd>Ctrl</kbd> + <kbd>L</kbd>                |
+| Auto Complete                                         | <kbd>Shift</kbd> + <kbd>Tab</kbd>             |
 
 Note: You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
