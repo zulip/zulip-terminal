@@ -3,6 +3,8 @@ from urllib.parse import urlparse
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor, wait, Future
 import time
+from collections import OrderedDict
+
 from typing import (
         Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple, Callable
 )
@@ -64,14 +66,6 @@ class Model:
     A class responsible for storing the data to be displayed.
     """
 
-    event_types = [
-        'message',
-        'update_message',
-        'reaction',
-        'typing',
-        'update_message_flags',
-    ]
-
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.client = controller.client
@@ -89,6 +83,14 @@ class Model:
         self.user_full_name = ""
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
+
+        self.event_actions = OrderedDict([
+            ('message', self.append_message),
+            ('update_message', self.update_message),
+            ('reaction', self.update_reaction),
+            ('typing', self.handle_typing_event),
+            ('update_message_flags', self.update_message_flag_status),
+        ])  # type: OrderedDict[str, Callable[[Event], None]]
 
         self.initial_data = {}  # type: Dict[str, Any]
 
@@ -108,14 +110,6 @@ class Model:
 
         self.new_user_input = True
         self._start_presence_updates()
-
-        self.event_actions = {
-            'message': self.append_message,
-            'update_message': self.update_message,
-            'reaction': self.update_reaction,
-            'typing': self.handle_typing_event,
-            'update_message_flags': self.update_message_flag_status,
-        }  # type: Dict[str, Callable[[Event], None]]
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -636,8 +630,9 @@ class Model:
             'muted_topics',
             'realm_user',  # Enables cross_realm_bots
         ]
+        event_types = list(self.event_actions)
         try:
-            response = self.client.register(event_types=Model.event_types,
+            response = self.client.register(event_types=event_types,
                                             fetch_event_types=fetch_types,
                                             client_gravatar=True,
                                             apply_markdown=True)
