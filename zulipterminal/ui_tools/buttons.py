@@ -134,6 +134,14 @@ class StreamButton(TopButton):
     def mark_muted(self) -> None:
         self.update_count(-1)
 
+    def mark_unmuted(self) -> None:
+        if self.stream_id in self.model.unread_counts['streams']:
+            unmuted_count = self.model.unread_counts['streams'][self.stream_id]
+            self.update_count(unmuted_count)
+        else:
+            # All messages in this stream are read.
+            self.update_count(0)
+
 
 class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,

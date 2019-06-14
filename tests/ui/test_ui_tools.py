@@ -18,6 +18,7 @@ from zulipterminal.config.keys import keys_for_command
 from urwid import AttrWrap, Columns, Padding, Text
 
 VIEWS = "zulipterminal.ui_tools.views"
+TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
 STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
 
@@ -1495,6 +1496,33 @@ class TestStreamButton:
                          width=10,
                          count=5)
         assert str(e.value) == "Unknown color format: '{}'".format(color)
+
+    @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
+                              is_action_muting', [
+        (86, {}, 204, False),
+        (86, {86, 205}, -1, True),
+        (205, {14, 99}, 0, False),
+    ], ids=[
+        'unmuting stream 86 - 204 unreads',
+        'muting stream 86',
+        'unmuting stream 205 - 0 unreads',
+    ])
+    def test_mark_stream_muted(self, mocker, stream_button, is_action_muting,
+                               stream_id, muted_streams, called_value) -> None:
+        stream_button.stream_id = stream_id
+        update_count = mocker.patch(TOPBUTTON + ".update_count")
+        stream_button.controller.model.unread_counts = {
+            'streams': {
+                86: 204,
+                14: 34,
+            }
+        }
+        stream_button.controller.model.muted_streams = muted_streams
+        if is_action_muting:
+            stream_button.mark_muted()
+        else:
+            stream_button.mark_unmuted()
+        stream_button.update_count.assert_called_once_with(called_value)
 
 
 class TestUserButton:
