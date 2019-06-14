@@ -558,6 +558,10 @@ class LeftColumnView(urwid.Pile):
                     count=self.model.unread_counts['streams'].get(stream[1], 0)
                 ) for stream in self.view.unpinned_streams]
 
+        self.view.stream_id_to_button = {stream.stream_id: stream
+                                         for stream in streams_btn_list
+                                         if hasattr(stream, 'stream_id')}
+
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
