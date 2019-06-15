@@ -67,6 +67,7 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
         "Loading with:",
         "   theme 'default' specified with no config.",
         "   autohide setting 'autohide' specified with no config.",
+        "   layout setting 'fill' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: {}.\x1b[0m".
             format(server_connection_error)),
@@ -104,6 +105,7 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
         "      (you could try: {}, {})"
         "\x1b[0m".format('a', 'b'),
         "   autohide setting 'autohide' specified with no config.",
+        "   layout setting 'fill' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: {}.\x1b[0m".
             format(server_connection_error)),

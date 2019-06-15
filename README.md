@@ -28,6 +28,7 @@ If you see further text, like the following, `zulip-term` should be loading!
 Loading with:
    theme 'default' specified with no config.
    autohide setting 'autohide' specified with no config.
+   layout setting 'fill' specified with no config.
 Welcome to Zulip.
 ```
 
@@ -67,6 +68,10 @@ site=https://realm.zulipchat.com
 theme=default
 # Autohide can also be set to 'no_autohide', to always show the left and right panels
 autohide=autohide
+# Layout can be set to:
+# - 'fill': Fill the whole screen (default).
+# - 'space-between': Make the center column less wide for easier reading on wider screens.
+layout=fill
 ```
 
 ## Hot Keys

@@ -27,6 +27,7 @@ class View(urwid.WidgetWrap):
 
     LEFT_WIDTH = 25
     RIGHT_WIDTH = 25
+    CENTER_WIDTH = 100
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
@@ -91,6 +92,12 @@ class View(urwid.WidgetWrap):
         self.left_panel = self.left_column_view()
         self.center_panel = self.message_view()
         self.right_panel = self.right_column_view()
+
+        if self.controller.layout == 'space-between':
+            self.center_panel = urwid.Padding(self.center_panel,
+                                              align='center',
+                                              width=View.CENTER_WIDTH)
+
         if self.controller.autohide:
             body = [
                 (View.LEFT_WIDTH, self.left_panel),
