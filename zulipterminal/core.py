@@ -78,7 +78,8 @@ class Controller:
 
     def update_screen(self) -> None:
         # Write something to update pipe to trigger draw_screen
-        os.write(self.update_pipe, b'1')
+        if hasattr(self, 'update_pipe'):
+            os.write(self.update_pipe, b'1')
 
     def draw_screen(self, *args: Any, **kwargs: Any) -> None:
         self.loop.draw_screen()
