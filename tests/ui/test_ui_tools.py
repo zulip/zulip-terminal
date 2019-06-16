@@ -474,6 +474,7 @@ class TestTopicsView:
                                 return_value=[])
         self.stream_button = stream_button
         self.view = mocker.Mock()
+        self.view.controller = mocker.Mock()
         topic_btn = mocker.Mock()
         topic_btn.caption = "BOO"
         self.topics_btn_list = [topic_btn]
@@ -483,6 +484,30 @@ class TestTopicsView:
         assert topic_view.log == []  # topic_view patches this
         assert topic_view.stream_button == self.stream_button
         assert topic_view.view == self.view
+
+    @pytest.mark.parametrize('topic_name, topic_initial_log,\
+                              topic_final_log', [
+        ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
+            ['TOPIC3', 'TOPIC2', 'TOPIC1']),
+        ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
+            ['TOPIC1', 'TOPIC2', 'TOPIC3']),
+        ('TOPIC4', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
+            ['TOPIC4', 'TOPIC1', 'TOPIC2', 'TOPIC3']),
+        ('TOPIC1', [], ['TOPIC1'])
+    ], ids=['reorder_topic3', 'topic1_discussion_continues', 'new_topic4',
+            'first_topic_1'])
+    def test_update_topics_list(self, mocker, topic_view, topic_name,
+                                topic_initial_log, topic_final_log):
+        mocker.patch(TOPBUTTON + '.__init__', return_value=None)
+        topic_view.view.controller.model.stream_dict = {
+            86: {'name': 'PTEST'}
+        }
+        topic_view.log = [mocker.Mock(topic_name=topic_name)
+                          for topic_name in topic_initial_log]
+
+        topic_view.update_topics_list(86, topic_name)
+        assert [topic.topic_name for topic in topic_view.log
+                ] == topic_final_log
 
     def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view):
         key = "t"
