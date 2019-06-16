@@ -101,6 +101,10 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         time.sleep(0.1)
 
     streams = controller.view.stream_w.log
+    is_open_topic_view = controller.view.left_panel.is_in_topic_view
+    if is_open_topic_view:
+        topics = controller.view.topic_w.log
+        toggled_stream_id = controller.view.topic_w.stream_button.stream_id
     users = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
@@ -115,6 +119,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         add_to_counts = True
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
+            msg_topic = messages[id]['subject']
             if stream_id in controller.model.muted_streams:
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
@@ -123,6 +128,16 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                         # FIXME: Update unread_count[streams]?
                         stream.update_count(stream.count + new_count)
                         break
+            # FIXME: Update unread_counts['unread_topics']?
+            if ([messages[id]['display_recipient'], msg_topic] in
+                    controller.model.muted_topics):
+                add_to_counts = False
+            if is_open_topic_view and stream_id == toggled_stream_id:
+                # If topic_view is open for incoming messages's stream,
+                # We update the respective TopicButton count accordingly.
+                for topic in topics:
+                    if topic.topic_name == msg_topic:
+                        topic.update_count(topic.count + new_count)
         else:
             for user in users:
                 if user.user_id == user_id:
