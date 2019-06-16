@@ -5,7 +5,11 @@ from typing import Any, Dict
 import pytest
 
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import StreamButton, UserButton
+from zulipterminal.ui_tools.buttons import (
+    StreamButton,
+    UserButton,
+    TopicButton,
+)
 from zulipterminal.helper import initial_index as helper_initial_index
 
 

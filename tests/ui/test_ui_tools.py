@@ -504,6 +504,7 @@ class TestTopicsView:
         topic_view.view.controller.model.stream_dict = {
             86: {'name': 'PTEST'}
         }
+        topic_view.view.controller.model.muted_topics = []
         topic_view.log = [mocker.Mock(topic_name=topic_name)
                           for topic_name in topic_initial_log]
 
@@ -1886,6 +1887,7 @@ class TestTopicButton:
             86: {'name': 'Django'},
             14: {'name': 'GSoC'},
         }
+        controller.model.muted_topics = []
         top_button = mocker.patch(TOPBUTTON+'.__init__')
         params = dict(controller=controller,
                       width=width,
@@ -1901,3 +1903,30 @@ class TestTopicButton:
         assert topic_button.stream_name == stream_name
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
+
+    @pytest.mark.parametrize('stream_name, title, muted_topics,\
+                              is_muted_called', [
+        ('Django', 'topic1', [['Django', 'topic1']], True),
+        ('Django', 'topic2', [['Django', 'topic1']], False),
+        ('GSoC', 'topic1', [['Django', 'topic1']], False),
+    ], ids=[
+        'stream_and_topic_match',
+        'topic_mismatch',
+        'stream_mismatch',
+    ])
+    def test_init_calls_mark_muted(self, mocker, stream_name, title,
+                                   muted_topics, is_muted_called):
+        mark_muted = mocker.patch(
+            'zulipterminal.ui_tools.buttons.TopicButton.mark_muted')
+        controller = mocker.Mock()
+        controller.model.muted_topics = muted_topics
+        controller.model.stream_dict = {
+            205: {'name': stream_name}
+        }
+        topic_button = TopicButton(stream_id=205,
+                                   topic=title, controller=controller,
+                                   width=40, count=0)
+        if is_muted_called:
+            mark_muted.assert_called_once_with()
+        else:
+            mark_muted.assert_not_called()
