@@ -605,6 +605,17 @@ class Model:
         # We need to update the topic order in index, unconditionally.
         if response['type'] == 'stream':
             self.update_topic_index(response['stream_id'], response['subject'])
+            # If the topic view is toggled for incoming message's
+            # recipient stream, then we re-arrange topic buttons
+            # with most recent at the top.
+            if (hasattr(self.controller, 'view') and
+                self.controller.view.left_panel.is_in_topic_view and
+                response['stream_id'] == self.controller.view.
+                    topic_w.stream_button.stream_id):
+                self.controller.view.topic_w.update_topics_list(
+                    response['stream_id'], response['subject'])
+                self.controller.update_screen()
+
         if hasattr(self.controller, 'view') and self.found_newest:
             self.index = index_messages([response], self, self.index)
             if self.msg_list.log:

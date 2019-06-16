@@ -314,6 +314,22 @@ class TopicsView(urwid.Frame):
         list_box = urwid.ListBox(self.log)
         super(TopicsView, self).__init__(list_box)
 
+    def update_topics_list(self, stream_id: int, topic_name: str) -> None:
+        # More recent topics are found towards the beginning
+        # of the list.
+        for topic_iterator, topic_button in enumerate(self.log):
+            if topic_button.topic_name == topic_name:
+                self.log.insert(0, self.log.pop(topic_iterator))
+                return
+        # No previous topics with same topic names are found
+        # hence we create a new topic button for it.
+        new_topic_button = TopicButton(stream_id,
+                                       topic_name,
+                                       self.view.controller,
+                                       self.view.LEFT_WIDTH,
+                                       0)
+        self.log.insert(0, new_topic_button)
+
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
