@@ -215,6 +215,7 @@ class TopicButton(TopButton):
         self.stream_name = controller.model.stream_dict[stream_id]['name']
         self.topic_name = topic
         self.stream_id = stream_id
+        self.model = controller.model
 
         super().__init__(controller=controller,
                          caption=self.topic_name,
@@ -222,6 +223,14 @@ class TopicButton(TopButton):
                          show_function=controller.narrow_to_topic,
                          width=width,
                          count=count)
+
+        if [self.stream_name, self.topic_name] in \
+                controller.model.muted_topics:
+            self.mark_muted()
+
+    def mark_muted(self) -> None:
+        self.update_count(-1)
+    # TODO: Handle event-based approach for topic-muting.
 
 
 class UnreadPMButton(urwid.Button):
