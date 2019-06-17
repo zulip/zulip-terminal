@@ -602,6 +602,9 @@ class Model:
         # sometimes `flags` are missing in `event` so initialize
         # an empty list of flags in that case.
         response['flags'] = event.get('flags', [])
+        # We need to update the topic order in index, unconditionally.
+        if response['type'] == 'stream':
+            self.update_topic_index(response['stream_id'], response['subject'])
         if hasattr(self.controller, 'view') and self.found_newest:
             self.index = index_messages([response], self, self.index)
             if self.msg_list.log:
@@ -644,6 +647,19 @@ class Model:
             if 'read' not in response['flags']:
                 set_count([response['id']], self.controller, 1)
             self.controller.update_screen()
+
+    def update_topic_index(self, stream_id: int, topic_name: str) -> None:
+        """
+        Update topic order in index based on incoming message.
+        """
+        topic_index = self.index['topics'][stream_id]
+        for topic_iterator, topic in enumerate(topic_index):
+            if topic == topic_name:
+                topic_index.insert(0, topic_index.pop(topic_iterator))
+                return
+        # No previous topics with same topic names are found
+        # hence, it must be a new topic.
+        topic_index.insert(0, topic_name)
 
     def update_message(self, response: Event) -> None:
         """

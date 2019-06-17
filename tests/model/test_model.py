@@ -561,6 +561,7 @@ class TestModel:
     def test_append_message_with_Falsey_log(self, mocker, model,
                                             message_fixture):
         model.found_newest = True
+        mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -580,6 +581,7 @@ class TestModel:
     def test_append_message_with_valid_log(self, mocker, model,
                                            message_fixture):
         model.found_newest = True
+        mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -600,6 +602,7 @@ class TestModel:
 
     def test_append_message_event_flags(self, mocker, model, message_fixture):
         model.found_newest = True
+        mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -624,16 +627,18 @@ class TestModel:
                                           self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
-        ({'type': 'stream', 'id': 1}, [], frozenset(), ['msg_w']),
+        ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
+          'id': 1}, [], frozenset(), ['msg_w']),
         ({'type': 'private', 'id': 1},
          [['is', 'private']], frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'display_recipient': 'a'},
+        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'FOO',
+          'display_recipient': 'a'},
          [['stream', 'a']], frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'subject': 'b',
+        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
           'display_recipient': 'a'},
          [['stream', 'a'], ['topic', 'b']],
          frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'subject': 'b',
+        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
           'display_recipient': 'a'},
          [['stream', 'c'], ['topic', 'b']],
          frozenset(), []),
@@ -656,6 +661,7 @@ class TestModel:
     def test_append_message(self, mocker, user_profile, response,
                             narrow, recipients, model, log):
         model.found_newest = True
+        mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         create_msg_box_list = mocker.patch('zulipterminal.model.'
@@ -678,6 +684,27 @@ class TestModel:
         model.append_message(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
+
+    @pytest.mark.parametrize('topic_name, topic_order_intial,\
+                             topic_order_final', [
+        ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
+                   ['TOPIC3', 'TOPIC2', 'TOPIC1']),
+        ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
+                   ['TOPIC1', 'TOPIC2', 'TOPIC3']),
+        ('TOPIC4', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
+                   ['TOPIC4', 'TOPIC1', 'TOPIC2', 'TOPIC3']),
+        ('TOPIC1', [], ['TOPIC1'])
+    ], ids=['reorder_topic3', 'topic1_discussion_continues', 'new_topic4',
+            'first_topic_1'])
+    def test_update_topic_index(self, topic_name, topic_order_intial,
+                                topic_order_final, model):
+        model.index = {
+            'topics': {
+                86: topic_order_intial,
+            }
+        }
+        model.update_topic_index(86, topic_name)
+        assert model.index['topics'][86] == topic_order_final
 
     @pytest.mark.parametrize('response, update_call_count, new_index', [
         ({  # Only subject of 1 message is updated.
