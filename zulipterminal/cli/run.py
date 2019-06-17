@@ -156,6 +156,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     settings = {
         'theme': ('default', NO_CONFIG),
         'autohide': ('autohide', NO_CONFIG),
+        'layout': ('fill', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:
@@ -165,6 +166,8 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
             settings['theme'] = (config['theme'], ZULIPRC_CONFIG)
         if 'autohide' in config:
             settings['autohide'] = (config['autohide'], ZULIPRC_CONFIG)
+        if 'layout' in config:
+            settings['layout'] = (config['layout'], ZULIPRC_CONFIG)
 
     return settings
 
@@ -222,6 +225,17 @@ def main(options: Optional[List[str]]=None) -> None:
             sys.exit(1)
         autohide_setting = (zterm['autohide'][0] == 'autohide')
 
+        valid_layout_settings = {'fill', 'space-between'}
+        if zterm['layout'][0] not in valid_layout_settings:
+            print("Invalid layout setting '{}' was specified {}."
+                  .format(*zterm['layout']))
+            print("The following options are available:")
+            for option in valid_layout_settings:
+                print("  ", option)
+            print("Specify the layout option in zuliprc file.")
+            sys.exit(1)
+        layout_setting = (zterm['layout'][0])
+
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
@@ -233,9 +247,11 @@ def main(options: Optional[List[str]]=None) -> None:
                            format(", ".join(complete))))
         print("   autohide setting '{}' specified {}."
               .format(*zterm['autohide']))
+        print("   layout setting '{}' specified {}."
+              .format(*zterm['layout']))
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
-                   autohide_setting).main()
+                   autohide_setting, layout_setting).main()
     except ServerConnectionFailure as e:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))

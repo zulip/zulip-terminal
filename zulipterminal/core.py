@@ -24,9 +24,10 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
-                 autohide: bool) -> None:
+                 autohide: bool, layout: str) -> None:
         self.theme = theme
         self.autohide = autohide
+        self.layout = layout
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
