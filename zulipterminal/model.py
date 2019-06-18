@@ -73,7 +73,7 @@ class Model:
         self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
-        self.update = False
+        self.update_allowed = False
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
@@ -301,7 +301,7 @@ class Model:
                 self.index['pointer'][str(self.narrow)] = response['anchor']
             query_range = num_after + num_before + 1
             if len(response['messages']) <= query_range:
-                self.update = True
+                self.update_allowed = True
             return True
         return False
 
@@ -489,7 +489,7 @@ class Model:
         # sometimes `flags` are missing in `event` so initialize
         # an empty list of flags in that case.
         response['flags'] = event.get('flags', [])
-        if hasattr(self.controller, 'view') and self.update:
+        if hasattr(self.controller, 'view') and self.update_allowed:
             self.index = index_messages([response], self, self.index)
             if self.msg_list.log:
                 last_message = self.msg_list.log[-1].original_widget.message

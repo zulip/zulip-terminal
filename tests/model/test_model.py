@@ -43,7 +43,7 @@ class TestModel:
         assert model.msg_view is None
         assert model.msg_list is None
         assert model.narrow == []
-        assert model.update is False
+        assert model.update_allowed is False
         assert model.stream_id == -1
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
@@ -332,7 +332,7 @@ class TestModel:
         anchor = messages_successful_response['anchor']
         if anchor < 10000000000000000:
             assert model.index['pointer'][str(model.narrow)] == anchor
-        assert model.update is True
+        assert model.update_allowed is True
 
     def test_get_message_false_first_anchor(
             self, mocker, messages_successful_response, index_all_messages,
@@ -367,16 +367,16 @@ class TestModel:
         assert model.index['pointer'][str(model.narrow)] == 0
 
         # TEST `query_range` < no of messages received
-        model.update = False  # RESET model.update value
+        model.update_allowed = False  # RESET model.update_allowed value
         model.get_messages(num_after=0, num_before=0, anchor=0)
-        assert model.update is False
+        assert model.update_allowed is False
 
         # TEST `query_range` == no_of messages received
         # len(messages_successful_response) = 3 so comparing this with
-        # num_after + num_before + 1 = 3, should set update to True.
-        model.update = False
+        # num_after + num_before + 1 = 3, should set update_allowed to True.
+        model.update_allowed = False
         model.get_messages(num_after=1, num_before=1, anchor=0)
-        assert model.update is True
+        assert model.update_allowed is True
 
     # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(self, mocker, error_response,
@@ -491,7 +491,7 @@ class TestModel:
         assert unpinned == streams  # FIXME generalize/parametrize
 
     def test_append_message_with_Falsey_log(self, mocker, model):
-        model.update = True
+        model.update_allowed = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -508,7 +508,7 @@ class TestModel:
          assert_called_once_with(model, [0], last_message=None))
 
     def test_append_message_with_valid_log(self, mocker, model):
-        model.update = True
+        model.update_allowed = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -527,7 +527,7 @@ class TestModel:
          assert_called_once_with(model, [0], last_message=expected_last_msg))
 
     def test_append_message_event_flags(self, mocker, model):
-        model.update = True
+        model.update_allowed = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -583,7 +583,7 @@ class TestModel:
             'user_pm_x_does_not_appear_in_narrow_without_x'])
     def test_append_message(self, mocker, user_profile, response,
                             narrow, recipients, model, log):
-        model.update = True
+        model.update_allowed = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         create_msg_box_list = mocker.patch('zulipterminal.model.'
@@ -602,9 +602,9 @@ class TestModel:
         assert model.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
-        model.update = False
+        model.update_allowed = False
         model.append_message(event)
-        # LOG REMAINS THE SAME IF UPDATE IS FALSE
+        # LOG REMAINS THE SAME IF UPDATE_ALLOWED IS FALSE
         assert model.msg_list.log == log
 
     @pytest.mark.parametrize('response, expected_message', [
