@@ -371,6 +371,13 @@ class TestModel:
         model.get_messages(num_after=0, num_before=0, anchor=0)
         assert model.update is False
 
+        # TEST `query_range` == no_of messages received
+        # len(messages_successful_response) = 3 so comparing this with
+        # num_after + num_before + 1 = 3, should set update to True.
+        model.update = False
+        model.get_messages(num_after=1, num_before=1, anchor=0)
+        assert model.update is True
+
     # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(self, mocker, error_response,
                                initial_data, num_before=30, num_after=10):
