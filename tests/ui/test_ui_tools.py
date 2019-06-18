@@ -1274,6 +1274,51 @@ class TestMessageBox:
             assert write_box.msg_edit_id is None
             write_box.msg_write_box.set_edit_text.assert_not_called()
 
+    @pytest.mark.parametrize('raw_html, expected_content', [
+        ("""<blockquote>
+                <p>A</p>
+            </blockquote>
+            <p>B</p>""", "░ A\n\nB"),
+        ("""<blockquote>
+                <blockquote>
+                    <p>A</p>
+                </blockquote>
+                <p>B</p>
+            </blockquote>
+            <p>C</p>""", "░ ░ A\n\n░ B\n\nC"),
+        ("""<blockquote>
+                <blockquote>
+                    <blockquote>
+                        <p>A</p>
+                    </blockquote>
+                    <p>B</p>
+                </blockquote>
+                <p>C</p>
+            </blockquote>
+            <p>D</p>""", "░ ░ ░ A\n\n░ ░ B\n\n░ C\n\nD"),
+        ("""<blockquote>
+                <p>A<br/>B</p>
+            </blockquote>
+            <p>C</p>""", "░ A\n░ B\n\nC"),
+        ("""<blockquote>
+                <p><a href='https://chat.zulip.org/'</a>czo</p>
+            </blockquote>""", "░ [czo](https://chat.zulip.org/)\n")
+    ], ids=[
+        "quoted level 1",
+        "quoted level 2",
+        "quoted level 3",
+        "multi-line quoting",
+        "quoting with links"
+    ])
+    def test_transform_content(self, mocker, raw_html, expected_content,
+                               messages_successful_response):
+        message = messages_successful_response['messages'][0]
+        msg_box = MessageBox(message, self.model, message)
+        msg_box.message['content'] = raw_html
+        content = msg_box.transform_content()
+        rendered_text = Text(content)
+        assert rendered_text.text == expected_content
+
 
 class TestTopButton:
     @pytest.mark.parametrize('prefix', [
