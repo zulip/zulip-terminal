@@ -584,13 +584,13 @@ class Model:
                     event['sender']['email'] in self.narrow[0][1].split(','):
                 if event['op'] == 'start':
                     user = self.user_dict[event['sender']['email']]
-                    self.controller.view.set_footer_text([
+                    self.controller.set_footer_text([
                         ' ',
                         ('code', user['full_name']),
                         ' is typing...'
                     ])
                 elif event['op'] == 'stop':
-                    self.controller.view.set_footer_text()
+                    self.controller.set_footer_text()
                 else:
                     raise RuntimeError("Unknown typing event operation")
 

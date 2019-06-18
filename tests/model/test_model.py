@@ -1147,13 +1147,13 @@ class TestModel:
             'start', 'stop'])
     def test_handle_typing_event(self, mocker, model,
                                  narrow, event, called):
-        mocker.patch('zulipterminal.ui.View.set_footer_text')
+        model.controller.set_footer_text = mocker.Mock()
         model.narrow = narrow
         model.user_dict = {'hamlet@zulip.com': {'full_name': 'hamlet'}}
 
         model.handle_typing_event(event)
 
-        assert model.controller.view.set_footer_text.called == called
+        assert model.controller.set_footer_text.called == called
 
     @pytest.mark.parametrize('event, final_muted_streams, ', [
         (
