@@ -23,6 +23,32 @@ STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
 
 
+class TestModListWalker:
+    @pytest.fixture
+    def mod_walker(self):
+        return ModListWalker([list(range(1))])
+
+    @pytest.mark.parametrize("num_items, focus_position", [
+        (5, 0),
+        (0, 0),
+    ])
+    def test_extend(self, num_items, focus_position, mod_walker, mocker):
+        items = list(range(num_items))
+        mocker.patch.object(mod_walker, "_set_focus")
+        mod_walker.extend(items)
+        mod_walker._set_focus.assert_called_once_with(focus_position)
+
+    def test__set_focus(self, mod_walker, mocker):
+        mod_walker.read_message = mocker.Mock()
+        mod_walker._set_focus(0)
+        mod_walker.read_message.assert_called_once_with()
+
+    def test_set_focus(self, mod_walker, mocker):
+        mod_walker.read_message = mocker.Mock()
+        mod_walker.set_focus(0)
+        mod_walker.read_message.assert_called_once_with()
+
+
 class TestMessageView:
 
     @pytest.fixture(autouse=True)

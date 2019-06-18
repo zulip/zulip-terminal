@@ -19,6 +19,44 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
 
 
+class ModListWalker(urwid.SimpleFocusListWalker):
+
+    def set_focus(self, position: int) -> None:
+        # When setting focus via set_focus method.
+        self.focus = position
+        self._modified()
+        if hasattr(self, 'read_message'):
+            self.read_message()
+
+    def _set_focus(self, index: int) -> None:
+        # This method is called when directly setting focus via
+        # self.focus = focus_position
+        if not self:
+            self._focus = 0
+            return
+        if index < 0 or index >= len(self):
+            raise IndexError('focus index is out of range: %s' % (index,))
+        if index != int(index):
+            raise IndexError('invalid focus index: %s' % (index,))
+        index = int(index)
+        if index != self._focus:
+            self._focus_changed(index)
+        self._focus = index
+        if hasattr(self, 'read_message'):
+            self.read_message()
+
+    def extend(self, items: List[Any],
+               focus_position: Optional[int]=None) -> int:
+        if focus_position is None:
+            focus = self._adjust_focus_on_contents_modified(
+                slice(len(self), len(self)), items)
+        else:
+            focus = focus_position
+        rval = super(urwid.MonitoredFocusList, self).extend(items)
+        self._set_focus(focus)
+        return rval
+
+
 class MessageView(urwid.ListBox):
     def __init__(self, model: Any) -> None:
         self.model = model
