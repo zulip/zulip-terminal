@@ -516,6 +516,7 @@ class MessageBox(urwid.Pile):
             child_list = tag.findChildren(recursive=False)
             actual_padding = (padding_char + ' ')*pad_count
             if len(child_list) == 1:
+                pad_count = 0
                 child_iterator = child_list
             else:
                 child_iterator = child_list[1:]
