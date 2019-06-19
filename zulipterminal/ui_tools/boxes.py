@@ -120,7 +120,7 @@ class WriteBox(urwid.Pile):
             return None
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('SEND_MESSAGE', key):
+        if is_command_key('SEND_MESSAGE', key) and not self.model.sending_msg:
             self.view.set_footer_text('  Sending...')
             if self.msg_edit_id:
                 if not self.to_write_box:

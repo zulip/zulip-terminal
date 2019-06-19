@@ -64,6 +64,7 @@ class TestModel:
         assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
+        assert model.sending_msg is False
 
     def test_register_initial_desired_events(self, mocker, initial_data):
         mocker.patch('zulipterminal.model.Model.get_messages')
@@ -307,6 +308,7 @@ class TestModel:
         self.client.send_message = mocker.Mock(return_value=response)
         model.controller.set_footer_text = mocker.Mock()
         model.send_message(req)
+        assert model.sending_msg is False
         self.client.send_message.assert_called_once_with(req)
         assert model.controller.set_footer_text.called_with(
             '  Sending...')

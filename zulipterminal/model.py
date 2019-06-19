@@ -88,6 +88,7 @@ class Model:
         self.user_id = -1  # type: int
         self.user_email = ""
         self.user_full_name = ""
+        self.sending_msg = False  # type: bool
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
 
@@ -268,7 +269,9 @@ class Model:
         })
         set_count(id_list, self.controller, -1)  # FIXME Update?
 
+    @asynch
     def send_message(self, request: Dict[str, Any]) -> None:
+        self.sending_msg = True
         self.controller.set_footer_text('  Sending...')
         response = self.client.send_message(request)
         if response['result'] == 'success':
@@ -279,6 +282,7 @@ class Model:
             self.controller.set_footer_text(
                 '  Failed to send message. Please make sure'
                 ' your compose box is not empty.', duration=3)
+        self.sending_msg = False
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
             request = {
