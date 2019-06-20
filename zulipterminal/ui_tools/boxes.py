@@ -625,6 +625,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(quote))
             self.model.controller.view.middle_column.set_focus('footer')
+        elif is_command_key('VIEW_IN_BROWSER', key):
+            self.model.controller.view_in_browser(self.message['id'])
         return key
 
 

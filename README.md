@@ -101,6 +101,7 @@ autohide=autohide
 | Search Streams                                        | <kbd>q</kbd>                                  |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
+| View the current message in a web-browser             | <kbd>v</kbd>                                  |
 | Jump to the Beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
 | Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |

@@ -4,12 +4,13 @@ import os
 import sys
 import time
 import signal
+import webbrowser
 
 import urwid
 import zulip
 
 from zulipterminal.version import ZT_VERSION
-from zulipterminal.helper import asynch
+from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -251,6 +252,16 @@ class Controller:
         w_list = create_msg_box_list(self.model, msg_id_list)
 
         self._finalize_show(w_list)
+
+    def view_in_browser(self, message_id: int) -> None:
+        url = '{}#narrow/near/{}'.format(self.model.server_url, message_id)
+        if (sys.platform != 'darwin' and sys.platform[:3] != 'win' and
+                not os.environ.get('DISPLAY') and os.environ.get('TERM')):
+            # Don't try to open web browser if running without a GUI
+            return
+        with suppress_output():
+            # Suppress anything on stdout or stderr when opening the browser
+            webbrowser.open(url)
 
     def _finalize_show(self, w_list: List[Any]) -> None:
         focus_position = self.model.get_focus_in_current_narrow()

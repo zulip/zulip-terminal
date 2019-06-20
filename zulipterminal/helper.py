@@ -3,9 +3,11 @@ from collections import defaultdict
 from functools import wraps
 from threading import Thread
 from typing import (
-    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union
+    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
+    Iterator
 )
 from mypy_extensions import TypedDict
+from contextlib import contextmanager
 
 import os
 
@@ -347,3 +349,21 @@ def match_user(user: Any, text: str) -> bool:
         if keyword.startswith(text.lower()):
             return True
     return False
+
+
+@contextmanager
+def suppress_output() -> Iterator[Any]:
+    """Context manager to redirect stdout and stderr to /dev/null.
+
+    Adapted from https://stackoverflow.com/a/2323563
+    """
+    out = os.dup(1)
+    err = os.dup(2)
+    os.close(1)
+    os.close(2)
+    os.open(os.devnull, os.O_RDWR)
+    try:
+        yield
+    finally:
+        os.dup2(out, 1)
+        os.dup2(err, 2)

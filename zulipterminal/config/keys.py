@@ -136,6 +136,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl c'},
         'help_text': 'Quit',
     }),
+    ('VIEW_IN_BROWSER', {
+        'keys': {'v'},
+        'help_text': 'View the current message in a web browser',
+    }),
     ('BEGINNING_OF_LINE', {
         'keys': {'ctrl a'},
         'help_text': 'Jump to the beginning of the line',
