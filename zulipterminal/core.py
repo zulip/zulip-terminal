@@ -137,7 +137,7 @@ class Controller:
             if hasattr(button, 'message'):
                 get_msg_opts['anchor'] = button.message['id']
             self.model.get_messages(**get_msg_opts)
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
+            msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
