@@ -2,6 +2,7 @@ import os
 import signal
 import sys
 import time
+import webbrowser
 from collections import OrderedDict
 from functools import partial
 from platform import platform
@@ -14,7 +15,7 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import asynch
+from zulipterminal.helper import LINUX, asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -303,6 +304,35 @@ class Controller:
             ),
             "area:msg",
         )
+
+    def open_in_browser(self, url: str) -> None:
+        """
+        Opens any provided URL in a graphical browser, if found, else
+        prints an appropriate error message.
+        """
+        # Don't try to open web browser if running without a GUI
+        # TODO: Explore and eventually support opening links in text-browsers.
+        if LINUX and not os.environ.get("DISPLAY") and os.environ.get("TERM"):
+            self.view.set_footer_text(
+                "No DISPLAY environment variable specified. This could "
+                "likely mean the ZT host is running without a GUI.",
+                3,
+            )
+            return
+        try:
+            # Checks for a runnable browser in the system and returns
+            # its browser controller, if found, else reports an error
+            browser_controller = webbrowser.get()
+            # Suppress stdout and stderr when opening browser
+            with suppress_output():
+                browser_controller.open(url)
+                self.view.set_footer_text(
+                    f"The link was successfully opened using {browser_controller.name}",
+                    3,
+                )
+        except webbrowser.Error as e:
+            # Set a footer text if no runnable browser is located
+            self.view.set_footer_text(f"ERROR: {e}", 3)
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
