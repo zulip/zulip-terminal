@@ -3,6 +3,7 @@ import platform
 import subprocess
 import time
 from collections import OrderedDict, defaultdict
+from contextlib import contextmanager
 from functools import wraps
 from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
@@ -14,6 +15,7 @@ from typing import (
     Dict,
     FrozenSet,
     Iterable,
+    Iterator,
     List,
     Set,
     Tuple,
@@ -714,3 +716,22 @@ def get_unused_fence(content: str) -> str:
         max_length_fence = max(max_length_fence, len(max(matches, key=len)) + 1)
 
     return "`" * max_length_fence
+
+
+@contextmanager
+def suppress_output() -> Iterator[None]:
+    """
+    Context manager to redirect stdout and stderr to /dev/null.
+
+    Adapted from https://stackoverflow.com/a/2323563
+    """
+    stdout = os.dup(1)
+    stderr = os.dup(2)
+    os.close(1)
+    os.close(2)
+    os.open(os.devnull, os.O_RDWR)
+    try:
+        yield
+    finally:
+        os.dup2(stdout, 1)
+        os.dup2(stderr, 2)
