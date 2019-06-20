@@ -1,3 +1,5 @@
+import os
+import webbrowser
 from platform import platform
 from typing import Any
 
@@ -264,6 +266,38 @@ class TestController:
         widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://chat.zulip.org/#narrow/stream/test",
+            "https://chat.zulip.org/user_uploads/sent/abcd/efg.png",
+            "https://github.com/",
+        ],
+    )
+    def test_open_in_browser_success(self, mocker, controller, url):
+        # Set DISPLAY environ to be able to run test in CI
+        os.environ["DISPLAY"] = ":0"
+        controller.view.set_footer_text = mocker.Mock()
+        mock_get = mocker.patch(CORE + ".webbrowser.get")
+        mock_open = mock_get.return_value.open
+
+        controller.open_in_browser(url)
+
+        mock_open.assert_called_once_with(url)
+        controller.view.set_footer_text.assert_called_once_with(
+            f"The link was successfully opened using {mock_get.return_value.name}", 3
+        )
+
+    def test_open_in_browser_fail__no_browser_controller(self, mocker, controller):
+        os.environ["DISPLAY"] = ":0"
+        error = "No runnable browser found"
+        controller.view.set_footer_text = mocker.Mock()
+        mocker.patch(CORE + ".webbrowser.get").side_effect = webbrowser.Error(error)
+
+        controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
+
+        controller.view.set_footer_text.assert_called_once_with(f"ERROR: {error}", 3)
 
     def test_main(self, mocker, controller):
         controller.view.palette = {"default": "theme_properties"}
