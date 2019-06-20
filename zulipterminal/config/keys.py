@@ -143,6 +143,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Narrow to the topic of the current message',
         'key_category': 'msg_actions',
     }),
+    ('VIEW_IN_BROWSER', {
+        'keys': ['v'],
+        'help_text': 'View current message in the web browser',
+        'key_category': 'msg_actions',
+    }),
     ('TOGGLE_NARROW', {
         'keys': ['z'],
         'help_text':
