@@ -1,3 +1,4 @@
+import os
 from platform import platform
 from typing import Any
 
@@ -270,6 +271,18 @@ class TestController:
                    .call_args_list[0][0][0])
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
+
+    def test_view_in_browser(self, mocker, controller):
+        # Set DISPLAY environ to be able to run test in Travis
+        os.environ['DISPLAY'] = ':0'
+        mock_open = mocker.patch('webbrowser.open', mocker.Mock())
+        message_id = 123456
+        controller.model.server_url = 'https://foo.zulipchat.com/'
+        controller.view_in_browser(message_id)
+        assert mock_open.call_count == 1
+        url = mock_open.call_args[0][0]
+        assert url.startswith(controller.model.server_url)
+        assert url.endswith('/{}'.format(message_id))
 
     def test_main(self, mocker, controller):
         controller.view.palette = {

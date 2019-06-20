@@ -1551,6 +1551,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.show_msg_info(self.message,
                                                 self.message_links,
                                                 self.time_mentions)
+        elif is_command_key('VIEW_IN_BROWSER', key):
+            self.model.controller.view_in_browser(self.message['id'])
         return key
 
 

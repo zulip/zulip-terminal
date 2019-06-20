@@ -2,6 +2,7 @@ import os
 import signal
 import sys
 import time
+import webbrowser
 from collections import OrderedDict
 from functools import partial
 from platform import platform
@@ -363,6 +364,14 @@ class Controller:
         # NOTE: Should we allow maintaining anchor focus here?
         # (nothing currently requires narrowing around a message id)
         self._narrow_to(anchor=None, mentioned=True)
+
+    def view_in_browser(self, message_id: int) -> None:
+        url = '{}#narrow/near/{}'.format(self.model.server_url, message_id)
+        if (sys.platform != 'darwin' and sys.platform[:3] != 'win'
+                and not os.environ.get('DISPLAY') and os.environ.get('TERM')):
+            # Don't try to open web browser if running without a GUI
+            return
+        webbrowser.open(url)
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
