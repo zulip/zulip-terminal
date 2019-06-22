@@ -102,6 +102,8 @@ class StreamButton(TopButton):
         # (self.stream_id is used elsewhere)
         caption, self.stream_id, orig_color, is_private = properties
         self.model = controller.model
+        self.count = count
+        self.view = view
 
         # Simplify the color from the original version & add to palette
         # TODO Should this occur elsewhere and more intelligently?
@@ -132,12 +134,18 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
+        self.model.unread_counts['all_msg'] -= self.count
         self.update_count(-1)
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
 
     def mark_unmuted(self) -> None:
         if self.stream_id in self.model.unread_counts['streams']:
             unmuted_count = self.model.unread_counts['streams'][self.stream_id]
             self.update_count(unmuted_count)
+            self.model.unread_counts['all_msg'] += self.count
+            self.view.home_button.update_count(
+                self.model.unread_counts['all_msg'])
         else:
             # All messages in this stream are read.
             self.update_count(0)
