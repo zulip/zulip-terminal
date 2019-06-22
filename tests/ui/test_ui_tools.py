@@ -1498,17 +1498,18 @@ class TestStreamButton:
         assert str(e.value) == "Unknown color format: '{}'".format(color)
 
     @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
-                              is_action_muting', [
-        (86, {}, 204, False),
-        (86, {86, 205}, -1, True),
-        (205, {14, 99}, 0, False),
+                             is_action_muting, updated_all_msgs', [
+        (86, {}, 204, False, 380),
+        (86, {86, 205}, -1, True, 320),
+        (205, {14, 99}, 0, False, 350),
     ], ids=[
         'unmuting stream 86 - 204 unreads',
         'muting stream 86',
         'unmuting stream 205 - 0 unreads',
     ])
     def test_mark_stream_muted(self, mocker, stream_button, is_action_muting,
-                               stream_id, muted_streams, called_value) -> None:
+                               stream_id, muted_streams, called_value,
+                               updated_all_msgs) -> None:
         stream_button.stream_id = stream_id
         update_count = mocker.patch(TOPBUTTON + ".update_count")
         stream_button.controller.model.unread_counts = {
@@ -1517,12 +1518,17 @@ class TestStreamButton:
                 14: 34,
             }
         }
+        stream_button.model.unread_counts['all_msg'] = 350
         stream_button.controller.model.muted_streams = muted_streams
         if is_action_muting:
             stream_button.mark_muted()
         else:
             stream_button.mark_unmuted()
         stream_button.update_count.assert_called_once_with(called_value)
+        if called_value:
+            stream_button.view.home_button.update_count.\
+                assert_called_once_with(updated_all_msgs)
+        assert stream_button.model.unread_counts['all_msg'] == updated_all_msgs
 
 
 class TestUserButton:
