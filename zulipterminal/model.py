@@ -350,6 +350,13 @@ class Model:
                 return False
         return True
 
+    @staticmethod
+    def exception_safe_result(future: 'Future[bool]') -> bool:
+        try:
+            return future.result()
+        except zulip.ZulipError:
+            return False
+
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
@@ -366,14 +373,8 @@ class Model:
             # Wait for threads to complete
             wait(futures.values())
 
-        def exception_safe_result(future: 'Future[bool]') -> bool:
-            try:
-                return future.result()
-            except zulip.ZulipError:
-                return False
-
         results = {
-            name: exception_safe_result(future)
+            name: self.exception_safe_result(future)
             for name, future in futures.items()
         }  # type: Dict[str, bool]
         if all(results.values()):
