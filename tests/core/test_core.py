@@ -17,6 +17,8 @@ class TestController:
                                  return_value=None)
         self.model.poll_for_events = mocker.patch('zulipterminal.model.Model'
                                                   '.poll_for_events')
+        self.model.view = self.view
+        self.view.focus_col = 1
         mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
@@ -53,7 +55,6 @@ class TestController:
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream', stream_button.caption]]
         controller.model.msg_view.clear.assert_called_once_with()
-        controller.model.msg_list.set_focus.assert_called_once_with(0)
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
         id_list = index_stream['all_stream'][stream_button.stream_id]
         assert {widget.original_widget.message['id']} == id_list
@@ -77,7 +78,6 @@ class TestController:
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.model.msg_view.clear.assert_called_once_with()
-        controller.model.msg_list.set_focus.assert_called_once_with(0)
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
         id_list = index_topic['stream'][msg_box.stream_id][msg_box.title]
         assert {widget.original_widget.message['id']} == id_list
@@ -97,7 +97,6 @@ class TestController:
         controller.narrow_to_user(user_button)
         assert controller.model.narrow == [["pm_with", user_button.email]]
         controller.model.msg_view.clear.assert_called_once_with()
-        controller.model.msg_list.set_focus.assert_called_once_with(0)
         recipients = frozenset([controller.model.user_id, user_button.user_id])
         assert controller.model.recipients == recipients
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
@@ -121,7 +120,6 @@ class TestController:
         assert controller.model.narrow == []
         controller.model.msg_view.clear.assert_called_once_with()
         num_am = len(index_all_messages['all_messages'])
-        controller.model.msg_list.set_focus.assert_called_once_with(num_am - 1)
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         id_list = index_all_messages['all_messages']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
@@ -139,7 +137,6 @@ class TestController:
         assert controller.model.narrow == [['is', 'private']]
         controller.model.msg_view.clear.assert_called_once_with()
         num_pm = len(index_user['all_private'])
-        controller.model.msg_list.set_focus.assert_called_once_with(num_pm - 1)
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         id_list = index_user['all_private']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
@@ -166,7 +163,6 @@ class TestController:
         controller.model.msg_view.clear.assert_called_once_with()
 
         num_sm = len(index_all_starred['all_starred'])
-        controller.model.msg_list.set_focus.assert_called_once_with(num_sm - 1)
 
         id_list = index_all_starred['all_starred']
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]

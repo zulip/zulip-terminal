@@ -258,15 +258,15 @@ class Controller:
 
     def _finalize_show(self, w_list: List[Any]) -> None:
         focus_position = self.model.get_focus_in_current_narrow()
-
         if focus_position == set():
             focus_position = len(w_list) - 1
         assert not isinstance(focus_position, set)
         self.model.msg_view.clear()
-        self.model.msg_view.extend(w_list)
-        self.editor_mode = False
         if focus_position >= 0 and focus_position < len(w_list):
-            self.model.msg_list.set_focus(focus_position)
+            self.model.msg_view.extend(w_list, focus_position)
+        else:
+            self.model.msg_view.extend(w_list)
+        self.editor_mode = False
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
