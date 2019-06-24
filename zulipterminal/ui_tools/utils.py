@@ -26,7 +26,8 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
             muted_msgs += 1
             if model.narrow == []:  # Don't show in 'All messages'.
                 continue
-
+        if is_unsubscribed_message(msg, model):
+            continue
         msg_flag = 'unread'  # type: Union[str, None]
         flags = msg.get('flags')
         # update_messages sends messages with no flags
@@ -58,5 +59,13 @@ def is_muted(msg: Dict[Any, Any], model: Any) -> bool:
     elif msg['stream_id'] in model.muted_streams:
         return True
     elif [msg['display_recipient'], msg['subject']] in model.muted_topics:
+        return True
+    return False
+
+
+def is_unsubscribed_message(msg: Dict[Any, Any], model: Any) -> bool:
+    if msg['type'] == 'private':
+        return False
+    if msg['stream_id'] not in model.stream_dict:
         return True
     return False

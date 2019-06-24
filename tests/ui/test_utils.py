@@ -86,12 +86,14 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     assert return_value is muted
 
 
-@pytest.mark.parametrize('narrow, messages, focus_msg_id, muted, len_w_list', [
+@pytest.mark.parametrize('narrow, messages, focus_msg_id, muted,\
+                          unsubscribed, len_w_list', [
     (
         # No muted messages
         [],
         None,
         None,
+        False,
         False,
         2,
     ),
@@ -101,6 +103,7 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         [1],
         None,
         False,
+        False,
         1,
     ),
     (
@@ -109,6 +112,7 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         [1],
         None,
         True,
+        False,
         1,
     ),
     (
@@ -117,11 +121,22 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         [1],
         None,
         True,
+        False,
         0,
-    )
+    ),
+    (
+        # Unsubscribed messages
+        [],
+        [1],
+        None,
+        False,
+        True,
+        0,
+    ),
+
 ])
 def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
-                             muted, len_w_list):
+                             muted, unsubscribed, len_w_list):
     model = mocker.Mock()
     model.narrow = narrow
     model.index = {
@@ -144,5 +159,7 @@ def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
     mocker.patch('zulipterminal.ui_tools.utils.urwid.AttrMap',
                  return_value='MSG')
     mocker.patch('zulipterminal.ui_tools.utils.is_muted', return_value=muted)
+    mocker.patch('zulipterminal.ui_tools.utils.is_unsubscribed_message',
+                 return_value=unsubscribed)
     return_value = create_msg_box_list(model, messages, focus_msg_id)
     assert len(return_value) == len_w_list
