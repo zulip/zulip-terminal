@@ -469,15 +469,9 @@ class MessageBox(urwid.Pile):
         else:
             content_header = None
 
-        # Content
-        soup = BeautifulSoup(self.message['content'], 'lxml')
+        # Transform raw message content into markup (As needed by urwid.Text)
         active_char = '▒'  # Options are '█', '▓', '▒', '░'
-        padding_char = '░'
-        body = soup.find(name='body')
-        if body and body.find(name='blockquote'):
-            self.indent_quoted_content(soup, padding_char)
-
-        content = (None, self.soup2markup(body))
+        content = self.transform_content()
 
         if self.message['id'] in self.model.index['edited_messages']:
             edited_label_size = 7
@@ -511,6 +505,15 @@ class MessageBox(urwid.Pile):
             (reactions, reactions != ''),
         ]
         return [part for part, condition in parts if condition]
+
+    def transform_content(self) -> Tuple[None, Any]:
+        soup = BeautifulSoup(self.message['content'], 'lxml')
+        body = soup.find(name='body')
+        if body and body.find(name='blockquote'):
+            padding_char = '░'
+            self.indent_quoted_content(soup, padding_char)
+
+        return (None, self.soup2markup(body))
 
     def indent_quoted_content(self, soup: Any, padding_char: str) -> None:
         '''
