@@ -10,6 +10,7 @@ from zulipterminal.ui_tools.views import (
     RightColumnView,
     LeftColumnView,
     HelpView,
+    ModListWalker,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import TopButton, StreamButton, UserButton
@@ -60,14 +61,14 @@ class TestMessageView:
     def msg_view(self, mocker, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.read_message")
-        self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(VIEWS + ".MessageView.set_focus")
         msg_view = MessageView(self.model)
+        msg_view.log = mocker.Mock()
+        msg_view.body = mocker.Mock()
         return msg_view
 
     def test_init(self, mocker, msg_view, msg_box):
         assert msg_view.model == self.model
-        self.urwid.SimpleFocusListWalker.assert_called_once_with([msg_box])
         msg_view.set_focus.assert_called_once_with(0)
         assert msg_view.old_loading is False
         assert msg_view.new_loading is False
@@ -316,7 +317,11 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.set_focus")
         mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
         msg_view = MessageView(self.model)
+        msg_view.log = mocker.Mock()
+        msg_view.body = mocker.Mock()
         msg_w = mocker.MagicMock()
+        msg_view.model.controller.view = mocker.Mock()
+        msg_view.model.controller.view.body.focus_col = 1
         msg_w.attr_map = {None: 'unread'}
         msg_w.original_widget.message = {'id': 1}
         msg_w.set_attr_map.return_value = None

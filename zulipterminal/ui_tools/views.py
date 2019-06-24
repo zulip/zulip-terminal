@@ -62,8 +62,8 @@ class MessageView(urwid.ListBox):
         self.model = model
         # Initialize for reference
         self.focus_msg = 0
-        self.log = urwid.SimpleFocusListWalker(self.main_view())
-        urwid.connect_signal(self.log, 'modified', self.read_message)
+        self.log = ModListWalker(self.main_view())
+        self.log.read_message = self.read_message
         # This Function completely controls the messages
         # shown in the MessageView
         self.model.msg_view = self.log
