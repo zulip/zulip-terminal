@@ -85,11 +85,15 @@ class Controller:
         self.loop.draw_screen()
 
     def show_help(self) -> None:
+        double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
+                            rline='║', lline='║',
+                            blcorner='╚', bline='═', brcorner='╝')
         cols, rows = self.loop.screen.get_cols_rows()
         help_view = HelpView(self)
         self.loop.widget = urwid.Overlay(
             urwid.LineBox(help_view,
-                          title="Help Menu (up/down scrolls)"),
+                          title="Help Menu (up/down scrolls)",
+                          **double_lines),
             self.view,
             align='center',
             valign='middle',
