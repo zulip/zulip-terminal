@@ -78,10 +78,10 @@ def msg_box(mocker, messages_successful_response):
 @pytest.fixture(scope="module")
 def logged_on_user():
     return {
+        'user_id': 1001,
+        'full_name': 'Human Myself',
         'email': 'FOOBOO@gmail.com',
-        'full_name': 'Tomás Farías',
-        'user_id': 5827,
-        'short_name': 'FOO',
+        'short_name': 'Human',
     }
 
 stream_msg_template = {
