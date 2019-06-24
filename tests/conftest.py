@@ -75,7 +75,7 @@ def msg_box(mocker, messages_successful_response):
 
 # --------------- Model Fixtures ----------------------------------------------
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def logged_on_user():
     return {
         'user_id': 1001,
@@ -209,7 +209,7 @@ def messages_successful_response() -> Dict[str, Any]:
     })
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def initial_data(logged_on_user):
     """
     Response from /register API request.
@@ -516,7 +516,7 @@ def index_all_starred(empty_index, request):
     return index
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def user_profile(logged_on_user):
     return {  # FIXME These should all be self-consistent with others?
         'max_message_id': 589270,
@@ -533,7 +533,7 @@ def user_profile(logged_on_user):
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def error_response():
     return {
         "msg": "Invalid API key",
@@ -541,7 +541,7 @@ def error_response():
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def user_dict(logged_on_user):
     """
     User_dict created according to `initial_data` fixture.
@@ -592,7 +592,7 @@ def user_dict(logged_on_user):
     }
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def user_list(logged_on_user):
     """
     List of users created corresponding to
@@ -637,7 +637,7 @@ def user_list(logged_on_user):
     }]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def streams():
     """
     List of streams created corresponding to
@@ -650,7 +650,7 @@ def streams():
     ]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def user_id(logged_on_user):
     """
     Default User id of the current
