@@ -17,6 +17,7 @@ from zulipterminal.ui_tools.buttons import (
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
+from zulipterminal.ui_tools.scroll import ScrollBar, Scrollable
 
 
 class MessageView(urwid.ListBox):
@@ -577,7 +578,7 @@ class LeftColumnView(urwid.Pile):
         return super(LeftColumnView, self).keypress(size, key)
 
 
-class HelpView(urwid.ListBox):
+class HelpView(urwid.LineBox):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
 
@@ -598,9 +599,26 @@ class HelpView(urwid.ListBox):
 
         self.number_of_actions = len(self.log)
 
-        super(HelpView, self).__init__(self.log)
+        scrollable = ScrollBar(Scrollable(urwid.Pile(self.log)))
+
+        super(HelpView, self).__init__(scrollable, title="Help Menu",
+                                       tlcorner='╔', tline='═', trcorner='╗',
+                                       rline='║', lline='║', blcorner='╚',
+                                       bline='═', brcorner='╝')
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_help()
         return super(HelpView, self).keypress(size, key)
+
+    def mouse_event(self, size: Any, event: str, button: int, col: int,
+                    row: int, focus: Any) -> Any:
+        if event == 'mouse press':
+            if button == 4:
+                self.keypress(size, 'up')
+                return True
+            elif button == 5:
+                self.keypress(size, 'down')
+                return True
+        return super(HelpView, self).mouse_event(size, event, button, col,
+                                                 row, focus)
