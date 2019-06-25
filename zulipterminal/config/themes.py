@@ -39,6 +39,10 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'popup_category': 'bold',
     'unread_count': 'bold',
     'filter_results': 'bold',
+    'edit_topic': 'standout',
+    'edit_tag': 'standout',
+    'edit_author': 'bold',
+    'edit_time': 'bold',
 }
 
 
@@ -154,6 +158,14 @@ THEMES = {
          None,             DEF['white:bold'],         DEF['black']),
         ('filter_results', 'white',                   'dark green',
          None,             DEF['white'],              DEF['dark_green']),
+        ('edit_topic',     'white',                   'dark gray',
+         None,             DEF['white'],              DEF['dark_gray']),
+        ('edit_tag',       'white',                   'dark gray',
+         None,             DEF['white'],              DEF['dark_gray']),
+        ('edit_author',    'yellow',                  'black',
+         None,             DEF['yellow'],             DEF['black']),
+        ('edit_time',      'light blue',              'black',
+         None,             DEF['light_blue'],         DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -222,6 +234,14 @@ THEMES = {
          None,             WHITEBOLD,         BLACK),
         ('filter_results', 'black',           'light green',
          None,             BLACK,             LIGHTGREEN),
+        ('edit_topic',     'black',           'dark gray',
+         None,             BLACK,             GRAY),
+        ('edit_tag',       'black',           'dark gray',
+         None,             BLACK,             GRAY),
+        ('edit_author',    'yellow',          'black',
+         None,             YELLOW,            BLACK),
+        ('edit_time',      'light blue',      'black',
+         None,             LIGHTBLUE,         BLACK),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -256,6 +276,10 @@ THEMES = {
         ('unread_count',   'dark blue, bold', 'white'),
         ('table_head',     'black, bold',     'white'),
         ('filter_results', 'white',           'dark green'),
+        ('edit_topic',     'white',           'dark gray'),
+        ('edit_tag',       'white',           'dark gray'),
+        ('edit_author',    'dark green',      'white'),
+        ('edit_time',      'dark blue',       'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -290,6 +314,10 @@ THEMES = {
         ('unread_count',   'yellow',          'light blue'),
         ('table_head',     'black, bold',     'light blue'),
         ('filter_results', 'white',           'dark green'),
+        ('edit_topic',     'white',           'dark blue'),
+        ('edit_tag',       'white',           'dark blue'),
+        ('edit_author',    'dark gray',       'light blue'),
+        ('edit_time',      'dark blue',       'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
