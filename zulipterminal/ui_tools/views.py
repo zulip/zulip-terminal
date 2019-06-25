@@ -1,8 +1,9 @@
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from typing import Any, List, Tuple, Optional, Callable
 import threading
 
 import urwid
+import time
 
 from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
 from zulipterminal.helper import asynch, match_user
@@ -751,3 +752,50 @@ class PopUpConfirmationView(urwid.Overlay):
         if is_command_key('GO_BACK', key):
             self.controller.exit_popup()
         return super(PopUpConfirmationView, self).keypress(size, key)
+
+
+class MsgInfoView(urwid.ListBox):
+    def __init__(self, controller: Any, msg: Any) -> None:
+        self.controller = controller
+        self.msg = msg
+
+        if msg['reactions']:
+            reactions = sorted(
+                        [reaction['emoji_name'] +
+                            ": " +
+                            reaction['user']['full_name'] +
+                            "\n"
+                            for reaction in msg['reactions']])
+            reactions[-1] = reactions[-1].rstrip("\n")
+
+        msg_info = OrderedDict([
+            ('Date & Time', time.ctime(msg['timestamp'])[:-5]),
+            ('Sender', msg['sender_full_name']),
+            ('Sender\'s Email ID', msg['sender_email']),
+            ('Reactions', reactions if msg['reactions'] else '---None---'),
+            ])
+
+        widths = [(len(field)+7,
+                  max(len(reaction_users) for reaction_users in data)
+                  if isinstance(data, list)
+                  else len(data)+2)
+                  for field, data in msg_info.items()]
+        max_widths = [max(width) for width in zip(*widths)]
+        self.width = sum(max_widths)
+        self.height = len(msg_info['Reactions'])+4 if msg['reactions'] else 5
+
+        self.log = urwid.SimpleListWalker(
+            [urwid.AttrWrap(
+                urwid.Columns([
+                    urwid.Text(field),
+                    (max_widths[1], urwid.Text(data))
+                ], dividechars=2),
+                None if index % 2 else 'bar')
+             for index, (field, data) in enumerate(msg_info.items())])
+
+        super(MsgInfoView, self).__init__(self.log)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
+            self.controller.exit_popup()
+        return super(MsgInfoView, self).keypress(size, key)

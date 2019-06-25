@@ -92,6 +92,7 @@ autohide=autohide
 | Toggle topics in a stream                             | <kbd>t</kbd>                                  |
 | Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>                         |
 | Edit a sent message                                   | <kbd>e</kbd>                                  |
+| Show message information                              | <kbd>i</kbd>                                  |
 | Narrow to the stream of the current message           | <kbd>s</kbd>                                  |
 | Narrow to the topic of the current message            | <kbd>S</kbd>                                  |
 | Narrow to a topic/private-chat, or stream/all-private-messages| <kbd>z</kbd>                                  |
