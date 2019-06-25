@@ -21,6 +21,7 @@ from zulipterminal.helper import (
     set_count,
     initial_index,
     Message,
+    notify,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -603,6 +604,21 @@ class Model:
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
+    def notify_user(self, message: Dict[str, Any]) -> None:
+        if message['sender_id'] == self.user_id:
+            return
+
+        recipient = ''
+        if message['type'] == 'private':
+            recipient = ' (to you)'
+        elif {'mentioned', 'wildcard_mentioned'}.intersection(
+                set(message['flags'])) and message['type'] == 'stream':
+            recipient = ' (to {} -> {})'.format(message['display_recipient'],
+                                                message['subject'])
+
+        if recipient:
+            notify(message['sender_full_name'] + recipient, message['content'])
+
     def append_message(self, event: Event) -> None:
         """
         Adds message to the end of the view.
@@ -626,6 +642,8 @@ class Model:
                     response['sender_id'])
                 self.controller.update_screen()
 
+        # We can notify user regardless of whether UI is rendered or not.
+        self.notify_user(response)
         if hasattr(self.controller, 'view') and self.found_newest:
             self.index = index_messages([response], self, self.index)
             if self.msg_list.log:
