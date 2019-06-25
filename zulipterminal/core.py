@@ -86,26 +86,29 @@ class Controller:
     def draw_screen(self, *args: Any, **kwargs: Any) -> None:
         self.loop.draw_screen()
 
-    def show_help(self) -> None:
+    def show_pop_up(self, to_show: Any, title: str) -> None:
         double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
                             rline='║', lline='║',
                             blcorner='╚', bline='═', brcorner='╝')
         cols, rows = self.loop.screen.get_cols_rows()
-        help_view = HelpView(self)
         self.loop.widget = urwid.Overlay(
-            urwid.LineBox(help_view,
-                          title="Help Menu (up/down scrolls)",
+            urwid.LineBox(to_show,
+                          title,
                           **double_lines),
             self.view,
             align='center',
             valign='middle',
             # +2 to both of the following, due to LineBox
-            width=help_view.width+2,
-            height=min(3*rows//4, help_view.number_of_actions)+2
+            width=to_show.width+2,
+            height=min(3*rows//4, to_show.height)+2
         )
 
     def exit_popup(self) -> None:
         self.loop.widget = self.view
+
+    def show_help(self) -> None:
+        help_view = HelpView(self)
+        self.show_pop_up(help_view, "Help Menu (up/down scrolls)")
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

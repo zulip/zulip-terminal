@@ -708,7 +708,7 @@ class HelpView(urwid.ListBox):
                 None if index % 2 else 'help')
              for index, binding in enumerate(KEY_BINDINGS.values())])
 
-        self.number_of_actions = len(self.log)
+        self.height = len(self.log)
 
         super(HelpView, self).__init__(self.log)
 
