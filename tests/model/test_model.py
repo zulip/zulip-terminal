@@ -568,12 +568,14 @@ class TestModel:
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
+        model.notify_user = mocker.Mock()
         model.msg_list.log = []
         event = {'message': message_fixture}
 
         model.append_message(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
+        model.notify_user.assert_called_once_with(event['message'])
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=None))
@@ -588,12 +590,14 @@ class TestModel:
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
+        model.notify_user = mocker.Mock()
         model.msg_list.log = [mocker.Mock()]
         event = {'message': message_fixture}
 
         model.append_message(event)
 
         assert len(model.msg_list.log) == 2  # Added "msg_w" element
+        model.notify_user.assert_called_once_with(event['message'])
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = model.msg_list.log[0].original_widget.message
         (create_msg_box_list.
@@ -609,6 +613,7 @@ class TestModel:
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
+        model.notify_user = mocker.Mock()
         model.msg_list.log = [mocker.Mock()]
         set_count = mocker.patch('zulipterminal.model.set_count')
 
@@ -619,6 +624,7 @@ class TestModel:
         set_count.assert_not_called()
 
         # Test event without flags
+        model.notify_user.assert_called_once_with(event['message'])
         model.msg_list.log = [mocker.Mock()]
         event = {'message': message_fixture, 'flags': []}
         model.append_message(event)
@@ -670,6 +676,7 @@ class TestModel:
         set_count = mocker.patch('zulipterminal.model.set_count')
         model.msg_list = mocker.Mock()
         model.msg_list.log = []
+        model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile['user_id']
@@ -681,6 +688,7 @@ class TestModel:
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
         model.found_newest = False
+        model.notify_user.assert_called_once_with(response)
         model.append_message(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
@@ -705,6 +713,27 @@ class TestModel:
         }
         model.update_topic_index(86, topic_name)
         assert model.index['topics'][86] == topic_order_final
+
+    @pytest.mark.parametrize('vary_each_msg, types_when_notify_called', [
+        ({'sender_id': 1}, []),  # model.user_id is 1
+        ({'sender_id': 2, 'flags': ['mentioned']}, ['stream', 'private']),
+        ({'sender_id': 2, 'flags': ['wildcard_mentioned']},
+         ['stream', 'private']),
+        ({'sender_id': 2, 'flags': []}, ['private']),
+    ], ids=['self_message', 'mentioned_msg', 'wildcard_mentioned',
+            'not_mentioned'])
+    def test_notify_users_calling_msg_type(self, mocker, model,
+                                           message_fixture, vary_each_msg,
+                                           types_when_notify_called):
+        message_fixture.update(vary_each_msg)
+        model.user_id = 1
+        notify = mocker.patch('zulipterminal.model.notify')
+        model.notify_user(message_fixture)
+        if message_fixture['type'] in types_when_notify_called:
+            # TODO: Add parameters with which notify is called.
+            assert notify.called
+        else:
+            notify.assert_not_called
 
     @pytest.mark.parametrize('response, update_call_count, new_index', [
         ({  # Only subject of 1 message is updated.
