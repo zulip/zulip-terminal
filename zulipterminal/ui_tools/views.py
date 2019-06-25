@@ -767,12 +767,12 @@ class MsgInfoView(urwid.ListBox):
                             "\n"
                             for reaction in msg['reactions']])
             reactions[-1] = reactions[-1].rstrip("\n")
-
         msg_info = OrderedDict([
             ('Date & Time', time.ctime(msg['timestamp'])[:-5]),
             ('Sender', msg['sender_full_name']),
             ('Sender\'s Email ID', msg['sender_email']),
             ('Reactions', reactions if msg['reactions'] else '---None---'),
+            ('Edit History', 'Press \'e\' to view'),
             ])
 
         widths = [(len(field)+7,
@@ -798,4 +798,150 @@ class MsgInfoView(urwid.ListBox):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
+        elif is_command_key('EDIT_HISTORY', key):
+            self.controller.show_edit_history(self.msg)
         return super(MsgInfoView, self).keypress(size, key)
+
+
+class EditHistoryView(urwid.ListBox):
+
+    def __init__(self, controller: Any, msg: Any):
+        self.controller = controller
+        self.msg = msg
+
+        self.width = 70
+        self.height = 0  # Calculated depending on contents to show
+        self.to_show = []  # type: List[urwid.Pile]
+
+        if 'edit_history' in self.msg:
+            # Current version
+            timestamp = time.ctime(msg['last_edit_timestamp'])[:-5]
+            topic = [msg['subject']]
+            # tracks topic for versions with no topic change
+            orig_topic = topic
+            if 'prev_subject' in msg['edit_history'][0]:
+                topic.append(" (edited)")
+            content = [msg['content_to_show']]
+            # tracks content for versions with no content change
+            orig_content = content
+            self.version_contents = []  # type: List[Any]
+
+            self.version_contents.extend([
+                urwid.Columns([
+                    urwid.AttrWrap(
+                        urwid.Text(topic), 'edit_topic'),
+                    (20, urwid.AttrWrap(
+                        urwid.Text(timestamp, align='right'),
+                        'edit_time'))
+                        ]),
+                urwid.AttrWrap(
+                    urwid.Text("(Current version)"), 'edit_history'),
+                urwid.Text([content, "\n"])
+                ])
+            if not msg['edit_history'][0]['user_id'] == msg['sender_id']:
+                # if edit_author not sender, find author by user id
+                edit_author = ''
+                for user in self.controller.view.users:
+                    if user['user_id'] == msg['edit_history'][0]['user_id']:
+                        edit_author = user['full_name']
+                self.version_contents.extend([
+                    urwid.AttrWrap(
+                        urwid.Text(["edited by ", edit_author, "\n"],
+                                   align='right'), 'edit_history')])
+
+            self.to_show.append(urwid.Pile(self.version_contents))
+
+            self.height += self.to_show[-1].rows((self.width,))
+
+            # Edited versions (all except current & original)
+            for version in range(0, len(msg['edit_history'])-1):
+                # each version contains previous version's content and subject
+                # timestamp of future version matches with
+                # current version's contents
+                self.version_contents = []
+                timestamp = time.ctime(msg['edit_history'][version+1]
+                                          ['timestamp'])[:-5]
+                if 'prev_subject' in msg['edit_history'][version]:
+                    topic = [msg['edit_history'][version]['prev_subject']]
+                    orig_topic = topic
+                    if 'prev_subject' in msg['edit_history'][version+1]:
+                        if msg['edit_history'][version+1]['prev_subject'] !=\
+                           msg['edit_history'][version]['prev_subject']:
+                            topic.append(" (edited)")
+                else:
+                    topic = orig_topic
+                    if 'prev_subject' in msg['edit_history'][version+1]:
+                        topic.append(" (edited)")
+                if 'prev_content' in msg['edit_history'][version]:
+                    content = [msg['edit_history'][version]['prev_content']]
+                    orig_content = content
+                else:
+                    content = orig_content
+                edit_author_id = msg['edit_history'][version+1]['user_id']
+                self.edit_history_content(topic,
+                                          timestamp,
+                                          content,
+                                          edit_author_id)
+                self.to_show.append(urwid.Pile(self.version_contents))
+                self.height += self.to_show[-1].rows((self.width,))
+
+            # Original version
+            timestamp = time.ctime(msg['timestamp'])[:-5]
+            if 'prev_subject' in msg['edit_history'][-1]:
+                topic = [msg['edit_history'][-1]['prev_subject']]
+            else:
+                topic = orig_topic
+            if 'prev_content' in msg['edit_history'][-1]:
+                content = [msg['edit_history'][-1]['prev_content']]
+            else:
+                content = orig_content
+            self.edit_history_content(topic,
+                                      timestamp,
+                                      content,
+                                      self.msg['sender_id'])
+            self.to_show.append(urwid.Pile(self.version_contents))
+            self.height += self.to_show[-1].rows((self.width,))
+
+        # Unedited
+        else:
+            self.to_show = urwid.Pile([
+                (urwid.AttrWrap(
+                    urwid.Text("Unedited"), 'edit_history'))
+            ])
+            self.to_show[-1].rows((self.width,))
+
+        self.log = urwid.SimpleFocusListWalker(self.to_show)
+
+        super(EditHistoryView, self).__init__(self.log)
+
+    def edit_history_content(self,
+                             topic: List[str],
+                             time: str,
+                             content: List[Any],
+                             edit_author_id: int) -> None:
+        self.version_contents.extend([
+                            urwid.Columns([
+                                (urwid.AttrWrap(
+                                    urwid.Text(topic), 'edit_topic')),
+                                (20, urwid.AttrWrap(
+                                    urwid.Text(time, align='right'),
+                                    'edit_time'))]),
+                            (urwid.Text([content, "\n"]))])
+        if not edit_author_id == self.msg['sender_id']:
+            # if edit_author not sender, find author by user id
+            for user in self.controller.view.users:
+                if user['user_id'] == edit_author_id:
+                    edit_author = user['full_name']
+            self.version_contents.extend([
+                            urwid.AttrWrap(urwid.Text(["edited by ",
+                                                       edit_author, "\n"],
+                                                      align='right'),
+                                           'edit_history')])
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('MSG_INFO', key):
+            self.controller.exit_popup()
+        elif is_command_key('GO_BACK', key) or\
+                is_command_key('EDIT_HISTORY', key):
+            self.controller.show_msg_info(self.msg)
+        return super(EditHistoryView, self).keypress(size, key)

@@ -148,6 +148,11 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'i'},
         'help_text': 'View message information',
     }),
+    ('EDIT_HISTORY', {
+        'keys': {'e'},
+        'help_text': 'View edit history from message information box',
+        'excluded_from_random_tips': True,
+    }),
     ('QUIT', {
         'keys': {'ctrl c'},
         'help_text': 'Quit',

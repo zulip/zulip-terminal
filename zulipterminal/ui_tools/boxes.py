@@ -484,6 +484,8 @@ class MessageBox(urwid.Pile):
             edited_label_size = 0
             left_padding = 8
 
+        self.message['content_to_show'] = content
+
         content = urwid.Padding(
             urwid.Columns([
                 (edited_label_size,
