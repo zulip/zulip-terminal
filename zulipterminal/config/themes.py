@@ -43,6 +43,7 @@ LIGHTGREEN = 'h142'  # bright_green
 LIGHTRED = 'h167'  # bright_red
 LIGHTREDBOLD = '%s, bold' % LIGHTRED
 GRAY = 'h244'  # gray_244
+LIGHTBLUEBOLD = '%s, bold' % LIGHTBLUE
 
 THEMES = {
     'default': [
@@ -70,6 +71,9 @@ THEMES = {
         ('bold',         'white, bold',     ''),
         ('footer',       'white',           'dark red',  'bold'),
         ('starred',      'light red, bold', ''),
+        ('edit_history', 'light red',       ''),
+        ('edit_time',    'light blue, bold', 'dark gray'),
+        ('edit_topic',   'white, bold',     'dark gray'),
     ],
     'gruvbox': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -122,6 +126,12 @@ THEMES = {
          'bold',         WHITE,             DARKRED),
         ('starred',      'light red, bold', 'black',
          None,           LIGHTREDBOLD,      BLACK),
+        ('edit_history', 'light red',       'black',
+         None,           LIGHTRED,          BLACK),
+        ('edit_time',    'light blue, bold', 'dark gray',
+         None,           LIGHTBLUEBOLD,     GRAY),
+        ('edit_topic',   'white, bold',     'dark gray',
+         None,           WHITEBOLD,         GRAY),
     ],
     'light': [
         (None,           'black',           'white'),
@@ -148,6 +158,9 @@ THEMES = {
         ('bold',         'white, bold',     'dark gray'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark gray'),
+        ('edit_history', 'light red',       'white'),
+        ('edit_time',    'white, bold',     'dark gray'),
+        ('edit_topic',   'white, bold',     'dark gray'),
     ],
     'blue': [
         (None,           'black',           'light blue'),
@@ -174,6 +187,9 @@ THEMES = {
         ('bold',         'white, bold',     'dark blue'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark blue'),
+        ('edit_history', 'light red',       'light blue'),
+        ('edit_time',    'white, bold',     'dark blue'),
+        ('edit_topic',   'white, bold',     'dark blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
