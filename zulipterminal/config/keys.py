@@ -144,6 +144,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl s', '*'},
         'help_text': 'Add/remove star status of the current message',
     }),
+    ('MSG_INFO', {
+        'keys': {'i'},
+        'help_text': 'View message information',
+    }),
     ('QUIT', {
         'keys': {'ctrl c'},
         'help_text': 'Quit',
