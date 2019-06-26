@@ -128,11 +128,11 @@ class StreamButton(TopButton):
                          count=count)
 
         # Mark muted streams 'M' during button creation.
-        self.mark_muted()
+        if self.stream_id in self.model.muted_streams:
+            self.mark_muted()
 
     def mark_muted(self) -> None:
-        if self.stream_id in self.model.muted_streams:
-            self.update_count(-1)
+        self.update_count(-1)
 
 
 class UserButton(TopButton):

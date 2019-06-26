@@ -1434,11 +1434,13 @@ class TestStreamButton:
                           is_private, expected_prefix,
                           width, count, short_text, caption='caption'):
         mocker.patch(STREAMBUTTON + ".mark_muted")
+        controller = mocker.Mock()
+        controller.model.muted_streams = {}
         properties = [caption, 5, '#ffffff', is_private]
         view_mock = mocker.Mock()
         view_mock.palette = [(None, 'black', 'white')]
         stream_button = StreamButton(properties,
-                                     controller=mocker.Mock(),
+                                     controller=controller,
                                      view=view_mock,
                                      width=width,
                                      count=count)
@@ -1457,13 +1459,15 @@ class TestStreamButton:
     ])
     def test_color_formats(self, mocker, color):
         mocker.patch(STREAMBUTTON + ".mark_muted")
+        controller = mocker.Mock()
+        controller.model.muted_streams = {}
         properties = ["", 1, color, False]  # only color is important
         view_mock = mocker.Mock()
         background = (None, 'white', 'black')
         view_mock.palette = [background]
 
         stream_button = StreamButton(properties,
-                                     controller=mocker.Mock(),
+                                     controller=controller,
                                      view=view_mock,
                                      width=10,
                                      count=5)
@@ -1479,12 +1483,14 @@ class TestStreamButton:
     def test_invalid_color_format(self, mocker, color):
         properties = ["", 1, color, False]  # only color is important
         view_mock = mocker.Mock()
+        controller = mocker.Mock()
+        controller.model.muted_streams = {}
         background = (None, 'white', 'black')
         view_mock.palette = [background]
 
         with pytest.raises(RuntimeError) as e:
             StreamButton(properties,
-                         controller=mocker.Mock(),
+                         controller=controller,
                          view=view_mock,
                          width=10,
                          count=5)
