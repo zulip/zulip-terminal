@@ -319,9 +319,13 @@ class Model:
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor and response['anchor'] != 10000000000000000:
                 self.index['pointer'][str(self.narrow)] = response['anchor']
-            query_range = num_after + num_before + 1
-            if len(response['messages']) < (query_range):
-                self.found_newest = True
+            if 'found_newest' in response:
+                self.found_newest = response['found_newest']
+            else:
+                # Older versions of the server does not contain the
+                # 'found_newest' flag. Instead, we use this logic:
+                query_range = num_after + num_before + 1
+                self.found_newest = len(response['messages']) < query_range
             return True
         return False
 
