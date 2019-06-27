@@ -291,14 +291,15 @@ class MessageBox(urwid.Pile):
             for reaction in reactions:
                 if reaction['reaction_type'] == 'unicode_emoji':
                     reacts[reaction['emoji_code']] += 1
-                elif reaction['reaction_type'] == 'realm_emoji':
-                    custom_reacts[reaction['emoji_name']] += 1
+                else:
+                    # Includes realm_emoji and zulip_extra_emoji
+                    custom_reacts[":"+reaction['emoji_name']+":"] += 1
             dis = [
                 '\\U' + '0'*(8-len(emoji)) + emoji + ' ' + str(reacts[emoji]) +
                 ' ' for emoji in reacts]
             emojis = ''.join(e.encode().decode('unicode-escape') for e in dis)
             custom_emojis = ''.join(
-                ['{} {}'.format(r, custom_reacts[r]) for r in custom_reacts])
+                ['{} {} '.format(r, custom_reacts[r]) for r in custom_reacts])
             return urwid.Padding(
                 urwid.Text(([
                     ('emoji', emoji.demojize(emojis + custom_emojis))
