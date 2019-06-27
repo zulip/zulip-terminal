@@ -344,6 +344,11 @@ class MessageBox(urwid.Pile):
                 text = unrendered_div_classes[matching_class.pop()]
                 if text:
                     markup.append(unrendered_template.format(text))
+            elif (element.name == 'img' and
+                    element.attrs.get('class', []) == ['emoji']):
+                # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
+                emoji_name = element.attrs.get('title', [])
+                markup.append(":"+emoji_name+":")
             elif element.name in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
                 text = unrendered_tags[element.name]

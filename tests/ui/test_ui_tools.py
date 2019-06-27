@@ -945,6 +945,8 @@ class TestMessageBox:
         ('<span class="emoji">:smile:</span>', [':smile:']),
         ('<div class="inline-preview-twitter"',
             ['[TWITTER PREVIEW NOT RENDERED]']),
+        ('<img class="emoji" title="zulip"/>', [':zulip:']),
+        ('<img class="emoji" title="github"/>', [':github:']),
     ], ids=[
         'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
@@ -952,7 +954,7 @@ class TestMessageBox:
         'link_userupload', 'listitem', 'listitems',
         'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
         'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
-        'emoji', 'preview-twitter'
+        'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])
     def test_soup2markup(self, content, markup):
         message = dict(display_recipient=['x'], stream_id=5, subject='hi',
