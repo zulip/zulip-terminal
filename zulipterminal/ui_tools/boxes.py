@@ -682,7 +682,7 @@ class SearchBox(urwid.Pile):
         super(SearchBox, self).__init__(self.main_view())
 
     def main_view(self) -> Any:
-        self.text_box = ReadlineEdit(u"Search: ")
+        self.text_box = ReadlineEdit(u"Search messages: ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.conversation_focus = urwid.Text(" ")
