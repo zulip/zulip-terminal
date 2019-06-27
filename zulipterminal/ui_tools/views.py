@@ -208,7 +208,7 @@ class StreamsView(urwid.Frame):
         self.search_box = StreamSearchBox(self)
         urwid.connect_signal(self.search_box, 'change', self.update_streams)
         super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
-            self.search_box, tlcorner=u'─', tline=u'─', lline=u'',
+            self.search_box, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
         ))
@@ -402,7 +402,7 @@ class RightColumnView(urwid.Frame):
                              self.update_user_list)
         self.view.user_search = self.user_search
         search_box = urwid.LineBox(
-            self.user_search, tlcorner=u'─', tline=u'─', lline=u'',
+            self.user_search, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
             )
