@@ -1362,13 +1362,34 @@ class TestMessageBox:
             <p>C</p>""", "░ A\n░ B\n\nC"),
         ("""<blockquote>
                 <p><a href='https://chat.zulip.org/'</a>czo</p>
-            </blockquote>""", "░ [czo](https://chat.zulip.org/)\n")
+            </blockquote>""", "░ [czo](https://chat.zulip.org/)\n"),
+        pytest.param("""<blockquote>
+                            <blockquote>
+                                <p>A<br>
+                                B</p>
+                            </blockquote>
+                        </blockquote>
+            """, "░ ░ A\n░ ░ B",
+                     marks=pytest.mark.xfail(reason="rendered_bug")),
+        pytest.param("""<blockquote>
+                            <blockquote>
+                                <p>A</p>
+                            </blockquote>
+                            <p>B</p>
+                            <blockquote>
+                                <p>C</p>
+                            </blockquote>
+                        </blockquote>
+        """, "░ ░ A\n░ B\n░ ░ C",
+                     marks=pytest.mark.xfail(reason="rendered_bug")),
     ], ids=[
         "quoted level 1",
         "quoted level 2",
         "quoted level 3",
         "multi-line quoting",
-        "quoting with links"
+        "quoting with links",
+        "multi-line level 2",
+        "quoted level 2-1-2",
     ])
     def test_transform_content(self, mocker, raw_html, expected_content,
                                messages_successful_response):
