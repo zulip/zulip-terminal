@@ -565,8 +565,8 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
-            tlcorner=u'─', tline=u'─', lline=u'',
-            trcorner=u'─', blcorner=u'', rline=u'',
+            tlcorner=u'━', tline=u'━', lline=u'',
+            trcorner=u'━', blcorner=u'', rline=u'',
             bline=u'', brcorner=u'─'
             )
         return w
