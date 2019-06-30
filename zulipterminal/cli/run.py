@@ -14,23 +14,11 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes
 )
+from zulipterminal.helper import in_color
 from zulipterminal.version import ZT_VERSION
 
 LOG_FILENAME = 'zulip-terminal-tracebacks.log'
 logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
-
-
-def in_color(color: str, text: str) -> str:
-    color_for_str = {
-        'red': '1',
-        'green': '2',
-        'yellow': '3',
-        'blue': '4',
-        'purple': '5',
-        'cyan': '6',
-    }
-    # We can use 3 instead of 9 if high-contrast is eg. less compatible?
-    return "\033[9{}m{}\033[0m".format(color_for_str[color], text)
 
 
 def parse_args(argv: List[str]) -> argparse.Namespace:

@@ -447,3 +447,16 @@ def notify(title: str, html_text: str) -> None:
     if command:
         res = subprocess.run(shlex.split(command), stdout=subprocess.DEVNULL,
                              stderr=subprocess.STDOUT)
+
+
+def in_color(color: str, text: str) -> str:
+    color_for_str = {
+        'red': '1',
+        'green': '2',
+        'yellow': '3',
+        'blue': '4',
+        'purple': '5',
+        'cyan': '6',
+    }
+    # We can use 3 instead of 9 if high-contrast is eg. less compatible?
+    return "\033[9{}m{}\033[0m".format(color_for_str[color], text)
