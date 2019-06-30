@@ -84,6 +84,8 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
             key = messages[id]['sender_id']
             unreads = unread_counts['unread_pms']  # type: ignore
 
+        # broader unread counts (for all_* and streams) are updated
+        # later conditionally.
         if key in unreads:
             unreads[key] += new_count
             if unreads[key] == 0:
@@ -115,6 +117,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
             else:
                 for stream in streams:
                     if stream.stream_id == stream_id:
+                        # FIXME: Update unread_count[streams]?
                         stream.update_count(stream.count + new_count)
                         break
         else:
@@ -122,10 +125,12 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                 if user.user_id == user_id:
                     user.update_count(user.count + new_count)
                     break
-            all_pm.update_count(all_pm.count + new_count)
+            unread_counts['all_pms'] += new_count
+            all_pm.update_count(unread_counts['all_pms'])
 
         if add_to_counts:
-            all_msg.update_count(all_msg.count + new_count)
+            unread_counts['all_msg'] += new_count
+            all_msg.update_count(unread_counts['all_msg'])
 
     while not hasattr(controller, 'loop'):
         time.sleep(0.1)
