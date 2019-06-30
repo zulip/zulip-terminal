@@ -4,6 +4,7 @@ import codecs
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 from zulipterminal.version import ZT_VERSION
+from zulipterminal.helper import in_color, LINUX, WSL, MACOS
 
 
 class PyTest(TestCommand):
@@ -90,3 +91,22 @@ setup(
         'mypy_extensions>=0.4',
     ],
 )
+
+
+print(in_color('green', '\nZulip Terminal was successfully installed!'))
+if MACOS:
+    sys.exit(0)
+print('\nTo ensure notifications are displayed, you may wish to run the '
+      'following:\n')
+if WSL:
+    print(in_color('blue', 'Run powershell as "admin" and run these commands'
+                   ' to install dependencies for showing notifications:'))
+    print(in_color('red', '\nset-executionpolicy remotesigned\nInstall-Module'
+                          ' -Name BurntToast\n'))
+elif LINUX:
+    print(in_color('blue', 'The following command installs `notify-send` on'
+                   ' Debian based systems, similar commands can be found for'
+                   ' other linux systems as well.'))
+    print(in_color('red', '\nsudo apt-get install libnotify-bin\n'))
+print('You can refer to https://github.com/zulip/zulip-terminal#notifications'
+      ' for more info on showing notifications.')
