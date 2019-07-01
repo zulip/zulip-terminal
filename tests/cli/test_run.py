@@ -1,5 +1,6 @@
 import pytest
-from zulipterminal.cli.run import main, in_color, THEMES
+from zulipterminal.cli.run import main, in_color
+from zulipterminal.config.themes import THEMES
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 

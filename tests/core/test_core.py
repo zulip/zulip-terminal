@@ -5,6 +5,7 @@ import pytest
 
 from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
+from zulipterminal.config.themes import THEMES
 
 CORE = "zulipterminal.core"
 
@@ -26,11 +27,11 @@ class TestController:
     @pytest.fixture
     def controller(self, mocker) -> None:
         self.config_file = 'path/to/zuliprc'
-        self.theme = 'default'
+        self.theme_name = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
-        return Controller(self.config_file, self.theme, self.autohide,
-                          self.notify_enabled)
+        return Controller(self.config_file, self.theme_name,
+                          self.config_file, self.autohide, self.notify_enabled)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
@@ -40,7 +41,9 @@ class TestController:
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
-        assert controller.theme == self.theme
+        assert controller.theme_name == self.theme_name
+        assert controller.theme == THEMES[self.theme_name]
+        assert controller.zuliprc_path == self.config_file
 
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:

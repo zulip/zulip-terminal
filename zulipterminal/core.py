@@ -15,7 +15,7 @@ from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import HelpView, MsgInfoView
-from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.themes import THEMES
 from zulipterminal.ui_tools.views import PopUpConfirmationView
 
 
@@ -25,13 +25,15 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: ThemeSpec,
-                 autohide: bool, notify: bool) -> None:
-        self.theme = theme
+    def __init__(self, config_file: str, theme_name: str,
+                 zuliprc_path: str, autohide: bool, notify: bool) -> None:
+        self.theme = THEMES[theme_name]
+        self.theme_name = theme_name
         self.autohide = autohide
         self.notify_enabled = notify
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+        self.zuliprc_path = os.path.expanduser(zuliprc_path)
 
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,

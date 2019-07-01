@@ -12,7 +12,7 @@ from urwid import set_encoding
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.config.themes import (
-    THEMES, all_themes, complete_and_incomplete_themes
+    all_themes, complete_and_incomplete_themes
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -200,7 +200,8 @@ def main(options: Optional[List[str]]=None) -> None:
         else:
             theme_to_use = zterm['theme']
         available_themes = all_themes()
-        if theme_to_use[0] not in available_themes:
+        theme = theme_to_use[0]
+        if theme not in available_themes:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
             print("The following themes are available:")
@@ -239,7 +240,8 @@ def main(options: Optional[List[str]]=None) -> None:
                 sys.exit(1)
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
         Controller(zuliprc_path,
-                   THEMES[theme_to_use[0]],
+                   theme,
+                   zuliprc_path,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',
