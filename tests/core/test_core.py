@@ -30,6 +30,8 @@ class TestController:
         self.theme_name = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
+                                      return_value=mocker.Mock())
         return Controller(self.config_file, self.theme_name,
                           self.config_file, self.autohide, self.notify_enabled)
 
@@ -181,14 +183,12 @@ class TestController:
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        ret_mock = mocker.Mock()
-        mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
         controller.view.palette = {
             'default': 'theme_properties'
         }
-        mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
+        controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
         controller.main()
-        assert mock_loop.call_count == 1
+        assert controller.loop.run.call_count == 1
 
     @pytest.mark.parametrize('muted_streams, action', [
         ({205, 89}, 'unmuting'),
@@ -209,3 +209,8 @@ class TestController:
                                  stream_button.stream_name +
                                  "' ?"), "center")
         pop_up.assert_called_once_with(controller, text(), partial())
+
+    def test_initialize_loop(self, mocker, controller):
+        assert self.main_loop.call_count == 1
+        controller.loop.watch_pipe.assert_called_once_with(
+            controller.draw_screen)
