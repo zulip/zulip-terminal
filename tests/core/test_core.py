@@ -187,7 +187,11 @@ class TestController:
             'default': 'theme_properties'
         }
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
+        controller.show_main_view = mocker.Mock()
+
         controller.main()
+
+        controller.show_main_view.assert_called_once_with()
         assert controller.loop.run.call_count == 1
 
     @pytest.mark.parametrize('muted_streams, action', [

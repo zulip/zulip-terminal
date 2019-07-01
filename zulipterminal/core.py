@@ -15,7 +15,6 @@ from zulipterminal.helper import asynch
 from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.config.themes import THEMES
 from zulipterminal.ui_tools.views import (
     HelpView,
     LoadingView,
@@ -23,6 +22,11 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
 )
+from zulipterminal.config.themes import (
+    THEMES,
+    complete_and_incomplete_themes,
+)
+from zulipterminal.config.tutorial import TUTORIAL
 
 
 class Controller:
@@ -326,6 +330,37 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
+    @asynch
+    def show_main_view(self) -> None:
+        def spinning_cursor() -> Any:
+            while True:
+                for cursor in '|/-\\':
+                    yield cursor
+
+        def loading_text(spinner: List[str]) -> List[Any]:
+            complete, incomplete = complete_and_incomplete_themes()
+            SETTINGS = ["\n\nTheme: ",
+                        ('starred', self.theme_name),
+                        "\nAutohide: ",
+                        ('starred', str(self.autohide))]
+            if self.theme_name in incomplete:
+                WARNING = [('name',
+                            "\nWARNING: Incomplete theme; "
+                            "results may vary!\n"
+                            "      (you could try: {})".
+                            format(", ".join(complete)))]
+                SETTINGS += WARNING
+            return [TUTORIAL, ('idle', ["\nLoading "] + spinner), SETTINGS]
+
+        self.capture_stdout()
+        spinner = spinning_cursor()
+        while not hasattr(self, 'view'):
+            self.txt.set_text(loading_text([next(spinner)]))
+            self.update_screen()
+            time.sleep(0.1)
+        self.txt.set_controller(self)
+        self.txt.keypress((20, 20), 'enter')
+
     def initialize_loop(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
@@ -351,6 +386,7 @@ class Controller:
                 'quit': 'undefined',  # Disable ^\, ^4
             }
             old_signal_list = self.loop.screen.tty_signal_keys(**disabled_keys)
+            self.show_main_view()
             self.loop.run()
         except Exception:
             self.restore_stdout()
