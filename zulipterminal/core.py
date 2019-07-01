@@ -5,6 +5,7 @@ import sys
 import time
 import signal
 from functools import partial
+import configparser
 
 import urwid
 import zulip
@@ -76,6 +77,13 @@ class Controller:
 
     def raise_exception(self, *args: Any, **kwargs: Any) -> None:
         raise self.exception
+
+    def update_zuliprc(self, setting: str, value: str) -> None:
+        zuliprc = configparser.ConfigParser()
+        re = zuliprc.read(self.zuliprc_path)
+        zuliprc['zterm'][setting] = value
+        with open(self.zuliprc_path, 'w') as config_file:
+            zuliprc.write(config_file)
 
     def capture_stdout(self, path: str='debug.log') -> None:
         if hasattr(self, '_stdout'):
