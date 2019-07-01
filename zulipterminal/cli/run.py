@@ -161,10 +161,8 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     if 'zterm' in zuliprc:
         config = zuliprc['zterm']
         ZULIPRC_CONFIG = 'in zuliprc file'
-        if 'theme' in config:
-            settings['theme'] = (config['theme'], ZULIPRC_CONFIG)
-        if 'autohide' in config:
-            settings['autohide'] = (config['autohide'], ZULIPRC_CONFIG)
+        for conf in config:
+            settings[conf] = (config[conf], ZULIPRC_CONFIG)
 
     return settings
 
