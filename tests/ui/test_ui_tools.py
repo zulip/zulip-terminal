@@ -13,6 +13,7 @@ from zulipterminal.ui_tools.views import (
     HelpView,
     ModListWalker,
     PopUpConfirmationView,
+    MsgInfoView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -1028,6 +1029,76 @@ class TestPopUpConfirmationView:
         popup_view.keypress(size, key)
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
+
+
+class TestMsgInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch, message_fixture):
+        self.controller = mocker.Mock()
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.msg_info_view = MsgInfoView(self.controller, message_fixture)
+
+    def test_keypress_any_key(self):
+        key = "a"
+        size = (200, 20)
+        self.msg_info_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
+    def test_keypress_goback(self, key):
+        size = (200, 20)
+        self.msg_info_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_height_noreactions(self, message_fixture):
+        self.msg_info_view = MsgInfoView(self.controller, message_fixture)
+        expected_height = 5
+        assert self.msg_info_view.height == expected_height
+
+    @pytest.mark.parametrize('to_vary_in_each_message', [
+        {'reactions': [{
+                'emoji_name': 'thumbs_up',
+                'emoji_code': '1f44d',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'AARON@zulip.com',
+                    'full_name': 'aaron',
+                    'id': 1,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'heart',
+                'emoji_code': '2764',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }]}
+        ])
+    def test_height_reactions(self, message_fixture, to_vary_in_each_message):
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        self.msg_info_view = MsgInfoView(self.controller, varied_message)
+        expected_height = 8
+        assert self.msg_info_view.height == expected_height
 
 
 class TestMessageBox:
