@@ -22,7 +22,6 @@ class TestController:
                                                   '.poll_for_events')
         self.model.view = self.view
         self.view.focus_col = 1
-        mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
     def controller(self, mocker) -> None:

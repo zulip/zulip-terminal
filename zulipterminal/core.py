@@ -45,33 +45,12 @@ class Controller:
         self.editor = None  # type: Any
         self.zuliprc_path = os.path.expanduser(zuliprc_path)
 
-        self.show_loading()
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
         self.init_model_view()
 
         self.initialize_loop()
-
-    @asynch
-    def show_loading(self) -> None:
-
-        def spinning_cursor() -> Any:
-            while True:
-                for cursor in '|/-\\':
-                    yield cursor
-
-        spinner = spinning_cursor()
-        sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
-        while not hasattr(self, 'view'):
-            next_spinner = "Loading " + next(spinner)
-            sys.stdout.write(next_spinner)
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b'*len(next_spinner))
-
-        sys.stdout.write('\n')
-        self.capture_stdout()
 
     @asynch
     def init_model_view(self) -> None:
@@ -337,7 +316,7 @@ class Controller:
                 for cursor in '|/-\\':
                     yield cursor
 
-        def loading_text(spinner: List[str]) -> List[Any]:
+        def loading_text(spinner: Any) -> List[Any]:
             complete, incomplete = complete_and_incomplete_themes()
             SETTINGS = ["\n\nTheme: ",
                         ('starred', self.theme_name),
