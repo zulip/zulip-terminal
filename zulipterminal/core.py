@@ -15,9 +15,14 @@ from zulipterminal.helper import asynch
 from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.views import HelpView, MsgInfoView
 from zulipterminal.config.themes import THEMES
-from zulipterminal.ui_tools.views import PopUpConfirmationView
+from zulipterminal.ui_tools.views import (
+    HelpView,
+    LoadingView,
+    HelpView,
+    MsgInfoView,
+    PopUpConfirmationView,
+)
 
 
 class Controller:
@@ -324,7 +329,11 @@ class Controller:
     def initialize_loop(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
-        self.loop = urwid.MainLoop(self.view,
+
+        self.txt = LoadingView("", align="left")
+        fill = urwid.Padding(self.txt, 'center', ('relative', 50))
+        fill = urwid.Filler(fill)
+        self.loop = urwid.MainLoop(fill,
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)

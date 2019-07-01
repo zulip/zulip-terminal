@@ -842,3 +842,26 @@ class MsgInfoView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super(MsgInfoView, self).keypress(size, key)
+
+
+class LoadingView(urwid.Text):
+
+    def set_controller(self, controller: Any) -> None:
+        self.controller = controller
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if hasattr(self, 'controller'):
+            if key == "enter":
+                # display the view
+                self.controller.loop.widget = self.controller.view
+                self.controller.loop.screen.register_palette(
+                    self.controller.theme)
+                self.controller.update_screen()
+            if key == 'h' and self.controller.wait_after_loading:
+                # Add tutorial=skip to the generated zuliprc
+                self.controller.update_zuliprc('tutorial', 'skip')
+                self.keypress(size, "enter")
+        return key
