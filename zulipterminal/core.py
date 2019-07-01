@@ -39,10 +39,7 @@ class Controller:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
-        self.model = Model(self)
-        self.view = View(self)
-        # Start polling for events after view is rendered.
-        self.model.poll_for_events()
+        self.init_model_view()
 
         self.initialize_loop()
 
@@ -65,6 +62,13 @@ class Controller:
 
         sys.stdout.write('\n')
         self.capture_stdout()
+
+    @asynch
+    def init_model_view(self) -> None:
+        self.model = Model(self)
+        self.view = View(self)
+        # Start polling for events after view is rendered.
+        self.model.poll_for_events()
 
     def capture_stdout(self, path: str='debug.log') -> None:
         if hasattr(self, '_stdout'):
