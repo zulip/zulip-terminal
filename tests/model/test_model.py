@@ -546,7 +546,7 @@ class TestModel:
         assert model.users == user_list
 
     @pytest.mark.parametrize('muted', [
-        set(), {86}, {14}, {99}, {99, 14}, {14, 86, 99}
+        set(), {1}, {2}, {99}, {99, 1}, {1, 2, 99}
     ])
     def test__stream_info_from_subscriptions(self, initial_data, streams,
                                              muted):
