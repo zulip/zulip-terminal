@@ -209,17 +209,6 @@ def main(options: Optional[List[str]]=None) -> None:
                   "using -t/--theme options on command line.")
             sys.exit(1)
 
-        valid_autohide_settings = {'autohide', 'no_autohide'}
-        if zterm['autohide'][0] not in valid_autohide_settings:
-            print("Invalid autohide setting '{}' was specified {}."
-                  .format(*zterm['autohide']))
-            print("The following options are available:")
-            for option in valid_autohide_settings:
-                print("  ", option)
-            print("Specify the autohide option in zuliprc file.")
-            sys.exit(1)
-        autohide_setting = (zterm['autohide'][0] == 'autohide')
-
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
@@ -231,9 +220,25 @@ def main(options: Optional[List[str]]=None) -> None:
                            format(", ".join(complete))))
         print("   autohide setting '{}' specified {}."
               .format(*zterm['autohide']))
+        # For binary settings
+        # Specify setting in order True, False
+        valid_settings = {
+            'autohide': ['autohide', 'no_autohide'],
+        }
+        boolean_settings = dict()  # type: Dict[str, bool]
+        for setting, valid_values in valid_settings.items():
+            if zterm[setting][0] not in valid_values:
+                print("Invalid {} setting '{}' was specified {}."
+                      .format(setting, *zterm[setting]))
+                print("The following options are available:")
+                for option in valid_values:
+                    print("  ", option)
+                print("Specify the {} option in zuliprc file.".format(setting))
+                sys.exit(1)
+            boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
-                   autohide_setting).main()
+                   **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))
