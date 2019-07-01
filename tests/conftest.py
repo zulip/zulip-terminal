@@ -101,6 +101,62 @@ def logged_on_user():
         'short_name': 'Human',
     }
 
+general_stream = {
+    'name': 'Some general stream',
+    'invite_only': False,
+    'color': '#b0a5fd',
+    'pin_to_top': False,
+    'stream_id': 1000,
+    'in_home_view': True,
+    'audible_notifications': False,
+    'description': 'General Stream',
+    'is_old_stream': True,
+    'desktop_notifications': False,
+    'stream_weekly_traffic': 0,
+    'push_notifications': False,
+    'email_address': 'general@example.comm',
+}
+
+# This is a private stream;
+# only description/stream_id/invite_only/name/color vary from above
+secret_stream = {
+    'description': 'Some private stream',
+    'stream_id': 99,
+    'pin_to_top': False,
+    'invite_only': True,
+    'name': 'Secret stream',
+    'email_address': 'secret@example.com',
+    'color': '#c3c3c3',
+    'in_home_view': True,
+    'audible_notifications': False,
+    'is_old_stream': True,
+    'desktop_notifications': False,
+    'stream_weekly_traffic': 0,
+    'push_notifications': False,
+}
+
+
+@pytest.fixture
+def streams_fixture():
+    streams = [general_stream, secret_stream]
+    for i in range(1, 3):
+        streams.append({
+            'name': 'Stream {}'.format(i),
+            'invite_only': False,
+            'color': '#b0a5fd',
+            'pin_to_top': False,
+            'stream_id': i,
+            'in_home_view': True,
+            'audible_notifications': False,
+            'description': 'A description of stream {}'.format(i),
+            'is_old_stream': True,
+            'desktop_notifications': False,
+            'stream_weekly_traffic': 0,
+            'push_notifications': False,
+            'email_address': 'stream{}@example.com'.format(i),
+        })
+    return deepcopy(streams)
+
 stream_msg_template = {
     'id': 537286,
     'sender_full_name': 'Foo Foo',
@@ -227,7 +283,7 @@ def messages_successful_response() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def initial_data(logged_on_user, users_fixture):
+def initial_data(logged_on_user, users_fixture, streams_fixture):
     """
     Response from /register API request.
     """
@@ -298,51 +354,7 @@ def initial_data(logged_on_user, users_fixture):
                           '78eecc367eedd27e6ac9292dc966beb6'
                           '?d=identicon&version=1'
         }],
-        'subscriptions': [{
-            'audible_notifications': False,
-            'description': '',
-            'stream_id': 86,
-            'is_old_stream': True,
-            'desktop_notifications': False,
-            'pin_to_top': False,
-            'stream_weekly_traffic': 0,
-            'invite_only': False,
-            'name': 'Django',
-            'push_notifications': False,
-            'email_address': '',
-            'color': '#94c849',
-            'in_home_view': True
-        }, {
-            'audible_notifications': False,
-            'description': 'The Google Summer of Code',
-            'stream_id': 14,
-            'is_old_stream': True,
-            'desktop_notifications': False,
-            'pin_to_top': False,
-            'stream_weekly_traffic': 53,
-            'invite_only': False,
-            'name': 'GSoC',
-            'push_notifications': False,
-            'email_address': '',
-            'color': '#c2c2c2',
-            'in_home_view': True
-        }, {
-            # This is a private stream;
-            # only description/stream_id/invite_only/name/color vary from above
-            'audible_notifications': False,
-            'description': 'Some private stream',
-            'stream_id': 99,
-            'is_old_stream': True,
-            'desktop_notifications': False,
-            'pin_to_top': False,
-            'stream_weekly_traffic': 53,
-            'invite_only': True,
-            'name': 'Secret stream',
-            'push_notifications': False,
-            'email_address': '',
-            'color': '#c3c3c3',
-            'in_home_view': True
-        }],
+        'subscriptions': streams_fixture,
         'msg': '',
         'max_message_id': 552761,
         'never_subscribed': [{
@@ -634,11 +646,10 @@ def streams():
     List of streams created corresponding to
     `initial_data` fixture.
     """
-    return [
-        ['Django', 86, '#94c849', False],
-        ['GSoC', 14, '#c2c2c2', False],
-        ['Secret stream', 99, '#c3c3c3', True],
-    ]
+    return [['Secret stream', 99, '#c3c3c3', True],
+            ['Some general stream', 1000, '#b0a5fd', False],
+            ['Stream 1', 1, '#b0a5fd', False],
+            ['Stream 2', 2, '#b0a5fd', False]]
 
 
 @pytest.fixture

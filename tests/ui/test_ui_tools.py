@@ -893,6 +893,9 @@ class TestLeftColumnView:
                 86: 1,
                 14: 1,
                 99: 1,
+                1: 1,
+                2: 1,
+                1000: 1,
             },
             'unread_topics': {
                 (205, 'TOPIC1'): 34,
@@ -917,7 +920,7 @@ class TestLeftColumnView:
                                           count=0, width=width)
 
     @pytest.mark.parametrize('pinned', [
-        set(), {86}, {14}, {99}, {14, 99}, {99, 86}, {14, 86}, {14, 99, 86}
+        set(), {1}, {2}, {99}, {99, 1}, {1, 2}, {2, 99}, {1, 2, 99}
     ])
     def test_streams_view(self, mocker, streams, pinned, width=40):
         self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
