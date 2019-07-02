@@ -319,7 +319,7 @@ def initial_data(logged_on_user):
             'name': 'Django',
             'push_notifications': False,
             'email_address': '',
-            'color': '#94c849',
+            'color': '#94c849',     # Color in '#xxxxxx' format
             'in_home_view': True
         }, {
             'audible_notifications': False,
@@ -333,7 +333,7 @@ def initial_data(logged_on_user):
             'name': 'GSoC',
             'push_notifications': False,
             'email_address': '',
-            'color': '#c2c2c2',
+            'color': '#ccc',        # Color in '#xxx' format
             'in_home_view': True
         }, {
             # This is a private stream;
@@ -640,9 +640,9 @@ def streams():
     `initial_data` fixture.
     """
     return [
-        ['Django', 86, '#94c849', False],
-        ['GSoC', 14, '#c2c2c2', False],
-        ['Secret stream', 99, '#c3c3c3', True],
+        ['Django', 86, '#9c4', False],
+        ['GSoC', 14, '#ccc', False],
+        ['Secret stream', 99, '#ccc', True],
     ]
 
 
