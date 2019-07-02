@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.helper import (
     index_messages,
+    canonicalize_color
 )
 from typing import Any
 
@@ -139,3 +140,20 @@ def test_index_starred(mocker,
             msg['flags'].append('starred')
 
     assert index_messages(messages, model, model.index) == expected_index
+
+
+@pytest.mark.parametrize('color', [
+    '#ffffff', '#f0f0f0', '#f0f1f2', '#fff', '#FFF', '#F3F5FA'
+])
+def test_color_formats(mocker, color):
+    canon = canonicalize_color(color)
+    assert canon == '#fff'
+
+
+@pytest.mark.parametrize('color', [
+    '#', '#f', '#ff', '#ffff', '#fffff', '#fffffff', '#abj', '#398a0s'
+])
+def test_invalid_color_format(mocker, color):
+    with pytest.raises(ValueError) as e:
+        canon = canonicalize_color(color)
+    assert str(e.value) == 'Unknown format for color "{}"'.format(color)
