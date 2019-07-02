@@ -2,6 +2,7 @@ import time
 from collections import defaultdict
 from itertools import chain, combinations
 from functools import wraps
+from re import match, ASCII
 from threading import Thread
 from typing import (
     Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
@@ -393,3 +394,19 @@ def powerset(iterable: Iterable[Any],
     s = list(iterable)
     powerset = chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
     return list(map(map_func, list(powerset)))
+
+
+def canonicalize_color(color: str) -> str:
+    """
+    Given a color of the format '#xxxxxx' or '#xxx', produces one of the
+    format '#xxx'. Always produces lowercase hex digits.
+    """
+    if match('^#[0-9A-Fa-f]{6}$', color, ASCII) is not None:
+        # '#xxxxxx' color, stored by current zulip server
+        return (color[:2] + color[3] + color[5]).lower()
+    elif match('^#[0-9A-Fa-f]{3}$', color, ASCII) is not None:
+        # '#xxx' color, which may be stored by the zulip server <= 2.0.0
+        # Potentially later versions too
+        return color.lower()
+    else:
+        raise ValueError('Unknown format for color "{}"'.format(color))

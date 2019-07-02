@@ -4,6 +4,7 @@ from zulipterminal.helper import (
     index_messages,
     powerset,
     classify_unread_counts,
+    canonicalize_color,
 )
 from typing import Any
 
@@ -181,3 +182,20 @@ def test_classify_unread_counts(mocker, initial_data, stream_dict,
     model.muted_streams = muted_streams
     assert classify_unread_counts(model) == dict(classified_unread_counts,
                                                  **vary_in_unreads)
+
+
+@pytest.mark.parametrize('color', [
+    '#ffffff', '#f0f0f0', '#f0f1f2', '#fff', '#FFF', '#F3F5FA'
+])
+def test_color_formats(mocker, color):
+    canon = canonicalize_color(color)
+    assert canon == '#fff'
+
+
+@pytest.mark.parametrize('color', [
+    '#', '#f', '#ff', '#ffff', '#fffff', '#fffffff', '#abj', '#398a0s'
+])
+def test_invalid_color_format(mocker, color):
+    with pytest.raises(ValueError) as e:
+        canon = canonicalize_color(color)
+    assert str(e.value) == 'Unknown format for color "{}"'.format(color)
