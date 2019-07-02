@@ -126,19 +126,10 @@ class StreamButton(TopButton):
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        self.stream_name, self.stream_id, orig_color, is_private = properties
+        self.stream_name, self.stream_id, color, is_private = properties
         self.model = controller.model
         self.count = count
         self.view = view
-
-        # Simplify the color from the original version & add to palette
-        # TODO Should this occur elsewhere and more intelligently?
-        if len(orig_color) == 7:  # modern zulip server format
-            color = ''.join(orig_color[i] for i in (0, 1, 3, 5))
-        elif len(orig_color) == 4:  # possible with zulip servers <=1.9.0 ?
-            color = orig_color
-        else:
-            raise RuntimeError("Unknown color format: '{}'".format(orig_color))
 
         for entry in view.palette:
             if entry[0] is None:

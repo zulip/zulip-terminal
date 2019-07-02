@@ -1217,7 +1217,7 @@ class TestMessageBox:
                        timestamp=99, reactions=[])
         self.model.stream_dict = {
             5: {  # matches stream_id above
-                'color': '#bfd56f',
+                'color': '#bd6',
             },
         }
         self.model.server_url = "SOME_BASE_URL"
@@ -1288,7 +1288,7 @@ class TestMessageBox:
     def test_main_view(self, mocker, message, last_message):
         self.model.stream_dict = {
             5: {
-                'color': '#bfd56f',
+                'color': '#bd6',
             },
         }
         msg_box = MessageBox(message, self.model, last_message)
@@ -1317,7 +1317,7 @@ class TestMessageBox:
         mocker.patch(VIEWS + ".urwid.Text")
         self.model.stream_dict = {
             5: {
-                'color': '#bfd56f',
+                'color': '#bd6',
             },
         }
         last_message = dict(message, **to_vary_in_last_message)
@@ -1406,7 +1406,7 @@ class TestMessageBox:
                                                  assert_search_bar):
         self.model.stream_dict = {
             205: {
-                'color': '#bfd56f',
+                'color': '#bd6',
             },
         }
         self.model.narrow = msg_narrow
@@ -1734,48 +1734,6 @@ class TestStreamButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
-
-    @pytest.mark.parametrize('color', [
-        '#ffffff', '#f0f0f0', '#f0f1f2', '#fff'
-    ])
-    def test_color_formats(self, mocker, color):
-        mocker.patch(STREAMBUTTON + ".mark_muted")
-        controller = mocker.Mock()
-        controller.model.muted_streams = {}
-        properties = ["", 1, color, False]  # only color is important
-        view_mock = mocker.Mock()
-        background = (None, 'white', 'black')
-        view_mock.palette = [background]
-
-        stream_button = StreamButton(properties,
-                                     controller=controller,
-                                     view=view_mock,
-                                     width=10,
-                                     count=5)
-
-        expected_palette = ([background] +
-                            [('#fff', '', '', '', '#fff, bold', 'black')] +
-                            [('s#fff', '', '', '', 'black', '#fff')])
-        assert view_mock.palette == expected_palette
-
-    @pytest.mark.parametrize('color', [
-        '#', '#f', '#ff', '#ffff', '#fffff', '#fffffff'
-    ])
-    def test_invalid_color_format(self, mocker, color):
-        properties = ["", 1, color, False]  # only color is important
-        view_mock = mocker.Mock()
-        controller = mocker.Mock()
-        controller.model.muted_streams = {}
-        background = (None, 'white', 'black')
-        view_mock.palette = [background]
-
-        with pytest.raises(RuntimeError) as e:
-            StreamButton(properties,
-                         controller=controller,
-                         view=view_mock,
-                         width=10,
-                         count=5)
-        assert str(e.value) == "Unknown color format: '{}'".format(color)
 
     @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
                              is_action_muting, updated_all_msgs', [

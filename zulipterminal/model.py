@@ -16,6 +16,7 @@ import zulip
 from zulipterminal.helper import (
     asynch,
     classify_unread_counts,
+    canonicalize_color,
     index_messages,
     set_count,
     initial_index,
@@ -523,6 +524,12 @@ class Model:
             subscriptions: List[Dict[str, Any]]
     ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
+
+        # Canonicalize color formats, since zulip server versions may use
+        # different formats
+        for subscription in subscriptions:
+            subscription['color'] = canonicalize_color(subscription['color'])
+
         # Mapping of stream-id to all available stream info
         # Stream IDs for muted streams
         # Limited stream info sorted by name (used in display)

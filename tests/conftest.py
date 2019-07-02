@@ -104,7 +104,7 @@ def logged_on_user():
 general_stream = {
     'name': 'Some general stream',
     'invite_only': False,
-    'color': '#b0a5fd',
+    'color': '#b0a5fd',                   # Color in '#xxxxxx' format
     'pin_to_top': False,
     'stream_id': 1000,
     'in_home_view': True,
@@ -126,7 +126,7 @@ secret_stream = {
     'invite_only': True,
     'name': 'Secret stream',
     'email_address': 'secret@example.com',
-    'color': '#c3c3c3',
+    'color': '#ccc',                      # Color in '#xxx' format
     'in_home_view': True,
     'audible_notifications': False,
     'is_old_stream': True,
@@ -662,10 +662,10 @@ def streams():
     List of streams created corresponding to
     `initial_data` fixture.
     """
-    return [['Secret stream', 99, '#c3c3c3', True],
-            ['Some general stream', 1000, '#b0a5fd', False],
-            ['Stream 1', 1, '#b0a5fd', False],
-            ['Stream 2', 2, '#b0a5fd', False]]
+    return [['Secret stream', 99, '#ccc', True],
+            ['Some general stream', 1000, '#baf', False],
+            ['Stream 1', 1, '#baf', False],
+            ['Stream 2', 2, '#baf', False]]
 
 
 @pytest.fixture
