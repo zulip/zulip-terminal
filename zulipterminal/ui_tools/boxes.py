@@ -113,6 +113,7 @@ class WriteBox(urwid.Pile):
                     self.msg_edit_id = None
                     self.keypress(size, 'esc')
         elif is_command_key('GO_BACK', key):
+            self.msg_edit_id = None
             self.view.controller.editor_mode = False
             self.main_view(False)
             self.view.middle_column.set_focus('body')
