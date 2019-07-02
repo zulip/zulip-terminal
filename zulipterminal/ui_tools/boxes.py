@@ -218,7 +218,7 @@ class MessageBox(urwid.Pile):
 
     def stream_header(self) -> Any:
         bar_color = self.model.stream_dict[self.stream_id]['color']
-        bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
+        bar_color = 's' + bar_color
         stream_title_markup = ('bar', [
             (bar_color, '{} >'.format(self.stream_name)),
             ('title', ' {} '.format(self.topic_name))
@@ -257,7 +257,7 @@ class MessageBox(urwid.Pile):
             text_to_fill = 'Starred messages'
         elif self.message['type'] == 'stream':
             bar_color = self.model.stream_dict[self.stream_id]['color']
-            bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
+            bar_color = 's' + bar_color
             if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
                 text_to_fill = ('bar', [  # type: ignore
                     (bar_color, '{}'.format(self.stream_name)),
