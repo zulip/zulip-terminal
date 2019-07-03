@@ -70,6 +70,7 @@ THEMES = {
         ('bold',         'white, bold',     ''),
         ('footer',       'white',           'dark red',  'bold'),
         ('starred',      'light red, bold', ''),
+        ('category',     'light blue, bold', ''),
     ],
     'gruvbox': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -122,6 +123,8 @@ THEMES = {
          'bold',         WHITE,             DARKRED),
         ('starred',      'light red, bold', 'black',
          None,           LIGHTREDBOLD,      BLACK),
+        ('category',     'light blue, bold', 'black',
+         None,           LIGHTBLUE,         BLACK),
     ],
     'light': [
         (None,           'black',           'white'),
@@ -148,6 +151,7 @@ THEMES = {
         ('bold',         'white, bold',     'dark gray'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark gray'),
+        ('category',     'dark gray, bold', 'light gray'),
     ],
     'blue': [
         (None,           'black',           'light blue'),
@@ -174,6 +178,7 @@ THEMES = {
         ('bold',         'white, bold',     'dark blue'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark blue'),
+        ('category',     'light gray, bold', 'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
