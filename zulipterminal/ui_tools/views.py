@@ -296,7 +296,6 @@ class StreamsView(urwid.Frame):
             self.set_focus('header')
             return key
         elif is_command_key('GO_BACK', key):
-            self.search_box.set_edit_text("Search streams")
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus('body')

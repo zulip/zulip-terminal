@@ -450,8 +450,6 @@ class TestStreamsView:
         mocker.patch.object(stream_view, 'set_focus')
         stream_view.keypress(size, key)
         stream_view.set_focus.assert_called_once_with("body")
-        stream_view.search_box.set_edit_text.assert_called_once_with(
-            "Search streams")
         assert stream_view.log == self.streams_btn_list
 
 

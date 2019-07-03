@@ -749,9 +749,11 @@ class StreamSearchBox(urwid.Edit):
     Search Box to search streams in real-time.urwid
     """
 
+    search_text = "Search streams"
+
     def __init__(self, stream_view: Any) -> None:
         self.stream_view = stream_view
-        super(StreamSearchBox, self).__init__(edit_text="Search streams")
+        super(StreamSearchBox, self).__init__(edit_text=self.search_text)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key) and len(self.stream_view.log):
@@ -760,7 +762,7 @@ class StreamSearchBox(urwid.Edit):
             self.stream_view.body.set_focus(0)
         if is_command_key('GO_BACK', key):
             self.stream_view.view.controller.editor_mode = False
-            self.set_edit_text("Search streams")
+            self.set_edit_text(self.search_text)
             self.stream_view.set_focus("body")
             self.stream_view.keypress(size, 'esc')
 
