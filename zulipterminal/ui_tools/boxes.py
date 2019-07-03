@@ -43,6 +43,7 @@ class WriteBox(urwid.Pile):
             func=self.generic_autocomplete,
             key=keys_for_command('AUTOCOMPLETE').pop()
         )
+        self.view.user_state = 'msg_compose'
         to_write_box = urwid.LineBox(
             self.to_write_box, tlcorner=u'─', tline=u'─', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
@@ -62,6 +63,7 @@ class WriteBox(urwid.Pile):
             func=self.generic_autocomplete,
             key=keys_for_command('AUTOCOMPLETE').pop()
         )
+        self.view.user_state = 'msg_compose'
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
             edit_text=caption
@@ -150,11 +152,13 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_id:
                     self.msg_edit_id = None
                     self.keypress(size, 'esc')
+                self.view.user_state = ''
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
             self.view.controller.editor_mode = False
             self.main_view(False)
             self.view.middle_column.set_focus('body')
+            self.view.user_state = ''
         elif is_command_key('TAB', key):
             if len(self.contents) == 0:
                 return key

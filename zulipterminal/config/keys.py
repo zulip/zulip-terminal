@@ -289,9 +289,15 @@ def keys_for_command(command: str) -> Set[str]:
         raise InvalidCommand(command)
 
 
-def commands_for_random_tips() -> List[KeyBinding]:
+def commands_for_random_tips(key_category: str='') -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
     """
-    return [key_binding for key_binding in KEY_BINDINGS.values()
-            if not key_binding.get('excluded_from_random_tips', False)]
+    if key_category == 'msg_compose':
+        return [key_binding for key_binding in KEY_BINDINGS.values()
+                if not key_binding.get('excluded_from_random_tips', False) and
+                'msg_compose' == key_binding.get('key_category', '')]
+    else:
+        return [key_binding for key_binding in KEY_BINDINGS.values()
+                if not key_binding.get('excluded_from_random_tips', False) and
+                not 'msg_compose' == key_binding.get('key_category', '')]

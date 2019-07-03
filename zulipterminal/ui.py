@@ -58,9 +58,9 @@ class View(urwid.WidgetWrap):
             bline=u'', brcorner=u''
         )
 
-    def get_random_help(self) -> List[Any]:
+    def get_random_help(self, user_state: str='') -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
-        allowed_commands = commands_for_random_tips()
+        allowed_commands = commands_for_random_tips(user_state)
         if not allowed_commands:
             return ['Help(?): ', ]
         random_command = random.choice(allowed_commands)
@@ -71,10 +71,11 @@ class View(urwid.WidgetWrap):
         ]
 
     @asynch
-    def set_footer_text(self, text_list: Optional[List[Any]]=None,
+    def set_footer_text(self, user_state: str='',
+                        text_list: Optional[List[Any]]=None,
                         duration: Optional[float]=None) -> None:
         if text_list is None:
-            text = self.get_random_help()
+            text = self.get_random_help(user_state)
         else:
             text = text_list
         self._w.footer.set_text(text)
@@ -83,6 +84,8 @@ class View(urwid.WidgetWrap):
             assert duration > 0
             time.sleep(duration)
             self.set_footer_text()
+
+    user_state = property(fset=set_footer_text)
 
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
