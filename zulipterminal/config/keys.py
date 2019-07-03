@@ -183,6 +183,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'View message information',
         'key_category': 'msg_actions',
     }),
+    ('REDRAW', {
+        'keys': {'ctrl l'},
+        'help_text': 'Redraw screen',
+        'key_category': 'general',
+    }),
     ('QUIT', {
         'keys': {'ctrl c'},
         'help_text': 'Quit',
