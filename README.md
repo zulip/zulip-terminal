@@ -99,7 +99,7 @@ autohide=autohide
 | Narrow to all starred messages                        | <kbd>f</kbd>                                  |
 | Next Unread Topic                                     | <kbd>n</kbd>                                  |
 | Next Unread private message                           | <kbd>p</kbd>                                  |
-| Search People                                         | <kbd>w</kbd>                                  |
+| Search Users                                          | <kbd>w</kbd>                                  |
 | Search Messages                                       | <kbd>/</kbd>                                  |
 | Search Streams                                        | <kbd>q</kbd>                                  |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
