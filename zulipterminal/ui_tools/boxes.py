@@ -727,9 +727,11 @@ class UserSearchBox(urwid.Edit):
     Search Box to search users in real-time.
     """
 
+    search_text = "Search People"
+
     def __init__(self, user_view: Any) -> None:
         self.user_view = user_view
-        super(UserSearchBox, self).__init__(edit_text="Search people")
+        super(UserSearchBox, self).__init__(edit_text=self.search_text)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
@@ -737,7 +739,7 @@ class UserSearchBox(urwid.Edit):
             self.user_view.set_focus("body")
         if is_command_key('GO_BACK', key):
             self.user_view.view.controller.editor_mode = False
-            self.set_edit_text("Search people")
+            self.set_edit_text(self.search_text)
             self.user_view.set_focus("body")
             self.user_view.keypress(size, 'esc')
 
