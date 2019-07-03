@@ -727,7 +727,7 @@ class UserSearchBox(urwid.Edit):
     Search Box to search users in real-time.
     """
 
-    search_text = "Search People"
+    search_text = "Search:"
 
     def __init__(self, user_view: Any) -> None:
         self.user_view = user_view
@@ -751,7 +751,7 @@ class StreamSearchBox(urwid.Edit):
     Search Box to search streams in real-time.urwid
     """
 
-    search_text = "Search streams"
+    search_text = "Search:"
 
     def __init__(self, stream_view: Any) -> None:
         self.stream_view = stream_view
