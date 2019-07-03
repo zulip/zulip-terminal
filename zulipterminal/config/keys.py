@@ -248,6 +248,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Autocomplete @mentions and #stream_names',
         'key_category': 'msg_compose',
     }),
+    ('REDRAW', {
+        'keys': {'ctrl l'},
+        'help_text': 'Redraw screen',
+        'key_category': 'general',
+    })
 ])  # type: OrderedDict[str, KeyBinding]
 
 HELP_CATEGORIES = OrderedDict([
