@@ -5,7 +5,11 @@ import threading
 import urwid
 import time
 
-from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
+from zulipterminal.config.keys import (
+    KEY_BINDINGS,
+    is_command_key,
+    HELP_CATEGORIES
+)
 from zulipterminal.helper import asynch, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
@@ -723,14 +727,29 @@ class HelpView(urwid.ListBox):
         max_widths = [max(width) for width in zip(*widths)]
         self.width = sum(max_widths)
 
-        self.log = urwid.SimpleFocusListWalker(
-            [urwid.AttrWrap(
-                urwid.Columns([
-                    urwid.Text(binding['help_text']),
-                    (max_widths[1], urwid.Text(", ".join(binding['keys'])))
-                ], dividechars=2),
-                None if index % 2 else 'help')
-             for index, binding in enumerate(KEY_BINDINGS.values())])
+        help_menu_content = []  # type: List[urwid.AttrWrap]
+        for category in HELP_CATEGORIES:
+            if len(help_menu_content) > 0:  # Separate categories by newline
+                help_menu_content.append(urwid.Text(''))
+
+            help_menu_content.append(urwid.Text(('category',
+                                                 HELP_CATEGORIES[category])))
+
+            keys_in_category = (binding for binding in KEY_BINDINGS.values()
+                                if binding['key_category'] == category)
+            for help_item_number, binding in enumerate(keys_in_category):
+                help_menu_content.append(
+                    urwid.AttrWrap(
+                        urwid.Columns([
+                            urwid.Text(binding['help_text']),
+                            (max_widths[1],
+                                urwid.Text(", ".join(binding['keys'])))
+                            ], dividechars=2),
+                        None if help_item_number % 2 else 'help'
+                    )
+                )
+
+        self.log = urwid.SimpleFocusListWalker(help_menu_content)
 
         self.height = len(self.log)
 
