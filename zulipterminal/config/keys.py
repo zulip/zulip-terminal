@@ -118,7 +118,7 @@ KEY_BINDINGS = OrderedDict([
     }),
     ('SEARCH_PEOPLE', {
         'keys': {'w'},
-        'help_text': 'Search People',
+        'help_text': 'Search users',
     }),
     ('SEARCH_MESSAGES', {
         'keys': {'/'},
