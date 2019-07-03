@@ -96,6 +96,7 @@ Install-Module -Name BurntToast
 | ----------------------------------------------------- | --------------------------------------------- |
 | Show/hide help menu                                   | <kbd>?</kbd>                                  |
 | Go back                                               | <kbd>esc</kbd>                                |
+| Redraw screen                                         | <kbd>Ctrl</kbd> + <kbd>l</kbd>                |
 | Quit                                                  | <kbd>Ctrl</kbd> + <kbd>C</kbd>                |
 
 ### Navigation
