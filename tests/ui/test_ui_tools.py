@@ -864,9 +864,6 @@ class TestRightColumnView:
 
         right_col_view.keypress(size, key)
 
-        right_col_view.user_search.set_edit_text.assert_called_once_with(
-            "Search People"
-        )
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with('body')
         list_w.assert_called_once_with([])

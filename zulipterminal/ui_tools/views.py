@@ -561,7 +561,6 @@ class RightColumnView(urwid.Frame):
             return key
         elif is_command_key('GO_BACK', key):
             self.allow_update_user_list = True
-            self.user_search.set_edit_text("Search People")
             self.body = UsersView(
                 urwid.SimpleFocusListWalker(self.users_btn_list))
             self.set_body(self.body)
