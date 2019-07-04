@@ -613,7 +613,8 @@ class Model:
                 response['stream_id'] == self.controller.view.
                     topic_w.stream_button.stream_id):
                 self.controller.view.topic_w.update_topics_list(
-                    response['stream_id'], response['subject'])
+                    response['stream_id'], response['subject'],
+                    response['sender_id'])
                 self.controller.update_screen()
 
         if hasattr(self.controller, 'view') and self.found_newest:

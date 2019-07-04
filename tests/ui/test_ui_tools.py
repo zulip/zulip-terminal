@@ -499,15 +499,18 @@ class TestTopicsView:
     def test_update_topics_list(self, mocker, topic_view, topic_name,
                                 topic_initial_log, topic_final_log):
         mocker.patch(TOPBUTTON + '.__init__', return_value=None)
+        set_focus_valign = mocker.patch(
+            'zulipterminal.ui_tools.buttons.urwid.ListBox.set_focus_valign')
         topic_view.view.controller.model.stream_dict = {
             86: {'name': 'PTEST'}
         }
         topic_view.log = [mocker.Mock(topic_name=topic_name)
                           for topic_name in topic_initial_log]
 
-        topic_view.update_topics_list(86, topic_name)
+        topic_view.update_topics_list(86, topic_name, 1001)
         assert [topic.topic_name for topic in topic_view.log
                 ] == topic_final_log
+        set_focus_valign.assert_called_once_with('bottom')
 
     def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view):
         key = "t"
