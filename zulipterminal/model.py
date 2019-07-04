@@ -605,6 +605,10 @@ class Model:
                     raise RuntimeError("Unknown typing event operation")
 
     def notify_user(self, message: Dict[str, Any]) -> None:
+        # Check if notifications are enabled by the user.
+        # It is disabled by default.
+        if not self.controller.notify_enabled:
+            return
         if message['sender_id'] == self.user_id:
             return
 
