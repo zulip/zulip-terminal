@@ -735,6 +735,19 @@ class TestModel:
         else:
             notify.assert_not_called
 
+    @pytest.mark.parametrize('notify_enabled, is_notify_called', [
+        (True, True),
+        (False, False),
+    ])
+    def test_notify_users_enabled(self, mocker, model, message_fixture,
+                                  notify_enabled, is_notify_called):
+        message_fixture.update({'sender_id': 2, 'flags': ['mentioned']})
+        model.controller.notify_enabled = notify_enabled
+        model.user_id = 1
+        notify = mocker.patch('zulipterminal.model.notify')
+        model.notify_user(message_fixture)
+        assert notify.called == is_notify_called
+
     @pytest.mark.parametrize('response, update_call_count, new_index', [
         ({  # Only subject of 1 message is updated.
             'message_id': 1,
