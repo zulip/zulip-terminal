@@ -28,7 +28,9 @@ class TestController:
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
-        return Controller(self.config_file, self.theme, self.autohide)
+        self.notify_enabled = False
+        return Controller(self.config_file, self.theme, self.autohide,
+                          self.notify_enabled)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(

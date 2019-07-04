@@ -110,3 +110,4 @@ elif LINUX:
     print(in_color('red', '\nsudo apt-get install libnotify-bin\n'))
 print('You can refer to https://github.com/zulip/zulip-terminal#notifications'
       ' for more info on showing notifications.')
+print("Also, make sure `notify=enabled` is set in your zuliprc file!")
