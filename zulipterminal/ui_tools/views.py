@@ -311,15 +311,19 @@ class TopicsView(urwid.Frame):
         self.view = view
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
         self.stream_button = stream_button
-        list_box = urwid.ListBox(self.log)
-        super(TopicsView, self).__init__(list_box)
+        self.list_box = urwid.ListBox(self.log)
+        super(TopicsView, self).__init__(self.list_box)
 
-    def update_topics_list(self, stream_id: int, topic_name: str) -> None:
+    def update_topics_list(self, stream_id: int, topic_name: str,
+                           sender_id: int) -> None:
         # More recent topics are found towards the beginning
         # of the list.
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
                 self.log.insert(0, self.log.pop(topic_iterator))
+                self.list_box.set_focus_valign('bottom')
+                if sender_id == self.view.model.user_id:
+                    self.list_box.set_focus(0)
                 return
         # No previous topics with same topic names are found
         # hence we create a new topic button for it.
@@ -329,6 +333,9 @@ class TopicsView(urwid.Frame):
                                        self.view.LEFT_WIDTH,
                                        0)
         self.log.insert(0, new_topic_button)
+        self.list_box.set_focus_valign('bottom')
+        if sender_id == self.view.model.user_id:
+            self.list_box.set_focus(0)
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
