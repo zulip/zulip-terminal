@@ -159,6 +159,8 @@ class StreamButton(TopButton):
                 topic_view,
                 self.view.left_panel.options(height_type="weight")
                 )
+        elif is_command_key('TOGGLE_MUTE_STREAM', key):
+            self.controller.stream_muting_confirmation_popup(self)
         return super().keypress(size, key)
 
 
