@@ -10,7 +10,7 @@ from urwid_readline import ReadlineEdit
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
-from zulipterminal.config.keys import is_command_key
+from zulipterminal.config.keys import is_command_key, keys_for_command
 
 
 class WriteBox(urwid.Pile):
@@ -689,7 +689,10 @@ class SearchBox(urwid.Pile):
         super(SearchBox, self).__init__(self.main_view())
 
     def main_view(self) -> Any:
-        self.text_box = ReadlineEdit(u"Search: ")
+        search_text = ("Search [" +
+                       ", ".join(keys_for_command("SEARCH_MESSAGES")) +
+                       "]: ")
+        self.text_box = ReadlineEdit(search_text + " ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.conversation_focus = urwid.Text(" ")
@@ -727,7 +730,9 @@ class UserSearchBox(urwid.Edit):
     Search Box to search users in real-time.
     """
 
-    search_text = "Search:"
+    search_text = ("Search [" +
+                   ", ".join(keys_for_command("SEARCH_PEOPLE")) +
+                   "]: ")
 
     def __init__(self, user_view: Any) -> None:
         self.user_view = user_view
@@ -751,7 +756,9 @@ class StreamSearchBox(urwid.Edit):
     Search Box to search streams in real-time.urwid
     """
 
-    search_text = "Search:"
+    search_text = ("Search [" +
+                   ", ".join(keys_for_command("SEARCH_STREAMS")) +
+                   "]: ")
 
     def __init__(self, stream_view: Any) -> None:
         self.stream_view = stream_view
