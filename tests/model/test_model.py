@@ -698,7 +698,7 @@ class TestModel:
             'message_id': 1,
             'subject': 'new subject',
             'message_ids': [1, 2],
-        }, 1, {
+        }, 2, {
             'messages': {
                 1: {
                     'id': 1,
@@ -708,7 +708,7 @@ class TestModel:
                 2: {
                     'id': 2,
                     'content': 'old content',
-                    'subject': 'old subject'
+                    'subject': 'new subject'
                 }},
             'edited_messages': {1}
         }),
@@ -734,7 +734,7 @@ class TestModel:
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
             'message_ids': [1],
-        }, 1, {
+        }, 2, {
             'messages': {
                 1: {
                     'id': 1,
@@ -751,7 +751,7 @@ class TestModel:
         ({  # Some new type of update which we don't handle yet.
             'message_id': 1,
             'foo': 'boo',
-        }, 1, {
+        }, 0, {
             'messages': {
                 1: {
                     'id': 1,
