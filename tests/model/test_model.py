@@ -804,10 +804,21 @@ class TestModel:
         assert model.index == new_index
         assert model.update_rendered_view.call_count == update_call_count
 
-    def test_update_rendered_view(self, mocker, model, msg_id=1):
+    @pytest.mark.parametrize('subject, narrow, new_log_len', [
+        ('foo', [['stream', 'boo'], ['topic', 'foo']], 2),
+        ('foo', [['stream', 'boo'], ['topic', 'not foo']], 1),
+        ('foo', [], 2),
+    ], ids=[
+        'msgbox_updated_in_topic_narrow',
+        'msgbox_removed_due_to_topic_narrow_mismatch',
+        'msgbox_updated_in_all_messages_narrow',
+    ])
+    def test_update_rendered_view(self, mocker, model, subject, narrow,
+                                  new_log_len, msg_id=1):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
-        msg_w.original_widget.message = {'id': msg_id}
+        msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
+        model.narrow = narrow
         other_msg_w.original_widget.message = {'id': 2}
         model.msg_list = mocker.Mock()
         model.msg_list.log = [msg_w, other_msg_w]
@@ -818,9 +829,7 @@ class TestModel:
 
         model.update_rendered_view(msg_id)
 
-        cmbl.assert_called_once_with(
-            model, [msg_id], last_message=msg_w.original_widget.last_message)
-        assert model.msg_list.log == [new_msg_w, other_msg_w]
+        assert model.msg_list.log == [new_msg_w, other_msg_w][-new_log_len:]
         assert model.controller.update_screen.called
 
     @pytest.mark.parametrize('response, index', [
