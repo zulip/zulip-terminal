@@ -57,6 +57,7 @@ Event = TypedDict('Event', {
     'property': str,
     'stream_id': int,
     'value': bool,
+    'message_ids': List[int]  # Present when subject of msg(s) is updated
 }, total=False)  # Each Event will only have a subset of these
 
 OFFLINE_THRESHOLD_SECS = 140
@@ -645,18 +646,20 @@ class Model:
         # If the message is indexed
         if self.index['messages'].get(message_id):
             message = self.index['messages'][message_id]
+            self.index['edited_messages'].add(message_id)
 
             if 'rendered_content' in response:
                 message['content'] = response['rendered_content']
+                self.index['messages'][message_id] = message
+                self.update_rendered_view(message_id)
 
             # 'subject' is not present in update event if
             # the response didn't have a 'subject' update.
             if 'subject' in response:
-                message['subject'] = response['subject']
-
-            self.index['messages'][message_id] = message
-            self.index['edited_messages'].add(message_id)
-            self.update_rendered_view(message_id)
+                for msg_id in response['message_ids']:
+                    self.index['messages'][msg_id]['subject']\
+                        = response['subject']
+                    self.update_rendered_view(msg_id)
 
     def update_reaction(self, response: Event) -> None:
         message_id = response['message_id']
