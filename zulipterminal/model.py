@@ -559,6 +559,16 @@ class Model:
 
                 self.controller.update_screen()
 
+    def toggle_stream_muted_status(self, stream_id: int) -> bool:
+        request = [{
+            'stream_id': stream_id,
+            'property': 'is_muted',
+            'value':  stream_id not in self.muted_streams
+            # True for muting and False for unmuting.
+        }]
+        response = self.client.update_subscription_settings(request)
+        return response['result'] == 'success'
+
     def handle_typing_event(self, event: Event) -> None:
         if hasattr(self.controller, 'view'):
             # If the user is in pm narrow with the person typing
