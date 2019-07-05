@@ -723,6 +723,15 @@ class Model:
                 if len(self.narrow) == 2 and\
                         msg_box.message['subject'] != self.narrow[1][1]:
                     self.msg_list.log.remove(msg_w)
+                    # Change narrow if there are no messages left in the
+                    # current narrow.
+                    if not self.msg_list.log:
+                        msg_w_list = create_msg_box_list(
+                                        self, [msg_id],
+                                        last_message=msg_box.last_message)
+                        if msg_w_list:
+                            self.controller.narrow_to_topic(
+                                msg_w_list[0].original_widget)
                     self.controller.update_screen()
                     return
 

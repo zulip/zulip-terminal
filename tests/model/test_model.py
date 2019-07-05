@@ -832,6 +832,34 @@ class TestModel:
         assert model.msg_list.log == [new_msg_w, other_msg_w][-new_log_len:]
         assert model.controller.update_screen.called
 
+    @pytest.mark.parametrize('subject, narrow, narrow_changed', [
+        ('foo', [['stream', 'boo'], ['topic', 'foo']], False),
+        ('foo', [['stream', 'boo'], ['topic', 'not foo']], True),
+        ('foo', [], False),
+    ], ids=[
+        'same_topic_narrow',
+        'previous_topic_narrow_empty_so_change_narrow',
+        'same_all_messages_narrow',
+    ])
+    def test_update_rendered_view_change_narrow(self, mocker, model, subject,
+                                                narrow, narrow_changed,
+                                                msg_id=1):
+        msg_w = mocker.Mock()
+        other_msg_w = mocker.Mock()
+        msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
+        model.narrow = narrow
+        model.msg_list = mocker.Mock()
+        model.msg_list.log = [msg_w]
+        # New msg widget generated after updating index.
+        new_msg_w = mocker.Mock()
+        cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
+                            return_value=[new_msg_w])
+
+        model.update_rendered_view(msg_id)
+
+        assert model.controller.narrow_to_topic.called == narrow_changed
+        assert model.controller.update_screen.called
+
     @pytest.mark.parametrize('response, index', [
         ({'emoji_code': '1f44d',
           'id': 2,
