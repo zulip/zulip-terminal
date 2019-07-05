@@ -718,6 +718,14 @@ class Model:
         for msg_w in self.msg_list.log:
             msg_box = msg_w.original_widget
             if msg_box.message['id'] == msg_id:
+                # Remove the message if it no longer belongs in the current
+                # narrow.
+                if len(self.narrow) == 2 and\
+                        msg_box.message['subject'] != self.narrow[1][1]:
+                    self.msg_list.log.remove(msg_w)
+                    self.controller.update_screen()
+                    return
+
                 msg_w_list = create_msg_box_list(
                                 self, [msg_id],
                                 last_message=msg_box.last_message)
