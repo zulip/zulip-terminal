@@ -1742,6 +1742,14 @@ class TestStreamButton:
         (stream_button.view.left_panel.
             options.assert_called_once_with(height_type="weight"))
 
+    def test_keypress_TOGGLE_MUTE_STREAM(self, mocker, stream_button):
+        key = 'm'
+        size = (20,)
+        pop_up = mocker.patch(
+            'zulipterminal.core.Controller.stream_muting_confirmation_popup')
+        stream_button.keypress(size, key)
+        pop_up.assert_called_once_with(stream_button)
+
 
 class TestUserButton:
     @pytest.mark.parametrize('width, count, short_text', [
