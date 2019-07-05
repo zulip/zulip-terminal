@@ -448,6 +448,27 @@ class TestModel:
         with pytest.raises(ServerConnectionFailure):
             model = Model(self.controller)
 
+    @pytest.mark.parametrize('initial_muted_streams, value', [
+        ({315}, True),
+        ({205, 315}, False),
+        (set(), True),
+        ({205}, False),
+    ], ids=['muting_205', 'unmuting_205', 'first_muted_205',
+            'last_unmuted_205'])
+    def test_toggle_stream_muted_status(self, mocker, model,
+                                        initial_muted_streams, value):
+        model.muted_streams = initial_muted_streams
+        model.client.update_subscription_settings.return_value = \
+            {'result': "success"}
+        model.toggle_stream_muted_status(205)
+        request = [{
+            'stream_id': 205,
+            'property': 'is_muted',
+            'value': value
+        }]
+        model.client.update_subscription_settings.\
+            assert_called_once_with(request)
+
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
         (['starred'], 'remove'),
