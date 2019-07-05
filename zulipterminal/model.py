@@ -712,9 +712,10 @@ class Model:
                     return
                 else:
                     new_msg_w = msg_w_list[0]
-                msg_pos = self.msg_list.log.index(msg_w)
-                self.msg_list.log[msg_pos] = new_msg_w
-                self.controller.update_screen()
+                    msg_pos = self.msg_list.log.index(msg_w)
+                    self.msg_list.log[msg_pos] = new_msg_w
+                    self.controller.update_screen()
+                    return
 
     def _register_desired_events(self, *, fetch_data: bool=False) -> bool:
         fetch_types = None if not fetch_data else [
