@@ -6,6 +6,8 @@ import pytest
 from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
 
+CORE = "zulipterminal.core"
+
 
 class TestController:
     @pytest.fixture(autouse=True)
@@ -182,3 +184,23 @@ class TestController:
         mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
         controller.main()
         assert mock_loop.call_count == 1
+
+    @pytest.mark.parametrize('muted_streams, action', [
+        ({205, 89}, 'unmuting'),
+        ({89}, 'muting')
+    ])
+    def test_stream_muting_confirmation_popup(self, mocker, controller,
+                                              stream_button, muted_streams,
+                                              action):
+        pop_up = mocker.patch(CORE+'.PopUpConfirmationView')
+        text = mocker.patch(CORE + '.urwid.Text')
+        partial = mocker.patch(CORE + '.partial')
+        controller.model.muted_streams = muted_streams
+        controller.loop = mocker.Mock()
+
+        controller.stream_muting_confirmation_popup(stream_button)
+        text.assert_called_with(("bold", "Confirm " + action +
+                                 " of stream '" +
+                                 stream_button.stream_name +
+                                 "' ?"), "center")
+        pop_up.assert_called_once_with(controller, text(), partial())
