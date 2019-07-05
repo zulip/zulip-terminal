@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import signal
+from functools import partial
 
 import urwid
 import zulip
@@ -15,6 +16,7 @@ from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import HelpView
 from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.ui_tools.views import PopUpConfirmationView
 
 
 class Controller:
@@ -119,6 +121,17 @@ class Controller:
         focus_position = 0
         if focus_position >= 0 and focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
+
+    def stream_muting_confirmation_popup(self, button: Any) -> None:
+        type_of_action = "unmuting" if button.stream_id in \
+            self.model.muted_streams else "muting"
+        question = urwid.Text(("bold", "Confirm " + type_of_action +
+                               " of stream '" + button.stream_name+"' ?"),
+                              "center")
+        mute_this_stream = partial(self.model.toggle_stream_muted_status,
+                                   button.stream_id)
+        self.loop.widget = PopUpConfirmationView(self, question,
+                                                 mute_this_stream)
 
     def narrow_to_stream(self, button: Any) -> None:
         already_narrowed = self.model.set_narrow(stream=button.stream_name)
