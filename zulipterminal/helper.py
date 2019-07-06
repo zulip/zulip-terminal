@@ -303,9 +303,10 @@ def index_messages(messages: List[Any],
         if msg['type'] == 'stream' and len(narrow) == 2 and\
                 narrow[1][1] == msg['subject']:
 
-            if not index['stream'][msg['stream_id']].get(msg['subject']):
-                index['stream'][msg['stream_id']][msg['subject']] = set()
-            index['stream'][msg['stream_id']][msg['subject']].add(msg['id'])
+            topics_in_stream = index['stream'][msg['stream_id']]
+            if not topics_in_stream.get(msg['subject']):
+                topics_in_stream[msg['subject']] = set()
+            topics_in_stream[msg['subject']].add(msg['id'])
 
     return index
 
