@@ -311,10 +311,13 @@ class Model:
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
-                     anchor: Optional[int]) -> bool:
+                     anchor: Optional[int],
+                     narrow: Optional[List[Any]] = None) -> bool:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
+
+        fetch_narrow = narrow if narrow is not None else self.narrow
 
         request = {
             'anchor': anchor_value,
@@ -323,20 +326,23 @@ class Model:
             'apply_markdown': True,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': True,
-            'narrow': json.dumps(self.narrow),
+            'narrow': json.dumps(fetch_narrow),
         }
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor and response['anchor'] != 10000000000000000:
-                self.index['pointer'][str(self.narrow)] = response['anchor']
-            if 'found_newest' in response:
-                self.found_newest = response['found_newest']
-            else:
-                # Older versions of the server does not contain the
-                # 'found_newest' flag. Instead, we use this logic:
-                query_range = num_after + num_before + 1
-                self.found_newest = len(response['messages']) < query_range
+                self.index['pointer'][str(fetch_narrow)] = response['anchor']
+
+            # Update state associated with current narrow, if we fetched it
+            if fetch_narrow == self.narrow:
+                if 'found_newest' in response:
+                    self.found_newest = response['found_newest']
+                else:
+                    # Older versions of the server does not contain the
+                    # 'found_newest' flag. Instead, we use this logic:
+                    query_range = num_after + num_before + 1
+                    self.found_newest = len(response['messages']) < query_range
             return True
         return False
 
