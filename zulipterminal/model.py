@@ -110,7 +110,7 @@ class Model:
 
         subscriptions = self.initial_data['subscriptions']
         stream_data = Model._stream_info_from_subscriptions(subscriptions)
-        (self.stream_dict, self.muted_streams,
+        (self.stream_dict, (self.muted_streams, self.initial_unmuted_streams),
          self.pinned_streams, self.unpinned_streams) = stream_data
 
         self.muted_topics = self.initial_data['muted_topics']
@@ -528,7 +528,8 @@ class Model:
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
+    ) -> Tuple[Dict[int, Any], Tuple[Set[int], Set[int]],
+               List[List[str]], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
 
         # Canonicalize color formats, since zulip server versions may use
@@ -537,12 +538,14 @@ class Model:
             subscription['color'] = canonicalize_color(subscription['color'])
 
         # Mapping of stream-id to all available stream info
-        # Stream IDs for muted streams
+        # Stream IDs for muted/unmuted streams
         # Limited stream info sorted by name (used in display)
         return (
             {stream['stream_id']: stream for stream in subscriptions},
-            {stream['stream_id'] for stream in subscriptions
-             if stream['in_home_view'] is False},
+            ({stream['stream_id'] for stream in subscriptions
+              if stream['in_home_view'] is False},
+             {stream['stream_id'] for stream in subscriptions
+              if stream['in_home_view'] is True}),
             sorted([[stream[key] for key in stream_keys]
                     for stream in subscriptions if stream['pin_to_top']],
                    key=lambda s: s[0].lower()),
