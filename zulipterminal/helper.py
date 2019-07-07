@@ -109,10 +109,10 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     for id in id_list:
-        user_id = messages[id]['sender_id']
+        sender_id = messages[id]['sender_id']
 
         # If we sent this message, don't increase the count
-        if user_id == controller.model.user_id:
+        if sender_id == controller.model.user_id:
             continue
 
         msg_type = messages[id]['type']
