@@ -114,12 +114,48 @@ class Model:
          self.pinned_streams, self.unpinned_streams) = stream_data
 
         self.muted_topics = self.initial_data['muted_topics']
+
+        # Fetch additional messages to ensure non-empty all-messages narrow
+        # (caused by muted streams)
+        messages_not_muted = [
+            message
+            for message in self.index['messages'].values()
+            if (message['type'] == 'stream' and
+                message['stream_id'] not in self.muted_streams and
+                ([message['display_recipient'], message['subject']]
+                 not in self.muted_topics))
+        ]
+        if len(messages_not_muted) == 0:
+            self.__fetch_additional_initial_messages(workers=1)
+
         self.unread_counts = classify_unread_counts(self)
 
         self.fetch_all_topics(workers=5)
 
         self.new_user_input = True
         self._start_presence_updates()
+
+    def __fetch_additional_initial_messages(self, *, workers: int) -> None:
+        assert workers > 0
+        unmuted_stream_narrows = [
+            [['stream', self.stream_dict[stream_id]['name']]]
+            for stream_id in self.initial_unmuted_streams
+        ]
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(self.get_messages,
+                                num_after=10,
+                                num_before=30,
+                                anchor=None,
+                                narrow=narrow)
+                for narrow in unmuted_stream_narrows + [[['is', 'private']]]
+            }
+
+            # Wait for threads to complete
+            wait(futures)
+
+        if not all(self.exception_safe_result(future) for future in futures):
+            raise ServerConnectionFailure("fetching_additional_initial_messages")
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
