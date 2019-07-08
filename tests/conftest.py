@@ -76,6 +76,23 @@ def msg_box(mocker, messages_successful_response):
 # --------------- Model Fixtures ----------------------------------------------
 
 @pytest.fixture
+def users_fixture(logged_on_user):
+    users = [logged_on_user]
+    for i in range(1, 3):
+        users.append({
+            'user_id': 10 + i,
+            'full_name': 'Human {}'.format(i),
+            'email': 'person{}@example.com'.format(i),
+            'avatar_url': None,
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+        })
+    return users
+
+
+@pytest.fixture
 def logged_on_user():
     return {
         'user_id': 1001,
@@ -210,7 +227,7 @@ def messages_successful_response() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def initial_data(logged_on_user):
+def initial_data(logged_on_user, users_fixture):
     """
     Response from /register API request.
     """
@@ -235,33 +252,7 @@ def initial_data(logged_on_user):
         }],
         'result': 'success',
         'queue_id': '1522420755:786',
-        'realm_users': [{
-            'bot_type': None,
-            'is_bot': False,
-            'is_admin': False,
-            'email': logged_on_user['email'],
-            'full_name': logged_on_user['full_name'],
-            'user_id': logged_on_user['user_id'],
-            'avatar_url': None,
-            'is_active': True
-        }, {
-            'full_name': 'Jari Winberg',
-            'user_id': 6086,
-            'avatar_url': None,
-            'is_active': True,
-            'bot_type': None,
-            'is_bot': False,
-            'is_admin': False,
-            'email': 'nyan.salmon+sns@gmail.com',
-        }, {
-            'bot_type': None,
-            'is_bot': False,
-            'is_admin': False,
-            'email': 'cloudserver2@hotmail.de',
-            'full_name': 'Test Account',
-            'user_id': 6085,
-            'is_active': True
-        }],
+        'realm_users': users_fixture,
         'cross_realm_bots': [{
             'full_name': 'Notification Bot',
             'timezone': '',
@@ -553,17 +544,17 @@ def user_dict(logged_on_user):
             'status': 'active',
             'user_id': logged_on_user['user_id'],
         },
-        'nyan.salmon+sns@gmail.com': {
-            'full_name': 'Jari Winberg',
-            'email': 'nyan.salmon+sns@gmail.com',
-            'status': 'offline',
-            'user_id': 6086
+        'person1@example.com': {
+            'full_name': 'Human 1',
+            'email': 'person1@example.com',
+            'user_id': 11,
+            'status': 'inactive'
         },
-        'cloudserver2@hotmail.de': {
-            'full_name': 'Test Account',
-            'email': 'cloudserver2@hotmail.de',
-            'status': 'inactive',
-            'user_id': 6085
+        'person2@example.com': {
+            'full_name': 'Human 2',
+            'email': 'person2@example.com',
+            'user_id': 12,
+            'status': 'inactive'
         },
         'emailgateway@zulip.com': {
             'email': 'emailgateway@zulip.com',
@@ -605,25 +596,25 @@ def user_list(logged_on_user):
         'status': 'active',
         'user_id': logged_on_user['user_id'],
     }, {
-        'full_name': 'Jari Winberg',
-        'email': 'nyan.salmon+sns@gmail.com',
-        'status': 'offline',
-        'user_id': 6086
-    }, {
         'email': 'emailgateway@zulip.com',
         'full_name': 'Email Gateway',
         'status': 'inactive',
         'user_id': 6
     }, {
+        'full_name': 'Human 1',
+        'email': 'person1@example.com',
+        'user_id': 11,
+        'status': 'inactive'
+    }, {
+        'full_name': 'Human 2',
+        'email': 'person2@example.com',
+        'user_id': 12,
+        'status': 'inactive'
+    }, {
         'email': 'notification-bot@zulip.com',
         'full_name': 'Notification Bot',
         'status': 'inactive',
         'user_id': 5
-    }, {
-        'full_name': 'Test Account',
-        'email': 'cloudserver2@hotmail.de',
-        'status': 'inactive',
-        'user_id': 6085
     }, {
         'email': 'welcome-bot@zulip.com',
         'full_name': 'Welcome Bot',
