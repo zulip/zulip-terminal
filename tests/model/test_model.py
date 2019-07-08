@@ -675,67 +675,115 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
-    @pytest.mark.parametrize('response, expected_message', [
-        ({
+    @pytest.mark.parametrize('response, update_call_count, new_index', [
+        ({  # Only subject of 1 message is updated.
+            'message_id': 1,
             'subject': 'new subject',
-        }, {
-            'content': 'old content',
-            'subject': 'new subject',
+            'message_ids': [1],
+        }, 1, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': 'old content',
+                    'subject': 'new subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1}
         }),
-        ({
+        ({  # Subject of 2 messages is updated
+            'message_id': 1,
+            'subject': 'new subject',
+            'message_ids': [1, 2],
+        }, 1, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': 'old content',
+                    'subject': 'new subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1}
+        }),
+        ({  # Message content is updated
+            'message_id': 1,
             'rendered_content': '<p>new content</p>',
-        }, {
-            'subject': 'old subject',
-            'content': '<p>new content</p>',
+        }, 1, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': '<p>new content</p>',
+                    'subject': 'old subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1}
         }),
-        ({
+        ({  # Both message content and subject is updated.
+            'message_id': 1,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
-        }, {
-            'subject': 'new subject',
-            'content': '<p>new content</p>',
+            'message_ids': [1],
+        }, 1, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': '<p>new content</p>',
+                    'subject': 'new subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1}
         }),
-        ({}, {
-            'subject': 'old subject',
-            'content': 'old content',
+        ({  # Some new type of update which we don't handle yet.
+            'message_id': 1,
+            'foo': 'boo',
+        }, 1, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1}
         }),
     ])
-    def test_update_message(self, mocker, model, response, expected_message,
-                            msg_id=1):
+    def test_update_message(self, mocker, model, response, new_index,
+                            update_call_count):
         model.index = {
             'messages': {
-                msg_id: {
-                    'id': msg_id,
+                message_id: {
+                    'id': message_id,
                     'content': 'old content',
                     'subject': 'old subject',
-                },
+                } for message_id in [1, 2]
             },
             'edited_messages': set()
         }
-        model.msg_list = mocker.Mock()
-        mock_msg = mocker.Mock()
-        model.msg_list.log = [mock_msg]
-        mock_msg.original_widget.message = model.index['messages'][msg_id]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
-        response['message_id'] = msg_id
+        mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
         model.update_message(response)
 
-        assert model.index['messages'][msg_id]['content'] == \
-            expected_message['content']
-        assert model.index['messages'][msg_id]['subject'] == \
-            expected_message['subject']
-        assert model.msg_list.log[0] == mock_msg
-        # Ensure the index shows the message has been updated (edited)
-        assert model.index['edited_messages'] == {msg_id}
-        self.controller.update_screen.assert_called_once_with()
-
-        # TEST FOR FALSE CASES
-        model.index['messages'][msg_id] = {}
-        model.update_message(response)
-        # If there was no message earlier then don't update
-        assert model.index['messages'][msg_id] == {}
+        assert model.index == new_index
+        assert model.update_rendered_view.call_count == update_call_count
 
     @pytest.mark.parametrize('response, index', [
         ({'emoji_code': '1f44d',
