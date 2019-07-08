@@ -1,9 +1,11 @@
 import time
 from collections import defaultdict
+from itertools import chain, combinations
 from functools import wraps
 from threading import Thread
 from typing import (
-    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union
+    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
+    Iterable, Callable
 )
 from mypy_extensions import TypedDict
 
@@ -380,3 +382,14 @@ def match_user(user: Any, text: str) -> bool:
         if keyword.startswith(text.lower()):
             return True
     return False
+
+
+def powerset(iterable: Iterable[Any],
+             map_func: Callable[[Any], Any]=set) -> List[Any]:
+    """
+    >> powerset([1,2,3])
+    returns: [set(), {1}, {2}, {3}, {1, 2}, {1, 3}, {2, 3}, {1, 2, 3}]"
+    """
+    s = list(iterable)
+    powerset = chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+    return list(map(map_func, list(powerset)))

@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.helper import (
     index_messages,
+    powerset,
 )
 from typing import Any
 
@@ -139,3 +140,15 @@ def test_index_starred(mocker,
             msg['flags'].append('starred')
 
     assert index_messages(messages, model, model.index) == expected_index
+
+
+@pytest.mark.parametrize('iterable, map_func, expected_powerset', [
+    ([], set, [set()]),
+    ([1], set, [set(), {1}]),
+    ([1, 2], set, [set(), {1}, {2}, {1, 2}]),
+    ([1, 2, 3], set,
+     [set(), {1}, {2}, {3}, {1, 2}, {1, 3}, {2, 3}, {1, 2, 3}]),
+    ([1, 2], tuple, [(), (1,), (2,), (1, 2)]),
+])
+def test_powerset(iterable, map_func, expected_powerset):
+    assert powerset(iterable, map_func) == expected_powerset
