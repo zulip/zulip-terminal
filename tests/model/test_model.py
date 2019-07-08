@@ -804,6 +804,25 @@ class TestModel:
         assert model.index == new_index
         assert model.update_rendered_view.call_count == update_call_count
 
+    def test_update_rendered_view(self, mocker, model, msg_id=1):
+        msg_w = mocker.Mock()
+        other_msg_w = mocker.Mock()
+        msg_w.original_widget.message = {'id': msg_id}
+        other_msg_w.original_widget.message = {'id': 2}
+        model.msg_list = mocker.Mock()
+        model.msg_list.log = [msg_w, other_msg_w]
+        # New msg widget generated after updating index.
+        new_msg_w = mocker.Mock()
+        cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
+                            return_value=[new_msg_w])
+
+        model.update_rendered_view(msg_id)
+
+        cmbl.assert_called_once_with(
+            model, [msg_id], last_message=msg_w.original_widget.last_message)
+        assert model.msg_list.log == [new_msg_w, other_msg_w]
+        assert model.controller.update_screen.called
+
     @pytest.mark.parametrize('response, index', [
         ({'emoji_code': '1f44d',
           'id': 2,
