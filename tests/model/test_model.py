@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from zulipterminal.model import Model, ServerConnectionFailure
-from zulipterminal.helper import initial_index
+from zulipterminal.helper import initial_index, powerset
 
 
 class TestModel:
@@ -545,9 +545,7 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
-    @pytest.mark.parametrize('muted', [
-        set(), {1}, {2}, {99}, {99, 1}, {1, 2, 99}
-    ])
+    @pytest.mark.parametrize('muted', powerset([1, 2, 99, 1000]))
     def test__stream_info_from_subscriptions(self, initial_data, streams,
                                              muted):
         subs = [dict(entry, in_home_view=entry['stream_id'] not in muted)

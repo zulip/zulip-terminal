@@ -23,6 +23,7 @@ from zulipterminal.ui_tools.buttons import (
     TopicButton,
 )
 from zulipterminal.config.keys import keys_for_command
+from zulipterminal.helper import powerset
 
 from urwid import AttrWrap, Columns, Padding, Text
 
@@ -919,9 +920,7 @@ class TestLeftColumnView:
         pm_button.assert_called_once_with(left_col_view.controller,
                                           count=0, width=width)
 
-    @pytest.mark.parametrize('pinned', [
-        set(), {1}, {2}, {99}, {99, 1}, {1, 2}, {2, 99}, {1, 2, 99}
-    ])
+    @pytest.mark.parametrize('pinned', powerset([1, 2, 99, 1000]))
     def test_streams_view(self, mocker, streams, pinned, width=40):
         self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
         self.view.pinned_streams = [s for s in streams if s[1] in pinned]
