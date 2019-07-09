@@ -399,7 +399,7 @@ class TestStreamsView:
         self.view = mocker.Mock()
         self.search_box = mocker.patch(VIEWS + ".StreamSearchBox")
         stream_btn = mocker.Mock()
-        stream_btn.caption = "FOO"
+        stream_btn.stream_name = "FOO"
         self.streams_btn_list = [stream_btn]
         return StreamsView(self.streams_btn_list, view=self.view)
 
@@ -917,8 +917,10 @@ class TestMessageBox:
         self.model.index = initial_index
 
     @pytest.mark.parametrize('message_type, set_fields', [
-        ('stream', [('caption', ''), ('stream_id', None), ('title', '')]),
-        ('private', [('email', ''), ('user_id', None)]),
+        ('stream',
+            [('stream_name', ''), ('stream_id', None), ('topic_name', '')]),
+        ('private',
+            [('email', ''), ('user_id', None)]),
     ])
     def test_init(self, mocker, message_type, set_fields):
         mocker.patch.object(MessageBox, 'main_view')
