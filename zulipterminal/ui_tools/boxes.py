@@ -139,9 +139,9 @@ class MessageBox(urwid.Pile):
                  last_message: Any) -> None:
         self.model = model
         self.message = message
-        self.caption = ''
+        self.stream_name = ''
         self.stream_id = None  # type: Union[int, None]
-        self.title = ''
+        self.topic_name = ''
         self.email = ''
         self.user_id = None  # type: Union[int, None]
         self.last_message = last_message
@@ -150,9 +150,9 @@ class MessageBox(urwid.Pile):
             self.last_message = defaultdict(dict)
 
         if self.message['type'] == 'stream':
-            self.caption = self.message['display_recipient']
+            self.stream_name = self.message['display_recipient']
             self.stream_id = self.message['stream_id']
-            self.title = self.message['subject']
+            self.topic_name = self.message['subject']
         elif self.message['type'] == 'private':
             self.email = self.message['sender_email']
             self.user_id = self.message['sender_id']
@@ -196,8 +196,8 @@ class MessageBox(urwid.Pile):
         last_msg = self.last_message
         if self.message['type'] == 'stream':
             if (last_msg['type'] == 'stream' and
-                    self.title == last_msg['subject'] and
-                    self.caption == last_msg['display_recipient']):
+                    self.topic_name == last_msg['subject'] and
+                    self.stream_name == last_msg['display_recipient']):
                 return False
             return True
         elif self.message['type'] == 'private':
@@ -223,8 +223,8 @@ class MessageBox(urwid.Pile):
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
         stream_title_markup = ('bar', [
-            (bar_color, '{} >'.format(self.caption)),
-            ('title', ' {} '.format(self.title))
+            (bar_color, '{} >'.format(self.stream_name)),
+            ('title', ' {} '.format(self.topic_name))
         ])
         stream_title = urwid.Text(stream_title_markup)
         header = urwid.AttrWrap(stream_title, 'bar')
@@ -263,12 +263,12 @@ class MessageBox(urwid.Pile):
             bar_color = 's' + bar_color[:2] + bar_color[3] + bar_color[5]
             if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
                 text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, '{}'.format(self.caption)),
+                    (bar_color, '{}'.format(self.stream_name)),
                     (bar_color, ': topic narrow')
                 ])
             else:
                 text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, '{}'.format(self.caption))
+                    (bar_color, '{}'.format(self.stream_name))
                 ])
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = 'Group private conversation'

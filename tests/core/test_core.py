@@ -53,7 +53,8 @@ class TestController:
         controller.model.muted_topics = []
         controller.narrow_to_stream(stream_button)
         assert controller.model.stream_id == stream_button.stream_id
-        assert controller.model.narrow == [['stream', stream_button.caption]]
+        assert controller.model.narrow == [['stream',
+                                            stream_button.stream_name]]
         controller.model.msg_view.clear.assert_called_once_with()
 
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
@@ -63,8 +64,8 @@ class TestController:
 
     def test_narrow_to_topic(self, mocker, controller,
                              msg_box, index_topic):
-        expected_narrow = [['stream', msg_box.caption],
-                           ['topic', msg_box.title]]
+        expected_narrow = [['stream', msg_box.stream_name],
+                           ['topic', msg_box.topic_name]]
         controller.model.narrow = []
         controller.model.index = index_topic
         controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
@@ -82,7 +83,7 @@ class TestController:
         controller.model.msg_view.clear.assert_called_once_with()
 
         widget = controller.model.msg_view.extend.call_args_list[0][0][0][0]
-        stream_id, topic_name = msg_box.stream_id, msg_box.title
+        stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
         id_list = index_topic['topic_msg_ids'][stream_id][topic_name]
         assert {widget.original_widget.message['id']} == id_list
 
