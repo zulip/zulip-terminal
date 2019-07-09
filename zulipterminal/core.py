@@ -121,7 +121,7 @@ class Controller:
             self.model.msg_list.set_focus(focus_position)
 
     def narrow_to_stream(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(stream=button.caption)
+        already_narrowed = self.model.set_narrow(stream=button.stream_name)
         if already_narrowed:
             return
 
@@ -148,8 +148,8 @@ class Controller:
         self._finalize_show(w_list)
 
     def narrow_to_topic(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(stream=button.caption,
-                                                 topic=button.title)
+        already_narrowed = self.model.set_narrow(stream=button.stream_name,
+                                                 topic=button.topic_name)
         if already_narrowed:
             return
 

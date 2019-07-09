@@ -101,7 +101,7 @@ class StreamButton(TopButton):
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        self.caption, self.stream_id, orig_color, is_private = properties
+        self.stream_name, self.stream_id, orig_color, is_private = properties
         self.model = controller.model
         self.count = count
         self.view = view
@@ -124,7 +124,7 @@ class StreamButton(TopButton):
         view.palette.append(('s' + color, '', '', '', inverse_text, color))
 
         super().__init__(controller,
-                         caption=self.caption,
+                         caption=self.stream_name,
                          show_function=controller.narrow_to_stream,
                          prefix_character=(color, 'P' if is_private else '#'),
                          width=width,
@@ -165,9 +165,8 @@ class UserButton(TopButton):
         # FIXME Is this still needed?
         self.recipients = frozenset({self.user_id, view.model.user_id})
 
-        caption = user['full_name']
         super().__init__(controller,
-                         caption=caption,
+                         caption=user['full_name'],
                          show_function=self._narrow_with_compose,
                          prefix_character=(color, '\N{BULLET}'),
                          text_color=color,
@@ -184,8 +183,8 @@ class UserButton(TopButton):
 
 class TopicButton(urwid.Button):
     def __init__(self, stream_id: int, topic: str, model: Any) -> None:
-        self.caption = model.stream_dict[stream_id]['name']  # stream name
-        self.title = topic
+        self.stream_name = model.stream_dict[stream_id]['name']
+        self.topic_name = topic
         self.stream_id = stream_id
 
 
