@@ -20,7 +20,7 @@ class TopButton(urwid.Button):
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
                  count: int=0) -> None:
-        self.caption = caption
+        self._caption = caption
         self.prefix_character = prefix_character
         self.count = count
         self.width_for_text_space_count = width - 4
@@ -44,12 +44,13 @@ class TopButton(urwid.Button):
             count_text = str(count)
 
         # Shrink text, but always require at least one space
+        # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_space_count -
                               len(str(count_text)) - 1)
-        if len(self.caption) > max_caption_length:
-            caption = self.caption[:max_caption_length-2] + '..'
+        if len(self._caption) > max_caption_length:
+            caption = self._caption[:max_caption_length-2] + '..'
         else:
-            caption = self.caption
+            caption = self._caption
         num_spaces = max_caption_length - len(caption) + 1
 
         return urwid.AttrMap(urwid.SelectableIcon(
@@ -100,7 +101,7 @@ class StreamButton(TopButton):
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        caption, self.stream_id, orig_color, is_private = properties
+        self.caption, self.stream_id, orig_color, is_private = properties
         self.model = controller.model
         self.count = count
         self.view = view
@@ -123,7 +124,7 @@ class StreamButton(TopButton):
         view.palette.append(('s' + color, '', '', '', inverse_text, color))
 
         super().__init__(controller,
-                         caption=caption,
+                         caption=self.caption,
                          show_function=controller.narrow_to_stream,
                          prefix_character=(color, 'P' if is_private else '#'),
                          width=width,
