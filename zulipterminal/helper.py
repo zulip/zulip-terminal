@@ -6,11 +6,16 @@ from re import match, ASCII
 from threading import Thread
 from typing import (
     Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
-    Iterable, Callable
+    Iterator, Iterable, Callable
 )
 from mypy_extensions import TypedDict
+from contextlib import contextmanager
 
 import os
+import sys
+import requests
+import subprocess
+import tempfile
 
 Message = Dict[str, Any]
 
@@ -410,3 +415,59 @@ def canonicalize_color(color: str) -> str:
         return color.lower()
     else:
         raise ValueError('Unknown format for color "{}"'.format(color))
+
+
+@contextmanager
+def suppress_output() -> Iterator[Any]:
+    """
+    Context manager to redirect stdout and stderr to /dev/null.
+    Adapted from https://stackoverflow.com/a/2323563
+    """
+    out = os.dup(1)
+    err = os.dup(2)
+    os.close(1)
+    os.close(2)
+    os.open(os.devnull, os.O_RDWR)
+    try:
+        yield
+    finally:
+        os.dup2(out, 1)
+        os.dup2(err, 2)
+
+
+def open_media(controller, url: str):
+    # Uploaded media
+    if 'user_uploads' in url:
+        # Tries to download media and open in default viewer
+        # If can't, opens in browser
+        img_name = url.split("/")[-1]
+        img_dir_path = os.path.join(tempfile.gettempdir(),
+                                    "ZulipTerminal_media")
+        img_path = os.path.join(img_dir_path, img_name)
+        try:
+            os.mkdir(img_dir_path)
+        except FileExistsError:
+            pass
+        with requests.get(url, stream=True,
+                          auth=requests.auth.HTTPBasicAuth(
+                              controller.client.email,
+                              controller.client.api_key)) as r:
+            if r.status_code == 200:
+                with open(img_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:  # filter out keep-alive new chunks
+                            f.write(chunk)
+        r.close()
+
+        try:
+            imageViewerFromCommandLine = {'linux': 'xdg-open',
+                                          'win32': 'explorer',
+                                          'darwin': 'open'}[sys.platform]
+            with suppress_output():
+                subprocess.run([imageViewerFromCommandLine, img_path])
+        except(FileNotFoundError):
+            controller.view_in_browser(url)
+
+    # Other urls
+    else:
+        controller.view_in_browser(url)

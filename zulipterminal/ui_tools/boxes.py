@@ -137,6 +137,7 @@ class MessageBox(urwid.Pile):
         self.model = model
         self.message = message
         self.stream_name = ''
+        self.message['links'] = dict()  # type: Dict
         self.stream_id = None  # type: Union[int, None]
         self.topic_name = ''
         self.email = ''
@@ -370,6 +371,7 @@ class MessageBox(urwid.Pile):
                      'user-group-mention' in element.attrs.get('class', [])):
                 # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('span', element.text))
+                self.message['links'][element.text] = element.text
             elif element.name == 'a':
                 # LINKS
                 link = element.attrs['href']
@@ -380,12 +382,15 @@ class MessageBox(urwid.Pile):
                     # a link then just display the link
                     markup.append(text)
                 else:
+                    if link.startswith('user_uploads/'):
+                        link = self.model.server_url + link
                     if link.startswith('/user_uploads/'):
                         # Append org url to before user_uploads to convert it
                         # into a link.
-                        link = self.model.server_url + link
+                        link = self.model.server_url + link[1:]
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
+                self.message['links'][text] = link
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
@@ -681,6 +686,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
             self.model.controller.show_msg_info(self.message)
+        elif is_command_key('MSG_LINKS', key):
+            self.model.controller.show_msg_links(self.message)
         return key
 
 

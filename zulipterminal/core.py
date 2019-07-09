@@ -5,16 +5,17 @@ import sys
 import time
 import signal
 from functools import partial
+import webbrowser
 
 import urwid
 import zulip
 
 from zulipterminal.version import ZT_VERSION
-from zulipterminal.helper import asynch
+from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.views import HelpView, MsgInfoView
+from zulipterminal.ui_tools.views import HelpView, MsgInfoView, MsgLinksView
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.ui_tools.views import PopUpConfirmationView
 
@@ -114,6 +115,10 @@ class Controller:
         msg_info_view = MsgInfoView(self, msg)
         self.show_pop_up(msg_info_view,
                          "Message Information (up/down scrolls)")
+
+    def show_msg_links(self, msg: Any):
+        msg_links_view = MsgLinksView(self, msg)
+        self.show_pop_up(msg_links_view, "Message Links (up/down scrolls)")
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -244,6 +249,15 @@ class Controller:
             w_list = create_msg_box_list(self.model, msg_id_list)
 
         self._finalize_show(w_list)
+
+    def view_in_browser(self, url) -> None:
+        if (sys.platform != 'darwin' and sys.platform[:3] != 'win' and
+                not os.environ.get('DISPLAY') and os.environ.get('TERM')):
+            # Don't try to open web browser if running without a GUI
+            return
+        with suppress_output():
+            # Suppress anything on stdout or stderr when opening the browser
+            webbrowser.open_new(url)
 
     def show_all_pm(self, button: Any) -> None:
         already_narrowed = self.model.set_narrow(pms=True)

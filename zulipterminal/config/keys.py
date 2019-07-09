@@ -196,6 +196,10 @@ KEY_BINDINGS = OrderedDict([
         'keys': {'ctrl l'},
         'help_text': 'Clear message',
     }),
+    ('MSG_LINKS', {
+        'keys': {'v'},
+        'help_text': 'View all links in the current message',
+    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 

@@ -6,7 +6,7 @@ import urwid
 import time
 
 from zulipterminal.config.keys import KEY_BINDINGS, is_command_key
-from zulipterminal.helper import asynch, match_user
+from zulipterminal.helper import asynch, match_user, open_media
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UnreadPMButton,
@@ -18,6 +18,7 @@ from zulipterminal.ui_tools.buttons import (
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
+from zulipterminal.ui_tools.buttons import MsgLinkButton
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -823,3 +824,80 @@ class MsgInfoView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super(MsgInfoView, self).keypress(size, key)
+
+
+class MsgLinksView(urwid.ListBox):
+    def __init__(self, controller: Any, msg: Any):
+        self.controller = controller
+        self.msg = msg
+
+        self.width = 70
+        self.height = 10
+
+        self.log = []
+        for url in self.msg['links']:
+            if not url.startswith('/user_uploads'):
+                if len(url) > 0:
+                    self.log.append(MsgLinkButton(self.controller,
+                                                  self.width,
+                                                  0,
+                                                  url,
+                                                  self.perform_action))
+                else:
+                    self.log.append(MsgLinkButton(self.controller,
+                                                  self.width,
+                                                  0,
+                                                  self.msg['links'][url],
+                                                  self.perform_action))
+        super(MsgLinksView, self).__init__(self.log)
+
+    def perform_action(self, button):
+        # If stream
+        if self.msg['links'][button._caption].startswith('/#narrow'):
+            found_stream = False
+            for stream_details in self.controller.model.stream_dict.values():
+                # Check mentioned stream with all subscribed streams
+                if stream_details['name'] == button._caption[1:]:
+                    # Stream button to call function to narrow to stream
+                    req_details = ['name', 'stream_id', 'color', 'invite_only']
+                    stream = [stream_details[key] for key in req_details]
+                    btn = StreamButton(stream,
+                                       controller=self.controller,
+                                       view=self.controller.view,
+                                       width=self.width,
+                                       count=0)
+                    self.controller.narrow_to_stream(btn)
+                    found_stream = True
+                    break
+            if not found_stream:
+                self.controller.view.set_footer_text(
+                    "You are not subscribed to this stream.", 3)
+
+        # If user
+        elif self.msg['links'][button._caption].startswith('@'):
+            found_user = False
+            for user in self.controller.model.users:
+                if user['full_name'] == button._caption[1:]:
+                    btn = UserButton(user,
+                                     controller=self.controller,
+                                     view=self.controller.view,
+                                     width=self.width,
+                                     color=user['status'],
+                                     count=0)
+                    self.controller.narrow_to_user(btn)
+                    btn._narrow_with_compose(btn)
+                    found_user = True
+                    break
+            if not found_user:
+                self.controller.view.set_footer_text(
+                    "User not found in realm.\
+                    Their account may be deactivated.", 3)
+
+        # If link (uploaded media or other webpage)
+        else:
+            open_media(self.controller, self.msg['links'][button._caption])
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('GO_BACK', key) or is_command_key('MSG_LINKS', key):
+            self.controller.exit_popup()
+        return super(MsgLinksView, self).keypress(size, key)

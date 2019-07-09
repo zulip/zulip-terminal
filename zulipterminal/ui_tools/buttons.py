@@ -86,6 +86,14 @@ class TopButton(urwid.Button):
         return super().keypress(size, key)
 
 
+class MsgLinkButton(TopButton):
+    def __init__(self, controller: Any, width: int, count: int,
+                 caption: str, function: Callable) -> None:
+        super().__init__(controller, caption,
+                         function, count=count,
+                         width=width)
+
+
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
         button_text = ("All messages   [" +
