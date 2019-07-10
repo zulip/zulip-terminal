@@ -1596,7 +1596,7 @@ class TestMessageBox:
 
 class TestTopButton:
     @pytest.mark.parametrize('prefix', [
-        None, '\N{BULLET}', '-', ('blue', 'o'),
+        None, '\N{BULLET}', '-', ('blue', 'o'), '',
     ])
     @pytest.mark.parametrize('width, count, short_text', [
         (8, 0, 'c..'),
@@ -1639,6 +1639,11 @@ class TestTopButton:
         mocker.patch(STREAMBUTTON + ".mark_muted")
         show_function = mocker.Mock()
 
+        # To test having more space available with no bullet, but using
+        # same short text, reduce the effective space available
+        if prefix == '':
+            width -= 2
+
         if isinstance(prefix, tuple):
             prefix = prefix[1]  # just checking text, not color
 
@@ -1661,9 +1666,11 @@ class TestTopButton:
         count_str = '' if count == 0 else str(count)
         if count < 0:
             count_str = 'M'
-        expected_text = ' {} {}{}{}'.format(
-                prefix, short_text,
-                (width - 4 - len(short_text) - len(count_str))*' ',
+        expected_text = ' {}{}{}{}'.format(
+                (prefix + ' ') if prefix else '',
+                short_text,
+                (width - 2 - (2 if prefix else 0) - len(short_text) -
+                 len(count_str))*' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
