@@ -632,7 +632,7 @@ class LeftColumnView(urwid.Pile):
 
             # FIXME Necessary since the divider is treated as a StreamButton
             unpinned_divider.stream_id = -1
-            unpinned_divider.caption = ''
+            unpinned_divider.stream_name = ''
 
             streams_btn_list += [unpinned_divider]
 
