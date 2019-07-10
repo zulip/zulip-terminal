@@ -765,6 +765,25 @@ class TestModel:
                 }},
             'edited_messages': {1}
         }),
+        ({  # message_id not present in index.
+            'message_id': 3,
+            'rendered_content': '<p>new content</p>',
+            'subject': 'new subject',
+            'message_ids': [3],
+        }, 0, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                },
+                2: {
+                    'id': 2,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': set()
+        }),
     ])
     def test_update_message(self, mocker, model, response, new_index,
                             update_call_count):
