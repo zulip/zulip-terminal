@@ -49,12 +49,9 @@ class WriteBox(urwid.Pile):
         ]
         self.focus_position = 1
 
-    def stream_box_view(self, button: Any=None, caption: str='',
-                        title: str='') -> None:
+    def stream_box_view(self, caption: str='', title: str='') -> None:
         self.set_editor_mode()
         self.to_write_box = None
-        if caption == '' and button is not None:
-            caption = button.caption
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
