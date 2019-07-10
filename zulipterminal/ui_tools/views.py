@@ -631,8 +631,9 @@ class LeftColumnView(urwid.Pile):
             unpinned_divider = urwid.Divider("-")
 
             # FIXME Necessary since the divider is treated as a StreamButton
+            # NOTE: This is specifically for stream search to work correctly
             unpinned_divider.stream_id = -1
-            unpinned_divider.caption = ''
+            unpinned_divider.stream_name = ''
 
             streams_btn_list += [unpinned_divider]
 
