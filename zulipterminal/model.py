@@ -643,7 +643,7 @@ class Model:
         """
         message_id = response['message_id']
         # If the message is indexed
-        if self.index['messages'][message_id] != {}:
+        if self.index['messages'].get(message_id):
             message = self.index['messages'][message_id]
 
             if 'rendered_content' in response:
