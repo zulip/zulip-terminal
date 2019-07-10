@@ -100,12 +100,12 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     while not hasattr(controller, 'view'):
         time.sleep(0.1)
 
-    streams = controller.view.stream_w.log
+    stream_buttons_log = controller.view.stream_w.log
     is_open_topic_view = controller.view.left_panel.is_in_topic_view
     if is_open_topic_view:
-        topics = controller.view.topic_w.log
+        topic_buttons_log = controller.view.topic_w.log
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
-    users = controller.view.user_w.log
+    user_buttons_log = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     for id in id_list:
@@ -123,10 +123,11 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
             if stream_id in controller.model.muted_streams:
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
-                for stream in streams:
-                    if stream.stream_id == stream_id:
+                for stream_button in stream_buttons_log:
+                    if stream_button.stream_id == stream_id:
                         # FIXME: Update unread_count[streams]?
-                        stream.update_count(stream.count + new_count)
+                        stream_button.update_count(stream_button.count +
+                                                   new_count)
                         break
             # FIXME: Update unread_counts['unread_topics']?
             if ([messages[id]['display_recipient'], msg_topic] in
@@ -135,13 +136,14 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
             if is_open_topic_view and stream_id == toggled_stream_id:
                 # If topic_view is open for incoming messages's stream,
                 # We update the respective TopicButton count accordingly.
-                for topic in topics:
-                    if topic.topic_name == msg_topic:
-                        topic.update_count(topic.count + new_count)
+                for topic_button in topic_buttons_log:
+                    if topic_button.topic_name == msg_topic:
+                        topic_button.update_count(topic_button.count +
+                                                  new_count)
         else:
-            for user in users:
-                if user.user_id == user_id:
-                    user.update_count(user.count + new_count)
+            for user_button in user_buttons_log:
+                if user_button.user_id == user_id:
+                    user_button.update_count(user_button.count + new_count)
                     break
             unread_counts['all_pms'] += new_count
             all_pm.update_count(unread_counts['all_pms'])
