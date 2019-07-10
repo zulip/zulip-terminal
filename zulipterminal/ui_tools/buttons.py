@@ -20,10 +20,20 @@ class TopButton(urwid.Button):
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
                  count: int=0) -> None:
+        if isinstance(prefix_character, tuple):
+            prefix = prefix_character[1]
+        else:
+            prefix = prefix_character
+        assert len(prefix) in (0, 1)
         self._caption = caption
         self.prefix_character = prefix_character
+        self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
-        self.width_for_text_space_count = width - 4
+
+        prefix_length = 0 if prefix == '' else 2
+        # Space either side, at least one space between
+        self.width_for_text_and_count = width - 3 - prefix_length
+
         self.text_color = text_color
         self.show_function = show_function
         super().__init__("")
@@ -43,21 +53,23 @@ class TopButton(urwid.Button):
         else:
             count_text = str(count)
 
-        # Shrink text, but always require at least one space
         # Note that we don't modify self._caption
-        max_caption_length = (self.width_for_text_space_count -
-                              len(str(count_text)) - 1)
+        max_caption_length = (self.width_for_text_and_count -
+                              len(count_text))
         if len(self._caption) > max_caption_length:
             caption = self._caption[:max_caption_length-2] + '..'
         else:
             caption = self._caption
-        num_spaces = max_caption_length - len(caption) + 1
+        num_extra_spaces = (
+            self.width_for_text_and_count - len(count_text) - len(caption)
+        )
 
+        # NOTE: Generated text does not include space at end
         return urwid.AttrMap(urwid.SelectableIcon(
-            [' ', self.prefix_character,
-             ' {}{}'.format(caption, num_spaces*' '),
-             ('idle',  count_text)],
-            self.width_for_text_space_count+4),  # cursor location
+            [' ', self.prefix_character, self.post_prefix_spacing,
+             '{}{}'.format(caption, num_extra_spaces*' '),
+             ' ', ('idle',  count_text)],
+            self.width_for_text_and_count+5),  # cursor location
             self.text_color,
             'selected')
 
