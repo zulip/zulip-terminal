@@ -419,7 +419,7 @@ class TestStreamsView:
     @pytest.mark.parametrize('new_text, expected_log', [
         ('f', ['FOO', 'foo', 'fan']),
         ('foo', ['FOO', 'foo']),
-        ('FOO', []),
+        ('FOO', ['FOO', 'foo']),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log):
         self.view.controller.editor_mode = True
