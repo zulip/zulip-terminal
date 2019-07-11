@@ -979,13 +979,13 @@ class TestHelpMenu:
         key = "a"
         size = (200, 20)
         self.help_view.keypress(size, key)
-        assert not self.controller.exit_help.called
+        assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
     def test_keypress_goback(self, key):
         size = (200, 20)
         self.help_view.keypress(size, key)
-        assert self.controller.exit_help.called
+        assert self.controller.exit_popup.called
 
 
 class TestMessageBox:
