@@ -416,12 +416,22 @@ class TestStreamsView:
         assert stream_view.search_box
         self.search_box.assert_called_once_with(stream_view)
 
-    def test_update_streams(self, mocker, stream_view):
+    @pytest.mark.parametrize('new_text, expected_log', [
+        ('f', ['FOO', 'foo', 'fan']),
+        ('foo', ['FOO', 'foo']),
+        ('FOO', []),
+    ])
+    def test_update_streams(self, mocker, stream_view, new_text, expected_log):
         self.view.controller.editor_mode = True
-        new_text = "F"
+        new_text = new_text
         search_box = "SEARCH_BOX"
+        stream_view.streams_btn_list = [
+            mocker.Mock(stream_name=stream_name) for stream_name in [
+                'FOO', 'foo', 'fan', 'boo', 'BOO']]
         stream_view.update_streams(search_box, new_text)
-        assert not stream_view.log
+        assert [stream.stream_name for stream in stream_view.log
+                ] == expected_log
+        self.view.controller.update_screen.assert_called_once_with()
 
     def test_mouse_event(self, mocker, stream_view):
         mocker.patch.object(stream_view, 'keypress')
