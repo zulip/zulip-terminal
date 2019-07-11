@@ -102,7 +102,7 @@ class Controller:
             height=min(3*rows//4, help_view.number_of_actions)+2
         )
 
-    def exit_help(self) -> None:
+    def exit_popup(self) -> None:
         self.loop.widget = self.view
 
     def search_messages(self, text: str) -> None:
