@@ -829,6 +829,9 @@ class TestModel:
 
         model.update_rendered_view(msg_id)
 
+        # If there are 2 msgs and first one is updated, next one is updated too
+        if new_log_len == 2:
+            other_msg_w = new_msg_w
         assert model.msg_list.log == [new_msg_w, other_msg_w][-new_log_len:]
         assert model.controller.update_screen.called
 
