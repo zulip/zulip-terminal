@@ -25,8 +25,8 @@ class View(urwid.WidgetWrap):
     A class responsible for providing the application's interface.
     """
 
-    LEFT_WIDTH = 25
-    RIGHT_WIDTH = 25
+    LEFT_WIDTH = 27
+    RIGHT_WIDTH = 23
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller

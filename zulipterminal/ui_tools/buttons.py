@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Tuple, Callable, Optional, Union
 
 import urwid
 
-from zulipterminal.config.keys import is_command_key
+from zulipterminal.config.keys import is_command_key, keys_for_command
 
 
 class MenuButton(urwid.Button):
@@ -87,23 +87,35 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        super().__init__(controller, 'All messages',
+        button_text = ("All messages   [" +
+                       keys_for_command("GO_BACK").pop() +  # FIXME
+                       "]")
+        super().__init__(controller, button_text,
                          controller.show_all_messages, count=count,
+                         prefix_character='',
                          width=width)
 
 
 class PMButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        super().__init__(controller, 'Private messages',
+        button_text = ("Private messages [" +
+                       keys_for_command("ALL_PM").pop() +
+                       "]")
+        super().__init__(controller, button_text,
                          controller.show_all_pm, count=count,
+                         prefix_character='',
                          width=width)
 
 
 class StarredButton(TopButton):
     def __init__(self, controller: Any, width: int) -> None:
-        super().__init__(controller, 'Starred messages',
+        button_text = ("Starred messages [" +
+                       keys_for_command("ALL_STARRED").pop() +
+                       "]")
+        super().__init__(controller, button_text,
                          controller.show_all_starred,
                          width=width,
+                         prefix_character='',
                          count=0)  # Starred messages are already marked read
 
 
