@@ -319,10 +319,13 @@ class TopicsView(urwid.Frame):
         self.stream_button = stream_button
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(self, 'SEARCH_TOPICS')
+        self.header_list = urwid.Pile([self.stream_button,
+                                       urwid.Divider('─'),
+                                       self.topic_search_box])
         urwid.connect_signal(self.topic_search_box,
                              'change', self.update_topics)
         super(TopicsView, self).__init__(self.list_box, header=urwid.LineBox(
-            self.topic_search_box, tlcorner=u'─', tline=u'', lline=u'',
+            self.header_list, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
         ))
@@ -390,8 +393,8 @@ class TopicsView(urwid.Frame):
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)
             self.view.body.focus_col = 1
-        elif is_command_key('SEARCH_TOPICS', key):
-            self.set_focus('header')
+        if is_command_key('SEARCH_TOPICS', key):
+            self.header_list.set_focus(2)
             return key
         elif is_command_key('GO_BACK', key):
             self.log.clear()
