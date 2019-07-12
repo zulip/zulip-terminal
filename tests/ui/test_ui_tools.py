@@ -482,6 +482,8 @@ class TestTopicsView:
         topic_btn = mocker.Mock()
         topic_btn.caption = "BOO"
         self.topics_btn_list = [topic_btn]
+        self.header_list = mocker.patch(VIEWS + ".urwid.Pile")
+        self.divider = mocker.patch(VIEWS + ".urwid.Divider")
         return TopicsView(self.topics_btn_list, self.view, self.stream_button)
 
     def test_init(self, mocker, topic_view):
@@ -491,6 +493,9 @@ class TestTopicsView:
         assert topic_view.topic_search_box
         self.topic_search_box.assert_called_once_with(
             topic_view, 'SEARCH_TOPICS')
+        self.header_list.assert_called_once_with([topic_view.stream_button,
+                                                  self.divider('─'),
+                                                  topic_view.topic_search_box])
 
     @pytest.mark.parametrize('new_text, expected_log', [
         ('f', ['FOO', 'foo', 'fan']),
@@ -561,7 +566,7 @@ class TestTopicsView:
         size = (200, 20)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
         topic_view.keypress(size, key)
-        topic_view.set_focus.assert_called_once_with('header')
+        topic_view.header_list.set_focus.assert_called_once_with(2)
 
     def test_keypress_esc(self, mocker, topic_view):
         key = "esc"
