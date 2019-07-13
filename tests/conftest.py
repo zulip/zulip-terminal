@@ -373,10 +373,26 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             'stream_weekly_traffic': 0
         }],
         'unread_msgs': {
-            'pms': [],
+            'pms': [{
+                'sender_id': 1,
+                'unread_message_ids': [1, 2]
+            }, {
+                'sender_id': 2,
+                'unread_message_ids': [3]
+            }],
             'count': 0,
             'mentions': [],
-            'streams': [],
+            'streams': [{
+                'stream_id': 1000,
+                'topic': 'Some general unread topic',
+                'unread_message_ids': [4, 5, 6],
+                'sender_ids': [1, 2]
+            }, {
+                'stream_id': 99,
+                'topic': 'Some private unread topic',
+                'unread_message_ids': [7],
+                'sender_ids': [1, 2]
+            }],
             'huddles': []
         },
         'presences': {
@@ -660,3 +676,32 @@ def user_id(logged_on_user):
     according to current Fixtures.
     """
     return logged_on_user['user_id']
+
+
+@pytest.fixture
+def stream_dict(streams_fixture):
+    return {stream['stream_id']: stream for stream in streams_fixture}
+
+
+@pytest.fixture
+def classified_unread_counts():
+    """
+    Unread counts return by
+    helper.classify_unread_counts function.
+    """
+    return {
+        'all_msg': 7,
+        'all_pms': 3,
+        'unread_topics': {
+            (1000, 'Some general unread topic'): 3,
+            (99, 'Some private unread topic'): 1
+        },
+        'unread_pms': {
+            1: 2,
+            2: 1
+        },
+        'streams': {
+            1000: 3,
+            99: 1
+        }
+    }
