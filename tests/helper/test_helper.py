@@ -3,6 +3,7 @@ import pytest
 from zulipterminal.helper import (
     index_messages,
     powerset,
+    classify_unread_counts,
 )
 from typing import Any
 
@@ -152,3 +153,31 @@ def test_index_starred(mocker,
 ])
 def test_powerset(iterable, map_func, expected_powerset):
     assert powerset(iterable, map_func) == expected_powerset
+
+
+@pytest.mark.parametrize('muted_streams, muted_topics, vary_in_unreads', [
+    ([99], [['Some general stream', 'Some general unread topic']], {
+        'all_msg': 4,
+        'streams': {99: 1},
+        'unread_topics': {(99, 'Some private unread topic'): 1},
+    }),
+    ([1000], [['Secret stream', 'Some private unread topic']], {
+        'all_msg': 6,
+        'streams': {1000: 3},
+        'unread_topics': {(1000, 'Some general unread topic'): 3},
+    }),
+    ([1], [], {})
+], ids=['mute_private_stream_mute_general_stream_topic',
+        'mute_general_stream_mute_private_stream_topic',
+        'no_mute_some_other_stream_muted']
+)
+def test_classify_unread_counts(mocker, initial_data, stream_dict,
+                                classified_unread_counts, muted_topics,
+                                muted_streams, vary_in_unreads):
+    model = mocker.Mock()
+    model.stream_dict = stream_dict
+    model.initial_data = initial_data
+    model.muted_topics = muted_topics
+    model.muted_streams = muted_streams
+    assert classify_unread_counts(model) == dict(classified_unread_counts,
+                                                 **vary_in_unreads)
