@@ -173,7 +173,7 @@ stream_msg_template = {
     'subject': 'Test',
     'reactions': [],
     'subject_links': [],
-    'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+    'avatar_url': 'dummy_avatar_url',
     'is_me_message': False,
     'sender_short_name': 'foo',
     'content': 'Stream content here.',
@@ -195,7 +195,7 @@ pm_template = {
     'subject': '',
     'reactions': [],
     'type': 'private',
-    'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+    'avatar_url': 'dummy_avatar_url',
     'subject_links': [],
     'sender_short_name': 'foo',
     'content': 'Hey PM content here.',
@@ -229,7 +229,7 @@ group_pm_template = {
     'subject': '',
     'reactions': [],
     'type': 'private',
-    'avatar_url': '/user_avatars/2/foo.png?x=x&version=2',
+    'avatar_url': 'dummy_avatar_url',
     'subject_links': [],
     'sender_short_name': 'foo',
     'content': 'Hey PM content here again.',
@@ -317,9 +317,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             'email': 'notification-bot@zulip.com',
             'user_id': 5,
             'is_admin': False,
-            'avatar_url': 'https://secure.gravatar.com/avatar/'
-                          '0fc5476bdf03fe8640cc8fbc27a47549'
-                          '?d=identicon&version=1'
+            'avatar_url': 'dummy_avatar_url'
         }, {
             'full_name': 'Email Gateway',
             'timezone': '',
@@ -328,9 +326,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             'email': 'emailgateway@zulip.com',
             'user_id': 6,
             'is_admin': False,
-            'avatar_url': 'https://secure.gravatar.com/avatar/'
-                          '99ac4226a594fca879bb598c1b36fb42'
-                          '?d=identicon&version=1'
+            'avatar_url': 'dummy_avatar_url'
         }, {
             'full_name': 'Welcome Bot',
             'timezone': '',
@@ -339,9 +335,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             'email': 'welcome-bot@zulip.com',
             'user_id': 4,
             'is_admin': False,
-            'avatar_url': 'https://secure.gravatar.com/avatar/'
-                          '6a4e22d220487fb7ceb295fa706f39d5'
-                          '?d=identicon&version=1'
+            'avatar_url': 'dummy_avatar_url'
         }, {
             'full_name': 'Zulip Feedback Bot',
             'timezone': '',
@@ -350,9 +344,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             'email': 'feedback@zulip.com',
             'user_id': 1,
             'is_admin': False,
-            'avatar_url': 'https://secure.gravatar.com/avatar/'
-                          '78eecc367eedd27e6ac9292dc966beb6'
-                          '?d=identicon&version=1'
+            'avatar_url': 'dummy_avatar_url'
         }],
         'subscriptions': streams_fixture,
         'msg': '',
