@@ -118,6 +118,7 @@ class Controller:
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
+        self.model.index['search'].clear()
         self.model.set_narrow(search=text)
 
         self.model.found_newest = False
