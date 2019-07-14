@@ -296,6 +296,10 @@ class MessageBox(urwid.Pile):
 
     def top_search_bar(self) -> Any:
         curr_narrow = self.model.narrow
+        is_search_narrow = self.model.is_search_narrow()
+        if is_search_narrow:
+            curr_narrow = [sub_narrow for sub_narrow in curr_narrow
+                           if sub_narrow[0] != 'search']
         if curr_narrow == []:
             text_to_fill = 'All messages'
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'private':
@@ -318,8 +322,15 @@ class MessageBox(urwid.Pile):
             text_to_fill = 'Group private conversation'
         else:
             text_to_fill = 'Private conversation'
-        title_markup = ('header', [
-            ('custom', text_to_fill)
+
+        if is_search_narrow:
+            title_markup = ('header', [
+                ('custom', text_to_fill),
+                ('span', ' Search Results')
+            ])
+        else:
+            title_markup = ('header', [
+                ('custom', text_to_fill)
             ])
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, 'bar')
