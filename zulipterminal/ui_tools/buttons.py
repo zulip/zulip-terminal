@@ -57,7 +57,8 @@ class TopButton(urwid.Button):
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
         if len(self._caption) > max_caption_length:
-            caption = self._caption[:max_caption_length-2] + '..'
+            caption = (self._caption[:max_caption_length-1] +
+                       '\N{HORIZONTAL ELLIPSIS}')
         else:
             caption = self._caption
         num_extra_spaces = (
