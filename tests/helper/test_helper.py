@@ -147,6 +147,36 @@ def test_index_starred(mocker,
     assert index_messages(messages, model, model.index) == expected_index
 
 
+@pytest.mark.parametrize('mentioned_messages', [
+    {537286, 537287, 537288},
+    {537286}, {537287}, {537288},
+    {537286, 537287}, {537286, 537288}, {537287, 537288},
+])
+def test_index_mentioned_messages(mocker,
+                                  messages_successful_response,
+                                  empty_index,
+                                  mentioned_messages,
+                                  initial_index):
+    messages = messages_successful_response['messages']
+    for msg in messages:
+        if msg['id'] in mentioned_messages and 'mentioned' not in msg['flags']:
+            msg['flags'].append('mentioned')
+
+    model = mocker.patch('zulipterminal.model.Model.__init__',
+                         return_value=None)
+    model.index = initial_index
+    model.narrow = [['is', 'mentioned']]
+    model.is_search_narrow.return_value = False
+    expected_index = dict(empty_index, private_msg_ids={537287, 537288},
+                          mentioned_msg_ids=mentioned_messages)
+
+    for msg_id, msg in expected_index['messages'].items():
+        if msg_id in mentioned_messages and 'mentioned' not in msg['flags']:
+            msg['flags'].append('mentioned')
+
+    assert index_messages(messages, model, model.index) == expected_index
+
+
 @pytest.mark.parametrize('iterable, map_func, expected_powerset', [
     ([], set, [set()]),
     ([1], set, [set(), {1}]),
