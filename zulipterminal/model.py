@@ -722,6 +722,10 @@ class Model:
             if not self.narrow:
                 self.msg_list.log.append(msg_w)
 
+            elif self.narrow[0][1] == 'mentioned' and \
+                    'mentioned' in response['flags']:
+                self.msg_list.log.append(msg_w)
+
             elif self.narrow[0][1] == response['type'] and\
                     len(self.narrow) == 1:
                 self.msg_list.log.append(msg_w)

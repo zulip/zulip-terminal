@@ -746,11 +746,15 @@ class TestModel:
           'display_recipient': [{'id': 5827}, {'id': 3212}]},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), []),
+        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'c',
+          'display_recipient': 'a', 'flags': ['mentioned']},
+         [['is', 'mentioned']], frozenset(), ['msg_w']),
     ], ids=['stream_to_all_messages', 'private_to_all_private',
             'stream_to_stream', 'stream_to_topic',
             'stream_to_different_stream_same_topic',
             'user_pm_x_appears_in_narrow_with_x', 'search',
-            'user_pm_x_does_not_appear_in_narrow_without_x'])
+            'user_pm_x_does_not_appear_in_narrow_without_x',
+            'mentioned_msg_in_mentioned_msg_narrow'])
     def test_append_message(self, mocker, user_profile, response,
                             narrow, recipients, model, log):
         model.found_newest = True
@@ -767,7 +771,8 @@ class TestModel:
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile['user_id']
-        event = {'message': response}
+        event = {'message': response, 'flags': response['flags']
+                 if 'flags' in response else []}
 
         model.append_message(event)
 
