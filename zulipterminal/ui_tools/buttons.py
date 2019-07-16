@@ -106,6 +106,18 @@ class PMButton(TopButton):
                          width=width)
 
 
+class MentionedButton(TopButton):
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
+        button_text = ("Mentions         [" +
+                       keys_for_command("ALL_MENTIONS").pop() +
+                       "]")
+        super().__init__(controller, button_text,
+                         controller.show_all_mentions,
+                         width=width,
+                         count=count,
+                         prefix_character='')
+
+
 class StarredButton(TopButton):
     def __init__(self, controller: Any, width: int) -> None:
         button_text = ("Starred messages [" +
