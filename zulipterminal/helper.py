@@ -131,6 +131,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     user_buttons_log = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
+    all_mentioned = controller.view.mentioned_button
     for id in id_list:
         user_id = messages[id]['sender_id']
 
@@ -140,6 +141,10 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
 
         msg_type = messages[id]['type']
         add_to_counts = True
+        if 'mentioned' in messages[id]['flags']:
+            unread_counts['all_mentions'] += new_count
+            all_mentioned.update_count(unread_counts['all_mentions'])
+
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
             msg_topic = messages[id]['subject']
