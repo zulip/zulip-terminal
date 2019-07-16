@@ -28,6 +28,7 @@ Index = TypedDict('Index', {
     # Various sets of downloaded message ids (all, starred, ...)
     'all_msg_ids': Set[int],
     'starred_msg_ids': Set[int],
+    'mentioned_msg_ids': Set[int],
     'private_msg_ids': Set[int],
     'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
     'stream_msg_ids_by_stream_id': Dict[int, Set[int]],
@@ -44,6 +45,7 @@ initial_index = Index(
     pointer=defaultdict(set),
     all_msg_ids=set(),
     starred_msg_ids=set(),
+    mentioned_msg_ids=set(),
     private_msg_ids=set(),
     private_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
@@ -224,6 +226,11 @@ def index_messages(messages: List[Message],
             23423,
             ...
         },
+        'mentioned_msg_ids': {
+            14423,
+            33234,
+            ...
+        },
         'stream_msg_ids_by_stream_id': {
             123: {
                 53434,
@@ -321,6 +328,10 @@ def index_messages(messages: List[Message],
             if narrow[0][1] == 'starred':
                 if 'starred' in msg['flags']:
                     index['starred_msg_ids'].add(msg['id'])
+
+            if narrow[0][1] == 'mentioned':
+                if 'mentioned' in msg['flags']:
+                    index['mentioned_msg_ids'].add(msg['id'])
 
             if msg['type'] == 'private':
                 index['private_msg_ids'].add(msg['id'])
