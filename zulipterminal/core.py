@@ -65,10 +65,17 @@ class Controller:
 
     @asynch
     def init_model_view(self) -> None:
-        self.model = Model(self)
-        self.view = View(self)
-        # Start polling for events after view is rendered.
-        self.model.poll_for_events()
+        try:
+            self.model = Model(self)
+            self.view = View(self)
+            # Start polling for events after view is rendered.
+            self.model.poll_for_events()
+        except Exception as e:
+            self.exception = e
+            os.write(self.exception_pipe, b'1')
+
+    def raise_exception(self, *args: Any, **kwargs: Any) -> None:
+        raise self.exception
 
     def capture_stdout(self, path: str='debug.log') -> None:
         if hasattr(self, '_stdout'):
@@ -313,6 +320,7 @@ class Controller:
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
+        self.exception_pipe = self.loop.watch_pipe(self.raise_exception)
 
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)

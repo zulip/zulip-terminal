@@ -212,5 +212,12 @@ class TestController:
 
     def test_initialize_loop(self, mocker, controller):
         assert self.main_loop.call_count == 1
-        controller.loop.watch_pipe.assert_called_once_with(
-            controller.draw_screen)
+        controller.loop.watch_pipe.assert_has_calls([
+            mocker.call(controller.draw_screen),
+            mocker.call(controller.raise_exception)
+        ])
+
+    def test_raise_exception(self, mocker, controller):
+        controller.exception = Exception
+        with pytest.raises(Exception):
+            controller.raise_exception()
