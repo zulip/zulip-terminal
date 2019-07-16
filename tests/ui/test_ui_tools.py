@@ -1570,7 +1570,12 @@ class TestMessageBox:
         ([['is', 'starred']], 2, 'You and ', 'Starred messages'),
         ([['is', 'starred'], ['search', 'FOO']], 1, 'You and ',
          'Starred messages'),
-        ([['search', 'FOO']], 0, 'PTEST >', 'All messages')
+        ([['search', 'FOO']], 0, 'PTEST >', 'All messages'),
+        ([['is', 'mentioned']], 0, 'PTEST >', 'Mentions'),
+        ([['is', 'mentioned']], 1, 'You and ', 'Mentions'),
+        ([['is', 'mentioned']], 2, 'You and ', 'Mentions'),
+        ([['is', 'mentioned'], ['search', 'FOO']], 1, 'You and ',
+         'Mentions'),
     ])
     def test_msg_generates_search_and_header_bar(self, mocker,
                                                  messages_successful_response,

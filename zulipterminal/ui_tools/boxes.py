@@ -313,6 +313,8 @@ class MessageBox(urwid.Pile):
             text_to_fill = 'All private messages'
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'starred':
             text_to_fill = 'Starred messages'
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'mentioned':
+            text_to_fill = 'Mentions'
         elif self.message['type'] == 'stream':
             bar_color = self.model.stream_dict[self.stream_id]['color']
             bar_color = 's' + bar_color
