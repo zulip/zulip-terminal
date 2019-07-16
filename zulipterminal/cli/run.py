@@ -157,6 +157,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         'theme': ('default', NO_CONFIG),
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
+        'tutorial': ('view', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:
@@ -216,6 +217,7 @@ def main(options: Optional[List[str]]=None) -> None:
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
+            'tutorial': ['view', 'skip'],
         }
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():

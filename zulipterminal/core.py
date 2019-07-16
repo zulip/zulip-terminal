@@ -36,11 +36,13 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme_name: str,
-                 zuliprc_path: str, autohide: bool, notify: bool) -> None:
+                 zuliprc_path: str, autohide: bool, notify: bool,
+                 tutorial: bool) -> None:
         self.theme = THEMES[theme_name]
         self.theme_name = theme_name
         self.autohide = autohide
         self.notify_enabled = notify
+        self.wait_after_loading = tutorial
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
         self.zuliprc_path = os.path.expanduser(zuliprc_path)
@@ -338,7 +340,16 @@ class Controller:
             self.update_screen()
             time.sleep(0.1)
         self.txt.set_controller(self)
-        self.txt.keypress((20, 20), 'enter')
+
+        if self.wait_after_loading:
+            self.txt.set_text(loading_text([
+                u'\u2713  \nPress ',
+                ('starred', 'Enter'),
+                ' to continue >>\nPress ',
+                ('starred', 'h'),
+                ' to skip the tutorial from next time and continue.']))
+        else:
+            self.txt.keypress((20, 20), 'enter')
 
     def initialize_loop(self) -> None:
         screen = Screen()

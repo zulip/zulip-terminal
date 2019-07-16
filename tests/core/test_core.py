@@ -29,10 +29,12 @@ class TestController:
         self.theme_name = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.wait_after_loading = False
         self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
                                       return_value=mocker.Mock())
         return Controller(self.config_file, self.theme_name,
-                          self.config_file, self.autohide, self.notify_enabled)
+                          self.config_file, self.autohide, self.notify_enabled,
+                          self.wait_after_loading)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
