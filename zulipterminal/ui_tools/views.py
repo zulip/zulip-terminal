@@ -11,8 +11,8 @@ from zulipterminal.config.keys import (
 from zulipterminal.helper import Message, asynch, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
-    HomeButton, PMButton, StarredButton, StreamButton, TopicButton,
-    UnreadPMButton, UserButton,
+    HomeButton, MentionedButton, PMButton, StarredButton, StreamButton,
+    TopicButton, UnreadPMButton, UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
@@ -664,6 +664,11 @@ class LeftColumnView(urwid.Pile):
                                        count=count,
                                        width=self.width)
 
+        self.view.mentioned_button = MentionedButton(
+            self.controller,
+            width=self.width,
+            count=self.model.unread_counts['all_mentions'])
+
         # Starred messages are by definition read already
         self.view.starred_button = StarredButton(self.controller,
                                                  width=self.width)
@@ -671,6 +676,7 @@ class LeftColumnView(urwid.Pile):
         menu_btn_list = [
             self.view.home_button,
             self.view.pm_button,
+            self.view.mentioned_button,
             self.view.starred_button,
         ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))

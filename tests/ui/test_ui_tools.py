@@ -1022,7 +1022,8 @@ class TestLeftColumnView:
             'unread_topics': {
                 (205, 'TOPIC1'): 34,
                 (205, 'TOPIC2'): 100,
-            }
+            },
+            'all_mentions': 1,
         }
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
