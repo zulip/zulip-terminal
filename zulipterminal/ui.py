@@ -164,6 +164,9 @@ class View(urwid.WidgetWrap):
         elif is_command_key('ALL_STARRED', key):
             self.model.controller.show_all_starred(self)
             self.body.focus_col = 1
+        elif is_command_key('ALL_MENTIONS', key):
+            self.model.controller.show_all_mentions(self)
+            self.body.focus_col = 1
         elif is_command_key('SEARCH_PEOPLE', key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2

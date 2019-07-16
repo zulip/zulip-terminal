@@ -116,6 +116,7 @@ Install-Module -Name BurntToast
 | Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
 | Narrow to all private messages                        | <kbd>P</kbd>                                  |
 | Narrow to all starred messages                        | <kbd>f</kbd>                                  |
+| Narrow to messages in which you're mentioned          | <kbd>#</kbd>                                  |
 | Next unread topic                                     | <kbd>n</kbd>                                  |
 | Next unread private message                           | <kbd>p</kbd>                                  |
 

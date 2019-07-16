@@ -205,6 +205,17 @@ class TestView:
         view.keypress(size, key)
         super_view.assert_called_once_with(size, expected_key)
 
+    def test_keypress_ALL_MENTIONS(self, view, mocker):
+        view.body = mocker.Mock()
+        view.body.focus_col = None
+        view.controller.editor_mode = False
+        size = (20,)
+        view.model.controller.show_all_mentions = mocker.Mock()
+
+        view.keypress(size, "#")
+        view.model.controller.show_all_mentions.assert_called_once_with(view)
+        assert view.body.focus_col == 1
+
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
     def test_keypress_w(self, view, mocker, autohide):

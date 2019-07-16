@@ -140,6 +140,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Narrow to all starred messages',
         'key_category': 'navigation',
     }),
+    ('ALL_MENTIONS', {
+        'keys': {'#'},
+        'help_text': "Narrow to messages in which you're mentioned",
+        'key_category': 'navigation',
+    }),
     ('NEXT_UNREAD_TOPIC', {
         'keys': {'n'},
         'help_text': 'Next unread topic',
