@@ -60,6 +60,7 @@ initial_index = Index(
 UnreadCounts = TypedDict('UnreadCounts', {
     'all_msg': int,
     'all_pms': int,
+    'all_mentions': int,
     'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
     'unread_pms': Dict[int, int],  # sender_id
     'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
@@ -369,11 +370,15 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     unread_counts = UnreadCounts(
         all_msg=0,
         all_pms=0,
+        all_mentions=0,
         unread_topics=dict(),
         unread_pms=dict(),
         unread_huddles=dict(),
         streams=dict(),
     )
+
+    mentions_count = len(unread_msg_counts['mentions'])
+    unread_counts['all_mentions'] += mentions_count
 
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
