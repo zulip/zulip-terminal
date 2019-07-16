@@ -210,6 +210,7 @@ class TestModel:
         ([['stream', 'some stream'], ['topic', 'some topic']],
          dict(stream='some stream', topic='some topic')),
         ([['is', 'starred']], dict(starred=True)),
+        ([['is', 'mentioned']], dict(mentioned=True)),
         ([['is', 'private']], dict(pms=True)),
         ([['pm_with', 'FOO@zulip.com']], dict(pm_with='FOO@zulip.com')),
     ])
@@ -224,6 +225,7 @@ class TestModel:
         ([], [['stream', 'some stream'], ['topic', 'some topic']],
          dict(stream='some stream', topic='some topic')),
         ([], [['is', 'starred']], dict(starred=True)),
+        ([], [['is', 'mentioned']], dict(mentioned=True)),
         ([], [['is', 'private']], dict(pms=True)),
         ([], [['pm_with', 'FOOBOO@gmail.com']],
          dict(pm_with='FOOBOO@gmail.com')),
@@ -286,6 +288,9 @@ class TestModel:
                 1: {0, 1, 2}  # NOTE Should not be returned
             },
             'search': {0, 1},
+        }, {0, 1}),
+        ([['is', 'mentioned']], {
+            'mentioned_msg_ids': {0, 1}
         }, {0, 1}),
     ])
     def test_get_message_ids_in_current_narrow(self, mocker, model,

@@ -145,7 +145,8 @@ class Model:
                    topic: Optional[str]=None,
                    pms: bool=False,
                    pm_with: Optional[str]=None,
-                   starred: bool=False) -> bool:
+                   starred: bool=False,
+                   mentioned: bool=False) -> bool:
         selected_params = {k for k, v in locals().items() if k != 'self' and v}
         valid_narrows = {
             frozenset(): [],
@@ -155,6 +156,7 @@ class Model:
             frozenset(['pms']): [['is', 'private']],
             frozenset(['pm_with']): [['pm_with', pm_with]],
             frozenset(['starred']): [['is', 'starred']],
+            frozenset(['mentioned']): [['is', 'mentioned']],
         }  # type: Dict[FrozenSet[str], List[Any]]
         for narrow_param, narrow in valid_narrows.items():
             if narrow_param == selected_params:
@@ -211,6 +213,8 @@ class Model:
             ids = index['private_msg_ids_by_user_ids'].get(recipients, set())
         elif narrow[0][1] == 'starred':
             ids = index['starred_msg_ids']
+        elif narrow[0][1] == 'mentioned':
+            ids = index['mentioned_msg_ids']
         return ids.copy()
 
     def _notify_server_of_presence(self) -> Dict[str, Any]:
