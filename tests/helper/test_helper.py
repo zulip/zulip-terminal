@@ -194,13 +194,15 @@ def test_powerset(iterable, map_func, expected_powerset):
         'all_msg': 9,
         'streams': {99: 1},
         'unread_topics': {(99, 'Some private unread topic'): 1},
+        'all_mentions': 0,
     }),
     ([1000], [['Secret stream', 'Some private unread topic']], {
         'all_msg': 11,
         'streams': {1000: 3},
         'unread_topics': {(1000, 'Some general unread topic'): 3},
+        'all_mentions': 0,
     }),
-    ([1], [], {})
+    ([1], [], {'all_mentions': 0})
 ], ids=['mute_private_stream_mute_general_stream_topic',
         'mute_general_stream_mute_private_stream_topic',
         'no_mute_some_other_stream_muted']
