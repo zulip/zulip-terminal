@@ -357,7 +357,7 @@ def match_user(user: Any, text: str) -> bool:
 # download all the images/gifs first in /tmp/MSGID folder
 # Open the first image in the default viewer of the os.
 # user can click next in the viewer for viewing rest of the media
-def open_media(urls: List[str], msg_id: int, server_url: str):
+def open_media(urls: List[str], msg_id: int, server_url: str, client: Any):
     first_media = None
     for url in urls:
         # Capture 2 different type of `user_upload` links
@@ -374,7 +374,10 @@ def open_media(urls: List[str], msg_id: int, server_url: str):
             os.mkdir(img_dir_path)
         except FileExistsError:
             pass
-        with requests.get(url, stream=True) as r:
+        with requests.get(url,
+                          auth=requests.auth.HTTPBasicAuth(client.email,
+                                                          client.api_key),
+                          stream=True) as r:
             r.raise_for_status()
             with open(img_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=8192):

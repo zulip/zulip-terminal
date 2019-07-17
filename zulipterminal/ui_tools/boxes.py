@@ -538,7 +538,8 @@ class MessageBox(urwid.Pile):
             # TODO: Block multiple pressing of this key
             # TODO: Make this function async
             # TODO: Show `Downloading/Loading...` msg in footer via #T339.
-            open_media(self.media, self.message['id'], self.model.server_url)
+            open_media(self.media, self.message['id'], self.model.server_url,
+                      self.model.controller.client)
         return key
 
 
