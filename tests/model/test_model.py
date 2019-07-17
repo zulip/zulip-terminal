@@ -532,7 +532,8 @@ class TestModel:
             model._update_initial_data()
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
-                           user_id):
+                           user_id, mock_current_time):
+        # NOTE: time.time() in this test is set to 0.
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'
