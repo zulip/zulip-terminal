@@ -1,43 +1,94 @@
 # Zulip-terminal Changelog
 
-## Next Release
+## 0.4.0
+
+Thanks to the core team and many new contributors for the almost 300 commits since 0.3.1!
+
+### HIGHLIGHTS
+- Cleaner style, compact, more functional - and lots of bugs fixed!
+- Default to show both left and right panels (streams & users), with no_autohide mode
+- Messages now only get marked read if you actively move onto them
+- Clear indication of the current message view (narrow) next to the message search area
+- 'Zoom' in and out of stream/topic narrows using <kbd>z</kbd> (also all-private-messages/one-conversation)
+- Edit message content and subject/topic using <kbd>e</kbd> & see them marked & updated
+- Toggle between listing streams & topics in a stream easily using <kbd>t</kbd>
+- Examine who reacted to a message using the information menu accessible using <kbd>i</kbd>
+- Mute a selected stream from within zulip-term using <kbd>m</kbd>
+- Various areas now marked with shortcut keys in the UI, not just in the help menu (<kbd>?</kbd>)
 
 ### Interactivity improvements
-- Add feature to edit sent messages using <kbd>e</kbd> hotkey.
+- The 'no_autohide' option is now the default, with both left and right panels always shown
+- Added <kbd>e</kbd> to edit your own sent message content & subject/topic
+- Update message content and subject/topic appropriately from server (#401)
+- Change views as per webapp if the edited message subject/topic changes
+- Only mark messages read, if actively move across to message list and select them
+- Added <kbd>z</kbd> hot/shortcut key to toggle between stream/topic or all-private/specific-person narrows
+- Added <kbd>t</kbd> to toggle between streams & list of all topics in selected stream
+- Added <kbd>m</kbd> to mute/unmute selected stream, with confirmation popup
+- Added <kbd>i</kbd> to show further information of selected message (including reactions)
 - Use <kbd>?</kbd> to show *and* hide help menu (<kbd>esc</kbd> continues to exit)
-- Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>)
+- Add additional shortcut key for sending messages (<kbd>ctrl</kbd>+<kbd>d</kbd>) (#176)
+- Add hint in footer of how to copy text, if attempt to select text (with mouse) in terminal
+- Stream search is now case-insensitive
+- Add command-line option to check version (#280)
 - Allow <kbd>f</kbd> and <kbd>P</kbd> shortcut keys to work from side panels (narrow starred & private messages)
 - Warn on startup, if specified theme is lacking current required styles
 - Upon unexpected crash, exit cleanly and log traceback to `zulip-terminal-tracebacks.log`
-- Add <kbd>z</kbd> hot/shortcut key to toggle between stream/topic or all-private/specific-person narrows
 
 ### Visual improvements
 - Right-align unread-counts in left & right panels (as in webapp)
 - Remove intrusive flashing cursor in side panels
-- Truncate text in left & right panels cleanly with '..', avoiding text overflow
-- Show user status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
+- Truncate text in left & right panels cleanly with '…', avoiding text overflow (#237)
+- Show users' status as `active` (Green), `idle` (Yellow) or `offline` (White) using different colors.
+- Update user list every minute, not just at startup (#330)
+- Sort user list alphabetically, case-independently (#264)
 - Further improvement/reordering of shortcut keys in README & help menu (<kbd>?</kbd>)
-- Improve styling of help menu, and how the menu scales with application width & height
+- Improve styling of help menu, and how it scales with application width & height (#297, #307)
 - Make stream icons bold and correct background color
+- Themes improved (#254)
+- Support terminal transparency in default theme (#377)
+- Clarify that <kbd>ctrl</kbd>+<kbd>c</kbd> is the intended way to exit/quit (#208)
+- Mark edited messages with 'EDITED' at their top-left
+- Show current narrow with search box, above current-recipient indicator for message (#201, #340)
+- Hide current-recipient indicator when fully narrowed (in topic or conversation)
+- Improve rendering of quoted text with indents
+- Display custom emoji text-equivalents in messages and reactions (#238)
+- Readline keys are now listed in the online help
+- Change main widget styles, to clearly separate three columns, with bold top-lines
+- Minimize space taken up by search boxes & display shortcut keys for each
+- Remove bullets & display shortcut keys for all messages, private messages & starred messages
+- Style private message header like webapp (You and ...)
 
 ### Important bugfixes
-- Fix bug potentially mixing unread counts for messages from users & streams
-- Don't increase the unread counts if we sent the message
-- Exit cleanly if cannot connect to zulip server
-- Avoid crash in rare case of empty message content
+- Bug undoing thumbs_up if not in same session (#334)
+- Bug showing edited messages in raw text, not rendered version (#308)
+- Bug quoting original message, not rendered version (#239)
+- Bug where new messages from server would not be shown in message list
+- Bug potentially mixing unread counts for messages from users & streams
+- Bug with not showing self as recipient
+- Bug increasing the unread counts if we sent the message
+- Crash due to race in initialization (#391)
+- Crash due to not supporting short color format for streams from older Zulip servers (#273)
+- Crash pressing up on muted stream (#272)
+- Crash when using certain keys in a stream with no previous conversations (#247)
+- Crash in rare case of empty message content
+- Crash on receiving multiple starred-message events
+- Crash interacting with empty list of search results
+- Crash when text entry was not disabled properly
+- Crash on pressing <kbd>ctrl</kbd>+<kbd>4</kbd> (sending quit character)
+- Crash if user has unsubscribed from streams
+- Traceback on sending to multiple private recipients when narrowed to that conversation
 - Set terminal locale to `utf-8` by default which removes issues with rendering double width characters.
-- Avoid crash on receiving multiple starred-message events
-- Fix quoting original message, not rendered version 
-- Avoid crash by supporting short color format for streams from older Zulip servers
-- Avoid traceback on sending to multiple private recipients when narrowed to that conversation
+- Exit cleanly if cannot connect to zulip server (#216)
 
 ### Infrastructure changes
 - Remove support for python 3.4, which will have no further releases
+- Depend upon later versions of zulip & urwid-readline packages
 - Improve installation, development & troubleshooting notes in README
 - Minimized initial registration & communication with zulip server
 - Internal refactoring & centralization of code handling zulip server communication
 - Centralize server event callbacks into Model
-- Improve test coverage, including first tests for run.py
+- Improve test coverage, fixtures & builds on Travis
 - Simplify UI objects used in left & right panels
 
 ## 0.3.1
