@@ -738,7 +738,8 @@ class PopUpConfirmationView(urwid.Overlay):
                     [question, urwid.Divider(), wrapped_widget]
                 )))
         urwid.Overlay.__init__(self, prompt, self.controller.view,
-                               align="left", valign="top", width=26,
+                               align="left", valign="top",
+                               width=self.controller.view.LEFT_WIDTH+1,
                                height=8)
 
     def exit_popup_yes(self, args: Any) -> None:
