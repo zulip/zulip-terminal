@@ -67,7 +67,7 @@ setup(
     ],
     python_requires='>=3.5, <3.8',
     keywords='',
-    packages=find_packages(exclude=['test', 'test.*']),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
     cmdclass={'test': PyTest},
     test_suite='test',
