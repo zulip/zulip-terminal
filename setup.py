@@ -53,7 +53,7 @@ setup(
     author_email='zulip-devel@googlegroups.com',
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         'Intended Audience :: End Users/Desktop',
         'Topic :: Communications :: Chat',
