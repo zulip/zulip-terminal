@@ -996,6 +996,7 @@ class TestPopUpConfirmationView:
     @pytest.fixture
     def popup_view(self, mocker, stream_button):
         self.controller = mocker.Mock()
+        self.controller.view.LEFT_WIDTH = 27
         self.callback = mocker.Mock()
         self.list_walker = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
                                         return_value=[])
