@@ -40,7 +40,7 @@ class WriteBox(urwid.Pile):
         self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
-            func=self.autocomplete,
+            func=self.generic_autocomplete,
             key=keys_for_command('AUTOCOMPLETE').pop()
         )
         to_write_box = urwid.LineBox(
@@ -59,7 +59,7 @@ class WriteBox(urwid.Pile):
         self.to_write_box = None
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
-            func=self.autocomplete,
+            func=self.generic_autocomplete,
             key=keys_for_command('AUTOCOMPLETE').pop()
         )
         self.stream_write_box = ReadlineEdit(
@@ -87,18 +87,25 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
-    def autocomplete(self, text: Any, state: int) -> Optional[str]:
-        if text.startswith('@'):
-            users_list = self.view.users
-            user_typeahead = ['@**{}**'.format(user['full_name'])
-                              for user in users_list
-                              if match_user(user, text[1:])]
-            try:
-                return user_typeahead[state]
-            except IndexError:
-                return None
+    def generic_autocomplete(self, text: str, state: int) -> Optional[str]:
+        if text.startswith('@_'):
+            return self.autocomplete_mentions(text, state, '@_')
+        elif text.startswith('@'):
+            return self.autocomplete_mentions(text, state, '@')
         else:
             return text
+
+    def autocomplete_mentions(self, text: str, state: int,
+                              prefix_string: str) -> Optional[str]:
+        # Handles both mentions and silent mentions.
+        users_list = self.view.users
+        user_typeahead = [prefix_string+'**{}**'.format(user['full_name'])
+                          for user in users_list
+                          if match_user(user, text[len(prefix_string):])]
+        try:
+            return user_typeahead[state]
+        except IndexError:
+            return None
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
