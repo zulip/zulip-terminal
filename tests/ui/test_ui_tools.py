@@ -832,24 +832,58 @@ class TestMiddleColumnView:
             "MSG_LIST", header=self.search_box, footer=self.write_box
         )
 
-    def test_get_next_unread_topic(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {1: 1, 2: 1}}
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value == 1
-        assert mid_col_view.last_unread_topic == 1
+    @pytest.mark.parametrize('last_unread_topic, next_unread_topic', [
+        ((1, 'stream muted & unmuted topic'), (2, 'unmuted topic 1')),
+        ((2, 'unmuted topic 1'), (2, 'unmuted topic 2')),
+        ((2, 'unmuted topic 2'), (2, 'unmuted topic 3')),
+        ((2, 'unmuted topic 3'), (2, 'unmuted topic 1')),
+    ])
+    def test_get_next_unread_topic(self, mid_col_view, last_unread_topic,
+                                   next_unread_topic, stream_dict,
+                                   model_fixture):
+        mid_col_view.model = model_fixture
+        mid_col_view.model.unread_counts = dict()
+        unread_topics = OrderedDict()
+        unread_topics[(1, 'stream muted & unmuted topic')] = 1,
+        unread_topics[(1, 'muted stream muted topic')] = 1,
+        unread_topics[(2, 'muted topic')] = 1,
+        unread_topics[(2, 'unmuted topic 1')] = 1,
+        unread_topics[(2, 'unmuted topic 2')] = 1,
+        unread_topics[(2, 'unmuted topic 3')] = 1,
+        mid_col_view.model.unread_counts['unread_topics'] = unread_topics
+        mid_col_view.model.stream_dict = stream_dict
+        mid_col_view.model.muted_streams = [1]
+        mid_col_view.model.muted_topics = [
+            ('Stream 2', 'muted topic'),
+            ('Stream 1', 'muted stream muted topic'),
+        ]
+        mid_col_view.last_unread_topic = last_unread_topic
+        assert mid_col_view.get_next_unread_topic() == next_unread_topic
 
-    def test_get_next_unread_topic_again(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {1: 1, 2: 1}}
-        mid_col_view.last_unread_topic = 1
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value == 2
-        assert mid_col_view.last_unread_topic == 2
-
-    def test_get_next_unread_topic_no_unread(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {}}
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value is None
-        assert mid_col_view.last_unread_topic is None
+    @pytest.mark.parametrize('last_unread_topic, next_unread_topic', [
+        ((1, 'stream muted & unmuted topic'), None),
+        ((2, 'muted topic'), None),
+        (None, None),
+    ])
+    def test_get_next_unread_topic_no_unread(self, mid_col_view,
+                                             stream_dict,
+                                             last_unread_topic,
+                                             next_unread_topic,
+                                             model_fixture):
+        mid_col_view.model = model_fixture
+        mid_col_view.model.unread_counts = dict()
+        mid_col_view.model.unread_counts['unread_topics'] = {
+            (1, 'stream muted & unmuted topic'): 1,
+            (1, 'muted stream muted topic'): 1,
+            (2, 'muted topic'): 1,
+        }
+        mid_col_view.model.stream_dict = stream_dict
+        mid_col_view.model.muted_streams = [1]
+        mid_col_view.model.muted_topics = [
+            ('Stream 2', 'muted topic'),
+            ('Stream 1', 'muted stream muted topic'),
+        ]
+        assert mid_col_view.get_next_unread_topic() == next_unread_topic
 
     def test_get_next_unread_pm(self, mid_col_view):
         mid_col_view.model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
