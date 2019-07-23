@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
+from zulipterminal.model import Model
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
     StreamButton,
@@ -78,6 +79,33 @@ def msg_box(mocker, messages_successful_response):
 
 
 # --------------- Model Fixtures ----------------------------------------------
+
+@pytest.fixture
+def model_fixture(mocker, initial_data, user_profile):
+    mocker.patch('urllib.parse.urlparse')
+    controller = mocker.patch('zulipterminal.core.'
+                              'Controller',
+                              return_value=None)
+    client = mocker.patch('zulipterminal.core.'
+                          'Controller.client')
+    client.base_url = 'chat.zulip.zulip'
+    mocker.patch('zulipterminal.model.Model._start_presence_updates')
+    mocker.patch('zulipterminal.model.Model.get_messages')
+    client.register.return_value = initial_data
+    mocker.patch('zulipterminal.model.Model.get_all_users',
+                 return_value=[])
+    mocker.patch('zulipterminal.model.Model.'
+                 '_stream_info_from_subscriptions',
+                 return_value=({}, set(), [], []))
+    classify_unread_counts = mocker.patch(
+        'zulipterminal.model.classify_unread_counts',
+        return_value=[])
+    client.get_profile.return_value = user_profile
+    model = Model(controller)
+    model.muted_streams = []
+    model.muted_topics = []
+    return model
+
 
 @pytest.fixture
 def users_fixture(logged_on_user):
