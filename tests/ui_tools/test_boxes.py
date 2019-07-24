@@ -59,6 +59,8 @@ class TestWriteBox:
         ('@_Huma', 1, '@_', '@_**Human 1**'),
         ('@_Human', 1, '@_', '@_**Human 1**'),
         ('@_Human 1', 0, '@_', '@_**Human 1**'),
+        ('@"Human', 1, '@', '@**Human 1**'),
+        ('@_"Human', 1, '@_', '@_**Human 1**'),
         ('No match', 1, '', None),
     ])
     def test_autocomplete_mentions(self, write_box, users_fixture,
@@ -83,6 +85,7 @@ class TestWriteBox:
         ('#St', 0, '#**Stream 1**'),
         ('#St', 1, '#**Stream 2**'),
         ('#Stream 1', 0, '#**Stream 1**'),
+        ('#"Stream', 0, '#**Stream 1**'),
         ('No match', 0, None)
     ])
     def test_autocomplete_streams(self, write_box, streams_fixture,

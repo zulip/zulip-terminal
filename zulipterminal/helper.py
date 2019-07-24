@@ -374,6 +374,8 @@ def match_user(user: Any, text: str) -> bool:
     Matches if the user full name, last name or email matches
     with `text` or not.
     """
+    if text.startswith('"'):
+        text = text[1:]
     full_name = user['full_name'].lower()
     keywords = full_name.split()
     # adding full_name helps in further narrowing down the right user.
@@ -390,6 +392,8 @@ def match_stream(stream: Any, text: str) -> bool:
     True if the stream matches with `text` (case insensitive),
     False otherwise.
     """
+    if text.startswith('"'):
+        text = text[1:]
     stream_name = stream[0].lower()
     if stream_name.startswith(text.lower()):
         return True
