@@ -389,6 +389,12 @@ class Model:
     def is_muted_stream(self, stream_id: int) -> bool:
         return stream_id in self.muted_streams
 
+    def is_muted_topic(self, stream_id: int, topic: str) -> bool:
+        if stream_id in self.muted_streams:
+            return True
+        stream_name = self.stream_dict[stream_id]['name']
+        return (stream_name, topic) in self.muted_topics
+
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
