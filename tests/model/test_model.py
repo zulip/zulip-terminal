@@ -1188,3 +1188,12 @@ class TestModel:
         else:
             mark_muted.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize('stream_id, is_muted', [
+        (1,  True),  # muted stream
+        (2,  False),  # unmuted stream
+    ])
+    def test_is_muted_stream(self, stream_id, is_muted, stream_dict, model):
+        model.stream_dict = stream_dict
+        model.muted_streams = [1]
+        assert model.is_muted_stream(stream_id) == is_muted

@@ -386,6 +386,11 @@ class Model:
                         if not result]
             raise ServerConnectionFailure(", ".join(failures))
 
+    def is_muted_stream(self, stream_id: int) -> bool:
+        if stream_id in self.muted_streams:
+            return True
+        return False
+
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
