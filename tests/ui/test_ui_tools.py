@@ -1742,11 +1742,12 @@ class TestStreamButton:
         (25, 199, 'caption'),
         (25, 1999, 'caption'),
     ])
-    def test_text_content(self, mocker,
+    def test_text_content(self, mocker, model_fixture,
                           is_private, expected_prefix,
                           width, count, short_text, caption='caption'):
         mocker.patch(STREAMBUTTON + ".mark_muted")
         controller = mocker.Mock()
+        controller.model = model_fixture
         controller.model.muted_streams = {}
         properties = [caption, 5, '#ffffff', is_private]
         view_mock = mocker.Mock()
@@ -1778,7 +1779,7 @@ class TestStreamButton:
     ])
     def test_mark_stream_muted(self, mocker, stream_button, is_action_muting,
                                stream_id, muted_streams, called_value,
-                               updated_all_msgs) -> None:
+                               updated_all_msgs, model_fixture) -> None:
         stream_button.stream_id = stream_id
         update_count = mocker.patch(TOPBUTTON + ".update_count")
         stream_button.controller.model.unread_counts = {

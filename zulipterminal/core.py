@@ -131,8 +131,8 @@ class Controller:
             self.model.msg_list.set_focus(focus_position)
 
     def stream_muting_confirmation_popup(self, button: Any) -> None:
-        type_of_action = "unmuting" if button.stream_id in \
-            self.model.muted_streams else "muting"
+        type_of_action = "unmuting" if self.model.is_muted_stream(
+            button.stream_id) else "muting"
         question = urwid.Text(("bold", "Confirm " + type_of_action +
                                " of stream '" + button.stream_name+"' ?"),
                               "center")

@@ -56,7 +56,7 @@ def is_muted(msg: Dict[Any, Any], model: Any) -> bool:
     # In a topic narrow
     elif len(model.narrow) == 2:
         return False
-    elif msg['stream_id'] in model.muted_streams:
+    elif model.is_muted_stream(msg['stream_id']):
         return True
     elif [msg['display_recipient'], msg['subject']] in model.muted_topics:
         return True

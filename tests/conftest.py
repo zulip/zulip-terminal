@@ -33,15 +33,17 @@ def no_asynch(mocker):
 
 
 @pytest.fixture
-def stream_button(mocker):
+def stream_button(mocker, model_fixture):
     """
     Mocked stream button.
     """
     view_mock = mocker.Mock()
     view_mock.palette = [(None, 'black', 'white')]
+    controller = mocker.patch('zulipterminal.core.Controller')
+    controller.model = model_fixture
     button = StreamButton(
         properties=['PTEST', 205, '#bfd56f', False],
-        controller=mocker.patch('zulipterminal.core.Controller'),
+        controller=controller,
         width=40,
         view=view_mock,
         count=30
