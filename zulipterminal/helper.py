@@ -123,7 +123,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
             msg_topic = messages[id]['subject']
-            if stream_id in controller.model.muted_streams:
+            if controller.model.is_muted_stream(stream_id):
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
                 for stream_button in stream_buttons_log:

@@ -574,7 +574,7 @@ class Model:
         request = [{
             'stream_id': stream_id,
             'property': 'is_muted',
-            'value':  stream_id not in self.muted_streams
+            'value': not self.is_muted_stream(stream_id)
             # True for muting and False for unmuting.
         }]
         response = self.client.update_subscription_settings(request)

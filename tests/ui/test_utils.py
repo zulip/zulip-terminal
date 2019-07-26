@@ -79,8 +79,10 @@ from zulipterminal.ui_tools.utils import is_muted, create_msg_box_list
 ])
 def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     model = mocker.Mock()
+    model.is_muted_stream = (
+        mocker.Mock(return_value=(msg.get('stream_id', '') in muted_streams))
+    )
     model.narrow = narrow
-    model.muted_streams = muted_streams
     model.muted_topics = muted_topics
     return_value = is_muted(msg, model)
     assert return_value is muted
