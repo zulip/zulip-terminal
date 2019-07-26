@@ -1789,7 +1789,9 @@ class TestStreamButton:
             },
             'all_msg': 350,
         }
-        stream_button.controller.model.muted_streams = muted_streams
+        stream_button.controller.model.is_muted_stream = (
+            mocker.Mock(return_value=(stream_id in muted_streams))
+        )
         stream_button.view.home_button.update_count = mocker.Mock()
 
         if is_action_muting:
