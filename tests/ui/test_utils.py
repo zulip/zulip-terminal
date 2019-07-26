@@ -77,8 +77,9 @@ from zulipterminal.ui_tools.utils import is_muted, create_msg_box_list
         False
     ),
 ])
-def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
-    model = mocker.Mock()
+def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted,
+                  model_fixture):
+    model = model_fixture
     model.narrow = narrow
     model.muted_streams = muted_streams
     model.muted_topics = muted_topics
@@ -136,8 +137,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
 
 ])
 def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
-                             muted, unsubscribed, len_w_list):
-    model = mocker.Mock()
+                             muted, unsubscribed, len_w_list, model_fixture):
+    model = model_fixture
     model.narrow = narrow
     model.index = {
         'all_msg_ids': {1, 2},
