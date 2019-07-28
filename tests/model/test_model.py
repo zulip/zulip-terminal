@@ -558,7 +558,8 @@ class TestModel:
         assert pinned == []  # FIXME generalize/parametrize
         assert unpinned == streams  # FIXME generalize/parametrize
 
-    def test_append_message_with_Falsey_log(self, mocker, model):
+    def test_append_message_with_Falsey_log(self, mocker, model,
+                                            message_fixture):
         model.found_newest = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -567,15 +568,17 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.msg_list.log = []
-        event = {'message': {'id': 0}}
+        event = {'message': message_fixture}
 
         model.append_message(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
         (create_msg_box_list.
-         assert_called_once_with(model, [0], last_message=None))
+         assert_called_once_with(model, [message_fixture['id']],
+                                 last_message=None))
 
-    def test_append_message_with_valid_log(self, mocker, model):
+    def test_append_message_with_valid_log(self, mocker, model,
+                                           message_fixture):
         model.found_newest = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -584,7 +587,7 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.msg_list.log = [mocker.Mock()]
-        event = {'message': {'id': 0}}
+        event = {'message': message_fixture}
 
         model.append_message(event)
 
@@ -592,9 +595,10 @@ class TestModel:
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = model.msg_list.log[0].original_widget.message
         (create_msg_box_list.
-         assert_called_once_with(model, [0], last_message=expected_last_msg))
+         assert_called_once_with(model, [message_fixture['id']],
+                                 last_message=expected_last_msg))
 
-    def test_append_message_event_flags(self, mocker, model):
+    def test_append_message_event_flags(self, mocker, model, message_fixture):
         model.found_newest = True
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -606,14 +610,14 @@ class TestModel:
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         # Test event with flags
-        event = {'message': {'id': 0}, 'flags': ['read', 'mentioned']}
+        event = {'message': message_fixture, 'flags': ['read', 'mentioned']}
         model.append_message(event)
         # set count not called since 'read' flag present.
         set_count.assert_not_called()
 
         # Test event without flags
         model.msg_list.log = [mocker.Mock()]
-        event = {'message': {'id': 0}}
+        event = {'message': message_fixture, 'flags': []}
         model.append_message(event)
         # set count called since the message is unread.
         set_count.assert_called_once_with([event['message']['id']],
