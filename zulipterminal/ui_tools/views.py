@@ -271,10 +271,11 @@ class StreamsView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
         with self.search_lock:
-            streams_display = self.streams_btn_list.copy()
-            for stream in self.streams_btn_list:
-                if not stream.stream_name.lower().startswith(new_text.lower()):
-                    streams_display.remove(stream)
+            streams_display = [
+                stream
+                for stream in self.streams_btn_list.copy()
+                if stream.stream_name.lower().startswith(new_text.lower())
+            ]
             self.log.clear()
             self.log.extend(streams_display)
             self.view.controller.update_screen()
@@ -536,11 +537,12 @@ class RightColumnView(urwid.Frame):
             if user_list:
                 self.view.users = user_list
             users = self.view.users.copy()
-            users_display = users.copy()
             if new_text:
-                for user in users:
-                    if not match_user(user, new_text):
-                        users_display.remove(user)
+                users_display = [
+                    user for user in users if match_user(user, new_text)
+                ]
+            else:
+                users_display = users
             self.body = self.users_view(users_display)
             self.set_body(self.body)
             self.view.controller.update_screen()
