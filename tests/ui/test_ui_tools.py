@@ -817,10 +817,13 @@ class TestRightColumnView:
                                                right_col_view.user_search
         ))
 
-    def test_update_user_list_editor_mode(self, right_col_view):
+    def test_update_user_list_editor_mode(self, mocker, right_col_view):
+        right_col_view.view.controller.update_screen = mocker.Mock()
         right_col_view.view.controller.editor_mode = False
+
         right_col_view.update_user_list("SEARCH_BOX", "NEW_TEXT")
-        right_col_view.search_lock.acquire.assert_not_called()
+
+        right_col_view.view.controller.update_screen.assert_not_called()
 
     @pytest.mark.parametrize('search_string, assert_list, \
                               match_return_value', [
@@ -840,7 +843,6 @@ class TestRightColumnView:
 
         right_col_view.update_user_list("SEARCH_BOX", search_string)
 
-        right_col_view.search_lock.acquire.assert_called_once_with()
         right_col_view.users_view.assert_called_with(assert_list)
         set_body.assert_called_once_with(right_col_view.body)
 
@@ -850,7 +852,6 @@ class TestRightColumnView:
 
         right_col_view.update_user_list(user_list=user_list)
 
-        right_col_view.search_lock.acquire.assert_called_once_with()
         right_col_view.users_view.assert_called_with(user_list)
         set_body.assert_called_once_with(right_col_view.body)
 
