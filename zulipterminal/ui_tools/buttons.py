@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Tuple, Callable, Optional, Union
+import math
 
 import urwid
 
@@ -19,13 +20,15 @@ class TopButton(urwid.Button):
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
-                 count: int=0) -> None:
+                 count: int=0,
+                 shrink: bool=True) -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
         else:
             prefix = prefix_character
         assert len(prefix) in (0, 1)
         self._caption = caption
+        self.caption = caption
         self.prefix_character = prefix_character
         self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
@@ -36,6 +39,7 @@ class TopButton(urwid.Button):
 
         self.text_color = text_color
         self.show_function = show_function
+        self.shrink = shrink
         super().__init__("")
         self._w = self.widget(count)
         self.controller = controller
@@ -56,7 +60,7 @@ class TopButton(urwid.Button):
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
-        if len(self._caption) > max_caption_length:
+        if len(self._caption) > max_caption_length and self.shrink:
             caption = (self._caption[:max_caption_length-1] +
                        '\N{HORIZONTAL ELLIPSIS}')
         else:
@@ -66,13 +70,14 @@ class TopButton(urwid.Button):
         )
 
         # NOTE: Generated text does not include space at end
-        return urwid.AttrMap(urwid.SelectableIcon(
+        button = urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces*' '),
              ' ', ('idle',  count_text)],
-            self.width_for_text_and_count+5),  # cursor location
-            self.text_color,
-            'selected')
+            self.width_for_text_and_count+5)  # cursor location
+        button.set_layout('left', 'any', None)
+
+        return urwid.AttrMap(button, self.text_color, 'selected')
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -228,3 +233,31 @@ class UnreadPMButton(urwid.Button):
     def __init__(self, user_id: int, email: str) -> None:
         self.user_id = user_id
         self.email = email
+
+
+class GroupPMButton(TopButton):
+    def __init__(self, users: List[Dict[str, Any]], controller: Any,
+                 bw_width: int, view: Any, color: Optional[str]=None) -> None:
+        # Properties accessed externally
+        self.emails = ', '.join([user['email'] for user in users])
+        self.user_ids = {user['user_id'] for user in users}
+        self.user_ids.add(controller.model.user_id)
+        count = controller.model.unread_counts['unread_pms'].get(frozenset(
+            self.user_ids), 0)
+        self._view = view  # Used in _narrow_with_compose
+        caption = ', '.join(user['full_name'] for user in users)
+        text_rows = math.ceil(len(caption)/bw_width)
+        width = text_rows*bw_width
+        super().__init__(controller,
+                         caption=caption,
+                         show_function=self._narrow_with_compose,
+                         prefix_character=(color, '\N{BULLET}'),
+                         text_color=color,
+                         width=width,
+                         count=count,
+                         shrink=False)
+
+    def _narrow_with_compose(self, button: Any) -> None:
+        self.controller.narrow_to_user(self)
+        self._view.body.focus.original_widget.set_focus('footer')
+        self._view.write_box.private_box_view(email=self.emails)

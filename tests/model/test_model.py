@@ -69,6 +69,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_messages')
         mocker.patch('zulipterminal.model.Model.get_all_users')
         mocker.patch('zulipterminal.model.Model.fetch_all_topics')
+        mocker.patch('zulipterminal.model.classify_unread_counts')
         self.client.register.return_value = initial_data
 
         model = Model(self.controller)

@@ -308,7 +308,64 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
         }],
         'result': 'success',
         'queue_id': '1522420755:786',
+<<<<<<< HEAD
         'realm_users': users_fixture,
+=======
+        'realm_users': [{
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': logged_on_user['email'],
+            'full_name': logged_on_user['full_name'],
+            'user_id': logged_on_user['user_id'],
+            'avatar_url': None,
+            'is_active': True
+        }, {
+            'full_name': 'Boo Boo',
+            'email': 'boo@zulip.com',
+            'user_id': 5179,
+            'avatar_url': None,
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+        }, {
+            'full_name': 'Foo Foo',
+            'user_id': 5140,
+            'avatar_url': None,
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': 'foo@zulip.com',
+        }, {
+            'full_name': 'Bar Bar',
+            'user_id': 5180,
+            'avatar_url': None,
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': 'bar@zulip.com',
+        }, {
+            'full_name': 'Jari Winberg',
+            'user_id': 6086,
+            'avatar_url': None,
+            'is_active': True,
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': 'nyan.salmon+sns@gmail.com',
+        }, {
+            'bot_type': None,
+            'is_bot': False,
+            'is_admin': False,
+            'email': 'cloudserver2@hotmail.de',
+            'full_name': 'Test Account',
+            'user_id': 6085,
+            'is_active': True
+        }],
+>>>>>>> BuddyView: Implement v1 of buddy list.
         'cross_realm_bots': [{
             'full_name': 'Notification Bot',
             'timezone': '',
@@ -608,6 +665,24 @@ def user_dict(logged_on_user):
             'status': 'inactive',
             'user_id': 4
         },
+        'bar@zulip.com': {
+            'email': 'bar@zulip.com',
+            'full_name': 'Bar Bar',
+            'status': 'inactive',
+            'user_id': 5180
+        },
+        'boo@zulip.com': {
+            'email': 'boo@zulip.com',
+            'full_name': 'Boo Boo',
+            'status': 'inactive',
+            'user_id': 5179
+        },
+        'foo@zulip.com': {
+            'email': 'foo@zulip.com',
+            'full_name': 'Foo Foo',
+            'status': 'inactive',
+            'user_id': 5140
+        },
     }
 
 
@@ -619,15 +694,21 @@ def user_list(logged_on_user):
     """
     # NOTE These are sorted active > idle, then according to full_name
     return [{
-        'full_name': logged_on_user['full_name'],
-        'email': logged_on_user['email'],
-        'status': 'active',
-        'user_id': logged_on_user['user_id'],
+        'full_name': 'Tomás Farías',
+        'email': 'FOOBOO@gmail.com',
+        'user_id': 5827,
+        'status': 'active'
     }, {
         'email': 'emailgateway@zulip.com',
         'full_name': 'Email Gateway',
-        'status': 'inactive',
-        'user_id': 6
+        'email': 'emailgateway@zulip.com',
+        'user_id': 6,
+        'status': 'inactive'
+    }, {
+        'full_name': 'Foo Foo',
+        'email': 'foo@zulip.com',
+        'user_id': 5140,
+        'status': 'inactive'
     }, {
         'full_name': 'Human 1',
         'email': 'person1@example.com',
@@ -641,18 +722,20 @@ def user_list(logged_on_user):
     }, {
         'email': 'notification-bot@zulip.com',
         'full_name': 'Notification Bot',
-        'status': 'inactive',
-        'user_id': 5
+        'email': 'notification-bot@zulip.com',
+        'user_id': 5,
+        'status': 'inactive'
     }, {
         'email': 'welcome-bot@zulip.com',
         'full_name': 'Welcome Bot',
-        'status': 'inactive',
-        'user_id': 4
+        'email': 'welcome-bot@zulip.com',
+        'user_id': 4,
+        'status': 'inactive'
     }, {
-        'email': 'feedback@zulip.com',
         'full_name': 'Zulip Feedback Bot',
-        'status': 'inactive',
-        'user_id': 1
+        'email': 'feedback@zulip.com',
+        'user_id': 1,
+        'status': 'inactive'
     }]
 
 

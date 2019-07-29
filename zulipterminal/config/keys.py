@@ -14,6 +14,10 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Show/hide help menu',
         'excluded_from_random_tips': True,
     }),
+    ('BUDDY_LIST', {
+        'keys': {'b'},
+        'help_text': 'Show/hide buddy list',
+    }),
     ('GO_BACK', {
         'keys': {'esc'},
         'help_text': 'Go Back',

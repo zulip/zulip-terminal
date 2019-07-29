@@ -14,6 +14,7 @@ from zulipterminal.ui_tools.views import (
     ModListWalker,
     PopUpConfirmationView,
     MsgInfoView,
+    BuddyView,
 )
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -21,6 +22,7 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton,
     UserButton,
     TopicButton,
+    GroupPMButton,
 )
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import powerset
@@ -1705,6 +1707,35 @@ class TestTopButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
+        assert top_button._w._original_widget._wrap_mode == 'any'
+
+    @pytest.mark.parametrize('width, count, short_text', [
+        (15, 0, 'caption'),
+        (15, 1000, 'caption'),
+    ])
+    def test_shrink_false(self, mocker,
+                          width, count, short_text, caption='caption'):
+        show_function = mocker.Mock()
+        prefix = '\N{BULLET}'
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
+        top_button = TopButton(controller=mocker.Mock(),
+                               caption=caption,
+                               show_function=show_function,
+                               prefix_character=prefix,
+                               width=width,
+                               count=count,
+                               shrink=False)
+
+        text = top_button._w._original_widget.get_text()
+        count_str = '' if count == 0 else str(count)
+        if count < 0:
+            count_str = 'M'
+        expected_text = ' {} {}{}{}'.format(
+                prefix, short_text,
+                (width - 4 - len(short_text) - len(count_str))*' ',
+                count_str)
+        assert len(text[0]) == len(expected_text) == (width - 1)
+        assert text[0] == expected_text
 
 
 class TestStreamButton:
@@ -1901,3 +1932,111 @@ class TestTopicButton:
         assert topic_button.stream_name == stream_name
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
+
+class TestGroupPMButton:
+    @pytest.mark.parametrize('width, count, expected_text', [
+        (20, 0, ' • Foo Surname, Boo Surname            '),
+        (20, 10, ' • Foo Surname, Boo Surname          10'),
+        (20, 999, ' • Foo Surname, Boo Surname         999'),
+        (40, 0, ' • Foo Surname, Boo Surname            '),
+        (40, 10, ' • Foo Surname, Boo Surname          10'),
+        (40, 999, ' • Foo Surname, Boo Surname         999'),
+    ])
+    def test_text_content(self, mocker, width, count, expected_text):
+        users = [{
+            'email': 'some_email',
+            'user_id': 5,
+            'full_name': "Foo Surname",
+        }, {
+            'email': 'some_other_email',
+            'user_id': 6,
+            'full_name': "Boo Surname",
+        }]
+        controller = mocker.Mock()
+        controller.model.user_id = 1
+        controller.model.unread_counts = {
+            'unread_pms': {
+                frozenset({1, 5, 6}): count,
+            }
+        }
+        mocker.patch(TOPBUTTON + ".set_muted_streams")
+        group_pm_btn = GroupPMButton(users,
+                                     controller=controller,
+                                     bw_width=width,
+                                     view=mocker.Mock(),
+                                     color=None)
+
+        text = group_pm_btn._w._original_widget.get_text()
+        assert text[0] == expected_text
+
+
+class TestBuddyView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.controller = mocker.Mock()
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+
+    @pytest.fixture
+    def buddy_view(self, mocker):
+        mocker.patch(VIEWS + ".BuddyView.update_users_to_display")
+        mocker.patch(VIEWS + ".BuddyView.get_button", return_value="BUTTON")
+        return BuddyView(self.controller)
+
+    @pytest.fixture
+    def group_pms_to_display(self):
+        return [[{
+            'email': 'boo@zulip.com',
+            'full_name': 'Boo Boo',
+            'status': 'inactive',
+            'user_id': 5179
+        }, {
+            'email': 'foo@zulip.com',
+            'full_name': 'Foo Foo',
+            'status': 'inactive',
+            'user_id': 5140
+        }, {
+            'email': 'bar@zulip.com',
+            'full_name': 'Bar Bar',
+            'status': 'inactive',
+            'user_id': 5180
+        }], [{
+            'email': 'boo@zulip.com',
+            'full_name': 'Boo Boo',
+            'status': 'inactive',
+            'user_id': 5179
+        }, {
+            'email': 'foo@zulip.com',
+            'full_name': 'Foo Foo',
+            'status': 'inactive',
+            'user_id': 5140
+        }]]
+
+    def test_update_users_to_display(self, mocker, user_dict,
+                                     group_pms_to_display,
+                                     user_id_email_dict, empty_index):
+        mocker.patch(VIEWS + ".BuddyView.get_button", return_value="BUTTON")
+        mocker.patch(VIEWS + ".BuddyView.fetch_more_pms")
+        self.controller.model.index = empty_index
+        self.controller.model.user_dict = user_dict
+        self.controller.model.user_id_email_dict = user_id_email_dict
+        buddy_view = BuddyView(self.controller)
+        assert buddy_view.fetch_more_pms.called
+        assert buddy_view.users_to_display == []  # FIXME: Add users
+        # We just want to see if the list contents are same
+        # FIXME: Test for 'active', 'idle' and 'offline' users.
+        for i, group_pm in enumerate(buddy_view.group_pms_to_display):
+            assert sorted(group_pm, key=lambda x: x['user_id']
+                          ) == sorted(group_pms_to_display[i],
+                                      key=lambda x: x['user_id'])
+
+    def test_keypress_any_key(self, buddy_view):
+        key = "a"
+        size = (200, 20)
+        buddy_view.keypress(size, key)
+        assert buddy_view.controller.loop.widget != buddy_view.controller.view
+
+    @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
+    def test_keypress_goback(self, buddy_view, key):
+        size = (200, 20)
+        buddy_view.keypress(size, key)
+        assert buddy_view.controller.loop.widget == buddy_view.controller.view

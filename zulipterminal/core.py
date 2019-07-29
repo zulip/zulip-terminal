@@ -14,7 +14,13 @@ from zulipterminal.helper import asynch
 from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
 from zulipterminal.ui import View, Screen
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.views import HelpView, MsgInfoView
+from zulipterminal.ui_tools.views import (
+    HelpView,
+    MsgInfoView,
+    BuddyView,
+    BUDDY_VIEW_WIDTH
+)
+from zulipterminal.ui_tools.buttons import GroupPMButton
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.ui_tools.views import PopUpConfirmationView
 
@@ -114,6 +120,17 @@ class Controller:
         msg_info_view = MsgInfoView(self, msg)
         self.show_pop_up(msg_info_view,
                          "Message Information (up/down scrolls)")
+    def show_buddy_list(self) -> None:
+        cols, rows = self.loop.screen.get_cols_rows()
+        buddy_view = BuddyView(self)
+        self.loop.widget = urwid.Overlay(
+            urwid.LineBox(buddy_view),
+            self.view,
+            align='center',
+            valign='middle',
+            width=BUDDY_VIEW_WIDTH,
+            height=3*rows//4 + 2
+        )
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -203,6 +220,11 @@ class Controller:
             if not emails and len(button.message['display_recipient']) == 1:
                 emails = [self.model.user_email]
             user_emails = ', '.join(emails)
+            user_ids = {user['id']
+                        for user in button.message['display_recipient']}
+        elif isinstance(button, GroupPMButton):
+            user_emails = button.emails
+            user_ids = button.user_ids
         else:
             user_emails = button.email
 

@@ -191,6 +191,9 @@ class View(urwid.WidgetWrap):
             # Show help menu
             self.controller.show_help()
             return key
+        elif is_command_key('BUDDY_LIST', key):
+            self.controller.show_buddy_list()
+            return key
         # replace alternate keys with arrow/functional keys
         # This is needed for navigating in widgets
         # other than message_view.

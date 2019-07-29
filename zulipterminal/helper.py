@@ -23,6 +23,7 @@ Index = TypedDict('Index', {
     'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
     'stream_msg_ids_by_stream_id': Dict[int, Set[int]],
     'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
+    'pm_recipients': Dict[FrozenSet[int], int],
     # Extra cached information
     'edited_messages': Set[int],  # {message_ids, ...}
     'topics': Dict[int, List[str]],  # {topic names, ...}
@@ -39,6 +40,12 @@ initial_index = Index(
     private_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
+    pm_recipients=dict(),
+    stream=defaultdict(dict),
+    private=defaultdict(set),
+    all_messages=set(),
+    all_private=set(),
+    all_stream=defaultdict(set),
     edited_messages=set(),
     topics=defaultdict(list),
     search=set(),
@@ -86,8 +93,14 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         if msg['type'] == 'stream':
             key = (messages[id]['stream_id'], msg['subject'])
             unreads = unread_counts['unread_topics']
-        else:
+        # If it's a PM
+        elif len(msg['display_recipient']) == 2:
             key = messages[id]['sender_id']
+            unreads = unread_counts['unread_pms']  # type: ignore
+        else:  # If it's a group pm
+            key = frozenset(  # type: ignore
+                recipient['id'] for recipient in msg['display_recipient']
+            )
             unreads = unread_counts['unread_pms']  # type: ignore
 
         # broader unread counts (for all_* and streams) are updated
@@ -197,6 +210,11 @@ def index_messages(messages: List[Any],
                 ....
             ]
         },
+        'pm_recipients':{  # all the reciepents in PMs
+            {3, 7} : 123, # Timestamp of most recent message
+            {1, 2, 3, 4}: 123,
+            ...
+        }
         'all_msg_ids': {
             14231,
             23423,
@@ -292,6 +310,20 @@ def index_messages(messages: List[Any],
             index['edited_messages'].add(msg['id'])
 
         index['messages'][msg['id']] = msg
+        # Update pm_recipients if message type is private regardless of narrow
+        # Store timestamp of most recent msg to use for sorting later.
+        if msg['type'] == 'private':
+            recipients = frozenset(set(
+                recipient['id'] for recipient in msg['display_recipient']
+            ))
+            if recipients not in index['pm_recipients'].keys():
+                index['pm_recipients'][recipients] = msg['timestamp']
+            else:
+                stored_timestamp = index['pm_recipients'][recipients]
+                msg_timestamp = msg['timestamp']
+                if msg_timestamp > stored_timestamp:
+                    index['pm_recipients'][recipients] = msg_timestamp
+
         if not narrow:
             index['all_msg_ids'].add(msg['id'])
 
@@ -335,7 +367,6 @@ def index_messages(messages: List[Any],
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:
-    # TODO: support group pms
     unread_msg_counts = model.initial_data['unread_msgs']
 
     unread_counts = UnreadCounts(
@@ -365,6 +396,14 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         else:
             unread_counts['streams'][stream_id] += count
         unread_counts['all_msg'] += count
+
+    for group_pm in unread_msg_counts['huddles']:
+        count = len(group_pm['unread_message_ids'])
+        user_ids = group_pm['user_ids_string'].split(',')
+        user_ids = frozenset(map(int, user_ids))
+        unread_counts['unread_pms'][user_ids] = count
+        unread_counts['all_msg'] += count
+        unread_counts['all_pms'] += count
 
     return unread_counts
 
