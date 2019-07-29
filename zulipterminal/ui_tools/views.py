@@ -270,15 +270,14 @@ class StreamsView(urwid.Frame):
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
-        self.search_lock.acquire()
-        streams_display = self.streams_btn_list.copy()
-        for stream in self.streams_btn_list:
-            if not stream.stream_name.lower().startswith(new_text.lower()):
-                streams_display.remove(stream)
-        self.log.clear()
-        self.log.extend(streams_display)
-        self.view.controller.update_screen()
-        self.search_lock.release()
+        with self.search_lock:
+            streams_display = self.streams_btn_list.copy()
+            for stream in self.streams_btn_list:
+                if not stream.stream_name.lower().startswith(new_text.lower()):
+                    streams_display.remove(stream)
+            self.log.clear()
+            self.log.extend(streams_display)
+            self.view.controller.update_screen()
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
@@ -533,19 +532,18 @@ class RightColumnView(urwid.Frame):
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
-        self.search_lock.acquire()
-        if user_list:
-            self.view.users = user_list
-        users = self.view.users.copy()
-        users_display = users.copy()
-        if new_text:
-            for user in users:
-                if not match_user(user, new_text):
-                    users_display.remove(user)
-        self.body = self.users_view(users_display)
-        self.set_body(self.body)
-        self.view.controller.update_screen()
-        self.search_lock.release()
+        with self.search_lock:
+            if user_list:
+                self.view.users = user_list
+            users = self.view.users.copy()
+            users_display = users.copy()
+            if new_text:
+                for user in users:
+                    if not match_user(user, new_text):
+                        users_display.remove(user)
+            self.body = self.users_view(users_display)
+            self.set_body(self.body)
+            self.view.controller.update_screen()
 
     def users_view(self, users: Any=None) -> Any:
         reset_default_view_users = False
