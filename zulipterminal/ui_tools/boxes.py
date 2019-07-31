@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import match_user
+from zulipterminal.helper import match_user, match_stream
 
 
 class WriteBox(urwid.Pile):
@@ -92,6 +92,8 @@ class WriteBox(urwid.Pile):
             return self.autocomplete_mentions(text, state, '@_')
         elif text.startswith('@'):
             return self.autocomplete_mentions(text, state, '@')
+        elif text.startswith('#'):
+            return self.autocomplete_streams(text, state)
         else:
             return text
 
@@ -104,6 +106,16 @@ class WriteBox(urwid.Pile):
                           if match_user(user, text[len(prefix_string):])]
         try:
             return user_typeahead[state]
+        except IndexError:
+            return None
+
+    def autocomplete_streams(self, text: str, state: int) -> Optional[str]:
+        streams_list = self.view.pinned_streams + self.view.unpinned_streams
+        stream_typeahead = ['#**{}**'.format(stream[0])
+                            for stream in streams_list
+                            if match_stream(stream, text[1:])]
+        try:
+            return stream_typeahead[state]
         except IndexError:
             return None
 

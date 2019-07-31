@@ -68,3 +68,30 @@ class TestWriteBox:
         typeahead_string = write_box.autocomplete_mentions(
             text, state, prefix_string)
         assert typeahead_string == required_typeahead
+
+    @pytest.mark.parametrize('text, state, required_typeahead', [
+        ('#Stream', 0, '#**Stream 1**'),
+        ('#Stream', 1, '#**Stream 2**'),
+        ('#S', 0, '#**Some general stream**'),
+        ('#S', 1, '#**Secret stream**'),
+        ('#S', 2, '#**Stream 1**'),
+        ('#S', 3, '#**Stream 2**'),
+        ('#So', 0, '#**Some general stream**'),
+        ('#So', 1, None),
+        ('#Se', 0, '#**Secret stream**'),
+        ('#Se', 1, None),
+        ('#St', 0, '#**Stream 1**'),
+        ('#St', 1, '#**Stream 2**'),
+        ('#Stream 1', 0, '#**Stream 1**'),
+        ('No match', 0, None)
+    ])
+    def test_autocomplete_streams(self, write_box, streams_fixture,
+                                  text, state, required_typeahead):
+        write_box.view.pinned_streams = [
+            [stream['name']] for stream in
+            streams_fixture[:len(streams_fixture)//2]]
+        write_box.view.unpinned_streams = [
+            [stream['name']] for stream in
+            streams_fixture[len(streams_fixture)//2:]]
+        typeahead_string = write_box.autocomplete_streams(text, state)
+        assert typeahead_string == required_typeahead
