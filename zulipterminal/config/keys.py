@@ -198,7 +198,7 @@ KEY_BINDINGS = OrderedDict([
     }),
     ('AUTOCOMPLETE', {
         'keys': {'ctrl f'},
-        'help_text': 'Autocomplete @mentions',
+        'help_text': 'Autocomplete @mentions and #stream_names',
     }),
 ])  # type: OrderedDict[str, KeyBinding]
 
