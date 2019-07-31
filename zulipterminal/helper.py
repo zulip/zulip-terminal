@@ -385,6 +385,17 @@ def match_user(user: Any, text: str) -> bool:
     return False
 
 
+def match_stream(stream: Any, text: str) -> bool:
+    """
+    True if the stream matches with `text` (case insensitive),
+    False otherwise.
+    """
+    stream_name = stream[0].lower()
+    if stream_name.startswith(text.lower()):
+        return True
+    return False
+
+
 def powerset(iterable: Iterable[Any],
              map_func: Callable[[Any], Any]=set) -> List[Any]:
     """
