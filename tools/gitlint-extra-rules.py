@@ -39,8 +39,17 @@ class AreaFormatting(CommitRule):
             exclusions_text = " (or {})".format(exclusions_text)
         error = ("Areas at start of title should be lower case{}, "
                  "followed by ': '".format(exclusions_text))
+
+        def deny_capital_text(text: str) -> bool:
+            if text in exclusions:
+                return False
+            if not text.islower():
+                return True
+            return False
+
         for area in title_components[:-1]:
-            if not (area.islower() or area in exclusions) or ' ' in area:
+            if (any(deny_capital_text(word) for word in area.split('/')) or
+                    ' ' in area):
                 violations += [RuleViolation(self.id, error, line_nr=1)]
 
         error = "Summary of change, after area(s), should be capitalized"
