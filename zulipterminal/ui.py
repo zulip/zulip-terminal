@@ -183,9 +183,9 @@ class View(urwid.WidgetWrap):
             self.left_panel.keypress(size, 'q')
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
-            self.stream_w.search_box.set_edit_text("")
+            self.stream_w.stream_search_box.set_edit_text("")
             self.controller.editor_mode = True
-            self.controller.editor = self.stream_w.search_box
+            self.controller.editor = self.stream_w.stream_search_box
             return key
         elif is_command_key('HELP', key):
             # Show help menu

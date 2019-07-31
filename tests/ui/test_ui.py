@@ -221,7 +221,7 @@ class TestView:
     def test_keypress_q(self, view, mocker, autohide):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
-        view.stream_w.search_box = mocker.Mock()
+        view.stream_w.stream_search_box = mocker.Mock()
         view.controller.autohide = autohide
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), 'messages', 'users']
@@ -239,9 +239,10 @@ class TestView:
 
         view.left_panel.keypress.assert_called_once_with(size, "q")
         assert view.body.focus_position == 0
-        view.stream_w.search_box.set_edit_text.assert_called_once_with("")
+        view.stream_w.stream_search_box.set_edit_text.\
+            assert_called_once_with("")
         assert view.controller.editor_mode is True
-        assert view.controller.editor == view.stream_w.search_box
+        assert view.controller.editor == view.stream_w.stream_search_box
 
     def test_keypress_edit_mode(self, view, mocker):
         view.users_view = mocker.Mock()
