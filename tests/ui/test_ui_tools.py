@@ -406,7 +406,7 @@ class TestStreamsView:
         mocker.patch(VIEWS + ".urwid.connect_signal")
         mocker.patch(VIEWS + ".threading.Lock")
         self.view = mocker.Mock()
-        self.search_box = mocker.patch(VIEWS + ".PanelSearchBox")
+        self.stream_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
         stream_btn = mocker.Mock()
         stream_btn.stream_name = "FOO"
         self.streams_btn_list = [stream_btn]
@@ -416,8 +416,9 @@ class TestStreamsView:
         assert stream_view.view == self.view
         assert stream_view.log == []
         assert stream_view.streams_btn_list == self.streams_btn_list
-        assert stream_view.search_box
-        self.search_box.assert_called_once_with(stream_view, 'SEARCH_STREAMS')
+        assert stream_view.stream_search_box
+        self.stream_search_box.assert_called_once_with(
+            stream_view, 'SEARCH_STREAMS')
 
     @pytest.mark.parametrize('new_text, expected_log', [
         ('f', ['FOO', 'foo', 'fan']),

@@ -259,10 +259,11 @@ class StreamsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         list_box = urwid.ListBox(self.log)
-        self.search_box = PanelSearchBox(self, 'SEARCH_STREAMS')
-        urwid.connect_signal(self.search_box, 'change', self.update_streams)
+        self.stream_search_box = PanelSearchBox(self, 'SEARCH_STREAMS')
+        urwid.connect_signal(self.stream_search_box,
+                             'change', self.update_streams)
         super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
-            self.search_box, tlcorner=u'─', tline=u'', lline=u'',
+            self.stream_search_box, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
         ))
