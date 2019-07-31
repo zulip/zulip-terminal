@@ -787,54 +787,27 @@ class SearchBox(urwid.Pile):
         return key
 
 
-class UserSearchBox(urwid.Edit):
+class PanelSearchBox(urwid.Edit):
     """
-    Search Box to search users in real-time.
+    Search Box to search panel views in real-time.
     """
-
-    search_text = ("Search [" +
-                   ", ".join(keys_for_command("SEARCH_PEOPLE")) +
-                   "]: ")
-
-    def __init__(self, user_view: Any) -> None:
-        self.user_view = user_view
-        super(UserSearchBox, self).__init__(edit_text=self.search_text)
+    def __init__(self, panel_view: Any, search_command: str) -> None:
+        self.panel_view = panel_view
+        self.search_command = search_command
+        self.search_text = ("Search [" +
+                            ", ".join(keys_for_command(search_command)) +
+                            "]: ")
+        super(PanelSearchBox, self).__init__(edit_text=self.search_text)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
-            self.user_view.view.controller.editor_mode = False
-            self.user_view.set_focus("body")
-        if is_command_key('GO_BACK', key):
-            self.user_view.view.controller.editor_mode = False
+            self.panel_view.view.controller.editor_mode = False
+            self.panel_view.set_focus("body")
+            if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
+                self.panel_view.body.set_focus(0)
+        elif is_command_key('GO_BACK', key):
+            self.panel_view.view.controller.editor_mode = False
             self.set_edit_text(self.search_text)
-            self.user_view.set_focus("body")
-            self.user_view.keypress(size, 'esc')
-
-        return super(UserSearchBox, self).keypress(size, key)
-
-
-class StreamSearchBox(urwid.Edit):
-    """
-    Search Box to search streams in real-time.urwid
-    """
-
-    search_text = ("Search [" +
-                   ", ".join(keys_for_command("SEARCH_STREAMS")) +
-                   "]: ")
-
-    def __init__(self, stream_view: Any) -> None:
-        self.stream_view = stream_view
-        super(StreamSearchBox, self).__init__(edit_text=self.search_text)
-
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('ENTER', key) and len(self.stream_view.log):
-            self.stream_view.view.controller.editor_mode = False
-            self.stream_view.set_focus("body")
-            self.stream_view.body.set_focus(0)
-        if is_command_key('GO_BACK', key):
-            self.stream_view.view.controller.editor_mode = False
-            self.set_edit_text(self.search_text)
-            self.stream_view.set_focus("body")
-            self.stream_view.keypress(size, 'esc')
-
-        return super(StreamSearchBox, self).keypress(size, key)
+            self.panel_view.set_focus("body")
+            self.panel_view.keypress(size, 'esc')
+        return super(PanelSearchBox, self).keypress(size, key)

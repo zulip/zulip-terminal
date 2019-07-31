@@ -21,7 +21,7 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.boxes import UserSearchBox, StreamSearchBox
+from zulipterminal.ui_tools.boxes import PanelSearchBox
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -259,7 +259,7 @@ class StreamsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         list_box = urwid.ListBox(self.log)
-        self.search_box = StreamSearchBox(self)
+        self.search_box = PanelSearchBox(self, 'SEARCH_STREAMS')
         urwid.connect_signal(self.search_box, 'change', self.update_streams)
         super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
             self.search_box, tlcorner=u'─', tline=u'', lline=u'',
@@ -508,7 +508,7 @@ class RightColumnView(urwid.Frame):
     def __init__(self, width: int, view: Any) -> None:
         self.width = width
         self.view = view
-        self.user_search = UserSearchBox(self)
+        self.user_search = PanelSearchBox(self, 'SEARCH_PEOPLE')
         urwid.connect_signal(self.user_search, 'change',
                              self.update_user_list)
         self.view.user_search = self.user_search

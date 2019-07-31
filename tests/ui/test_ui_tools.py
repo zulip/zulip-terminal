@@ -406,7 +406,7 @@ class TestStreamsView:
         mocker.patch(VIEWS + ".urwid.connect_signal")
         mocker.patch(VIEWS + ".threading.Lock")
         self.view = mocker.Mock()
-        self.search_box = mocker.patch(VIEWS + ".StreamSearchBox")
+        self.search_box = mocker.patch(VIEWS + ".PanelSearchBox")
         stream_btn = mocker.Mock()
         stream_btn.stream_name = "FOO"
         self.streams_btn_list = [stream_btn]
@@ -417,7 +417,7 @@ class TestStreamsView:
         assert stream_view.log == []
         assert stream_view.streams_btn_list == self.streams_btn_list
         assert stream_view.search_box
-        self.search_box.assert_called_once_with(stream_view)
+        self.search_box.assert_called_once_with(stream_view, 'SEARCH_STREAMS')
 
     @pytest.mark.parametrize('new_text, expected_log', [
         ('f', ['FOO', 'foo', 'fan']),
@@ -789,7 +789,7 @@ class TestRightColumnView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
         self.view = mocker.Mock()
-        self.user_search = mocker.patch(VIEWS + ".UserSearchBox")
+        self.user_search = mocker.patch(VIEWS + ".PanelSearchBox")
         self.connect_signal = mocker.patch(VIEWS + ".urwid.connect_signal")
         self.line_box = mocker.patch(VIEWS + ".urwid.LineBox")
         self.thread = mocker.patch(VIEWS + ".threading")
