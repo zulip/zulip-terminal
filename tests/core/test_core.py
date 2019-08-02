@@ -210,11 +210,11 @@ class TestController:
     @pytest.mark.parametrize('initial_narrow, final_narrow', [
         ([], [['search', 'FOO']]),
         ([['search', 'BOO']], [['search', 'FOO']]),
-        ([['stream', 'PTEST']], [['search', 'FOO']]),
+        ([['stream', 'PTEST']], [['stream', 'PTEST'], ['search', 'FOO']]),
         ([['pm_with', 'foo@zulip.com'], ['search', 'BOO']],
-            [['search', 'FOO']]),
+         [['pm_with', 'foo@zulip.com'], ['search', 'FOO']]),
         ([['stream', 'PTEST'], ['topic', 'RDS']],
-            [['search', 'FOO']]),
+         [['stream', 'PTEST'], ['topic', 'RDS'], ['search', 'FOO']]),
     ], ids=[
         'Default_all_msg_search', 'redo_default_search',
         'search_within_stream', 'pm_search_again',
