@@ -72,6 +72,25 @@ def asynch(func: Any) -> Any:
     return wrapper
 
 
+def update_unread_count(key: Union[int, Tuple[int, str]],
+                        unreads: Dict[Any, int]) -> int:
+    if key in unreads:
+        unreads[key] += 1
+    else:
+        unreads[key] = 1
+    return unreads[key]
+
+
+def update_read_count(key: Union[int, Tuple[int, str]],
+                      unreads: Dict[Any, int]) -> int:
+    if key in unreads:
+        unreads[key] -= 1
+        return_count = unreads[key]
+        if unreads[key] == 0:
+            unreads.pop(key)
+    return return_count
+
+
 def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     # This method applies new_count for 'new message' (1) or 'read' (-1)
     # (we could ensure this in a different way by a different type)
@@ -79,25 +98,6 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
 
     messages = controller.model.index['messages']
     unread_counts = controller.model.unread_counts  # type: UnreadCounts
-
-    for id in id_list:
-        msg = messages[id]
-
-        if msg['type'] == 'stream':
-            key = (messages[id]['stream_id'], msg['subject'])
-            unreads = unread_counts['unread_topics']
-        else:
-            key = messages[id]['sender_id']
-            unreads = unread_counts['unread_pms']  # type: ignore
-
-        # broader unread counts (for all_* and streams) are updated
-        # later conditionally.
-        if key in unreads:
-            unreads[key] += new_count
-            if unreads[key] == 0:
-                unreads.pop(key)
-        elif new_count == 1:
-            unreads[key] = new_count
 
     # if view is not yet loaded. Usually the case when first message is read.
     while not hasattr(controller, 'view'):
@@ -112,10 +112,10 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     for id in id_list:
-        user_id = messages[id]['sender_id']
+        sender_id = messages[id]['sender_id']
 
         # If we sent this message, don't increase the count
-        if user_id == controller.model.user_id:
+        if sender_id == controller.model.user_id:
             continue
 
         msg_type = messages[id]['type']
@@ -123,14 +123,29 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         if msg_type == 'stream':
             stream_id = messages[id]['stream_id']
             msg_topic = messages[id]['subject']
+            if new_count == -1:
+                update_read_count((stream_id, msg_topic),
+                                  unread_counts['unread_topics'])
+            else:
+                update_unread_count((stream_id, msg_topic),
+                                    unread_counts['unread_topics'])
             if stream_id in controller.model.muted_streams:
+                if new_count == -1:
+                    update_read_count(stream_id, unread_counts['streams'])
+                else:
+                    update_unread_count(stream_id, unread_counts['streams'])
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
                 for stream_button in stream_buttons_log:
                     if stream_button.stream_id == stream_id:
-                        # FIXME: Update unread_count[streams]?
-                        stream_button.update_count(stream_button.count +
-                                                   new_count)
+                        if new_count == -1:
+                            stream_button.update_count(
+                                update_read_count(stream_id,
+                                                  unread_counts['streams']))
+                        else:
+                            stream_button.update_count(
+                                update_unread_count(stream_id,
+                                                    unread_counts['streams']))
                         break
             # FIXME: Update unread_counts['unread_topics']?
             if ([messages[id]['display_recipient'], msg_topic] in
@@ -145,8 +160,15 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                                                   new_count)
         else:
             for user_button in user_buttons_log:
-                if user_button.user_id == user_id:
-                    user_button.update_count(user_button.count + new_count)
+                if user_button.user_id == sender_id:
+                    if new_count == -1:
+                        user_button.update_count(
+                            update_read_count(sender_id,
+                                              unread_counts['unread_pms']))
+                    else:
+                        user_button.update_count(
+                            update_unread_count(sender_id,
+                                                unread_counts['unread_pms']))
                     break
             unread_counts['all_pms'] += new_count
             all_pm.update_count(unread_counts['all_pms'])
