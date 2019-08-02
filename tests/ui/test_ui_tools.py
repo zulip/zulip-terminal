@@ -474,6 +474,9 @@ class TestTopicsView:
         self.log = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
                                 return_value=[])
         self.stream_button = stream_button
+        mocker.patch(VIEWS + ".urwid.connect_signal")
+        mocker.patch(VIEWS + ".threading.Lock")
+        self.topic_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
         self.view = mocker.Mock()
         self.view.controller = mocker.Mock()
         topic_btn = mocker.Mock()
@@ -485,6 +488,26 @@ class TestTopicsView:
         assert topic_view.log == []  # topic_view patches this
         assert topic_view.stream_button == self.stream_button
         assert topic_view.view == self.view
+        assert topic_view.topic_search_box
+        self.topic_search_box.assert_called_once_with(
+            topic_view, 'SEARCH_TOPICS')
+
+    @pytest.mark.parametrize('new_text, expected_log', [
+        ('f', ['FOO', 'foo', 'fan']),
+        ('foo', ['FOO', 'foo']),
+        ('FOO', ['FOO', 'foo']),
+    ])
+    def test_update_topics(self, mocker, topic_view, new_text, expected_log):
+        self.view.controller.editor_mode = True
+        new_text = new_text
+        search_box = "SEARCH_BOX"
+        topic_view.topics_btn_list = [
+            mocker.Mock(topic_name=topic_name) for topic_name in [
+                'FOO', 'foo', 'fan', 'boo', 'BOO']]
+        topic_view.update_topics(search_box, new_text)
+        assert [topic.topic_name for topic in topic_view.log
+                ] == expected_log
+        self.view.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize('topic_name, topic_initial_log,\
                               topic_final_log', [
@@ -517,6 +540,7 @@ class TestTopicsView:
     def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view):
         key = "t"
         size = (200, 20)
+        mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.left_panel = mocker.Mock()
         topic_view.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
         topic_view.keypress(size, key)
@@ -526,6 +550,7 @@ class TestTopicsView:
     def test_keypress_GO_RIGHT(self, mocker, topic_view):
         key = "l"
         size = (200, 20)
+        mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.body.focus_col = None
 
         topic_view.keypress(size, key)
