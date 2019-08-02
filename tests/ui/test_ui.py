@@ -226,6 +226,7 @@ class TestView:
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), 'messages', 'users']
         view.left_panel = mocker.Mock()
+        view.left_panel.is_in_topic_view = False
         view.right_panel = mocker.Mock()
         size = (20,)
 

@@ -177,16 +177,20 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
-        elif (is_command_key('SEARCH_STREAMS', key) and
-              not self.left_panel.is_in_topic_view):
+        elif (is_command_key('SEARCH_STREAMS', key) or
+                is_command_key('SEARCH_TOPICS', key)):
             # jump stream search
             self.body.focus_position = 0
             self.left_panel.keypress(size, 'q')
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
-            self.stream_w.stream_search_box.set_edit_text("")
+            if self.left_panel.is_in_topic_view:
+                search_box = self.topic_w.topic_search_box
+            else:
+                search_box = self.stream_w.stream_search_box
+            search_box.set_edit_text("")
             self.controller.editor_mode = True
-            self.controller.editor = self.stream_w.stream_search_box
+            self.controller.editor = search_box
             return key
         elif is_command_key('HELP', key):
             # Show help menu
