@@ -672,6 +672,7 @@ class MessageBox(urwid.Pile):
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(self)
         elif is_command_key('TOGGLE_NARROW', key):
+            self.model.unset_search_narrow()
             if self.message['type'] == 'private':
                 if (len(self.model.narrow) == 1 and
                         self.model.narrow[0][0] == 'pm_with'):
