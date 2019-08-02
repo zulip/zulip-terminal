@@ -149,8 +149,8 @@ class TestModel:
 
     @pytest.mark.parametrize('bad_args', [
         dict(topic='some topic'),
-        dict(stream='foo', search='text'),
-        dict(topic='blah', search='text'),
+        dict(stream='foo', pm_with='someone'),
+        dict(topic='blah', pm_with='someone'),
         dict(pm_with='someone', topic='foo')
     ])
     def test_set_narrow_bad_input(self, model, bad_args):
@@ -162,8 +162,6 @@ class TestModel:
         ([['stream', 'some stream']], dict(stream='some stream')),
         ([['stream', 'some stream'], ['topic', 'some topic']],
          dict(stream='some stream', topic='some topic')),
-        ([['search', 'something interesting']],
-         dict(search='something interesting')),
         ([['is', 'starred']], dict(starred=True)),
         ([['is', 'private']], dict(pms=True)),
         ([['pm_with', 'FOO@zulip.com']], dict(pm_with='FOO@zulip.com')),

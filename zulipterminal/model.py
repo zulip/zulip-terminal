@@ -147,14 +147,12 @@ class Model:
     def set_narrow(self, *,
                    stream: Optional[str]=None,
                    topic: Optional[str]=None,
-                   search: Optional[str]=None,
                    pms: bool=False,
                    pm_with: Optional[str]=None,
                    starred: bool=False) -> bool:
         selected_params = {k for k, v in locals().items() if k != 'self' and v}
         valid_narrows = {
             frozenset(): [],
-            frozenset(['search']): [['search', search]],
             frozenset(['stream']): [['stream', stream]],
             frozenset(['stream', 'topic']): [['stream', stream],
                                              ['topic', topic]],
@@ -183,6 +181,18 @@ class Model:
             return False
         else:
             return True
+
+    def set_search_narrow(self, search_query: str) -> None:
+        self.unset_search_narrow()
+        self.narrow.append(['search', search_query])
+
+    def unset_search_narrow(self) -> None:
+        # If current narrow is a result of a previous started search,
+        # we pop the ['search', 'text'] term in the narrow, before
+        # setting a new narrow.
+        if self.is_search_narrow():
+            self.narrow = [item for item in self.narrow
+                           if item[0] != 'search']
 
     def get_message_ids_in_current_narrow(self) -> Set[int]:
         narrow = self.narrow
