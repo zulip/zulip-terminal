@@ -315,9 +315,34 @@ class TopicsView(urwid.Frame):
                  stream_button: Any) -> None:
         self.view = view
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
+        self.topics_btn_list = topics_btn_list
         self.stream_button = stream_button
         self.list_box = urwid.ListBox(self.log)
-        super(TopicsView, self).__init__(self.list_box)
+        self.topic_search_box = PanelSearchBox(self, 'SEARCH_TOPICS')
+        urwid.connect_signal(self.topic_search_box,
+                             'change', self.update_topics)
+        super(TopicsView, self).__init__(self.list_box, header=urwid.LineBox(
+            self.topic_search_box, tlcorner=u'─', tline=u'', lline=u'',
+            trcorner=u'─', blcorner=u'─', rline=u'',
+            bline=u'─', brcorner=u'─'
+        ))
+        self.search_lock = threading.Lock()
+
+    @asynch
+    def update_topics(self, search_box: Any, new_text: str) -> None:
+        if not self.view.controller.editor_mode:
+            return
+        # wait for any previously started search to finish to avoid
+        # displaying wrong topics list.
+        with self.search_lock:
+            topics_to_display = [
+                topic
+                for topic in self.topics_btn_list.copy()
+                if topic.topic_name.lower().startswith(new_text.lower())
+            ]
+            self.log.clear()
+            self.log.extend(topics_to_display)
+            self.view.controller.update_screen()
 
     def update_topics_list(self, stream_id: int, topic_name: str,
                            sender_id: int) -> None:
