@@ -102,6 +102,7 @@ autohide=autohide
 | Search Users                                          | <kbd>w</kbd>                                  |
 | Search Messages                                       | <kbd>/</kbd>                                  |
 | Search Streams                                        | <kbd>q</kbd>                                  |
+| Search Topics in Stream                               | <kbd>q</kbd>                                  |
 | Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
