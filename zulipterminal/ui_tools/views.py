@@ -390,6 +390,15 @@ class TopicsView(urwid.Frame):
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)
             self.view.body.focus_col = 1
+        elif is_command_key('SEARCH_TOPICS', key):
+            self.set_focus('header')
+            return key
+        elif is_command_key('GO_BACK', key):
+            self.log.clear()
+            self.log.extend(self.topics_btn_list)
+            self.set_focus('body')
+            self.view.controller.update_screen()
+            return key
         return super(TopicsView, self).keypress(size, key)
 
 
@@ -734,9 +743,13 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('SEARCH_STREAMS', key):
+        if (is_command_key('SEARCH_STREAMS', key) or
+                is_command_key('SEARCH_TOPICS', key)):
             self.focus_position = 1
-            self.view.stream_w.keypress(size, key)
+            if self.is_in_topic_view:
+                self.view.topic_w.keypress(size, key)
+            else:
+                self.view.stream_w.keypress(size, key)
             return key
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)

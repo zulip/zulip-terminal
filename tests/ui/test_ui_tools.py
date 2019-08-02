@@ -552,11 +552,24 @@ class TestTopicsView:
         size = (200, 20)
         mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.body.focus_col = None
-
         topic_view.keypress(size, key)
-
         assert topic_view.view.body.focus_col == 1
         topic_view.view.show_left_panel.assert_called_once_with(visible=False)
+
+    def test_keypress_SEARCH_TOPICS(self, mocker, topic_view):
+        key = 'q'
+        size = (200, 20)
+        mocker.patch(VIEWS + '.TopicsView.set_focus')
+        topic_view.keypress(size, key)
+        topic_view.set_focus.assert_called_once_with('header')
+
+    def test_keypress_esc(self, mocker, topic_view):
+        key = "esc"
+        size = (200, 20)
+        mocker.patch(VIEWS + '.TopicsView.set_focus')
+        topic_view.keypress(size, key)
+        topic_view.set_focus.assert_called_once_with("body")
+        assert topic_view.log == self.topics_btn_list
 
 
 class TestUsersView:
