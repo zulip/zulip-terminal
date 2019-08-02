@@ -163,6 +163,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Search Streams',
         'key_category': 'searching',
     }),
+    ('SEARCH_TOPICS', {
+        'keys': {'q'},
+        'help_text': 'Search topics in a stream',
+        'key_category': 'searching',
+    }),
     ('TOGGLE_MUTE_STREAM', {
         'keys': {'m'},
         'help_text': 'Mute/unmute Streams',
