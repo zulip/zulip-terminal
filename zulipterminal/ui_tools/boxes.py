@@ -300,6 +300,8 @@ class MessageBox(urwid.Pile):
         if is_search_narrow:
             curr_narrow = [sub_narrow for sub_narrow in curr_narrow
                            if sub_narrow[0] != 'search']
+        else:
+            self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
             text_to_fill = 'All messages'
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'private':
