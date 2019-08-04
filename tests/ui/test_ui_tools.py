@@ -1768,8 +1768,8 @@ class TestStreamButton:
 
     @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
                              is_action_muting, updated_all_msgs', [
-        (86, {}, 204, False, 380),
-        (86, {86, 205}, -1, True, 320),
+        (86, set(), 50, False, 400),
+        (86, {86, 205}, -1, True, 300),
         (205, {14, 99}, 0, False, 350),
     ], ids=[
         'unmuting stream 86 - 204 unreads',
@@ -1780,21 +1780,25 @@ class TestStreamButton:
                                stream_id, muted_streams, called_value,
                                updated_all_msgs) -> None:
         stream_button.stream_id = stream_id
+        stream_button.count = 50  # Override value in fixture
         update_count = mocker.patch(TOPBUTTON + ".update_count")
         stream_button.controller.model.unread_counts = {
             'streams': {
-                86: 204,
+                86: 50,
                 14: 34,
-            }
+            },
+            'all_msg': 350,
         }
-        stream_button.model.unread_counts['all_msg'] = 350
         stream_button.controller.model.muted_streams = muted_streams
+        stream_button.view.home_button.update_count = mocker.Mock()
+
         if is_action_muting:
             stream_button.mark_muted()
         else:
             stream_button.mark_unmuted()
+
         stream_button.update_count.assert_called_once_with(called_value)
-        if called_value:
+        if called_value != 0:
             stream_button.view.home_button.update_count.\
                 assert_called_once_with(updated_all_msgs)
         assert stream_button.model.unread_counts['all_msg'] == updated_all_msgs
