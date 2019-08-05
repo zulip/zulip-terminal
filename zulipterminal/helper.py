@@ -303,7 +303,7 @@ def index_messages(messages: List[Any],
         if not narrow:
             index['all_msg_ids'].add(msg['id'])
 
-        elif narrow[0][0] == 'search':
+        elif model.is_search_narrow():
             index['search'].add(msg['id'])
             continue
 

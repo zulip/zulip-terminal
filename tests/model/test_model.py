@@ -130,6 +130,23 @@ class TestModel:
         model.set_focus_in_current_narrow(msg_id)
         assert model.index['pointer'][str(narrow)] == msg_id
 
+    @pytest.mark.parametrize('narrow, is_search_narrow', [
+        ([], False),
+        ([['search', 'FOO']], True),
+        ([['is', 'private']], False),
+        ([['is', 'private'], ['search', 'FOO']], True),
+        ([['search', 'FOO'], ['is', 'private']], True),
+        ([['stream', 'PTEST']], False),
+        ([['stream', 'PTEST'], ['search', 'FOO']], True),
+        ([['stream', '7'], ['topic', 'Test']], False),
+        ([['stream', '7'], ['topic', 'Test'], ['search', 'FOO']], True),
+        ([['stream', '7'], ['search', 'FOO'], ['topic', 'Test']], True),
+        ([['search', 'FOO'], ['stream', '7'], ['topic', 'Test']], True)
+    ])
+    def test_is_search_narrow(self, model, narrow, is_search_narrow):
+        model.narrow = narrow
+        assert model.is_search_narrow() == is_search_narrow
+
     @pytest.mark.parametrize('bad_args', [
         dict(topic='some topic'),
         dict(stream='foo', search='text'),
