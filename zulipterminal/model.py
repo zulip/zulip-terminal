@@ -131,6 +131,15 @@ class Model:
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
         self.index['pointer'][str(self.narrow)] = focus_message
 
+    def is_search_narrow(self) -> bool:
+        """
+        Checks if the current narrow is a result of a previous search for
+        a messages in a different narrow.
+        """
+        return (True
+                if 'search' in [subnarrow[0] for subnarrow in self.narrow]
+                else False)
+
     def set_narrow(self, *,
                    stream: Optional[str]=None,
                    topic: Optional[str]=None,
@@ -176,6 +185,8 @@ class Model:
         index = self.index
         if narrow == []:
             ids = index['all_msg_ids']
+        elif self.is_search_narrow():
+            ids = index['search']
         elif narrow[0][0] == 'stream':
             stream_id = self.stream_id
             if len(narrow) == 1:
@@ -188,8 +199,6 @@ class Model:
         elif narrow[0][0] == 'pm_with':
             recipients = self.recipients
             ids = index['private_msg_ids_by_user_ids'].get(recipients, set())
-        elif narrow[0][0] == 'search':
-            ids = index['search']
         elif narrow[0][1] == 'starred':
             ids = index['starred_msg_ids']
         return ids.copy()

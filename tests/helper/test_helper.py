@@ -30,6 +30,7 @@ def test_index_messages_narrow_stream(mocker,
                          return_value=None)
     model.index = initial_index
     model.narrow = [['stream', 'PTEST']]
+    model.is_search_narrow.return_value = False
     model.stream_id = 205
     assert index_messages(messages, model, model.index) == index_stream
 
@@ -44,6 +45,7 @@ def test_index_messages_narrow_topic(mocker,
     model.index = initial_index
     model.narrow = [['stream', '7'],
                     ['topic', 'Test']]
+    model.is_search_narrow.return_value = False
     model.stream_id = 205
     assert index_messages(messages, model, model.index) == index_topic
 
@@ -57,6 +59,7 @@ def test_index_messages_narrow_user(mocker,
                          return_value=None)
     model.index = initial_index
     model.narrow = [['pm_with', 'boo@zulip.com']]
+    model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
         'boo@zulip.com': {
@@ -75,6 +78,7 @@ def test_index_messages_narrow_user_multiple(mocker,
                          return_value=None)
     model.index = initial_index
     model.narrow = [['pm_with', 'boo@zulip.com, bar@zulip.com']]
+    model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
         'boo@zulip.com': {
@@ -134,7 +138,7 @@ def test_index_starred(mocker,
                          return_value=None)
     model.index = initial_index
     model.narrow = [['is', 'starred']]
-
+    model.is_search_narrow.return_value = False
     expected_index = dict(empty_index, private_msg_ids={537287, 537288},
                           starred_msg_ids=msgs_with_stars)
     for msg_id, msg in expected_index['messages'].items():
