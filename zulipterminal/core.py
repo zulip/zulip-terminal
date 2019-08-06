@@ -4,7 +4,7 @@ import sys
 import time
 from functools import partial
 from platform import platform
-from typing import Any, List
+from typing import Any, List, Optional
 
 import urwid
 import zulip
@@ -143,19 +143,18 @@ class Controller:
         self.loop.widget = PopUpConfirmationView(self, question,
                                                  mute_this_stream)
 
-    def narrow_to_stream(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(stream=button.stream_name)
+    def _narrow_to(self, button: Any, anchor: Optional[int],
+                   **narrow: Any) -> None:
+        already_narrowed = self.model.set_narrow(**narrow)
         if already_narrowed:
             return
 
-        if hasattr(button, 'message'):
-            anchor = button.message['id']
-        else:
-            anchor = None
-
         self.model.found_newest = False
+
         # store the steam id in the model (required for get_message_ids...)
-        self.model.stream_id = button.stream_id
+        if hasattr(button, 'stream_id'):  # FIXME Include in set_narrow?
+            self.model.stream_id = button.stream_id
+
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         # if no messages are found get more messages
@@ -171,33 +170,26 @@ class Controller:
 
         self._finalize_show(w_list)
 
-    def narrow_to_topic(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(stream=button.stream_name,
-                                                 topic=button.topic_name)
-        if already_narrowed:
-            return
-
+    def narrow_to_stream(self, button: Any) -> None:
         if hasattr(button, 'message'):
             anchor = button.message['id']
         else:
             anchor = None
 
-        self.model.found_newest = False
-        # store the steam id in the model (required for get_message_ids...)
-        self.model.stream_id = button.stream_id
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
+        self._narrow_to(button,
+                        anchor=anchor,
+                        stream=button.stream_name)
 
-        if len(msg_id_list) == 0:
-            self.model.get_messages(num_before=30,
-                                    num_after=10,
-                                    anchor=anchor)
-            msg_id_list = self.model.get_message_ids_in_current_narrow()
+    def narrow_to_topic(self, button: Any) -> None:
+        if hasattr(button, 'message'):
+            anchor = button.message['id']
+        else:
+            anchor = None
 
-        w_list = create_msg_box_list(self.model,
-                                     msg_id_list,
-                                     focus_msg_id=anchor)
-
-        self._finalize_show(w_list)
+        self._narrow_to(button,
+                        anchor=anchor,
+                        stream=button.stream_name,
+                        topic=button.topic_name)
 
     def narrow_to_user(self, button: Any) -> None:
         if hasattr(button, 'message'):
@@ -207,84 +199,23 @@ class Controller:
             user_emails = button.email
             anchor = None
 
-        already_narrowed = self.model.set_narrow(pm_with=user_emails)
-        if already_narrowed:
-            return
-
-        self.model.found_newest = False
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        if len(msg_id_list) == 0:
-            self.model.get_messages(num_before=30,
-                                    num_after=10,
-                                    anchor=anchor)
-            msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        w_list = create_msg_box_list(self.model,
-                                     msg_id_list,
-                                     focus_msg_id=anchor)
-
-        self._finalize_show(w_list)
+        self._narrow_to(button,
+                        anchor=anchor,
+                        pm_with=user_emails)
 
     def show_all_messages(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow()
-        if already_narrowed:
-            return
-
-        anchor = None
-
-        self.model.found_newest = False
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        w_list = create_msg_box_list(self.model,
-                                     msg_id_list,
-                                     focus_msg_id=anchor)
-
-        self._finalize_show(w_list)
+        self._narrow_to(button,
+                        anchor=None)
 
     def show_all_pm(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(pms=True)
-        if already_narrowed:
-            return
-
-        anchor = None
-
-        self.model.found_newest = False
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        if len(msg_id_list) == 0:
-            self.model.get_messages(num_before=30,
-                                    num_after=10,
-                                    anchor=anchor)
-            msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        w_list = create_msg_box_list(self.model,
-                                     msg_id_list,
-                                     focus_msg_id=anchor)
-
-        self._finalize_show(w_list)
+        self._narrow_to(button,
+                        anchor=None,
+                        pms=True)
 
     def show_all_starred(self, button: Any) -> None:
-        already_narrowed = self.model.set_narrow(starred=True)
-        if already_narrowed:
-            return
-
-        anchor = None
-
-        self.model.found_newest = False
-        msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        if len(msg_id_list) == 0:
-            self.model.get_messages(num_before=30,
-                                    num_after=10,
-                                    anchor=anchor)
-            msg_id_list = self.model.get_message_ids_in_current_narrow()
-
-        w_list = create_msg_box_list(self.model,
-                                     msg_id_list,
-                                     focus_msg_id=anchor)
-
-        self._finalize_show(w_list)
+        self._narrow_to(button,
+                        anchor=None,
+                        starred=True)
 
     def _finalize_show(self, w_list: List[Any]) -> None:
         focus_position = self.model.get_focus_in_current_narrow()
