@@ -102,6 +102,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Send a message',
         'key_category': 'msg_compose',
     }),
+    ('AUTOCOMPLETE', {
+        'keys': {'ctrl f'},
+        'help_text': 'Autocomplete @mentions and #stream_names',
+        'key_category': 'msg_compose',
+    }),
     ('STREAM_NARROW', {
         'keys': {'s'},
         'help_text': 'Narrow to the stream of the current message',
@@ -121,17 +126,17 @@ KEY_BINDINGS = OrderedDict([
     ('TOGGLE_TOPIC', {
         'keys': {'t'},
         'help_text': 'Toggle topics in a stream',
-        'key_category': 'navigation'
+        'key_category': 'stream_list',
     }),
     ('ALL_PM', {
         'keys': {'P'},
         'help_text': 'Narrow to all private messages',
-        'key_category': 'msg_actions',
+        'key_category': 'navigation',
     }),
     ('ALL_STARRED', {
         'keys': {'f'},
         'help_text': 'Narrow to all starred messages',
-        'key_category': 'msg_actions',
+        'key_category': 'navigation',
     }),
     ('NEXT_UNREAD_TOPIC', {
         'keys': {'n'},
@@ -161,7 +166,7 @@ KEY_BINDINGS = OrderedDict([
     ('TOGGLE_MUTE_STREAM', {
         'keys': {'m'},
         'help_text': 'Mute/unmute Streams',
-        'key_category': 'general',
+        'key_category': 'stream_list',
     }),
     ('ENTER', {
         'keys': {'enter'},
@@ -248,18 +253,14 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Clear compose screen',
         'key_category': 'msg_compose',
     }),
-    ('AUTOCOMPLETE', {
-        'keys': {'ctrl f'},
-        'help_text': 'Autocomplete @mentions and #stream_names',
-        'key_category': 'msg_compose',
-    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 HELP_CATEGORIES = OrderedDict([
     ('general', 'General'),
     ('navigation', 'Navigation'),
     ('searching', 'Searching'),
-    ('msg_actions', 'Message Actions'),
+    ('msg_actions', 'Actions for the selected message'),
+    ('stream_list', 'Stream list actions'),
     ('msg_compose', 'Composing a Message'),
 ])
 

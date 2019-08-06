@@ -109,14 +109,16 @@ Install-Module -Name BurntToast
 | Scroll up                                             | <kbd>PgUp</kbd> / <kbd>K</kbd>                |
 | Scroll down                                           | <kbd>PgDn</kbd> / <kbd>J</kbd>                |
 | Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
+| Narrow to all private messages                        | <kbd>P</kbd>                                  |
+| Narrow to all starred messages                        | <kbd>f</kbd>                                  |
 | Next unread topic                                     | <kbd>n</kbd>                                  |
 | Next unread private message                           | <kbd>p</kbd>                                  |
 
 ### Searching
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
+| Search users                                          | <kbd>w</kbd>                                  |
 | Search messages                                       | <kbd>/</kbd>                                  |
-| Search people                                         | <kbd>w</kbd>                                  |
 | Search streams                                        | <kbd>q</kbd>                                  |
 
 ### Message actions
@@ -126,26 +128,28 @@ Install-Module -Name BurntToast
 | Reply mentioning the sender of the current message    | <kbd>@</kbd>                                  |
 | Reply quoting the current message text                | <kbd>></kbd>                                  |
 | Reply privately to the sender of the current message  | <kbd>R</kbd>                                  |
+| Edit a sent message                                   | <kbd>e</kbd>                                  |
 | New message to a stream                               | <kbd>c</kbd>                                  |
 | New message to a person or group of people            | <kbd>x</kbd>                                  |
-| Toggle topics in a stream                             | <kbd>t</kbd>                                  |
-| Edit a sent message                                   | <kbd>e</kbd>                                  |
-| Show message information                              | <kbd>i</kbd>                                  |
 | Narrow to the stream of the current message           | <kbd>s</kbd>                                  |
 | Narrow to the topic of the current message            | <kbd>S</kbd>                                  |
 | Narrow to a topic/private-chat, or stream/all-private-messages| <kbd>z</kbd>                          |
-| Narrow to all private messages                        | <kbd>P</kbd>                                  |
-| Narrow to all starred messages                        | <kbd>f</kbd>                                  |
-| Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
-| Autocomplete @mentions and #stream_names              | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
+| Show message information                              | <kbd>i</kbd>                                  |
+
+### Stream list actions
+| Command                                               | Key Combination                               |
+| ----------------------------------------------------- | --------------------------------------------- |
+| Toggle topics in a stream                             | <kbd>t</kbd>                                  |
+| Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
 
 ### Composing a message
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
-| Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
 | Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
+| Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
+| Autocomplete @mentions and #stream_names              | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
 | Jump to the beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
 | Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |
