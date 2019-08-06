@@ -59,12 +59,24 @@ class TestWriteBox:
         ('@_Huma', 1, '@_', '@_**Human 1**'),
         ('@_Human', 1, '@_', '@_**Human 1**'),
         ('@_Human 1', 0, '@_', '@_**Human 1**'),
+        ('@Group', 0, '@', '@*Group 1*'),
+        ('@Group', 1, '@', '@*Group 2*'),
+        ('@G', 0, '@', '@*Group 1*'),
+        ('@Gr', 0, '@', '@*Group 1*'),
+        ('@Gro', 0, '@', '@*Group 1*'),
+        ('@Grou', 0, '@', '@*Group 1*'),
+        ('@G', 1, '@', '@*Group 2*'),
+        ('@Gr', 1, '@', '@*Group 2*'),
+        ('@Gro', 1, '@', '@*Group 2*'),
+        ('@Grou', 1, '@', '@*Group 2*'),
         ('No match', 1, '', None),
     ])
     def test_autocomplete_mentions(self, write_box, users_fixture,
                                    text, state, prefix_string,
-                                   required_typeahead):
+                                   required_typeahead, user_groups_fixture):
         write_box.view.users = users_fixture
+        write_box.model.user_group_names = [
+            groups['name'] for groups in user_groups_fixture]
         typeahead_string = write_box.autocomplete_mentions(
             text, state, prefix_string)
         assert typeahead_string == required_typeahead
