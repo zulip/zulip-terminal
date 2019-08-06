@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import match_user, match_stream
+from zulipterminal.helper import match_user, match_stream, match_groups
 
 
 class WriteBox(urwid.Pile):
@@ -99,13 +99,19 @@ class WriteBox(urwid.Pile):
 
     def autocomplete_mentions(self, text: str, state: int,
                               prefix_string: str) -> Optional[str]:
-        # Handles both mentions and silent mentions.
+        # Handles user mentions (@ mentions and silent mentions)
+        # and group mentions.
+        group_typeahead = ['@*{}*'.format(group_name)
+                           for group_name in self.model.user_group_names
+                           if match_groups(group_name, text[1:])]
+
         users_list = self.view.users
         user_typeahead = [prefix_string+'**{}**'.format(user['full_name'])
                           for user in users_list
                           if match_user(user, text[len(prefix_string):])]
+        combined_typeahead = group_typeahead + user_typeahead
         try:
-            return user_typeahead[state]
+            return combined_typeahead[state]
         except IndexError:
             return None
 
