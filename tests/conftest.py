@@ -97,6 +97,20 @@ def users_fixture(logged_on_user):
 
 
 @pytest.fixture
+def user_groups_fixture():
+    user_groups = []
+    members = [[1001, 11], [11, 12], [12], []]
+    for i in range(1, 5):
+        user_groups.append({
+            'id': 10 + i,
+            'name': 'Group {}'.format(i),
+            'description': 'Core developers of Group {}'.format(i),
+            'members': members[i-1],
+        })
+    return user_groups
+
+
+@pytest.fixture
 def logged_on_user():
     return {
         'user_id': 1001,
