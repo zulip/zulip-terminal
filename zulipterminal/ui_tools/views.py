@@ -864,4 +864,10 @@ class LoadingView(urwid.Text):
                 # Add tutorial=skip to the generated zuliprc
                 self.controller.update_zuliprc('tutorial', 'skip')
                 self.keypress(size, "enter")
+            if key == 'a':
+                config = 'autohide'
+                if self.controller.autohide:
+                    new_config = 'no_autohide'
+                self.controller.autohide = not self.controller.autohide
+                self.controller.update_zuliprc('autohide', 'no_autohide')
         return key
