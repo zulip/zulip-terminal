@@ -323,7 +323,9 @@ class Controller:
             SETTINGS = ["\n\nTheme: ",
                         ('starred', self.theme_name),
                         "\nAutohide: ",
-                        ('starred', str(self.autohide))]
+                        ('starred', str(self.autohide)),
+                        "\nNotify: ",
+                        ('starred', str(self.wait_after_loading))]
             if self.theme_name in incomplete:
                 WARNING = [('name',
                             "\nWARNING: Incomplete theme; "
