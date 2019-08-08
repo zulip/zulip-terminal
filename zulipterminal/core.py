@@ -50,17 +50,19 @@ class Controller:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
-        self.init_model_view()
+        self.init_model()
 
         self.initialize_loop()
 
+    def init_view(self) -> None:
+        self.view = View(self)
+        # Start polling for events after view is rendered.
+        self.model.poll_for_events()
+
     @asynch
-    def init_model_view(self) -> None:
+    def init_model(self) -> None:
         try:
             self.model = Model(self)
-            self.view = View(self)
-            # Start polling for events after view is rendered.
-            self.model.poll_for_events()
         except Exception as e:
             self.exception = e
             os.write(self.exception_pipe, b'1')
@@ -311,6 +313,26 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
+    def loading_text(self, spinner: Any,
+                     show_settings: bool=False) -> List[Any]:
+        complete, incomplete = complete_and_incomplete_themes()
+        SETTINGS = ["\n\nTheme: ",
+                    ('starred', self.theme_name),
+                    "\nAutohide [a]: ",
+                    ('starred', str(self.autohide)),
+                    "\nNotify [n]: ",
+                    ('starred', str(self.notify_enabled))]
+        if self.theme_name in incomplete:
+            WARNING = [('name',
+                        "\nWARNING: Incomplete theme; "
+                        "results may vary!\n"
+                        "      (you could try: {})".
+                        format(", ".join(complete)))]
+            SETTINGS += WARNING
+        if show_settings:
+            return [TUTORIAL, ('idle', ["\nLoading "] + spinner), SETTINGS]
+        return [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
+
     @asynch
     def show_main_view(self) -> None:
         def spinning_cursor() -> Any:
@@ -318,40 +340,31 @@ class Controller:
                 for cursor in '|/-\\':
                     yield cursor
 
-        def loading_text(spinner: Any) -> List[Any]:
-            complete, incomplete = complete_and_incomplete_themes()
-            SETTINGS = ["\n\nTheme: ",
-                        ('starred', self.theme_name),
-                        "\nAutohide: ",
-                        ('starred', str(self.autohide)),
-                        "\nNotify: ",
-                        ('starred', str(self.wait_after_loading))]
-            if self.theme_name in incomplete:
-                WARNING = [('name',
-                            "\nWARNING: Incomplete theme; "
-                            "results may vary!\n"
-                            "      (you could try: {})".
-                            format(", ".join(complete)))]
-                SETTINGS += WARNING
-            return [TUTORIAL, ('idle', ["\nLoading "] + spinner), SETTINGS]
-
         self.capture_stdout()
         spinner = spinning_cursor()
-        while not hasattr(self, 'view'):
-            self.txt.set_text(loading_text([next(spinner)]))
+        while not hasattr(self, 'model'):
+            self.txt.set_text(self.loading_text([next(spinner)]))
             self.update_screen()
             time.sleep(0.1)
         self.txt.set_controller(self)
 
         if self.wait_after_loading:
-            self.txt.set_text(loading_text([
-                u'\u2713  \nPress ',
-                ('starred', 'Enter'),
-                ' to continue >>\nPress ',
-                ('starred', 'h'),
-                ' to skip the tutorial from next time and continue.']))
+            self.show_settings_after_loading()
         else:
             self.txt.keypress((20, 20), 'enter')
+
+    def show_settings_after_loading(self) -> None:
+        self.txt.set_text(self.loading_text([
+            u'\u2713  \nPress ',
+            ('starred', 'Enter'),
+            ' to continue >>\nPress ',
+            ('starred', 'h'),
+            ' to skip the tutorial from next time and continue.\n\n'
+            'You can now toggle some of the settings below by pressing the'
+            ' key next to them.'],
+            show_settings=True
+        ))
+        self.update_screen()
 
     def initialize_loop(self) -> None:
         screen = Screen()

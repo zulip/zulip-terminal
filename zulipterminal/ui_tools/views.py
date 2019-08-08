@@ -856,6 +856,7 @@ class LoadingView(urwid.Text):
         if hasattr(self, 'controller'):
             if key == "enter":
                 # display the view
+                self.controller.init_view()
                 self.controller.loop.widget = self.controller.view
                 self.controller.loop.screen.register_palette(
                     self.controller.theme)
@@ -869,5 +870,14 @@ class LoadingView(urwid.Text):
                 if self.controller.autohide:
                     new_config = 'no_autohide'
                 self.controller.autohide = not self.controller.autohide
-                self.controller.update_zuliprc('autohide', 'no_autohide')
+                self.controller.update_zuliprc('autohide', config)
+                self.controller.show_settings_after_loading()
+            if key == 'n':
+                config = 'enabled'
+                if self.controller.notify_enabled:
+                    new_config = 'disabled'
+                self.controller.notify_enabled = not \
+                    self.controller.notify_enabled
+                self.controller.update_zuliprc('notify', config)
+                self.controller.show_settings_after_loading()
         return key

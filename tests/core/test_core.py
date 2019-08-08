@@ -42,8 +42,6 @@ class TestController:
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
         self.model.assert_called_once_with(controller)
-        self.view.assert_called_once_with(controller)
-        self.model.poll_for_events.assert_called_once_with()
         assert controller.theme_name == self.theme_name
         assert controller.theme == THEMES[self.theme_name]
         assert controller.zuliprc_path == self.config_file
@@ -184,9 +182,6 @@ class TestController:
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        controller.view.palette = {
-            'default': 'theme_properties'
-        }
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
         controller.show_main_view = mocker.Mock()
 
