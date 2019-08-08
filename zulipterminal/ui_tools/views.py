@@ -1,6 +1,7 @@
 from collections import defaultdict, OrderedDict
 from typing import Any, List, Tuple, Optional, Callable
 import threading
+from itertools import cycle
 
 import urwid
 import time
@@ -10,6 +11,7 @@ from zulipterminal.config.keys import (
     is_command_key,
     HELP_CATEGORIES
 )
+from zulipterminal.config.themes import THEMES, all_themes
 from zulipterminal.helper import asynch, match_user
 from zulipterminal.ui_tools.buttons import (
     TopicButton,
@@ -845,6 +847,7 @@ class MsgInfoView(urwid.ListBox):
 
 
 class LoadingView(urwid.Text):
+    cycle_themes = cycle(all_themes())
 
     def set_controller(self, controller: Any) -> None:
         self.controller = controller
@@ -865,6 +868,16 @@ class LoadingView(urwid.Text):
                 # Add tutorial=skip to the generated zuliprc
                 self.controller.update_zuliprc('tutorial', 'skip')
                 self.keypress(size, "enter")
+            if key == 't':
+                config = next(self.cycle_themes)
+                if config == self.controller.theme_name:
+                    config = next(self.cycle_themes)
+                self.controller.theme = THEMES[config]
+                self.controller.theme_name = config
+                self.controller.loop.screen.register_palette(THEMES[config])
+                self.controller.loop.screen.clear()
+                self.controller.update_zuliprc('theme', config)
+                self.controller.show_settings_after_loading()
             if key == 'a':
                 config = 'autohide'
                 if self.controller.autohide:

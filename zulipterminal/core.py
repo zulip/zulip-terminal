@@ -316,7 +316,7 @@ class Controller:
     def loading_text(self, spinner: Any,
                      show_settings: bool=False) -> List[Any]:
         complete, incomplete = complete_and_incomplete_themes()
-        SETTINGS = ["\n\nTheme: ",
+        SETTINGS = ["\n\nTheme [t]: ",
                     ('starred', self.theme_name),
                     "\nAutohide [a]: ",
                     ('starred', str(self.autohide)),
