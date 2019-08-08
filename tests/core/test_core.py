@@ -206,3 +206,39 @@ class TestController:
                                  stream_button.stream_name +
                                  "' ?"), "center")
         pop_up.assert_called_once_with(controller, text(), partial())
+
+    @pytest.mark.parametrize('initial_narrow, final_narrow', [
+        ([], [['search', 'FOO']]),
+        ([['search', 'BOO']], [['search', 'FOO']]),
+        ([['stream', 'PTEST']], [['search', 'FOO']]),
+        ([['pm_with', 'foo@zulip.com'], ['search', 'BOO']],
+            [['search', 'FOO']]),
+        ([['stream', 'PTEST'], ['topic', 'RDS']],
+            [['search', 'FOO']]),
+    ], ids=[
+        'Default_all_msg_search', 'redo_default_search',
+        'search_within_stream', 'pm_search_again',
+        'search_within_topic_narrow',
+    ])
+    @pytest.mark.parametrize('msg_ids', [
+        ({200, 300, 400}),
+        (set()),
+        ({100})
+    ])
+    def test_search_message(self, initial_narrow, final_narrow,
+                            controller, mocker, msg_ids):
+        get_message = mocker.patch('zulipterminal.model.Model.get_messages')
+        create_msg = mocker.patch('zulipterminal.core.create_msg_box_list')
+        mocker.patch(
+            'zulipterminal.model.Model.get_message_ids_in_current_narrow',
+            return_value=msg_ids)
+        controller.model.index = {'search': msg_ids}
+        controller.model.msg_view = []
+        controller.model.narrow = initial_narrow
+
+        controller.search_messages('FOO')
+
+        assert controller.model.narrow == final_narrow
+        get_message.assert_called_once_with(
+            num_after=0, num_before=30, anchor=10000000000)
+        create_msg.assert_called_once_with(controller.model, msg_ids)
