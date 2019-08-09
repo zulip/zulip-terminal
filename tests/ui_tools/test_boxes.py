@@ -70,6 +70,22 @@ class TestWriteBox:
         ('@Gro', 1, '@', '@*Group 2*'),
         ('@Grou', 1, '@', '@*Group 2*'),
         ('No match', 1, '', None),
+        # Expected sequence of autocompletes from '@'
+        ('@', 0, '@', '@*Group 1*'),
+        ('@', 1, '@', '@*Group 2*'),
+        ('@', 2, '@', '@*Group 3*'),
+        ('@', 3, '@', '@*Group 4*'),
+        ('@', 4, '@', '@**Human Myself**'),
+        ('@', 5, '@', '@**Human 1**'),
+        ('@', 6, '@', '@**Human 2**'),
+        ('@', 7, '@', None),  # Reached last match
+        ('@', 8, '@', None),  # Beyond end
+        # Expected sequence of autocompletes from '@_'
+        ('@_', 0, '@_', '@_**Human Myself**'),  # NOTE: No silent group mention
+        ('@_', 1, '@_', '@_**Human 1**'),
+        ('@_', 2, '@_', '@_**Human 2**'),
+        ('@_', 3, '@_', None),  # Reached last match
+        ('@_', 4, '@_', None),  # Beyond end
     ])
     def test_autocomplete_mentions(self, write_box, users_fixture,
                                    text, state, prefix_string,
