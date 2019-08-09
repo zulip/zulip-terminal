@@ -111,16 +111,52 @@ class Model:
 
         subscriptions = self.initial_data['subscriptions']
         stream_data = Model._stream_info_from_subscriptions(subscriptions)
-        (self.stream_dict, self.muted_streams,
+        (self.stream_dict, (self.muted_streams, self.initial_unmuted_streams),
          self.pinned_streams, self.unpinned_streams) = stream_data
 
         self.muted_topics = self.initial_data['muted_topics']
+
+        # Fetch additional messages to ensure non-empty all-messages narrow
+        # (caused by muted streams)
+        messages_not_muted = [
+            message
+            for message in self.index['messages'].values()
+            if (message['type'] == 'stream' and
+                message['stream_id'] not in self.muted_streams and
+                ([message['display_recipient'], message['subject']]
+                 not in self.muted_topics))
+        ]
+        if len(messages_not_muted) == 0:
+            self.__fetch_additional_initial_messages(workers=1)
+
         self.unread_counts = classify_unread_counts(self)
 
         self.fetch_all_topics(workers=5)
 
         self.new_user_input = True
         self._start_presence_updates()
+
+    def __fetch_additional_initial_messages(self, *, workers: int) -> None:
+        assert workers > 0
+        unmuted_stream_narrows = [
+            [['stream', self.stream_dict[stream_id]['name']]]
+            for stream_id in self.initial_unmuted_streams
+        ]
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(self.get_messages,
+                                num_after=10,
+                                num_before=30,
+                                anchor=None,
+                                narrow=narrow)
+                for narrow in unmuted_stream_narrows + [[['is', 'private']]]
+            }
+
+            # Wait for threads to complete
+            wait(futures)
+
+        if not all(self.exception_safe_result(future) for future in futures):
+            raise ServerConnectionFailure("fetching_additional_initial_messages")
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -312,10 +348,13 @@ class Model:
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
-                     anchor: Optional[int]) -> bool:
+                     anchor: Optional[int],
+                     narrow: Optional[List[Any]] = None) -> bool:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
+
+        fetch_narrow = narrow if narrow is not None else self.narrow
 
         request = {
             'anchor': anchor_value,
@@ -324,20 +363,23 @@ class Model:
             'apply_markdown': True,
             'use_first_unread_anchor': first_anchor,
             'client_gravatar': True,
-            'narrow': json.dumps(self.narrow),
+            'narrow': json.dumps(fetch_narrow),
         }
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor and response['anchor'] != 10000000000000000:
-                self.index['pointer'][str(self.narrow)] = response['anchor']
-            if 'found_newest' in response:
-                self.found_newest = response['found_newest']
-            else:
-                # Older versions of the server does not contain the
-                # 'found_newest' flag. Instead, we use this logic:
-                query_range = num_after + num_before + 1
-                self.found_newest = len(response['messages']) < query_range
+                self.index['pointer'][str(fetch_narrow)] = response['anchor']
+
+            # Update state associated with current narrow, if we fetched it
+            if fetch_narrow == self.narrow:
+                if 'found_newest' in response:
+                    self.found_newest = response['found_newest']
+                else:
+                    # Older versions of the server does not contain the
+                    # 'found_newest' flag. Instead, we use this logic:
+                    query_range = num_after + num_before + 1
+                    self.found_newest = len(response['messages']) < query_range
             return True
         return False
 
@@ -532,7 +574,8 @@ class Model:
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
+    ) -> Tuple[Dict[int, Any], Tuple[Set[int], Set[int]],
+               List[List[str]], List[List[str]]]:
         stream_keys = ('name', 'stream_id', 'color', 'invite_only')
 
         # Canonicalize color formats, since zulip server versions may use
@@ -541,12 +584,14 @@ class Model:
             subscription['color'] = canonicalize_color(subscription['color'])
 
         # Mapping of stream-id to all available stream info
-        # Stream IDs for muted streams
+        # Stream IDs for muted/unmuted streams
         # Limited stream info sorted by name (used in display)
         return (
             {stream['stream_id']: stream for stream in subscriptions},
-            {stream['stream_id'] for stream in subscriptions
-             if stream['in_home_view'] is False},
+            ({stream['stream_id'] for stream in subscriptions
+              if stream['in_home_view'] is False},
+             {stream['stream_id'] for stream in subscriptions
+              if stream['in_home_view'] is True}),
             sorted([[stream[key] for key in stream_keys]
                     for stream in subscriptions if stream['pin_to_top']],
                    key=lambda s: s[0].lower()),
