@@ -1637,33 +1637,26 @@ class TestTopButton:
     @pytest.mark.parametrize('width, count, short_text', [
         (8, 0, 'ca…'),
         (9, 0, 'cap…'),
-        (9, -1, 'ca…'),
         (9, 1, 'ca…'),
         (10, 0, 'capt…'),
-        (10, -1, 'cap…'),
         (10, 1, 'cap…'),
         (11, 0, 'capti…'),
-        (11, -1, 'capt…'),
         (11, 1, 'capt…'),
         (11, 10, 'cap…'),
         (12, 0, 'caption'),
-        (12, -1, 'capti…'),
         (12, 1, 'capti…'),
         (12, 10, 'capt…'),
         (12, 100, 'cap…'),
         (13, 0, 'caption'),
-        (13, -1, 'caption'),
         (13, 10, 'capti…'),
         (13, 100, 'capt…'),
         (13, 1000, 'cap…'),
         (15, 0, 'caption'),
-        (15, -1, 'caption'),
         (15, 1, 'caption'),
         (15, 10, 'caption'),
         (15, 100, 'caption'),
         (15, 1000, 'capti…'),
         (25, 0, 'caption'),
-        (25, -1, 'caption'),
         (25, 1, 'caption'),
         (25, 19, 'caption'),
         (25, 199, 'caption'),
@@ -1700,8 +1693,6 @@ class TestTopButton:
 
         text = top_button._w._original_widget.get_text()
         count_str = '' if count == 0 else str(count)
-        if count < 0:
-            count_str = 'M'
         expected_text = ' {}{}{}{}'.format(
                 (prefix + ' ') if prefix else '',
                 short_text,
@@ -1772,7 +1763,7 @@ class TestStreamButton:
     @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
                              is_action_muting, updated_all_msgs', [
         (86, set(), 50, False, 400),
-        (86, {86, 205}, -1, True, 300),
+        (86, {86, 205}, None, True, 300),
         (205, {14, 99}, 0, False, 350),
     ], ids=[
         'unmuting stream 86 - 204 unreads',
@@ -1802,7 +1793,8 @@ class TestStreamButton:
         else:
             stream_button.mark_unmuted()
 
-        stream_button.update_count.assert_called_once_with(called_value)
+        if called_value is not None:
+            stream_button.update_count.assert_called_once_with(called_value)
         if called_value != 0:
             stream_button.view.home_button.update_count.\
                 assert_called_once_with(updated_all_msgs)
