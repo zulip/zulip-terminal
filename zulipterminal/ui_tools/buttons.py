@@ -37,22 +37,21 @@ class TopButton(urwid.Button):
         self.text_color = text_color
         self.show_function = show_function
         super().__init__("")
-        self._w = self.widget(count)
+        self.update_count(count)
         self.controller = controller
         urwid.connect_signal(self, 'click', self.activate)
 
     def update_count(self, count: int) -> None:
         self.count = count
-        self._w = self.widget(count)
-
-    def widget(self, count: int) -> Any:
         if count < 0:
             count_text = 'M'  # Muted
         elif count == 0:
             count_text = ''
         else:
             count_text = str(count)
+        self._w = self.widget(count_text)
 
+    def widget(self, count_text: str) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
