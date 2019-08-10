@@ -233,7 +233,13 @@ class TestModel:
         }, {0, 1}),
         ([['is', 'starred']], {
             'starred_msg_ids': {0, 1}
-        }, {0, 1})
+        }, {0, 1}),
+        ([['stream', 'FOO'], ['search', 'FOO']], {
+            "stream_msg_ids_by_stream_id": {
+                1: {0, 1, 2}  # NOTE Should not be returned
+            },
+            'search': {0, 1},
+        }, {0, 1}),
     ])
     def test_get_message_ids_in_current_narrow(self, mocker, model,
                                                narrow, index, current_ids):

@@ -199,6 +199,8 @@ class Model:
         index = self.index
         if narrow == []:
             ids = index['all_msg_ids']
+        elif self.is_search_narrow():  # Check searches first
+            ids = index['search']
         elif narrow[0][0] == 'stream':
             stream_id = self.stream_id
             if len(narrow) == 1:
@@ -211,8 +213,6 @@ class Model:
         elif narrow[0][0] == 'pm_with':
             recipients = self.recipients
             ids = index['private_msg_ids_by_user_ids'].get(recipients, set())
-        elif self.is_search_narrow():
-            ids = index['search']
         elif narrow[0][1] == 'starred':
             ids = index['starred_msg_ids']
         return ids.copy()
