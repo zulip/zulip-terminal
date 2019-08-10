@@ -43,9 +43,7 @@ class TopButton(urwid.Button):
 
     def update_count(self, count: int) -> None:
         self.count = count
-        if count < 0:
-            count_text = 'M'
-        elif count == 0:
+        if count == 0:
             count_text = ''
         else:
             count_text = str(count)
@@ -149,9 +147,13 @@ class StreamButton(TopButton):
         if self.model.is_muted_stream(self.stream_id):
             self.mark_muted()
 
+    def mark_button_M(self) -> None:
+        count_text = 'M'
+        self._w = self.widget(count_text)
+
     def mark_muted(self) -> None:
+        self.mark_button_M()
         self.model.unread_counts['all_msg'] -= self.count
-        self.update_count(-1)
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
