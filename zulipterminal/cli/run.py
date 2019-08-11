@@ -240,17 +240,6 @@ def main(options: Optional[List[str]]=None) -> None:
                   "using -t/--theme options on command line.")
             sys.exit(1)
 
-        print("Loading with:")
-        print("   theme '{}' specified {}.".format(*theme_to_use))
-        complete, incomplete = complete_and_incomplete_themes()
-        if theme_to_use[0] in incomplete:
-            print(in_color('yellow',
-                           "   WARNING: Incomplete theme; "
-                           "results may vary!\n"
-                           "      (you could try: {})".
-                           format(", ".join(complete))))
-        print("   autohide setting '{}' specified {}."
-              .format(*zterm['autohide']))
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
