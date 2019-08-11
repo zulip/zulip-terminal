@@ -14,7 +14,7 @@ from zulipterminal.ui_tools.buttons import (
 from zulipterminal.ui_tools.views import (
     HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
     MsgInfoView, PopUpConfirmationView, RightColumnView, StreamsView,
-    TopicsView, UsersView,
+    TopicsView, UsersView, LoadingView
 )
 
 
@@ -2100,3 +2100,11 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+
+class TestLoadingView:
+
+    def test_init(self):
+        text = "Random Text"
+        loading_view = LoadingView(text)
+        assert loading_view.text == text

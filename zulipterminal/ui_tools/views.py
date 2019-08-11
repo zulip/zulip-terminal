@@ -906,3 +906,9 @@ class MsgInfoView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super().keypress(size, key)
+
+
+class LoadingView(urwid.Text):
+
+    def selectable(self) -> bool:
+        return True
