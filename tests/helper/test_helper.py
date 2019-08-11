@@ -4,7 +4,7 @@ import pytest
 
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, index_messages, notify,
-    powerset,
+    powerset, update_zuliprc,
 )
 
 
@@ -249,3 +249,19 @@ def test_notify(mocker, OS, is_notification_sent):
     subprocess = mocker.patch('zulipterminal.helper.subprocess')
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
+
+
+@pytest.mark.parametrize('initial_setting, final_setting', [
+    ('', '[zterm]\nsetting = value'),
+    ('[zterm]\nsetting = not_value', '[zterm]\nsetting = value'),
+    ('[zterm]\nfoo = boo\nsetting = not_value',
+     '[zterm]\nfoo = boo\nsetting = value'),
+])
+def test_update_zuliprc(mocker, tmpdir,
+                        initial_setting, final_setting):
+    p = tmpdir.mkdir("sub").join("zuliprc")
+    api_details = "[api]\nemail = foo@boo.com\nkey = abcd\nsite = x.com\n"
+    p.write(api_details + "\n" + initial_setting)
+    zuliprc_path = str(p)
+    update_zuliprc(zuliprc_path, 'setting', 'value')
+    assert p.read() == api_details + "\n" + final_setting + "\n\n"

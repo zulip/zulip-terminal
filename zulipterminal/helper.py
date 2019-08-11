@@ -1,3 +1,4 @@
+import configparser
 import os
 import platform
 import shlex
@@ -485,3 +486,13 @@ def notify(title: str, html_text: str) -> None:
     if command:
         res = subprocess.run(shlex.split(command), stdout=subprocess.DEVNULL,
                              stderr=subprocess.STDOUT)
+
+
+def update_zuliprc(zuliprc_path: str, setting: str, value: str) -> None:
+    zuliprc = configparser.ConfigParser()
+    zuliprc.read(zuliprc_path)
+    if 'zterm' not in zuliprc.sections():
+        zuliprc['zterm'] = {}
+    zuliprc['zterm'][setting] = value
+    with open(zuliprc_path, 'w') as config_file:
+        zuliprc.write(config_file)
