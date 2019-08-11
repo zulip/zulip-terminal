@@ -12,9 +12,9 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
-    MsgInfoView, PopUpConfirmationView, PopUpView, RightColumnView,
-    StreamInfoView, StreamsView, TopicsView, UsersView,
+    HelpView, LeftColumnView, LoadingView, MessageView, MiddleColumnView,
+    ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
+    RightColumnView, StreamInfoView, StreamsView, TopicsView, UsersView,
 )
 
 
@@ -2225,3 +2225,14 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+
+class TestLoadingView:
+    @pytest.fixture
+    def loading_view(self, mocker):
+        self.text = "Random Text"
+        loading_view = LoadingView(self.text)
+        return loading_view
+
+    def test_init(self, loading_view):
+        assert loading_view.text == self.text

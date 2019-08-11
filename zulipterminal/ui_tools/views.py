@@ -897,3 +897,9 @@ class MsgInfoView(PopUpView):
              for index, (field, data) in enumerate(msg_info.items())]
 
         super().__init__(controller, msg_info_content, 'MSG_INFO')
+
+
+class LoadingView(urwid.Text):
+
+    def selectable(self) -> bool:
+        return True
