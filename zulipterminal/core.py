@@ -43,6 +43,8 @@ class Controller:
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
+        self.initialize_loop()
+
     @asynch
     def show_loading(self) -> None:
 
@@ -260,7 +262,7 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
-    def main(self) -> None:
+    def initialize_loop(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
         self.loop = urwid.MainLoop(self.view,
@@ -271,6 +273,7 @@ class Controller:
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)
 
+    def main(self) -> None:
         try:
             # TODO: Enable resuming? (in which case, remove ^Z below)
             disabled_keys = {
@@ -278,14 +281,14 @@ class Controller:
                 'stop': 'undefined',  # Disable ^S - enabling shortcut key use
                 'quit': 'undefined',  # Disable ^\, ^4
             }
-            old_signal_list = screen.tty_signal_keys(**disabled_keys)
+            old_signal_list = self.loop.screen.tty_signal_keys(**disabled_keys)
             self.loop.run()
 
         except Exception:
             self.restore_stdout()
-            screen.tty_signal_keys(*old_signal_list)
+            self.loop.screen.tty_signal_keys(*old_signal_list)
             raise
 
         finally:
             self.restore_stdout()
-            screen.tty_signal_keys(*old_signal_list)
+            self.loop.screen.tty_signal_keys(*old_signal_list)
