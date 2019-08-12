@@ -232,9 +232,14 @@ class TestController:
         mocker.patch(
             'zulipterminal.model.Model.get_message_ids_in_current_narrow',
             return_value=msg_ids)
-        controller.model.index = {'search': msg_ids}
+        controller.model.index = {'search': {500}}  # Any initial search index
         controller.model.msg_view = []
         controller.model.narrow = initial_narrow
+
+        def set_msg_ids(*args, **kwargs):
+            controller.model.index['search'].update(msg_ids)
+        get_message.side_effect = set_msg_ids
+        assert controller.model.index['search'] == {500}
 
         controller.search_messages('FOO')
 
@@ -242,3 +247,4 @@ class TestController:
         get_message.assert_called_once_with(
             num_after=0, num_before=30, anchor=10000000000)
         create_msg.assert_called_once_with(controller.model, msg_ids)
+        assert controller.model.index == {'search': msg_ids}
