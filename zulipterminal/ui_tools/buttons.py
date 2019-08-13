@@ -49,9 +49,9 @@ class TopButton(urwid.Button):
             count_text = ''
         else:
             count_text = str(count)
-        self._w = self.widget(count_text)
+        self.update_widget(count_text)
 
-    def widget(self, count_text: str) -> Any:
+    def update_widget(self, count_text: str) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
@@ -65,7 +65,7 @@ class TopButton(urwid.Button):
         )
 
         # NOTE: Generated text does not include space at end
-        return urwid.AttrMap(urwid.SelectableIcon(
+        self._w = urwid.AttrMap(urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces*' '),
              ' ', ('idle',  count_text)],
