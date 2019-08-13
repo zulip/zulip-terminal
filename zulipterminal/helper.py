@@ -100,6 +100,11 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         elif len(msg['display_recipient']) <= 2:
             key = messages[id]['sender_id']
             unreads = unread_counts['unread_pms']  # type: ignore
+        else:  # If it's a group pm
+            key = frozenset(  # type: ignore
+                recipient['id'] for recipient in msg['display_recipient']
+            )
+            unreads = unread_counts['unread_huddles']  # type: ignore
 
         # broader unread counts (for all_* and streams) are updated
         # later conditionally.
