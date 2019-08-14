@@ -538,7 +538,8 @@ class TestUsersView:
     @pytest.fixture
     def user_view(self, mocker):
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        return UsersView("USER_BTN_LIST")
+        self.view = mocker.Mock()
+        return UsersView(self.view, "USER_BTN_LIST")
 
     def test_mouse_event(self, mocker, user_view):
         mocker.patch.object(user_view, 'keypress')
@@ -883,7 +884,8 @@ class TestRightColumnView:
                 color=self.view.users[0]['status'],
                 count=1
             )
-        users_view.assert_called_once_with(right_col_view.users_btn_list)
+        users_view.assert_called_once_with(self.view,
+                                           right_col_view.users_btn_list)
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     def test_keypress_w(self, right_col_view, mocker):
