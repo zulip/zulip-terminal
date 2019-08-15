@@ -367,11 +367,22 @@ class TopicsView(urwid.Frame):
         return super(TopicsView, self).keypress(size, key)
 
 
-class UsersView(urwid.ListBox):
+class UsersView(urwid.Frame):
     def __init__(self, view: Any, users_btn_list: List[Any]) -> None:
         self.view = view
+        self.users_btn_list = users_btn_list
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
-        super(UsersView, self).__init__(self.log)
+        list_box = urwid.ListBox(self.log)
+        self.user_search = UserSearchBox(self)
+        self.view.user_search = self.user_search
+        urwid.connect_signal(self.user_search, 'change', self.update_user_list)
+        self.allow_update_user_list = True
+        super(UsersView, self).__init__(list_box, header=urwid.LineBox(
+                            self.user_search, tlcorner=u'─', tline=u'', lline=u'',
+                            trcorner=u'─', blcorner=u'─', rline=u'',
+                            bline=u'─', brcorner=u'─'
+                            ))
+        self.search_lock = threading.Lock()
 
     @asynch
     def update_user_list(self, search_box: Any=None,
@@ -398,9 +409,24 @@ class UsersView(urwid.ListBox):
                 ]
             else:
                 users_display = users
-            self.body = self.users_view(users_display)
-            self.set_body(self.body)
+            self.log = urwid.SimpleFocusListWalker(self.view.users_view.build_user_view(users_display))
+            self.contents['body'] = (urwid.ListBox(self.log), None)
             self.view.controller.update_screen()
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('SEARCH_PEOPLE', key):
+            self.allow_update_user_list = False
+            self.set_focus('header')
+            return key
+        elif is_command_key('GO_BACK', key):
+            self.allow_update_user_list = True
+            self.log.clear()
+            self.log.extend(self.users_btn_list)
+            self.set_focus('body')
+            self.log.set_focus(0)
+            self.view.controller.update_screen()
+            return key
+        return super(UsersView, self).keypress(size, key)
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
@@ -530,7 +556,7 @@ class MiddleColumnView(urwid.Frame):
         return super(MiddleColumnView, self).keypress(size, key)
 
 
-class RightColumnView(urwid.Frame):
+class RightColumnView(urwid.Pile):
     """
     Displays the users list on the right side of the app.
     """
@@ -538,54 +564,15 @@ class RightColumnView(urwid.Frame):
     def __init__(self, width: int, view: Any) -> None:
         self.width = width
         self.view = view
-        self.user_search = UserSearchBox(self)
-        urwid.connect_signal(self.user_search, 'change',
-                             self.update_user_list)
-        self.view.user_search = self.user_search
-        search_box = urwid.LineBox(
-            self.user_search, tlcorner=u'─', tline=u'', lline=u'',
-            trcorner=u'─', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─'
-            )
-        self.allow_update_user_list = True
-        self.search_lock = threading.Lock()
-        super(RightColumnView, self).__init__(self.users_view(),
-                                              header=search_box)
-
-    @asynch
-    def update_user_list(self, search_box: Any=None,
-                         new_text: str="",
-                         user_list: Any=None) -> None:
-
-        assert ((user_list is None and search_box is not None) or
-                (user_list is not None and search_box is None and
-                 new_text == ""))
-
-        if not self.view.controller.editor_mode and not user_list:
-            return
-        if not self.allow_update_user_list and new_text == "":
-            return
-        # wait for any previously started search to finish to avoid
-        # displaying wrong user list.
-        with self.search_lock:
-            if user_list:
-                self.view.users = user_list
-            users = self.view.users.copy()
-            if new_text:
-                users_display = [
-                    user for user in users if match_user(user, new_text)
-                ]
-            else:
-                users_display = users
-            self.body = self.users_view(users_display)
-            self.set_body(self.body)
-            self.view.controller.update_screen()
+        self.user_v = self.users_view()
+        self.right_column_structure = [
+            self.user_v
+        ]
+        super(RightColumnView, self).__init__(self.right_column_structure)
 
     def build_user_view(self, users: Any=None) -> List[Any]:
-        self.reset_default_view_users = False
         if users is None:
             users = self.view.users.copy()
-            self.reset_default_view_users = True
         users_btn_list = list()  # type: List[Any]
         for user in users:
             # Only include `inactive` users in search result.
@@ -606,26 +593,17 @@ class RightColumnView(urwid.Frame):
             )
         return users_btn_list
 
-    def users_view(self, users: Any=None) -> Any:
-        users_btn_list = self.build_users_view()
+    def users_view(self) -> Any:
+        users_btn_list = self.build_user_view()
         user_w = UsersView(self.view, users_btn_list)
-        # Donot reset them while searching.
-        if self.reset_default_view_users:
-            self.users_btn_list = users_btn_list
-            self.view.user_w = user_w
+        # Do not reset them while searching.
+        self.users_btn_list = users_btn_list
+        self.view.user_w = user_w
         return user_w
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEARCH_PEOPLE', key):
-            self.allow_update_user_list = False
-            self.set_focus('header')
-            return key
-        elif is_command_key('GO_BACK', key):
-            self.allow_update_user_list = True
-            self.body = UsersView(self.view, self.users_btn_list)
-            self.set_body(self.body)
-            self.set_focus('body')
-            self.view.controller.update_screen()
+            self.view.user_w.keypress(size, key)
             return key
         elif is_command_key('GO_LEFT', key):
             self.view.show_right_panel(visible=False)
