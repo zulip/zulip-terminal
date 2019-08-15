@@ -612,8 +612,7 @@ class RightColumnView(urwid.Frame):
                     count=unread_count
                 )
             )
-        user_w = UsersView(
-            urwid.SimpleFocusListWalker(users_btn_list))
+        user_w = UsersView(users_btn_list)
         # Donot reset them while searching.
         if reset_default_view_users:
             self.users_btn_list = users_btn_list
@@ -627,8 +626,7 @@ class RightColumnView(urwid.Frame):
             return key
         elif is_command_key('GO_BACK', key):
             self.allow_update_user_list = True
-            self.body = UsersView(
-                urwid.SimpleFocusListWalker(self.users_btn_list))
+            self.body = UsersView(self.users_btn_list)
             self.set_body(self.body)
             self.set_focus('body')
             self.view.controller.update_screen()
