@@ -373,6 +373,35 @@ class UsersView(urwid.ListBox):
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
         super(UsersView, self).__init__(self.log)
 
+    @asynch
+    def update_user_list(self, search_box: Any=None,
+                         new_text: str="",
+                         user_list: Any=None) -> None:
+
+        assert ((user_list is None and search_box is not None) or
+                (user_list is not None and search_box is None and
+                 new_text == ""))
+
+        if not self.view.controller.editor_mode and not user_list:
+            return
+        if not self.allow_update_user_list and new_text == "":
+            return
+        # wait for any previously started search to finish to avoid
+        # displaying wrong user list.
+        with self.search_lock:
+            if user_list:
+                self.view.users = user_list
+            users = self.view.users.copy()
+            if new_text:
+                users_display = [
+                    user for user in users if match_user(user, new_text)
+                ]
+            else:
+                users_display = users
+            self.body = self.users_view(users_display)
+            self.set_body(self.body)
+            self.view.controller.update_screen()
+
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
