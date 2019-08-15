@@ -59,7 +59,6 @@ class Controller:
             time.sleep(0.1)
             sys.stdout.write('\b'*len(next_spinner))
 
-        sys.stdout.write('\n')
         self.capture_stdout()
 
     def capture_stdout(self, path: str='debug.log') -> None:
