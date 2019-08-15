@@ -915,11 +915,8 @@ class TestRightColumnView:
         }]
         self.view.controller.editor_mode = editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
-        mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
-
+        users_view = mocker.patch(VIEWS + ".UsersView")
         right_col_view = RightColumnView(width, self.view)
-
         if status != 'inactive':
             unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
@@ -930,7 +927,7 @@ class TestRightColumnView:
                 color=self.view.users[0]['status'],
                 count=1
             )
-        list_w.assert_called_once_with(right_col_view.users_btn_list)
+        users_view.assert_called_once_with(right_col_view.users_btn_list)
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     def test_keypress_w(self, right_col_view, mocker):
@@ -944,7 +941,6 @@ class TestRightColumnView:
         key = 'esc'
         size = (20,)
         mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch(VIEWS + ".RightColumnView.set_body")
         right_col_view.users_btn_list = []
@@ -953,7 +949,6 @@ class TestRightColumnView:
 
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with('body')
-        list_w.assert_called_once_with([])
 
 
 class TestLeftColumnView:
