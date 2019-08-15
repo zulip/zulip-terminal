@@ -772,6 +772,7 @@ class TestRightColumnView:
     @pytest.fixture
     def right_col_view(self, mocker, width=50):
         mocker.patch(VIEWS + ".RightColumnView.users_view")
+        mocker.patch(VIEWS + ".RightColumnView.build_user_view")
         return RightColumnView(width, self.view)
 
     def test_init(self, right_col_view):
@@ -802,8 +803,8 @@ class TestRightColumnView:
         }], 1, True, 'active'),
         (None, 0, False, 'inactive'),
     ])
-    def test_users_view(self, users, users_btn_len, editor_mode, status,
-                        mocker, width=40):
+    def test_users_view(self, right_col_view, users, users_btn_len,
+                        editor_mode, status, mocker, width=40):
         self.view.users = [{
             'user_id': 1,
             'status': status
@@ -811,7 +812,7 @@ class TestRightColumnView:
         self.view.controller.editor_mode = editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
-        right_col_view = RightColumnView(width, self.view)
+        right_col_view.user_views()
         if status != 'inactive':
             unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
