@@ -209,6 +209,7 @@ class MessageBox(urwid.Pile):
                 self.recipients_names = \
                     self.message['display_recipient'][0]['full_name']
                 self.recipients_emails = self.model.user_email
+                self.user_name = self.recipients_names
             else:
                 self.recipients_names = ', '.join(list(
                             recipient['full_name']
@@ -220,7 +221,7 @@ class MessageBox(urwid.Pile):
                             for recipient in self.message['display_recipient']
                             if recipient['email'] != self.model.user_email
                         ))
-
+                self.user_name = self.recipients_names
         # mouse_event helper variable
         self.displaying_selection_hint = False
 
