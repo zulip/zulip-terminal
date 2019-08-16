@@ -1001,6 +1001,42 @@ class TestLeftColumnView:
             for topic, count in zip(topic_list, unread_count_list)
         ])
 
+    @pytest.mark.parametrize('pinned', powerset([1, 2, 99, 1000]))
+    def test_stream_buttons(self, mocker, streams, pinned, width=40):
+        self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
+        self.view.pinned_streams = [s for s in streams if s[1] in pinned]
+
+        class button:
+            pass
+
+        def altbutton(stream, *args, **kwargs):
+            obj = button()
+            obj.stream_name = stream[0]
+            obj.stream_id = stream[1]
+            return obj
+
+        def altdivider(char):
+            obj = button()
+            return obj
+
+        def altlinebox(view, *args, **kwargs):
+            return view
+
+        def altstreamsview(btnlist, *args, **kwargs):
+            return btnlist
+
+        stream_button = mocker.patch(VIEWS + '.StreamButton',
+                                     side_effect=altbutton)
+        stream_view = mocker.patch(VIEWS + '.StreamsView',
+                                   side_effect=altstreamsview)
+        divider = mocker.patch(VIEWS + '.urwid.Divider',
+                               side_effect=altdivider)
+        line_box = mocker.patch(VIEWS + '.urwid.LineBox')
+        mocker.patch(STREAMBUTTON + ".mark_muted")
+        left_col_view = LeftColumnView(width, self.view)
+        for i in left_col_view.view.stream_w:
+            assert hasattr(i, 'stream_name') and hasattr(i, 'stream_id')
+
 
 class TestHelpMenu:
     @pytest.fixture(autouse=True)
