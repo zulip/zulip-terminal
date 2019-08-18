@@ -314,7 +314,7 @@ class TestTopicButton:
                                    topic=title, controller=controller,
                                    width=40, count=0)
         if is_muted_called:
-            mark_muted.assert_called_once_with()
+            mark_muted.called
         else:
             mark_muted.assert_not_called()
 

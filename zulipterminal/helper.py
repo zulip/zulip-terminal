@@ -89,6 +89,7 @@ class UnreadCounts(TypedDict):
     all_pms: int
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
+    unread_muted_topics: Dict[Tuple[int, str], int]
     unread_pms: Dict[int, int]  # sender_id
     unread_huddles: Dict[FrozenSet[int], int]  # Group pms
     streams: Dict[int, int]  # stream_id
@@ -429,6 +430,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         all_pms=0,
         all_mentions=0,
         unread_topics=dict(),
+        unread_muted_topics=dict(),
         unread_pms=dict(),
         unread_huddles=dict(),
         streams=defaultdict(int),
@@ -446,12 +448,13 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
+        stream_topic = (stream_id, stream['topic'])
         # unsubscribed streams may be in raw unreads, but are not tracked
         if not model.is_user_subscribed_to_stream(stream_id):
             continue
         if model.is_muted_topic(stream_id, stream['topic']):
+            unread_counts['unread_muted_topics'][stream_topic] = count
             continue
-        stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count
         if not unread_counts['streams'].get(stream_id):
             unread_counts['streams'][stream_id] = count
