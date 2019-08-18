@@ -226,7 +226,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_count(-1)
+        self.update_widget('M')
     # TODO: Handle event-based approach for topic-muting.
 
 
