@@ -114,7 +114,8 @@ class Model:
         (self.stream_dict, self.muted_streams,
          self.pinned_streams, self.unpinned_streams) = stream_data
 
-        self.muted_topics = self.initial_data['muted_topics']
+        self.muted_topics = (
+            self.initial_data['muted_topics'])  # type: List[List[str]]
 
         groups = self.initial_data['realm_user_groups']
         self.user_group_by_id = {}  # type: Dict[int, Dict[str, Any]]
@@ -416,7 +417,8 @@ class Model:
         if stream_id in self.muted_streams:
             return True
         stream_name = self.stream_dict[stream_id]['name']
-        return (stream_name, topic) in self.muted_topics
+        topic_to_search = [stream_name, topic]  # type: List[str]
+        return topic_to_search in self.muted_topics
 
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
