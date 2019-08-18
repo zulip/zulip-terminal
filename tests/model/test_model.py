@@ -1286,8 +1286,8 @@ class TestModel:
         model.stream_dict = stream_dict
         model.muted_streams = [1]
         model.muted_topics = [
-            ('Stream 2', 'muted topic'),
-            ('Stream 1', 'muted stream muted topic'),
+            ['Stream 2', 'muted topic'],
+            ['Stream 1', 'muted stream muted topic'],
         ]
         assert model.is_muted_topic(stream_id=topic[0],
                                     topic=topic[1]) == is_muted
