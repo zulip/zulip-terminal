@@ -617,6 +617,15 @@ class Model:
 
                 self.controller.update_screen()
 
+    def toggle_topic_muted_status(self, stream_id: int, stream_name:str, topic_name :str) -> bool:
+        request = {
+            'stream': stream_name,
+            'topic': topic_name,
+            'op': 'remove' if self.is_muted_topic(stream_id, topic_name) else 'add'
+        }
+        response = self.client.mute_topic(request)
+        return response['result'] == 'success'
+
     def toggle_stream_muted_status(self, stream_id: int) -> bool:
         request = [{
             'stream_id': stream_id,
