@@ -848,6 +848,18 @@ class Model:
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)
 
+    def toggle_topic_muted_status(self, stream_id: int,
+                                  stream_name: str, topic_name: str) -> None:
+        request = {
+            'stream': stream_name,
+            'topic': topic_name,
+            'op': 'remove'
+            if self.is_muted_topic(stream_id, topic_name)
+            else 'add'
+        }
+        response = self.client.mute_topic(request)
+        display_error_if_present(response, self.controller)
+
     def stream_id_from_name(self, stream_name: str) -> int:
         for stream_id, stream in self.stream_dict.items():
             if stream['name'] == stream_name:

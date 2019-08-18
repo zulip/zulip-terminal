@@ -706,6 +706,34 @@ class TestModel:
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
 
+    @pytest.mark.parametrize(['initial_muted_topics', 'op',
+                              'topic_to_be_toggled'], [
+        ({
+            ('Stream 1', 'delhi'): 1
+         }, 'add', ('Stream 1', 'party')),
+        ({
+            ('Stream 1', 'delhi'): 1,
+            ('Stream 1', 'party'): 2
+        }, 'remove', ('Stream 1', 'delhi'))
+    ], ids=['muting_party', 'unmuting_delhi'])
+    def test_toggle_topic_muted_status(self, mocker, model,
+                                       stream_dict, topic_to_be_toggled,
+                                       initial_muted_topics, op,
+                                       response={'result': 'success'}):
+        model._muted_topics = initial_muted_topics
+        model.stream_dict = stream_dict
+        model.client.mute_topic.return_value = response
+        model.toggle_topic_muted_status(1, topic_to_be_toggled[0],
+                                        topic_to_be_toggled[1])
+        request = {
+            'stream': topic_to_be_toggled[0],
+            'topic': topic_to_be_toggled[1],
+            'op': op
+        }
+        model.client.mute_topic.assert_called_once_with(request)
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
+
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
         (['starred'], 'remove'),
