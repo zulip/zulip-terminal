@@ -263,6 +263,11 @@ class TopicButton(TopButton):
             # All messages in this topic are read.
             self.update_count(0)
 
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if is_command_key('TOGGLE_MUTE_TOPIC', key):
+            self.controller.topic_muting_confirmation_popup(self)
+        return super().keypress(size, key)
+
 
 class UnreadPMButton(urwid.Button):
     def __init__(self, user_id: int, email: str) -> None:
