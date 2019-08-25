@@ -1,0 +1,26 @@
+FROM python:3.7-alpine AS builder
+
+RUN addgroup -S zulipgr \
+&& adduser -S zulip -G zulipgr \
+&& apk add --no-cache ca-certificates gcc musl-dev libffi-dev openssl-dev libxml2-dev libxslt-dev
+
+USER zulip
+WORKDIR /home/zulip
+
+RUN set -ex; python3 -m venv zulip-terminal-venv \
+&& source zulip-terminal-venv/bin/activate \
+&& pip3 --disable-pip-version-check install zulip-term \
+&& rm -rf /home/zulip/.cache
+
+FROM python:3.7-alpine
+
+RUN addgroup -S zulipgr \
+&& adduser -S zulip -G zulipgr \
+&& apk add --no-cache ca-certificates libffi openssl libxml2 libxslt \
+&& rm -rf /var/cache/apk/*
+
+COPY --from=builder --chown=zulip:zulipgr /home/zulip /home/zulip
+USER zulip
+WORKDIR /home/zulip
+ENTRYPOINT ["/home/zulip/zulip-terminal-venv/bin/zulip-term"]
+CMD ["--config-file", "/.zulip/zuliprc"]
