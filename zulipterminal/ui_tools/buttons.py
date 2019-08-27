@@ -18,7 +18,7 @@ class TopButton(urwid.Button):
     def __init__(self, controller: Any, caption: str,
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
-                 postfix_txt_markup: Tuple[Any, str]='',
+                 postfix_txt_markup: Tuple[str, str]=('', ''),
                  text_color: Optional[str]=None,
                  count: int=0) -> None:
         if isinstance(prefix_character, tuple):
@@ -182,7 +182,7 @@ class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,
                  view: Any, width: int,
                  color: Optional[str]=None, count: int=0,
-                 postfix_txt_markup: Tuple[Any, str]='') -> None:
+                 postfix_txt_markup: Tuple[str, str]=('', '')) -> None:
         # Properties accessed externally
         self.email = user['email']
         self.user_id = user['user_id']

@@ -567,7 +567,7 @@ class RightColumnView(urwid.Frame):
             if self.view.model.user_id == user['user_id']:
                 postfix_txt_markup = ('light grey', u" (you)")
             else:
-                postfix_txt_markup = ''
+                postfix_txt_markup = ('', '')
             users_btn_list.append(
                 UserButton(
                     user,

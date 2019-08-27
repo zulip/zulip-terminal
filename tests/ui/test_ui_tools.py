@@ -884,7 +884,7 @@ class TestRightColumnView:
                 view=self.view,
                 width=width,
                 color=self.view.users[0]['status'],
-                postfix_txt_markup='',
+                postfix_txt_markup=('', ''),
                 count=1
             )
         list_w.assert_called_once_with(right_col_view.users_btn_list)
