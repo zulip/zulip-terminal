@@ -564,6 +564,10 @@ class RightColumnView(urwid.Frame):
                 continue
             unread_count = (self.view.model.unread_counts['unread_pms'].
                             get(user['user_id'], 0))
+            if self.view.model.user_id == user['user_id']:
+                postfix_txt_markup = ('light grey', u" (you)")
+            else:
+                postfix_txt_markup = ''
             users_btn_list.append(
                 UserButton(
                     user,
@@ -571,6 +575,7 @@ class RightColumnView(urwid.Frame):
                     view=self.view,
                     width=self.width,
                     color=user['status'],
+                    postfix_txt_markup=postfix_txt_markup,
                     count=unread_count
                 )
             )

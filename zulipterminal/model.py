@@ -459,10 +459,10 @@ class Model:
         for user in self.initial_data['realm_users']:
             if self.user_id == user['user_id']:
                 current_user = {
-                    'full_name': user['full_name'] + '(you)',
+                    'full_name': user['full_name'],
                     'email': user['email'],
                     'user_id': user['user_id'],
-                    'status': 'current_user_active',
+                    'status': 'active',
                 }
                 continue
             email = user['email']
