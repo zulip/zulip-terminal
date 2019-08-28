@@ -533,38 +533,6 @@ class TestTopicsView:
         topic_view.view.show_left_panel.assert_called_once_with(visible=False)
 
 
-class TestUsersView:
-
-    @pytest.fixture
-    def user_view(self, mocker):
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        return UsersView("USER_BTN_LIST")
-
-    def test_mouse_event(self, mocker, user_view):
-        mocker.patch.object(user_view, 'keypress')
-        size = (200, 20)
-        col = 1
-        row = 1
-        focus = "WIDGET"
-        # Left click
-        user_view.mouse_event(size, "mouse press", 4, col, row, focus)
-        user_view.keypress.assert_called_with(size, "up")
-
-        # Right click
-        user_view.mouse_event(size, "mouse press", 5, col, row, focus)
-        user_view.keypress.assert_called_with(size, "down")
-
-        # Other actions - No action
-        return_value = user_view.mouse_event(
-            size, "mouse release", 4, col, row, focus)
-        assert return_value is False
-
-        # Other clicks
-        return_value = user_view.mouse_event(
-            size, "mouse press", 1, col, row, focus)
-        assert return_value is False
-
-
 class TestMiddleColumnView:
 
     @pytest.fixture(autouse=True)
@@ -804,6 +772,7 @@ class TestRightColumnView:
     @pytest.fixture
     def right_col_view(self, mocker, width=50):
         mocker.patch(VIEWS + ".RightColumnView.users_view")
+        mocker.patch(VIEWS + ".RightColumnView.build_user_view")
         return RightColumnView(width, self.view)
 
     def test_init(self, right_col_view):
@@ -816,35 +785,6 @@ class TestRightColumnView:
                                            header=self.line_box(
                                                right_col_view.user_search
         ))
-
-    def test_update_user_list_editor_mode(self, mocker, right_col_view):
-        right_col_view.view.controller.update_screen = mocker.Mock()
-        right_col_view.view.controller.editor_mode = False
-
-        right_col_view.update_user_list("SEARCH_BOX", "NEW_TEXT")
-
-        right_col_view.view.controller.update_screen.assert_not_called()
-
-    @pytest.mark.parametrize('search_string, assert_list, \
-                              match_return_value', [
-        ('U', ["USER1", "USER2"], True),
-        ('F', [], False)
-    ], ids=[
-        'user match', 'no user match',
-    ])
-    def test_update_user_list(self, right_col_view, mocker,
-                              search_string, assert_list, match_return_value):
-        right_col_view.view.controller.editor_mode = True
-        self.view.users = ["USER1", "USER2"]
-        mocker.patch(VIEWS + ".match_user", return_value=match_return_value)
-        mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
-        set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
-
-        right_col_view.update_user_list("SEARCH_BOX", search_string)
-
-        right_col_view.users_view.assert_called_with(assert_list)
-        set_body.assert_called_once_with(right_col_view.body)
 
     def test_update_user_presence(self, right_col_view, mocker,
                                   user_list):
@@ -863,19 +803,16 @@ class TestRightColumnView:
         }], 1, True, 'active'),
         (None, 0, False, 'inactive'),
     ])
-    def test_users_view(self, users, users_btn_len, editor_mode, status,
-                        mocker, width=40):
+    def test_users_view(self, right_col_view, users, users_btn_len,
+                        editor_mode, status, mocker, width=40):
         self.view.users = [{
             'user_id': 1,
             'status': status
         }]
         self.view.controller.editor_mode = editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
-        mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
-
-        right_col_view = RightColumnView(width, self.view)
-
+        users_view = mocker.patch(VIEWS + ".UsersView")
+        right_col_view.user_views()
         if status != 'inactive':
             unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
@@ -886,7 +823,8 @@ class TestRightColumnView:
                 color=self.view.users[0]['status'],
                 count=1
             )
-        list_w.assert_called_once_with(right_col_view.users_btn_list)
+        users_view.assert_called_once_with(self.view,
+                                           right_col_view.users_btn_list)
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     def test_keypress_w(self, right_col_view, mocker):
@@ -900,7 +838,6 @@ class TestRightColumnView:
         key = 'esc'
         size = (20,)
         mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch(VIEWS + ".RightColumnView.set_body")
         right_col_view.users_btn_list = []
@@ -909,7 +846,6 @@ class TestRightColumnView:
 
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with('body')
-        list_w.assert_called_once_with([])
 
 
 class TestLeftColumnView:
