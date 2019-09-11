@@ -654,7 +654,15 @@ class Model:
 
         recipient = ''
         if message['type'] == 'private':
-            recipient = ' (to you)'
+            target = 'you'
+            if len(message['display_recipient']) > 2:
+                extra_targets = [target] + [
+                    recip['full_name']
+                    for recip in message['display_recipient']
+                    if recip['id'] not in (self.user_id, message['sender_id'])
+                ]
+                target = ', '.join(extra_targets)
+            recipient = ' (to {})'.format(target)
         elif {'mentioned', 'wildcard_mentioned'}.intersection(
                 set(message['flags'])) and message['type'] == 'stream':
             recipient = ' (to {} -> {})'.format(message['display_recipient'],
