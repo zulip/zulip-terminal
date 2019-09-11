@@ -767,8 +767,16 @@ class TestModel:
         notify = mocker.patch('zulipterminal.model.notify')
         model.notify_user(message_fixture)
         if message_fixture['type'] in types_when_notify_called:
-            # TODO: Add parameters with which notify is called.
-            assert notify.called
+            who = message_fixture['type']
+            if who == 'stream':
+                target = 'PTEST -> Test'
+            elif who == 'private':
+                target = 'you'
+                if len(message_fixture['display_recipient']) > 2:
+                    target += ', Bar Bar'
+            title = 'Foo Foo (to {})'.format(target)
+            # TODO: Test message content too?
+            notify.assert_called_once_with(title, mocker.ANY)
         else:
             notify.assert_not_called
 
