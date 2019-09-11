@@ -748,19 +748,22 @@ class TestModel:
         model.update_topic_index(86, topic_name)
         assert model.index['topics'][86] == topic_order_final
 
-    @pytest.mark.parametrize('vary_each_msg, types_when_notify_called', [
-        ({'sender_id': 1}, []),  # model.user_id is 1
-        ({'sender_id': 2, 'flags': ['mentioned']}, ['stream', 'private']),
-        ({'sender_id': 2, 'flags': ['wildcard_mentioned']},
-         ['stream', 'private']),
-        ({'sender_id': 2, 'flags': []}, ['private']),
+    # TODO: Ideally message_fixture would use standardized ids?
+    @pytest.mark.parametrize('user_id, vary_each_msg, \
+                              types_when_notify_called', [
+        (5140, {}, []),  # message_fixture sender_id is 5140
+        (5179, {'flags': ['mentioned']}, ['stream', 'private']),
+        (5179, {'flags': ['wildcard_mentioned']}, ['stream', 'private']),
+        (5179, {'flags': []}, ['private']),
     ], ids=['self_message', 'mentioned_msg', 'wildcard_mentioned',
             'not_mentioned'])
     def test_notify_users_calling_msg_type(self, mocker, model,
-                                           message_fixture, vary_each_msg,
+                                           message_fixture,
+                                           user_id,
+                                           vary_each_msg,
                                            types_when_notify_called):
         message_fixture.update(vary_each_msg)
-        model.user_id = 1
+        model.user_id = user_id
         notify = mocker.patch('zulipterminal.model.notify')
         model.notify_user(message_fixture)
         if message_fixture['type'] in types_when_notify_called:
