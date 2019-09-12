@@ -671,7 +671,9 @@ class Model:
                                                 message['subject'])
 
         if recipient:
-            notify(message['sender_full_name'] + recipient, message['content'])
+            notify((self.server_name + ":\n" +
+                    message['sender_full_name'] + recipient),
+                   message['content'])
 
     def append_message(self, event: Event) -> None:
         """
