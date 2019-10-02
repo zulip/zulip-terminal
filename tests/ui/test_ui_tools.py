@@ -639,7 +639,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_topic(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_topics': {1: 1, 2: 1}
+            'stream_topics': {1: 1, 2: 1}
         }
         return_value = mid_col_view.get_next_unread_topic()
         assert return_value == 1
@@ -647,7 +647,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_topic_again(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_topics': {1: 1, 2: 1}
+            'stream_topics': {1: 1, 2: 1}
         }
         mid_col_view.last_unread_topic = 1
         return_value = mid_col_view.get_next_unread_topic()
@@ -656,7 +656,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_topic_no_unread(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_topics': {}
+            'stream_topics': {}
         }
         return_value = mid_col_view.get_next_unread_topic()
         assert return_value is None
@@ -664,7 +664,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_pm(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_pms': {1: 1, 2: 1}
+            'solo_pms': {1: 1, 2: 1}
         }
         return_value = mid_col_view.get_next_unread_pm()
         assert return_value == 1
@@ -672,7 +672,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_pm_again(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_pms': {1: 1, 2: 1}
+            'solo_pms': {1: 1, 2: 1}
         }
         mid_col_view.last_unread_pm = 1
         return_value = mid_col_view.get_next_unread_pm()
@@ -681,7 +681,7 @@ class TestMiddleColumnView:
 
     def test_get_next_unread_pm_no_unread(self, mid_col_view):
         mid_col_view.model.unread_counts = {
-            'unread_pms': {}
+            'solo_pms': {}
         }
         return_value = mid_col_view.get_next_unread_pm()
         assert return_value is None
@@ -839,7 +839,7 @@ class TestRightColumnView:
         self.thread = mocker.patch(VIEWS + ".threading")
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
-            'unread_pms': {
+            'solo_pms': {
                 1: 1,
                 2: 1,
             }
@@ -972,7 +972,7 @@ class TestLeftColumnView:
                 2: 1,
                 1000: 1,
             },
-            'unread_topics': {
+            'stream_topics': {
                 (205, 'TOPIC1'): 34,
                 (205, 'TOPIC2'): 100,
             }
