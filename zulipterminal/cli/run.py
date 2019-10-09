@@ -47,6 +47,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                              organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
                         help='choose color theme. (e.g. blue, light)')
+    parser.add_argument('--autohide ',
+                        action='store_true',
+                        help='Set autohide configuration to true.',
+                        dest="autohide")
+    parser.add_argument('--no-autohide',
+                        action='store_true',
+                        help='Set autohide configuration to false.',
+                        dest="noautohide")
     # debug mode
     parser.add_argument("-d",
                         "--debug",
@@ -194,6 +202,12 @@ def main(options: Optional[List[str]]=None) -> None:
 
     try:
         zterm = parse_zuliprc(zuliprc_path)
+
+        if args.autohide:
+            zterm['autohide'] = ('autohide', 'with no config')
+
+        if args.noautohide:
+            zterm['autohide'] = ('no_autohide', 'with no config')
 
         if args.theme:
             theme_to_use = (args.theme, 'on command line')

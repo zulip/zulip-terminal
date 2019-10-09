@@ -29,6 +29,8 @@ def test_main_help(capsys, options):
 
     required_arguments = {
         '--theme THEME, -t THEME',
+        '--autohide',
+        '--no-autohide',
         '-h, --help',
         '-d, --debug',
         '--profile',
