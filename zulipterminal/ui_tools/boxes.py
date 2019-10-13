@@ -364,7 +364,7 @@ class MessageBox(urwid.Pile):
                 ['{} {} '.format(r, custom_reacts[r]) for r in custom_reacts])
             return urwid.Padding(
                 urwid.Text(([
-                    ('emoji', emoji.demojize(emojis + custom_emojis))
+                    ('reaction', emoji.demojize(emojis + custom_emojis))
                 ])), align='left', width=('relative', 90), left=25,
                 min_width=50)
         except Exception:
@@ -412,7 +412,7 @@ class MessageBox(urwid.Pile):
                     element.attrs.get('class', []) == ['emoji']):
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
                 emoji_name = element.attrs.get('title', [])
-                markup.append(":"+emoji_name+":")
+                markup.append(('emoji', ":"+emoji_name+":"))
             elif element.name in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
                 text = unrendered_tags[element.name]
@@ -424,7 +424,7 @@ class MessageBox(urwid.Pile):
             elif (element.name == 'span' and element.attrs and
                   'emoji' in element.attrs.get('class', [])):
                 # EMOJI
-                markup.append(element.text)
+                markup.append(('emoji', element.text))
             elif (element.name == 'span' and element.attrs and
                   ('katex-display' in element.attrs.get('class', []) or
                    'katex' in element.attrs.get('class', []))):

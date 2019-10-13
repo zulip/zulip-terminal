@@ -21,6 +21,7 @@ required_styles = {
     'bar',
     'help',
     'emoji',
+    'reaction',
     'span',
     'link',
     'blockquote',
@@ -44,6 +45,8 @@ LIGHTGREEN = 'h142'  # bright_green
 LIGHTRED = 'h167'  # bright_red
 LIGHTREDBOLD = '%s, bold' % LIGHTRED
 GRAY = 'h244'  # gray_244
+LIGHTMAGENTA = 'h132'  # neutral_purple
+LIGHTMAGENTABOLD = '%s, bold' % LIGHTMAGENTA
 
 THEMES = {
     'default': [
@@ -64,6 +67,7 @@ THEMES = {
         ('bar',          'white',           'dark gray'),
         ('help',         'white',           'dark gray'),
         ('emoji',        'light magenta',   ''),
+        ('reaction',     'light magenta, bold', ''),
         ('span',         'light red, bold', ''),
         ('link',         'light blue',      ''),
         ('blockquote',   'brown',           ''),
@@ -109,7 +113,9 @@ THEMES = {
         ('help',         'black',           'dark gray',
          None,           BLACK,             GRAY),
         ('emoji',        'light magenta',   'black',
-         None,           'light magenta',   BLACK),
+         None,           LIGHTMAGENTA,   BLACK),
+        ('reaction',     'light magenta, bold', 'black',
+         None,           LIGHTMAGENTABOLD,   BLACK),
         ('span',         'light red, bold', 'black',
          None,           LIGHTREDBOLD,      BLACK),
         ('link',         'light blue',      'black',
@@ -145,6 +151,7 @@ THEMES = {
         ('bar',          'white',           'dark gray'),
         ('help',         'white',           'dark gray'),
         ('emoji',        'light magenta',   'light gray'),
+        ('reaction',     'light magenta, bold',   ''),
         ('span',         'light red, bold', 'light gray'),
         ('link',         'dark blue',       'light gray'),
         ('blockquote',   'brown',           'dark gray'),
@@ -172,6 +179,7 @@ THEMES = {
         ('bar',          'white',           'dark blue'),
         ('help',         'white',           'dark gray'),
         ('emoji',        'dark magenta',   'light blue'),
+        ('reaction',     'dark magenta, bold', ''),
         ('span',         'light red, bold', 'light blue'),
         ('link',         'dark blue',       'light gray'),
         ('blockquote',   'brown',           'dark blue'),
