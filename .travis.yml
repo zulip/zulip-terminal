@@ -13,9 +13,7 @@ matrix:
       name: "CPython 3.6 pytest & mypy type-checking (default linux)"
       env: RUN_MYPY=yes
     - python: 3.7
-      name: "CPython 3.7 pytest (ubuntu xenial)"
-      dist: xenial
-      sudo: true
+      name: "CPython 3.7 pytest (default linux)"
     - python: pypy3.5
       name: "PyPy 3.5 pytest (default linux)"
     - os: osx
