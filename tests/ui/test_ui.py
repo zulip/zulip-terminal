@@ -97,13 +97,16 @@ class TestView:
         full_name = "Bob James"
         email = "Bob@bob.com"
         server = "https://chat.zulip.zulip/"
+        server_name = "Test Organization"
 
         self.controller.model = self.model
         self.model.user_full_name = full_name
         self.model.user_email = email
         self.model.server_url = server
+        self.model.server_name = server_name
 
-        title_length = (len(email) + len(full_name) + len(server) + 8)
+        title_length = (len(email) + len(full_name) +
+                        len(server) + len(server_name) + 11)
 
         view = View(self.controller)
 
