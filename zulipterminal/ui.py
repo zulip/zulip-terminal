@@ -112,10 +112,11 @@ class View(urwid.WidgetWrap):
             self.model.msg_list.read_message)
         div_char = '═'
 
-        title_text = " {full_name} ({email}) - {server} ".format(
+        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
                      full_name=self.model.user_full_name,
                      email=self.model.user_email,
-                     server=self.model.server_url)
+                     server_name=self.model.server_name,
+                     url=self.model.server_url)
 
         title_bar = urwid.Columns([
             urwid.Divider(div_char=div_char),
