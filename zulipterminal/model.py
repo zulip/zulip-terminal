@@ -91,6 +91,7 @@ class Model:
         self.user_full_name = ""
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
+        self.server_name = ""
 
         self.event_actions = OrderedDict([
             ('message', self.append_message),
@@ -444,6 +445,7 @@ class Model:
             self.user_id = self.initial_data['user_id']
             self.user_email = self.initial_data['email']
             self.user_full_name = self.initial_data['full_name']
+            self.server_name = self.initial_data['realm_name']
         else:
             failures = [name for name, result in results.items() if not result]
             raise ServerConnectionFailure(", ".join(failures))
