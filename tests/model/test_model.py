@@ -55,6 +55,7 @@ class TestModel:
         assert model.user_id == user_profile['user_id']
         assert model.user_full_name == user_profile['full_name']
         assert model.user_email == user_profile['email']
+        assert model.server_name == initial_data['realm_name']
         # FIXME Add test here for model.server_url
         model.get_all_users.assert_called_once_with()
         assert model.users == []

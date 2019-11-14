@@ -309,6 +309,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
         'full_name': logged_on_user['full_name'],
         'email': logged_on_user['email'],
         'user_id': logged_on_user['user_id'],
+        'realm_name': 'Test Organization Name',
         'unsubscribed': [{
             'audible_notifications': False,
             'description': 'announce',
