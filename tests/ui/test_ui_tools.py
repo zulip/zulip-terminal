@@ -1246,10 +1246,12 @@ class TestMessageBox:
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
-        ('<a href="foo">foo</a>', [('link', 'foo')]),
-        ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
+        ('<a href="http://foo">http://foo</a>', [('link', 'http://foo')]),
+        ('<a href="http://foo">bar</a>', [('link', '[bar](http://foo)')]),
         ('<a href="/user_uploads/blah"',
             [('link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
+        ('<a href="/api"',
+            [('link', '[]({}/api)'.format(SERVER_URL))]),
         ('<li>Something', ['  * ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  * ', '', 'Something', '  * ', '', 'else']),
@@ -1274,8 +1276,10 @@ class TestMessageBox:
     ], ids=[
         'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
-        'embedded_content', 'link_sametext', 'link_differenttext',
-        'link_userupload', 'listitem', 'listitems',
+        'embedded_content',
+        'link_sametext', 'link_differenttext',
+        'link_userupload', 'link_api',
+        'listitem', 'listitems',
         'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
         'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
