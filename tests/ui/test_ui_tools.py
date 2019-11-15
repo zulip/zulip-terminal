@@ -1244,7 +1244,7 @@ class TestMessageBox:
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
-        ('<a href="foo">foo</a>', ['foo']),  # FIXME? Render with link style?
+        ('<a href="foo">foo</a>', [('link', 'foo')]),
         ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
         ('<a href="/user_uploads/blah"',
             [('link', '[](SOME_BASE_URL/user_uploads/blah)')]),
