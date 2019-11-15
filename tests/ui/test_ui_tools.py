@@ -1262,9 +1262,8 @@ class TestMessageBox:
         ('<ul><li>text</li></ul>', ['', '  * ', '', 'text']),
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
         ('<div class="message_inline_image">'
-         '<a href="x"><img src="x"></a></div>', ['', 'x']),
-        ('<div class="message_inline_ref">blah</div>',
-            ['[MESSAGE INLINE REF NOT RENDERED]']),
+         '<a href="x"><img src="x"></a></div>', []),
+        ('<div class="message_inline_ref">blah</div>', []),
         ('<span class="emoji">:smile:</span>', [':smile:']),
         ('<div class="inline-preview-twitter"',
             ['[TWITTER PREVIEW NOT RENDERED]']),
