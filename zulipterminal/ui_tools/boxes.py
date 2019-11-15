@@ -439,7 +439,7 @@ class MessageBox(urwid.Pile):
                     # If the link and text are same
                     # usually the case when user just pastes
                     # a link then just display the link
-                    markup.append(text)
+                    markup.append(('link', text))
                 else:
                     if link.startswith('/user_uploads/'):
                         # Append org url to before user_uploads to convert it
