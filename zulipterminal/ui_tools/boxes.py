@@ -3,6 +3,7 @@ from time import ctime, time
 from datetime import datetime
 from sys import platform
 from typing import Any, Dict, List, Tuple, Union, Optional
+from urllib.parse import urlparse, urljoin
 
 import emoji
 import urwid
@@ -441,10 +442,10 @@ class MessageBox(urwid.Pile):
                     # a link then just display the link
                     markup.append(('link', text))
                 else:
-                    if link.startswith('/user_uploads/'):
-                        # Append org url to before user_uploads to convert it
-                        # into a link.
-                        link = self.model.server_url + link
+                    parsed_link = urlparse(link)
+                    if not parsed_link.scheme:  # => relative link
+                        # Prepend org url to convert it to an absolute link
+                        link = urljoin(self.model.server_url, link)
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':
