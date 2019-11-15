@@ -436,16 +436,18 @@ class MessageBox(urwid.Pile):
                 # LINKS
                 link = element.attrs['href']
                 text = element.img['src'] if element.img else element.text
+
+                parsed_link = urlparse(link)
+                if not parsed_link.scheme:  # => relative link
+                    # Prepend org url to convert it to an absolute link
+                    link = urljoin(self.model.server_url, link)
+
                 if link == text:
                     # If the link and text are same
                     # usually the case when user just pastes
                     # a link then just display the link
                     markup.append(('link', text))
                 else:
-                    parsed_link = urlparse(link)
-                    if not parsed_link.scheme:  # => relative link
-                        # Prepend org url to convert it to an absolute link
-                        link = urljoin(self.model.server_url, link)
                     markup.append(
                         ('link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':

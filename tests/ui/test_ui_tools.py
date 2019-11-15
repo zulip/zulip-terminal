@@ -1254,6 +1254,9 @@ class TestMessageBox:
             [('link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
         ('<a href="/api"',
             [('link', '[]({}/api)'.format(SERVER_URL))]),
+        ('<a href="some/relative_url">{}/some/relative_url</a>'
+         .format(SERVER_URL),
+            [('link', '{}/some/relative_url'.format(SERVER_URL))]),
         ('<li>Something', ['  * ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  * ', '', 'Something', '  * ', '', 'else']),
@@ -1280,7 +1283,7 @@ class TestMessageBox:
         'strong', 'em', 'blockquote',
         'embedded_content',
         'link_sametext', 'link_sameimage', 'link_differenttext',
-        'link_userupload', 'link_api',
+        'link_userupload', 'link_api', 'link_serverrelative_same',
         'listitem', 'listitems',
         'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
         'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
