@@ -1247,6 +1247,8 @@ class TestMessageBox:
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
         ('<a href="http://foo">http://foo</a>', [('link', 'http://foo')]),
+        ('<a href="http://foo/bar.png">http://foo/bar.png</a>',
+            [('link', 'http://foo/bar.png')]),
         ('<a href="http://foo">bar</a>', [('link', '[bar](http://foo)')]),
         ('<a href="/user_uploads/blah"',
             [('link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
@@ -1277,7 +1279,7 @@ class TestMessageBox:
         'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
         'embedded_content',
-        'link_sametext', 'link_differenttext',
+        'link_sametext', 'link_sameimage', 'link_differenttext',
         'link_userupload', 'link_api',
         'listitem', 'listitems',
         'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
