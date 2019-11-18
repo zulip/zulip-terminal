@@ -84,7 +84,7 @@ setup(
     tests_require=testing_deps,
     install_requires=[
         'urwid==2.0.1',
-        'zulip==0.5.9',
+        'zulip==0.6.1',
         'emoji==0.5.0',
         'urwid_readline==0.10',
         'beautifulsoup4==4.6.0',

@@ -1,5 +1,5 @@
 urwid==2.0.1
-zulip==0.5.9
+zulip==0.6.1
 pytest==3.10.1
 pytest-cov==2.5.1
 pytest-pep8==1.0.6
