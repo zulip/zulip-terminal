@@ -330,7 +330,7 @@ class Model:
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
-                     anchor: Optional[int]) -> bool:
+                     anchor: Optional[int]) -> str:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
@@ -356,10 +356,10 @@ class Model:
                 # 'found_newest' flag. Instead, we use this logic:
                 query_range = num_after + num_before + 1
                 self.found_newest = len(response['messages']) < query_range
-            return True
-        return False
+            return ""
+        return response['msg']
 
-    def get_topics_in_stream(self, stream_list: Iterable[int]) -> bool:
+    def get_topics_in_stream(self, stream_list: Iterable[int]) -> str:
         """
         Fetch all topics with specified stream_id's and
         index their names (Version 1)
@@ -371,15 +371,15 @@ class Model:
                 self.index['topics'][stream_id] = [topic['name'] for
                                                    topic in response['topics']]
             else:
-                return False
-        return True
+                return response['msg']
+        return ""
 
     @staticmethod
-    def exception_safe_result(future: 'Future[bool]') -> bool:
+    def exception_safe_result(future: 'Future[str]') -> str:
         try:
             return future.result()
-        except zulip.ZulipError:
-            return False
+        except zulip.ZulipError as e:
+            return str(e)
 
     def fetch_all_topics(self, workers: int) -> None:
         """
@@ -392,17 +392,17 @@ class Model:
                 i: executor.submit(self.get_topics_in_stream,
                                    list_of_streams[i::workers])
                 for i in range(workers)
-            }  # type: Dict[int, Future[bool]]
+            }  # type: Dict[int, Future[str]]
             wait(thread_objects.values())
 
         results = {
             str(name): self.exception_safe_result(thread_object)
             for name, thread_object in thread_objects.items()
-        }  # type: Dict[str, bool]
-        if not all(results.values()):
+        }  # type: Dict[str, str]
+        if any(results.values()):
             failures = ['fetch_topics[{}]'.format(name)
                         for name, result in results.items()
-                        if not result]
+                        if result]
             raise ServerConnectionFailure(", ".join(failures))
 
     def is_muted_stream(self, stream_id: int) -> bool:
@@ -426,7 +426,7 @@ class Model:
                                                 anchor=None),
                 'register': executor.submit(self._register_desired_events,
                                             fetch_data=True),
-            }  # Dict[str, Future[bool]]
+            }  # type: Dict[str, Future[str]]
 
             # Wait for threads to complete
             wait(futures.values())
@@ -434,14 +434,14 @@ class Model:
         results = {
             name: self.exception_safe_result(future)
             for name, future in futures.items()
-        }  # type: Dict[str, bool]
-        if all(results.values()):
+        }  # type: Dict[str, str]
+        if not any(results.values()):
             self.user_id = self.initial_data['user_id']
             self.user_email = self.initial_data['email']
             self.user_full_name = self.initial_data['full_name']
             self.server_name = self.initial_data['realm_name']
         else:
-            failures = [name for name, result in results.items() if not result]
+            failures = [name for name, result in results.items() if result]
             raise ServerConnectionFailure(", ".join(failures))
 
     def get_all_users(self) -> List[Dict[str, Any]]:
@@ -869,7 +869,7 @@ class Model:
                     self.controller.update_screen()
                     return
 
-    def _register_desired_events(self, *, fetch_data: bool=False) -> bool:
+    def _register_desired_events(self, *, fetch_data: bool=False) -> str:
         fetch_types = None if not fetch_data else [
             'realm',
             'presence',
@@ -886,8 +886,8 @@ class Model:
                                             fetch_event_types=fetch_types,
                                             client_gravatar=True,
                                             apply_markdown=True)
-        except zulip.ZulipError:
-            return False
+        except zulip.ZulipError as e:
+            return str(e)
 
         if response['result'] == 'success':
             if fetch_data:
@@ -895,8 +895,8 @@ class Model:
             self.max_message_id = response['max_message_id']
             self.queue_id = response['queue_id']
             self.last_event_id = response['last_event_id']
-            return True
-        return False
+            return ""
+        return response['msg']
 
     @asynch
     def poll_for_events(self) -> None:
