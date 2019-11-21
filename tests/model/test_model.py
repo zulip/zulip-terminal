@@ -3,6 +3,7 @@ from platform import platform
 from typing import Any
 
 import pytest
+from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import Model, ServerConnectionFailure
@@ -66,6 +67,49 @@ class TestModel:
         assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
+
+    def test_init_InvalidAPIKey_response(self, mocker, initial_data):
+        # Both network calls indicate the same response
+        mocker.patch('zulipterminal.model.Model.get_messages',
+                     return_value='Invalid API key')
+        mocker.patch('zulipterminal.model.Model._register_desired_events',
+                     return_value='Invalid API key')
+
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        mocker.patch('zulipterminal.model.Model.'
+                     '_stream_info_from_subscriptions',
+                     return_value=({}, set(), [], []))
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+
+        with pytest.raises(ServerConnectionFailure) as e:
+            model = Model(self.controller)
+
+        assert str(e.value) == 'Invalid API key (get_messages, register)'
+
+    def test_init_ZulipError_exception(self, mocker, initial_data,
+                                       exception_text="X"):
+        # Both network calls fail, resulting in exceptions
+        mocker.patch('zulipterminal.model.Model.get_messages',
+                     side_effect=ZulipError(exception_text))
+        mocker.patch('zulipterminal.model.Model._register_desired_events',
+                     side_effect=ZulipError(exception_text))
+
+        mocker.patch('zulipterminal.model.Model.get_all_users',
+                     return_value=[])
+        mocker.patch('zulipterminal.model.Model.'
+                     '_stream_info_from_subscriptions',
+                     return_value=({}, set(), [], []))
+        self.classify_unread_counts = mocker.patch(
+            'zulipterminal.model.classify_unread_counts',
+            return_value=[])
+
+        with pytest.raises(ServerConnectionFailure) as e:
+            model = Model(self.controller)
+
+        assert str(e.value) == exception_text + ' (get_messages, register)'
 
     def test_register_initial_desired_events(self, mocker, initial_data):
         mocker.patch('zulipterminal.model.Model.get_messages',
