@@ -22,7 +22,8 @@ class TestModel:
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile):
-        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_messages',
+                     return_value='')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
@@ -67,7 +68,8 @@ class TestModel:
         assert model.unread_counts == []
 
     def test_register_initial_desired_events(self, mocker, initial_data):
-        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_messages',
+                     return_value='')
         mocker.patch('zulipterminal.model.Model.get_all_users')
         mocker.patch('zulipterminal.model.Model.fetch_all_topics')
         self.client.register.return_value = initial_data
@@ -252,10 +254,11 @@ class TestModel:
 
     @pytest.mark.parametrize("response, expected_index, return_value", [
         ({'result': 'success', 'topics': [{'name': 'Foo'}, {'name': 'Boo'}]},
-         {23: ['Foo', 'Boo']}, True),
+         {23: ['Foo', 'Boo']}, ''),
         ({'result': 'success', 'topics': []},
-         {23: []}, True),
-        ({'result': 'failure', 'topics': []}, {23: []}, False)
+         {23: []}, ''),
+        ({'result': 'failure', 'msg': 'Some Error', 'topics': []},
+         {23: []}, 'Some Error')
     ])
     def test_get_topics_in_streams(self, mocker, response, model, return_value,
                                    expected_index) -> None:
@@ -533,7 +536,7 @@ class TestModel:
 
     def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
-        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
         mocker.patch('zulipterminal.model.Model.'
@@ -568,7 +571,7 @@ class TestModel:
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
                            user_id):
-        mocker.patch('zulipterminal.model.Model.get_messages')
+        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'
                      '_stream_info_from_subscriptions',
