@@ -1,11 +1,11 @@
 import json
 import time
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from threading import Thread
 from typing import (
-    Any, Callable, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple,
-    Union,
+    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
+    Tuple, Union,
 )
 from urllib.parse import urlparse
 
@@ -441,8 +441,15 @@ class Model:
             self.user_full_name = self.initial_data['full_name']
             self.server_name = self.initial_data['realm_name']
         else:
-            failures = [name for name, result in results.items() if result]
-            raise ServerConnectionFailure(", ".join(failures))
+            failures = defaultdict(list)  # type: DefaultDict[str, List[str]]
+            for name, result in results.items():
+                if result:
+                    failures[result].append(name)
+            failure_text = [
+                "{} ({})".format(error, ", ".join(sorted(calls)))
+                for error, calls in failures.items()
+            ]
+            raise ServerConnectionFailure(", ".join(failure_text))
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
