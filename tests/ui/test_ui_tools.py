@@ -32,6 +32,8 @@ TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
 STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
 
+SERVER_URL = "https://chat.zulip.zulip"
+
 
 class TestModListWalker:
     @pytest.fixture
@@ -1247,7 +1249,7 @@ class TestMessageBox:
         ('<a href="foo">foo</a>', [('link', 'foo')]),
         ('<a href="foo">bar</a>', [('link', '[bar](foo)')]),
         ('<a href="/user_uploads/blah"',
-            [('link', '[](SOME_BASE_URL/user_uploads/blah)')]),
+            [('link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
         ('<li>Something', ['  * ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  * ', '', 'Something', '  * ', '', 'else']),
@@ -1289,7 +1291,7 @@ class TestMessageBox:
                 'color': '#bd6',
             },
         }
-        self.model.server_url = "SOME_BASE_URL"
+        self.model.server_url = SERVER_URL
         # NOTE Absence of previous (last) message should not affect markup
         msg_box = MessageBox(message, self.model, None)
 
