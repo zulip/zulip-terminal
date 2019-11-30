@@ -1,4 +1,5 @@
 import pytest
+import datetime
 from collections import defaultdict, OrderedDict
 from bs4 import BeautifulSoup
 
@@ -1584,17 +1585,24 @@ class TestMessageBox:
             'timestamp': 1532103879,
         }
     ])
+    @pytest.mark.parametrize('current_year', [2018, 2019, 2050],
+                             ids=['now_2018', 'now_2019', 'now_2050'])
     @pytest.mark.parametrize('starred_msg', ['this', 'last', 'neither'],
                              ids=['this_starred', 'last_starred', 'no_stars'])
     @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
-        (['alice', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
-        ([' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),  # 100 earlier
-        (['alice', ' ', 'DAYDATETIME'], {'timestamp': 0}),  # much earlier!
+        (['alice', ' ', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
+        ([' ', ' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),
+        (['alice', ' ', ' ', 'DAYDATETIME'], {'timestamp': 0}),
     ], ids=['author_different', 'earlier_message', 'much_earlier_message'])
     def test_main_view_content_header_without_header(self, mocker, message,
                                                      expected_header,
+                                                     current_year,
                                                      starred_msg,
                                                      to_vary_in_last_message):
+        date = mocker.patch('zulipterminal.ui_tools.boxes.date')
+        date.today.return_value = datetime.date(current_year, 1, 1)
+        date.side_effect = lambda *args, **kw: datetime.date(*args, **kw)
+
         stars = {msg: ({'flags': ['starred']} if msg == starred_msg else {})
                  for msg in ('this', 'last')}
         this_msg = dict(message, **stars['this'])
@@ -1602,7 +1610,8 @@ class TestMessageBox:
         last_msg = dict(message, **all_to_vary)
         msg_box = MessageBox(this_msg, self.model, last_msg)
         expected_header[1] = '*' if starred_msg == 'this' else ' '
-        expected_header[2] = msg_box._time_for_message(message)
+        expected_header[2] = '2018 -' if current_year > 2018 else ' '
+        expected_header[3] = msg_box._time_for_message(message)
 
         view_components = msg_box.main_view()
         assert len(view_components) == 2
