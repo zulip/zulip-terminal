@@ -1,6 +1,6 @@
 from collections import defaultdict
 from time import ctime, time
-from datetime import datetime
+from datetime import datetime, date
 from sys import platform
 from typing import Any, Dict, List, Tuple, Union, Optional
 from urllib.parse import urlparse, urljoin
@@ -519,8 +519,9 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
-            text = {key: (None, ' ')
-                    for key in ('author', 'star', 'time')}  # type: TextType
+            text_keys = ('author', 'star', 'time', 'prev_year')
+            text = {key: (None, ' ') for key in text_keys}  # type: TextType
+
             if any(different[key] for key in ('recipients', 'author', '24h')):
                 text['author'] = ('name', message['this']['author'])
             if message['this']['is_starred']:
@@ -528,10 +529,15 @@ class MessageBox(urwid.Pile):
             if any(different[key]
                    for key in ('recipients', 'author', 'timestamp')):
                 text['time'] = ('time', message['this']['time'])
+                this_year = date.today().year
+                msg_year = message['this']['datetime'].year
+                if this_year != msg_year:
+                    text['prev_year'] = ('time', '{} -'.format(msg_year))
 
             content_header = urwid.Columns([
                 ('weight', 10, urwid.Text(text['author'])),
                 (1, urwid.Text(text['star'], align='right')),
+                (6, urwid.Text(text['prev_year'], align='right')),
                 (16, urwid.Text(text['time'], align='right')),
                 ], dividechars=1)
         else:
