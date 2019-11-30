@@ -1593,7 +1593,9 @@ class TestMessageBox:
         (['alice', ' ', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
         ([' ', ' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),
         (['alice', ' ', ' ', 'DAYDATETIME'], {'timestamp': 0}),
-    ], ids=['author_different', 'earlier_message', 'much_earlier_message'])
+    ], ids=['show_author_as_authors_different',
+            'merge_messages_as_only_slightly_earlier_message',
+            'dont_merge_messages_as_much_earlier_message'])
     def test_main_view_content_header_without_header(self, mocker, message,
                                                      expected_header,
                                                      current_year,
