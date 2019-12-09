@@ -401,8 +401,6 @@ class TestStreamsView:
 
     @pytest.fixture
     def stream_view(self, mocker):
-        self.log = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
-                                return_value=[])
         mocker.patch(VIEWS + ".urwid.connect_signal")
         mocker.patch(VIEWS + ".threading.Lock")
         self.view = mocker.Mock()
@@ -414,7 +412,6 @@ class TestStreamsView:
 
     def test_init(self, mocker, stream_view):
         assert stream_view.view == self.view
-        assert stream_view.log == []
         assert stream_view.streams_btn_list == self.streams_btn_list
         assert stream_view.stream_search_box
         self.stream_search_box.assert_called_once_with(
@@ -465,6 +462,40 @@ class TestStreamsView:
         stream_view.keypress(size, key)
         stream_view.set_focus.assert_called_once_with("body")
         assert stream_view.log == self.streams_btn_list
+
+    @pytest.mark.parametrize('current_focus, stream', [
+        (0, 'FOO'),
+        (2, 'fan'),
+        (4, 'BOO'),
+    ])
+    def test_return_to_focus(self, mocker, stream_view, current_focus, stream):
+        # Initialize log
+        stream_view.streams_btn_list = [
+            mocker.Mock(stream_name=stream_name) for stream_name in [
+                'FOO', 'foo', 'fan', 'boo', 'BOO']]
+        stream_view.log.extend(stream_view.streams_btn_list)
+
+        # Set initial stream focus to 'current_focus' and name to 'stream'
+        stream_view.log.set_focus(current_focus)
+        stream_view.before_search_focus_index = current_focus
+        previous_focus = stream_view.log.get_focus()[1]
+        previous_focus_stream_name = stream
+
+        # Toggle Stream Search
+        key = "q"
+        size = (20,)
+        stream_view.keypress(size, key)
+
+        # Exit Stream Search
+        key = "esc"
+        size = (20,)
+        stream_view.keypress(size, key)
+
+        # Obtain new stream focus
+        new_focus = stream_view.log.get_focus()[1]
+        new_focus_stream_name = stream_view.log[new_focus].stream_name
+        assert new_focus == previous_focus
+        assert previous_focus_stream_name == new_focus_stream_name
 
 
 class TestTopicsView:
