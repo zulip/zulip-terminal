@@ -1,7 +1,6 @@
 from collections import defaultdict, OrderedDict
 from typing import Any, List, Tuple, Optional, Callable
 import threading
-
 import urwid
 import time
 
@@ -258,6 +257,7 @@ class StreamsView(urwid.Frame):
         self.view = view
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
+        self.focus_index_before_search = 0
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(self, 'SEARCH_STREAMS')
         urwid.connect_signal(self.stream_search_box,
@@ -305,9 +305,12 @@ class StreamsView(urwid.Frame):
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus('body')
+            self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
-        return super(StreamsView, self).keypress(size, key)
+        return_value = super(StreamsView, self).keypress(size, key)
+        _, self.focus_index_before_search = self.log.get_focus()
+        return return_value
 
 
 class TopicsView(urwid.Frame):
