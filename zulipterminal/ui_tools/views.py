@@ -596,6 +596,10 @@ class RightColumnView(urwid.Frame):
             reset_default_view_users = True
         users_btn_list = list()  # type: List[Any]
         for user in users:
+            if self.view.model.user_id == user['user_id']:
+                current_user_indicator = ('current_user', '(you)')
+            else:
+                current_user_indicator = (' ')
             # Only include `inactive` users in search result.
             if user['status'] == 'inactive' and\
                     not self.view.controller.editor_mode:
@@ -609,7 +613,8 @@ class RightColumnView(urwid.Frame):
                     view=self.view,
                     width=self.width,
                     color=user['status'],
-                    count=unread_count
+                    count=unread_count,
+                    current_user_indicator=current_user_indicator,
                 )
             )
         user_w = UsersView(users_btn_list)
