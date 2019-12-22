@@ -1611,9 +1611,9 @@ class TestMessageBox:
         all_to_vary = dict(to_vary_in_last_message, **stars['last'])
         last_msg = dict(message, **all_to_vary)
         msg_box = MessageBox(this_msg, self.model, last_msg)
-        expected_header[1] = '*' if starred_msg == 'this' else ' '
-        expected_header[2] = '2018 -' if current_year > 2018 else ' '
-        expected_header[3] = msg_box._time_for_message(message)
+        expected_header[1] = '2018 -' if current_year > 2018 else ' '
+        expected_header[2] = msg_box._time_for_message(message)
+        expected_header[3] = '*' if starred_msg == 'this' else ' '
 
         view_components = msg_box.main_view()
         assert len(view_components) == 2
