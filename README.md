@@ -11,6 +11,11 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
+## Supported platforms
+- Linux
+- OSX
+- WSL (On Windows)
+
 ## Installation & Running
 
 We recommend installing `zulip-term` in a new python virtual environment (venv); with the required python 3.5+, the following should work on most systems:
