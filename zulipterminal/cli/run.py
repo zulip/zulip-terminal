@@ -92,7 +92,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
                       "web browser to log in to Zulip." +
                       "\nIt often looks like one of the following:" +
                       in_color('green', "\n   your-org.zulipchat.com") +
-                      " (Zulip-hosted servers)" +
+                      " (Zulip cloud)" +
                       in_color('green', "\n   zulip.your-org.com") +
                       " (self-hosted servers)" +
                       in_color('green', "\n   chat.zulip.org") +
@@ -109,7 +109,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     res, email = get_api_key(realm_url)
 
     while res.status_code != 200:
-        print(in_color('red', "\nUsername or Password Incorrect!\n"))
+        print(in_color('red', "\nIncorrect Email or Password!\n"))
         res, email = get_api_key(realm_url)
 
     with open(zuliprc_path, 'w') as f:
