@@ -66,19 +66,36 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def get_login_id(realm_url: str) -> str:
+    res_json = requests.get(url=realm_url + '/api/v1/server_settings').json()
+    require_email_format_usernames = res_json['require_email_format_usernames']
+    email_auth_enabled = res_json['email_auth_enabled']
+
+    if not require_email_format_usernames and email_auth_enabled:
+        label = 'Email or Username: '
+    elif not require_email_format_usernames:
+        label = 'Username: '
+    else:
+        # TODO: Validate Email address
+        label = 'Email: '
+
+    login_id = input(in_color('blue', label))
+    return login_id
+
+
 def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
     from getpass import getpass
 
-    email = input(in_color('blue', "Email: "))
+    login_id = get_login_id(realm_url)
     password = getpass(in_color('blue', "Password: "))
     response = requests.post(
         url=realm_url + '/api/v1/fetch_api_key',
         data={
-            'username': email,
+            'username': login_id,
             'password': password,
         }
     )
-    return response, email
+    return response, login_id
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
@@ -106,15 +123,15 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     # Remove trailing "/"s from realm_url to simplify the below logic
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
-    res, email = get_api_key(realm_url)
+    res, login_id = get_api_key(realm_url)
 
     while res.status_code != 200:
-        print(in_color('red', "\nIncorrect Email or Password!\n"))
-        res, email = get_api_key(realm_url)
+        print(in_color('red', "\nIncorrect Email(or Username) or Password!\n"))
+        res, login_id = get_api_key(realm_url)
 
     with open(zuliprc_path, 'w') as f:
         f.write('[api]' +
-                '\nemail=' + email +
+                '\nemail=' + login_id +
                 '\nkey=' + str(res.json()['api_key']) +
                 '\nsite=' + realm_url)
     print('Generated API key saved at ' + zuliprc_path)
