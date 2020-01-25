@@ -17,6 +17,7 @@ pytest = "==3.10.1"
 pytest-pep8 = "==1.0.6"
 pytest-mock = "==1.7.1"
 pytest-cov = "==2.5.1"
+zipp = "==1.0.0"  # To support Python 3.5
 pudb = "==2017.1.4"
 snakeviz = "==0.4.2"
 gitlint = "==0.10.0"
