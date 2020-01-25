@@ -33,6 +33,7 @@ testing_deps = [
     'pytest-cov==2.5.1',
     'pytest-mock==1.7.1',
     'pytest-pep8==1.0.6',
+    'zipp==1.0.0',  # To support Python 3.5
 ]
 
 dev_helper_deps = [
