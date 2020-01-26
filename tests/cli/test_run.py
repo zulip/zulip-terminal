@@ -1,5 +1,5 @@
 import pytest
-from zulipterminal.cli.run import main, in_color, THEMES
+from zulipterminal.cli.run import main, in_color, THEMES, get_login_id
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
@@ -14,6 +14,29 @@ from zulipterminal.version import ZT_VERSION
 ])
 def test_in_color(color, code, text="some text"):
     assert in_color(color, text) == code + text + "\x1b[0m"
+
+
+@pytest.mark.parametrize('json, label', [
+    (dict(require_email_format_usernames=False, email_auth_enabled=True),
+     'Email or Username'),
+    (dict(require_email_format_usernames=False, email_auth_enabled=False),
+     'Username'),
+    (dict(require_email_format_usernames=True, email_auth_enabled=True),
+     'Email'),
+    (dict(require_email_format_usernames=True, email_auth_enabled=False),
+     'Email'),
+])
+def test_get_login_id(mocker, json, label):
+    response = mocker.Mock(json=lambda: json)
+    mocked_get = mocker.patch('requests.get', return_value=response)
+    mocked_styled_input = mocker.patch('zulipterminal.cli.run.styled_input',
+                                       return_value='input return value')
+
+    result = get_login_id('REALM_URL')
+
+    assert result == 'input return value'
+    mocked_get.assert_called_with(url='REALM_URL/api/v1/server_settings')
+    mocked_styled_input.assert_called_with(label + ': ')
 
 
 @pytest.mark.parametrize('options', ['-h', '--help'])
