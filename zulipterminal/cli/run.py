@@ -66,6 +66,10 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def styled_input(label: str) -> str:
+    return input(in_color('blue', label))
+
+
 def get_login_id(realm_url: str) -> str:
     res_json = requests.get(url=realm_url + '/api/v1/server_settings').json()
     require_email_format_usernames = res_json['require_email_format_usernames']
@@ -79,8 +83,7 @@ def get_login_id(realm_url: str) -> str:
         # TODO: Validate Email address
         label = 'Email: '
 
-    login_id = input(in_color('blue', label))
-    return login_id
+    return styled_input(label)
 
 
 def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
@@ -99,23 +102,20 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
-    realm_url = input(in_color('red', "zuliprc file was not found at " +
-                                      zuliprc_path) +
-                      "\nPlease enter your credentials to login into your"
-                      " Zulip organization."
-                      "\n" +
-                      "\nNOTE: The " + in_color('blue', "Zulip URL") +
-                      " is where you would go in a "
-                      "web browser to log in to Zulip." +
-                      "\nIt often looks like one of the following:" +
-                      in_color('green', "\n   your-org.zulipchat.com") +
-                      " (Zulip cloud)" +
-                      in_color('green', "\n   zulip.your-org.com") +
-                      " (self-hosted servers)" +
-                      in_color('green', "\n   chat.zulip.org") +
-                      " (the Zulip community server)"
-                      "\n" +
-                      in_color('blue', "Zulip URL: "))
+    print(in_color('red', "zuliprc file was not found at " + zuliprc_path) +
+          "\nPlease enter your credentials to login into your"
+          " Zulip organization."
+          "\n" +
+          "\nNOTE: The " + in_color('blue', "Zulip URL") +
+          " is where you would go in a web browser to log in to Zulip." +
+          "\nIt often looks like one of the following:" +
+          in_color('green', "\n   your-org.zulipchat.com") +
+          " (Zulip cloud)" +
+          in_color('green', "\n   zulip.your-org.com") +
+          " (self-hosted servers)" +
+          in_color('green', "\n   chat.zulip.org") +
+          " (the Zulip community server)")
+    realm_url = styled_input('Zulip URL: ')
     if realm_url.startswith("localhost"):
         realm_url = "http://" + realm_url
     elif not realm_url.startswith("http"):
