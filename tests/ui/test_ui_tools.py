@@ -1857,7 +1857,8 @@ class TestStreamButton:
         mocker.patch(STREAMBUTTON + ".mark_muted")
         controller = mocker.Mock()
         controller.model.muted_streams = {}
-        properties = [caption, 5, '#ffffff', is_private]
+        properties = \
+            [caption, 5, '#ffffff', is_private, 'Some Stream Description']
         view_mock = mocker.Mock()
         view_mock.palette = [(None, 'black', 'white')]
         stream_button = StreamButton(properties,
