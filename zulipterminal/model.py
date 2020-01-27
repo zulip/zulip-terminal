@@ -553,7 +553,8 @@ class Model:
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
     ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
-        stream_keys = ('name', 'stream_id', 'color', 'invite_only')
+        stream_keys = ('name', 'stream_id', 'color',
+                       'invite_only', 'description')
 
         # Canonicalize color formats, since zulip server versions may use
         # different formats
