@@ -840,6 +840,22 @@ class PopUpConfirmationView(urwid.Overlay):
         return super(PopUpConfirmationView, self).keypress(size, key)
 
 
+class StreamInfoView(urwid.ListBox):
+    def __init__(self, controller: Any, color: str,
+                 name: str, desc: str)-> None:
+        self.controller = controller
+        self.width = max(len(desc), len("# {} ".format(name)))+2
+        self.height = 2
+        log = [urwid.Text(desc, align='center')]
+        super(StreamInfoView, self).__init__(log)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if (is_command_key('GO_BACK', key) or
+                is_command_key('STREAM_DESC', key)):
+                self.controller.exit_popup()
+        return super(StreamInfoView, self).keypress(size, key)
+
+
 class MsgInfoView(urwid.ListBox):
     def __init__(self, controller: Any, msg: Any) -> None:
         self.controller = controller

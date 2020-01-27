@@ -193,6 +193,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'View message information',
         'key_category': 'msg_actions',
     }),
+    ('STREAM_DESC', {
+        'keys': {'i'},
+        'help_text': 'View stream description',
+        'key_category': 'stream_list',
+    }),
     ('REDRAW', {
         'keys': {'ctrl l'},
         'help_text': 'Redraw screen',

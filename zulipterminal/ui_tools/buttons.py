@@ -123,7 +123,8 @@ class StreamButton(TopButton):
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        self.stream_name, self.stream_id, color, is_private = properties
+        self.stream_name, self.stream_id, self.color, is_private, \
+            self.description = properties
         self.model = controller.model
         self.count = count
         self.view = view
@@ -133,13 +134,16 @@ class StreamButton(TopButton):
                 background = entry[5] if len(entry) > 4 else entry[2]
                 inverse_text = background if background else 'black'
                 break
-        view.palette.append((color, '', '', '', color+', bold', background))
-        view.palette.append(('s' + color, '', '', '', inverse_text, color))
+        view.palette.append((
+            self.color, '', '', '', self.color+', bold', background))
+        view.palette.append((
+            's' + self.color, '', '', '', inverse_text, self.color))
 
         super().__init__(controller,
                          caption=self.stream_name,
                          show_function=controller.narrow_to_stream,
-                         prefix_character=(color, 'P' if is_private else '#'),
+                         prefix_character=(
+                            self.color, 'P' if is_private else '#'),
                          width=width,
                          count=count)
 
@@ -174,6 +178,9 @@ class StreamButton(TopButton):
                 )
         elif is_command_key('TOGGLE_MUTE_STREAM', key):
             self.controller.stream_muting_confirmation_popup(self)
+        elif is_command_key('STREAM_DESC', key):
+            self.model.controller.show_stream_info(
+                self.color, self.stream_name, self.description)
         return super().keypress(size, key)
 
 

@@ -149,6 +149,7 @@ Install-Module -Name BurntToast
 | ----------------------------------------------------- | --------------------------------------------- |
 | Toggle topics in a stream                             | <kbd>t</kbd>                                  |
 | Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
+| Show stream description                               | <kbd>i</kbd>                                  |
 
 ### Composing a message
 | Command                                               | Key Combination                               |

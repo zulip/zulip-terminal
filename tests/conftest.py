@@ -39,7 +39,7 @@ def stream_button(mocker):
     view_mock = mocker.Mock()
     view_mock.palette = [(None, 'black', 'white')]
     button = StreamButton(
-        properties=['PTEST', 205, '#bfd56f', False],
+        properties=['PTEST', 205, '#bfd56f', False, "Test stream description"],
         controller=mocker.patch('zulipterminal.core.Controller'),
         width=40,
         view=view_mock,
@@ -680,10 +680,10 @@ def streams():
     List of streams created corresponding to
     `initial_data` fixture.
     """
-    return [['Secret stream', 99, '#ccc', True],
-            ['Some general stream', 1000, '#baf', False],
-            ['Stream 1', 1, '#baf', False],
-            ['Stream 2', 2, '#baf', False]]
+    return [['Secret stream', 99, '#ccc', True, 'Some private stream'],
+            ['Some general stream', 1000, '#baf', False, 'General Stream'],
+            ['Stream 1', 1, '#baf', False, 'A description of stream 1'],
+            ['Stream 2', 2, '#baf', False, 'A description of stream 2']]
 
 
 @pytest.fixture
