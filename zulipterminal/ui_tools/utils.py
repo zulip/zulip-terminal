@@ -6,6 +6,7 @@ from zulipterminal.ui_tools.boxes import MessageBox
 
 
 def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
+                        *,
                         focus_msg_id: Union[None, int]=None,
                         last_message: Union[None, Any]=None) -> List[Any]:
     """
