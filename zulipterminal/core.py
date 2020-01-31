@@ -164,7 +164,7 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, focus_msg_id=button.message['id'])
         else:
             w_list = create_msg_box_list(self.model, msg_id_list)
 
@@ -191,7 +191,7 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, focus_msg_id=button.message['id'])
         else:
             w_list = create_msg_box_list(self.model, msg_id_list)
 
@@ -220,7 +220,7 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, focus_msg_id=button.message['id'])
         else:
             w_list = create_msg_box_list(self.model, msg_id_list)
 
@@ -236,7 +236,7 @@ class Controller:
 
         if hasattr(button, 'message'):
             w_list = create_msg_box_list(
-                self.model, msg_id_list, button.message['id'])
+                self.model, msg_id_list, focus_msg_id=button.message['id'])
         else:
             w_list = create_msg_box_list(self.model, msg_id_list)
 
