@@ -204,15 +204,27 @@ class Controller:
                         pm_with=user_emails)
 
     def show_all_messages(self, button: Any) -> None:
+        if hasattr(button, 'message'):
+            anchor = button.message['id']
+        else:
+            anchor = None
+
         self._narrow_to(button,
-                        anchor=None)
+                        anchor=anchor)
 
     def show_all_pm(self, button: Any) -> None:
+        if hasattr(button, 'message'):
+            anchor = button.message['id']
+        else:
+            anchor = None
+
         self._narrow_to(button,
-                        anchor=None,
+                        anchor=anchor,
                         pms=True)
 
     def show_all_starred(self, button: Any) -> None:
+        # NOTE: Should we ensure we maintain anchor focus here?
+        # (it seems to work fine without)
         self._narrow_to(button,
                         anchor=None,
                         starred=True)
