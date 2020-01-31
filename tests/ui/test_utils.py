@@ -164,5 +164,6 @@ def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
     mocker.patch('zulipterminal.ui_tools.utils.is_muted', return_value=muted)
     mocker.patch('zulipterminal.ui_tools.utils.is_unsubscribed_message',
                  return_value=unsubscribed)
-    return_value = create_msg_box_list(model, messages, focus_msg_id)
+    return_value = create_msg_box_list(model, messages,
+                                       focus_msg_id=focus_msg_id)
     assert len(return_value) == len_w_list
