@@ -15,6 +15,7 @@ from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import (
     Message, match_groups, match_stream, match_user,
 )
+from zulipterminal.urwid_types import urwid_Size
 
 
 class WriteBox(urwid.Pile):
@@ -128,7 +129,7 @@ class WriteBox(urwid.Pile):
         except IndexError:
             return None
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('SEND_MESSAGE', key):
             if self.msg_edit_id:
                 if not self.to_write_box:
@@ -645,7 +646,7 @@ class MessageBox(urwid.Pile):
         # is designed to take focus.
         return True
 
-    def mouse_event(self, size: Tuple[int, int], event: Any, button: Any,
+    def mouse_event(self, size: urwid_Size, event: Any, button: Any,
                     col: int, row: int, focus: int) -> Union[bool, Any]:
         if event == 'mouse press':
             if button == 1:
@@ -665,7 +666,7 @@ class MessageBox(urwid.Pile):
 
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('ENTER', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
@@ -789,7 +790,7 @@ class SearchBox(urwid.Pile):
             blcorner=u'─', rline=u'', bline=u'─', brcorner=u'─')
         return [self.search_bar, self.recipient_bar]
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key):
             self.text_box.set_edit_text("")
             self.controller.editor_mode = False
@@ -820,7 +821,7 @@ class PanelSearchBox(urwid.Edit):
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(edit_text=self.search_text)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('ENTER', key):
             self.panel_view.view.controller.editor_mode = False
             self.panel_view.set_focus("body")

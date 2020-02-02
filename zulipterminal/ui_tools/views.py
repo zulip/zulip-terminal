@@ -15,6 +15,7 @@ from zulipterminal.ui_tools.buttons import (
     UnreadPMButton, UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.urwid_types import urwid_Size
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -130,7 +131,7 @@ class MessageView(urwid.ListBox):
         self.model.controller.update_screen()
         self.new_loading = False
 
-    def mouse_event(self, size: Any, event: str, button: int, col: int,
+    def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
@@ -141,7 +142,7 @@ class MessageView(urwid.ListBox):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('NEXT_MESSAGE', key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
@@ -278,7 +279,7 @@ class StreamsView(urwid.Frame):
             self.log.extend(streams_display)
             self.view.controller.update_screen()
 
-    def mouse_event(self, size: Any, event: str, button: int, col: int,
+    def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
@@ -289,7 +290,7 @@ class StreamsView(urwid.Frame):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('SEARCH_STREAMS', key):
             self.set_focus('header')
             return key
@@ -365,7 +366,7 @@ class TopicsView(urwid.Frame):
         if sender_id == self.view.model.user_id:
             self.list_box.set_focus(0)
 
-    def mouse_event(self, size: Any, event: str, button: int, col: int,
+    def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
@@ -376,7 +377,7 @@ class TopicsView(urwid.Frame):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('TOGGLE_TOPIC', key):
             # Exit topic view
             self.view.left_panel.contents[1] = (
@@ -404,7 +405,7 @@ class UsersView(urwid.ListBox):
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
         super().__init__(self.log)
 
-    def mouse_event(self, size: Any, event: str, button: int, col: int,
+    def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
         if event == 'mouse press':
             if button == 4:
@@ -460,7 +461,7 @@ class MiddleColumnView(urwid.Frame):
             return pm
         return None
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key):
             self.header.keypress(size, 'esc')
             self.footer.keypress(size, 'esc')
@@ -610,7 +611,7 @@ class RightColumnView(urwid.Frame):
             self.view.user_w = user_w
         return user_w
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('SEARCH_PEOPLE', key):
             self.allow_update_user_list = False
             self.set_focus('header')
@@ -734,7 +735,7 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if (is_command_key('SEARCH_STREAMS', key) or
                 is_command_key('SEARCH_TOPICS', key)):
             self.focus_position = 1
@@ -786,7 +787,7 @@ class HelpView(urwid.ListBox):
 
         super().__init__(self.log)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_popup()
         return super().keypress(size, key)
@@ -822,7 +823,7 @@ class PopUpConfirmationView(urwid.Overlay):
     def exit_popup_no(self, args: Any) -> None:
         self.controller.exit_popup()
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key):
             self.controller.exit_popup()
         return super().keypress(size, key)
@@ -886,7 +887,7 @@ class MsgInfoView(urwid.ListBox):
 
         super().__init__(self.log)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super().keypress(size, key)

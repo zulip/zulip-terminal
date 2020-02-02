@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import urwid
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.urwid_types import urwid_Size
 
 
 class MenuButton(urwid.Button):
@@ -77,7 +78,7 @@ class TopButton(urwid.Button):
         self.controller.view.body.focus_col = 1
         self.show_function(self)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('ENTER', key):
             self.activate(key)
         return super().keypress(size, key)
@@ -168,7 +169,7 @@ class StreamButton(TopButton):
             # All messages in this stream are read.
             self.update_count(0)
 
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('TOGGLE_TOPIC', key):
             topic_view = self.view.left_panel.topics_view(self)
             self.view.left_panel.is_in_topic_view = True
