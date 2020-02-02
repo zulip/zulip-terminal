@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+cmds = ["isort"]
+
+result = subprocess.call(cmds + ["--check-only", "--diff"])
+
+if result == 0:
+    print("All files have imports sorted according to rules.")
+else:
+    print("Some files are not sorted according to rules.")
+    print("You might try '{}' to automatically fix all files.".format(" ".join(cmds)))
+    print("Alternatively try 'isort <somefiles>' to just fix specific files.")
+
+sys.exit(result)
