@@ -1,20 +1,21 @@
 import argparse
 import configparser
-import traceback
-import sys
 import logging
-import requests
-from typing import Dict, Any, List, Optional, Tuple
+import sys
+import traceback
 from os import path, remove
+from typing import Any, Dict, List, Optional, Tuple
 
+import requests
 from urwid import set_encoding
 
+from zulipterminal.config.themes import (
+    THEMES, all_themes, complete_and_incomplete_themes,
+)
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.config.themes import (
-    THEMES, all_themes, complete_and_incomplete_themes
-)
 from zulipterminal.version import ZT_VERSION
+
 
 LOG_FILENAME = 'zulip-terminal-tracebacks.log'
 logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)

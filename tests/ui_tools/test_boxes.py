@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.ui_tools.boxes import WriteBox
 
+
 WRITEBOX = "zulipterminal.ui_tools.boxes.WriteBox"
 
 

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import argparse
+import os
 import subprocess
-import lister
-from typing import cast, Dict, List
+import sys
 from pathlib import PurePath
+from typing import Dict, List, cast
+
+import lister
+
 
 EXCLUDE_FILES = ['tools/fetch-pull-request', 'tools/fetch-rebase-pull-request']
 

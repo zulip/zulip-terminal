@@ -1,6 +1,8 @@
-from typing import Set, Dict, List
 from collections import OrderedDict
+from typing import Dict, List, Set
+
 from mypy_extensions import TypedDict
+
 
 KeyBinding = TypedDict('KeyBinding', {
     'keys': Set[str],
