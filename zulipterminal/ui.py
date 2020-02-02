@@ -146,7 +146,7 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 2
 
     # FIXME: The type of size should be urwid_Size; this needs checking
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
+    def keypress(self, size: Tuple[int, int], key: str) -> Optional[str]:
         self.model.new_user_input = True
         if self.controller.editor_mode:
             return self.controller.editor.keypress((size[1],), key)

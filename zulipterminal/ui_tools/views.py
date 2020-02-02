@@ -142,7 +142,7 @@ class MessageView(urwid.ListBox):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('NEXT_MESSAGE', key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
@@ -290,7 +290,7 @@ class StreamsView(urwid.Frame):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('SEARCH_STREAMS', key):
             self.set_focus('header')
             return key
@@ -377,7 +377,7 @@ class TopicsView(urwid.Frame):
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('TOGGLE_TOPIC', key):
             # Exit topic view
             self.view.left_panel.contents[1] = (
@@ -461,7 +461,7 @@ class MiddleColumnView(urwid.Frame):
             return pm
         return None
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('GO_BACK', key):
             self.header.keypress(size, 'esc')
             self.footer.keypress(size, 'esc')
@@ -611,7 +611,7 @@ class RightColumnView(urwid.Frame):
             self.view.user_w = user_w
         return user_w
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('SEARCH_PEOPLE', key):
             self.allow_update_user_list = False
             self.set_focus('header')
@@ -735,7 +735,7 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (is_command_key('SEARCH_STREAMS', key) or
                 is_command_key('SEARCH_TOPICS', key)):
             self.focus_position = 1
