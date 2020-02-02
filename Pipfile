@@ -21,3 +21,4 @@ zipp = "==1.0.0"  # To support Python 3.5
 pudb = "==2017.1.4"
 snakeviz = "==0.4.2"
 gitlint = "==0.10.0"
+isort = "==4.3.21"

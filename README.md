@@ -292,6 +292,7 @@ Once you have a development environment set up, you might find the following use
 | Run all tests (including linter) | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 | Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
+| Check isort compliance | `./tools/run-isort-check` | `pipenv run ./tools/run-isort-check` |
 
 #### GitLint (optional)
 
