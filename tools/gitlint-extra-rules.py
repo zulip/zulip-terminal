@@ -1,8 +1,8 @@
-import gitlint
-from gitlint.rules import CommitRule, RuleViolation
-from gitlint.options import ListOption
+from typing import Any, List, Optional
 
-from typing import List, Any, Optional
+import gitlint
+from gitlint.options import ListOption
+from gitlint.rules import CommitRule, RuleViolation
 
 
 class EndsWithDot(CommitRule):

@@ -4,13 +4,11 @@ from typing import Any, Dict
 
 import pytest
 
+from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
-    StreamButton,
-    UserButton,
-    TopicButton,
+    StreamButton, TopicButton, UserButton,
 )
-from zulipterminal.helper import initial_index as helper_initial_index
 
 
 @pytest.fixture(autouse=True)

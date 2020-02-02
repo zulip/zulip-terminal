@@ -1,8 +1,9 @@
 import pytest
 
 from zulipterminal.config.themes import (
-    THEMES, required_styles, all_themes, complete_and_incomplete_themes
+    THEMES, all_themes, complete_and_incomplete_themes, required_styles,
 )
+
 
 expected_complete_themes = {
     'default', 'gruvbox', 'light', 'blue'

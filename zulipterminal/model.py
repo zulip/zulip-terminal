@@ -1,29 +1,23 @@
 import json
-from urllib.parse import urlparse
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor, wait, Future
 import time
 from collections import OrderedDict
-
+from concurrent.futures import Future, ThreadPoolExecutor, wait
+from threading import Thread
 from typing import (
-        Any, Dict, List, FrozenSet, Set, Union, Optional, Tuple, Callable,
-        Iterable
+    Any, Callable, Dict, FrozenSet, Iterable, List, Optional, Set, Tuple,
+    Union,
 )
-from mypy_extensions import TypedDict
+from urllib.parse import urlparse
 
 import zulip
+from mypy_extensions import TypedDict
 
 from zulipterminal.helper import (
-    asynch,
-    classify_unread_counts,
-    canonicalize_color,
-    index_messages,
-    set_count,
-    initial_index,
-    Message,
-    notify,
+    Message, asynch, canonicalize_color, classify_unread_counts,
+    index_messages, initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
+
 
 GetMessagesArgs = TypedDict('GetMessagesArgs', {
      'num_before': int,

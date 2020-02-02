@@ -1,13 +1,11 @@
+from typing import Any
+
 import pytest
 
 from zulipterminal.helper import (
-    index_messages,
+    canonicalize_color, classify_unread_counts, index_messages, notify,
     powerset,
-    classify_unread_counts,
-    canonicalize_color,
-    notify,
 )
-from typing import Any
 
 
 def test_index_messages_narrow_all_messages(mocker,

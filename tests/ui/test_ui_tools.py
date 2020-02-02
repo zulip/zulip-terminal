@@ -1,32 +1,22 @@
-import pytest
 import datetime
-from collections import defaultdict, OrderedDict
-from bs4 import BeautifulSoup
+from collections import OrderedDict, defaultdict
 
-from zulipterminal.ui_tools.views import (
-    MessageView,
-    MiddleColumnView,
-    StreamsView,
-    TopicsView,
-    UsersView,
-    RightColumnView,
-    LeftColumnView,
-    HelpView,
-    ModListWalker,
-    PopUpConfirmationView,
-    MsgInfoView,
-)
-from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import (
-    TopButton,
-    StreamButton,
-    UserButton,
-    TopicButton,
-)
+import pytest
+from bs4 import BeautifulSoup
+from urwid import AttrWrap, Columns, Padding, Text
+
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import powerset
+from zulipterminal.ui_tools.boxes import MessageBox
+from zulipterminal.ui_tools.buttons import (
+    StreamButton, TopButton, TopicButton, UserButton,
+)
+from zulipterminal.ui_tools.views import (
+    HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
+    MsgInfoView, PopUpConfirmationView, RightColumnView, StreamsView,
+    TopicsView, UsersView,
+)
 
-from urwid import AttrWrap, Columns, Padding, Text
 
 VIEWS = "zulipterminal.ui_tools.views"
 TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"

@@ -1,22 +1,23 @@
-from platform import platform
-from typing import Any, List
 import os
+import signal
 import sys
 import time
-import signal
 from functools import partial
+from platform import platform
+from typing import Any, List
 
 import urwid
 import zulip
 
-from zulipterminal.version import ZT_VERSION
-from zulipterminal.helper import asynch
-from zulipterminal.model import Model, GetMessagesArgs, ServerConnectionFailure
-from zulipterminal.ui import View, Screen
-from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.views import HelpView, MsgInfoView
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.ui_tools.views import PopUpConfirmationView
+from zulipterminal.helper import asynch
+from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
+from zulipterminal.ui import Screen, View
+from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.ui_tools.views import (
+    HelpView, MsgInfoView, PopUpConfirmationView,
+)
+from zulipterminal.version import ZT_VERSION
 
 
 class Controller:

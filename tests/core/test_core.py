@@ -6,6 +6,7 @@ import pytest
 from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
 
+
 CORE = "zulipterminal.core"
 
 

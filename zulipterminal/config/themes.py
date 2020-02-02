@@ -1,4 +1,5 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
 
 ThemeSpec = List[Tuple[Optional[str], ...]]
 

@@ -1,8 +1,10 @@
+import codecs
 import os
 import sys
-import codecs
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 from setuptools.command.test import test as TestCommand
+
 from zulipterminal.version import ZT_VERSION
 
 

@@ -1,5 +1,6 @@
 import pytest
-from zulipterminal.ui_tools.utils import is_muted, create_msg_box_list
+
+from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
 @pytest.mark.parametrize('msg, narrow, muted_streams, muted_topics,\

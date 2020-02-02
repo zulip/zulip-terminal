@@ -1,5 +1,6 @@
 import pytest
-from zulipterminal.cli.run import main, in_color, THEMES, get_login_id
+
+from zulipterminal.cli.run import THEMES, get_login_id, in_color, main
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 

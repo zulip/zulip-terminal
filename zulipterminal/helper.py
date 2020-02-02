@@ -1,20 +1,21 @@
-import time
-from collections import defaultdict
-from itertools import chain, combinations
-from functools import wraps
-from re import match, ASCII
-from threading import Thread
-from typing import (
-    Any, Dict, List, Set, Tuple, Optional, DefaultDict, FrozenSet, Union,
-    Iterable, Callable, FrozenSet
-)
-from mypy_extensions import TypedDict
-
 import os
 import platform
-import subprocess
 import shlex
+import subprocess
+import time
+from collections import defaultdict
+from functools import wraps
+from itertools import chain, combinations
+from re import ASCII, match
+from threading import Thread
+from typing import (
+    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
+    Tuple, Union,
+)
+
 import lxml.html
+from mypy_extensions import TypedDict
+
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"

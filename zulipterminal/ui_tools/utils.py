@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Union, Dict
+from typing import Any, Dict, Iterable, List, Union
 
 import urwid
 

@@ -8,7 +8,9 @@ cache:
 matrix:
   include:
     - python: 3.5
-      name: "CPython 3.5 pytest (default linux)"
+      name: "CPython 3.5 pytest & isort linting (default linux)"
+      # Note that running isort on the lowest version should ensure changes are compatible
+      env: RUN_ISORT_CHECK=yes
     - python: 3.6
       name: "CPython 3.6 pytest & mypy type-checking (default linux)"
       env: RUN_MYPY=yes
@@ -30,6 +32,7 @@ install:
 script:
   - pipenv run pytest
   - if [[ "$RUN_MYPY" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-mypy; fi
+  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-isort-check; fi
 after_success:
   - pip install codecov
   - codecov

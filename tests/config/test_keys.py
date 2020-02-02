@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.config import keys
 
+
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
 
 USED_KEYS = {key

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import subprocess
-import re
-from collections import defaultdict
 import argparse
+import os
+import re
+import subprocess
+import sys
+from collections import defaultdict
+
 from six.moves import filter
 
 
