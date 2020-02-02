@@ -177,7 +177,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     controller.update_screen()
 
 
-def index_messages(messages: List[Any],
+def index_messages(messages: List[Message],
                    model: Any,
                    index: Index) -> Index:
     """

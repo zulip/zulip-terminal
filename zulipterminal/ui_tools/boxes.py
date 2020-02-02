@@ -12,7 +12,9 @@ from bs4.element import NavigableString, Tag
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import match_groups, match_stream, match_user
+from zulipterminal.helper import (
+    Message, match_groups, match_stream, match_user,
+)
 
 
 class WriteBox(urwid.Pile):
@@ -180,7 +182,8 @@ class WriteBox(urwid.Pile):
 
 
 class MessageBox(urwid.Pile):
-    def __init__(self, message: Dict[str, Any], model: Any,
+    # type of last_message is Optional[Message], but needs refactoring
+    def __init__(self, message: Message, model: Any,
                  last_message: Any) -> None:
         self.model = model
         self.message = message
@@ -226,7 +229,7 @@ class MessageBox(urwid.Pile):
 
         super(MessageBox, self).__init__(self.main_view())
 
-    def _time_for_message(self, message: Dict[str, Any]) -> str:
+    def _time_for_message(self, message: Message) -> str:
         return ctime(message['timestamp'])[:-8]
 
     def need_recipient_header(self) -> bool:

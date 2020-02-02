@@ -244,7 +244,7 @@ class Model:
 
     @asynch
     def react_to_message(self,
-                         message: Dict[str, Any],
+                         message: Message,
                          reaction_to_toggle: str) -> None:
         # FIXME Only support thumbs_up for now
         assert reaction_to_toggle == 'thumbs_up'
@@ -268,7 +268,7 @@ class Model:
             response = self.client.add_reaction(reaction_to_toggle_spec)
 
     @asynch
-    def toggle_message_star_status(self, message: Dict[str, Any]) -> None:
+    def toggle_message_star_status(self, message: Message) -> None:
         base_request = dict(flag='starred', messages=[message['id']])
         if 'starred' in message['flags']:
             request = dict(base_request, op='remove')
@@ -641,7 +641,7 @@ class Model:
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
-    def notify_user(self, message: Dict[str, Any]) -> None:
+    def notify_user(self, message: Message) -> None:
         # Check if notifications are enabled by the user.
         # It is disabled by default.
         if not self.controller.notify_enabled:
