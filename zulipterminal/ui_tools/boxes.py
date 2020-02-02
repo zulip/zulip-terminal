@@ -646,8 +646,8 @@ class MessageBox(urwid.Pile):
         # is designed to take focus.
         return True
 
-    def mouse_event(self, size: urwid_Size, event: Any, button: Any,
-                    col: int, row: int, focus: int) -> Union[bool, Any]:
+    def mouse_event(self, size: urwid_Size, event: str, button: int,
+                    col: int, row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 1:
                 self.keypress(size, 'enter')
