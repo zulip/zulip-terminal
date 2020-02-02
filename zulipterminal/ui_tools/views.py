@@ -132,7 +132,7 @@ class MessageView(urwid.ListBox):
         self.new_loading = False
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
-                    row: int, focus: Any) -> Any:
+                    row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
                 self.keypress(size, 'up')
@@ -280,7 +280,7 @@ class StreamsView(urwid.Frame):
             self.view.controller.update_screen()
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
-                    row: int, focus: Any) -> Any:
+                    row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
                 self.keypress(size, 'up')
@@ -367,7 +367,7 @@ class TopicsView(urwid.Frame):
             self.list_box.set_focus(0)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
-                    row: int, focus: Any) -> Any:
+                    row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
                 self.keypress(size, 'up')
@@ -406,7 +406,7 @@ class UsersView(urwid.ListBox):
         super().__init__(self.log)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
-                    row: int, focus: Any) -> Any:
+                    row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
                 for _ in range(5):
