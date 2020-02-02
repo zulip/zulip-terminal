@@ -1,14 +1,15 @@
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Iterable, List, Optional, Union
 
 import urwid
 
+from zulipterminal.helper import Message
 from zulipterminal.ui_tools.boxes import MessageBox
 
 
 def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
                         *,
                         focus_msg_id: Union[None, int]=None,
-                        last_message: Union[None, Any]=None) -> List[Any]:
+                        last_message: Optional[Message]=None) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
     """
@@ -50,7 +51,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
     return w_list
 
 
-def is_muted(msg: Dict[Any, Any], model: Any) -> bool:
+def is_muted(msg: Message, model: Any) -> bool:
     # PMs cannot be muted
     if msg['type'] == 'private':
         return False
@@ -64,7 +65,7 @@ def is_muted(msg: Dict[Any, Any], model: Any) -> bool:
     return False
 
 
-def is_unsubscribed_message(msg: Dict[Any, Any], model: Any) -> bool:
+def is_unsubscribed_message(msg: Message, model: Any) -> bool:
     if msg['type'] == 'private':
         return False
     if msg['stream_id'] not in model.stream_dict:

@@ -10,7 +10,7 @@ import urwid
 import zulip
 
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import asynch
+from zulipterminal.helper import Message, asynch
 from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -111,7 +111,7 @@ class Controller:
         help_view = HelpView(self)
         self.show_pop_up(help_view, "Help Menu (up/down scrolls)")
 
-    def show_msg_info(self, msg: Any) -> None:
+    def show_msg_info(self, msg: Message) -> None:
         msg_info_view = MsgInfoView(self, msg)
         self.show_pop_up(msg_info_view,
                          "Message Information (up/down scrolls)")

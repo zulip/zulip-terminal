@@ -8,7 +8,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.helper import asynch, match_user
+from zulipterminal.helper import Message, asynch, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, PMButton, StarredButton, StreamButton, TopicButton,
@@ -852,7 +852,7 @@ class StreamInfoView(urwid.ListBox):
 
 
 class MsgInfoView(urwid.ListBox):
-    def __init__(self, controller: Any, msg: Any) -> None:
+    def __init__(self, controller: Any, msg: Message) -> None:
         self.controller = controller
         self.msg = msg
 
