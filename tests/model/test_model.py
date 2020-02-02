@@ -4,8 +4,8 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.model import Model, ServerConnectionFailure
 from zulipterminal.helper import initial_index, powerset
+from zulipterminal.model import Model, ServerConnectionFailure
 
 
 class TestModel:

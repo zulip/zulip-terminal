@@ -1,18 +1,18 @@
 from collections import defaultdict
-from time import ctime, time
-from datetime import datetime, date
+from datetime import date, datetime
 from sys import platform
-from typing import Any, Dict, List, Tuple, Union, Optional
-from urllib.parse import urlparse, urljoin
+from time import ctime, time
+from typing import Any, Dict, List, Optional, Tuple, Union
+from urllib.parse import urljoin, urlparse
 
 import emoji
 import urwid
-from urwid_readline import ReadlineEdit
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import match_user, match_stream, match_groups
+from zulipterminal.helper import match_groups, match_stream, match_user
 
 
 class WriteBox(urwid.Pile):

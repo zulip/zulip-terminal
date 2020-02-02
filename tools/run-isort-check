@@ -3,6 +3,7 @@
 import subprocess
 import sys
 
+
 cmds = ["isort"]
 
 result = subprocess.call(cmds + ["--check-only", "--diff"])

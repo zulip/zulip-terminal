@@ -1,26 +1,20 @@
-from collections import defaultdict, OrderedDict
-from typing import Any, List, Tuple, Optional, Callable
 import threading
-import urwid
 import time
+from collections import OrderedDict, defaultdict
+from typing import Any, Callable, List, Optional, Tuple
+
+import urwid
 
 from zulipterminal.config.keys import (
-    KEY_BINDINGS,
-    is_command_key,
-    HELP_CATEGORIES
+    HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
 from zulipterminal.helper import asynch, match_user
+from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
-    TopicButton,
-    UnreadPMButton,
-    UserButton,
-    HomeButton,
-    PMButton,
-    StarredButton,
-    StreamButton,
+    HomeButton, PMButton, StarredButton, StreamButton, TopicButton,
+    UnreadPMButton, UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.ui_tools.boxes import PanelSearchBox
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
