@@ -29,7 +29,7 @@ def long_description():
 
 
 testing_deps = [
-    'pytest==3.10.1',
+    'pytest==5.3.5',
     'pytest-cov==2.5.1',
     'pytest-mock==1.7.1',
     'pytest-pep8==1.0.6',

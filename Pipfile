@@ -13,7 +13,7 @@ lxml = "==4.2.3"
 mypy_extensions = ">=0.4"
 
 [dev-packages]
-pytest = "==3.10.1"
+pytest = "==5.3.5"
 pytest-pep8 = "==1.0.6"
 pytest-mock = "==1.7.1"
 pytest-cov = "==2.5.1"
