@@ -495,6 +495,7 @@ class MessageBox(urwid.Pile):
                 'is_starred': 'starred' in msg['flags'],
                 'author': (msg['sender_full_name']
                            if 'sender_full_name' in msg else None),
+                'author_id': msg['sender_id'],
                 'time': (self._time_for_message(msg)
                          if 'timestamp' in msg else None),
                 'datetime': (datetime.fromtimestamp(msg['timestamp'])
@@ -519,11 +520,14 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
-            text_keys = ('author', 'star', 'time', 'prev_year')
+            text_keys = ('author', 'author_id', 'star', 'time', 'prev_year')
             text = {key: (None, ' ') for key in text_keys}  # type: TextType
 
             if any(different[key] for key in ('recipients', 'author', '24h')):
-                text['author'] = ('name', message['this']['author'])
+                if message['this']['author_id'] in self.model.active_users:
+                    text['author'] = ('name', message['this']['author'] + " •")
+                else:
+                    text['author'] = ('name', message['this']['author'])
             if message['this']['is_starred']:
                 text['star'] = ('starred', "*")
             if any(different[key]

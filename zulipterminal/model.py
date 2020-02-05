@@ -107,7 +107,7 @@ class Model:
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
         self._update_initial_data()
-
+        self.active_users = {}
         self.users = self.get_all_users()
 
         subscriptions = self.initial_data['subscriptions']
@@ -534,6 +534,9 @@ class Model:
             self.user_id_email_dict[bot['user_id']] = email
 
         # Generate filtered lists for active & idle users
+        self.active_users = {properties['user_id'] for properties in self.user_dict.values()
+                             if properties['status'] == 'active'}
+        self.active_users.add(self.user_id)
         active = [properties for properties in self.user_dict.values()
                   if properties['status'] == 'active']
         idle = [properties for properties in self.user_dict.values()
