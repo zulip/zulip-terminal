@@ -89,7 +89,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
 
 
 @pytest.mark.parametrize('narrow, messages, focus_msg_id, muted,\
-                          unsubscribed, len_w_list', [
+                         unsubscribed, stream_details, pm_details,\
+                         len_w_list', [
     (
         # No muted messages
         [],
@@ -97,6 +98,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         None,
         False,
         False,
+        None,
+        None,
         2,
     ),
     (
@@ -106,6 +109,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         None,
         False,
         False,
+        None,
+        None,
         1,
     ),
     (
@@ -115,6 +120,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         None,
         True,
         False,
+        None,
+        None,
         1,
     ),
     (
@@ -124,7 +131,38 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         None,
         True,
         False,
+        None,
+        None,
         0,
+    ),
+    (
+        # Displays dummy stream message
+        [['stream', 'foo']],
+        [],
+        None,
+        False,
+        False,
+        {
+            'caption': 'Boo',
+            'description': 'News about Boo',
+        },
+        None,
+        1,
+    ),
+    (
+        # Displays dummy private message
+        [['pm_with', 'boo@zulip.com']],
+        [],
+        None,
+        False,
+        False,
+        None,
+        {
+            'caption': 'Boo Boo',
+            'recipient_email': 'bar@zulip.com',
+            'sender_id': 8
+        },
+        1,
     ),
     (
         # Unsubscribed messages
@@ -133,12 +171,21 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
         None,
         False,
         True,
+        None,
+        None,
         0,
-    ),
-
+    )], ids=[
+    'All Messages - no muted messages',
+    'Stream narrow - unmuted',
+    'Stream narrow - muted',
+    'All Messages - muted messages',
+    'Empty stream narrow - dummy message test',
+    'Empty pm narrow - dummy message test',
+    'Unsubscribed messages',
 ])
 def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
-                             muted, unsubscribed, len_w_list):
+                             muted, unsubscribed, stream_details, pm_details,
+                             len_w_list):
     model = mocker.Mock()
     model.narrow = narrow
     model.index = {
@@ -163,5 +210,8 @@ def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
     mocker.patch('zulipterminal.ui_tools.utils.is_muted', return_value=muted)
     mocker.patch('zulipterminal.ui_tools.utils.is_unsubscribed_message',
                  return_value=unsubscribed)
-    return_value = create_msg_box_list(model, messages, focus_msg_id)
+    return_value = create_msg_box_list(model, messages, focus_msg_id,
+                                       stream_details=stream_details,
+                                       pm_details=pm_details)
     assert len(return_value) == len_w_list
+    assert msg_box.call_count == len_w_list

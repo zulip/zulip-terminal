@@ -1569,6 +1569,52 @@ class TestMessageBox:
         assert header_bar.text.startswith(assert_header_bar)
         assert search_bar.text_to_fill == assert_search_bar
 
+    @pytest.mark.parametrize('index_value, split_character, \
+                                assert_string, message', [
+        (0, '>', 'Foo Foo', {
+            'type': 'stream',
+            'display_recipient': 'Foo Foo',
+            'subject': 'disription about foo',
+            'stream_id': 8,
+        }),
+        (0, ':', 'You and Boo Boo', {
+            'type': 'private',
+            'display_recipient': [{'full_name': 'Boo Boo',
+                                   'email': 'boo@zulip.com',
+                                   'id': None}],
+            'sender_id': 9,
+        })
+    ])
+    def test_main_view_generates_dummy_message(self, mocker, message,
+                                               index_value, split_character,
+                                               assert_string):
+        self.model.stream_dict = {
+            8: {
+                'color': '#bfd56f',
+            },
+        }
+        message.update({
+            'content': "<p> Dummy stream/PM message. </p>",
+            'sender_full_name': 'Welcome Bot',
+            'sender_email': 'welcome-bot@zulip.com',
+            'timestamp': 150989984,
+            'id': None,
+            'reactions': [],
+            'flags': ['read']
+            })
+        msg_box = MessageBox(message, self.model, None,
+                             is_empty_narrow=True)
+        view_components = msg_box.main_view()
+        assert len(view_components) == 3
+        assert isinstance(view_components[0], AttrWrap)
+        assert isinstance(view_components[1], Columns)
+        assert isinstance(view_components[2], Padding)
+        # Extracting label from header.
+        header = view_components[0].original_widget.get_text()[0].strip()
+        header_message = (header.split(split_character)
+                          [index_value].strip())
+        assert header_message == assert_string
+
     # Assume recipient (PM/stream/topic) header is unchanged below
     @pytest.mark.parametrize('message', [
         {

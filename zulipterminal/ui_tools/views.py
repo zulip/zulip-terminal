@@ -93,6 +93,9 @@ class MessageView(urwid.ListBox):
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
         if self.log:
             top_message_id = self.log[0].original_widget.message['id']
+            # This for the dummy message
+            if top_message_id is None:
+                return
             ids_to_keep.remove(top_message_id)  # update this id
             no_update_baseline = {top_message_id}
         else:
@@ -129,6 +132,11 @@ class MessageView(urwid.ListBox):
         else:
             last_message = None
 
+        if self.log:
+            top_message_id = self.log[0].original_widget.message.get('id')
+            # This for the dummy message
+            if top_message_id is None:
+                return
         message_list = create_msg_box_list(self.model, new_ids,
                                            last_message=last_message)
         self.log.extend(message_list)
@@ -191,12 +199,14 @@ class MessageView(urwid.ListBox):
                 return super(MessageView, self).keypress(size, 'page down')
 
         elif is_command_key('THUMBS_UP', key):
+            # FIXME: Improve reactions for dummy messages.
             if self.focus is not None:
                 self.model.react_to_message(
                     self.focus.original_widget.message,
                     reaction_to_toggle='thumbs_up')
 
         elif is_command_key('TOGGLE_STAR_STATUS', key):
+            # FIXME: Improve reactions for dummy messages.
             if self.focus is not None:
                 message = self.focus.original_widget.message
                 self.model.toggle_message_star_status(message)
@@ -487,6 +497,7 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key('REPLY_MESSAGE', key):
+            # TODO: Prevent 'r' for dummy stream message.
             self.body.keypress(size, 'enter')
             if self.footer.focus is not None:
                 self.set_focus('footer')

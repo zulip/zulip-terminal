@@ -667,6 +667,67 @@ class TestModel:
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
 
+    @pytest.mark.parametrize('previous_message', [
+        ({'type': 'private', 'id': None,
+          'display_recipient': [{'id': 100, 'email': 'bar@zulip.com'}]}),
+        ({'type': 'stream', 'stream_id': 1, 'id': None,
+          'subject': 'FOO', 'display_recipient': 'bar'})
+    ])
+    @pytest.mark.parametrize('response, narrow', [
+        (
+            {'type': 'private', 'id': 0,
+             'display_recipient': [{'id': 200, 'email': 'boo@zulip.com'}]},
+            [['pm_with', 'bar@zulip.com']]
+        ),
+        (
+            {'type': 'stream', 'stream_id': 1, 'id': 0,
+             'subject': 'FOO', 'display_recipient': 'boo'},
+            [['stream', 'bar']]
+        ),
+        (
+            {'type': 'stream', 'stream_id': 1, 'id': 0,
+             'subject': 'FOO', 'display_recipient': 'bar'},
+            [['stream', 'bar']]
+        ),
+        (
+            {'type': 'private', 'id': 0,
+             'display_recipient': [{'id': 100, 'email': 'bar@zulip.com'}]},
+            [['pm_with', 'bar@zulip.com']]
+        ),
+        (
+            {'type': 'private', 'id': 0,
+             'display_recipient': [{'id': 100, 'email': 'bar@zulip.com'},
+                                   {'id': 200, 'email': 'boo@zulip.com'}]},
+            [['pm_with', 'bar@zulip.com']]
+        )
+    ], ids=['PM_to_user_in_different_PM_narrow',
+            'stream_to_different_stream',
+            'stream__to_same_stream',
+            'PM_to_user_in_same_PM_narrow',
+            'GroupPM_to_user_in_PM_narrow'
+            ])
+    def test_append_message_with_dummy_previous_message(
+            self, mocker, model,
+            previous_message, response, narrow,
+            user_profile):
+        model.update = True
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value={})
+        model.msg_list = mocker.Mock()
+        mocker.patch('zulipterminal.model.Model.notify_user')
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        model.msg_list.log = [mocker.Mock()]
+        model.msg_list.log[0].original_widget.message = previous_message
+        model.narrow = narrow
+        model.user_id = user_profile['user_id']
+        model.recipients = frozenset({5827, 100}) if\
+            response['type'] == 'private' else frozenset()
+        event = {'message': response}
+        model.append_message(event)
+        assert len(model.msg_list.log) == 1
+
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
           'id': 1}, [], frozenset(), ['msg_w']),

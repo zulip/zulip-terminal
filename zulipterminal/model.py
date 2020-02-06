@@ -706,6 +706,15 @@ class Model:
                 last_message = self.msg_list.log[-1].original_widget.message
             else:
                 last_message = None
+            # We replace the dummy message in the current narrow
+            # if the incoming message is meant for the same narrow.
+            dummy_message_found = False
+            if self.msg_list.log:
+                possible_dummy_message = \
+                    self.msg_list.log[0].original_widget.message
+                if possible_dummy_message.get('id') is None:
+                    dummy_message_found = True
+
             msg_w_list = create_msg_box_list(self, [response['id']],
                                              last_message=last_message)
             if not msg_w_list:
@@ -731,6 +740,9 @@ class Model:
                                           self.narrow[1][1] ==
                                           response['subject'])):
                     self.msg_list.log.append(msg_w)
+                    if dummy_message_found:
+                        del self.msg_list.log[0]
+                        set_count([response['id']], self.controller, 1)
 
             elif response['type'] == 'private' and len(self.narrow) == 1 and\
                     self.narrow[0][0] == "pm_with":
@@ -739,6 +751,9 @@ class Model:
                     [user['id'] for user in response['display_recipient']])
                 if narrow_recipients == message_recipients:
                     self.msg_list.log.append(msg_w)
+                    if dummy_message_found:
+                        del self.msg_list.log[0]
+                        set_count([response['id']], self.controller, 1)
             if 'read' not in response['flags']:
                 set_count([response['id']], self.controller, 1)
             self.controller.update_screen()

@@ -184,7 +184,7 @@ class UserButton(TopButton):
         # Properties accessed externally
         self.email = user['email']
         self.user_id = user['user_id']
-
+        self.user_name = user['full_name']
         self._view = view  # Used in _narrow_with_compose
 
         # FIXME Is this still needed?
