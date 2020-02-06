@@ -1,6 +1,7 @@
 from collections import defaultdict
 from copy import deepcopy
 from typing import Any, Dict
+import time
 
 import pytest
 
@@ -11,6 +12,7 @@ from zulipterminal.ui_tools.buttons import (
     TopicButton,
 )
 from zulipterminal.helper import initial_index as helper_initial_index
+from zulipterminal.model import OFFLINE_THRESHOLD_SECS
 
 
 @pytest.fixture(autouse=True)
@@ -78,6 +80,14 @@ def msg_box(mocker, messages_successful_response):
 
 
 # --------------- Model Fixtures ----------------------------------------------
+
+@pytest.fixture
+def mock_current_time(mocker):
+    """
+    This makes time based tests consistent.
+    """
+    return mocker.patch('time.time', return_value=0)
+
 
 @pytest.fixture
 def users_fixture(logged_on_user):
@@ -301,7 +311,8 @@ def messages_successful_response() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def initial_data(logged_on_user, users_fixture, streams_fixture):
+def initial_data(logged_on_user, users_fixture, streams_fixture,
+                 mock_current_time):
     """
     Response from /register API request.
     """
@@ -413,12 +424,12 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             }]
         },
         'presences': {
-            'nyan.salmon+sns@gmail.com': {
+            'person1@example.com': {
                 'ZulipElectron': {
                     'pushable': False,
                     'client': 'ZulipElectron',
-                    'status': 'idle',
-                    'timestamp': 1522484059
+                    'status': 'active',
+                    'timestamp': time.time(),
                 },
                 'ZulipMobile': {
                     'pushable': False,
@@ -427,7 +438,26 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
                     'timestamp': 1522384165
                 },
                 'aggregated': {
-                    'timestamp': 1522484059,
+                    'timestamp': time.time(),
+                    'client': 'ZulipElectron',
+                    'status': 'active'
+                }
+            },
+            'person2@example.com': {
+                'ZulipElectron': {
+                    'pushable': False,
+                    'client': 'ZulipElectron',
+                    'status': 'idle',
+                    'timestamp': time.time() - OFFLINE_THRESHOLD_SECS + 1
+                },
+                'ZulipMobile': {
+                    'pushable': False,
+                    'client': 'ZulipMobile',
+                    'status': 'idle',
+                    'timestamp': 1522384165
+                },
+                'aggregated': {
+                    'timestamp': time.time() - OFFLINE_THRESHOLD_SECS + 1,
                     'client': 'ZulipElectron',
                     'status': 'idle'
                 }
@@ -594,13 +624,13 @@ def user_dict(logged_on_user):
             'full_name': 'Human 1',
             'email': 'person1@example.com',
             'user_id': 11,
-            'status': 'inactive'
+            'status': 'active'
         },
         'person2@example.com': {
             'full_name': 'Human 2',
             'email': 'person2@example.com',
             'user_id': 12,
-            'status': 'inactive'
+            'status': 'idle'
         },
         'emailgateway@zulip.com': {
             'email': 'emailgateway@zulip.com',
@@ -642,20 +672,20 @@ def user_list(logged_on_user):
         'status': 'active',
         'user_id': logged_on_user['user_id'],
     }, {
-        'email': 'emailgateway@zulip.com',
-        'full_name': 'Email Gateway',
-        'status': 'inactive',
-        'user_id': 6
-    }, {
         'full_name': 'Human 1',
         'email': 'person1@example.com',
         'user_id': 11,
-        'status': 'inactive'
+        'status': 'active'
     }, {
         'full_name': 'Human 2',
         'email': 'person2@example.com',
         'user_id': 12,
-        'status': 'inactive'
+        'status': 'idle'
+    }, {
+        'email': 'emailgateway@zulip.com',
+        'full_name': 'Email Gateway',
+        'status': 'inactive',
+        'user_id': 6
     }, {
         'email': 'notification-bot@zulip.com',
         'full_name': 'Notification Bot',

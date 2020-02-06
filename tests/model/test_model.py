@@ -567,7 +567,8 @@ class TestModel:
         assert user_group_names == ['Group 1', 'Group 2', 'Group 3', 'Group 4']
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
-                           user_id):
+                           user_id, mock_current_time):
+        # NOTE: time.time() in this test is set to 0.
         mocker.patch('zulipterminal.model.Model.get_messages')
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.'
