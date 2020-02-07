@@ -15,7 +15,8 @@ matrix:
       name: "CPython 3.6 pytest & mypy type-checking (default linux)"
       env: RUN_MYPY=yes
     - python: 3.7
-      name: "CPython 3.7 pytest (default linux)"
+      name: "CPython 3.7 pytest & pycodestyle PEP8 linting (default linux)"
+      env: RUN_PYCODESTYLE=yes
     - python: 3.8
       name: "CPython 3.8 pytest (default linux)"
     - python: pypy3.5
@@ -33,6 +34,7 @@ script:
   - pipenv run pytest
   - if [[ "$RUN_MYPY" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-mypy; fi
   - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-isort-check; fi
+  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run pycodestyle; fi
 after_success:
   - pip install codecov
   - codecov
