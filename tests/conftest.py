@@ -117,6 +117,7 @@ def logged_on_user():
         'short_name': 'Human',
     }
 
+
 general_stream = {
     'name': 'Some general stream',
     'invite_only': False,
@@ -172,6 +173,7 @@ def streams_fixture():
             'email_address': 'stream{}@example.com'.format(i),
         })
     return deepcopy(streams)
+
 
 stream_msg_template = {
     'id': 537286,

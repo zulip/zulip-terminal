@@ -309,24 +309,24 @@ class Model:
         return response['result'] == 'success'
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
-            request = {
-                "message_id": msg_id,
-                "content": content,
-            }
-            response = self.client.update_message(request)
-            return response['result'] == 'success'
+        request = {
+            "message_id": msg_id,
+            "content": content,
+        }
+        response = self.client.update_message(request)
+        return response['result'] == 'success'
 
     def update_stream_message(self, topic: str, msg_id: int,
                               content: str) -> bool:
-            request = {
-                "message_id": msg_id,
-                "content": content,
-                # TODO: Add support for "change_later" & "change_all"
-                "propagate_mode": "change_one",
-                "subject": topic,
-            }
-            response = self.client.update_message(request)
-            return response['result'] == 'success'
+        request = {
+            "message_id": msg_id,
+            "content": content,
+            # TODO: Add support for "change_later" & "change_all"
+            "propagate_mode": "change_one",
+            "subject": topic,
+        }
+        response = self.client.update_message(request)
+        return response['result'] == 'success'
 
     def get_messages(self, *,
                      num_after: int, num_before: int,

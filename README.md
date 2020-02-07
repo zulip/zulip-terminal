@@ -289,10 +289,11 @@ Once you have a development environment set up, you might find the following use
 | Run normally | `zulip-term` | `pipenv run zulip-term` |
 | Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
 | Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
-| Run all tests (including linter) | `pytest` | `pipenv run pytest` |
+| Run all tests | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 | Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
 | Check isort compliance | `./tools/run-isort-check` | `pipenv run ./tools/run-isort-check` |
+| Check PEP8 compliance | `pycodestyle` | `pipenv run pycodestyle` |
 
 #### GitLint (optional)
 
