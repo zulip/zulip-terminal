@@ -34,16 +34,19 @@ testing_deps = [
     'pytest==5.3.5',
     'pytest-cov==2.5.1',
     'pytest-mock==1.7.1',
-    'pycodestyle==2.5.0',
     'zipp==1.0.0',  # To support Python 3.5
 ]
 
-dev_helper_deps = [
+linting_deps = [
+    'isort==4.3.21',
     'mypy==0.740',
+    'pycodestyle==2.5.0',
+]
+
+dev_helper_deps = [
     'pudb==2017.1.4',
     'snakeviz==0.4.2',
     'gitlint>=0.10',
-    'isort==4.3.21',
 ]
 
 setup(
@@ -84,7 +87,9 @@ setup(
         ],
     },
     extras_require={
-        'dev': testing_deps + dev_helper_deps,
+        'dev': testing_deps + linting_deps + dev_helper_deps,
+        'testing': testing_deps,
+        'linting': linting_deps,
     },
     tests_require=testing_deps,
     install_requires=[
