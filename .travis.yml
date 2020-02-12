@@ -19,16 +19,17 @@ matrix:
       # Note that running isort on the lowest version should ensure changes are compatible
       script: ./tools/run-isort-check
     - python: 3.5
-      name: "CPython 3.5 pytest (default linux)"
+      name: "Pytest - CPython 3.5 (default linux)"
     - python: 3.6
-      name: "CPython 3.6 pytest (default linux)"
+      name: "Pytest - CPython 3.6 (default linux)"
     - python: 3.7
-      name: "CPython 3.7 pytest (default linux)"
+      name: "Pytest - CPython 3.7 (default linux)"
     - python: 3.8
-      name: "CPython 3.8 pytest (default linux)"
+      name: "Pytest - CPython 3.8 (default linux)"
     - python: pypy3.5
-      name: "PyPy 3.5 pytest (default linux)"
+      name: "Pytest - PyPy 3.5 (default linux)"
     - os: osx
+      name: "Pytest - Python 3 (OS X; xcode10)"
       cache:
       - $HOME/Library/Caches/pip
       osx_image: xcode10
