@@ -26,12 +26,12 @@ matrix:
       sudo: required
       language: generic
 install:
-  - pip3 install .[dev]
+  - pip3 install .[testing]
 script:
   - pytest
-  - if [[ "$RUN_MYPY" == "yes" ]]; then pip3 install -r requirements.txt && ./tools/run-mypy; fi
-  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pip3 install -r requirements.txt && ./tools/run-isort-check; fi
-  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pip3 install -r requirements.txt && pycodestyle; fi
+  - if [[ "$RUN_MYPY" == "yes" ]]; then pip3 install .[linting] && ./tools/run-mypy; fi
+  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pip3 install .[linting] && ./tools/run-isort-check; fi
+  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pip3 install .[linting] && pycodestyle; fi
 after_success:
   - pip3 install codecov
   - codecov
