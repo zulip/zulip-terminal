@@ -19,24 +19,24 @@ matrix:
       # Note that running isort on the lowest version should ensure changes are compatible
       script: ./tools/run-isort-check
     - python: 3.5
-      name: "Pytest - CPython 3.5 (default linux)"
+      name: "Install & pytest - CPython 3.5 (default linux)"
     - python: 3.6
-      name: "Pytest - CPython 3.6 (default linux)"
+      name: "Install & pytest - CPython 3.6 (default linux)"
     - python: 3.7
-      name: "Pytest - CPython 3.7 (default linux)"
+      name: "Install & pytest - CPython 3.7 (default linux)"
     - python: 3.8
-      name: "Pytest - CPython 3.8 (default linux)"
+      name: "Install & pytest - CPython 3.8 (default linux)"
     - python: pypy3.5
-      name: "Pytest - PyPy 3.5 (default linux)"
+      name: "Install & pytest - PyPy 3.5 (default linux)"
     - os: osx
-      name: "Pytest - Python 3 (OS X; xcode10)"
+      name: "Install & pytest - Python 3 (OS X; xcode10)"
       cache:
       - $HOME/Library/Caches/pip
       osx_image: xcode10
       sudo: required
       language: generic
 install:
-  - pip3 install .[testing]
+  - pip3 install . && pip3 install .[testing]
 script:
   - pytest
 after_success:
