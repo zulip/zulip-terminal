@@ -5,16 +5,25 @@ cache:
   pip: true
 matrix:
   include:
-    - python: 3.5
-      name: "CPython 3.5 pytest & isort linting (default linux)"
-      # Note that running isort on the lowest version should ensure changes are compatible
-      env: RUN_ISORT_CHECK=yes
-    - python: 3.6
-      name: "CPython 3.6 pytest & mypy type-checking (default linux)"
-      env: RUN_MYPY=yes
     - python: 3.7
-      name: "CPython 3.7 pytest & pycodestyle PEP8 linting (default linux)"
-      env: RUN_PYCODESTYLE=yes
+      name: "Linting - type consistency (mypy)"
+      install: pip3 install .[linting]
+      script: ./tools/run-mypy
+    - python: 3.7
+      name: "Linting - PEP8 (pycodestyle)"
+      install: pip3 install .[linting]
+      script: pycodestyle
+    - python: 3.5
+      name: "Linting - import order (isort)"
+      install: pip3 install .[linting]
+      # Note that running isort on the lowest version should ensure changes are compatible
+      script: ./tools/run-isort-check
+    - python: 3.5
+      name: "CPython 3.5 pytest (default linux)"
+    - python: 3.6
+      name: "CPython 3.6 pytest (default linux)"
+    - python: 3.7
+      name: "CPython 3.7 pytest (default linux)"
     - python: 3.8
       name: "CPython 3.8 pytest (default linux)"
     - python: pypy3.5
@@ -29,9 +38,6 @@ install:
   - pip3 install .[testing]
 script:
   - pytest
-  - if [[ "$RUN_MYPY" == "yes" ]]; then pip3 install .[linting] && ./tools/run-mypy; fi
-  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pip3 install .[linting] && ./tools/run-isort-check; fi
-  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pip3 install .[linting] && pycodestyle; fi
 after_success:
   - pip3 install codecov
   - codecov
