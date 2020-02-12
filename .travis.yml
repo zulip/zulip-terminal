@@ -3,8 +3,6 @@ git:
   depth: 20
 cache:
   pip: true
-  directories:
-    - $HOME/.cache/pipenv
 matrix:
   include:
     - python: 3.5
@@ -28,13 +26,12 @@ matrix:
       sudo: required
       language: generic
 install:
-  - pip install pipenv==11.10
-  - pipenv install --three --dev Pipfile
+  - pip3 install .[dev]
 script:
-  - pipenv run pytest
-  - if [[ "$RUN_MYPY" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-mypy; fi
-  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run ./tools/run-isort-check; fi
-  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pipenv run pip install -r requirements.txt && pipenv run pycodestyle; fi
+  - pytest
+  - if [[ "$RUN_MYPY" == "yes" ]]; then pip3 install -r requirements.txt && ./tools/run-mypy; fi
+  - if [[ "$RUN_ISORT_CHECK" == "yes" ]]; then pip3 install -r requirements.txt && ./tools/run-isort-check; fi
+  - if [[ "$RUN_PYCODESTYLE" == "yes" ]]; then pip3 install -r requirements.txt && pycodestyle; fi
 after_success:
-  - pip install codecov
+  - pip3 install codecov
   - codecov
