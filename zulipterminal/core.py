@@ -143,6 +143,20 @@ class Controller:
         self.loop.widget = PopUpConfirmationView(self, question,
                                                  mute_this_stream)
 
+    def topic_muting_confirmation_popup(self, button: Any) -> None:
+        currently_muted = self.model.is_muted_topic(button.stream_id,
+                                                    button.topic_name)
+        type_of_action = "unmuting" if currently_muted else "muting"
+        question = urwid.Text(("bold", "Confirm " + type_of_action +
+                               " of topic '" + button.topic_name +
+                               "' under the '" + button.stream_name +
+                               " stream ?'"))
+        mute_this_topic = partial(self.model.toggle_topic_muted_status,
+                                  button.stream_id, button.stream_name,
+                                  button.topic_name)
+        self.loop.widget = PopUpConfirmationView(self, question,
+                                                 mute_this_topic)
+
     def narrow_to_stream(self, button: Any) -> None:
         already_narrowed = self.model.set_narrow(stream=button.stream_name)
         if already_narrowed:

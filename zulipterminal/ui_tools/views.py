@@ -730,6 +730,9 @@ class LeftColumnView(urwid.Pile):
                 get((stream_id, topic), 0)
             ) for topic in self.model.index['topics'][stream_id]]
 
+        self.view.topic_name_to_button = {topic.topic_name: topic
+                                          for topic in topics_btn_list}
+
         self.view.topic_w = TopicsView(topics_btn_list, self.view,
                                        stream_button)
         w = urwid.LineBox(

@@ -175,6 +175,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Mute/unmute Streams',
         'key_category': 'stream_list',
     }),
+    ('TOGGLE_MUTE_TOPIC', {
+        'keys': {'M'},
+        'help_text': 'Mute/unmute Topics',
+        'key_category': 'stream_list',
+    }),
     ('ENTER', {
         'keys': {'enter'},
         'help_text': 'Perform current action',
@@ -268,6 +273,7 @@ HELP_CATEGORIES = OrderedDict([
     ('searching', 'Searching'),
     ('msg_actions', 'Actions for the selected message'),
     ('stream_list', 'Stream list actions'),
+    ('topic_list', 'Topic list actions'),
     ('msg_compose', 'Composing a Message'),
 ])
 

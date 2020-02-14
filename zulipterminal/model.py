@@ -92,6 +92,7 @@ class Model:
             ('update_message', self.update_message),
             ('reaction', self.update_reaction),
             ('subscription', self.update_subscription),
+            ('muted_topics', self.update_topic_muting),
             ('typing', self.handle_typing_event),
             ('update_message_flags', self.update_message_flag_status),
         ])  # type: OrderedDict[str, Callable[[Event], None]]
@@ -591,6 +592,39 @@ class Model:
         user_group_names.sort(key=str.lower)
         return user_group_names
 
+    def update_topic_muting(self, event:Event) -> None:
+        """
+        Handle Topic muting events
+        """
+        if hasattr(self.controller, 'view'):
+            if (event['type'] == 'muted_topics' and
+                    'muted_topics' in event):
+                new_muted_topics = event['muted_topics']
+                added_topic, is_mute_topic = self._get_muted_topic(new_muted_topics)
+                self.muted_topics = new_muted_topics
+                if (self.controller.view.left_panel.is_in_topic_view and
+                    added_topic[0] == self.controller.view.
+                    topic_w.stream_button.stream_name):
+                    topic_button = self.controller.view.topic_name_to_button[added_topic[1]]
+                    if is_mute_topic:
+                        topic_button.mark_muted()
+                    else:
+                        topic_button.mark_unmuted()
+                self.controller.update_screen()
+
+    def _get_muted_topic(self, muted_topics: List[List[str]]) -> Tuple[List[str], bool]:
+        """
+        We figure out which topic has been muted/unmuted and return the extra
+        topic and whether it is muting/unmuting.
+        """
+        for topic in muted_topics:
+            if topic not in self.muted_topics:
+                return (topic, True)
+        # If it reaches here, then we must have unmuted a topic.
+        for topic in self.muted_topics:
+            if topic not in muted_topics:
+                return (topic, False)
+
     def update_subscription(self, event: Event) -> None:
         """
         Handle changes in subscription (Eg: muting/unmuting streams)
@@ -612,6 +646,15 @@ class Model:
                     stream_button.mark_muted()
 
                 self.controller.update_screen()
+
+    def toggle_topic_muted_status(self, stream_id: int, stream_name:str, topic_name :str) -> bool:
+        request = {
+            'stream': stream_name,
+            'topic': topic_name,
+            'op': 'remove' if self.is_muted_topic(stream_id, topic_name) else 'add'
+        }
+        response = self.client.mute_topic(request)
+        return response['result'] == 'success'
 
     def toggle_stream_muted_status(self, stream_id: int) -> bool:
         request = [{
