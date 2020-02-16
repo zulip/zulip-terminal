@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import date, datetime
 from sys import platform
 from time import ctime, time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import emoji
@@ -808,12 +808,14 @@ class PanelSearchBox(urwid.Edit):
     """
     Search Box to search panel views in real-time.
     """
-    def __init__(self, panel_view: Any, search_command: str) -> None:
+    def __init__(self, panel_view: Any, search_command: str,
+                 update_function: Callable[..., None]) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
         self.search_text = ("Search [" +
                             ", ".join(keys_for_command(search_command)) +
                             "]: ")
+        urwid.connect_signal(self, 'change', update_function)
         super(PanelSearchBox, self).__init__(edit_text=self.search_text)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:

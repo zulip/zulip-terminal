@@ -253,9 +253,9 @@ class StreamsView(urwid.Frame):
         self.streams_btn_list = streams_btn_list
         self.focus_index_before_search = 0
         list_box = urwid.ListBox(self.log)
-        self.stream_search_box = PanelSearchBox(self, 'SEARCH_STREAMS')
-        urwid.connect_signal(self.stream_search_box,
-                             'change', self.update_streams)
+        self.stream_search_box = PanelSearchBox(self,
+                                                'SEARCH_STREAMS',
+                                                self.update_streams)
         super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
             self.stream_search_box, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
@@ -315,12 +315,12 @@ class TopicsView(urwid.Frame):
         self.topics_btn_list = topics_btn_list
         self.stream_button = stream_button
         self.list_box = urwid.ListBox(self.log)
-        self.topic_search_box = PanelSearchBox(self, 'SEARCH_TOPICS')
+        self.topic_search_box = PanelSearchBox(self,
+                                               'SEARCH_TOPICS',
+                                               self.update_topics)
         self.header_list = urwid.Pile([self.stream_button,
                                        urwid.Divider('─'),
                                        self.topic_search_box])
-        urwid.connect_signal(self.topic_search_box,
-                             'change', self.update_topics)
         super(TopicsView, self).__init__(self.list_box, header=urwid.LineBox(
             self.header_list, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
@@ -543,9 +543,9 @@ class RightColumnView(urwid.Frame):
     def __init__(self, width: int, view: Any) -> None:
         self.width = width
         self.view = view
-        self.user_search = PanelSearchBox(self, 'SEARCH_PEOPLE')
-        urwid.connect_signal(self.user_search, 'change',
-                             self.update_user_list)
+        self.user_search = PanelSearchBox(self,
+                                          'SEARCH_PEOPLE',
+                                          self.update_user_list)
         self.view.user_search = self.user_search
         search_box = urwid.LineBox(
             self.user_search, tlcorner=u'─', tline=u'', lline=u'',
