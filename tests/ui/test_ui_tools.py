@@ -394,7 +394,6 @@ class TestStreamsView:
 
     @pytest.fixture
     def stream_view(self, mocker):
-        mocker.patch(VIEWS + ".urwid.connect_signal")
         mocker.patch(VIEWS + ".threading.Lock")
         self.view = mocker.Mock()
         self.stream_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
@@ -408,7 +407,7 @@ class TestStreamsView:
         assert stream_view.streams_btn_list == self.streams_btn_list
         assert stream_view.stream_search_box
         self.stream_search_box.assert_called_once_with(
-            stream_view, 'SEARCH_STREAMS')
+            stream_view, 'SEARCH_STREAMS', stream_view.update_streams)
 
     @pytest.mark.parametrize('new_text, expected_log', [
         ('f', ['FOO', 'foo', 'fan']),
@@ -499,7 +498,6 @@ class TestTopicsView:
         self.log = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
                                 return_value=[])
         self.stream_button = stream_button
-        mocker.patch(VIEWS + ".urwid.connect_signal")
         mocker.patch(VIEWS + ".threading.Lock")
         self.topic_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
         self.view = mocker.Mock()
@@ -517,7 +515,7 @@ class TestTopicsView:
         assert topic_view.view == self.view
         assert topic_view.topic_search_box
         self.topic_search_box.assert_called_once_with(
-            topic_view, 'SEARCH_TOPICS')
+            topic_view, 'SEARCH_TOPICS', topic_view.update_topics)
         self.header_list.assert_called_once_with([topic_view.stream_button,
                                                   self.divider('─'),
                                                   topic_view.topic_search_box])
