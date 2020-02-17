@@ -66,7 +66,7 @@ class MessageView(urwid.ListBox):
         # shown in the MessageView
         self.model.msg_view = self.log
 
-        super(MessageView, self).__init__(self.log)
+        super().__init__(self.log)
         self.set_focus(self.focus_msg)
         # if loading new/old messages - True
         self.old_loading = False
@@ -139,8 +139,7 @@ class MessageView(urwid.ListBox):
             if button == 5:
                 self.keypress(size, 'down')
                 return True
-        return super(MessageView, self).mouse_event(size, event, button, col,
-                                                    row, focus)
+        return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('NEXT_MESSAGE', key) and not self.new_loading:
@@ -175,14 +174,14 @@ class MessageView(urwid.ListBox):
                self.focus_position == 0:
                 return self.keypress(size, 'up')
             else:
-                return super(MessageView, self).keypress(size, 'page up')
+                return super().keypress(size, 'page up')
 
         elif is_command_key('SCROLL_TO_BOTTOM', key) and not self.old_loading:
             if self.focus is not None and \
                self.focus_position == len(self.log) - 1:
                 return self.keypress(size, 'down')
             else:
-                return super(MessageView, self).keypress(size, 'page down')
+                return super().keypress(size, 'page down')
 
         elif is_command_key('THUMBS_UP', key):
             if self.focus is not None:
@@ -195,7 +194,7 @@ class MessageView(urwid.ListBox):
                 message = self.focus.original_widget.message
                 self.model.toggle_message_star_status(message)
 
-        key = super(MessageView, self).keypress(size, key)
+        key = super().keypress(size, key)
         return key
 
     def update_search_box_narrow(self, message_view: Any) -> None:
@@ -256,7 +255,7 @@ class StreamsView(urwid.Frame):
         self.stream_search_box = PanelSearchBox(self,
                                                 'SEARCH_STREAMS',
                                                 self.update_streams)
-        super(StreamsView, self).__init__(list_box, header=urwid.LineBox(
+        super().__init__(list_box, header=urwid.LineBox(
             self.stream_search_box, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
@@ -288,8 +287,7 @@ class StreamsView(urwid.Frame):
             elif button == 5:
                 self.keypress(size, 'down')
                 return True
-        return super(StreamsView, self).mouse_event(size, event, button, col,
-                                                    row, focus)
+        return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('SEARCH_STREAMS', key):
@@ -302,7 +300,7 @@ class StreamsView(urwid.Frame):
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
-        return_value = super(StreamsView, self).keypress(size, key)
+        return_value = super().keypress(size, key)
         _, self.focus_index_before_search = self.log.get_focus()
         return return_value
 
@@ -321,7 +319,7 @@ class TopicsView(urwid.Frame):
         self.header_list = urwid.Pile([self.stream_button,
                                        urwid.Divider('─'),
                                        self.topic_search_box])
-        super(TopicsView, self).__init__(self.list_box, header=urwid.LineBox(
+        super().__init__(self.list_box, header=urwid.LineBox(
             self.header_list, tlcorner=u'─', tline=u'', lline=u'',
             trcorner=u'─', blcorner=u'─', rline=u'',
             bline=u'─', brcorner=u'─'
@@ -376,8 +374,7 @@ class TopicsView(urwid.Frame):
             elif button == 5:
                 self.keypress(size, 'down')
                 return True
-        return super(TopicsView, self).mouse_event(size, event, button, col,
-                                                   row, focus)
+        return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('TOGGLE_TOPIC', key):
@@ -399,13 +396,13 @@ class TopicsView(urwid.Frame):
             self.set_focus('body')
             self.view.controller.update_screen()
             return key
-        return super(TopicsView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class UsersView(urwid.ListBox):
     def __init__(self, users_btn_list: List[Any]) -> None:
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
-        super(UsersView, self).__init__(self.log)
+        super().__init__(self.log)
 
     def mouse_event(self, size: Any, event: str, button: int, col: int,
                     row: int, focus: Any) -> Any:
@@ -417,8 +414,7 @@ class UsersView(urwid.ListBox):
             elif button == 5:
                 for _ in range(5):
                     self.keypress(size, 'down')
-        return super(UsersView, self).mouse_event(size, event, button, col,
-                                                  row, focus)
+        return super().mouse_event(size, event, button, col, row, focus)
 
 
 class MiddleColumnView(urwid.Frame):
@@ -432,8 +428,7 @@ class MiddleColumnView(urwid.Frame):
         self.last_unread_pm = None
         self.search_box = search_box
         model.msg_list = msg_list
-        super(MiddleColumnView, self).__init__(msg_list, header=search_box,
-                                               footer=write_box)
+        super().__init__(msg_list, header=search_box, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts['unread_topics'].keys())
@@ -472,7 +467,7 @@ class MiddleColumnView(urwid.Frame):
             self.set_focus('body')
 
         elif self.focus_position in ['footer', 'header']:
-            return super(MiddleColumnView, self).keypress(size, key)
+            return super().keypress(size, key)
 
         elif is_command_key('SEARCH_MESSAGES', key):
             self.controller.editor_mode = True
@@ -532,7 +527,7 @@ class MiddleColumnView(urwid.Frame):
             self.view.show_left_panel(visible=True)
         elif is_command_key('GO_RIGHT', key):
             self.view.show_right_panel(visible=True)
-        return super(MiddleColumnView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class RightColumnView(urwid.Frame):
@@ -554,8 +549,7 @@ class RightColumnView(urwid.Frame):
             )
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
-        super(RightColumnView, self).__init__(self.users_view(),
-                                              header=search_box)
+        super().__init__(self.users_view(), header=search_box)
 
     @asynch
     def update_user_list(self, search_box: Any=None,
@@ -630,7 +624,7 @@ class RightColumnView(urwid.Frame):
             return key
         elif is_command_key('GO_LEFT', key):
             self.view.show_right_panel(visible=False)
-        return super(RightColumnView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class LeftColumnView(urwid.Pile):
@@ -651,7 +645,7 @@ class LeftColumnView(urwid.Pile):
             (4, self.menu_v),
             self.stream_v
         ]
-        super(LeftColumnView, self).__init__(self.left_column_structure)
+        super().__init__(self.left_column_structure)
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
@@ -751,7 +745,7 @@ class LeftColumnView(urwid.Pile):
             return key
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)
-        return super(LeftColumnView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class HelpView(urwid.ListBox):
@@ -790,12 +784,12 @@ class HelpView(urwid.ListBox):
 
         self.height = len(self.log)
 
-        super(HelpView, self).__init__(self.log)
+        super().__init__(self.log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_popup()
-        return super(HelpView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class PopUpConfirmationView(urwid.Overlay):
@@ -831,7 +825,7 @@ class PopUpConfirmationView(urwid.Overlay):
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key):
             self.controller.exit_popup()
-        return super(PopUpConfirmationView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class StreamInfoView(urwid.ListBox):
@@ -842,13 +836,13 @@ class StreamInfoView(urwid.ListBox):
         self.width = max(len(desc), len("# {}".format(name)))+2
         self.height = 2
         log = [urwid.Text(desc, align='center')]
-        super(StreamInfoView, self).__init__(log)
+        super().__init__(log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if (is_command_key('GO_BACK', key) or
                 is_command_key('STREAM_DESC', key)):
                 self.controller.exit_popup()
-        return super(StreamInfoView, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class MsgInfoView(urwid.ListBox):
@@ -890,9 +884,9 @@ class MsgInfoView(urwid.ListBox):
                 None if index % 2 else 'bar')
              for index, (field, data) in enumerate(msg_info.items())])
 
-        super(MsgInfoView, self).__init__(self.log)
+        super().__init__(self.log)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
-        return super(MsgInfoView, self).keypress(size, key)
+        return super().keypress(size, key)

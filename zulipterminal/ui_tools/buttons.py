@@ -9,7 +9,7 @@ class MenuButton(urwid.Button):
     def __init__(self, caption: Any, email: str='') -> None:
         self.caption = caption  # str
         self.email = email
-        super(MenuButton, self).__init__("")
+        super().__init__("")
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [self.caption], 0), None, 'selected')
 

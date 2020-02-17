@@ -32,7 +32,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
-        super(View, self).__init__(self.main_window())
+        super().__init__(self.main_window())
 
     def left_column_view(self) -> Any:
         return LeftColumnView(View.LEFT_WIDTH, self)
@@ -209,7 +209,7 @@ class View(urwid.WidgetWrap):
             key = 'page down'
         elif is_command_key('END_MESSAGE', key):
             key = 'end'
-        return super(View, self).keypress(size, key)
+        return super().keypress(size, key)
 
 
 class Screen(urwid.raw_display.Screen):
