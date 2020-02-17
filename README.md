@@ -290,11 +290,13 @@ Once you have a development environment set up, you might find the following use
 | Run normally | `zulip-term` | `pipenv run zulip-term` |
 | Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
 | Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
+| Run all linters | `./tools/lint-all` | `pipenv run ./tools/lint-all` |
 | Run all tests | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
-| Check type annotations | `./tools/run-mypy` | `pipenv run ./tools/run-mypy` |
-| Check isort compliance | `./tools/run-isort-check` | `pipenv run ./tools/run-isort-check` |
-| Check PEP8 compliance | `pycodestyle` | `pipenv run pycodestyle` |
+
+NOTE: The linters and pytest are run in CI (travis) when you submit a pull request (PR), and we expect them to pass before code is merged. Running them locally can speed your development time, but if you have troubles understanding why the linters or pytest are failing, please do push your code to a branch/PR and we can discuss the problems in the PR or on chat.zulip.org.
+
+NOTE: The lint script runs a number of separate linters to simplify the development workflow, but each individual linter can be run separately if you find this useful.
 
 #### GitLint (optional)
 

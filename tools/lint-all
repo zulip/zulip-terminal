@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+
+tools = {
+    'Import order (isort)': './tools/run-isort-check',
+    'Type consistency (mypy)': './tools/run-mypy',
+    'PEP8 (pycodestyle)': 'pycodestyle',
+}
+
+for tool_name, command in tools.items():
+    print(80*"=")
+    print(tool_name)
+    print(80*"-")
+    result = subprocess.call(command)
+    if result != 0:
+        print(80*"=")
+        print("LINTING FAILED")
+        sys.exit(1)
+
+print(80*"=")
+print("LINTING SUCCESSFUL")
