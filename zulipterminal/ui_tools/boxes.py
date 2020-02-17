@@ -19,7 +19,7 @@ from zulipterminal.helper import (
 
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
-        super(WriteBox, self).__init__(self.main_view(True))
+        super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
         self.msg_edit_id = None  # type: Optional[int]
@@ -177,7 +177,7 @@ class WriteBox(urwid.Pile):
             self.focus_position = self.focus_position == 0
             self.contents[0][0].focus_col = 0
 
-        key = super(WriteBox, self).keypress(size, key)
+        key = super().keypress(size, key)
         return key
 
 
@@ -227,7 +227,7 @@ class MessageBox(urwid.Pile):
         # mouse_event helper variable
         self.displaying_selection_hint = False
 
-        super(MessageBox, self).__init__(self.main_view())
+        super().__init__(self.main_view())
 
     def _time_for_message(self, message: Message) -> str:
         return ctime(message['timestamp'])[:-8]
@@ -663,8 +663,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.set_footer_text()
             self.displaying_selection_hint = False
 
-        return super(MessageBox, self).mouse_event(size, event, button, col,
-                                                   row, focus)
+        return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
@@ -768,7 +767,7 @@ class MessageBox(urwid.Pile):
 class SearchBox(urwid.Pile):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
-        super(SearchBox, self).__init__(self.main_view())
+        super().__init__(self.main_view())
 
     def main_view(self) -> Any:
         search_text = ("Search [" +
@@ -803,7 +802,7 @@ class SearchBox(urwid.Pile):
             self.controller.view.middle_column.set_focus('body')
             return key
 
-        key = super(SearchBox, self).keypress(size, key)
+        key = super().keypress(size, key)
         return key
 
 
@@ -819,7 +818,7 @@ class PanelSearchBox(urwid.Edit):
                             ", ".join(keys_for_command(search_command)) +
                             "]: ")
         urwid.connect_signal(self, 'change', update_function)
-        super(PanelSearchBox, self).__init__(edit_text=self.search_text)
+        super().__init__(edit_text=self.search_text)
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         if is_command_key('ENTER', key):
@@ -832,4 +831,4 @@ class PanelSearchBox(urwid.Edit):
             self.set_edit_text(self.search_text)
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, 'esc')
-        return super(PanelSearchBox, self).keypress(size, key)
+        return super().keypress(size, key)
