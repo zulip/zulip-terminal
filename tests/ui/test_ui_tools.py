@@ -410,17 +410,26 @@ class TestStreamsView:
             stream_view, 'SEARCH_STREAMS', stream_view.update_streams)
 
     @pytest.mark.parametrize('new_text, expected_log', [
-        ('f', ['FOO', 'foo', 'fan']),
-        ('foo', ['FOO', 'foo']),
-        ('FOO', ['FOO', 'foo']),
+        ('f', ['FOO', 'FOOBAR', 'foo', 'fan']),
+        ('a', ['FOOBAR', 'fan', 'bar']),
+        ('bar', ['FOOBAR', 'bar']),
+        ('foo', ['FOO', 'FOOBAR', 'foo']),
+        ('FOO', ['FOO', 'FOOBAR', 'foo']),
+        ('test', ['test here']),
+        ('here', ['test here']),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log):
+        stream_names = [
+            'FOO', 'FOOBAR', 'foo', 'fan',
+            'boo', 'BOO', 'bar', 'test here',
+        ]
         self.view.controller.editor_mode = True
         new_text = new_text
         search_box = "SEARCH_BOX"
         stream_view.streams_btn_list = [
-            mocker.Mock(stream_name=stream_name) for stream_name in [
-                'FOO', 'foo', 'fan', 'boo', 'BOO']]
+            mocker.Mock(stream_name=stream_name)
+            for stream_name in stream_names
+        ]
         stream_view.update_streams(search_box, new_text)
         assert [stream.stream_name for stream in stream_view.log
                 ] == expected_log
@@ -521,17 +530,26 @@ class TestTopicsView:
                                                   topic_view.topic_search_box])
 
     @pytest.mark.parametrize('new_text, expected_log', [
-        ('f', ['FOO', 'foo', 'fan']),
-        ('foo', ['FOO', 'foo']),
-        ('FOO', ['FOO', 'foo']),
+        ('f', ['FOO', 'FOOBAR', 'foo', 'fan']),
+        ('a', ['FOOBAR', 'fan', 'bar']),
+        ('bar', ['FOOBAR', 'bar']),
+        ('foo', ['FOO', 'FOOBAR', 'foo']),
+        ('FOO', ['FOO', 'FOOBAR', 'foo']),
+        ('(no', ['(no topic)']),
+        ('topic', ['(no topic)']),
     ])
     def test_update_topics(self, mocker, topic_view, new_text, expected_log):
+        topic_names = [
+            'FOO', 'FOOBAR', 'foo', 'fan',
+            'boo', 'BOO', 'bar', '(no topic)',
+        ]
         self.view.controller.editor_mode = True
         new_text = new_text
         search_box = "SEARCH_BOX"
         topic_view.topics_btn_list = [
-            mocker.Mock(topic_name=topic_name) for topic_name in [
-                'FOO', 'foo', 'fan', 'boo', 'BOO']]
+            mocker.Mock(topic_name=topic_name)
+            for topic_name in topic_names
+        ]
         topic_view.update_topics(search_box, new_text)
         assert [topic.topic_name for topic in topic_view.log
                 ] == expected_log
