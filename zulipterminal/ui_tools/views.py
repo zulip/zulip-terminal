@@ -270,10 +270,11 @@ class StreamsView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
         with self.search_lock:
+            new_text = new_text.lower()
             streams_display = [
                 stream
                 for stream in self.streams_btn_list.copy()
-                if stream.stream_name.lower().startswith(new_text.lower())
+                if new_text in stream.stream_name.lower()
             ]
             self.log.clear()
             self.log.extend(streams_display)
@@ -335,10 +336,11 @@ class TopicsView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong topics list.
         with self.search_lock:
+            new_text = new_text.lower()
             topics_to_display = [
                 topic
                 for topic in self.topics_btn_list.copy()
-                if topic.topic_name.lower().startswith(new_text.lower())
+                if new_text in topic.topic_name.lower()
             ]
             self.log.clear()
             self.log.extend(topics_to_display)
