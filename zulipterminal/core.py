@@ -40,6 +40,7 @@ class Controller:
                                           format(ZT_VERSION, platform()))
         self.model = Model(self)
         self.view = View(self)
+        self.set_footer_text = self.view.set_footer_text
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 

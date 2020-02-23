@@ -83,6 +83,7 @@ class Model:
         self.user_id = -1  # type: int
         self.user_email = ""
         self.user_full_name = ""
+        self.sending_msg = False  # type: bool
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
         self.server_name = ""
@@ -287,26 +288,20 @@ class Model:
         })
         set_count(id_list, self.controller, -1)  # FIXME Update?
 
-    def send_private_message(self, recipients: str,
-                             content: str) -> bool:
-        request = {
-            'type': 'private',
-            'to': recipients,
-            'content': content,
-        }
+    @asynch
+    def send_message(self, request: Dict[str, Any]) -> None:
+        self.sending_msg = True
+        self.controller.set_footer_text('  Sending...')
         response = self.client.send_message(request)
-        return response['result'] == 'success'
-
-    def send_stream_message(self, stream: str, topic: str,
-                            content: str) -> bool:
-        request = {
-            'type': 'stream',
-            'to': stream,
-            'subject': topic,
-            'content': content,
-        }
-        response = self.client.send_message(request)
-        return response['result'] == 'success'
+        if response['result'] == 'success':
+            self.controller.set_footer_text(
+                '  Message successfully sent!', duration=3)
+            self.controller.view.write_box.msg_write_box.edit_text = ''
+        else:
+            self.controller.set_footer_text(
+                '  Failed to send message. Please make sure'
+                ' your compose box is not empty.', duration=3)
+        self.sending_msg = False
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
         request = {
@@ -631,13 +626,13 @@ class Model:
                     event['sender']['email'] in self.narrow[0][1].split(','):
                 if event['op'] == 'start':
                     user = self.user_dict[event['sender']['email']]
-                    self.controller.view.set_footer_text([
+                    self.controller.set_footer_text([
                         ' ',
                         ('code', user['full_name']),
                         ' is typing...'
                     ])
                 elif event['op'] == 'stop':
-                    self.controller.view.set_footer_text()
+                    self.controller.set_footer_text()
                 else:
                     raise RuntimeError("Unknown typing event operation")
 

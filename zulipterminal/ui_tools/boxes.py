@@ -129,7 +129,8 @@ class WriteBox(urwid.Pile):
             return None
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if is_command_key('SEND_MESSAGE', key):
+        if is_command_key('SEND_MESSAGE', key) and not self.model.sending_msg:
+            self.view.set_footer_text('  Sending...')
             if self.msg_edit_id:
                 if not self.to_write_box:
                     success = self.model.update_stream_message(
@@ -142,23 +143,28 @@ class WriteBox(urwid.Pile):
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_id,
                     )
+                if success:
+                    self.view.set_footer_text('  Message successfully edited!',
+                                              duration=3)
+                    self.msg_write_box.edit_text = ''
+                    if self.msg_edit_id:
+                        self.msg_edit_id = None
+                        self.keypress(size, 'esc')
             else:
                 if not self.to_write_box:
-                    success = self.model.send_stream_message(
-                        stream=self.stream_write_box.edit_text,
-                        topic=self.title_write_box.edit_text,
-                        content=self.msg_write_box.edit_text
-                    )
+                    request = {
+                        'type': 'stream',
+                        'to': self.stream_write_box.edit_text,
+                        'subject': self.title_write_box.edit_text,
+                        'content': self.msg_write_box.edit_text
+                    }
                 else:
-                    success = self.model.send_private_message(
-                        recipients=self.to_write_box.edit_text,
-                        content=self.msg_write_box.edit_text
-                    )
-            if success:
-                self.msg_write_box.edit_text = ''
-                if self.msg_edit_id:
-                    self.msg_edit_id = None
-                    self.keypress(size, 'esc')
+                    request = {
+                        'type': 'private',
+                        'to': self.to_write_box.edit_text,
+                        'content': self.msg_write_box.edit_text
+                    }
+                self.model.send_message(request)
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
             self.view.controller.editor_mode = False
