@@ -89,9 +89,16 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
 
     messages = controller.model.index['messages']
     unread_counts = controller.model.unread_counts  # type: UnreadCounts
+    unindexed_messages = controller.model.unindexed_messages
 
     for id in id_list:
-        msg = messages[id]
+        # We check to see if the message we are altering count to is
+        # indexed or not, and fetch it from the respective collection.
+        if id in messages:
+            msg = messages[id]
+        else:
+            msg = unindexed_messages[id]
+            messages = unindexed_messages
 
         if msg['type'] == 'stream':
             key = (messages[id]['stream_id'], msg['subject'])

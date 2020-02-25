@@ -98,6 +98,8 @@ class Model:
 
         self.initial_data = {}  # type: Dict[str, Any]
 
+        self.unindexed_messages = {}  # type: Dict[int, Any]
+
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
         self._update_initial_data()
@@ -287,6 +289,18 @@ class Model:
         })
         set_count(id_list, self.controller, -1)  # FIXME Update?
 
+    def increase_unindexed_message_count(self,
+                                         message: Dict[str, Any]) -> None:
+        self.unindexed_messages[message['id']] = message
+        # FIXME: Check if the message is already marked as read?
+        set_count([message['id']], self.controller, 1)
+
+    def decrease_unindexed_message_count(self,
+                                         messages: List[Any]) -> None:
+        for msg in messages:
+            if msg['id'] in self.unindexed_messages:
+                self.unindexed_messages.pop(msg['id'])
+
     def send_private_message(self, recipients: str,
                              content: str) -> bool:
         request = {
@@ -356,6 +370,9 @@ class Model:
                 # 'found_newest' flag. Instead, we use this logic:
                 query_range = num_after + num_before + 1
                 self.found_newest = len(response['messages']) < query_range
+            # In-case any of the fetched messages were previously un-indexed, we
+            # remove them from the collection.
+            self.decrease_unindexed_message_count(response['messages'])
             return True
         return False
 
@@ -737,6 +754,8 @@ class Model:
             if 'read' not in response['flags']:
                 set_count([response['id']], self.controller, 1)
             self.controller.update_screen()
+        else:
+            self.increase_unindexed_message_count(response)
 
     def update_topic_index(self, stream_id: int, topic_name: str) -> None:
         """
