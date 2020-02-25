@@ -792,6 +792,16 @@ class HelpView(urwid.ListBox):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key('HELP', key):
             self.controller.exit_popup()
+        elif is_command_key('GO_UP', key):
+            key = 'up'
+        elif is_command_key('GO_DOWN', key):
+            key = 'down'
+        elif is_command_key('SCROLL_UP', key):
+            key = 'page up'
+        elif is_command_key('SCROLL_DOWN', key):
+            key = 'page down'
+        elif is_command_key('GO_TO_BOTTOM', key):
+            key = 'end'
         return super().keypress(size, key)
 
 
