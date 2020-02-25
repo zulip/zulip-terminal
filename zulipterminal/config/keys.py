@@ -24,14 +24,14 @@ KEY_BINDINGS = OrderedDict([
         'excluded_from_random_tips': False,
         'key_category': 'general',
     }),
-    ('PREVIOUS_MESSAGE', {
+    ('GO_UP', {
         'keys': {'k', 'up'},
-        'help_text': 'Previous message',
+        'help_text': 'Go up/Previous message',
         'key_category': 'navigation',
     }),
-    ('NEXT_MESSAGE', {
+    ('GO_DOWN', {
         'keys': {'j', 'down'},
-        'help_text': 'Next message',
+        'help_text': 'Go down/Next message',
         'key_category': 'navigation',
     }),
     ('GO_LEFT', {
@@ -44,19 +44,19 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Go right',
         'key_category': 'navigation',
     }),
-    ('SCROLL_TO_TOP', {
+    ('SCROLL_UP', {
         'keys': {'K', 'page up'},
-        'help_text': 'Scroll to top',
+        'help_text': 'Scroll up',
         'key_category': 'navigation',
     }),
-    ('SCROLL_TO_BOTTOM', {
+    ('SCROLL_DOWN', {
         'keys': {'J', 'page down'},
-        'help_text': 'Scroll to bottom',
+        'help_text': 'Scroll down',
         'key_category': 'navigation',
     }),
-    ('END_MESSAGE', {
+    ('GO_TO_BOTTOM', {
         'keys': {'G', 'end'},
-        'help_text': 'Go to last message in view',
+        'help_text': 'Go to bottom/last message in view',
         'key_category': 'navigation',
     }),
     ('REPLY_MESSAGE', {

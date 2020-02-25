@@ -143,7 +143,7 @@ class MessageView(urwid.ListBox):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key('NEXT_MESSAGE', key) and not self.new_loading:
+        if is_command_key('GO_DOWN', key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, 'above')
@@ -156,7 +156,7 @@ class MessageView(urwid.ListBox):
                     self.load_new_messages(id)
                 return key
 
-        elif is_command_key('PREVIOUS_MESSAGE', key) and not self.old_loading:
+        elif is_command_key('GO_UP', key) and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, 'below')
@@ -170,14 +170,14 @@ class MessageView(urwid.ListBox):
                     self.load_old_messages()
                 return key
 
-        elif is_command_key('SCROLL_TO_TOP', key) and not self.old_loading:
+        elif is_command_key('SCROLL_UP', key) and not self.old_loading:
             if self.focus is not None and \
                self.focus_position == 0:
                 return self.keypress(size, 'up')
             else:
                 return super().keypress(size, 'page up')
 
-        elif is_command_key('SCROLL_TO_BOTTOM', key) and not self.old_loading:
+        elif is_command_key('SCROLL_DOWN', key) and not self.old_loading:
             if self.focus is not None and \
                self.focus_position == len(self.log) - 1:
                 return self.keypress(size, 'down')

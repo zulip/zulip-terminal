@@ -196,19 +196,19 @@ class View(urwid.WidgetWrap):
         # replace alternate keys with arrow/functional keys
         # This is needed for navigating in widgets
         # other than message_view.
-        elif is_command_key('PREVIOUS_MESSAGE', key):
+        elif is_command_key('GO_UP', key):
             key = 'up'
-        elif is_command_key('NEXT_MESSAGE', key):
+        elif is_command_key('GO_DOWN', key):
             key = 'down'
         elif is_command_key('GO_LEFT', key):
             key = 'left'
         elif is_command_key('GO_RIGHT', key):
             key = 'right'
-        elif is_command_key('SCROLL_TO_TOP', key):
+        elif is_command_key('SCROLL_UP', key):
             key = 'page up'
-        elif is_command_key('SCROLL_TO_BOTTOM', key):
+        elif is_command_key('SCROLL_DOWN', key):
             key = 'page down'
-        elif is_command_key('END_MESSAGE', key):
+        elif is_command_key('GO_TO_BOTTOM', key):
             key = 'end'
         return super().keypress(size, key)
 
