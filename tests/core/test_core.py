@@ -178,6 +178,30 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
+    def test_show_all_mentions(self, mocker, controller, index_all_mentions):
+        controller.model.narrow = []
+        controller.model.index = index_all_mentions
+        controller.model.muted_streams = set()  # FIXME Expand upon this
+        controller.model.muted_topics = []  # FIXME Expand upon this
+        controller.model.user_email = "some@email"
+        controller.model.stream_dict = {
+            205: {
+                'color': '#ffffff',
+            }
+        }
+        controller.model.msg_view = mocker.patch('urwid.SimpleFocusListWalker')
+        controller.model.msg_list = mocker.patch('urwid.ListBox')
+
+        controller.show_all_mentions('')
+
+        assert controller.model.narrow == [['is', 'mentioned']]
+        controller.model.msg_view.clear.assert_called_once_with()
+
+        id_list = index_all_mentions['mentioned_msg_ids']
+        widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
+        msg_ids = {widget.original_widget.message['id'] for widget in widgets}
+        assert msg_ids == id_list
+
     def test_main(self, mocker, controller):
         ret_mock = mocker.Mock()
         mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
