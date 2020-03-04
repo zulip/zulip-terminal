@@ -554,6 +554,21 @@ def index_all_starred(empty_index, request):
     return index
 
 
+@pytest.fixture(params=[
+    {537286, 537287, 537288},
+    {537286}, {537287}, {537288},
+    {537286, 537287}, {537286, 537288}, {537287, 537288},
+])
+def index_all_mentions(empty_index, request):
+    mentioned_messages = request.param
+    index = dict(empty_index, mentioned_msg_ids=mentioned_messages,
+                 private_msg_ids={537287, 537288})
+    for msg_id, msg in index['messages'].items():
+        if msg_id in mentioned_messages and 'mentioned' not in msg['flags']:
+            msg['flags'].append('mentioned')
+    return index
+
+
 @pytest.fixture
 def user_profile(logged_on_user):
     return {  # FIXME These should all be self-consistent with others?

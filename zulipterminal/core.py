@@ -233,6 +233,13 @@ class Controller:
                         anchor=None,
                         starred=True)
 
+    def show_all_mentions(self, button: Any) -> None:
+        # NOTE: Should we ensure we maintain anchor focus here?
+        # (As with starred, it seems to work fine without)
+        self._narrow_to(button,
+                        anchor=None,
+                        mentioned=True)
+
     def _finalize_show(self, w_list: List[Any]) -> None:
         focus_position = self.model.get_focus_in_current_narrow()
         if focus_position == set():
