@@ -20,13 +20,19 @@ class TopButton(urwid.Button):
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
-                 count: int=0) -> None:
+                 count: int=0,
+                 postfix_caption: Union[str, Tuple[Any, str]]='') -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
         else:
             prefix = prefix_character
         assert len(prefix) in (0, 1)
+        if isinstance(postfix_caption, tuple):
+            self.postfix_text = postfix_caption[1]
+        else:
+            self.postfix_text = postfix_caption
         self._caption = caption
+        self.postfix_caption = postfix_caption
         self.prefix_character = prefix_character
         self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
@@ -53,7 +59,7 @@ class TopButton(urwid.Button):
     def update_widget(self, count_text: str) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count -
-                              len(count_text))
+                              len(count_text) - len(self.postfix_text))
         if len(self._caption) > max_caption_length:
             caption = (self._caption[:max_caption_length-1] +
                        '\N{HORIZONTAL ELLIPSIS}')
@@ -61,13 +67,14 @@ class TopButton(urwid.Button):
             caption = self._caption
         num_extra_spaces = (
             self.width_for_text_and_count - len(count_text) - len(caption)
+            - len(self.postfix_text)
         )
 
         # NOTE: Generated text does not include space at end
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces*' '),
-             ' ', ('idle',  count_text)],
+             ' ', self.postfix_caption, ('idle',  count_text)],
             self.width_for_text_and_count+5),  # cursor location
             self.text_color,
             'selected')
@@ -188,7 +195,8 @@ class StreamButton(TopButton):
 class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,
                  view: Any, width: int,
-                 color: Optional[str]=None, count: int=0) -> None:
+                 color: Optional[str]=None, count: int=0,
+                 is_current_user: bool=False) -> None:
         # Properties accessed externally
         self.email = user['email']
         self.user_id = user['user_id']
@@ -204,7 +212,9 @@ class UserButton(TopButton):
                          prefix_character=(color, '\N{BULLET}'),
                          text_color=color,
                          width=width,
-                         count=count)
+                         count=count,
+                         postfix_caption=('current_user_indicator', '(You)')
+                         if is_current_user else '')
 
     def _narrow_with_compose(self, button: Any) -> None:
         # Switches directly to composing with user

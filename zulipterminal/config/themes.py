@@ -29,6 +29,7 @@ required_styles = {
     'bold',
     'footer',
     'starred',
+    'current_user_indicator',
 }
 
 # Colors used in gruvbox-256
@@ -76,6 +77,7 @@ THEMES = {
         ('footer',       'white',           'dark red',  'bold'),
         ('starred',      'light red, bold', ''),
         ('category',     'light blue, bold', ''),
+        ('current_user_indicator', 'white',  ''),
     ],
     'gruvbox': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -132,6 +134,8 @@ THEMES = {
          None,           LIGHTREDBOLD,      BLACK),
         ('category',     'light blue, bold', 'black',
          None,           LIGHTBLUE,         BLACK),
+        ('current_user_indicator',  'white', 'black',
+         None,           WHITE,             BLACK),
     ],
     'light': [
         (None,           'black',           'white'),
@@ -160,6 +164,7 @@ THEMES = {
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark gray'),
         ('category',     'dark gray, bold', 'light gray'),
+        ('current_user_indicator', 'white', 'dark gray'),
     ],
     'blue': [
         (None,           'black',           'light blue'),
@@ -188,6 +193,7 @@ THEMES = {
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark blue'),
         ('category',     'light gray, bold', 'light blue'),
+        ('current_user_indicator',  'white', 'dark blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 

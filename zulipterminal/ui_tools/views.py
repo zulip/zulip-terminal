@@ -603,7 +603,10 @@ class RightColumnView(urwid.Frame):
                     view=self.view,
                     width=self.width,
                     color=user['status'],
-                    count=unread_count
+                    count=unread_count,
+                    is_current_user=(
+                        self.view.model.user_id == user['user_id']
+                    )
                 )
             )
         user_w = UsersView(users_btn_list)
