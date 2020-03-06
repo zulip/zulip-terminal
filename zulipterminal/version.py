@@ -1,1 +1,1 @@
-ZT_VERSION = '0.4.0'
+ZT_VERSION = '0.4.0+git'
