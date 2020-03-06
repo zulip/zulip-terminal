@@ -1,5 +1,6 @@
 import pytest
 
+from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui import View
 
 
@@ -180,19 +181,29 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    def test_keypress(self, view, mocker):
+    @pytest.mark.parametrize('key, expected_key', [
+        (key, expected_key)
+        for keys, expected_key in [
+            (keys_for_command('GO_UP'), 'up'),
+            (keys_for_command('GO_DOWN'), 'down'),
+            (keys_for_command('SCROLL_UP'), 'page up'),
+            (keys_for_command('SCROLL_DOWN'), 'page down'),
+            (keys_for_command('GO_TO_BOTTOM'), 'end'),
+        ]
+        for key in keys
+    ])
+    def test_keypress_normal_mode_navigation(self, view, mocker,
+                                             key, expected_key):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
         size = (20,)
-        key = 'j'
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
 
-        # Test Normal Mode keypress
         view.controller.editor_mode = False
-        view.keypress(size, 'down')
-        super_view.assert_called_once_with(size, 'down')
+        view.keypress(size, key)
+        super_view.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
