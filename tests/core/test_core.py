@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.core import Controller
+from zulipterminal.core import Controller, TUTORIAL
 from zulipterminal.version import ZT_VERSION
 
 
@@ -22,7 +22,6 @@ class TestController:
                                                   '.poll_for_events')
         self.model.view = self.view
         self.view.focus_col = 1
-        mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
     def controller(self, mocker) -> None:
@@ -41,9 +40,33 @@ class TestController:
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
         self.model.assert_called_once_with(controller)
+        assert controller.theme == self.theme
+
+    def test_init_model(self, mocker) -> None:
+        mocker.patch('zulipterminal.core.Controller.__init__',
+                     return_value=None)
+        controller = Controller('config', 'theme', True, True)
+        controller.capture_stdout = mocker.Mock()
+        controller.init_model()
+
+        self.model.assert_called_once_with(controller)
+        assert controller.capture_stdout.called
+
+    def test_init_view(self, controller, mocker) -> None:
+        controller.init_view()
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
-        assert controller.theme == self.theme
+
+    def test_raise_exception(self, controller) -> None:
+        with pytest.raises(Exception):
+            controller.raise_exception(Exception)
+
+    @pytest.mark.parametrize('spinner', [
+        ['-'], ['|']
+    ])
+    def test_loading_text(self, controller, spinner):
+        text = controller.loading_text(spinner)
+        assert text == [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
 
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:
@@ -205,13 +228,15 @@ class TestController:
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        controller.view.palette = {
-            'default': 'theme_properties'
-        }
+        # pass
+        controller.show_main_view = mocker.Mock()
         mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
+        controller.restore_stdout = mocker.Mock()
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
         controller.main()
-        assert controller.loop.run.call_count == 1
+
+        controller.show_main_view.assert_called_once_with()
+        controller.loop.run.assert_called_once_with()
 
     @pytest.mark.parametrize('muted_streams, action', [
         ({205, 89}, 'unmuting'),
@@ -277,5 +302,23 @@ class TestController:
 
     def test_initialize_loop(self, mocker, controller):
         assert self.main_loop.call_count == 1
-        controller.loop.watch_pipe.assert_called_once_with(
-            controller.draw_screen)
+        assert controller.loop.watch_pipe.call_count == 2
+
+    def test_show_main_view_has_model(self, controller, mocker):
+        controller.capture_stdout = mocker.Mock()
+        controller.model = mocker.Mock()
+        controller.update_screen = mocker.Mock()
+        controller.init_view = mocker.Mock()
+        controller.txt = mocker.Mock()
+        controller.loading_text = mocker.Mock()
+        controller.view = mocker.Mock()
+
+        controller.show_main_view()
+
+        controller.capture_stdout.assert_called_once_with()
+        assert controller.update_screen.call_count == 1
+        controller.init_view.assert_called_once_with()
+        assert controller.loop.widget == controller.view
+        controller.loop.screen.register_palette.assert_called_once_with(
+            controller.theme
+        )

@@ -9,13 +9,14 @@ from typing import Any, List, Optional
 import urwid
 import zulip
 
-from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.themes import THEMES, ThemeSpec
+from zulipterminal.config.tutorial import TUTORIAL
 from zulipterminal.helper import Message, asynch
 from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    HelpView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
+    HelpView, LoadingView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -34,35 +35,31 @@ class Controller:
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
 
-        self.show_loading()
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
-        self.model = Model(self)
+        self.init_model()
+        # Show LoadingView first, then main View after
+        # Model is initialized.
+        self.initialize_loop()
+
+    def init_view(self) -> None:
         self.view = View(self)
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
-        self.initialize_loop()
-
     @asynch
-    def show_loading(self) -> None:
-
-        def spinning_cursor() -> Any:
-            while True:
-                for cursor in '|/-\\':
-                    yield cursor
-
-        spinner = spinning_cursor()
-        sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
-        while not hasattr(self, 'view'):
-            next_spinner = "Loading " + next(spinner)
-            sys.stdout.write(next_spinner)
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b'*len(next_spinner))
+    def init_model(self) -> None:
+        try:
+            self.model = Model(self)
+        except Exception as e:
+            self.exception = e
+            os.write(self.exception_pipe, b'1')
 
         self.capture_stdout()
+
+    def raise_exception(self, *args: Any, **kwargs: Any) -> None:
+        raise self.exception
 
     def capture_stdout(self, path: str='debug.log') -> None:
         if hasattr(self, '_stdout'):
@@ -262,13 +259,41 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
+    def loading_text(self, spinner: Any) -> List[Any]:
+        return [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
+
+    @asynch
+    def show_main_view(self) -> None:
+        def spinning_cursor() -> Any:
+            while True:
+                for cursor in '|/-\\':
+                    yield cursor
+
+        self.capture_stdout()
+        spinner = spinning_cursor()
+        while not hasattr(self, 'model'):
+            self.txt.set_text(self.loading_text([next(spinner)]))
+            self.update_screen()
+            time.sleep(0.1)
+
+        # display the view
+        self.init_view()
+        self.loop.widget = self.view
+        self.loop.screen.register_palette(self.theme)
+        self.update_screen()
+
     def initialize_loop(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
-        self.loop = urwid.MainLoop(self.view,
+
+        self.txt = LoadingView("", align="left")
+        fill = urwid.Padding(self.txt, 'center', ('relative', 50))
+        fill = urwid.Filler(fill)
+        self.loop = urwid.MainLoop(fill,
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
+        self.exception_pipe = self.loop.watch_pipe(self.raise_exception)
 
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)
@@ -282,6 +307,7 @@ class Controller:
                 'quit': 'undefined',  # Disable ^\, ^4
             }
             old_signal_list = self.loop.screen.tty_signal_keys(**disabled_keys)
+            self.show_main_view()
             self.loop.run()
 
         except Exception:
