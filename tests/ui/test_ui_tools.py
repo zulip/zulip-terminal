@@ -462,13 +462,17 @@ class TestStreamsView:
         stream_view.set_focus.assert_called_once_with("body")
         assert stream_view.log == self.streams_btn_list
 
+    @pytest.mark.parametrize('search_streams_key',
+                             keys_for_command('SEARCH_STREAMS'))
+    @pytest.mark.parametrize('go_back_key', keys_for_command('GO_BACK'))
     @pytest.mark.parametrize('current_focus, stream', [
         (0, 'FOO'),
         (2, 'fan'),
         (4, 'BOO'),
     ])
     def test_return_to_focus_after_search(self, mocker, stream_view,
-                                          current_focus, stream):
+                                          current_focus, stream,
+                                          search_streams_key, go_back_key):
         # Initialize log
         stream_view.streams_btn_list = [
             mocker.Mock(stream_name=stream_name) for stream_name in [
@@ -482,14 +486,12 @@ class TestStreamsView:
         previous_focus_stream_name = stream
 
         # Toggle Stream Search
-        key = "q"
         size = (20,)
-        stream_view.keypress(size, key)
+        stream_view.keypress(size, search_streams_key)
 
         # Exit Stream Search
-        key = "esc"
         size = (20,)
-        stream_view.keypress(size, key)
+        stream_view.keypress(size, go_back_key)
 
         # Obtain new stream focus
         new_focus = stream_view.log.get_focus()[1]
@@ -1679,6 +1681,7 @@ class TestMessageBox:
             assert label[0].text == 'EDITED'
             assert label[1][1] == 7
 
+    @pytest.mark.parametrize('key', keys_for_command('EDIT_MESSAGE'))
     @pytest.mark.parametrize('to_vary_in_each_message, realm_editing_allowed,\
                              expect_editing_to_succeed', [
         ({'sender_id': 2, 'timestamp': 45}, True, False),
@@ -1689,12 +1692,12 @@ class TestMessageBox:
             'time_limit_esceeded',
             'editing_not_allowed',
             'all_conditions_met'])
-    def test_keypress_edit_message(self, mocker, message_fixture,
+    def test_keypress_EDIT_MESSAGE(self, mocker, message_fixture,
                                    expect_editing_to_succeed,
                                    to_vary_in_each_message,
-                                   realm_editing_allowed):
+                                   realm_editing_allowed,
+                                   key):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
-        key = 'e'
         size = (20,)
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         msg_box.model.user_id = 1
