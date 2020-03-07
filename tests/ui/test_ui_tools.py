@@ -2108,3 +2108,45 @@ class TestLoadingView:
         text = "Random Text"
         loading_view = LoadingView(text)
         assert loading_view.text == text
+
+    def test_set_controller(self, mocker):
+        controller = mocker.Mock()
+        loading_view = LoadingView('')
+        loading_view.set_controller(controller)
+        assert loading_view.controller == controller
+
+    def test_keypress_enter(self, mocker):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+
+        key = 'enter'
+        loading_view.keypress((20, 20), key)
+
+        loading_view.controller.init_view.assert_called_once_with()
+        loop = loading_view.controller.loop
+        assert loop.widget == loading_view.controller.view
+        loop.screen.register_palette.assert_called_once_with(
+            loading_view.controller.theme
+        )
+        loading_view.controller.update_screen.assert_called_once_with()
+
+    def test_keypress_h(self, mocker):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+        loading_view.controller.wait_after_loading = True
+        update_zuliprc = mocker.patch(
+            'zulipterminal.ui_tools.views.update_zuliprc')
+
+        key = 'h'
+        loading_view.keypress((20, 20), key)
+
+        update_zuliprc.assert_called_once_with(
+            loading_view.controller.zuliprc_path, 'tutorial', 'skip'
+        )
+        loading_view.controller.init_view.assert_called_once_with()
+        loop = loading_view.controller.loop
+        assert loop.widget == loading_view.controller.view
+        loop.screen.register_palette.assert_called_once_with(
+            loading_view.controller.theme
+        )
+        loading_view.controller.update_screen.assert_called_once_with()

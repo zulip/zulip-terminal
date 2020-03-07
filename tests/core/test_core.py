@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.core import Controller, TUTORIAL
+from zulipterminal.core import Controller, TUTORIAL, THEMES
 from zulipterminal.version import ZT_VERSION
 
 
@@ -26,13 +26,14 @@ class TestController:
     @pytest.fixture
     def controller(self, mocker) -> None:
         self.config_file = 'path/to/zuliprc'
-        self.theme = 'default'
+        self.theme_name = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.tutorial = True
         self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
                                       return_value=mocker.Mock())
-        return Controller(self.config_file, self.theme, self.autohide,
-                          self.notify_enabled)
+        return Controller(self.config_file, self.theme_name, self.autohide,
+                          self.notify_enabled, self.tutorial)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
@@ -40,12 +41,12 @@ class TestController:
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
         self.model.assert_called_once_with(controller)
-        assert controller.theme == self.theme
+        assert controller.theme == THEMES[self.theme_name]
 
     def test_init_model(self, mocker) -> None:
         mocker.patch('zulipterminal.core.Controller.__init__',
                      return_value=None)
-        controller = Controller('config', 'theme', True, True)
+        controller = Controller('config', 'theme', True, True, True)
         controller.capture_stdout = mocker.Mock()
         controller.init_model()
 
@@ -304,7 +305,10 @@ class TestController:
         assert self.main_loop.call_count == 1
         assert controller.loop.watch_pipe.call_count == 2
 
-    def test_show_main_view_has_model(self, controller, mocker):
+    @pytest.mark.parametrize('tutorial', [
+        True, False
+    ])
+    def test_show_main_view_has_model(self, controller, mocker, tutorial):
         controller.capture_stdout = mocker.Mock()
         controller.model = mocker.Mock()
         controller.update_screen = mocker.Mock()
@@ -312,13 +316,11 @@ class TestController:
         controller.txt = mocker.Mock()
         controller.loading_text = mocker.Mock()
         controller.view = mocker.Mock()
-
+        controller.wait_after_loading = tutorial
         controller.show_main_view()
 
-        controller.capture_stdout.assert_called_once_with()
-        assert controller.update_screen.call_count == 1
-        controller.init_view.assert_called_once_with()
-        assert controller.loop.widget == controller.view
-        controller.loop.screen.register_palette.assert_called_once_with(
-            controller.theme
-        )
+        if tutorial:
+            assert controller.txt.set_text.called
+            controller.update_screen.assert_called_once_with()
+        else:
+            controller.txt.keypress.assert_called_once_with((20, 20), 'enter')

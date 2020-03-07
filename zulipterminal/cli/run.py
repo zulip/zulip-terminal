@@ -185,6 +185,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         'theme': ('default', NO_CONFIG),
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
+        'tutorial': ('view', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:
@@ -230,7 +231,8 @@ def main(options: Optional[List[str]]=None) -> None:
         else:
             theme_to_use = zterm['theme']
         available_themes = all_themes()
-        if theme_to_use[0] not in available_themes:
+        theme_name = theme_to_use[0]
+        if theme_name not in available_themes:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
             print("The following themes are available:")
@@ -245,6 +247,7 @@ def main(options: Optional[List[str]]=None) -> None:
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
+            'tutorial': ['view', 'skip'],
         }
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():
@@ -258,7 +261,7 @@ def main(options: Optional[List[str]]=None) -> None:
                 sys.exit(1)
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
         Controller(zuliprc_path,
-                   THEMES[theme_to_use[0]],
+                   theme_name,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',

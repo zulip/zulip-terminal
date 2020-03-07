@@ -27,13 +27,16 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: ThemeSpec,
-                 autohide: bool, notify: bool) -> None:
-        self.theme = theme
+    def __init__(self, config_file: str, theme_name: str,
+                 autohide: bool, notify: bool, tutorial: bool) -> None:
+        self.theme = THEMES[theme_name]
+        self.theme_name = theme_name
         self.autohide = autohide
         self.notify_enabled = notify
+        self.wait_after_loading = tutorial
         self.editor_mode = False  # type: bool
         self.editor = None  # type: Any
+        self.zuliprc_path = os.path.expanduser(config_file)
 
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
@@ -275,12 +278,19 @@ class Controller:
             self.txt.set_text(self.loading_text([next(spinner)]))
             self.update_screen()
             time.sleep(0.1)
+        self.txt.set_controller(self)
 
-        # display the view
-        self.init_view()
-        self.loop.widget = self.view
-        self.loop.screen.register_palette(self.theme)
-        self.update_screen()
+        if self.wait_after_loading:
+            self.txt.set_text(self.loading_text([
+                u'\u2713  \nPress ',
+                ('starred', 'Enter'),
+                ' to continue >>\nPress ',
+                ('starred', 'h'),
+                ' to skip the tutorial from next time and continue.\n\n'],
+            ))
+            self.update_screen()
+        else:
+            self.txt.keypress((20, 20), 'enter')
 
     def initialize_loop(self) -> None:
         screen = Screen()

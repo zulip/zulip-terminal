@@ -8,7 +8,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.helper import Message, asynch, match_user
+from zulipterminal.helper import Message, asynch, match_user, update_zuliprc
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, PMButton, StarredButton, StreamButton, TopicButton,
@@ -910,5 +910,24 @@ class MsgInfoView(urwid.ListBox):
 
 class LoadingView(urwid.Text):
 
+    def set_controller(self, controller: Any) -> None:
+        self.controller = controller
+
     def selectable(self) -> bool:
         return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if hasattr(self, 'controller'):
+            if key == "enter":
+                # display the view
+                self.controller.init_view()
+                self.controller.loop.widget = self.controller.view
+                self.controller.loop.screen.register_palette(
+                    self.controller.theme)
+                self.controller.update_screen()
+            if key == 'h' and self.controller.wait_after_loading:
+                # Add tutorial=skip to the generated zuliprc
+                update_zuliprc(self.controller.zuliprc_path,
+                               'tutorial', 'skip')
+                self.keypress(size, "enter")
+        return key
