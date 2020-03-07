@@ -217,9 +217,10 @@ class TestView:
         view.model.controller.show_all_mentions.assert_called_once_with(view)
         assert view.body.focus_col == 1
 
+    @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
-    def test_keypress_w(self, view, mocker, autohide):
+    def test_keypress_autohide_users(self, view, mocker, autohide, key):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.controller.autohide = autohide
@@ -234,17 +235,17 @@ class TestView:
 
         view.body.focus_position = None
 
-        # Test "w" keypress
-        view.keypress(size, "w")
-        view.users_view.keypress.assert_called_once_with(size, "w")
+        view.keypress(size, key)
+        view.users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
         view.user_search.set_edit_text.assert_called_once_with("")
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.user_search
 
+    @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
-    def test_keypress_q(self, view, mocker, autohide):
+    def test_keypress_autohide_streams(self, view, mocker, autohide, key):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.stream_search_box = mocker.Mock()
@@ -261,10 +262,8 @@ class TestView:
 
         view.body.focus_position = None
 
-        # Test "q" keypress
-        view.keypress(size, "q")
-
-        view.left_panel.keypress.assert_called_once_with(size, "q")
+        view.keypress(size, key)
+        view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
         view.stream_w.stream_search_box.set_edit_text.\
             assert_called_once_with("")
