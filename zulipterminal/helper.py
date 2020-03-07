@@ -510,15 +510,20 @@ def canonicalize_color(color: str) -> str:
 def notify(title: str, html_text: str) -> None:
     document = lxml.html.document_fromstring(html_text)
     text = document.text_content()
+    quoted_text = shlex.quote(text)
+
+    quoted_title = shlex.quote(title)
+
     command = ""
-    if WSL:
+    if WSL:  # FIXME May no longer work - needs further testing with quotes
         command = ('powershell.exe "New-BurntToastNotification'
-                   ' -Text \'{}\', \'{}\'"'.format(title, text))
-    elif MACOS:
+                   ' -Text \'{}\', \'{}\'"'.format(quoted_title, quoted_text))
+    elif MACOS:  # FIXME May no longer work - needs further testing wth quotes
         command = ("osascript -e 'display notification \"{}\" with title"
-                   " \"{}\"'".format(text, title))
+                   " \"{}\"'".format(quoted_text, quoted_title))
     elif LINUX:
-        command = 'notify-send "{}" "{}"'.format(title, text)
+        command = 'notify-send {} {}'.format(quoted_title, quoted_text)
+
     if command:
         res = subprocess.run(shlex.split(command), stdout=subprocess.DEVNULL,
                              stderr=subprocess.STDOUT)
