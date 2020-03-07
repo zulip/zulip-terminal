@@ -205,14 +205,15 @@ class TestView:
         view.keypress(size, key)
         super_view.assert_called_once_with(size, expected_key)
 
-    def test_keypress_ALL_MENTIONS(self, view, mocker):
+    @pytest.mark.parametrize('key', keys_for_command('ALL_MENTIONS'))
+    def test_keypress_ALL_MENTIONS(self, view, mocker, key):
         view.body = mocker.Mock()
         view.body.focus_col = None
         view.controller.editor_mode = False
         size = (20,)
         view.model.controller.show_all_mentions = mocker.Mock()
 
-        view.keypress(size, "#")
+        view.keypress(size, key)
         view.model.controller.show_all_mentions.assert_called_once_with(view)
         assert view.body.focus_col == 1
 
@@ -270,7 +271,8 @@ class TestView:
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.stream_w.stream_search_box
 
-    def test_keypress_edit_mode(self, view, mocker):
+    @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
+    def test_keypress_edit_mode(self, view, mocker, key):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -281,5 +283,5 @@ class TestView:
         # Test Edit Mode Keypress
         view.controller.editor_mode = True
         size = (130, 28)
-        view.keypress(size, "w")
-        view.controller.editor.keypress.assert_called_once_with((28,), "w")
+        view.keypress(size, key)
+        view.controller.editor.keypress.assert_called_once_with((28,), key)
