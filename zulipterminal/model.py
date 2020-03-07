@@ -86,7 +86,7 @@ class Model:
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
         self.server_name = ""
-
+    
         self.event_actions = OrderedDict([
             ('message', self.append_message),
             ('update_message', self.update_message),

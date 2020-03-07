@@ -15,7 +15,7 @@ from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    HelpView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
+    HelpView, MsgInfoView, PopUpConfirmationView, StreamInfoView, UserInfoView
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -119,6 +119,10 @@ class Controller:
     def show_stream_info(self, color: str, name: str, desc: str) -> None:
         show_stream_view = StreamInfoView(self, color, name, desc)
         self.show_pop_up(show_stream_view, "# {}".format(name))
+
+    def show_user_info(self, user_id:int) -> None:      
+        show_userinfo_view = UserInfoView(self, user_id)
+        self.show_pop_up(show_userinfo_view, "{}".format(user_id))
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

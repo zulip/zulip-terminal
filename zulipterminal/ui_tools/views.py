@@ -1,5 +1,6 @@
 import threading
 import time
+import math
 from collections import OrderedDict, defaultdict
 from typing import Any, Callable, List, Optional, Tuple
 
@@ -848,6 +849,22 @@ class StreamInfoView(urwid.ListBox):
         return super().keypress(size, key)
 
 
+class UserInfoView(urwid.ListBox):
+    def __init__(self, controller, display_data) -> None:
+        self.controller = controller
+        log = [urwid.Text(str(display_data), align = 'center')]
+        self.width = 20
+        self.height = 20
+
+        super().__init__(log)
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if (is_command_key('GO_BACK', key) or
+                is_command_key('USER_INFO', key)):
+                self.controller.exit_popup()
+        return super().keypress(size, key)
+
+
 class MsgInfoView(urwid.ListBox):
     def __init__(self, controller: Any, msg: Message) -> None:
         self.controller = controller
@@ -885,7 +902,7 @@ class MsgInfoView(urwid.ListBox):
                     (max_widths[1], urwid.Text(data))
                 ], dividechars=2),
                 None if index % 2 else 'bar')
-             for index, (field, data) in enumerate(msg_info.items())])
+            for index, (field, data) in enumerate(msg_info.items())])
 
         super().__init__(self.log)
 

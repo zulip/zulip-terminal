@@ -126,6 +126,7 @@ Install-Module -Name BurntToast
 | Search messages                                       | <kbd>/</kbd>                                  |
 | Search streams                                        | <kbd>q</kbd>                                  |
 | Search topics in a stream                             | <kbd>q</kbd>                                  |
+| View user information                                 | <kbd>i</kbd>                                  |
 
 ### Message actions
 | Command                                               | Key Combination                               |
