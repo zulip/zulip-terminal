@@ -1679,6 +1679,7 @@ class TestMessageBox:
             assert label[0].text == 'EDITED'
             assert label[1][1] == 7
 
+    @pytest.mark.parametrize('key', keys_for_command('EDIT_MESSAGE'))
     @pytest.mark.parametrize('to_vary_in_each_message, realm_editing_allowed,\
                              expect_editing_to_succeed', [
         ({'sender_id': 2, 'timestamp': 45}, True, False),
@@ -1689,12 +1690,12 @@ class TestMessageBox:
             'time_limit_esceeded',
             'editing_not_allowed',
             'all_conditions_met'])
-    def test_keypress_edit_message(self, mocker, message_fixture,
+    def test_keypress_EDIT_MESSAGE(self, mocker, message_fixture,
                                    expect_editing_to_succeed,
                                    to_vary_in_each_message,
-                                   realm_editing_allowed):
+                                   realm_editing_allowed,
+                                   key):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
-        key = 'e'
         size = (20,)
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         msg_box.model.user_id = 1
