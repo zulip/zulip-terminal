@@ -1145,13 +1145,15 @@ class TestModel:
 
     def test_update_star_status_no_index(self, mocker, model):
         model.index = dict(messages={})  # Not indexed
-        event = dict(messages=[1], flag='starred', all=False)
+        event = dict(messages=[1], flag='starred', all=False, operation='add')
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        set_count = mocker.patch('zulipterminal.model.set_count')
 
         model.update_message_flag_status(event)
 
         assert model.index == dict(messages={})
         model.update_rendered_view.assert_not_called()
+        set_count.assert_not_called()
 
     def test_update_star_status_invalid_operation(self, mocker, model):
         model.index = dict(messages={1: {'flags': None}})  # Minimal
@@ -1163,9 +1165,11 @@ class TestModel:
             'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        set_count = mocker.patch('zulipterminal.model.set_count')
         with pytest.raises(RuntimeError):
             model.update_message_flag_status(event)
         model.update_rendered_view.assert_not_called()
+        set_count.assert_not_called()
 
     @pytest.mark.parametrize('event_message_ids, indexed_ids', [
         ([1], [1]),
@@ -1199,6 +1203,7 @@ class TestModel:
             'all': False,
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        set_count = mocker.patch('zulipterminal.model.set_count')
 
         model.update_message_flag_status(event)
 
@@ -1206,11 +1211,71 @@ class TestModel:
         for changed_id in changed_ids:
             assert model.index['messages'][changed_id]['flags'] == flags_after
         (model.update_rendered_view.
-         has_calls([mocker.call(changed_id) for changed_id in changed_ids]))
+         assert_has_calls([mocker.call(changed_id)
+                          for changed_id in changed_ids]))
 
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
             assert (model.index['messages'][unchanged_id]['flags'] ==
                     flags_before)
+
+        set_count.assert_not_called()
+
+    @pytest.mark.parametrize('event_message_ids, indexed_ids', [
+        ([1], [1]),
+        ([1, 2], [1]),
+        ([1, 2], [1, 2]),
+        ([1], [1, 2]),
+        ([], [1, 2]),
+        ([1, 2], []),
+    ])
+    @pytest.mark.parametrize('event_op, flags_before, flags_after', [
+        ('add', [], ['read']),
+        ('add', ['read'], ['read']),
+        ('add', ['starred'], ['starred', 'read']),
+        ('add', ['read', 'starred'], ['read', 'starred']),
+        ('remove', [], []),
+        ('remove', ['read'], ['read']),   # msg cannot be marked 'unread'
+        ('remove', ['starred'], ['starred']),
+        ('remove', ['starred', 'read'], ['starred', 'read']),
+        ('remove', ['read', 'starred'], ['read', 'starred']),
+    ])
+    def test_update_read_status(self, mocker, model, event_op,
+                                event_message_ids, indexed_ids,
+                                flags_before, flags_after):
+        model.index = dict(messages={msg_id: {'flags': flags_before}
+                                     for msg_id in indexed_ids})
+        event = {
+            'messages': event_message_ids,
+            'type': 'update_message_flags',
+            'flag': 'read',
+            'operation': event_op,
+            'all': False,
+        }
+
+        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        set_count = mocker.patch('zulipterminal.model.set_count')
+
+        model.update_message_flag_status(event)
+
+        changed_ids = set(indexed_ids) & set(event_message_ids)
+        for changed_id in changed_ids:
+            assert model.index['messages'][changed_id]['flags'] == flags_after
+
+            if event_op == 'add':
+                model.update_rendered_view.assert_has_calls(
+                        [mocker.call(changed_id)])
+            elif event_op == 'remove':
+                model.update_rendered_view.assert_not_called()
+
+        for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
+            assert (model.index['messages'][unchanged_id]['flags'] ==
+                    flags_before)
+
+        if event_op == 'add':
+            set_count.assert_called_once_with(list(changed_ids),
+                                              self.controller, -1)
+        elif event_op == 'remove':
+            set_count.assert_not_called()
 
     @pytest.mark.parametrize('narrow, event, called', [
         # Not in PM Narrow

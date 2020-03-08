@@ -285,7 +285,6 @@ class Model:
             'flag': 'read',
             'op': 'add',
         })
-        set_count(id_list, self.controller, -1)  # FIXME Update?
 
     def send_private_message(self, recipients: str,
                              content: str) -> bool:
@@ -811,9 +810,11 @@ class Model:
         if event['all']:  # FIXME Should handle eventually
             return
 
-        # TODO: Expand from 'starred' to also support 'read' flag changes?
         flag_to_change = event['flag']
-        if flag_to_change != 'starred':
+        if flag_to_change not in {'starred', 'read'}:
+            return
+
+        if flag_to_change == 'read' and event['operation'] == 'remove':
             return
 
         indexed_message_ids = set(self.index['messages'])
@@ -832,6 +833,10 @@ class Model:
 
             self.index['messages'][message_id] = msg
             self.update_rendered_view(message_id)
+
+        if event['operation'] == 'add' and flag_to_change == 'read':
+            set_count(list(message_ids_to_mark & indexed_message_ids),
+                      self.controller, -1)
 
     def update_rendered_view(self, msg_id: int) -> None:
         # Update new content in the rendered view
