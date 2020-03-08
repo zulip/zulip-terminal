@@ -100,5 +100,6 @@ setup(
         'beautifulsoup4==4.6.0',
         'lxml==4.2.3',
         'mypy_extensions>=0.4',
+        'pytz==2019.3'
     ],
 )

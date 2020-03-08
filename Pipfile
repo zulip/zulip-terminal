@@ -11,6 +11,7 @@ urwid-readline = "==0.10"
 beautifulsoup4 = "==4.6.0"
 lxml = "==4.2.3"
 mypy_extensions = ">=0.4"
+pytz = "==2019.3"
 
 [dev-packages]
 pytest = "==5.3.5"
