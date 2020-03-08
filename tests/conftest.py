@@ -480,7 +480,8 @@ def empty_index():
             stream_msg_template['id']: stream_msg_template,
             pm_template['id']: pm_template,
             group_pm_template['id']: group_pm_template,
-        })
+        }),
+        'unread_msg_ids': set()
     })
 
 
@@ -704,10 +705,10 @@ def stream_dict(streams_fixture):
 @pytest.fixture
 def classified_unread_counts():
     """
-    Unread counts return by
+    Unread counts and unread_msg_ids returned by
     helper.classify_unread_counts function.
     """
-    return {
+    return ({
         'all_msg': 12,
         'all_pms': 8,
         'unread_topics': {
@@ -726,4 +727,4 @@ def classified_unread_counts():
             1000: 3,
             99: 1
         }
-    }
+    }, {1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 101, 102})

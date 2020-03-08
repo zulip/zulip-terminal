@@ -183,8 +183,9 @@ def test_classify_unread_counts(mocker, initial_data, stream_dict,
     model.initial_data = initial_data
     model.muted_topics = muted_topics
     model.muted_streams = muted_streams
-    assert classify_unread_counts(model) == dict(classified_unread_counts,
-                                                 **vary_in_unreads)
+    assert classify_unread_counts(model) == (dict(classified_unread_counts[0],
+                                             **vary_in_unreads),
+                                             classified_unread_counts[1])
 
 
 @pytest.mark.parametrize('color', [

@@ -38,6 +38,8 @@ Index = TypedDict('Index', {
     'search': Set[int],  # {message_id, ...}
     # Downloaded message data
     'messages': Dict[int, Message],  # message_id: Message
+    # unread message data; additional data in model.initial_data['unread_msgs']
+    'unread_msg_ids': Set[int]  # {message_ids, ...}
 })
 
 initial_index = Index(
@@ -52,6 +54,7 @@ initial_index = Index(
     topics=defaultdict(list),
     search=set(),
     messages=defaultdict(dict),
+    unread_msg_ids=set(),
 )
 
 
@@ -351,9 +354,10 @@ def index_messages(messages: List[Message],
     return index
 
 
-def classify_unread_counts(model: Any) -> UnreadCounts:
+def classify_unread_counts(model: Any) -> Tuple[UnreadCounts, Set[int]]:
     # TODO: support group pms
     unread_msg_counts = model.initial_data['unread_msgs']
+    unread_msg_ids = set()  # type: Set[int]
 
     unread_counts = UnreadCounts(
         all_msg=0,
@@ -365,13 +369,17 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     )
 
     for pm in unread_msg_counts['pms']:
-        count = len(pm['unread_message_ids'])
+        message_ids = pm['unread_message_ids']
+        unread_msg_ids.update(message_ids)
+        count = len(message_ids)
         unread_counts['unread_pms'][pm['sender_id']] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 
     for stream in unread_msg_counts['streams']:
-        count = len(stream['unread_message_ids'])
+        message_ids = stream['unread_message_ids']
+        unread_msg_ids.update(message_ids)
+        count = len(message_ids)
         stream_id = stream['stream_id']
         if [model.stream_dict[stream_id]['name'],
                 stream['topic']] in model.muted_topics:
@@ -386,14 +394,16 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
 
     # store unread count of group pms in `unread_huddles`
     for group_pm in unread_msg_counts['huddles']:
-        count = len(group_pm['unread_message_ids'])
+        message_ids = group_pm['unread_message_ids']
+        unread_msg_ids.update(message_ids)
+        count = len(message_ids)
         user_ids = group_pm['user_ids_string'].split(',')
         user_ids = frozenset(map(int, user_ids))
         unread_counts['unread_huddles'][user_ids] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 
-    return unread_counts
+    return unread_counts, unread_msg_ids
 
 
 def match_user(user: Any, text: str) -> bool:

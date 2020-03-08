@@ -116,7 +116,8 @@ class Model:
         self.user_group_by_id = {}  # type: Dict[int, Dict[str, Any]]
         self.user_group_names = self._group_info_from_realm_user_groups(groups)
 
-        self.unread_counts = classify_unread_counts(self)
+        unread_data = classify_unread_counts(self)
+        self.unread_counts, self.index['unread_msg_ids'] = unread_data
 
         self.fetch_all_topics(workers=5)
 
