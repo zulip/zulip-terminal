@@ -838,6 +838,7 @@ class Model:
         if event['operation'] == 'add' and flag_to_change == 'read':
             set_count(list(message_ids_to_mark & indexed_message_ids),
                       self.controller, -1)
+            self.index['unread_msg_ids'].difference_update(message_ids_to_mark)
 
     def update_rendered_view(self, msg_id: int) -> None:
         # Update new content in the rendered view

@@ -1244,6 +1244,8 @@ class TestModel:
                                 flags_before, flags_after):
         model.index = dict(messages={msg_id: {'flags': flags_before}
                                      for msg_id in indexed_ids})
+        model.index['unread_msg_ids'] = set(event_message_ids)
+
         event = {
             'messages': event_message_ids,
             'type': 'update_message_flags',
@@ -1274,8 +1276,10 @@ class TestModel:
         if event_op == 'add':
             set_count.assert_called_once_with(list(changed_ids),
                                               self.controller, -1)
+            assert len(model.index['unread_msg_ids']) == 0
         elif event_op == 'remove':
             set_count.assert_not_called()
+            assert model.index['unread_msg_ids'] == set(event_message_ids)
 
     @pytest.mark.parametrize('narrow, event, called', [
         # Not in PM Narrow
