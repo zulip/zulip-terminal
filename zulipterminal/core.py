@@ -1,7 +1,9 @@
 import os
+import pytz
 import signal
 import sys
 import time
+from datetime import datetime
 from functools import partial
 from platform import platform
 from typing import Any, List, Optional
@@ -120,9 +122,64 @@ class Controller:
         show_stream_view = StreamInfoView(self, color, name, desc)
         self.show_pop_up(show_stream_view, "# {}".format(name))
 
-    def show_user_info(self, user_id:int) -> None:      
-        show_userinfo_view = UserInfoView(self, user_id)
-        self.show_pop_up(show_userinfo_view, "{}".format(user_id))
+    def show_user_info(self, user_id:int) -> None:
+        url = 'users/' + str(user_id)
+        response = self.client.call_endpoint(
+           url=url,
+           method='GET',
+           request={'include_custom_profile_fields': True}
+        )
+
+        index = {
+          '17': 'Github username',
+          '18': 'Twitter',
+          '3': 'Country',
+          '5': 'Zulip expertise',
+          '7': 'About me',
+          '13': {
+            '0': 'emacs',
+            '1': 'vim',
+            '2': 'vscode',
+            '3': 'sublime',
+            '4': 'atom',
+            '5': 'Other',
+          },
+          '16': 'Favourite date',
+        }
+
+        display_data = {}
+        res_data = response['members'][0]
+
+        for key, value in res_data['profile_data'].items():
+            if key == '13':
+                display_data['Favourite editor'] = index['13'][str(res_data['profile_data']['13']['value'])]
+            else: display_data[str(index[key])] = value['value']
+
+        display_data['Email'] = res_data['email']
+        display_data['Date joined'] = res_data['date_joined'][:10]
+        display_data['Timezone'] = res_data['timezone']
+
+        try:
+            display_data['Local time'] = datetime.now(pytz.timezone(str(res_data['timezone']))).strftime("%H:%M")
+        except:
+            display_data['Local time'] = "Unknown timezone"
+
+        presence = self.client.get_user_presence(str(res_data['email']))
+        if presence['presence']['aggregated']['status'] == 'active':
+            display_data['Last active'] = "Currently online"
+        else:
+            display_data['Last active'] = str(datetime.fromtimestamp(presence['presence']['aggregated']['timestamp']))
+
+        if res_data['is_admin']:
+            display_data['Role'] = "Admin"
+        elif res_data['is_guest']:
+            display_data['Role'] = "Guest"
+        else:
+            display_data['Role'] = "Member"
+
+        show_userinfo_view = UserInfoView(self, display_data)
+        self.show_pop_up(show_userinfo_view, "{}".format(res_data['full_name']))
+        return response['result'] == 'success'
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
