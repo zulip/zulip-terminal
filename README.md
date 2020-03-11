@@ -158,6 +158,7 @@ Install-Module -Name BurntToast
 | Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
 | Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
 | Autocomplete @mentions and #stream_names              | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
+| Cycle through autocomplete suggestions in reverse     | <kbd>Ctrl</kbd> + <kbd>r</kbd>                |
 | Jump to the beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
 | Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
 | Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |
