@@ -45,7 +45,8 @@ class WriteBox(urwid.Pile):
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop()
+            key=keys_for_command('AUTOCOMPLETE').pop(),
+            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
         to_write_box = urwid.LineBox(
             self.to_write_box, tlcorner=u'─', tline=u'─', lline=u'',
@@ -64,7 +65,8 @@ class WriteBox(urwid.Pile):
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop()
+            key=keys_for_command('AUTOCOMPLETE').pop(),
+            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
         self.stream_write_box = ReadlineEdit(
             caption=u"Stream:  ",
@@ -116,7 +118,7 @@ class WriteBox(urwid.Pile):
         combined_typeahead = group_typeahead + user_typeahead
         try:
             return combined_typeahead[state]
-        except IndexError:
+        except (IndexError, TypeError):
             return None
 
     def autocomplete_streams(self, text: str, state: int) -> Optional[str]:
@@ -126,7 +128,7 @@ class WriteBox(urwid.Pile):
                             if match_stream(stream, text[1:])]
         try:
             return stream_typeahead[state]
-        except IndexError:
+        except (IndexError, TypeError):
             return None
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
