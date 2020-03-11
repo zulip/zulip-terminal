@@ -45,6 +45,10 @@ class TestWriteBox:
         ('@Human', 0, '@', '@**Human Myself**'),
         ('@Human', 1, '@', '@**Human 1**'),
         ('@Human', 2, '@', '@**Human 2**'),
+        ('@Human', -1, '@', '@**Human 2**'),
+        ('@Human', -2, '@', '@**Human 1**'),
+        ('@Human', -3, '@', '@**Human Myself**'),
+        ('@Human', -4, '@', None),
         ('@_Human', 0, '@_', '@_**Human Myself**'),
         ('@_Human', 1, '@_', '@_**Human 1**'),
         ('@_Human', 2, '@_', '@_**Human 2**'),
@@ -71,6 +75,7 @@ class TestWriteBox:
         ('@Gro', 1, '@', '@*Group 2*'),
         ('@Grou', 1, '@', '@*Group 2*'),
         ('No match', 1, '', None),
+        ('No match', -1, '', None),
         # Expected sequence of autocompletes from '@'
         ('@', 0, '@', '@*Group 1*'),
         ('@', 1, '@', '@*Group 2*'),
@@ -87,6 +92,7 @@ class TestWriteBox:
         ('@_', 2, '@_', '@_**Human 2**'),
         ('@_', 3, '@_', None),  # Reached last match
         ('@_', 4, '@_', None),  # Beyond end
+        ('@_', -1, '@_', '@_**Human 2**'),
     ])
     def test_autocomplete_mentions(self, write_box, users_fixture,
                                    text, state, prefix_string,
@@ -105,6 +111,11 @@ class TestWriteBox:
         ('#S', 1, '#**Secret stream**'),
         ('#S', 2, '#**Stream 1**'),
         ('#S', 3, '#**Stream 2**'),
+        ('#S', -1, '#**Stream 2**'),
+        ('#S', -2, '#**Stream 1**'),
+        ('#S', -3, '#**Secret stream**'),
+        ('#S', -4, '#**Some general stream**'),
+        ('#S', -5, None),
         ('#So', 0, '#**Some general stream**'),
         ('#So', 1, None),
         ('#Se', 0, '#**Secret stream**'),
@@ -112,7 +123,8 @@ class TestWriteBox:
         ('#St', 0, '#**Stream 1**'),
         ('#St', 1, '#**Stream 2**'),
         ('#Stream 1', 0, '#**Stream 1**'),
-        ('No match', 0, None)
+        ('No match', 0, None),
+        ('No match', -1, None)
     ])
     def test_autocomplete_streams(self, write_box, streams_fixture,
                                   text, state, required_typeahead):

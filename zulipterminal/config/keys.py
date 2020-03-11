@@ -109,6 +109,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Autocomplete @mentions and #stream_names',
         'key_category': 'msg_compose',
     }),
+    ('AUTOCOMPLETE_REVERSE', {
+        'keys': {'ctrl r'},
+        'help_text': 'Cycle through autocomplete suggestions in reverse',
+        'key_category': 'msg_compose',
+    }),
     ('STREAM_NARROW', {
         'keys': {'s'},
         'help_text': 'Narrow to the stream of the current message',
