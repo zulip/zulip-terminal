@@ -415,6 +415,8 @@ class TestStreamsView:
         ('FOO', ['FOO', 'FOOBAR', 'foo']),
         ('test', ['test here']),
         ('here', ['test here']),
+        ('', ['FOO', 'FOOBAR', 'foo', 'fan',
+            'boo', 'BOO', 'bar', 'test here'])
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log):
         stream_names = [

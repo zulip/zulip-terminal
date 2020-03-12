@@ -278,6 +278,7 @@ class StreamsView(urwid.Frame):
             ]
             self.log.clear()
             self.log.extend(streams_display)
+            self.log.set_focus(0)
             self.view.controller.update_screen()
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
