@@ -825,6 +825,9 @@ class PanelSearchBox(urwid.Edit):
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(edit_text=self.search_text)
 
+    def reset_search_text(self) -> None:
+        self.set_edit_text(self.search_text)
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
             self.panel_view.view.controller.editor_mode = False

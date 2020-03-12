@@ -458,8 +458,10 @@ class TestStreamsView:
     def test_keypress_GO_BACK(self, mocker, stream_view, key):
         size = (20,)
         mocker.patch.object(stream_view, 'set_focus')
+        mocker.patch.object(stream_view.stream_search_box, 'reset_search_text')
         stream_view.keypress(size, key)
         stream_view.set_focus.assert_called_once_with("body")
+        assert stream_view.stream_search_box.reset_search_text.called
         assert stream_view.log == self.streams_btn_list
 
     @pytest.mark.parametrize('search_streams_key',
@@ -613,8 +615,10 @@ class TestTopicsView:
     def test_keypress_GO_BACK(self, mocker, topic_view, key):
         size = (200, 20)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
+        mocker.patch.object(topic_view.topic_search_box, 'reset_search_text')
         topic_view.keypress(size, key)
         topic_view.set_focus.assert_called_once_with("body")
+        assert topic_view.topic_search_box.reset_search_text.called
         assert topic_view.log == self.topics_btn_list
 
 
@@ -989,12 +993,14 @@ class TestRightColumnView:
         mocker.patch(VIEWS + ".UsersView")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch(VIEWS + ".RightColumnView.set_body")
+        mocker.patch.object(right_col_view.user_search, 'reset_search_text')
         right_col_view.users_btn_list = []
 
         right_col_view.keypress(size, key)
 
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with('body')
+        assert right_col_view.user_search.reset_search_text.called
 
 
 class TestLeftColumnView:

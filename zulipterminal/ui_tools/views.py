@@ -296,6 +296,7 @@ class StreamsView(urwid.Frame):
             self.set_focus('header')
             return key
         elif is_command_key('GO_BACK', key):
+            self.stream_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus('body')
@@ -394,6 +395,7 @@ class TopicsView(urwid.Frame):
             self.header_list.set_focus(2)
             return key
         elif is_command_key('GO_BACK', key):
+            self.topic_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.topics_btn_list)
             self.set_focus('body')
@@ -619,6 +621,7 @@ class RightColumnView(urwid.Frame):
             self.set_focus('header')
             return key
         elif is_command_key('GO_BACK', key):
+            self.user_search.reset_search_text()
             self.allow_update_user_list = True
             self.body = UsersView(self.users_btn_list)
             self.set_body(self.body)
