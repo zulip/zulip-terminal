@@ -1,6 +1,8 @@
 import pytest
 
-from zulipterminal.cli.run import THEMES, get_login_id, in_color, main
+from zulipterminal.cli.run import (
+    THEMES, get_login_id, in_color, main, parse_args,
+)
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
@@ -57,6 +59,8 @@ def test_main_help(capsys, options):
         '-d, --debug',
         '--profile',
         '--config-file CONFIG_FILE, -c CONFIG_FILE',
+        '--autohide',
+        '--no-autohide',
         '-v, --version'
     }
     optional_argument_lines = {line[2:] for line in lines
@@ -150,3 +154,30 @@ def test_zt_version(capsys, options):
     assert lines == expected
 
     assert captured.err == ""
+
+
+@pytest.mark.parametrize('option, autohide', [
+        ('--autohide', 'autohide'),
+        ('--no-autohide', 'no_autohide'),
+        ('--debug', None),  # no-autohide by default
+        ]
+)
+def test_parse_args_valid_autohide_option(option, autohide):
+    args = parse_args([option])
+    assert args.autohide == autohide
+
+
+@pytest.mark.parametrize('options', [
+        ['--autohide', '--no-autohide'],
+        ['--no-autohide', '--autohide']]
+)
+def test_main_multiple_autohide_options(capsys, options):
+    with pytest.raises(SystemExit) as e:
+        main(options)
+        assert str(e.value) == "2"
+    captured = capsys.readouterr()
+    lines = captured.err.strip('\n')
+    lines = lines.split("pytest: ", 1)[1]
+    expected = ("error: argument {}: not allowed "
+                "with argument {}".format(options[1], options[0]))
+    assert lines == expected

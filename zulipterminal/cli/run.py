@@ -58,6 +58,15 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         action="store_true",
                         default=False, help='Profile runtime.')
 
+    autohide_group = parser.add_mutually_exclusive_group()
+    autohide_group.add_argument('--autohide', dest='autohide', default=None,
+                                action="store_const", const='autohide',
+                                help='Autohide list of users and streams.')
+
+    autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
+                                action="store_const", const='no_autohide',
+                                help='Don\'t autohide list of users and streams.')
+
     parser.add_argument('-v',
                         '--version',
                         action='store_true',
@@ -213,6 +222,8 @@ def main(options: Optional[List[str]]=None) -> None:
     try:
         zterm = parse_zuliprc(zuliprc_path)
 
+        if args.autohide:
+            zterm['autohide'] = (args.autohide, 'on command line')
         if args.theme:
             theme_to_use = (args.theme, 'on command line')
         else:
