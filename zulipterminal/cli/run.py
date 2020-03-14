@@ -65,7 +65,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
 
     autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
                                 action="store_const", const='no_autohide',
-                                help='Don\'t autohide list of users and streams.')
+                                help='Don\'t autohide list of\
+                                        users and streams.')
 
     parser.add_argument('-v',
                         '--version',
