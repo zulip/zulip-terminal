@@ -9,7 +9,9 @@ from typing import Any, List, Optional
 import urwid
 import zulip
 
-from zulipterminal.config.themes import THEMES, ThemeSpec
+from zulipterminal.config.themes import (
+    THEMES, ThemeSpec, complete_and_incomplete_themes,
+)
 from zulipterminal.config.tutorial import TUTORIAL
 from zulipterminal.helper import Message, asynch
 from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
@@ -262,7 +264,24 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
-    def loading_text(self, spinner: Any) -> List[Any]:
+    def loading_text(self, spinner: Any,
+                     show_settings: bool=False) -> List[Any]:
+        complete, incomplete = complete_and_incomplete_themes()
+        SETTINGS = ["\n\nTheme [t]: ",
+                    ('starred', self.theme_name),
+                    "\nAutohide [a]: ",
+                    ('starred', str(self.autohide)),
+                    "\nNotify [n]: ",
+                    ('starred', str(self.notify_enabled))]
+        if self.theme_name in incomplete:
+            WARNING = [('name',
+                        "\nWARNING: Incomplete theme; "
+                        "results may vary!\n"
+                        "      (you could try: {})".
+                        format(", ".join(complete)))]
+            SETTINGS += WARNING
+        if show_settings:
+            return [TUTORIAL, ('idle', ["\nLoaded "] + spinner), SETTINGS]
         return [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
 
     @asynch
@@ -281,16 +300,22 @@ class Controller:
         self.txt.set_controller(self)
 
         if self.wait_after_loading:
-            self.txt.set_text(self.loading_text([
-                u'\u2713  \nPress ',
-                ('starred', 'Enter'),
-                ' to continue >>\nPress ',
-                ('starred', 'h'),
-                ' to skip the tutorial from next time and continue.\n\n'],
-            ))
-            self.update_screen()
+            self.show_settings_after_loading()
         else:
             self.txt.keypress((20, 20), 'enter')
+
+    def show_settings_after_loading(self) -> None:
+        self.txt.set_text(self.loading_text([
+            u'\u2713  \nPress ',
+            ('starred', 'Enter'),
+            ' to continue >>\nPress ',
+            ('starred', 'h'),
+            ' to skip the tutorial from next time and continue.\n\n'
+            'You can now toggle some of the settings below by pressing the'
+            ' key next to them.'],
+            show_settings=True
+        ))
+        self.update_screen()
 
     def initialize_loop(self) -> None:
         screen = Screen()

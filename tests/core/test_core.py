@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.core import Controller, TUTORIAL, THEMES
+from zulipterminal.core import THEMES, TUTORIAL, Controller
 from zulipterminal.version import ZT_VERSION
 
 
@@ -62,12 +62,23 @@ class TestController:
         with pytest.raises(Exception):
             controller.raise_exception(Exception)
 
-    @pytest.mark.parametrize('spinner', [
-        ['-'], ['|']
+    @pytest.mark.parametrize('spinner, show_settings', [
+        (['-'], True),
+        (['|'], False),
     ])
-    def test_loading_text(self, controller, spinner):
-        text = controller.loading_text(spinner)
-        assert text == [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
+    def test_loading_text(self, controller, spinner, show_settings):
+        SETTINGS = ["\n\nTheme [t]: ",
+                    ('starred', controller.theme_name),
+                    "\nAutohide [a]: ",
+                    ('starred', str(controller.autohide)),
+                    "\nNotify [n]: ",
+                    ('starred', str(controller.notify_enabled))]
+        text = controller.loading_text(spinner, show_settings)
+        if show_settings:
+            assert text == [TUTORIAL, ('idle', ["\nLoaded "] + spinner),
+                            SETTINGS]
+        else:
+            assert text == [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
 
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:
@@ -324,3 +335,23 @@ class TestController:
             controller.update_screen.assert_called_once_with()
         else:
             controller.txt.keypress.assert_called_once_with((20, 20), 'enter')
+
+    def test_show_settings_after_loading(self, controller, mocker):
+        controller.txt = mocker.Mock()
+        controller.update_screen = mocker.Mock()
+        controller.loading_text = mocker.Mock()
+
+        controller.show_settings_after_loading()
+
+        assert controller.txt.set_text.called
+        controller.loading_text.assert_called_once_with([
+            u'\u2713  \nPress ',
+            ('starred', 'Enter'),
+            ' to continue >>\nPress ',
+            ('starred', 'h'),
+            ' to skip the tutorial from next time and continue.\n\n'
+            'You can now toggle some of the settings below by pressing the'
+            ' key next to them.'],
+            show_settings=True
+        )
+        controller.update_screen.assert_called_once_with()

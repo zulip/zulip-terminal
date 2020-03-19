@@ -1,6 +1,7 @@
 import threading
 import time
 from collections import OrderedDict, defaultdict
+from itertools import cycle
 from typing import Any, Callable, List, Optional, Tuple
 
 import urwid
@@ -8,6 +9,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
+from zulipterminal.config.themes import THEMES, all_themes
 from zulipterminal.helper import Message, asynch, match_user, update_zuliprc
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -909,6 +911,7 @@ class MsgInfoView(urwid.ListBox):
 
 
 class LoadingView(urwid.Text):
+    cycle_themes = cycle(all_themes())
 
     def set_controller(self, controller: Any) -> None:
         self.controller = controller
@@ -930,4 +933,32 @@ class LoadingView(urwid.Text):
                 update_zuliprc(self.controller.zuliprc_path,
                                'tutorial', 'skip')
                 self.keypress(size, "enter")
+            if key == 't':
+                config = next(self.cycle_themes)
+                if config == self.controller.theme_name:
+                    config = next(self.cycle_themes)
+                self.controller.theme = THEMES[config]
+                self.controller.theme_name = config
+                self.controller.loop.screen.register_palette(THEMES[config])
+                self.controller.loop.screen.clear()
+                update_zuliprc(self.controller.zuliprc_path,
+                               'theme', config)
+                self.controller.show_settings_after_loading()
+            if key == 'a':
+                config = 'autohide'
+                if self.controller.autohide:
+                    config = 'no_autohide'
+                self.controller.autohide = not self.controller.autohide
+                update_zuliprc(self.controller.zuliprc_path,
+                               'autohide', config)
+                self.controller.show_settings_after_loading()
+            if key == 'n':
+                config = 'enabled'
+                if self.controller.notify_enabled:
+                    config = 'disabled'
+                self.controller.notify_enabled = not \
+                    self.controller.notify_enabled
+                update_zuliprc(self.controller.zuliprc_path,
+                               'notify', config)
+                self.controller.show_settings_after_loading()
         return key
