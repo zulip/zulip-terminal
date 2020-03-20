@@ -5,7 +5,7 @@ import pytest
 from bs4 import BeautifulSoup
 from urwid import AttrWrap, Columns, Padding, Text
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -13,8 +13,8 @@ from zulipterminal.ui_tools.buttons import (
 )
 from zulipterminal.ui_tools.views import (
     HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
-    MsgInfoView, PopUpConfirmationView, RightColumnView, StreamsView,
-    TopicsView, UsersView,
+    MsgInfoView, PopUpConfirmationView, PopUpView, RightColumnView,
+    StreamsView, TopicsView, UsersView,
 )
 
 
@@ -1091,6 +1091,56 @@ class TestLeftColumnView:
                         count=count)
             for topic, count in zip(topic_list, unread_count_list)
         ])
+
+
+class TestPopUpView:
+    @pytest.fixture(autouse=True)
+    def pop_up_view(self, mocker):
+        self.controller = mocker.Mock()
+        self.command = 'COMMAND'
+        self.widget = mocker.Mock()
+        self.widgets = [self.widget, ]
+        self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
+                                        return_value=[])
+        self.super_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__')
+        self.super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.pop_up_view = PopUpView(self.controller, self.widgets,
+                                     self.command)
+
+    def test_init(self):
+        assert self.pop_up_view.controller == self.controller
+        assert self.pop_up_view.command == self.command
+        self.list_walker.assert_called_once_with(self.widgets)
+        self.super_init.assert_called_once_with(self.pop_up_view.log)
+
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
+    def test_keypress_GO_BACK(self, key):
+        size = (200, 20)
+        self.pop_up_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_command_key(self, mocker):
+        size = (200, 20)
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key: command == self.command
+        ))
+        self.pop_up_view.keypress(size, 'cmd_key')
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        # Patch `is_command_key` to not raise an 'Invalid Command' exception
+        # when its parameters are (self.command, key) as there is no
+        # self.command='COMMAND' command in keys.py.
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key:
+            False if command == self.command
+            else is_command_key(command, key)
+        ))
+        self.pop_up_view.keypress(size, key)
+        self.super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestHelpMenu:
