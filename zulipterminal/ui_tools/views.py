@@ -849,26 +849,18 @@ class PopUpConfirmationView(urwid.Overlay):
         return super().keypress(size, key)
 
 
-class StreamInfoView(urwid.ListBox):
+class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, color: str,
                  name: str, desc: str) -> None:
-        self.controller = controller
         # TODO: Width & Height handling could be improved
         self.width = max(len(desc), len("# {}".format(name)))+2
         self.height = 2
-        log = [urwid.Text(desc, align='center')]
-        super().__init__(log)
-
-    def keypress(self, size: Tuple[int, int], key: str) -> str:
-        if (is_command_key('GO_BACK', key) or
-                is_command_key('STREAM_DESC', key)):
-                self.controller.exit_popup()
-        return super().keypress(size, key)
+        stream_info_content = [urwid.Text(desc, align='center')]
+        super().__init__(controller, stream_info_content, 'STREAM_DESC')
 
 
-class MsgInfoView(urwid.ListBox):
+class MsgInfoView(PopUpView):
     def __init__(self, controller: Any, msg: Message) -> None:
-        self.controller = controller
         self.msg = msg
 
         if msg['reactions']:
@@ -896,18 +888,12 @@ class MsgInfoView(urwid.ListBox):
         self.width = sum(max_widths)
         self.height = len(msg_info['Reactions'])+4 if msg['reactions'] else 5
 
-        self.log = urwid.SimpleListWalker(
-            [urwid.AttrWrap(
+        msg_info_content = [urwid.AttrWrap(
                 urwid.Columns([
                     urwid.Text(field),
                     (max_widths[1], urwid.Text(data))
                 ], dividechars=2),
                 None if index % 2 else 'bar')
-             for index, (field, data) in enumerate(msg_info.items())])
+             for index, (field, data) in enumerate(msg_info.items())]
 
-        super().__init__(self.log)
-
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
-            self.controller.exit_popup()
-        return super().keypress(size, key)
+        super().__init__(controller, msg_info_content, 'MSG_INFO')
