@@ -14,7 +14,7 @@ from zulipterminal.ui_tools.buttons import (
 from zulipterminal.ui_tools.views import (
     HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
     MsgInfoView, PopUpConfirmationView, PopUpView, RightColumnView,
-    StreamsView, TopicsView, UsersView,
+    StreamInfoView, StreamsView, TopicsView, UsersView,
 )
 
 
@@ -1213,6 +1213,22 @@ class TestPopUpConfirmationView:
         assert self.controller.exit_popup.called
 
 
+class TestStreamInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.stream_info_view = StreamInfoView(self.controller, '', '', '')
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.stream_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
 class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch, message_fixture):
@@ -1281,6 +1297,14 @@ class TestMsgInfoView:
         self.msg_info_view = MsgInfoView(self.controller, varied_message)
         expected_height = 8
         assert self.msg_info_view.height == expected_height
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.msg_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestMessageBox:
