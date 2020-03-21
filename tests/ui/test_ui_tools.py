@@ -1112,18 +1112,9 @@ class TestHelpMenu:
         self.help_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize('key, expected_key', [
-        (key, expected_key)
-        for keys, expected_key in [
-            (keys_for_command('GO_UP'), 'up'),
-            (keys_for_command('GO_DOWN'), 'down'),
-            (keys_for_command('SCROLL_UP'), 'page up'),
-            (keys_for_command('SCROLL_DOWN'), 'page down'),
-            (keys_for_command('GO_TO_BOTTOM'), 'end'),
-        ]
-        for key in keys
-    ])
-    def test_keypress_navigation(self, mocker, key, expected_key):
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
         size = (200, 20)
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.help_view.keypress(size, key)
