@@ -181,19 +181,9 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    @pytest.mark.parametrize('key, expected_key', [
-        (key, expected_key)
-        for keys, expected_key in [
-            (keys_for_command('GO_UP'), 'up'),
-            (keys_for_command('GO_DOWN'), 'down'),
-            (keys_for_command('SCROLL_UP'), 'page up'),
-            (keys_for_command('SCROLL_DOWN'), 'page down'),
-            (keys_for_command('GO_TO_BOTTOM'), 'end'),
-        ]
-        for key in keys
-    ])
     def test_keypress_normal_mode_navigation(self, view, mocker,
-                                             key, expected_key):
+                                             navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
