@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
+from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -756,3 +757,27 @@ def classified_unread_counts():
             99: 1
         }
     }
+
+# --------------- UI Fixtures -----------------------------------------
+
+
+@pytest.fixture(params=[
+        (key, expected_key)
+        for keys, expected_key in [
+            (keys_for_command('GO_UP'), 'up'),
+            (keys_for_command('GO_DOWN'), 'down'),
+            (keys_for_command('SCROLL_UP'), 'page up'),
+            (keys_for_command('SCROLL_DOWN'), 'page down'),
+            (keys_for_command('GO_TO_BOTTOM'), 'end'),
+        ]
+        for key in keys
+    ],
+    ids=lambda param: 'key:{}-expected_key:{}'.format(*param)
+)
+def navigation_key_expected_key_pair(request):
+    """
+    Fixture to generate pairs of navigation keys with their respective
+    expected key.
+    The expected key is the one which is passed to the super `keypress` calls.
+    """
+    return request.param
