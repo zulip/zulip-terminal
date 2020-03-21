@@ -443,6 +443,14 @@ class TestStreamsView:
                 ] == expected_log
         self.view.controller.update_screen.assert_called_once_with()
 
+    def test_keypress_navigation(self, mocker, stream_view,
+                                 mouse_event_navigation_key_expected_key_pair):
+        key, expected_key = mouse_event_navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.Frame.keypress')
+        stream_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
     @pytest.mark.parametrize('button, key', [
             (4, 'up'),
             (5, 'down'),
@@ -667,6 +675,14 @@ class TestTopicsView:
         assert new_focus == previous_focus
         assert previous_focus_topic_name == new_focus_topic_name
 
+    def test_keypress_navigation(self, mocker, topic_view,
+                                 mouse_event_navigation_key_expected_key_pair):
+        key, expected_key = mouse_event_navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.Frame.keypress')
+        topic_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
 
 class TestUsersView:
 
@@ -674,6 +690,14 @@ class TestUsersView:
     def user_view(self, mocker):
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         return UsersView("USER_BTN_LIST")
+
+    def test_keypress_navigation(self, mocker, user_view,
+                                 mouse_event_navigation_key_expected_key_pair):
+        key, expected_key = mouse_event_navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        user_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('button, key', [
             (4, 'up'),

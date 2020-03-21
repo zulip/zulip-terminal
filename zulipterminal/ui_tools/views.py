@@ -302,6 +302,10 @@ class StreamsView(urwid.Frame):
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
+        elif is_command_key('GO_UP', key):
+            key = 'up'
+        elif is_command_key('GO_DOWN', key):
+            key = 'down'
         return_value = super().keypress(size, key)
         _, self.focus_index_before_search = self.log.get_focus()
         return return_value
@@ -403,6 +407,10 @@ class TopicsView(urwid.Frame):
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
+        elif is_command_key('GO_UP', key):
+            key = 'up'
+        elif is_command_key('GO_DOWN', key):
+            key = 'down'
         return_value = super().keypress(size, key)
         _, self.focus_index_before_search = self.log.get_focus()
         return return_value
@@ -424,6 +432,13 @@ class UsersView(urwid.ListBox):
                 for _ in range(5):
                     self.keypress(size, 'down')
         return super().mouse_event(size, event, button, col, row, focus)
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key('GO_UP', key):
+            key = 'up'
+        elif is_command_key('GO_DOWN', key):
+            key = 'down'
+        return super().keypress(size, key)
 
 
 class MiddleColumnView(urwid.Frame):

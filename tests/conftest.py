@@ -779,3 +779,22 @@ def navigation_key_expected_key_pair(request):
     The expected key is the one which is passed to the super `keypress` calls.
     """
     return request.param
+
+
+@pytest.fixture(params=[
+        (key, expected_key)
+        for keys, expected_key in [
+            (keys_for_command('GO_UP'), 'up'),
+            (keys_for_command('GO_DOWN'), 'down'),
+        ]
+        for key in keys
+    ],
+    ids=lambda param: 'key:{}-expected_key:{}'.format(*param)
+)
+def mouse_event_navigation_key_expected_key_pair(request):
+    """
+    Fixture to generate pairs of navigation keys with their respective
+    expected key.
+    The expected key is the one which is passed to the super `keypress` calls.
+    """
+    return request.param
