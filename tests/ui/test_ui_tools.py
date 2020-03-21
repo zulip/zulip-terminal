@@ -1629,9 +1629,9 @@ class TestMessageBox:
     @pytest.mark.parametrize('starred_msg', ['this', 'last', 'neither'],
                              ids=['this_starred', 'last_starred', 'no_stars'])
     @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
-        (['alice', ' ', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
-        ([' ', ' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),
-        (['alice', ' ', ' ', 'DAYDATETIME'], {'timestamp': 0}),
+        (['alice', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
+        ([' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),
+        (['alice', ' ', 'DAYDATETIME'], {'timestamp': 0}),
     ], ids=['show_author_as_authors_different',
             'merge_messages_as_only_slightly_earlier_message',
             'dont_merge_messages_as_much_earlier_message'])
@@ -1650,11 +1650,13 @@ class TestMessageBox:
         all_to_vary = dict(to_vary_in_last_message, **stars['last'])
         last_msg = dict(message, **all_to_vary)
         msg_box = MessageBox(this_msg, self.model, last_msg)
-        expected_header[1] = '2018 -' if current_year > 2018 else ' '
-        expected_header[2] = msg_box._time_for_message(message)
-        expected_header[3] = '*' if starred_msg == 'this' else ' '
+        expected_header[1] = msg_box._time_for_message(message)
+        if current_year > 2018:
+            expected_header[1] = '2018 - ' + expected_header[1]
+        expected_header[2] = '*' if starred_msg == 'this' else ' '
 
         view_components = msg_box.main_view()
+
         assert len(view_components) == 2
         assert isinstance(view_components[0], Columns)
         assert ([w.text for w in view_components[0].widget_list] ==

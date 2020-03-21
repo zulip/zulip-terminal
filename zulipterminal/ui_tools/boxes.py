@@ -527,7 +527,7 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
-            text_keys = ('author', 'star', 'time', 'prev_year')
+            text_keys = ('author', 'star', 'time')
             text = {key: (None, ' ') for key in text_keys}  # type: TextType
 
             if any(different[key] for key in ('recipients', 'author', '24h')):
@@ -536,16 +536,19 @@ class MessageBox(urwid.Pile):
                 text['star'] = ('starred', "*")
             if any(different[key]
                    for key in ('recipients', 'author', 'timestamp')):
-                text['time'] = ('time', message['this']['time'])
                 this_year = date.today().year
                 msg_year = message['this']['datetime'].year
                 if this_year != msg_year:
-                    text['prev_year'] = ('time', '{} -'.format(msg_year))
+                    text['time'] = (
+                        'time',
+                        '{} - {}'.format(msg_year, message['this']['time'])
+                    )
+                else:
+                    text['time'] = ('time', message['this']['time'])
 
             content_header = urwid.Columns([
                 ('weight', 10, urwid.Text(text['author'])),
-                (6, urwid.Text(text['prev_year'], align='right')),
-                (16, urwid.Text(text['time'], align='right')),
+                (23, urwid.Text(text['time'], align='right')),
                 (1, urwid.Text(text['star'], align='right')),
                 ], dividechars=1)
         else:
