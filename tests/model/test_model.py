@@ -33,7 +33,7 @@ class TestModel:
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
         self.client.get_profile.return_value = user_profile
         model = Model(self.controller)
         return model
@@ -81,7 +81,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         with pytest.raises(ServerConnectionFailure) as e:
             model = Model(self.controller)
@@ -103,7 +103,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         with pytest.raises(ServerConnectionFailure) as e:
             model = Model(self.controller)
@@ -440,7 +440,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         self.client.get_messages.return_value = messages_successful_response
@@ -480,7 +480,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         messages_successful_response['anchor'] = 0
@@ -513,7 +513,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mock before calling get_messages
         # FIXME This has no influence on the result
@@ -593,7 +593,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         self.client.register.return_value = initial_data
@@ -627,7 +627,7 @@ class TestModel:
                      return_value=({}, set(), [], []))
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
         model = Model(self.controller)
         assert model.user_dict == user_dict
         assert model.users == user_list

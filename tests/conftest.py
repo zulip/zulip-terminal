@@ -493,7 +493,8 @@ def empty_index():
             stream_msg_template['id']: stream_msg_template,
             pm_template['id']: pm_template,
             group_pm_template['id']: group_pm_template,
-        })
+        }),
+        'unread_msgs': defaultdict(dict),
     })
 
 
@@ -732,10 +733,10 @@ def stream_dict(streams_fixture):
 @pytest.fixture
 def classified_unread_counts():
     """
-    Unread counts return by
-    helper.classify_unread_counts function.
+    Tuple of unread counts and unread_msg data
+    returned by helper.classify_unread_counts function.
     """
-    return {
+    return ({
         'all_msg': 12,
         'all_pms': 8,
         'unread_topics': {
@@ -754,7 +755,33 @@ def classified_unread_counts():
             1000: 3,
             99: 1
         }
-    }
+    }, {
+        1: {'type': 'private', 'sender_id': 1, 'flags': []},
+        2: {'type': 'private', 'sender_id': 1, 'flags': []},
+        3: {'type': 'private', 'sender_id': 2, 'flags': []},
+        4: {'type': 'stream',  'display_recipient': 'Some general stream',
+            'stream_id': 1000, 'subject': 'Some general unread topic',
+            'sender_ids': frozenset({1, 2}), 'flags': []},
+        5: {'type': 'stream', 'display_recipient': 'Some general stream',
+            'stream_id': 1000, 'subject': 'Some general unread topic',
+            'sender_ids': frozenset({1, 2}), 'flags': []},
+        6: {'type': 'stream', 'display_recipient': 'Some general stream',
+            'stream_id': 1000, 'subject': 'Some general unread topic',
+            'sender_ids': frozenset({1, 2}), 'flags': []},
+        7: {'type': 'stream', 'display_recipient': 'Secret stream',
+            'stream_id': 99, 'subject': 'Some private unread topic',
+            'sender_ids': frozenset({1, 2}), 'flags': []},
+        11: {'type': 'private', 'display_recipient':
+                                frozenset({11, 12, 1001}), 'flags': []},
+        12: {'type': 'private', 'display_recipient':
+                                frozenset({11, 12, 1001}), 'flags': []},
+        13: {'type': 'private', 'display_recipient':
+                                frozenset({11, 12, 1001}), 'flags': []},
+        101: {'type': 'private', 'display_recipient':
+                                 frozenset({11, 12, 13, 1001}), 'flags': []},
+        102: {'type': 'private', 'display_recipient':
+                                 frozenset({11, 12, 13, 1001}), 'flags': []},
+    })
 
 # --------------- UI Fixtures -----------------------------------------
 

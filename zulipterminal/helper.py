@@ -39,6 +39,7 @@ Index = TypedDict('Index', {
     'search': Set[int],  # {message_id, ...}
     # Downloaded message data
     'messages': Dict[int, Message],  # message_id: Message
+    'unread_msgs': Dict[int, Dict[str, Any]],  # message_id: Dict
 })
 
 initial_index = Index(
@@ -54,6 +55,7 @@ initial_index = Index(
     topics=defaultdict(list),
     search=set(),
     messages=defaultdict(dict),
+    unread_msgs=defaultdict(dict),
 )
 
 
@@ -386,9 +388,11 @@ def index_messages(messages: List[Message],
     return index
 
 
-def classify_unread_counts(model: Any) -> UnreadCounts:
+def classify_unread_counts(model: Any) -> Tuple[UnreadCounts,
+                                                Dict[int, Dict[str, Any]]]:
     # TODO: support group pms
     unread_msg_counts = model.initial_data['unread_msgs']
+    unread_msgs = {}  # type: Dict[int, Dict[str, Any]]
 
     unread_counts = UnreadCounts(
         all_msg=0,
@@ -405,6 +409,10 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
 
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
+        pm_data = {'type': 'private', 'sender_id': pm['sender_id'],
+                   'flags': []}
+        unread_msgs.update(dict(zip(pm['unread_message_ids'],
+                                    [pm_data] * count)))
         unread_counts['unread_pms'][pm['sender_id']] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
@@ -412,6 +420,14 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
+        stream_name = model.stream_dict[stream_id]['name']
+        sender_ids = stream['sender_ids']
+        sender_ids = frozenset(sender_ids)
+        stream_data = {'type': 'stream', 'stream_id': stream_id, 'subject':
+                       stream['topic'], 'display_recipient': stream_name,
+                       'sender_ids': sender_ids, 'flags': []}
+        unread_msgs.update(dict(zip(stream['unread_message_ids'],
+                                    [stream_data] * count)))
         if [model.stream_dict[stream_id]['name'],
                 stream['topic']] in model.muted_topics:
             continue
@@ -428,11 +444,19 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         count = len(group_pm['unread_message_ids'])
         user_ids = group_pm['user_ids_string'].split(',')
         user_ids = frozenset(map(int, user_ids))
+        huddle_data = {'type': 'private', 'display_recipient': user_ids,
+                       'flags': []}
+        unread_msgs.update(dict(zip(group_pm['unread_message_ids'],
+                                    [huddle_data] * count)))
         unread_counts['unread_huddles'][user_ids] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 
-    return unread_counts
+    for mentioned_message_id in unread_msg_counts['mentions']:
+        if(unread_msgs.get(mentioned_message_id)):
+            unread_msgs[mentioned_message_id].update({'flags': ['mentioned']})
+
+    return unread_counts, unread_msgs
 
 
 def match_user(user: Any, text: str) -> bool:
