@@ -199,11 +199,12 @@ class TestView:
         view.user_search = mocker.Mock()
         size = (20,)
 
-        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
+                                      ".keypress")
 
         view.controller.editor_mode = False
         view.keypress(size, key)
-        super_view.assert_called_once_with(size, expected_key)
+        super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('key', keys_for_command('ALL_MENTIONS'))
     def test_keypress_ALL_MENTIONS(self, view, mocker, key):

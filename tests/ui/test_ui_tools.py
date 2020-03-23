@@ -1125,9 +1125,9 @@ class TestHelpMenu:
     ])
     def test_keypress_navigation(self, mocker, key, expected_key):
         size = (200, 20)
-        super_view = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.help_view.keypress(size, key)
-        super_view.assert_called_once_with(size, expected_key)
+        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestPopUpConfirmationView:
