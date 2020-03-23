@@ -10,7 +10,10 @@ import requests
 from urwid import set_encoding
 
 from zulipterminal.config.themes import (
-    THEMES, all_themes, complete_and_incomplete_themes,
+    THEMES,
+    all_themes, 
+    complete_and_incomplete_themes, 
+    get_transparent_theme_variant
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
@@ -73,6 +76,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         action='store_true',
                         default=False,
                         help='Print zulip-terminal version and exit')
+                        
+    parser.add_argument('--transparent',
+                        dest='transparent',
+                        action='store_true',
+                        default=False,
+                        help='Use transparent (provided by terminal) background.')                        
 
     return parser.parse_args(argv)
 
@@ -185,6 +194,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         'theme': ('default', NO_CONFIG),
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
+        'transparent': ('disabled', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:
@@ -225,6 +235,8 @@ def main(options: Optional[List[str]]=None) -> None:
 
         if args.autohide:
             zterm['autohide'] = (args.autohide, 'on command line')
+        if args.transparent:
+            zterm['transparent'] = ('enabled', 'on command line')
         if args.theme:
             theme_to_use = (args.theme, 'on command line')
         else:
@@ -256,6 +268,7 @@ def main(options: Optional[List[str]]=None) -> None:
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
+            'transparent': ['enabled', 'disabled'],
         }
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():
@@ -268,6 +281,7 @@ def main(options: Optional[List[str]]=None) -> None:
                 print("Specify the {} option in zuliprc file.".format(setting))
                 sys.exit(1)
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
+                        
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
                    **boolean_settings).main()

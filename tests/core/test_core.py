@@ -30,8 +30,9 @@ class TestController:
         self.theme = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.transparent_background = False
         return Controller(self.config_file, self.theme, self.autohide,
-                          self.notify_enabled)
+                          self.notify_enabled, self.transparent_background)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(

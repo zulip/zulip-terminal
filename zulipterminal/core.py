@@ -9,7 +9,7 @@ from typing import Any, List, Optional
 import urwid
 import zulip
 
-from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.themes import ThemeSpec, get_transparent_theme_variant
 from zulipterminal.helper import Message, asynch
 from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
@@ -19,7 +19,6 @@ from zulipterminal.ui_tools.views import (
 )
 from zulipterminal.version import ZT_VERSION
 
-
 class Controller:
     """
     A class responsible for setting up the model and view and running
@@ -27,7 +26,9 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
-                 autohide: bool, notify: bool) -> None:
+                 autohide: bool, notify: bool, transparent: bool) -> None:
+        if transparent:
+            theme = get_transparent_theme_variant(theme)
         self.theme = theme
         self.autohide = autohide
         self.notify_enabled = notify

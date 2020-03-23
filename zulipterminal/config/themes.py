@@ -31,6 +31,30 @@ required_styles = {
     'starred',
 }
 
+# Transparent background may be enabled 
+# (based on config and/or command line) for:
+elements_with_transparent_backgrounds = {
+    None,
+    'msg_selected',
+    'content',
+    'name',
+    'unread',
+    'active',
+    'idle',
+    'offline',
+    'inactive',
+    'title',
+    'time',
+    'emoji',
+    'reaction',
+    'span',
+    'link',
+    'blockquote',
+    'bold',
+    'starred',
+}
+
+
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = 'h234'  # dark0_hard
@@ -47,34 +71,34 @@ LIGHTREDBOLD = '%s, bold' % LIGHTRED
 GRAY = 'h244'  # gray_244
 LIGHTMAGENTA = 'h132'  # neutral_purple
 LIGHTMAGENTABOLD = '%s, bold' % LIGHTMAGENTA
-
+        
 THEMES = {
     'default': [
-        (None,           'white',           ''),
+        (None,           'white',           'black'),
         ('selected',     'white',           'dark blue'),
-        ('msg_selected', 'light green',     ''),
+        ('msg_selected', 'light green',     'black'),
         ('header',       'dark cyan',       'dark blue', 'bold'),
         ('custom',       'white',           'dark blue', 'underline'),
-        ('content',      'white',           '',          'standout'),
-        ('name',         'yellow, bold',    ''),
-        ('unread',       'light blue',      ''),
-        ('active',       'light green',     ''),
-        ('idle',         'yellow',          ''),
-        ('offline',      'white',           ''),
-        ('inactive',     'white',           ''),
-        ('title',        'white, bold',     ''),
-        ('time',         'light blue',      ''),
+        ('content',      'white',           'black', 'standout'),
+        ('name',         'yellow, bold',    'black'),
+        ('unread',       'light blue',      'black'),
+        ('active',       'light green',     'black'),
+        ('idle',         'yellow',          'black'),
+        ('offline',      'white',           'black'),
+        ('inactive',     'white',           'black'),
+        ('title',        'white, bold',     'black'),
+        ('time',         'light blue',      'black'),
         ('bar',          'white',           'dark gray'),
         ('help',         'white',           'dark gray'),
-        ('emoji',        'light magenta',   ''),
-        ('reaction',     'light magenta, bold', ''),
-        ('span',         'light red, bold', ''),
-        ('link',         'light blue',      ''),
-        ('blockquote',   'brown',           ''),
+        ('emoji',        'light magenta',   'black'),
+        ('reaction',     'light magenta, bold', 'black'),
+        ('span',         'light red, bold', 'black'),
+        ('link',         'light blue',      'black'),
+        ('blockquote',   'brown',           'black'),
         ('code',         'black',           'white'),
-        ('bold',         'white, bold',     ''),
+        ('bold',         'white, bold',     'black'),
         ('footer',       'white',           'dark red',  'bold'),
-        ('starred',      'light red, bold', ''),
+        ('starred',      'light red, bold', 'black'),
         ('category',     'light blue, bold', ''),
     ],
     'gruvbox': [
@@ -201,3 +225,12 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
                 if set(s[0] for s in styles).issuperset(required_styles)}
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
+    
+def get_transparent_theme_variant(theme: ThemeSpec) -> ThemeSpec:
+    result = []
+    for element in theme:
+        if element[0] in elements_with_transparent_backgrounds and len(element) > 2:
+            result.append(element[:2] + ('',) + element[3:])
+        else:
+            result.append(element)
+    return result
