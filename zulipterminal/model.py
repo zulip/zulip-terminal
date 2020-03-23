@@ -154,7 +154,8 @@ class Model:
         self.user_group_by_id: Dict[int, Dict[str, Any]] = {}
         self.user_group_names = self._group_info_from_realm_user_groups(groups)
 
-        self.unread_counts = classify_unread_counts(self)
+        (self.unread_counts,
+            self.index['unread_msgs']) = classify_unread_counts(self)
 
         self._draft: Optional[Composition] = None
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
