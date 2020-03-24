@@ -175,6 +175,19 @@ def streams_fixture():
     return deepcopy(streams)
 
 
+@pytest.fixture
+def emojis_fixture():
+    return [
+        'happy',
+        'joker',
+        'joy_cat',
+        'rock_on',
+        'smile',
+        'smiley',
+        'smirk',
+        ]
+
+
 stream_msg_template = {
     'id': 537286,
     'sender_full_name': 'Foo Foo',

@@ -423,6 +423,14 @@ def match_user(user: Any, text: str) -> bool:
     return False
 
 
+def match_emoji(emoji: str, text: str) -> bool:
+    """
+    True if the emoji matches with `text` (case insensitive),
+    False otherwise.
+    """
+    return emoji.lower().startswith(text.lower())
+
+
 def match_stream(stream: Any, text: str) -> bool:
     """
     True if the stream matches with `text` (case insensitive),
