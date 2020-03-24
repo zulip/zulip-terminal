@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+import os
+
+from zulipterminal.emoji_dict import EMOJI_NAME_MAPS
+
+
+INPUT_FILE = "zulipterminal/emoji_dict.py"
+OUTPUT_FILE = "zulipterminal/emoji_names.py"
+
+emoji_dict = EMOJI_NAME_MAPS
+
+emoji_list = []
+for emoji_names in emoji_dict.values():
+    emoji_list.append(emoji_names['canonical_name'])
+    emoji_list.extend(emoji_names['aliases'])
+
+emoji_list.sort()
+
+with open(OUTPUT_FILE, "w") as f:
+    f.write('# Generated automatically by tools/convert-emoji-names\n')
+    f.write('# Do not modify.\n\n')
+    f.write('EMOJI_NAMES = [\n')
+    for listitem in emoji_list:
+        f.write('    \'%s\',\n' % listitem)
+    f.write(']\n')
+
+print("Emoji list saved in {}".format(OUTPUT_FILE))
+if os.path.exists(INPUT_FILE):
+    os.remove(INPUT_FILE)
+    print("{} deleted.".format(INPUT_FILE))

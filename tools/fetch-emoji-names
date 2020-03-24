@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+import requests
+
+
+OUTPUT_FILE = "zulipterminal/emoji_dict.py"
+
+# download emojis dictionary
+URL = "https://raw.githubusercontent.com/zulip/zulip/master/tools/setup/emoji/emoji_names.py"
+r = requests.get(URL)
+
+with open(OUTPUT_FILE, 'w') as f:
+    f.write(r.text)
+print("Emoji dictionary saved in {}".format(OUTPUT_FILE))
+print("Run tools/convert-emoji-names to convert dictionary to a list")
