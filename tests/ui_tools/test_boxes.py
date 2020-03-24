@@ -22,6 +22,9 @@ class TestWriteBox:
         assert write_box.view == self.view
         assert write_box.msg_edit_id is None
 
+    def emojis_fixture_sorted(self, emojis_fixture):
+        assert emojis_fixture == sorted(emojis_fixture)
+
     @pytest.mark.parametrize('text, prefix_string, state', [
         ('@Boo', '@', 0),
         ('@Boo', '@', 1),
@@ -135,4 +138,29 @@ class TestWriteBox:
             [stream['name']] for stream in
             streams_fixture[len(streams_fixture)//2:]]
         typeahead_string = write_box.autocomplete_streams(text, state)
+        assert typeahead_string == required_typeahead
+
+    @pytest.mark.parametrize('text, state, required_typeahead', [
+        (':rock_o', 0, ':rock_on:'),
+        (':rock_o', 1, None),
+        (':rock_o', -1, ':rock_on:'),
+        (':rock_o', -2, None),
+        (':smi', 0, ':smile:'),
+        (':smi', 1, ':smiley:'),
+        (':smi', 2, ':smirk:'),
+        (':jo', 0, ':joker:'),
+        (':jo', 1, ':joy_cat:'),
+        (':jok', 0, ':joker:'),
+        (':', 0, ':happy:'),
+        (':', 1, ':joker:'),
+        (':', -2, ':smiley:'),
+        (':', -1, ':smirk:'),
+        ('no match', 0, None),
+        (':nomatch', 0, None),
+        (':nomatch', -1, None),
+        ])
+    def test_autocomplete_emojis(self, write_box, emojis_fixture,
+                                 text, state, required_typeahead):
+        typeahead_string = write_box.autocomplete_emojis(text,
+                                                         state, emojis_fixture)
         assert typeahead_string == required_typeahead
