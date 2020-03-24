@@ -84,14 +84,14 @@ def asynch(func: Any) -> Any:
     return wrapper
 
 
-def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
-    # This method applies new_count for 'new message' (1) or 'read' (-1)
-    # (we could ensure this in a different way by a different type)
-    assert new_count == 1 or new_count == -1
-
-    messages = controller.model.index['messages']
-    unread_counts = controller.model.unread_counts  # type: UnreadCounts
-
+def _set_count_in_model(id_list: List[int], new_count: int,
+                        messages: Dict[int, Message],
+                        unread_counts: UnreadCounts) -> None:
+    """
+        This function doesn't explicitly set counts in model,
+        but updates `unread_counts` (which can update the model
+        if it's passed in, but is not tied to it).
+    """
     for id in id_list:
         msg = messages[id]
 
@@ -118,10 +118,16 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         elif new_count == 1:
             unreads[key] = new_count
 
-    # if view is not yet loaded. Usually the case when first message is read.
-    while not hasattr(controller, 'view'):
-        time.sleep(0.1)
 
+def _set_count_in_view(id_list: List[int], controller: Any, new_count: int,
+                       messages: Dict[int, Message],
+                       unread_counts: UnreadCounts) -> None:
+    """
+        This function for the most part contains the logic for setting the
+        count in the UI buttons. The later buttons (all_msg, all_pms)
+        additionally set the current count in the model and make use of the
+        same in the UI.
+    """
     stream_buttons_log = controller.view.stream_w.log
     is_open_topic_view = controller.view.left_panel.is_in_topic_view
     if is_open_topic_view:
@@ -173,6 +179,22 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
         if add_to_counts:
             unread_counts['all_msg'] += new_count
             all_msg.update_count(unread_counts['all_msg'])
+
+
+def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
+    # This method applies new_count for 'new message' (1) or 'read' (-1)
+    # (we could ensure this in a different way by a different type)
+    assert new_count == 1 or new_count == -1
+    messages = controller.model.index['messages']
+    unread_counts = controller.model.unread_counts  # type: UnreadCounts
+
+    _set_count_in_model(id_list, new_count, messages, unread_counts)
+
+    # if view is not yet loaded. Usually the case when first message is read.
+    while not hasattr(controller, 'view'):
+        time.sleep(0.1)
+
+    _set_count_in_view(id_list, controller, new_count, messages, unread_counts)
 
     while not hasattr(controller, 'loop'):
         time.sleep(0.1)
