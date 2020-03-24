@@ -12,8 +12,9 @@ from bs4.element import NavigableString, Tag
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.emoji_names import EMOJI_NAMES
 from zulipterminal.helper import (
-    Message, match_groups, match_stream, match_user,
+    Message, match_emoji, match_groups, match_stream, match_user,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -100,6 +101,8 @@ class WriteBox(urwid.Pile):
             return self.autocomplete_mentions(text, state, '@')
         elif text.startswith('#'):
             return self.autocomplete_streams(text, state)
+        elif text.startswith(':'):
+            return self.autocomplete_emojis(text, state)
         else:
             return text
 
@@ -128,6 +131,17 @@ class WriteBox(urwid.Pile):
                             if match_stream(stream, text[1:])]
         try:
             return stream_typeahead[state]
+        except (IndexError, TypeError):
+            return None
+
+    def autocomplete_emojis(self, text: str, state: int,
+                            emoji_list: List[str] = EMOJI_NAMES
+                            ) -> Optional[str]:
+        emoji_typeahead = [':{}:'.format(emoji)
+                           for emoji in emoji_list
+                           if match_emoji(emoji, text[1:])]
+        try:
+            return emoji_typeahead[state]
         except (IndexError, TypeError):
             return None
 
