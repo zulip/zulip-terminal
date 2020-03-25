@@ -14,8 +14,20 @@ class TestWriteBox:
         self.view.model = mocker.Mock()
 
     @pytest.fixture()
-    def write_box(self, mocker):
+    def write_box(self, mocker, users_fixture, user_groups_fixture,
+                  streams_fixture, emojis_fixture):
         write_box = WriteBox(self.view)
+        write_box.view.users = users_fixture
+        write_box.model.user_group_names = [
+            groups['name'] for groups in user_groups_fixture]
+
+        write_box.view.pinned_streams = []
+        write_box.view.unpinned_streams = [
+            [stream['name']] for stream in
+            streams_fixture]
+
+        mocker.patch('zulipterminal.ui_tools.boxes.emoji_names',
+                     EMOJI_NAMES=emojis_fixture)
         return write_box
 
     def test_init(self, write_box):
@@ -83,12 +95,8 @@ class TestWriteBox:
         ('@_', 4, None),  # Beyond end
         ('@_', -1, '@_**Human 2**'),
     ])
-    def test_generic_autocomplete_mentions(self, write_box, users_fixture,
-                                           text, state, required_typeahead,
-                                           user_groups_fixture):
-        write_box.view.users = users_fixture
-        write_box.model.user_group_names = [
-            groups['name'] for groups in user_groups_fixture]
+    def test_generic_autocomplete_mentions(self, write_box, text,
+                                           required_typeahead, state):
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
@@ -112,14 +120,8 @@ class TestWriteBox:
         ('#St', 1, '#**Stream 2**'),
         ('#Stream 1', 0, '#**Stream 1**'),
     ])
-    def test_generic_autocomplete_streams(self, write_box, streams_fixture,
-                                          text, state, required_typeahead):
-        write_box.view.pinned_streams = [
-            [stream['name']] for stream in
-            streams_fixture[:len(streams_fixture) // 2]]
-        write_box.view.unpinned_streams = [
-            [stream['name']] for stream in
-            streams_fixture[len(streams_fixture) // 2:]]
+    def test_generic_autocomplete_streams(self, write_box, text,
+                                          state, required_typeahead):
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
@@ -141,10 +143,8 @@ class TestWriteBox:
         (':nomatch', 0, None),
         (':nomatch', -1, None),
         ])
-    def test_generic_autocomplete_emojis(self, write_box, emojis_fixture, text,
+    def test_generic_autocomplete_emojis(self, write_box, text,
                                          mocker, state, required_typeahead):
-        mocker.patch('zulipterminal.ui_tools.boxes.emoji_names',
-                     EMOJI_NAMES=emojis_fixture)
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
