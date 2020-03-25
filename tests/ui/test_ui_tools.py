@@ -6,15 +6,16 @@ from bs4 import BeautifulSoup
 from urwid import AttrWrap, Columns, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.themes import THEMES
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    HelpView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
-    MsgInfoView, PopUpConfirmationView, RightColumnView, StreamsView,
-    TopicsView, UsersView,
+    HelpView, LeftColumnView, LoadingView, MessageView, MiddleColumnView,
+    ModListWalker, MsgInfoView, PopUpConfirmationView, RightColumnView,
+    StreamsView, TopicsView, UsersView,
 )
 
 
@@ -2102,3 +2103,117 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+
+class TestLoadingView:
+
+    def test_init(self):
+        text = "Random Text"
+        loading_view = LoadingView(text)
+        assert loading_view.text == text
+
+    def test_set_controller(self, mocker):
+        controller = mocker.Mock()
+        loading_view = LoadingView('')
+        loading_view.set_controller(controller)
+        assert loading_view.controller == controller
+
+    def test_keypress_enter(self, mocker):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+
+        key = 'enter'
+        loading_view.keypress((20, 20), key)
+
+        loading_view.controller.init_view.assert_called_once_with()
+        loop = loading_view.controller.loop
+        assert loop.widget == loading_view.controller.view
+        loop.screen.register_palette.assert_called_once_with(
+            loading_view.controller.theme
+        )
+        loading_view.controller.update_screen.assert_called_once_with()
+
+    def test_keypress_h(self, mocker):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+        loading_view.controller.wait_after_loading = True
+        update_zuliprc = mocker.patch(
+            'zulipterminal.ui_tools.views.update_zuliprc')
+
+        key = 'h'
+        loading_view.keypress((20, 20), key)
+
+        update_zuliprc.assert_called_once_with(
+            loading_view.controller.zuliprc_path, 'tutorial', 'skip'
+        )
+        loading_view.controller.init_view.assert_called_once_with()
+        loop = loading_view.controller.loop
+        assert loop.widget == loading_view.controller.view
+        loop.screen.register_palette.assert_called_once_with(
+            loading_view.controller.theme
+        )
+        loading_view.controller.update_screen.assert_called_once_with()
+
+    def test_keypress_t(self, mocker):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+        loading_view.controller.wait_after_loading = True
+        update_zuliprc = mocker.patch(
+            'zulipterminal.ui_tools.views.update_zuliprc')
+
+        loading_view.cycle_themes = iter(['default'])
+        key = 't'
+        loading_view.keypress((20, 20), key)
+
+        assert loading_view.controller.theme ==\
+            THEMES[loading_view.controller.theme_name]
+
+        controller = loading_view.controller
+        controller.loop.screen.register_palette.assert_called_once_with(
+            loading_view.controller.theme
+        )
+        update_zuliprc.assert_called_once_with(
+            loading_view.controller.zuliprc_path, 'theme',
+            loading_view.controller.theme_name
+        )
+        controller.show_settings_after_loading.assert_called_once_with()
+
+    @pytest.mark.parametrize('autohide', [True, False])
+    def test_keypress_a(self, mocker, autohide):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+        loading_view.controller.wait_after_loading = True
+        update_zuliprc = mocker.patch(
+            'zulipterminal.ui_tools.views.update_zuliprc')
+
+        loading_view.controller.autohide = autohide
+        config = 'no_autohide' if autohide else 'autohide'
+
+        key = 'a'
+        loading_view.keypress((20, 20), key)
+
+        assert loading_view.controller.autohide == (not autohide)
+        update_zuliprc.assert_called_once_with(
+            loading_view.controller.zuliprc_path, 'autohide', config)
+        loading_view.controller.show_settings_after_loading.assert_called_once(
+        )
+
+    @pytest.mark.parametrize('notify_enabled', [True, False])
+    def test_keypress_n(self, mocker, notify_enabled):
+        loading_view = LoadingView('')
+        loading_view.controller = mocker.Mock()
+        loading_view.controller.wait_after_loading = True
+        update_zuliprc = mocker.patch(
+            'zulipterminal.ui_tools.views.update_zuliprc')
+
+        loading_view.controller.notify_enabled = notify_enabled
+        config = 'disabled' if notify_enabled else 'enabled'
+
+        key = 'n'
+        loading_view.keypress((20, 20), key)
+
+        controller = loading_view.controller
+        assert controller.notify_enabled == (not notify_enabled)
+        update_zuliprc.assert_called_once_with(
+            loading_view.controller.zuliprc_path, 'notify', config)
+        controller.show_settings_after_loading.assert_called_once_with()

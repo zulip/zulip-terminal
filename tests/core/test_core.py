@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from zulipterminal.core import Controller
+from zulipterminal.core import THEMES, TUTORIAL, Controller
 from zulipterminal.version import ZT_VERSION
 
 
@@ -22,16 +22,18 @@ class TestController:
                                                   '.poll_for_events')
         self.model.view = self.view
         self.view.focus_col = 1
-        mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
     def controller(self, mocker) -> None:
         self.config_file = 'path/to/zuliprc'
-        self.theme = 'default'
+        self.theme_name = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
-        return Controller(self.config_file, self.theme, self.autohide,
-                          self.notify_enabled)
+        self.tutorial = True
+        self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
+                                      return_value=mocker.Mock())
+        return Controller(self.config_file, self.theme_name, self.autohide,
+                          self.notify_enabled, self.tutorial)
 
     def test_initialize_controller(self, controller, mocker) -> None:
         self.client.assert_called_once_with(
@@ -39,9 +41,44 @@ class TestController:
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
         self.model.assert_called_once_with(controller)
+        assert controller.theme == THEMES[self.theme_name]
+
+    def test_init_model(self, mocker) -> None:
+        mocker.patch('zulipterminal.core.Controller.__init__',
+                     return_value=None)
+        controller = Controller('config', 'theme', True, True, True)
+        controller.capture_stdout = mocker.Mock()
+        controller.init_model()
+
+        self.model.assert_called_once_with(controller)
+        assert controller.capture_stdout.called
+
+    def test_init_view(self, controller, mocker) -> None:
+        controller.init_view()
         self.view.assert_called_once_with(controller)
         self.model.poll_for_events.assert_called_once_with()
-        assert controller.theme == self.theme
+
+    def test_raise_exception(self, controller) -> None:
+        with pytest.raises(Exception):
+            controller.raise_exception(Exception)
+
+    @pytest.mark.parametrize('spinner, show_settings', [
+        (['-'], True),
+        (['|'], False),
+    ])
+    def test_loading_text(self, controller, spinner, show_settings):
+        SETTINGS = ["\n\nTheme [t]: ",
+                    ('starred', controller.theme_name),
+                    "\nAutohide [a]: ",
+                    ('starred', str(controller.autohide)),
+                    "\nNotify [n]: ",
+                    ('starred', str(controller.notify_enabled))]
+        text = controller.loading_text(spinner, show_settings)
+        if show_settings:
+            assert text == [TUTORIAL, ('idle', ["\nLoaded "] + spinner),
+                            SETTINGS]
+        else:
+            assert text == [TUTORIAL, ('idle', ["\nLoading "] + spinner)]
 
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:
@@ -203,14 +240,15 @@ class TestController:
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        ret_mock = mocker.Mock()
-        mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
-        controller.view.palette = {
-            'default': 'theme_properties'
-        }
+        # pass
+        controller.show_main_view = mocker.Mock()
         mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
+        controller.restore_stdout = mocker.Mock()
+        controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
         controller.main()
-        assert mock_loop.call_count == 1
+
+        controller.show_main_view.assert_called_once_with()
+        controller.loop.run.assert_called_once_with()
 
     @pytest.mark.parametrize('muted_streams, action', [
         ({205, 89}, 'unmuting'),
@@ -273,3 +311,47 @@ class TestController:
             num_after=0, num_before=30, anchor=10000000000)
         create_msg.assert_called_once_with(controller.model, msg_ids)
         assert controller.model.index == {'search': msg_ids}
+
+    def test_initialize_loop(self, mocker, controller):
+        assert self.main_loop.call_count == 1
+        assert controller.loop.watch_pipe.call_count == 2
+
+    @pytest.mark.parametrize('tutorial', [
+        True, False
+    ])
+    def test_show_main_view_has_model(self, controller, mocker, tutorial):
+        controller.capture_stdout = mocker.Mock()
+        controller.model = mocker.Mock()
+        controller.update_screen = mocker.Mock()
+        controller.init_view = mocker.Mock()
+        controller.txt = mocker.Mock()
+        controller.loading_text = mocker.Mock()
+        controller.view = mocker.Mock()
+        controller.wait_after_loading = tutorial
+        controller.show_main_view()
+
+        if tutorial:
+            assert controller.txt.set_text.called
+            controller.update_screen.assert_called_once_with()
+        else:
+            controller.txt.keypress.assert_called_once_with((20, 20), 'enter')
+
+    def test_show_settings_after_loading(self, controller, mocker):
+        controller.txt = mocker.Mock()
+        controller.update_screen = mocker.Mock()
+        controller.loading_text = mocker.Mock()
+
+        controller.show_settings_after_loading()
+
+        assert controller.txt.set_text.called
+        controller.loading_text.assert_called_once_with([
+            u'\u2713  \nPress ',
+            ('starred', 'Enter'),
+            ' to continue >>\nPress ',
+            ('starred', 'h'),
+            ' to skip the tutorial from next time and continue.\n\n'
+            'You can now toggle some of the settings below by pressing the'
+            ' key next to them.'],
+            show_settings=True
+        )
+        controller.update_screen.assert_called_once_with()

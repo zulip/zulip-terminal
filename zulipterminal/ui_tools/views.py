@@ -1,6 +1,7 @@
 import threading
 import time
 from collections import OrderedDict, defaultdict
+from itertools import cycle
 from typing import Any, Callable, List, Optional, Tuple
 
 import urwid
@@ -8,7 +9,8 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.helper import Message, asynch, match_user
+from zulipterminal.config.themes import THEMES, all_themes
+from zulipterminal.helper import Message, asynch, match_user, update_zuliprc
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, PMButton, StarredButton, StreamButton, TopicButton,
@@ -906,3 +908,57 @@ class MsgInfoView(urwid.ListBox):
         if is_command_key('GO_BACK', key) or is_command_key('MSG_INFO', key):
             self.controller.exit_popup()
         return super().keypress(size, key)
+
+
+class LoadingView(urwid.Text):
+    cycle_themes = cycle(all_themes())
+
+    def set_controller(self, controller: Any) -> None:
+        self.controller = controller
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if hasattr(self, 'controller'):
+            if key == "enter":
+                # display the view
+                self.controller.init_view()
+                self.controller.loop.widget = self.controller.view
+                self.controller.loop.screen.register_palette(
+                    self.controller.theme)
+                self.controller.update_screen()
+            if key == 'h' and self.controller.wait_after_loading:
+                # Add tutorial=skip to the generated zuliprc
+                update_zuliprc(self.controller.zuliprc_path,
+                               'tutorial', 'skip')
+                self.keypress(size, "enter")
+            if key == 't':
+                config = next(self.cycle_themes)
+                if config == self.controller.theme_name:
+                    config = next(self.cycle_themes)
+                self.controller.theme = THEMES[config]
+                self.controller.theme_name = config
+                self.controller.loop.screen.register_palette(THEMES[config])
+                self.controller.loop.screen.clear()
+                update_zuliprc(self.controller.zuliprc_path,
+                               'theme', config)
+                self.controller.show_settings_after_loading()
+            if key == 'a':
+                config = 'autohide'
+                if self.controller.autohide:
+                    config = 'no_autohide'
+                self.controller.autohide = not self.controller.autohide
+                update_zuliprc(self.controller.zuliprc_path,
+                               'autohide', config)
+                self.controller.show_settings_after_loading()
+            if key == 'n':
+                config = 'enabled'
+                if self.controller.notify_enabled:
+                    config = 'disabled'
+                self.controller.notify_enabled = not \
+                    self.controller.notify_enabled
+                update_zuliprc(self.controller.zuliprc_path,
+                               'notify', config)
+                self.controller.show_settings_after_loading()
+        return key
