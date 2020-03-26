@@ -27,8 +27,10 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
+                 color_depth: int,
                  autohide: bool, notify: bool) -> None:
         self.theme = theme
+        self.color_depth = color_depth
         self.autohide = autohide
         self.notify_enabled = notify
         self.editor_mode = False  # type: bool
@@ -262,7 +264,7 @@ class Controller:
 
     def main(self) -> None:
         screen = Screen()
-        screen.set_terminal_properties(colors=256)
+        screen.set_terminal_properties(colors=self.color_depth)
         self.loop = urwid.MainLoop(self.view,
                                    self.theme,
                                    screen=screen)

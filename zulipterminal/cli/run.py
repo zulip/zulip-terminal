@@ -48,6 +48,9 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                              organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
                         help='choose color theme. (e.g. blue, light)')
+    parser.add_argument('--color-depth',
+                        choices=['1', '16', '256'], default=256,
+                        help="Force the color depth (default 256).")
     # debug mode
     parser.add_argument("-d",
                         "--debug",
@@ -270,6 +273,7 @@ def main(options: Optional[List[str]]=None) -> None:
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
         Controller(zuliprc_path,
                    THEMES[theme_to_use[0]],
+                   int(args.color_depth),
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',
