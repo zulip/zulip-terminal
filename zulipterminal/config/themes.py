@@ -165,7 +165,7 @@ THEMES = {
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'white'),
         ('category',     'dark gray, bold', 'light gray'),
-        ('unread_count', 'yellow',          'dark gray'),
+        ('unread_count', 'dark blue, bold', 'white'),
     ],
     'blue': [
         (None,           'black',           'light blue'),
@@ -194,7 +194,7 @@ THEMES = {
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'dark blue'),
         ('category',     'light gray, bold', 'light blue'),
-        ('unread_count', 'yellow',          'dark blue'),
+        ('unread_count', 'yellow',          'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
