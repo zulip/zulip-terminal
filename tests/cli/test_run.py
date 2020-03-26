@@ -61,7 +61,8 @@ def test_main_help(capsys, options):
         '--config-file CONFIG_FILE, -c CONFIG_FILE',
         '--autohide',
         '--no-autohide',
-        '-v, --version'
+        '-v, --version',
+        '--color-depth'
     }
     optional_argument_lines = {line[2:] for line in lines
                                if len(line) > 2 and line[2] == '-'}
