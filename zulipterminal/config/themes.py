@@ -29,6 +29,7 @@ required_styles = {
     'bold',
     'footer',
     'starred',
+    'category',
 }
 
 # Colors used in gruvbox-256
