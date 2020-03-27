@@ -2,6 +2,7 @@ import pytest
 
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes, required_styles,
+    theme_with_monochrome_added,
 )
 
 
@@ -34,3 +35,25 @@ def test_complete_and_incomplete_themes():
     result = (sorted(list(expected_complete_themes)),
               sorted(list(set(THEMES)-expected_complete_themes)))
     assert result == complete_and_incomplete_themes()
+
+
+@pytest.mark.parametrize('theme, expected_new_theme, req_styles', [
+    ([('a', 'another')], [], {}),
+    ([('a', 'another')], [('a', 'another')], {'a': ''}),
+    ([('a', 'fg', 'bg')], [('a', 'fg', 'bg', 'x')], {'a': 'x'}),
+    ([('a', 'fg', 'bg', 'bold')], [('a', 'fg', 'bg', 'x')], {'a': 'x'}),
+    ([('a', 'fg', 'bg', 'bold', 'h1', 'h2')],
+     [('a', 'fg', 'bg', 'x', 'h1', 'h2')],
+     {'a': 'x'}),
+], ids=[
+    'incomplete_theme',
+    'one_to_one',
+    '16_color_add_mono',
+    '16_color_mono_overwrite',
+    '256_color',
+])
+def test_theme_with_monochrome_added(mocker,
+                                     theme, expected_new_theme, req_styles):
+    mocker.patch.dict('zulipterminal.config.themes.required_styles',
+                      req_styles)
+    assert theme_with_monochrome_added(theme) == expected_new_theme
