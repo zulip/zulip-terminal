@@ -11,6 +11,7 @@ from urwid import set_encoding
 
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes,
+    theme_with_monochrome_added,
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
@@ -271,8 +272,15 @@ def main(options: Optional[List[str]]=None) -> None:
                 print("Specify the {} option in zuliprc file.".format(setting))
                 sys.exit(1)
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
+
+        color_depth = int(args.color_depth)
+        if color_depth == 1:
+            theme_data = theme_with_monochrome_added(THEMES[theme_to_use[0]])
+        else:
+            theme_data = THEMES[theme_to_use[0]]
+
         Controller(zuliprc_path,
-                   THEMES[theme_to_use[0]],
+                   theme_data,
                    int(args.color_depth),
                    **boolean_settings).main()
     except ServerConnectionFailure as e:

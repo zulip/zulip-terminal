@@ -3,34 +3,38 @@ from typing import Dict, List, Optional, Tuple
 
 ThemeSpec = List[Tuple[Optional[str], ...]]
 
-required_styles = {
-    None,
-    'selected',
-    'msg_selected',
-    'header',
-    'custom',
-    'name',
-    'unread',
-    'user_active',
-    'user_idle',
-    'user_offline',
-    'user_inactive',
-    'title',
-    'time',
-    'bar',
-    'popup_contrast',
-    'msg_emoji',
-    'reaction',
-    'msg_mention',
-    'msg_link',
-    'msg_quote',
-    'msg_code',
-    'msg_bold',
-    'footer',
-    'starred',
-    'popup_category',
-    'unread_count',
-    'filter_results',
+# The keys in required_styles specify what styles are necessary for a theme to
+# be complete, while the values are those used to style each element in
+# monochrome (1-bit) mode - independently of the specified theme
+
+required_styles = {  # style-name: monochrome-bit-depth-style
+    None: '',
+    'selected': 'standout',
+    'msg_selected': 'standout',
+    'header': 'bold',
+    'custom': 'standout',
+    'name': '',
+    'unread': 'strikethrough',
+    'user_active': 'bold',
+    'user_idle': '',
+    'user_offline': '',
+    'user_inactive': '',
+    'title': 'standout',
+    'time': '',
+    'bar': 'standout',
+    'popup_contrast': 'standout',
+    'msg_emoji': 'bold',
+    'reaction': 'bold',
+    'msg_mention': 'bold',
+    'msg_link': '',
+    'msg_quote': 'underline',
+    'msg_code': 'bold',
+    'msg_bold': 'bold',
+    'footer': 'standout',
+    'starred': 'bold',
+    'popup_category': 'bold',
+    'unread_count': '',
+    'filter_results': 'bold',
 }
 
 # Colors used in gruvbox-256
@@ -55,8 +59,8 @@ THEMES = {
         (None,             'white',           ''),
         ('selected',       'white',           'dark blue'),
         ('msg_selected',   'white',           'dark blue'),
-        ('header',         'dark cyan',       'dark blue', 'bold'),
-        ('custom',         'white',           'dark blue', 'underline'),
+        ('header',         'dark cyan',       'dark blue'),
+        ('custom',         'white',           'dark blue'),
         ('name',           'yellow, bold',    ''),
         ('unread',         'dark blue',       ''),
         ('user_active',    'light green',     ''),
@@ -74,7 +78,7 @@ THEMES = {
         ('msg_quote',      'brown',           ''),
         ('msg_code',       'black',           'white'),
         ('msg_bold',       'white, bold',     ''),
-        ('footer',         'white',           'dark red',  'bold'),
+        ('footer',         'white',           'dark red'),
         ('starred',        'light red, bold', ''),
         ('popup_category', 'light blue, bold', ''),
         ('unread_count',   'yellow',          ''),
@@ -91,9 +95,9 @@ THEMES = {
         ('msg_selected',   'black',           'white',
          None,             BLACK,             WHITE),
         ('header',         'dark cyan',       'dark blue',
-         'bold',           'dark cyan',       DARKBLUE),
+         None,             'dark cyan',       DARKBLUE),
         ('custom',         'white',           'dark blue',
-         'underline',      WHITE,             DARKBLUE),
+         None,             WHITE,             DARKBLUE),
         ('name',           'yellow, bold',    'black',
          None,             YELLOWBOLD,        BLACK),
         ('unread',         'light magenta',   'black',
@@ -129,7 +133,7 @@ THEMES = {
         ('msg_bold',       'white, bold',     'black',
          None,             WHITEBOLD,         BLACK),
         ('footer',         'white',           'dark red',
-         'bold',           WHITE,             DARKRED),
+         None,             WHITE,             DARKRED),
         ('starred',        'light red, bold', 'black',
          None,             LIGHTREDBOLD,      BLACK),
         ('popup_category', 'light blue, bold', 'black',
@@ -145,9 +149,9 @@ THEMES = {
         (None,             'black',           'white'),
         ('selected',       'black',           'light green'),
         ('msg_selected',   'black',           'light green'),
-        ('header',         'white',           'dark blue',  'bold'),
-        ('custom',         'white',           'dark blue',  'underline'),
-        ('name',           'dark green',      'white', 'bold'),
+        ('header',         'white',           'dark blue'),
+        ('custom',         'white',           'dark blue'),
+        ('name',           'dark green',      'white'),
         ('unread',         'dark gray',       'light gray'),
         ('user_active',    'dark green',      'white'),
         ('user_idle',      'dark blue',       'white'),
@@ -164,7 +168,7 @@ THEMES = {
         ('msg_quote',      'black',           'brown'),
         ('msg_code',       'black',           'light gray'),
         ('msg_bold',       'white, bold',     'dark gray'),
-        ('footer',         'white',           'dark red',   'bold'),
+        ('footer',         'white',           'dark red'),
         ('starred',        'light red, bold', 'white'),
         ('popup_category', 'dark gray, bold', 'light gray'),
         ('unread_count',   'dark blue, bold', 'white'),
@@ -175,9 +179,9 @@ THEMES = {
         (None,             'black',           'light blue'),
         ('selected',       'black',           'light gray'),
         ('msg_selected',   'black',           'light gray'),
-        ('header',         'black',           'dark blue',  'bold'),
-        ('custom',         'white',           'dark blue',  'underline'),
-        ('name',           'dark red',        'light blue', 'bold'),
+        ('header',         'black',           'dark blue'),
+        ('custom',         'white',           'dark blue'),
+        ('name',           'dark red',        'light blue'),
         ('unread',         'light gray',      'light blue'),
         ('user_active',    'light green, bold', 'light blue'),
         ('user_idle',      'dark gray',       'light blue'),
@@ -194,7 +198,7 @@ THEMES = {
         ('msg_quote',      'brown',           'dark blue'),
         ('msg_code',       'dark blue',       'white'),
         ('msg_bold',       'white, bold',     'dark blue'),
-        ('footer',         'white',           'dark red',   'bold'),
+        ('footer',         'white',           'dark red'),
         ('starred',        'light red, bold', 'light blue'),
         ('popup_category', 'light gray, bold', 'light blue'),
         ('unread_count',   'yellow',          'light blue'),
@@ -213,3 +217,22 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
                 if set(s[0] for s in styles).issuperset(required_styles)}
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
+
+
+def theme_with_monochrome_added(theme: ThemeSpec) -> ThemeSpec:
+    updated_theme = []
+    for style in theme:
+        style_name = style[0]
+        if style_name not in required_styles:  # incomplete theme
+            continue
+        mono_style = required_styles[style_name]
+        if len(style) > 4:     # 256 colors+
+            new_style = style[:3] + (mono_style,) + style[4:]
+        elif len(style) == 4:  # 16 colors + mono (overwrite mono)
+            new_style = style[:3] + (mono_style,)
+        elif len(style) == 3:  # 16 colors only
+            new_style = style[:3] + (mono_style,)
+        else:                  # 1-to-1 mapping (same as other style)
+            new_style = style
+        updated_theme.append(new_style)
+    return updated_theme
