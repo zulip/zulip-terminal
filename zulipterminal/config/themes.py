@@ -54,7 +54,7 @@ THEMES = {
     'default': [
         (None,           'white',           ''),
         ('selected',     'white',           'dark blue'),
-        ('msg_selected', 'light green',     ''),
+        ('msg_selected', 'white',           'dark blue'),
         ('header',       'dark cyan',       'dark blue', 'bold'),
         ('custom',       'white',           'dark blue', 'underline'),
         ('content',      'white',           '',          'standout'),
@@ -85,10 +85,10 @@ THEMES = {
         # on 256 colors
         (None,           'white',           'black',
          None,           WHITE,             BLACK),
-        ('selected',     'white',           'dark blue',
-         None,           WHITE,             DARKBLUE),
-        ('msg_selected', 'light green',     'black',
-         None,           LIGHTGREEN,        BLACK),
+        ('selected',     'black',           'white',
+         None,           BLACK,             WHITE),
+        ('msg_selected', 'black',           'white',
+         None,           BLACK,             WHITE),
         ('header',       'dark cyan',       'dark blue',
          'bold',         'dark cyan',       DARKBLUE),
         ('custom',       'white',           'dark blue',
@@ -169,7 +169,7 @@ THEMES = {
     ],
     'blue': [
         (None,           'black',           'light blue'),
-        ('selected',     'white',           'dark blue'),
+        ('selected',     'black',           'light gray'),
         ('msg_selected', 'black',           'light gray'),
         ('header',       'black',           'dark blue',  'bold'),
         ('custom',       'white',           'dark blue',  'underline'),
