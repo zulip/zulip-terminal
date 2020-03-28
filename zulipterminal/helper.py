@@ -93,19 +93,19 @@ def _set_count_in_model(id_list: List[int], new_count: int,
         if it's passed in, but is not tied to it).
     """
     for id in id_list:
-        msg = messages[id]
+        message = messages[id]
 
-        if msg['type'] == 'stream':
-            key = (messages[id]['stream_id'], msg['subject'])
+        if message['type'] == 'stream':
+            key = (message['stream_id'], message['subject'])
             unreads = unread_counts['unread_topics']
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
-        elif len(msg['display_recipient']) <= 2:
-            key = messages[id]['sender_id']
+        elif len(message['display_recipient']) <= 2:
+            key = message['sender_id']
             unreads = unread_counts['unread_pms']  # type: ignore
         else:  # If it's a group pm
             key = frozenset(  # type: ignore
-                recipient['id'] for recipient in msg['display_recipient']
+                recipient['id'] for recipient in message['display_recipient']
             )
             unreads = unread_counts['unread_huddles']  # type: ignore
 
@@ -137,17 +137,18 @@ def _set_count_in_view(id_list: List[int], controller: Any, new_count: int,
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     for id in id_list:
-        user_id = messages[id]['sender_id']
+        message = messages[id]
+        user_id = message['sender_id']
 
         # If we sent this message, don't increase the count
         if user_id == controller.model.user_id:
             continue
 
-        msg_type = messages[id]['type']
+        msg_type = message['type']
         add_to_counts = True
         if msg_type == 'stream':
-            stream_id = messages[id]['stream_id']
-            msg_topic = messages[id]['subject']
+            stream_id = message['stream_id']
+            msg_topic = message['subject']
             if controller.model.is_muted_stream(stream_id):
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
@@ -158,7 +159,7 @@ def _set_count_in_view(id_list: List[int], controller: Any, new_count: int,
                                                    new_count)
                         break
             # FIXME: Update unread_counts['unread_topics']?
-            if ([messages[id]['display_recipient'], msg_topic] in
+            if ([message['display_recipient'], msg_topic] in
                     controller.model.muted_topics):
                 add_to_counts = False
             if is_open_topic_view and stream_id == toggled_stream_id:
