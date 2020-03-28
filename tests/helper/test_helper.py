@@ -186,6 +186,14 @@ def test_set_count_muted_topics(initial_unread_counts, muted_topics,
     assert controller.model.unread_counts == expected_unread_counts
 
 
+@pytest.mark.parametrize('id_list, new_count', [([], 1)])
+def test_set_count_screen_updated(mocker, controller, id_list, new_count):
+    controller.update_screen = mocker.patch(
+            'zulipterminal.core.Controller.update_screen')
+    set_count(id_list, controller, new_count)
+    controller.update_screen.assert_called_once_with()
+
+
 def test_index_messages_narrow_all_messages(mocker,
                                             messages_successful_response,
                                             index_all_messages,
