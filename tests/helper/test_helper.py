@@ -152,6 +152,40 @@ def test_set_count_muted_streams(initial_unread_counts, muted_streams,
     assert controller.model.unread_counts == expected_unread_counts
 
 
+@pytest.mark.parametrize('all_msg, unread_topics', [
+    (6, {(1001, 'Topic 1'): 3, (1002, 'Topic 3'): 1, (1003, 'Topic 10'): 2}),
+    ])
+@pytest.mark.parametrize(
+    'new_count, expected_unread_topics, id_list, muted_topics,\
+            expected_all_msg', [
+     (1, {(1001, 'Topic 1'): 4, (1002, 'Topic 3'): 1,
+          (1003, 'Topic 10'): 4}, [7, 8, 9], [['stream 1', 'Topic 1'],
+                                              ['stream 10', 'Topic 10']], 6),
+     (1, {(1001, 'Topic 1'): 4, (1002, 'Topic 3'): 2, (1003, 'Topic 10'): 4},
+      [7, 8, 9, 4], [['stream 1', 'Topic 1'], ['stream 10', 'Topic 10']], 7),
+     (-1, {(1001, 'Topic 1'): 2, (1002, 'Topic 3'): 1,
+           (1003, 'Topic 10'): 2}, [2], [['stream 1', 'Topic 1']], 6),
+     (-1, {(1001, 'Topic 1'): 2, (1003, 'Topic 10'): 2}, [2, 4],
+      [['stream 1', 'Topic 1']], 5),
+     ])
+def test_set_count_muted_topics(initial_unread_counts, muted_topics,
+                                unread_topics, all_msg, id_list, new_count,
+                                expected_unread_topics, expected_all_msg,
+                                controller):
+    # all_msg does not change for muted topics.
+    controller.model.muted_topics = muted_topics
+    unread_counts = deepcopy(dict(initial_unread_counts,
+                                  **{'all_msg': all_msg,
+                                     'unread_topics': unread_topics}))
+    expected_unread_counts = dict(initial_unread_counts,
+                                  **{'all_msg': expected_all_msg,
+                                     'unread_topics': expected_unread_topics})
+    controller.model.unread_counts = unread_counts
+
+    set_count(id_list, controller, new_count)
+    assert controller.model.unread_counts == expected_unread_counts
+
+
 def test_index_messages_narrow_all_messages(mocker,
                                             messages_successful_response,
                                             index_all_messages,
