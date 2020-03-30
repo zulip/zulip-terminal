@@ -1397,7 +1397,59 @@ class TestMessageBox:
         ('<hr/>', ['[RULER NOT RENDERED]']),
         ('<img>', ['[IMAGE NOT RENDERED]']),
         ('<img/>', ['[IMAGE NOT RENDERED]']),
-        ('<table>stuff</table>', ['[TABLE NOT RENDERED]']),
+        ('<table><thead><tr><th>Firstname</th><th>Lastname</th></tr></thead>'
+         '<tbody><tr><td>John</td><td>Doe</td></tr><tr><td>Mary</td><td>Moe'
+         '</td></tr></tbody></table>', [
+            '┌─', '─────────', '─┬─', '────────', '─┐\n',
+            '│ ', ('table_head', 'Firstname'), ' │ ',
+            ('table_head', 'Lastname'), ' │\n',
+            '├─', '─────────', '─┼─', '────────', '─┤\n',
+            '│ ', (None, 'John     '), ' │ ', (None, 'Doe     '), ' │\n',
+            '│ ', (None, 'Mary     '), ' │ ', (None, 'Moe     '), ' │\n',
+            '└─', '─────────', '─┴─', '────────', '─┘',
+         ]),
+        ('<table><thead><tr><th align="left">Name</th><th align="right">Id'
+         '</th></tr></thead><tbody><tr><td align="left">Robert</td>'
+         '<td align="right">1</td></tr><tr><td align="left">Mary</td>'
+         '<td align="right">100</td></tr></tbody></table>', [
+            '┌─', '──────', '─┬─', '───', '─┐\n',
+            '│ ', ('table_head', 'Name  '), ' │ ', ('table_head', ' Id'),
+            ' │\n',
+            '├─', '──────', '─┼─', '───', '─┤\n',
+            '│ ', (None, 'Robert'), ' │ ', (None,  '  1'), ' │\n',
+            '│ ', (None, 'Mary  '), ' │ ', (None, '100'), ' │\n',
+            '└─', '──────', '─┴─', '───', '─┘',
+         ]),
+        ('<table><thead><tr><th align="center">Name</th><th align="right">Id'
+         '</th></tr></thead><tbody><tr><td align="center">Robert</td>'
+         '<td align="right">1</td></tr><tr><td align="center">Mary</td>'
+         '<td align="right">100</td></tr></tbody></table>', [
+            '┌─', '──────', '─┬─', '───', '─┐\n',
+            '│ ', ('table_head', ' Name '), ' │ ', ('table_head', ' Id'),
+            ' │\n',
+            '├─', '──────', '─┼─', '───', '─┤\n',
+            '│ ', (None, 'Robert'), ' │ ', (None,  '  1'), ' │\n',
+            '│ ', (None, ' Mary '), ' │ ', (None, '100'), ' │\n',
+            '└─', '──────', '─┴─', '───', '─┘',
+         ]),
+        ('<table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Foo</td>'
+         '</tr><tr><td>Bar</td></tr><tr><td>Baz</td></tr></tbody></table>', [
+            '┌─', '────', '─┐\n',
+            '│ ', ('table_head', 'Name'), ' │\n',
+            '├─', '────', '─┤\n',
+            '│ ', (None, 'Foo '), ' │\n',
+            '│ ', (None, 'Bar '), ' │\n',
+            '│ ', (None, 'Baz '), ' │\n',
+            '└─', '────', '─┘',
+         ]),
+        ('<table><thead><tr><th>Column1</th></tr></thead><tbody><tr><td></td>'
+         '</tr></tbody></table>', [
+            '┌─', '───────', '─┐\n',
+            '│ ', ('table_head', 'Column1'), ' │\n',
+            '├─', '───────', '─┤\n',
+            '│ ', (None,  '       '), ' │\n',
+            '└─', '───────', '─┘',
+         ]),
         ('<span class="katex-display">some-math</span>', ['some-math']),
         ('<span class="katex">some-math</span>', ['some-math']),
         ('<ul><li>text</li></ul>', ['', '  * ', '', 'text']),
@@ -1417,7 +1469,13 @@ class TestMessageBox:
         'link_sametext', 'link_sameimage', 'link_differenttext',
         'link_userupload', 'link_api', 'link_serverrelative_same',
         'listitem', 'listitems',
-        'br', 'br2', 'hr', 'hr2', 'img', 'img2', 'table', 'math', 'math2',
+        'br', 'br2', 'hr', 'hr2', 'img', 'img2',
+        'table_default',
+        'table_with_left_and_right_alignments',
+        'table_with_center_and_right_alignments',
+        'table_with_single_column',
+        'table_with_the_bare_minimum',
+        'math', 'math2',
         'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])
