@@ -14,7 +14,7 @@ from urwid_readline import ReadlineEdit
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.emoji_names import EMOJI_NAMES
 from zulipterminal.helper import (
-    Message, match_emoji, match_groups, match_stream, match_user,
+    Message, match_emoji, match_groups, match_stream, match_user, render_table,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -400,7 +400,6 @@ class MessageBox(urwid.Pile):
             'br': '',  # No indicator of absence
             'hr': 'RULER',
             'img': 'IMAGE',
-            'table': 'TABLE'
         }
         unrendered_div_classes = {  # In pairs of 'div_class': 'text'
             # TODO: Support embedded content & twitter preview?
@@ -496,6 +495,8 @@ class MessageBox(urwid.Pile):
                 # TODO: Support nested lists
                 markup.append('  * ')
                 markup.extend(self.soup2markup(element))
+            elif element.name == 'table':
+                markup.extend(render_table(element))
             else:
                 markup.extend(self.soup2markup(element))
         return markup
