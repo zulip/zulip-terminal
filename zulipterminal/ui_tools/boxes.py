@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from urwid_readline import ReadlineEdit
 
+from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.emoji_names import EMOJI_NAMES
 from zulipterminal.helper import (
     Message, match_emoji, match_groups, match_stream, match_user,
 )
@@ -134,9 +134,8 @@ class WriteBox(urwid.Pile):
         except (IndexError, TypeError):
             return None
 
-    def autocomplete_emojis(self, text: str, state: int,
-                            emoji_list: List[str] = EMOJI_NAMES
-                            ) -> Optional[str]:
+    def autocomplete_emojis(self, text: str, state: int) -> Optional[str]:
+        emoji_list = emoji_names.EMOJI_NAMES
         emoji_typeahead = [':{}:'.format(emoji)
                            for emoji in emoji_list
                            if match_emoji(emoji, text[1:])]

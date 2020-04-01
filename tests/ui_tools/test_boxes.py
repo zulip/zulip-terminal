@@ -1,5 +1,6 @@
 import pytest
 
+import zulipterminal.emoji_names
 from zulipterminal.ui_tools.boxes import WriteBox
 
 
@@ -156,8 +157,9 @@ class TestWriteBox:
         (':nomatch', 0, None),
         (':nomatch', -1, None),
         ])
-    def test_autocomplete_emojis(self, write_box, emojis_fixture,
+    def test_autocomplete_emojis(self, write_box, emojis_fixture, mocker,
                                  text, state, required_typeahead):
-        typeahead_string = write_box.autocomplete_emojis(text,
-                                                         state, emojis_fixture)
+        emoji_names = mocker.patch('zulipterminal.ui_tools.boxes.emoji_names')
+        emoji_names.EMOJI_NAMES = emojis_fixture
+        typeahead_string = write_box.autocomplete_emojis(text, state)
         assert typeahead_string == required_typeahead
