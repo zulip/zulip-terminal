@@ -468,10 +468,10 @@ class MessageBox(urwid.Pile):
                     # If the link and text are same
                     # usually the case when user just pastes
                     # a link then just display the link
-                    markup.append(('link', text))
+                    markup.append(('msg_link', text))
                 else:
                     markup.append(
-                        ('link', '[' + text + ']' + '(' + link + ')'))
+                        ('msg_link', '[' + text + ']' + '(' + link + ')'))
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
