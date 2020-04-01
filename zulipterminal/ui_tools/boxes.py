@@ -476,13 +476,13 @@ class MessageBox(urwid.Pile):
             elif element.name == 'code':
                 # CODE (INLINE?)
                 markup.append((
-                    'code', element.text
+                    'msg_code', element.text
                 ))
             elif element.name == 'div' and element.attrs and\
                     'codehilite' in element.attrs.get('class', []):
                 # CODE (BLOCK?)
                 markup.append((
-                    'code', element.text
+                    'msg_code', element.text
                 ))
             elif element.name in ('strong', 'em'):
                 # BOLD & ITALIC
