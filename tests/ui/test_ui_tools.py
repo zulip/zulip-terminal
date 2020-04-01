@@ -1374,8 +1374,8 @@ class TestMessageBox:
         ('<span class="user-group-mention">@A Group', [('span', '@A Group')]),
         ('<code>some code', [('msg_code', 'some code')]),
         ('<div class="codehilite">some code', [('msg_code', 'some code')]),
-        ('<strong>Something', [('bold', 'Something')]),
-        ('<em>Something', [('bold', 'Something')]),
+        ('<strong>Something', [('msg_bold', 'Something')]),
+        ('<em>Something', [('msg_bold', 'Something')]),
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported

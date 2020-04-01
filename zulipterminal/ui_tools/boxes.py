@@ -486,7 +486,7 @@ class MessageBox(urwid.Pile):
                 ))
             elif element.name in ('strong', 'em'):
                 # BOLD & ITALIC
-                markup.append(('bold', element.text))
+                markup.append(('msg_bold', element.text))
             elif element.name == 'li':
                 # LISTS
                 # TODO: Support nested lists
