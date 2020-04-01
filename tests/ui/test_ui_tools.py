@@ -1370,8 +1370,10 @@ class TestMessageBox:
     @pytest.mark.parametrize('content, markup', [
         ('', []),
         ('<p>hi</p>', ['', 'hi']),
-        ('<span class="user-mention">@Bob Smith', [('span', '@Bob Smith')]),
-        ('<span class="user-group-mention">@A Group', [('span', '@A Group')]),
+        ('<span class="user-mention">@Bob Smith',
+            [('msg_mention', '@Bob Smith')]),
+        ('<span class="user-group-mention">@A Group',
+            [('msg_mention', '@A Group')]),
         ('<code>some code', [('msg_code', 'some code')]),
         ('<div class="codehilite">some code', [('msg_code', 'some code')]),
         ('<strong>Something', [('msg_bold', 'Something')]),
