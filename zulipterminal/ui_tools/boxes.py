@@ -14,7 +14,7 @@ from urwid_readline import ReadlineEdit
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import (
-    Message, match_emoji, match_groups, match_stream, match_user,
+    Message, match_emoji, match_group, match_stream, match_user,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -117,7 +117,7 @@ class WriteBox(urwid.Pile):
         # and group mentions.
         group_typeahead = ['@*{}*'.format(group_name)
                            for group_name in self.model.user_group_names
-                           if match_groups(group_name, text[1:])]
+                           if match_group(group_name, text[1:])]
 
         users_list = self.view.users
         user_typeahead = [prefix_string+'**{}**'.format(user['full_name'])
