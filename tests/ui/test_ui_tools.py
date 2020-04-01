@@ -1379,17 +1379,17 @@ class TestMessageBox:
         ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
-        ('<a href="http://foo">http://foo</a>', [('link', 'http://foo')]),
+        ('<a href="http://foo">http://foo</a>', [('msg_link', 'http://foo')]),
         ('<a href="http://foo/bar.png">http://foo/bar.png</a>',
-            [('link', 'http://foo/bar.png')]),
-        ('<a href="http://foo">bar</a>', [('link', '[bar](http://foo)')]),
+            [('msg_link', 'http://foo/bar.png')]),
+        ('<a href="http://foo">bar</a>', [('msg_link', '[bar](http://foo)')]),
         ('<a href="/user_uploads/blah"',
-            [('link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
+            [('msg_link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
         ('<a href="/api"',
-            [('link', '[]({}/api)'.format(SERVER_URL))]),
+            [('msg_link', '[]({}/api)'.format(SERVER_URL))]),
         ('<a href="some/relative_url">{}/some/relative_url</a>'
          .format(SERVER_URL),
-            [('link', '{}/some/relative_url'.format(SERVER_URL))]),
+            [('msg_link', '{}/some/relative_url'.format(SERVER_URL))]),
         ('<li>Something', ['  * ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  * ', '', 'Something', '  * ', '', 'else']),
