@@ -392,7 +392,7 @@ class MessageBox(urwid.Pile):
     def soup2markup(self, soup: Any) -> List[Any]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
-        markup = ['']  # type: List[Union[str, Tuple[str, Any]]]
+        markup = ['']  # type: List[Union[str, Tuple[Optional[str], Any]]]
         if soup is None:  # This is not iterable, so return promptly
             return markup
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
