@@ -1375,7 +1375,7 @@ class TestMessageBox:
         ('<div class="codehilite">some code', [('msg_code', 'some code')]),
         ('<strong>Something', [('msg_bold', 'Something')]),
         ('<em>Something', [('msg_bold', 'Something')]),
-        ('<blockquote>stuff', [('blockquote', ['', 'stuff'])]),
+        ('<blockquote>stuff', [('msg_quote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
         ('<a href="http://foo">http://foo</a>', [('msg_link', 'http://foo')]),
