@@ -1458,11 +1458,11 @@ class TestMessageBox:
         ('<div class="message_inline_image">'
          '<a href="x"><img src="x"></a></div>', []),
         ('<div class="message_inline_ref">blah</div>', []),
-        ('<span class="emoji">:smile:</span>', [('emoji', ':smile:')]),
+        ('<span class="emoji">:smile:</span>', [('msg_emoji', ':smile:')]),
         ('<div class="inline-preview-twitter"',
             ['[TWITTER PREVIEW NOT RENDERED]']),
-        ('<img class="emoji" title="zulip"/>', [('emoji', ':zulip:')]),
-        ('<img class="emoji" title="github"/>', [('emoji', ':github:')]),
+        ('<img class="emoji" title="zulip"/>', [('msg_emoji', ':zulip:')]),
+        ('<img class="emoji" title="github"/>', [('msg_emoji', ':github:')]),
     ], ids=[
         'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
