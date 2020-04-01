@@ -810,7 +810,7 @@ class HelpView(PopUpView):
                             (max_widths[1],
                                 urwid.Text(", ".join(binding['keys'])))
                             ], dividechars=2),
-                        None if help_item_number % 2 else 'help'
+                        None if help_item_number % 2 else 'popup_contrast'
                     )
                 )
 
@@ -899,7 +899,7 @@ class MsgInfoView(PopUpView):
                     urwid.Text(field),
                     (max_widths[1], urwid.Text(data))
                 ], dividechars=2),
-                None if index % 2 else 'bar')
+                None if index % 2 else 'popup_contrast')
              for index, (field, data) in enumerate(msg_info.items())]
 
         super().__init__(controller, msg_info_content, 'MSG_INFO')
