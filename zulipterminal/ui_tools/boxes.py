@@ -471,7 +471,7 @@ class MessageBox(urwid.Pile):
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
-                    'blockquote', self.soup2markup(element)
+                    'msg_quote', self.soup2markup(element)
                 ))
             elif element.name == 'code':
                 # CODE (INLINE?)
