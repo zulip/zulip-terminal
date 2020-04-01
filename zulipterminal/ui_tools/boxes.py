@@ -454,7 +454,7 @@ class MessageBox(urwid.Pile):
                     ('user-mention' in element.attrs.get('class', []) or
                      'user-group-mention' in element.attrs.get('class', [])):
                 # USER MENTIONS & USER-GROUP MENTIONS
-                markup.append(('span', element.text))
+                markup.append(('msg_mention', element.text))
             elif element.name == 'a':
                 # LINKS
                 link = element.attrs['href']
