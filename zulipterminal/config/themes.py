@@ -160,7 +160,7 @@ THEMES = {
         ('span',         'light red, bold', 'light gray'),
         ('link',         'dark blue',       'light gray'),
         ('blockquote',   'black',           'brown'),
-        ('code',         'dark gray',       'white'),
+        ('code',         'black',           'light gray'),
         ('bold',         'white, bold',     'dark gray'),
         ('footer',       'white',           'dark red',   'bold'),
         ('starred',      'light red, bold', 'white'),
