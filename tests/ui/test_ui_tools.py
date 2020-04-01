@@ -974,7 +974,7 @@ class TestRightColumnView:
                 controller=self.view.controller,
                 view=self.view,
                 width=width,
-                color=self.view.users[0]['status'],
+                color='user_' + self.view.users[0]['status'],
                 count=1
             )
         users_view.assert_called_once_with(right_col_view.users_btn_list)

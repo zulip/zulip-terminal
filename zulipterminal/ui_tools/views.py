@@ -604,7 +604,7 @@ class RightColumnView(urwid.Frame):
                     controller=self.view.controller,
                     view=self.view,
                     width=self.width,
-                    color=user['status'],
+                    color='user_' + user['status'],
                     count=unread_count
                 )
             )
