@@ -797,7 +797,7 @@ class HelpView(PopUpView):
             if len(help_menu_content) > 0:  # Separate categories by newline
                 help_menu_content.append(urwid.Text(''))
 
-            help_menu_content.append(urwid.Text(('category',
+            help_menu_content.append(urwid.Text(('popup_category',
                                                  HELP_CATEGORIES[category])))
 
             keys_in_category = (binding for binding in KEY_BINDINGS.values()
