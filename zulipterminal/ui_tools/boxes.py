@@ -96,18 +96,23 @@ class WriteBox(urwid.Pile):
 
     def generic_autocomplete(self, text: str, state: int) -> Optional[str]:
         if text.startswith('@_'):
-            return self.autocomplete_mentions(text, state, '@_')
+            typeahead = self.autocomplete_mentions(text, '@_')
         elif text.startswith('@'):
-            return self.autocomplete_mentions(text, state, '@')
+            typeahead = self.autocomplete_mentions(text, '@')
         elif text.startswith('#'):
-            return self.autocomplete_streams(text, state)
+            typeahead = self.autocomplete_streams(text)
         elif text.startswith(':'):
-            return self.autocomplete_emojis(text, state)
+            typeahead = self.autocomplete_emojis(text)
         else:
             return text
 
-    def autocomplete_mentions(self, text: str, state: int,
-                              prefix_string: str) -> Optional[str]:
+        try:
+            return typeahead[state]
+        except (IndexError, TypeError):
+            return None
+
+    def autocomplete_mentions(self, text: str, prefix_string: str
+                              ) -> List[str]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
         group_typeahead = ['@*{}*'.format(group_name)
@@ -119,30 +124,22 @@ class WriteBox(urwid.Pile):
                           for user in users_list
                           if match_user(user, text[len(prefix_string):])]
         combined_typeahead = group_typeahead + user_typeahead
-        try:
-            return combined_typeahead[state]
-        except (IndexError, TypeError):
-            return None
 
-    def autocomplete_streams(self, text: str, state: int) -> Optional[str]:
+        return combined_typeahead
+
+    def autocomplete_streams(self, text: str) -> List[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
         stream_typeahead = ['#**{}**'.format(stream[0])
                             for stream in streams_list
                             if match_stream(stream, text[1:])]
-        try:
-            return stream_typeahead[state]
-        except (IndexError, TypeError):
-            return None
+        return stream_typeahead
 
-    def autocomplete_emojis(self, text: str, state: int) -> Optional[str]:
+    def autocomplete_emojis(self, text: str) -> List[str]:
         emoji_list = emoji_names.EMOJI_NAMES
         emoji_typeahead = [':{}:'.format(emoji)
                            for emoji in emoji_list
                            if match_emoji(emoji, text[1:])]
-        try:
-            return emoji_typeahead[state]
-        except (IndexError, TypeError):
-            return None
+        return emoji_typeahead
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('SEND_MESSAGE', key):
