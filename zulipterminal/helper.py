@@ -60,9 +60,9 @@ initial_index = Index(
 UnreadCounts = TypedDict('UnreadCounts', {
     'all_msg': int,
     'all_pms': int,
-    'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
-    'unread_pms': Dict[int, int],  # sender_id
-    'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
+    'stream_topics': Dict[Tuple[int, str], int],  # stream_id, topic
+    'solo_pms': Dict[int, int],  # sender_id
+    'group_pms': Dict[FrozenSet[int], int],
     'streams': Dict[int, int],  # stream_id
 })
 
@@ -97,17 +97,17 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
 
         if msg['type'] == 'stream':
             key = (messages[id]['stream_id'], msg['subject'])
-            unreads = unread_counts['unread_topics']
+            unreads = unread_counts['stream_topics']
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(msg['display_recipient']) <= 2:
             key = messages[id]['sender_id']
-            unreads = unread_counts['unread_pms']  # type: ignore
+            unreads = unread_counts['solo_pms']  # type: ignore
         else:  # If it's a group pm
             key = frozenset(  # type: ignore
                 recipient['id'] for recipient in msg['display_recipient']
             )
-            unreads = unread_counts['unread_huddles']  # type: ignore
+            unreads = unread_counts['group_pms']  # type: ignore
 
         # broader unread counts (for all_* and streams) are updated
         # later conditionally.
@@ -151,7 +151,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
                         stream_button.update_count(stream_button.count +
                                                    new_count)
                         break
-            # FIXME: Update unread_counts['unread_topics']?
+            # FIXME: Update unread_counts['stream_topics']?
             if ([messages[id]['display_recipient'], msg_topic] in
                     controller.model.muted_topics):
                 add_to_counts = False
@@ -369,15 +369,15 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     unread_counts = UnreadCounts(
         all_msg=0,
         all_pms=0,
-        unread_topics=dict(),
-        unread_pms=dict(),
-        unread_huddles=dict(),
+        stream_topics=dict(),
+        solo_pms=dict(),
+        group_pms=dict(),
         streams=dict(),
     )
 
     for pm in unread_msg_counts['pms']:
         count = len(pm['unread_message_ids'])
-        unread_counts['unread_pms'][pm['sender_id']] = count
+        unread_counts['solo_pms'][pm['sender_id']] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 
@@ -388,7 +388,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
                 stream['topic']] in model.muted_topics:
             continue
         stream_topic = (stream_id, stream['topic'])
-        unread_counts['unread_topics'][stream_topic] = count
+        unread_counts['stream_topics'][stream_topic] = count
         if not unread_counts['streams'].get(stream_id):
             unread_counts['streams'][stream_id] = count
         else:
@@ -400,7 +400,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         count = len(group_pm['unread_message_ids'])
         user_ids = group_pm['user_ids_string'].split(',')
         user_ids = frozenset(map(int, user_ids))
-        unread_counts['unread_huddles'][user_ids] = count
+        unread_counts['group_pms'][user_ids] = count
         unread_counts['all_msg'] += count
         unread_counts['all_pms'] += count
 

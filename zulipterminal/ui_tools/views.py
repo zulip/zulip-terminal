@@ -436,7 +436,7 @@ class MiddleColumnView(urwid.Frame):
         super().__init__(msg_list, header=search_box, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
-        topics = list(self.model.unread_counts['unread_topics'].keys())
+        topics = list(self.model.unread_counts['stream_topics'].keys())
         next_topic = False
         for topic in topics:
             if next_topic is True:
@@ -451,7 +451,7 @@ class MiddleColumnView(urwid.Frame):
         return None
 
     def get_next_unread_pm(self) -> Optional[int]:
-        pms = list(self.model.unread_counts['unread_pms'].keys())
+        pms = list(self.model.unread_counts['solo_pms'].keys())
         next_pm = False
         for pm in pms:
             if next_pm is True:
@@ -596,7 +596,7 @@ class RightColumnView(urwid.Frame):
             if user['status'] == 'inactive' and\
                     not self.view.controller.editor_mode:
                 continue
-            unread_count = (self.view.model.unread_counts['unread_pms'].
+            unread_count = (self.view.model.unread_counts['solo_pms'].
                             get(user['user_id'], 0))
             users_btn_list.append(
                 UserButton(
@@ -726,7 +726,7 @@ class LeftColumnView(urwid.Pile):
                 topic=topic,
                 controller=self.controller,
                 width=self.width,
-                count=self.model.unread_counts['unread_topics'].
+                count=self.model.unread_counts['stream_topics'].
                 get((stream_id, topic), 0)
             ) for topic in self.model.index['topics'][stream_id]]
 
