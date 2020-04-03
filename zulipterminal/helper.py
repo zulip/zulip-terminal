@@ -98,9 +98,8 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
         if message['type'] == 'stream':
             key = (message['stream_id'], message['subject'])
             unreads = unread_counts['unread_topics']
-        # self-pm has only one display_recipient
-        # 1-1 pms have 2 display_recipient
-        elif len(message['display_recipient']) <= 2:
+        # 1-1 pms and self-pms
+        elif message['type'] == 'private' and 'sender_id' in message:
             key = message['sender_id']
             unreads = unread_counts['unread_pms']  # type: ignore
         else:  # If it's a group pm
@@ -138,13 +137,16 @@ def _set_count_in_view(controller: Any, new_count: int,
     all_pm = controller.view.pm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
-        user_id = message['sender_id']
-
-        # If we sent this message, don't increase the count
-        if user_id == controller.model.user_id:
-            continue
 
         msg_type = message['type']
+        # FIXME no user_id for streams?
+        if msg_type != 'stream':
+            user_id = message['sender_id']
+
+            # If we sent this message, don't increase the count
+            if user_id == controller.model.user_id:
+                continue
+
         add_to_counts = True
         if 'mentioned' in message['flags']:
             unread_counts['all_mentions'] += new_count
@@ -190,7 +192,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     # This method applies new_count for 'new message' (1) or 'read' (-1)
     # (we could ensure this in a different way by a different type)
     assert new_count == 1 or new_count == -1
-    messages = controller.model.index['messages']
+    messages = controller.model.index['unread_msgs']
     unread_counts = controller.model.unread_counts  # type: UnreadCounts
     changed_messages = [messages[id] for id in id_list]
     _set_count_in_model(new_count, changed_messages, unread_counts)

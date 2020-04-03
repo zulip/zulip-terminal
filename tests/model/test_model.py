@@ -1297,7 +1297,7 @@ class TestModel:
                     == flags_before)
 
         if event_op == 'add':
-            set_count.assert_called_once_with(list(changed_ids),
+            set_count.assert_called_once_with(list(event_message_ids),
                                               self.controller, -1)
         elif event_op == 'remove':
             set_count.assert_not_called()

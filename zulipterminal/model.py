@@ -879,8 +879,7 @@ class Model:
             self._update_rendered_view(message_id)
 
         if event['operation'] == 'add' and flag_to_change == 'read':
-            set_count(list(message_ids_to_mark & indexed_message_ids),
-                      self.controller, -1)
+            set_count(list(message_ids_to_mark), self.controller, -1)
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
