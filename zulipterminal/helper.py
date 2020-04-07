@@ -145,9 +145,8 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
             update_unreads(unread_counts['unread_topics'],
                            (stream_id, message['subject']))
             update_unreads(unread_counts['streams'], stream_id)
-        # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
-        elif len(message['display_recipient']) <= 2:
+        elif len(message['display_recipient']) == 2:
             update_unreads(unread_counts['unread_pms'], message['sender_id'])
         else:  # If it's a group pm
             update_unreads(unread_counts['unread_huddles'],
@@ -197,7 +196,7 @@ def _set_count_in_view(controller: Any, new_count: int,
                         stream_button.update_count(stream_button.count
                                                    + new_count)
                         break
-            # FIXME: Update unread_counts['unread_topics']?
+
             if controller.model.is_muted_topic(stream_id, msg_topic):
                 add_to_counts = False
             if is_open_topic_view and stream_id == toggled_stream_id:

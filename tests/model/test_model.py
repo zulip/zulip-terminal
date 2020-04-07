@@ -813,7 +813,7 @@ class TestModel:
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -834,7 +834,7 @@ class TestModel:
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -853,12 +853,40 @@ class TestModel:
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
 
-    def test__handle_message_event_with_flags(self, mocker,
-                                              model, message_fixture):
+    @pytest.mark.parametrize('indexed_unread_msg_ids', [
+        {
+            "stream": {
+                537286: {
+                    'type': 'stream',
+                    'display_recipient': 'PTEST',
+                    'stream_id': 205,
+                    'subject': 'Test',
+                    'flags': []
+                }
+            },
+            "pm": {
+                537287: {
+                    'type': 'private',
+                    'sender_id': 5140,
+                    'flags': []
+                }
+            },
+            "pm_huddles": {
+                537288: {
+                    'type': 'private',
+                    'display_recipient': frozenset({5179, 5140, 5180}),
+                    'flags': []
+                }
+            }
+        }
+    ])
+    def test__handle_message_event_with_flags(self, mocker, model,
+                                              indexed_unread_msg_ids,
+                                              message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -889,14 +917,24 @@ class TestModel:
 
         model._handle_message_event(event)
 
+        # Test update of index['unread_msgs'].
+        if message_fixture['id'] == 537286:
+            msg_type = "stream"
+        elif message_fixture['id'] == 537287:
+            msg_type = "pm"
+        else:
+            msg_type = "pm_huddles"
+        assert model.index['unread_msgs'] == indexed_unread_msg_ids[msg_type]
+
         # set count called since the message is unread.
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
-          'id': 1}, [], frozenset(), ['msg_w']),
-        ({'type': 'private', 'id': 1},
+          'id': 1, 'display_recipient': 'a'}, [], frozenset(), ['msg_w']),
+        ({'type': 'private', 'id': 1, 'sender_id': 1,
+          'display_recipient': []},
          [['is', 'private']], frozenset(), ['msg_w']),
         ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'FOO',
           'display_recipient': 'a'},
@@ -909,14 +947,15 @@ class TestModel:
           'display_recipient': 'a'},
          [['stream', 'c'], ['topic', 'b']],
          frozenset(), []),
-        ({'type': 'private', 'id': 1,
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
           'display_recipient': [{'id': 5827}, {'id': 5}]},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), ['msg_w']),
-        ({'type': 'private', 'id': 1},
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
+          'display_recipient': []},
          [['is', 'search']],
          frozenset(), []),
-        ({'type': 'private', 'id': 1,
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
           'display_recipient': [{'id': 5827}, {'id': 3212}]},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), []),
@@ -934,7 +973,7 @@ class TestModel:
         model._have_last_message[repr(narrow)] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
