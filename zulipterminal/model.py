@@ -732,9 +732,28 @@ class Model:
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
 
-        # Index messages before calling set_count.
         self.index = index_messages([message], self, self.index)
         if 'read' not in message['flags']:
+            if message['type'] == 'stream':
+                unread_data = {'type': 'stream', 'display_recipient':
+                               message['display_recipient'],
+                               'stream_id': message['stream_id'],
+                               'subject': message['subject'],
+                               'flags': message['flags']}
+            elif len(message['display_recipient']) <= 2:
+                # pm and self-pm
+                unread_data = {'type': 'private',
+                               'sender_id': message['sender_id'],
+                               'flags': message['flags']}
+            else:
+                # huddles
+                message_recipients = frozenset(
+                    [user['id'] for user in message['display_recipient']])
+                unread_data = {'type': 'private',
+                               'display_recipient': message_recipients,
+                               'flags': message['flags']}
+            self.index['unread_msgs'].update(
+                            {int(message['id']): unread_data})
             set_count([message['id']], self.controller, 1)
 
         if hasattr(self.controller, 'view') and self.found_newest:
