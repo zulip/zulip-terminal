@@ -348,7 +348,8 @@ class MessageBox(urwid.Pile):
         if is_search_narrow:
             title_markup = ('header', [
                 ('custom', text_to_fill),
-                ('span', ' Search Results')
+                (None, ' '),
+                ('filter_results', 'Search Results')
             ])
         else:
             title_markup = ('header', [
