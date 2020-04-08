@@ -10,12 +10,13 @@ import urwid
 import zulip
 
 from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.tutorial import TUTORIAL
 from zulipterminal.helper import Message, asynch
 from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    HelpView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
+    HelpView, LoadingView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -40,6 +41,8 @@ class Controller:
                                           format(ZT_VERSION, platform()))
         self.model = Model(self)
         self.view = View(self)
+        self.set_loading_view()
+
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
@@ -53,7 +56,7 @@ class Controller:
 
         spinner = spinning_cursor()
         sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
-        while not hasattr(self, 'view'):
+        while not hasattr(self, 'loading_view'):
             next_spinner = "Loading " + next(spinner)
             sys.stdout.write(next_spinner)
             sys.stdout.flush()
@@ -260,10 +263,19 @@ class Controller:
         self.deregister_client()
         sys.exit(0)
 
+    def set_loading_view(self) -> None:
+        tutorial = LoadingView(self, TUTORIAL, align="left")
+        tutorial = urwid.Padding(tutorial, 'center', ('relative', 50))
+        self.loading_view = urwid.Filler(tutorial)
+
+    def show_main_view(self) -> None:
+        self.loop.widget = self.view
+        self.update_screen()
+
     def main(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=256)
-        self.loop = urwid.MainLoop(self.view,
+        self.loop = urwid.MainLoop(self.loading_view,
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)

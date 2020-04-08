@@ -2231,8 +2231,16 @@ class TestLoadingView:
     @pytest.fixture
     def loading_view(self, mocker):
         self.text = "Random Text"
-        loading_view = LoadingView(self.text)
+        self.controller = mocker.Mock()
+        self.align = "left"
+        loading_view = LoadingView(self.controller,
+                                   self.text, self.align)
         return loading_view
 
     def test_init(self, loading_view):
         assert loading_view.text == self.text
+
+    @pytest.mark.parametrize('key', ['enter'])
+    def test_keypress_enter(self, loading_view, key):
+        loading_view.keypress((20, 20), key)
+        loading_view.controller.show_main_view.assert_called_once_with()

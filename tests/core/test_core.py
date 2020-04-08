@@ -2,6 +2,7 @@ from platform import platform
 from typing import Any
 
 import pytest
+from urwid import Filler
 
 from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
@@ -201,6 +202,18 @@ class TestController:
         widgets = controller.model.msg_view.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
+
+    def test_set_loading_view(self, controller):
+        controller.set_loading_view()
+        assert isinstance(controller.loading_view, Filler)
+
+    def test_show_main_view(self, mocker, controller):
+        controller.loop = mocker.Mock()
+        controller.update_screen = mocker.Mock()
+
+        controller.show_main_view()
+        assert controller.loop.widget == controller.view
+        controller.update_screen.assert_called_once_with()
 
     def test_main(self, mocker, controller):
         ret_mock = mocker.Mock()

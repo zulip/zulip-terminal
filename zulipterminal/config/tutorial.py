@@ -14,5 +14,6 @@ TUTORIAL = [
     '- To reply to a message or use `r` or `Enter`.\n',
     '- You can type your message in the bottom big box and send it using'
     ' `ctrl d` or alt enter.\n'
-    '- To compose a new stream message press `c`\n',
+    '- To compose a new stream message press `c`\n\n\n',
+    'Press `Enter` to continue',
 ]
