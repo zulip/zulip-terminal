@@ -376,22 +376,25 @@ class MessageBox(urwid.Pile):
                     custom_reaction_stats[reaction['emoji_name']] += 1
 
             std_reactions = [
-                '{} {} '.format(
+                '{} {}'.format(
                     '\\U{:0>8}'.format(reaction)
                     .encode().decode('unicode-escape'),
                     count)
                 for reaction, count in std_reaction_stats.items()
             ]
             custom_reactions = [
-                ':{}: {} '.format(reaction, count)
+                ':{}: {}'.format(reaction, count)
                 for reaction, count in custom_reaction_stats.items()
             ]
-            all_emoji_text = ''.join(std_reactions + custom_reactions)
+            all_emoji = std_reactions + custom_reactions
+            spaced_emoji = [
+                ('reaction', emoji.demojize(entry)) if entry != ' ' else entry
+                for pair in zip(all_emoji, ' ' * len(all_emoji))
+                for entry in pair
+            ]
             return urwid.Padding(
-                urwid.Text(([
-                    ('reaction', emoji.demojize(all_emoji_text))
-                ])), align='left', width=('relative', 90), left=25,
-                min_width=50)
+                urwid.Text(spaced_emoji),
+                align='left', width=('relative', 90), left=25, min_width=50)
         except Exception:
             return ''
 
