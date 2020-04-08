@@ -377,8 +377,9 @@ class MessageBox(urwid.Pile):
                     # Includes realm_emoji and zulip_extra_emoji
                     custom_reacts[":"+reaction['emoji_name']+":"] += 1
             dis = [
-                '\\U' + '0'*(8-len(emoji)) + emoji + ' ' + str(reacts[emoji]) +
-                ' ' for emoji in reacts]
+                '\\U{:0>8} {} '.format(emoji, reacts[emoji])
+                for emoji in reacts
+            ]
             emojis = ''.join(e.encode().decode('unicode-escape') for e in dis)
             custom_emojis = ''.join(
                 ['{} {} '.format(r, custom_reacts[r]) for r in custom_reacts])
