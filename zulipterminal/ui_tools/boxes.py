@@ -1,4 +1,5 @@
-from collections import defaultdict
+import typing
+from collections import Counter, defaultdict
 from datetime import date, datetime
 from sys import platform
 from time import ctime, time
@@ -365,22 +366,22 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ''
         try:
-            reacts = defaultdict(int)  # type: Dict[str, int]
-            custom_reacts = defaultdict(int)  # type: Dict[str, int]
+            std_reaction_stats = Counter()  # type: typing.Counter[str]
+            custom_reaction_stats = Counter()  # type: typing.Counter[str]
             for reaction in reactions:
                 if reaction['reaction_type'] == 'unicode_emoji':
-                    reacts[reaction['emoji_code']] += 1
+                    std_reaction_stats[reaction['emoji_code']] += 1
                 else:
                     # Includes realm_emoji and zulip_extra_emoji
-                    custom_reacts[":"+reaction['emoji_name']+":"] += 1
+                    custom_reaction_stats[":"+reaction['emoji_name']+":"] += 1
             dis = [
                 '\\U{:0>8} {} '.format(reaction, count)
-                for reaction, count in reacts.items()
+                for reaction, count in std_reaction_stats.items()
             ]
             emojis = ''.join(e.encode().decode('unicode-escape') for e in dis)
             custom_emojis = ''.join(
                 ['{} {} '.format(reaction, count)
-                 for reaction, count in custom_reacts.items()])
+                 for reaction, count in custom_reaction_stats.items()])
             return urwid.Padding(
                 urwid.Text(([
                     ('reaction', emoji.demojize(emojis + custom_emojis))
