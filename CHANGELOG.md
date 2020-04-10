@@ -1,5 +1,47 @@
 # Zulip-terminal Changelog
 
+## Next Release
+
+Expected to be a point release, this contains much of the remaining work from last year's GSoC students, and various other contributors - thanks to you all! (190+ commits)
+
+If you've been waiting for autocomplete, popup notifications, mentions, better themes, search & platform support...this release is for you!
+
+### HIGHLIGHTS
+- Autocomplete users/groups/streams/emoji when composing messages, given a prefix (<kbd>ctrl</kbd>+<kbd>f</kbd> / <kbd>ctrl</kbd>+<kbd>r</kbd>)
+- Popup notifications for private messages & mentions (NOTE: disabled by default; tools may be required on WSL/Linux)
+- See details of messages in which you are mentioned - narrow to them using <kbd>#</kbd>
+- All themes now considered usable (light/blue much improved)
+- Search for messages only within a specific narrow, not just within all messages
+- Support added for running on Python 3.8 and PyPy, and also on WSL (including WSL2)
+- Sample Dockerfiles added, to enable building containers to run from any docker-enabled system
+
+### Interactivity improvements
+- Improved topic list handling (search topics, topics update)
+- Support /me slash command
+- Toggle display of stream description using <kbd>i</kbd>
+- Enable/disable autohide setting at startup
+- Extend support for vim-like navigation (scrolling)
+
+### Visual improvements
+- Add support to render tables in messages
+- Improve rendering of links in messages
+- Categorize and further reorganize help menu
+- Show the year of a message, if it is not the current year
+- Show server name & description in the title bar
+
+### Important bugfixes
+- Bug causing occasional screen corruption at startup (#456)
+- On changing to a narrow which contains the focused message, retain focus on that message
+- Message search results correctly reset between searches
+- Improved unread count handling
+
+### Infrastructure changes
+- Split linters into separate Travis tasks to improve developer understanding
+- Replace pytest-pep8 with pycodestyle for PEP8 linting
+- Add isort as linter/reformatter for imports
+- Use pip instead of pipenv in Travis to improve CI speed
+- Depend upon later versions of zulip, urwid & urwid-readline packages
+
 ## 0.4.0
 
 Thanks to the core team and many new contributors for the almost 300 commits since 0.3.1!
