@@ -22,6 +22,7 @@ VIEWS = "zulipterminal.ui_tools.views"
 TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
 STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
+BOXES = "zulipterminal.ui_tools.boxes"
 
 SERVER_URL = "https://chat.zulip.zulip"
 
@@ -1935,6 +1936,22 @@ class TestMessageBox:
         content = msg_box.transform_content()
         rendered_text = Text(content)
         assert rendered_text.text == expected_content
+
+    @pytest.mark.parametrize(
+        'key', keys_for_command('ENTER'),
+        ids=lambda param: 'left_click-key:{}'.format(param)
+    )
+    def test_mouse_event_left_click(self, mocker, msg_box, key):
+        size = (20, )
+        col = 1
+        row = 1
+        focus = mocker.Mock()
+        mocker.patch(BOXES + '.keys_for_command', return_value=[key])
+        mocker.patch.object(msg_box, 'keypress')
+
+        msg_box.mouse_event(size, 'mouse press', 1, col, row, focus)
+
+        msg_box.keypress.assert_called_once_with(size, key)
 
 
 class TestTopButton:

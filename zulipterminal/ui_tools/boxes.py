@@ -681,7 +681,7 @@ class MessageBox(urwid.Pile):
                     col: int, row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 1:
-                self.keypress(size, 'enter')
+                self.keypress(size, keys_for_command('ENTER').pop())
                 return True
         elif event == 'mouse drag':
             selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
