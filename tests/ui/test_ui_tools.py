@@ -443,19 +443,20 @@ class TestStreamsView:
                 ] == expected_log
         self.view.controller.update_screen.assert_called_once_with()
 
-    def test_mouse_event(self, mocker, stream_view):
-        mocker.patch.object(stream_view, 'keypress')
+    @pytest.mark.parametrize('button, key', [
+            (4, 'up'),
+            (5, 'down'),
+        ],
+        ids=['scroll_wheel_up', 'scroll_wheel_down']
+    )
+    def test_mouse_event(self, mocker, stream_view, button, key):
         size = (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
-        # Left click
-        stream_view.mouse_event(size, "mouse press", 4, col, row, focus)
-        stream_view.keypress.assert_called_once_with(size, "up")
-
-        # Right click
-        stream_view.mouse_event(size, "mouse press", 5, col, row, focus)
-        stream_view.keypress.assert_called_with(size, "down")
+        mocker.patch.object(stream_view, 'keypress')
+        stream_view.mouse_event(size, 'mouse press', button, col, row, focus)
+        stream_view.keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key):
@@ -674,19 +675,20 @@ class TestUsersView:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         return UsersView("USER_BTN_LIST")
 
-    def test_mouse_event(self, mocker, user_view):
-        mocker.patch.object(user_view, 'keypress')
+    @pytest.mark.parametrize('button, key', [
+            (4, 'up'),
+            (5, 'down'),
+        ],
+        ids=['scroll_wheel_up', 'scroll_wheel_down']
+    )
+    def test_mouse_event(self, mocker, user_view, button, key):
         size = (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
-        # Left click
-        user_view.mouse_event(size, "mouse press", 4, col, row, focus)
-        user_view.keypress.assert_called_with(size, "up")
-
-        # Right click
-        user_view.mouse_event(size, "mouse press", 5, col, row, focus)
-        user_view.keypress.assert_called_with(size, "down")
+        mocker.patch.object(user_view, 'keypress')
+        user_view.mouse_event(size, 'mouse press', button, col, row, focus)
+        user_view.keypress.assert_called_with(size, key)
 
     @pytest.mark.parametrize('event, button', [
             ('mouse release', 0),
