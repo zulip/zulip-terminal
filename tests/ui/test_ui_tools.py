@@ -70,6 +70,7 @@ class TestMessageView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
         self.model = mocker.MagicMock()
+        self.view = mocker.Mock()
         self.urwid = mocker.patch(VIEWS + ".urwid")
 
     @pytest.fixture
@@ -77,7 +78,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.read_message")
         mocker.patch(VIEWS + ".MessageView.set_focus")
-        msg_view = MessageView(self.model)
+        msg_view = MessageView(self.model, self.view)
         msg_view.log = mocker.Mock()
         msg_view.body = mocker.Mock()
         return msg_view
@@ -99,7 +100,9 @@ class TestMessageView:
         mocker.patch(VIEWS + ".create_msg_box_list",
                      return_value=msg_list)
         self.model.get_focus_in_current_narrow.return_value = narrow_focus_pos
-        msg_view = MessageView(self.model)
+
+        msg_view = MessageView(self.model, self.view)
+
         assert msg_view.focus_msg == focus_msg
 
     @pytest.mark.parametrize('messages_fetched', [
@@ -329,7 +332,7 @@ class TestMessageView:
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(VIEWS + ".MessageView.set_focus")
         mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
-        msg_view = MessageView(self.model)
+        msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
         msg_view.log = mocker.Mock()
         msg_view.body = mocker.Mock()
@@ -381,7 +384,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.set_focus")
         mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
-        msg_view = MessageView(self.model)
+        msg_view = MessageView(self.model, self.view)
         msg_view.model.controller.view = mocker.Mock()
         msg_w = mocker.Mock()
         msg_view.body = mocker.Mock()
@@ -398,7 +401,7 @@ class TestMessageView:
                                                       empty_index, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.set_focus")
-        msg_view = MessageView(self.model)
+        msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
         msg_view.log = [0, 1]
         msg_view.body = mocker.Mock()
@@ -792,7 +795,7 @@ class TestMiddleColumnView:
         assert mid_col_view.last_unread_topic is None
         assert mid_col_view.last_unread_pm is None
         assert mid_col_view.search_box == self.search_box
-        assert self.model.msg_list == "MSG_LIST"
+        assert self.view.msg_list == "MSG_LIST"
         self.super.assert_called_once_with("MSG_LIST", header=self.search_box,
                                            footer=self.write_box)
 
