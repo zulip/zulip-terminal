@@ -4,7 +4,7 @@ import sys
 import time
 from functools import partial
 from platform import platform
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import urwid
 import zulip
@@ -203,7 +203,18 @@ class Controller:
                                      msg_id_list,
                                      focus_msg_id=anchor)
 
-        self._finalize_show(w_list)
+        focus_position = self.model.get_focus_in_current_narrow()
+        if focus_position == set():  # No available focus; set to end
+            focus_position = len(w_list) - 1
+        assert not isinstance(focus_position, set)
+
+        self.model.msg_view.clear()
+        if focus_position >= 0 and focus_position < len(w_list):
+            self.model.msg_view.extend(w_list, focus_position)
+        else:
+            self.model.msg_view.extend(w_list)
+
+        self.exit_editor_mode()
 
     def narrow_to_stream(self, button: Any) -> None:
         if hasattr(button, 'message'):
@@ -270,18 +281,6 @@ class Controller:
         self._narrow_to(button,
                         anchor=None,
                         mentioned=True)
-
-    def _finalize_show(self, w_list: List[Any]) -> None:
-        focus_position = self.model.get_focus_in_current_narrow()
-        if focus_position == set():
-            focus_position = len(w_list) - 1
-        assert not isinstance(focus_position, set)
-        self.model.msg_view.clear()
-        if focus_position >= 0 and focus_position < len(w_list):
-            self.model.msg_view.extend(w_list, focus_position)
-        else:
-            self.model.msg_view.extend(w_list)
-        self.exit_editor_mode()
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
