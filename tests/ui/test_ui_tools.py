@@ -643,14 +643,26 @@ class TestUsersView:
         user_view.mouse_event(size, "mouse press", 5, col, row, focus)
         user_view.keypress.assert_called_with(size, "down")
 
-        # Other actions - No action
-        return_value = user_view.mouse_event(
-            size, "mouse release", 4, col, row, focus)
-        assert return_value is False
-
-        # Other clicks
-        return_value = user_view.mouse_event(
-            size, "mouse press", 1, col, row, focus)
+    @pytest.mark.parametrize('event, button', [
+            ('mouse release', 0),
+            ('mouse press', 1),
+            ('mouse press', 3),
+            ('mouse release', 4),
+        ],
+        ids=[
+            'unsupported_mouse_release_action',
+            'unsupported_left_click_mouse_press_action',
+            'unsupported_right_click_mouse_press_action',
+            'invalid_event_button_combination',
+        ]
+    )
+    def test_mouse_event_invalid(self, user_view, event, button):
+        size = (200, 20)
+        col = 1
+        row = 1
+        focus = 'WIDGET'
+        return_value = user_view.mouse_event(size, event, button, col, row,
+                                             focus)
         assert return_value is False
 
 
