@@ -25,6 +25,7 @@ class TestView:
         assert view.model == self.model
         assert view.pinned_streams == self.model.pinned_streams
         assert view.unpinned_streams == self.model.unpinned_streams
+        assert view.msg_list is None
         self.write_box.assert_called_once_with(view)
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
@@ -108,9 +109,14 @@ class TestView:
         footer = view.footer_view()
         assert isinstance(footer.text, str)
 
-    def test_main_window(self, mocker):
+    def test_main_window(self, mocker, monkeypatch):
         left = mocker.patch('zulipterminal.ui.View.left_column_view')
-        center = mocker.patch('zulipterminal.ui.View.message_view')
+
+        # NOTE: Use monkeypatch not patch, as view doesn't exist until later
+        def just_set_msg_list(self):
+            self.msg_list = mocker.Mock(read_message=lambda: None)
+        monkeypatch.setattr(View, 'message_view', just_set_msg_list)
+
         right = mocker.patch('zulipterminal.ui.View.right_column_view')
         col = mocker.patch("zulipterminal.ui.urwid.Columns")
         frame = mocker.patch('zulipterminal.ui.urwid.Frame')
@@ -135,17 +141,17 @@ class TestView:
         view = View(self.controller)
 
         left.assert_called_once_with()
-        center.assert_called_once_with()
+        # NOTE: Don't check center here, as we're monkeypatching it
         right.assert_called_once_with()
 
         expected_column_calls = [
             mocker.call([
                 (View.LEFT_WIDTH, left()),
-                ('weight', 10, center()),
+                ('weight', 10, mocker.ANY),  # ANY is a center
                 (0, right()),
                 ], focus_column=0),
             mocker.call()._contents.set_focus_changed_callback(
-                view.model.msg_list.read_message),
+                view.msg_list.read_message),
             mocker.call([
                 title_divider(),
                 (title_length, text()),

@@ -66,7 +66,6 @@ class Model:
         self.controller = controller
         self.client = controller.client
 
-        self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
         self._have_last_message = {}  # type: Dict[str, bool]
         self.stream_id = -1
@@ -744,8 +743,9 @@ class Model:
 
         if (hasattr(self.controller, 'view')
                 and self._have_last_message[repr(self.narrow)]):
-            if self.msg_list.log:
-                last_message = self.msg_list.log[-1].original_widget.message
+            msg_log = self.controller.view.msg_list.log
+            if msg_log:
+                last_message = msg_log[-1].original_widget.message
             else:
                 last_message = None
             msg_w_list = create_msg_box_list(self, [message['id']],
@@ -756,15 +756,15 @@ class Model:
                 msg_w = msg_w_list[0]
 
             if not self.narrow:
-                self.msg_list.log.append(msg_w)
+                msg_log.append(msg_w)
 
             elif (self.narrow[0][1] == 'mentioned'
                     and 'mentioned' in message['flags']):
-                self.msg_list.log.append(msg_w)
+                msg_log.append(msg_w)
 
             elif (self.narrow[0][1] == message['type']
                     and len(self.narrow) == 1):
-                self.msg_list.log.append(msg_w)
+                msg_log.append(msg_w)
 
             elif (message['type'] == 'stream'
                     and self.narrow[0][0] == "stream"):
@@ -776,7 +776,7 @@ class Model:
                     and (len(self.narrow) == 1
                          or (len(self.narrow) == 2
                              and self.narrow[1][1] == message['subject']))):
-                    self.msg_list.log.append(msg_w)
+                    msg_log.append(msg_w)
 
             elif (message['type'] == 'private' and len(self.narrow) == 1
                     and self.narrow[0][0] == "pm_with"):
@@ -784,7 +784,7 @@ class Model:
                 message_recipients = frozenset(
                     [user['id'] for user in message['display_recipient']])
                 if narrow_recipients == message_recipients:
-                    self.msg_list.log.append(msg_w)
+                    msg_log.append(msg_w)
             self.controller.update_screen()
 
     def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
@@ -893,17 +893,18 @@ class Model:
         Helper method called by various _handle_* methods
         """
         # Update new content in the rendered view
-        for msg_w in self.msg_list.log:
+        view = self.controller.view
+        for msg_w in view.msg_list.log:
             msg_box = msg_w.original_widget
             if msg_box.message['id'] == msg_id:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
                 if (len(self.narrow) == 2
                         and msg_box.message['subject'] != self.narrow[1][1]):
-                    self.msg_list.log.remove(msg_w)
+                    view.msg_list.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.
-                    if not self.msg_list.log:
+                    if not view.msg_list.log:
                         msg_w_list = create_msg_box_list(
                                         self, [msg_id],
                                         last_message=msg_box.last_message)
@@ -920,17 +921,17 @@ class Model:
                     return
                 else:
                     new_msg_w = msg_w_list[0]
-                    msg_pos = self.msg_list.log.index(msg_w)
-                    self.msg_list.log[msg_pos] = new_msg_w
+                    msg_pos = view.msg_list.log.index(msg_w)
+                    view.msg_list.log[msg_pos] = new_msg_w
 
                     # If this is not the last message in the view
                     # update the next message's last_message too.
-                    if len(self.msg_list.log) != (msg_pos + 1):
-                        next_msg_w = self.msg_list.log[msg_pos + 1]
+                    if len(view.msg_list.log) != (msg_pos + 1):
+                        next_msg_w = view.msg_list.log[msg_pos + 1]
                         msg_w_list = create_msg_box_list(
                             self, [next_msg_w.original_widget.message['id']],
                             last_message=new_msg_w.original_widget.message)
-                        self.msg_list.log[msg_pos + 1] = msg_w_list[0]
+                        view.msg_list.log[msg_pos + 1] = msg_w_list[0]
                     self.controller.update_screen()
                     return
 

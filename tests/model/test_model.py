@@ -41,7 +41,6 @@ class TestModel:
     def test_init(self, model, initial_data, user_profile):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
-        assert model.msg_list is None
         assert model.narrow == []
         assert model._have_last_message == {}
         assert model.stream_id == -1
@@ -656,7 +655,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        model.msg_list = mocker.Mock(log=[])
+        self.controller.view.msg_list = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
@@ -665,7 +664,7 @@ class TestModel:
 
         model._handle_message_event(event)
 
-        assert len(model.msg_list.log) == 1  # Added "msg_w" element
+        assert len(self.controller.view.msg_list.log) == 1  # Added "msg_w"
         model.notify_user.assert_called_once_with(event['message'])
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
@@ -677,7 +676,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        model.msg_list = mocker.Mock(log=[mocker.Mock()])
+        self.controller.view.msg_list = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
@@ -686,10 +685,11 @@ class TestModel:
 
         model._handle_message_event(event)
 
-        assert len(model.msg_list.log) == 2  # Added "msg_w" element
+        assert len(self.controller.view.msg_list.log) == 2  # Added "msg_w"
         model.notify_user.assert_called_once_with(event['message'])
         # NOTE: So we expect the first element *was* the last_message parameter
-        expected_last_msg = model.msg_list.log[0].original_widget.message
+        expected_last_msg = (self.controller.view.msg_list.log[0]
+                             .original_widget.message)
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
@@ -700,12 +700,11 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        model.msg_list = mocker.Mock()
+        self.controller.view.msg_list = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
-        model.msg_list.log = [mocker.Mock()]
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         # Test event with flags
@@ -716,7 +715,7 @@ class TestModel:
 
         # Test event without flags
         model.notify_user.assert_called_once_with(event['message'])
-        model.msg_list.log = [mocker.Mock()]
+        self.controller.view.msg_list.log = [mocker.Mock()]
         event = {'message': message_fixture, 'flags': []}
         model._handle_message_event(event)
         # set count called since the message is unread.
@@ -769,7 +768,7 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         set_count = mocker.patch('zulipterminal.model.set_count')
-        model.msg_list = mocker.Mock(log=[])
+        self.controller.view.msg_list = mocker.Mock(log=[])
         model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients
@@ -779,14 +778,14 @@ class TestModel:
 
         model._handle_message_event(event)
 
-        assert model.msg_list.log == log
+        assert self.controller.view.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
         model._have_last_message[repr(narrow)] = False
         model.notify_user.assert_called_once_with(response)
         model._handle_message_event(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
-        assert model.msg_list.log == log
+        assert self.controller.view.msg_list.log == log
 
     @pytest.mark.parametrize(['topic_name', 'topic_order_intial',
                               'topic_order_final'], [
@@ -1019,7 +1018,7 @@ class TestModel:
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
         model.narrow = narrow
         other_msg_w.original_widget.message = {'id': 2}
-        model.msg_list = mocker.Mock(log=[msg_w, other_msg_w])
+        self.controller.view.msg_list = mocker.Mock(log=[msg_w, other_msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
@@ -1030,7 +1029,8 @@ class TestModel:
         # If there are 2 msgs and first one is updated, next one is updated too
         if new_log_len == 2:
             other_msg_w = new_msg_w
-        assert model.msg_list.log == [new_msg_w, other_msg_w][-new_log_len:]
+        assert (self.controller.view.msg_list.log
+                == [new_msg_w, other_msg_w][-new_log_len:])
         assert model.controller.update_screen.called
 
     @pytest.mark.parametrize('subject, narrow, narrow_changed', [
@@ -1049,7 +1049,7 @@ class TestModel:
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
         model.narrow = narrow
-        model.msg_list = mocker.Mock(log=[msg_w])
+        self.controller.view.msg_list = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
@@ -1100,10 +1100,10 @@ class TestModel:
         })])
     def test__handle_reaction_event(self, mocker, model, response, index):
         model.index = index
-        model.msg_list = mocker.Mock()
         mock_msg = mocker.Mock()
         another_msg = mocker.Mock()
-        model.msg_list.log = [mock_msg, another_msg]
+        self.controller.view.msg_list = mocker.Mock()
+        self.controller.view.msg_list.log = [mock_msg, another_msg]
         mock_msg.original_widget.message = index['messages'][1]
         another_msg.original_widget.message = index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
@@ -1162,7 +1162,9 @@ class TestModel:
         model.index = index
         mock_msg = mocker.Mock()
         another_msg = mocker.Mock()
-        model.msg_list = mocker.Mock(log=[mock_msg, another_msg])
+        self.controller.view.msg_list = (
+            mocker.Mock(log=[mock_msg, another_msg])
+        )
         mock_msg.original_widget.message = index['messages'][1]
         another_msg.original_widget.message = index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',

@@ -56,8 +56,9 @@ class ModListWalker(urwid.SimpleFocusListWalker):
 
 
 class MessageView(urwid.ListBox):
-    def __init__(self, model: Any) -> None:
+    def __init__(self, model: Any, view: Any) -> None:
         self.model = model
+        self.view = view
         # Initialize for reference
         self.focus_msg = 0
         self.log = ModListWalker(self.main_view())
@@ -466,14 +467,14 @@ class UsersView(urwid.ListBox):
 class MiddleColumnView(urwid.Frame):
     def __init__(self, view: Any, model: Any,
                  write_box: Any, search_box: Any) -> None:
-        msg_list = MessageView(model)
+        msg_list = MessageView(model, view)
         self.model = model
         self.controller = model.controller
         self.view = view
         self.last_unread_topic = None
         self.last_unread_pm = None
         self.search_box = search_box
-        model.msg_list = msg_list
+        view.msg_list = msg_list
         super().__init__(msg_list, header=search_box, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
