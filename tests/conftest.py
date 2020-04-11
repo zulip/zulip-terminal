@@ -798,3 +798,21 @@ def mouse_event_navigation_key_expected_key_pair(request):
     The expected key is the one which is passed to the super `keypress` calls.
     """
     return request.param
+
+
+@pytest.fixture(params=[
+        (key, button)
+        for keys, button in [
+            (keys_for_command('GO_UP'), 4),
+            (keys_for_command('GO_DOWN'), 5),
+        ]
+        for key in keys
+    ],
+    ids=lambda param: 'scroll_wheel_' + ('up' if param[1] == 4 else 'down')
+                      + '-key:{}-button:{}'.format(*param)
+)
+def mouse_scroll_key_button_pair(request):
+    """
+    Fixture to generate key and their respective button pair.
+    """
+    return request.param

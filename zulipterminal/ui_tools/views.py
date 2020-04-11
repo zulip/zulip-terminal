@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 import urwid
 
 from zulipterminal.config.keys import (
-    HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
+    HELP_CATEGORIES, KEY_BINDINGS, is_command_key, keys_for_command,
 )
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
@@ -134,10 +134,10 @@ class MessageView(urwid.ListBox):
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
-                self.keypress(size, 'up')
+                self.keypress(size, keys_for_command('GO_UP').pop())
                 return True
             if button == 5:
-                self.keypress(size, 'down')
+                self.keypress(size, keys_for_command('GO_DOWN').pop())
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -283,10 +283,10 @@ class StreamsView(urwid.Frame):
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
-                self.keypress(size, 'up')
+                self.keypress(size, keys_for_command('GO_UP').pop())
                 return True
             elif button == 5:
-                self.keypress(size, 'down')
+                self.keypress(size, keys_for_command('GO_DOWN').pop())
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -377,10 +377,10 @@ class TopicsView(urwid.Frame):
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 4:
-                self.keypress(size, 'up')
+                self.keypress(size, keys_for_command('GO_UP').pop())
                 return True
             elif button == 5:
-                self.keypress(size, 'down')
+                self.keypress(size, keys_for_command('GO_DOWN').pop())
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -426,11 +426,11 @@ class UsersView(urwid.ListBox):
         if event == 'mouse press':
             if button == 4:
                 for _ in range(5):
-                    self.keypress(size, 'up')
+                    self.keypress(size, keys_for_command('GO_UP').pop())
                 return True
             elif button == 5:
                 for _ in range(5):
-                    self.keypress(size, 'down')
+                    self.keypress(size, keys_for_command('GO_DOWN').pop())
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:

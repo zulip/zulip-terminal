@@ -235,14 +235,13 @@ class TestMessageView:
                                                         num_after=30,
                                                         anchor=0)
 
-    @pytest.mark.parametrize("event, button, keypress", [
-        ("mouse press", 4, "up"),
-        ("mouse press", 5, "down"),
-    ])
-    def test_mouse_event(self, mocker, msg_view, event, button, keypress):
+    def test_mouse_event(self, mocker, msg_view, mouse_scroll_key_button_pair):
+        key, button = mouse_scroll_key_button_pair
+        size = (20, )
+        mocker.patch(VIEWS + '.keys_for_command', return_value=[key])
         mocker.patch.object(msg_view, "keypress")
-        msg_view.mouse_event((20,), event, button, 0, 0, mocker.Mock())
-        msg_view.keypress.assert_called_once_with((20,), keypress)
+        msg_view.mouse_event(size, 'mouse press', button, 0, 0, mocker.Mock())
+        msg_view.keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize('key', keys_for_command('GO_DOWN'))
     def test_keypress_GO_DOWN(self, mocker, msg_view, key):
@@ -451,17 +450,14 @@ class TestStreamsView:
         stream_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
-    @pytest.mark.parametrize('button, key', [
-            (4, 'up'),
-            (5, 'down'),
-        ],
-        ids=['scroll_wheel_up', 'scroll_wheel_down']
-    )
-    def test_mouse_event(self, mocker, stream_view, button, key):
+    def test_mouse_event(self, mocker, stream_view,
+                         mouse_scroll_key_button_pair):
+        key, button = mouse_scroll_key_button_pair
         size = (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
+        mocker.patch(VIEWS + '.keys_for_command', return_value=[key])
         mocker.patch.object(stream_view, 'keypress')
         stream_view.mouse_event(size, 'mouse press', button, col, row, focus)
         stream_view.keypress.assert_called_once_with(size, key)
@@ -683,6 +679,18 @@ class TestTopicsView:
         topic_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
+    def test_mouse_event(self, mocker, topic_view,
+                         mouse_scroll_key_button_pair):
+        key, button = mouse_scroll_key_button_pair
+        size = (200, 20)
+        col = 1
+        row = 1
+        focus = mocker.Mock()
+        mocker.patch(VIEWS + '.keys_for_command', return_value=[key])
+        mocker.patch.object(topic_view, 'keypress')
+        topic_view.mouse_event(size, 'mouse press', button, col, row, focus)
+        topic_view.keypress.assert_called_with(size, key)
+
 
 class TestUsersView:
 
@@ -699,17 +707,14 @@ class TestUsersView:
         user_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
-    @pytest.mark.parametrize('button, key', [
-            (4, 'up'),
-            (5, 'down'),
-        ],
-        ids=['scroll_wheel_up', 'scroll_wheel_down']
-    )
-    def test_mouse_event(self, mocker, user_view, button, key):
+    def test_mouse_event(self, mocker, user_view,
+                         mouse_scroll_key_button_pair):
+        key, button = mouse_scroll_key_button_pair
         size = (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
+        mocker.patch(VIEWS + '.keys_for_command', return_value=[key] * 5)
         mocker.patch.object(user_view, 'keypress')
         user_view.mouse_event(size, 'mouse press', button, col, row, focus)
         user_view.keypress.assert_called_with(size, key)
