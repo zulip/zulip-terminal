@@ -15,6 +15,7 @@ def controller(mocker, index_multiple_messages):
     controller.model.index = index_multiple_messages
     controller.model.is_muted_stream = mocker.patch(
             'zulipterminal.model.Model.is_muted_stream', return_value=False)
+    controller.view.left_panel.is_in_topic_view = False
     return controller
 
 
@@ -110,6 +111,41 @@ def test_set_count_group_pms(initial_unread_counts, all_msg, new_count,
                                      'all_pms': expected_all_pms,
                                      'unread_huddles': expected_unread_huddles
                                      })
+    controller.model.unread_counts = unread_counts
+
+    set_count(id_list, controller, new_count)
+    assert controller.model.unread_counts == expected_unread_counts
+
+
+@pytest.mark.parametrize('all_msg, unread_topics', [
+    (6, {(1001, 'Topic 1'): 3, (1002, 'Topic 3'): 1, (1003, 'Topic 10'): 2}),
+    ])
+@pytest.mark.parametrize(
+    'new_count, expected_unread_topics, id_list, muted_streams,\
+            expected_all_msg', [
+     (1, {(1001, 'Topic 1'): 4, (1002, 'Topic 3'): 1,
+          (1003, 'Topic 10'): 4}, [7, 8, 9], [1001, 1003], 6),
+     (1, {(1001, 'Topic 1'): 4, (1002, 'Topic 3'): 1,
+          (1003, 'Topic 10'): 4}, [7, 8, 9], [1001, 1002, 1003], 6),
+     (1, {(1001, 'Topic 1'): 4, (1002, 'Topic 3'): 2,
+          (1003, 'Topic 10'): 4}, [7, 8, 9, 4], [1001, 1003], 7),
+     (-1, {(1001, 'Topic 1'): 2, (1002, 'Topic 3'): 1,
+           (1003, 'Topic 10'): 2}, [2], [1001], 6),
+     (-1, {(1001, 'Topic 1'): 2, (1003, 'Topic 10'): 2}, [2, 4], [1001], 5),
+     ])
+def test_set_count_muted_streams(initial_unread_counts, muted_streams,
+                                 unread_topics, all_msg, id_list, new_count,
+                                 expected_unread_topics, expected_all_msg,
+                                 controller):
+    # all_msg does not change for muted streams.
+    controller.model.is_muted_stream = lambda stream_id: \
+        stream_id in muted_streams
+    unread_counts = deepcopy(dict(initial_unread_counts,
+                                  **{'all_msg': all_msg,
+                                     'unread_topics': unread_topics}))
+    expected_unread_counts = dict(initial_unread_counts,
+                                  **{'all_msg': expected_all_msg,
+                                     'unread_topics': expected_unread_topics})
     controller.model.unread_counts = unread_counts
 
     set_count(id_list, controller, new_count)
