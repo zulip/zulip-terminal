@@ -8,7 +8,7 @@ import urwid
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.themes import THEMES
-from zulipterminal.helper import asynch
+from zulipterminal.helper import WSL, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView, MiddleColumnView, RightColumnView,
@@ -219,7 +219,7 @@ class View(urwid.WidgetWrap):
 class Screen(urwid.raw_display.Screen):
 
     def write(self, data: Any) -> None:
-        if "Microsoft" in platform.platform():
+        if WSL:
             # replace urwid's SI/SO, which produce artifacts under WSL.
             # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
             # Above link describes the change.
