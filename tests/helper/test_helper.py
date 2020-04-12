@@ -51,6 +51,36 @@ def test_set_count_stream(controller, initial_unread_counts,
     assert controller.model.unread_counts == expected_unread_counts
 
 
+@pytest.mark.parametrize('all_msg, all_pms, unread_pms, user_id', [
+    (4, 3, {200: 2, 201: 1}, 202)
+    ])
+@pytest.mark.parametrize(('new_count, id_list, expected_all_msg,'
+                         'expected_all_pms, expected_unread_pms'), [
+    (-1, [10, 13], 2, 1, {201: 1}),
+    (-1, [10, 13, 11], 1, 0, {}),
+    (-1, [], 4, 3, {200: 2, 201: 1}),
+    (-1, [15], 4, 3, {200: 2, 201: 1}),   # self-pm
+    (1, [16, 10], 6, 5, {200: 4, 201: 1}),
+    (1, [], 4, 3, {200: 2, 201: 1}),
+    ])
+def test_set_count_pms(controller, initial_unread_counts, all_msg,
+                       all_pms, unread_pms, user_id, id_list, new_count,
+                       expected_unread_pms, expected_all_pms,
+                       expected_all_msg):
+    controller.model.user_id = user_id
+    unread_counts = deepcopy(dict(initial_unread_counts,
+                                  **{'all_msg': all_msg, 'all_pms': all_pms,
+                                     'unread_pms': unread_pms}))
+    expected_unread_counts = dict(initial_unread_counts,
+                                  **{'all_msg': expected_all_msg,
+                                     'all_pms': expected_all_pms,
+                                     'unread_pms': expected_unread_pms})
+    controller.model.unread_counts = unread_counts
+
+    set_count(id_list, controller, new_count)
+    assert controller.model.unread_counts == expected_unread_counts
+
+
 def test_index_messages_narrow_all_messages(mocker,
                                             messages_successful_response,
                                             index_all_messages,

@@ -793,6 +793,21 @@ def index_multiple_messages():
             'stream_id': 1003, 'display_recipient': 'stream 10', 'flags': []},
         9: {'id': 9, 'type': 'stream', 'subject': 'Topic 10', 'sender_id': 101,
             'stream_id': 1003, 'display_recipient': 'stream 10', 'flags': []},
+        # pms
+        10: {'id': 10, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        11: {'id': 11, 'type': 'private', 'sender_id': 201,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        12: {'id': 12, 'type': 'private', 'sender_id': 202,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        13: {'id': 13, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        14: {'id': 14, 'type': 'private', 'sender_id': 201,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        15: {'id': 15, 'type': 'private', 'sender_id': 202,
+             'display_recipient': [{'id': 202}], 'flags': []},
+        16: {'id': 16, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
         }})
 
 # --------------- UI Fixtures -----------------------------------------
