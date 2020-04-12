@@ -19,7 +19,7 @@ from mypy_extensions import TypedDict
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
-WSL = 'Microsoft' in platform.release()
+WSL = 'microsoft' in platform.release().lower()
 
 Message = Dict[str, Any]
 
