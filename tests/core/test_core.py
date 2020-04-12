@@ -14,18 +14,18 @@ class TestController:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: Any) -> None:
         self.client = mocker.patch('zulip.Client')
-        self.model = mocker.patch('zulipterminal.model.Model.__init__',
-                                  return_value=None)
-        self.view = mocker.patch('zulipterminal.ui.View.__init__',
-                                 return_value=None)
-        self.model.poll_for_events = mocker.patch('zulipterminal.model.Model'
-                                                  '.poll_for_events')
+        # Patch init only, in general, allowing specific patching elsewhere
+        self.model = mocker.patch(CORE + '.Model.__init__', return_value=None)
+        self.view = mocker.patch(CORE + '.View.__init__', return_value=None)
         self.model.view = self.view
         self.view.focus_col = 1
-        mocker.patch('zulipterminal.core.Controller.show_loading')
 
     @pytest.fixture
     def controller(self, mocker) -> None:
+        # Patch these unconditionally to avoid calling in __init__
+        self.poll_for_events = mocker.patch(CORE + '.Model.poll_for_events')
+        mocker.patch(CORE + '.Controller.show_loading')
+
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
@@ -40,7 +40,7 @@ class TestController:
         )
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
-        self.model.poll_for_events.assert_called_once_with()
+        self.poll_for_events.assert_called_once_with()
         assert controller.theme == self.theme
 
     def test_initial_editor_mode(self, controller):
