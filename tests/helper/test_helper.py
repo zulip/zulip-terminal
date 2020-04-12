@@ -1,11 +1,54 @@
+from copy import deepcopy
 from typing import Any
 
 import pytest
 
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, index_messages, notify,
-    powerset,
+    powerset, set_count,
 )
+
+
+@pytest.fixture
+def controller(mocker, index_multiple_messages):
+    controller = mocker.patch('zulipterminal.core.Controller.__init__')
+    controller.model.index = index_multiple_messages
+    controller.model.is_muted_stream = mocker.patch(
+            'zulipterminal.model.Model.is_muted_stream', return_value=False)
+    return controller
+
+
+@pytest.mark.parametrize('all_msg, unread_topics', [
+    (6, {(1001, 'Topic 1'): 3, (1002, 'Topic 2'): 1, (1002, 'Topic 3'): 2}),
+    ])
+@pytest.mark.parametrize(
+    'new_count, id_list, expected_all_msg, expected_unread_topics', [
+     (1, [], 6, {(1001, 'Topic 1'): 3, (1002, 'Topic 2'): 1,
+                 (1002, 'Topic 3'): 2}),
+     (1, [7], 7, {(1001, 'Topic 1'): 4, (1002, 'Topic 2'): 1,
+                  (1002, 'Topic 3'): 2}),
+     (1, [7, 8, 9], 9, {(1001, 'Topic 1'): 4, (1002, 'Topic 2'): 1,
+                        (1002, 'Topic 3'): 2, (1003, 'Topic 10'): 2}),
+     (-1, [], 6, {(1001, 'Topic 1'): 3, (1002, 'Topic 2'): 1,
+                  (1002, 'Topic 3'): 2}),
+     (-1, [5], 5, {(1001, 'Topic 1'): 3, (1002, 'Topic 2'): 1,
+                   (1002, 'Topic 3'): 1}),
+     (-1, [1, 2, 4, 6], 2, {(1002, 'Topic 2'): 1, (1002, 'Topic 3'): 1}),
+     (-1, [1, 2, 3, 4, 5, 6], 0, {}),
+     ])
+def test_set_count_stream(controller, initial_unread_counts,
+                          unread_topics, all_msg, id_list, new_count,
+                          expected_unread_topics, expected_all_msg):
+    unread_counts = deepcopy(dict(initial_unread_counts,
+                                  **{'all_msg': all_msg,
+                                     'unread_topics': unread_topics}))
+    expected_unread_counts = dict(initial_unread_counts,
+                                  **{'all_msg': expected_all_msg,
+                                     'unread_topics': expected_unread_topics})
+    controller.model.unread_counts = unread_counts
+
+    set_count(id_list, controller, new_count)
+    assert controller.model.unread_counts == expected_unread_counts
 
 
 def test_index_messages_narrow_all_messages(mocker,
