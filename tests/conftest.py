@@ -808,6 +808,24 @@ def index_multiple_messages():
              'display_recipient': [{'id': 202}], 'flags': []},
         16: {'id': 16, 'type': 'private', 'sender_id': 200,
              'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        # group-pms
+        17: {'id': 17, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 201}, {'id': 200}]},
+        18: {'id': 18, 'type': 'private', 'sender_id': 200, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 201}]},
+        19: {'id': 19, 'type': 'private', 'sender_id': 201, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 201}, {'id': 200}]},
+        20: {'id': 21, 'type': 'private', 'sender_id': 200, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 201}]},
+        21: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        22: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        23: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        24: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199},
+                                   {'id': 198}]},
         }})
 
 # --------------- UI Fixtures -----------------------------------------

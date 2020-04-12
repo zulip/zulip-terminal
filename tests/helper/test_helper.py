@@ -81,6 +81,41 @@ def test_set_count_pms(controller, initial_unread_counts, all_msg,
     assert controller.model.unread_counts == expected_unread_counts
 
 
+@pytest.mark.parametrize('all_msg, all_pms, unread_huddles', [
+    (4, 3, {frozenset({202, 200, 201}): 2, frozenset({202, 200, 199, 198}): 1})
+    ])
+@pytest.mark.parametrize(('new_count, id_list, expected_all_msg,'
+                         'expected_all_pms, expected_unread_huddles'), [
+    (-1, [20, 18], 2, 1, {frozenset({202, 200, 199, 198}): 1}),
+    (-1, [20, 18, 24], 1, 0, {}),
+    (-1, [], 4, 3, {frozenset({202, 200, 201}): 2,
+                    frozenset({202, 200, 199, 198}): 1}),
+    (1, [17, 19], 6, 5, {frozenset({202, 200, 201}): 4,
+                         frozenset({202, 200, 199, 198}): 1}),
+    (1, [17, 19, 23], 7, 6, {frozenset({202, 200, 201}): 4,
+                             frozenset({202, 200, 199, 198}): 1,
+                             frozenset({202, 200, 199}): 1}),
+    (1, [], 4, 3, {frozenset({202, 200, 201}): 2,
+                   frozenset({202, 200, 199, 198}): 1}),
+    ])
+def test_set_count_group_pms(initial_unread_counts, all_msg, new_count,
+                             all_pms, unread_huddles, user_id, id_list,
+                             expected_unread_huddles, expected_all_pms,
+                             expected_all_msg, controller):
+    unread_counts = deepcopy(dict(initial_unread_counts,
+                                  **{'all_msg': all_msg, 'all_pms': all_pms,
+                                     'unread_huddles': unread_huddles}))
+    expected_unread_counts = dict(initial_unread_counts,
+                                  **{'all_msg': expected_all_msg,
+                                     'all_pms': expected_all_pms,
+                                     'unread_huddles': expected_unread_huddles
+                                     })
+    controller.model.unread_counts = unread_counts
+
+    set_count(id_list, controller, new_count)
+    assert controller.model.unread_counts == expected_unread_counts
+
+
 def test_index_messages_narrow_all_messages(mocker,
                                             messages_successful_response,
                                             index_all_messages,
