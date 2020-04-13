@@ -2,6 +2,7 @@ from typing import Any
 
 import pytest
 
+import zulipterminal.helper
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, index_messages, notify,
     powerset,
@@ -251,3 +252,33 @@ def test_notify(mocker, OS, is_notification_sent):
     subprocess = mocker.patch('zulipterminal.helper.subprocess')
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
+
+
+@pytest.mark.parametrize('text', [
+    "x", "Spaced text.", "'", '"'
+], ids=["x", "spaced_text", "single", "double"])
+@pytest.mark.parametrize('title', [
+    "X", 'Spaced title', "'", '"'
+], ids=["X", "spaced_title", "single", "double"])
+@pytest.mark.parametrize('OS, cmd_length', [
+    ('LINUX', 3),
+    ('MACOS', 3),
+    ('WSL', 2)
+])
+def test_notify_quotes(monkeypatch, mocker,
+                       OS, cmd_length, title, text):
+    subprocess = mocker.patch('zulipterminal.helper.subprocess')
+
+    for os in ('LINUX', 'MACOS', 'WSL'):
+        if os != OS:
+            monkeypatch.setattr(zulipterminal.helper, os, False)
+        else:
+            monkeypatch.setattr(zulipterminal.helper, os, True)
+
+    notify(title, text)
+
+    params = subprocess.run.call_args_list
+    assert len(params) == 1  # One external run call
+    assert len(params[0][0][0]) == cmd_length
+
+    # NOTE: If there is a quoting error, we may get a ValueError too

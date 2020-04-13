@@ -515,15 +515,29 @@ def notify(title: str, html_text: str) -> None:
     quoted_title = shlex.quote(title)
 
     command = ""
-    if WSL:  # FIXME May no longer work - needs further testing with quotes
-        command = ('powershell.exe "New-BurntToastNotification'
-                   ' -Text \'{}\', \'{}\'"'.format(quoted_title, quoted_text))
-    elif MACOS:  # FIXME May no longer work - needs further testing wth quotes
-        command = ("osascript -e 'display notification \"{}\" with title"
-                   " \"{}\"'".format(quoted_text, quoted_title))
+    if WSL:  # FIXME May work - needs further testing with quotes
+        command = (
+            'powershell.exe '
+            '"New-BurntToastNotification -Text \'\"{}\"\', \'\"{}\"\'"'
+            .format(quoted_title, quoted_text)
+        )
+        expected_length = 2
+    elif MACOS:  # NOTE Tested and should work!
+        command = (
+            "osascript -e "
+            "'display notification \"\'{}\'\" with title \"\'{}\'\"'"
+            .format(quoted_text, quoted_title)
+        )
+        expected_length = 3
     elif LINUX:
         command = 'notify-send {} {}'.format(quoted_title, quoted_text)
+        expected_length = 3
 
     if command:
-        res = subprocess.run(shlex.split(command), stdout=subprocess.DEVNULL,
+        command_list = shlex.split(command)
+
+        # NOTE: We assert this in tests, but this signals unexpected breakage
+        assert len(command_list) == expected_length
+
+        res = subprocess.run(command_list, stdout=subprocess.DEVNULL,
                              stderr=subprocess.STDOUT)
