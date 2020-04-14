@@ -75,7 +75,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    python_requires='>=3.5, <=3.8',
+    python_requires='>=3.5, <3.9',
     keywords='',
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
