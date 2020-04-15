@@ -516,12 +516,20 @@ def notify(title: str, html_text: str) -> None:
 
     command = ""
     if WSL:  # FIXME May work - needs further testing with quotes
-        command = (
-            'powershell.exe '
-            '"New-BurntToastNotification -Text \'\"{}\"\', \'\"{}\"\'"'
+        # Escaping of quotes in powershell is done usign ` instead of \
+        escaped_text = text.replace('\'', '`\'').replace('\"', '`\"')
+        quoted_text = '\"' + escaped_text + '\"'
+        command_list = [
+            'powershell.exe',
+            "New-BurntToastNotification -Text {}, {}"
             .format(quoted_title, quoted_text)
-        )
+        ]
+        res = subprocess.run(command_list, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.STDOUT)
         expected_length = 2
+        assert len(command_list) == expected_length
+        return
+
     elif MACOS:  # NOTE Tested and should work!
         command = (
             "osascript -e "
