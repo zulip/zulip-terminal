@@ -528,7 +528,8 @@ def notify(title: str, html_text: str) -> None:
     elif MACOS:  # NOTE Tested and should work!
         command_list = shlex.split(
             "osascript -e "
-            "'display notification \"\'{}\'\" with title \"\'{}\'\"'"
+            "'display notification \"\'{}\'\" with title \"\'{}\'\" "
+            " sound name \"ZT_NOTIFICATION_SOUND\"'"
             .format(quoted_text, quoted_title)
         )
         expected_length = 3
