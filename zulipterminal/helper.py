@@ -514,7 +514,7 @@ def notify(title: str, html_text: str) -> None:
 
     quoted_title = shlex.quote(title)
 
-    command = ""
+    command_list = None
     if WSL:  # NOTE Tested and should work!
         # Escaping of quotes in powershell is done using ` instead of \
         escaped_text = text.replace('\'', '`\'').replace('\"', '`\"')
@@ -524,26 +524,21 @@ def notify(title: str, html_text: str) -> None:
             "New-BurntToastNotification -Text {}, {}"
             .format(quoted_title, quoted_text)
         ]
-        res = subprocess.run(command_list, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.STDOUT)
         expected_length = 2
-        assert len(command_list) == expected_length
-        return
-
     elif MACOS:  # NOTE Tested and should work!
-        command = (
+        command_list = shlex.split(
             "osascript -e "
             "'display notification \"\'{}\'\" with title \"\'{}\'\"'"
             .format(quoted_text, quoted_title)
         )
         expected_length = 3
     elif LINUX:
-        command = 'notify-send {} {}'.format(quoted_title, quoted_text)
+        command_list = shlex.split(
+            'notify-send {} {}'.format(quoted_title, quoted_text)
+        )
         expected_length = 3
 
-    if command:
-        command_list = shlex.split(command)
-
+    if command_list is not None:
         # NOTE: We assert this in tests, but this signals unexpected breakage
         assert len(command_list) == expected_length
 
