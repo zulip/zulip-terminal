@@ -52,13 +52,12 @@ dev_helper_deps = [
 setup(
     name='zulip-term',
     version=ZT_VERSION,
-    description='A terminal-based interface to zulip chat',
+    description='A terminal-based interface to Zulip chat',
     long_description=long_description(),
     long_description_content_type='text/markdown',
     url='https://github.com/zulip/zulip-terminal',
-    author='Zulip',
+    author='Zulip Open Source Project',
     author_email='zulip-devel@googlegroups.com',
-    license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
 
