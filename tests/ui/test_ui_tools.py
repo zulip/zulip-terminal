@@ -2001,7 +2001,7 @@ class TestMessageBox:
         assert reactions_view.original_widget.attrib == [
             ('reaction', 9), (None, 1),
             ('reaction', 13), (None, 1),
-            ('reaction', 9),
+            ('reaction_mine', 9),
         ]
 
     @pytest.mark.parametrize(
