@@ -1,5 +1,5 @@
 import typing
-from collections import Counter, defaultdict
+from collections import defaultdict
 from datetime import date, datetime
 from sys import platform
 from time import ctime, time
@@ -365,22 +365,27 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ''
         try:
-            reaction_stats = Counter()  # type: typing.Counter[str]
+            reaction_stats = defaultdict(set)
             for reaction in reactions:
-                reaction_stats[reaction['emoji_name']] += 1
+                user_id = int(reaction['user'].get('id', -1))
+                if user_id == -1:
+                    user_id = int(reaction['user']['user_id'])
+                reaction_stats[reaction['emoji_name']].add(user_id)
 
             sorted_stats = sorted(
                 (reaction, count)
                 for reaction, count in reaction_stats.items()
             )
 
+            my_user_id = self.model.user_id
             reaction_texts = [
-                ':{}: {}'.format(reaction, count)
-                for reaction, count in sorted_stats
+                ('reaction_mine' if my_user_id in ids else 'reaction',
+                 ':{}: {}'.format(reaction, len(ids)))
+                for reaction, ids in sorted_stats
             ]
 
             spaced_reaction_texts = [
-                ('reaction', entry) if entry != ' ' else entry
+                entry
                 for pair in zip(reaction_texts,
                                 ' ' * len(reaction_texts))
                 for entry in pair
