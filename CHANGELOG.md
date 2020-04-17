@@ -1,8 +1,8 @@
 # Zulip-terminal Changelog
 
-## Next Release
+## 0.5.0
 
-Expected to be a point release, this contains much of the remaining work from last year's GSoC students, and various other contributors - thanks to you all! (190+ commits)
+This release contains much of the remaining work from last year's GSoC students, and various other contributors - thanks to you all! (almost 200 commits)
 
 If you've been waiting for autocomplete, popup notifications, mentions, better themes, search & platform support...this release is for you!
 
