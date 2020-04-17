@@ -1,5 +1,9 @@
 # Zulip-terminal Changelog
 
+## Next Release
+
+No changes yet!
+
 ## 0.5.0
 
 This release contains much of the remaining work from last year's GSoC students, and various other contributors - thanks to you all! (almost 200 commits)
