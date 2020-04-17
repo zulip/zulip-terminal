@@ -1442,7 +1442,29 @@ class TestModel:
             }
         return _factory
 
-    def test__handle_reaction_event(
+    @pytest.mark.parametrize("op", ["add", "remove"])
+    def test__handle_reaction_event_not_in_index(
+        self, mocker, model,
+        reaction_event_factory, reaction_event_index_factory,
+        op,
+    ):
+        reaction_event = reaction_event_factory(op=op)
+        model.index = reaction_event_index_factory(
+            [
+                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
+                (2, []),
+            ]
+        )
+        model._update_rendered_view = mocker.Mock()
+        model.index['messages'][1] = {}
+
+        model._handle_reaction_event(reaction_event)
+
+        # If there was no message earlier then don't update
+        assert model.index['messages'][1] == {}
+        assert not model._update_rendered_view.called
+
+    def test__handle_reaction_event_add_reaction(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
     ):
@@ -1461,14 +1483,6 @@ class TestModel:
         assert update_emoji == reaction_event['emoji_code']
 
         model._update_rendered_view.assert_called_once_with(1)
-
-        # TEST FOR FALSE CASES
-        model.index['messages'][1] = {}
-
-        model._handle_reaction_event(reaction_event)
-
-        # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
 
     def test__handle_reaction_event_remove_reaction(
         self, mocker, model,
