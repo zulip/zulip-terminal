@@ -2,7 +2,7 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
-[Recent changes](CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
+[Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
