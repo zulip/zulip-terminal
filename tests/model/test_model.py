@@ -651,12 +651,11 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        model.msg_list = mocker.Mock()
+        model.msg_list = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
-        model.msg_list.log = []
         event = {'message': message_fixture}
 
         model.append_message(event)
@@ -673,12 +672,11 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        model.msg_list = mocker.Mock()
+        model.msg_list = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
-        model.msg_list.log = [mocker.Mock()]
         event = {'message': message_fixture}
 
         model.append_message(event)
@@ -765,8 +763,7 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         set_count = mocker.patch('zulipterminal.model.set_count')
-        model.msg_list = mocker.Mock()
-        model.msg_list.log = []
+        model.msg_list = mocker.Mock(log=[])
         model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients
@@ -996,8 +993,7 @@ class TestModel:
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
         model.narrow = narrow
         other_msg_w.original_widget.message = {'id': 2}
-        model.msg_list = mocker.Mock()
-        model.msg_list.log = [msg_w, other_msg_w]
+        model.msg_list = mocker.Mock(log=[msg_w, other_msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
@@ -1027,8 +1023,7 @@ class TestModel:
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
         model.narrow = narrow
-        model.msg_list = mocker.Mock()
-        model.msg_list.log = [msg_w]
+        model.msg_list = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
@@ -1139,10 +1134,9 @@ class TestModel:
     def test_update_reaction_remove_reaction(self, mocker, model, response,
                                              index):
         model.index = index
-        model.msg_list = mocker.Mock()
         mock_msg = mocker.Mock()
         another_msg = mocker.Mock()
-        model.msg_list.log = [mock_msg, another_msg]
+        model.msg_list = mocker.Mock(log=[mock_msg, another_msg])
         mock_msg.original_widget.message = index['messages'][1]
         another_msg.original_widget.message = index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
