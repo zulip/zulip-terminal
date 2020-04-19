@@ -6,7 +6,7 @@ from typing import Any, Callable, List, Optional, Tuple
 import urwid
 
 from zulipterminal.config.keys import (
-    HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
+    HELP_CATEGORIES, KEY_BINDINGS, is_command_key, keys_for_command,
 )
 from zulipterminal.helper import Message, asynch, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
@@ -903,3 +903,18 @@ class MsgInfoView(PopUpView):
              for index, (field, data) in enumerate(msg_info.items())]
 
         super().__init__(controller, msg_info_content, 'MSG_INFO')
+
+
+class LoadingView(urwid.Text):
+    def __init__(self, controller: Any, text: List[object],
+                 align: str) -> None:
+        self.controller = controller
+        super().__init__(text, align)
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        if key == keys_for_command('ENTER').pop():
+            self.controller.show_main_view()
+        return key
