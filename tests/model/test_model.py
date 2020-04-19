@@ -648,7 +648,7 @@ class TestModel:
     def test__handle_message_event_with_Falsey_log(self, mocker,
                                                    model, message_fixture):
         model.found_newest = True
-        mocker.patch('zulipterminal.model.Model.update_topic_index')
+        mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock(log=[])
@@ -669,7 +669,7 @@ class TestModel:
     def test__handle_message_event_with_valid_log(self, mocker,
                                                   model, message_fixture):
         model.found_newest = True
-        mocker.patch('zulipterminal.model.Model.update_topic_index')
+        mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock(log=[mocker.Mock()])
@@ -692,7 +692,7 @@ class TestModel:
     def test__handle_message_event_with_flags(self, mocker,
                                               model, message_fixture):
         model.found_newest = True
-        mocker.patch('zulipterminal.model.Model.update_topic_index')
+        mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         model.msg_list = mocker.Mock()
@@ -757,7 +757,7 @@ class TestModel:
     def test__handle_message_event(self, mocker, user_profile, response,
                                    narrow, recipients, model, log):
         model.found_newest = True
-        mocker.patch('zulipterminal.model.Model.update_topic_index')
+        mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         create_msg_box_list = mocker.patch('zulipterminal.model.'
@@ -794,14 +794,14 @@ class TestModel:
         ('TOPIC1', [], ['TOPIC1'])
     ], ids=['reorder_topic3', 'topic1_discussion_continues', 'new_topic4',
             'first_topic_1'])
-    def test_update_topic_index(self, topic_name, topic_order_intial,
-                                topic_order_final, model):
+    def test__update_topic_index(self, topic_name, topic_order_intial,
+                                 topic_order_final, model):
         model.index = {
             'topics': {
                 86: topic_order_intial,
             }
         }
-        model.update_topic_index(86, topic_name)
+        model._update_topic_index(86, topic_name)
         assert model.index['topics'][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
@@ -972,12 +972,12 @@ class TestModel:
             },
             'edited_messages': set()
         }
-        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        mocker.patch('zulipterminal.model.Model._update_rendered_view')
 
         model._handle_update_message_event(response)
 
         assert model.index == new_index
-        assert model.update_rendered_view.call_count == update_call_count
+        assert model._update_rendered_view.call_count == update_call_count
 
     @pytest.mark.parametrize('subject, narrow, new_log_len', [
         ('foo', [['stream', 'boo'], ['topic', 'foo']], 2),
@@ -988,8 +988,8 @@ class TestModel:
         'msgbox_removed_due_to_topic_narrow_mismatch',
         'msgbox_updated_in_all_messages_narrow',
     ])
-    def test_update_rendered_view(self, mocker, model, subject, narrow,
-                                  new_log_len, msg_id=1):
+    def test__update_rendered_view(self, mocker, model, subject, narrow,
+                                   new_log_len, msg_id=1):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
@@ -1001,7 +1001,7 @@ class TestModel:
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
                             return_value=[new_msg_w])
 
-        model.update_rendered_view(msg_id)
+        model._update_rendered_view(msg_id)
 
         # If there are 2 msgs and first one is updated, next one is updated too
         if new_log_len == 2:
@@ -1018,9 +1018,9 @@ class TestModel:
         'previous_topic_narrow_empty_so_change_narrow',
         'same_all_messages_narrow',
     ])
-    def test_update_rendered_view_change_narrow(self, mocker, model, subject,
-                                                narrow, narrow_changed,
-                                                msg_id=1):
+    def test__update_rendered_view_change_narrow(self, mocker, model, subject,
+                                                 narrow, narrow_changed,
+                                                 msg_id=1):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
@@ -1031,7 +1031,7 @@ class TestModel:
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
                             return_value=[new_msg_w])
 
-        model.update_rendered_view(msg_id)
+        model._update_rendered_view(msg_id)
 
         assert model.controller.narrow_to_topic.called == narrow_changed
         assert model.controller.update_screen.called
@@ -1152,13 +1152,13 @@ class TestModel:
     def test_update_star_status_no_index(self, mocker, model):
         model.index = dict(messages={})  # Not indexed
         event = dict(messages=[1], flag='starred', all=False, operation='add')
-        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         model._handle_update_message_flags_event(event)
 
         assert model.index == dict(messages={})
-        model.update_rendered_view.assert_not_called()
+        model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
     def test_update_star_status_invalid_operation(self, mocker, model):
@@ -1170,11 +1170,11 @@ class TestModel:
             'operation': 'OTHER',  # not 'add' or 'remove'
             'all': False,
         }
-        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
         with pytest.raises(RuntimeError):
             model._handle_update_message_flags_event(event)
-        model.update_rendered_view.assert_not_called()
+        model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
     @pytest.mark.parametrize('event_message_ids, indexed_ids', [
@@ -1208,7 +1208,7 @@ class TestModel:
             'operation': event_op,
             'all': False,
         }
-        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         model._handle_update_message_flags_event(event)
@@ -1216,7 +1216,7 @@ class TestModel:
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
             assert model.index['messages'][changed_id]['flags'] == flags_after
-        (model.update_rendered_view.
+        (model._update_rendered_view.
          assert_has_calls([mocker.call(changed_id)
                           for changed_id in changed_ids]))
 
@@ -1258,7 +1258,7 @@ class TestModel:
             'all': False,
         }
 
-        mocker.patch('zulipterminal.model.Model.update_rendered_view')
+        mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         model._handle_update_message_flags_event(event)
@@ -1268,10 +1268,10 @@ class TestModel:
             assert model.index['messages'][changed_id]['flags'] == flags_after
 
             if event_op == 'add':
-                model.update_rendered_view.assert_has_calls(
+                model._update_rendered_view.assert_has_calls(
                         [mocker.call(changed_id)])
             elif event_op == 'remove':
-                model.update_rendered_view.assert_not_called()
+                model._update_rendered_view.assert_not_called()
 
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
             assert (model.index['messages'][unchanged_id]['flags'] ==

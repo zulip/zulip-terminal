@@ -602,6 +602,16 @@ class Model:
         user_group_names.sort(key=str.lower)
         return user_group_names
 
+    def toggle_stream_muted_status(self, stream_id: int) -> bool:
+        request = [{
+            'stream_id': stream_id,
+            'property': 'is_muted',
+            'value': not self.is_muted_stream(stream_id)
+            # True for muting and False for unmuting.
+        }]
+        response = self.client.update_subscription_settings(request)
+        return response['result'] == 'success'
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting streams)
@@ -623,16 +633,6 @@ class Model:
                     stream_button.mark_muted()
 
                 self.controller.update_screen()
-
-    def toggle_stream_muted_status(self, stream_id: int) -> bool:
-        request = [{
-            'stream_id': stream_id,
-            'property': 'is_muted',
-            'value': not self.is_muted_stream(stream_id)
-            # True for muting and False for unmuting.
-        }]
-        response = self.client.update_subscription_settings(request)
-        return response['result'] == 'success'
 
     def _handle_typing_event(self, event: Event) -> None:
         """
@@ -693,7 +693,8 @@ class Model:
         response['flags'] = event.get('flags', [])
         # We need to update the topic order in index, unconditionally.
         if response['type'] == 'stream':
-            self.update_topic_index(response['stream_id'], response['subject'])
+            self._update_topic_index(response['stream_id'],
+                                     response['subject'])
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
@@ -755,9 +756,10 @@ class Model:
                 set_count([response['id']], self.controller, 1)
             self.controller.update_screen()
 
-    def update_topic_index(self, stream_id: int, topic_name: str) -> None:
+    def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
         """
         Update topic order in index based on incoming message.
+        Helper method called by _handle_message_event
         """
         topic_index = self.index['topics'][stream_id]
         for topic_iterator, topic in enumerate(topic_index):
@@ -781,7 +783,7 @@ class Model:
             if 'rendered_content' in response:
                 message['content'] = response['rendered_content']
                 self.index['messages'][message_id] = message
-                self.update_rendered_view(message_id)
+                self._update_rendered_view(message_id)
 
             # 'subject' is not present in update event if
             # the response didn't have a 'subject' update.
@@ -789,7 +791,7 @@ class Model:
                 for msg_id in response['message_ids']:
                     self.index['messages'][msg_id]['subject']\
                         = response['subject']
-                    self.update_rendered_view(msg_id)
+                    self._update_rendered_view(msg_id)
 
     def _handle_reaction_event(self, response: Event) -> None:
         """
@@ -818,7 +820,7 @@ class Model:
                         message['reactions'].remove(reaction)
 
             self.index['messages'][message_id] = message
-            self.update_rendered_view(message_id)
+            self._update_rendered_view(message_id)
 
     def _handle_update_message_flags_event(self, event: Event) -> None:
         """
@@ -849,13 +851,16 @@ class Model:
                 raise RuntimeError(event, msg['flags'])
 
             self.index['messages'][message_id] = msg
-            self.update_rendered_view(message_id)
+            self._update_rendered_view(message_id)
 
         if event['operation'] == 'add' and flag_to_change == 'read':
             set_count(list(message_ids_to_mark & indexed_message_ids),
                       self.controller, -1)
 
-    def update_rendered_view(self, msg_id: int) -> None:
+    def _update_rendered_view(self, msg_id: int) -> None:
+        """
+        Helper method called by various _handle_* methods
+        """
         # Update new content in the rendered view
         for msg_w in self.msg_list.log:
             msg_box = msg_w.original_widget
