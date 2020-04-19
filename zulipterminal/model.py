@@ -88,12 +88,12 @@ class Model:
         self.server_name = ""
 
         self.event_actions = OrderedDict([
-            ('message', self.append_message),
-            ('update_message', self.update_message),
-            ('reaction', self.update_reaction),
-            ('subscription', self.update_subscription),
-            ('typing', self.handle_typing_event),
-            ('update_message_flags', self.update_message_flag_status),
+            ('message', self._handle_message_event),
+            ('update_message', self._handle_update_message_event),
+            ('reaction', self._handle_reaction_event),
+            ('subscription', self._handle_subscription_event),
+            ('typing', self._handle_typing_event),
+            ('update_message_flags', self._handle_update_message_flags_event),
         ])  # type: OrderedDict[str, Callable[[Event], None]]
 
         self.initial_data = {}  # type: Dict[str, Any]
@@ -602,9 +602,9 @@ class Model:
         user_group_names.sort(key=str.lower)
         return user_group_names
 
-    def update_subscription(self, event: Event) -> None:
+    def _handle_subscription_event(self, event: Event) -> None:
         """
-        Handle changes in subscription (Eg: muting/unmuting streams)
+        Handle changes in subscription (eg. muting/unmuting streams)
         """
         if hasattr(self.controller, 'view'):
             if ('property' in event and
@@ -634,7 +634,10 @@ class Model:
         response = self.client.update_subscription_settings(request)
         return response['result'] == 'success'
 
-    def handle_typing_event(self, event: Event) -> None:
+    def _handle_typing_event(self, event: Event) -> None:
+        """
+        Handle typing notifications (in private messages)
+        """
         if hasattr(self.controller, 'view'):
             # If the user is in pm narrow with the person typing
             if len(self.narrow) == 1 and self.narrow[0][0] == 'pm_with' and\
@@ -680,9 +683,9 @@ class Model:
                     message['sender_full_name'] + recipient),
                    message['content'])
 
-    def append_message(self, event: Event) -> None:
+    def _handle_message_event(self, event: Event) -> None:
         """
-        Adds message to the end of the view.
+        Handle new messages (eg. add message to the end of the view)
         """
         response = event['message']
         # sometimes `flags` are missing in `event` so initialize
@@ -765,9 +768,9 @@ class Model:
         # hence, it must be a new topic.
         topic_index.insert(0, topic_name)
 
-    def update_message(self, response: Event) -> None:
+    def _handle_update_message_event(self, response: Event) -> None:
         """
-        Updates previously rendered message.
+        Handle updated (edited) messages (changed content/subject)
         """
         message_id = response['message_id']
         # If the message is indexed
@@ -788,7 +791,10 @@ class Model:
                         = response['subject']
                     self.update_rendered_view(msg_id)
 
-    def update_reaction(self, response: Event) -> None:
+    def _handle_reaction_event(self, response: Event) -> None:
+        """
+        Handle change to reactions on a message
+        """
         message_id = response['message_id']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
@@ -814,7 +820,10 @@ class Model:
             self.index['messages'][message_id] = message
             self.update_rendered_view(message_id)
 
-    def update_message_flag_status(self, event: Event) -> None:
+    def _handle_update_message_flags_event(self, event: Event) -> None:
+        """
+        Handle change to message flags (eg. starred, read)
+        """
         if event['all']:  # FIXME Should handle eventually
             return
 

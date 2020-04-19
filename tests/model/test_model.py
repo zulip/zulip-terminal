@@ -645,8 +645,8 @@ class TestModel:
         assert pinned == []  # FIXME generalize/parametrize
         assert unpinned == streams  # FIXME generalize/parametrize
 
-    def test_append_message_with_Falsey_log(self, mocker, model,
-                                            message_fixture):
+    def test__handle_message_event_with_Falsey_log(self, mocker,
+                                                   model, message_fixture):
         model.found_newest = True
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
@@ -658,7 +658,7 @@ class TestModel:
         model.notify_user = mocker.Mock()
         event = {'message': message_fixture}
 
-        model.append_message(event)
+        model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
         model.notify_user.assert_called_once_with(event['message'])
@@ -666,8 +666,8 @@ class TestModel:
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=None))
 
-    def test_append_message_with_valid_log(self, mocker, model,
-                                           message_fixture):
+    def test__handle_message_event_with_valid_log(self, mocker,
+                                                  model, message_fixture):
         model.found_newest = True
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
@@ -679,7 +679,7 @@ class TestModel:
         model.notify_user = mocker.Mock()
         event = {'message': message_fixture}
 
-        model.append_message(event)
+        model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 2  # Added "msg_w" element
         model.notify_user.assert_called_once_with(event['message'])
@@ -689,7 +689,8 @@ class TestModel:
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
 
-    def test_append_message_event_flags(self, mocker, model, message_fixture):
+    def test__handle_message_event_with_flags(self, mocker,
+                                              model, message_fixture):
         model.found_newest = True
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
@@ -704,7 +705,7 @@ class TestModel:
 
         # Test event with flags
         event = {'message': message_fixture, 'flags': ['read', 'mentioned']}
-        model.append_message(event)
+        model._handle_message_event(event)
         # set count not called since 'read' flag present.
         set_count.assert_not_called()
 
@@ -712,7 +713,7 @@ class TestModel:
         model.notify_user.assert_called_once_with(event['message'])
         model.msg_list.log = [mocker.Mock()]
         event = {'message': message_fixture, 'flags': []}
-        model.append_message(event)
+        model._handle_message_event(event)
         # set count called since the message is unread.
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
@@ -753,8 +754,8 @@ class TestModel:
             'user_pm_x_appears_in_narrow_with_x', 'search',
             'user_pm_x_does_not_appear_in_narrow_without_x',
             'mentioned_msg_in_mentioned_msg_narrow'])
-    def test_append_message(self, mocker, user_profile, response,
-                            narrow, recipients, model, log):
+    def test__handle_message_event(self, mocker, user_profile, response,
+                                   narrow, recipients, model, log):
         model.found_newest = True
         mocker.patch('zulipterminal.model.Model.update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
@@ -771,14 +772,14 @@ class TestModel:
         event = {'message': response, 'flags': response['flags']
                  if 'flags' in response else []}
 
-        model.append_message(event)
+        model._handle_message_event(event)
 
         assert model.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
         model.found_newest = False
         model.notify_user.assert_called_once_with(response)
-        model.append_message(event)
+        model._handle_message_event(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
@@ -958,8 +959,9 @@ class TestModel:
             'edited_messages': set()
         }),
     ])
-    def test_update_message(self, mocker, model, response, new_index,
-                            update_call_count):
+    def test__handle_update_message_event(self, mocker, model,
+                                          response, new_index,
+                                          update_call_count):
         model.index = {
             'messages': {
                 message_id: {
@@ -972,7 +974,7 @@ class TestModel:
         }
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
 
-        model.update_message(response)
+        model._handle_update_message_event(response)
 
         assert model.index == new_index
         assert model.update_rendered_view.call_count == update_call_count
@@ -1072,7 +1074,7 @@ class TestModel:
                 }
             }
         })])
-    def test_update_reaction(self, mocker, model, response, index):
+    def test__handle_reaction_event(self, mocker, model, response, index):
         model.index = index
         model.msg_list = mocker.Mock()
         mock_msg = mocker.Mock()
@@ -1082,14 +1084,14 @@ class TestModel:
         another_msg.original_widget.message = index['messages'][2]
         mocker.patch('zulipterminal.model.create_msg_box_list',
                      return_value=[mock_msg])
-        model.update_reaction(response)
+        model._handle_reaction_event(response)
         update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
         assert update_emoji == response['emoji_code']
         self.controller.update_screen.assert_called_once_with()
 
         # TEST FOR FALSE CASES
         model.index['messages'][1] = {}
-        model.update_reaction(response)
+        model._handle_reaction_event(response)
         # If there was no message earlier then don't update
         assert model.index['messages'][1] == {}
 
@@ -1131,8 +1133,8 @@ class TestModel:
                 }
             }
         })])
-    def test_update_reaction_remove_reaction(self, mocker, model, response,
-                                             index):
+    def test__handle_reaction_event_remove_reaction(self, mocker, model,
+                                                    response, index):
         model.index = index
         mock_msg = mocker.Mock()
         another_msg = mocker.Mock()
@@ -1144,7 +1146,7 @@ class TestModel:
 
         # Test removing of reaction.
         response['op'] = 'remove'
-        model.update_reaction(response)
+        model._handle_reaction_event(response)
         assert len(model.index['messages'][1]['reactions']) == 1
 
     def test_update_star_status_no_index(self, mocker, model):
@@ -1153,7 +1155,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
-        model.update_message_flag_status(event)
+        model._handle_update_message_flags_event(event)
 
         assert model.index == dict(messages={})
         model.update_rendered_view.assert_not_called()
@@ -1171,7 +1173,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
         with pytest.raises(RuntimeError):
-            model.update_message_flag_status(event)
+            model._handle_update_message_flags_event(event)
         model.update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
@@ -1209,7 +1211,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
-        model.update_message_flag_status(event)
+        model._handle_update_message_flags_event(event)
 
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
@@ -1259,7 +1261,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
-        model.update_message_flag_status(event)
+        model._handle_update_message_flags_event(event)
 
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
@@ -1349,13 +1351,13 @@ class TestModel:
         )
     ], ids=['not_in_pm_narrow', 'not_in_pm_narrow_with_sender',
             'start', 'stop'])
-    def test_handle_typing_event(self, mocker, model,
-                                 narrow, event, called):
+    def test__handle_typing_event(self, mocker, model,
+                                  narrow, event, called):
         mocker.patch('zulipterminal.ui.View.set_footer_text')
         model.narrow = narrow
         model.user_dict = {'hamlet@zulip.com': {'full_name': 'hamlet'}}
 
-        model.handle_typing_event(event)
+        model._handle_typing_event(event)
 
         assert model.controller.view.set_footer_text.called == called
 
@@ -1375,8 +1377,8 @@ class TestModel:
     ], ids=[
         'remove_19', 'add_30'
     ])
-    def test_update_subscription(self, model, mocker, event, stream_button,
-                                 final_muted_streams):
+    def test__handle_subscription_event(self, model, mocker, stream_button,
+                                        event, final_muted_streams):
         model.muted_streams = {15, 19}
         model.controller.view.stream_id_to_button = {
             event['stream_id']: stream_button  # stream id is known
@@ -1385,7 +1387,9 @@ class TestModel:
             'zulipterminal.ui_tools.buttons.StreamButton.mark_muted')
         mark_unmuted = mocker.patch(
             'zulipterminal.ui_tools.buttons.StreamButton.mark_unmuted')
-        model.update_subscription(event)
+
+        model._handle_subscription_event(event)
+
         assert model.muted_streams == final_muted_streams
         if event['value']:
             mark_unmuted.assert_called_once_with()
