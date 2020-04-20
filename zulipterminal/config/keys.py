@@ -106,7 +106,7 @@ KEY_BINDINGS = OrderedDict([
     }),
     ('AUTOCOMPLETE', {
         'keys': {'ctrl f'},
-        'help_text': 'Autocomplete @mentions and #stream_names',
+        'help_text': 'Autocomplete @mentions, #stream_names and :emoji:',
         'key_category': 'msg_compose',
     }),
     ('AUTOCOMPLETE_REVERSE', {
