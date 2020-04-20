@@ -1472,13 +1472,18 @@ class TestModel:
         assert model.index == previous_index
         assert not model._update_rendered_view.called
 
-    def test__handle_reaction_event_add_reaction(
+    @pytest.mark.parametrize("op, expected_number_after", [
+        ("add", 2),
+        ("remove", 1),  # Removed emoji doesn't match, so length remains 1
+    ])
+    def test__handle_reaction_event_for_msg_in_index(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
+        op, expected_number_after,
         event_message_id=1,
     ):
         reaction_event = reaction_event_factory(
-            op="add", message_id=event_message_id,
+            op=op, message_id=event_message_id,
         )
         model.index = reaction_event_index_factory(
             [
@@ -1490,31 +1495,8 @@ class TestModel:
 
         model._handle_reaction_event(reaction_event)
 
-        new_emoji = model.index['messages'][event_message_id]['reactions'][-1]
-        assert new_emoji["emoji_code"] == reaction_event["emoji_code"]
-
-        model._update_rendered_view.assert_called_once_with(event_message_id)
-
-    def test__handle_reaction_event_remove_reaction(
-        self, mocker, model,
-        reaction_event_factory, reaction_event_index_factory,
-        event_message_id=1,
-    ):
-        reaction_event = reaction_event_factory(
-            op="remove", message_id=event_message_id,
-        )
-        model.index = reaction_event_index_factory(
-            [
-                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
-                (2, []),
-            ]
-        )
-        model._update_rendered_view = mocker.Mock()
-
-        model._handle_reaction_event(reaction_event)
-
-        # Removed emoji doesn't match, so length remains 1
-        assert len(model.index['messages'][event_message_id]['reactions']) == 1
+        end_reactions = model.index['messages'][event_message_id]['reactions']
+        assert len(end_reactions) == expected_number_after
 
         model._update_rendered_view.assert_called_once_with(event_message_id)
 
