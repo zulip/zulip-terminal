@@ -11,7 +11,7 @@ import zulip
 
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.helper import Message, asynch
-from zulipterminal.model import GetMessagesArgs, Model, ServerConnectionFailure
+from zulipterminal.model import Model, ServerConnectionFailure
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
