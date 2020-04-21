@@ -33,7 +33,7 @@ class Controller:
         self.color_depth = color_depth
         self.autohide = autohide
         self.notify_enabled = notify
-        self.editor_mode = False  # type: bool
+        self.editor_mode = False
         self.editor = None  # type: Any
 
         self.show_loading()

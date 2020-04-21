@@ -233,7 +233,7 @@ class MessageView(urwid.ListBox):
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
-        read_msg_ids = list()  # type: List[int]
+        read_msg_ids = list()
         # until we find a read message above the current message
         while msg_w.attr_map == {None: 'unread'}:
             msg_id = msg_w.original_widget.message['id']
@@ -590,7 +590,7 @@ class RightColumnView(urwid.Frame):
         if users is None:
             users = self.view.users.copy()
             reset_default_view_users = True
-        users_btn_list = list()  # type: List[Any]
+        users_btn_list = list()
         for user in users:
             # Only include `inactive` users in search result.
             if user['status'] == 'inactive' and\
