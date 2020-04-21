@@ -19,12 +19,6 @@ from zulipterminal.helper import (
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
-GetMessagesArgs = TypedDict('GetMessagesArgs', {
-     'num_before': int,
-     'num_after': int,
-     'anchor': Optional[int]
-    })
-
 Event = TypedDict('Event', {
     'type': str,
     # typing:
