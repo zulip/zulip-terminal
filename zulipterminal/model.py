@@ -80,7 +80,7 @@ class Model:
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
 
-        self.user_id = -1  # type: int
+        self.user_id = -1
         self.user_email = ""
         self.user_full_name = ""
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
