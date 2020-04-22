@@ -6,7 +6,6 @@ from time import ctime, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
-import emoji
 import urwid
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
