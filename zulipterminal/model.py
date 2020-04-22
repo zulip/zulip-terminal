@@ -681,35 +681,35 @@ class Model:
         """
         Handle new messages (eg. add message to the end of the view)
         """
-        response = event['message']
+        message = event['message']
         # sometimes `flags` are missing in `event` so initialize
         # an empty list of flags in that case.
-        response['flags'] = event.get('flags', [])
+        message['flags'] = event.get('flags', [])
         # We need to update the topic order in index, unconditionally.
-        if response['type'] == 'stream':
-            self._update_topic_index(response['stream_id'],
-                                     response['subject'])
+        if message['type'] == 'stream':
+            self._update_topic_index(message['stream_id'],
+                                     message['subject'])
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
             if (hasattr(self.controller, 'view') and
                 self.controller.view.left_panel.is_in_topic_view and
-                response['stream_id'] == self.controller.view.
+                message['stream_id'] == self.controller.view.
                     topic_w.stream_button.stream_id):
                 self.controller.view.topic_w.update_topics_list(
-                    response['stream_id'], response['subject'],
-                    response['sender_id'])
+                    message['stream_id'], message['subject'],
+                    message['sender_id'])
                 self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not.
-        self.notify_user(response)
+        self.notify_user(message)
         if hasattr(self.controller, 'view') and self.found_newest:
-            self.index = index_messages([response], self, self.index)
+            self.index = index_messages([message], self, self.index)
             if self.msg_list.log:
                 last_message = self.msg_list.log[-1].original_widget.message
             else:
                 last_message = None
-            msg_w_list = create_msg_box_list(self, [response['id']],
+            msg_w_list = create_msg_box_list(self, [message['id']],
                                              last_message=last_message)
             if not msg_w_list:
                 return
@@ -720,34 +720,34 @@ class Model:
                 self.msg_list.log.append(msg_w)
 
             elif self.narrow[0][1] == 'mentioned' and \
-                    'mentioned' in response['flags']:
+                    'mentioned' in message['flags']:
                 self.msg_list.log.append(msg_w)
 
-            elif self.narrow[0][1] == response['type'] and\
+            elif self.narrow[0][1] == message['type'] and\
                     len(self.narrow) == 1:
                 self.msg_list.log.append(msg_w)
 
-            elif response['type'] == 'stream' and \
+            elif message['type'] == 'stream' and \
                     self.narrow[0][0] == "stream":
-                recipient_stream = response['display_recipient']
+                recipient_stream = message['display_recipient']
                 narrow_stream = self.narrow[0][1]
                 append_to_stream = recipient_stream == narrow_stream
 
                 if append_to_stream and (len(self.narrow) == 1 or
                                          (len(self.narrow) == 2 and
                                           self.narrow[1][1] ==
-                                          response['subject'])):
+                                          message['subject'])):
                     self.msg_list.log.append(msg_w)
 
-            elif response['type'] == 'private' and len(self.narrow) == 1 and\
+            elif message['type'] == 'private' and len(self.narrow) == 1 and\
                     self.narrow[0][0] == "pm_with":
                 narrow_recipients = self.recipients
                 message_recipients = frozenset(
-                    [user['id'] for user in response['display_recipient']])
+                    [user['id'] for user in message['display_recipient']])
                 if narrow_recipients == message_recipients:
                     self.msg_list.log.append(msg_w)
-            if 'read' not in response['flags']:
-                set_count([response['id']], self.controller, 1)
+            if 'read' not in message['flags']:
+                set_count([message['id']], self.controller, 1)
             self.controller.update_screen()
 
     def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
