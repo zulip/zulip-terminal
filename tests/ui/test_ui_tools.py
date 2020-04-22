@@ -1276,6 +1276,7 @@ class TestMsgInfoView:
         expected_height = 5
         assert self.msg_info_view.height == expected_height
 
+    # FIXME This is the same parametrize as MessageBox:test_reactions_view
     @pytest.mark.parametrize('to_vary_in_each_message', [
         {'reactions': [{
                 'emoji_name': 'thumbs_up',
@@ -1945,6 +1946,63 @@ class TestMessageBox:
         content = msg_box.transform_content()
         rendered_text = Text(content)
         assert rendered_text.text == expected_content
+
+    # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
+    @pytest.mark.parametrize('to_vary_in_each_message', [
+        {'reactions': [{
+                'emoji_name': 'thumbs_up',
+                'emoji_code': '1f44d',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'AARON@zulip.com',
+                    'full_name': 'aaron',
+                    'id': 1,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'heart',
+                'emoji_code': '2764',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }]}
+        ])
+    def test_reactions_view(self, message_fixture, to_vary_in_each_message):
+        self.model.user_id = 1
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        msg_box = MessageBox(varied_message, self.model, None)
+        reactions = to_vary_in_each_message['reactions']
+
+        reactions_view = msg_box.reactions_view(reactions)
+
+        assert reactions_view.original_widget.text == (
+                ':heart: 1 :thumbs_up: 1 :zulip: 2 '
+        )
+        assert reactions_view.original_widget.attrib == [
+            ('reaction', 9), (None, 1),
+            ('reaction', 13), (None, 1),
+            ('reaction', 9),
+        ]
 
     @pytest.mark.parametrize(
         'key', keys_for_command('ENTER'),

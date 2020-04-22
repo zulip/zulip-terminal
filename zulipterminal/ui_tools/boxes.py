@@ -369,9 +369,14 @@ class MessageBox(urwid.Pile):
             for reaction in reactions:
                 reaction_stats[reaction['emoji_name']] += 1
 
+            sorted_stats = sorted(
+                (reaction, count)
+                for reaction, count in reaction_stats.items()
+            )
+
             reaction_texts = [
                 ':{}: {}'.format(reaction, count)
-                for reaction, count in reaction_stats.items()
+                for reaction, count in sorted_stats
             ]
 
             spaced_reaction_texts = [
