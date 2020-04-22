@@ -9,7 +9,6 @@ snakeviz==0.4.2
 gitlint==0.10.0
 mypy==0.770
 isort==4.3.21
-emoji==0.5.0
 urwid_readline==0.11
 beautifulsoup4==4.6.0
 lxml==4.2.3
