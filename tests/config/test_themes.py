@@ -7,7 +7,7 @@ from zulipterminal.config.themes import (
 
 
 expected_complete_themes = {
-    'default', 'gruvbox', 'light', 'blue'
+    'zt_dark', 'gruvbox_dark', 'zt_light', 'zt_blue',
 }
 
 
