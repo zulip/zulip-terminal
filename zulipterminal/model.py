@@ -962,6 +962,5 @@ class Model:
 
             for event in response['events']:
                 last_event_id = max(last_event_id, int(event['id']))
-                for event_type, do_action_for in self.event_actions.items():
-                    if event_type == event['type']:
-                        do_action_for(event)
+                if event['type'] in self.event_actions:
+                    self.event_actions[event['type']](event)
