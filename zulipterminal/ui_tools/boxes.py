@@ -366,34 +366,23 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ''
         try:
-            std_reaction_stats = Counter()  # type: typing.Counter[str]
-            custom_reaction_stats = Counter()  # type: typing.Counter[str]
+            reaction_stats = Counter()  # type: typing.Counter[str]
             for reaction in reactions:
-                if reaction['reaction_type'] == 'unicode_emoji':
-                    std_reaction_stats[reaction['emoji_code']] += 1
-                else:
-                    # Includes realm_emoji and zulip_extra_emoji
-                    custom_reaction_stats[reaction['emoji_name']] += 1
+                reaction_stats[reaction['emoji_name']] += 1
 
-            std_reactions = [
-                '{} {}'.format(
-                    '\\U{:0>8}'.format(reaction)
-                    .encode().decode('unicode-escape'),
-                    count)
-                for reaction, count in std_reaction_stats.items()
-            ]
-            custom_reactions = [
+            reaction_texts = [
                 ':{}: {}'.format(reaction, count)
-                for reaction, count in custom_reaction_stats.items()
+                for reaction, count in reaction_stats.items()
             ]
-            all_emoji = std_reactions + custom_reactions
-            spaced_emoji = [
-                ('reaction', emoji.demojize(entry)) if entry != ' ' else entry
-                for pair in zip(all_emoji, ' ' * len(all_emoji))
+
+            spaced_reaction_texts = [
+                ('reaction', entry) if entry != ' ' else entry
+                for pair in zip(reaction_texts,
+                                ' ' * len(reaction_texts))
                 for entry in pair
             ]
             return urwid.Padding(
-                urwid.Text(spaced_emoji),
+                urwid.Text(spaced_reaction_texts),
                 align='left', width=('relative', 90), left=25, min_width=50)
         except Exception:
             return ''
