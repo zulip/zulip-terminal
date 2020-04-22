@@ -764,49 +764,49 @@ class Model:
         # hence, it must be a new topic.
         topic_index.insert(0, topic_name)
 
-    def _handle_update_message_event(self, response: Event) -> None:
+    def _handle_update_message_event(self, event: Event) -> None:
         """
         Handle updated (edited) messages (changed content/subject)
         """
-        message_id = response['message_id']
+        message_id = event['message_id']
         # If the message is indexed
         if self.index['messages'].get(message_id):
             message = self.index['messages'][message_id]
             self.index['edited_messages'].add(message_id)
 
-            if 'rendered_content' in response:
-                message['content'] = response['rendered_content']
+            if 'rendered_content' in event:
+                message['content'] = event['rendered_content']
                 self.index['messages'][message_id] = message
                 self._update_rendered_view(message_id)
 
             # 'subject' is not present in update event if
-            # the response didn't have a 'subject' update.
-            if 'subject' in response:
-                for msg_id in response['message_ids']:
+            # the event didn't have a 'subject' update.
+            if 'subject' in event:
+                for msg_id in event['message_ids']:
                     self.index['messages'][msg_id]['subject']\
-                        = response['subject']
+                        = event['subject']
                     self._update_rendered_view(msg_id)
 
-    def _handle_reaction_event(self, response: Event) -> None:
+    def _handle_reaction_event(self, event: Event) -> None:
         """
         Handle change to reactions on a message
         """
-        message_id = response['message_id']
+        message_id = event['message_id']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
 
             message = self.index['messages'][message_id]
-            if response['op'] == 'add':
+            if event['op'] == 'add':
                 message['reactions'].append(
                     {
-                        'user': response['user'],
-                        'reaction_type': response['reaction_type'],
-                        'emoji_code': response['emoji_code'],
-                        'emoji_name': response['emoji_name'],
+                        'user': event['user'],
+                        'reaction_type': event['reaction_type'],
+                        'emoji_code': event['emoji_code'],
+                        'emoji_name': event['emoji_name'],
                     }
                 )
             else:
-                emoji_code = response['emoji_code']
+                emoji_code = event['emoji_code']
                 for reaction in message['reactions']:
                     # Since Who reacted is not displayed,
                     # remove the first one encountered
