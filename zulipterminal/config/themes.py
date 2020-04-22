@@ -77,8 +77,15 @@ GRAY = 'h244'  # gray_244
 LIGHTMAGENTA = 'h132'  # neutral_purple
 LIGHTMAGENTABOLD = '%s, bold' % LIGHTMAGENTA
 
+THEME_ALIASES = {
+    'default': 'zt_dark',
+    'gruvbox': 'gruvbox_dark',
+    'light': 'zt_light',
+    'blue': 'zt_blue',
+}
+
 THEMES = {
-    'default': [
+    'zt_dark': [
         (None,             'white',                   'black',
          None,             DEF['white'],              DEF['black']),
         ('selected',       'white',                   'dark blue',
@@ -138,7 +145,7 @@ THEMES = {
         ('filter_results', 'white',                   'dark green',
          None,             DEF['white'],              DEF['dark_green']),
     ],
-    'gruvbox': [
+    'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
         # on 256 colors
         (None,             'white',           'black',
@@ -200,7 +207,7 @@ THEMES = {
         ('filter_results', 'black',           'light green',
          None,             BLACK,             LIGHTGREEN),
     ],
-    'light': [
+    'zt_light': [
         (None,             'black',           'white'),
         ('selected',       'black',           'light green'),
         ('msg_selected',   'black',           'light green'),
@@ -231,7 +238,7 @@ THEMES = {
         ('table_head',     'black, bold',     'white'),
         ('filter_results', 'white',           'dark green'),
     ],
-    'blue': [
+    'zt_blue': [
         (None,             'black',           'light blue'),
         ('selected',       'black',           'light gray'),
         ('msg_selected',   'black',           'light gray'),
@@ -267,6 +274,10 @@ THEMES = {
 
 def all_themes() -> List[str]:
     return list(THEMES.keys())
+
+
+def aliased_themes() -> Dict[str, str]:
+    return dict(THEME_ALIASES)
 
 
 def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:

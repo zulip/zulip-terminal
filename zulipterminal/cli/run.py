@@ -10,7 +10,7 @@ import requests
 from urwid import display_common, set_encoding
 
 from zulipterminal.config.themes import (
-    THEMES, all_themes, complete_and_incomplete_themes,
+    THEMES, aliased_themes, all_themes, complete_and_incomplete_themes,
     theme_with_monochrome_added,
 )
 from zulipterminal.core import Controller
@@ -186,7 +186,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     # default settings
     NO_CONFIG = 'with no config'
     settings = {
-        'theme': ('default', NO_CONFIG),
+        'theme': ('zt_dark', NO_CONFIG),
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
     }
@@ -229,12 +229,19 @@ def main(options: Optional[List[str]]=None) -> None:
 
         if args.autohide:
             zterm['autohide'] = (args.autohide, 'on command line')
+
         if args.theme:
             theme_to_use = (args.theme, 'on command line')
         else:
             theme_to_use = zterm['theme']
+
         available_themes = all_themes()
-        if theme_to_use[0] not in available_themes:
+        theme_aliases = aliased_themes()
+        is_valid_theme = (
+            theme_to_use[0] in available_themes
+            or theme_to_use[0] in theme_aliases
+        )
+        if not is_valid_theme:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
             print("The following themes are available:")
@@ -243,6 +250,13 @@ def main(options: Optional[List[str]]=None) -> None:
             print("Specify theme in zuliprc file or override "
                   "using -t/--theme options on command line.")
             sys.exit(1)
+        if theme_to_use[0] not in available_themes:
+            # theme must be an alias, as it is valid
+            real_theme_name = theme_aliases[theme_to_use[0]]
+            theme_to_use = (
+                real_theme_name,
+                "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0])
+            )
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
