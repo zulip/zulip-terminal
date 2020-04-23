@@ -7,7 +7,7 @@ from os import path, remove
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
-from urwid import set_encoding
+from urwid import display_common, set_encoding
 
 from zulipterminal.config.themes import (
     THEMES, all_themes, complete_and_incomplete_themes,
@@ -286,6 +286,14 @@ def main(options: Optional[List[str]]=None) -> None:
     except ServerConnectionFailure as e:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))
+        # Acts as separator between logs
+        logging.info("\n\n" + str(e) + "\n\n")
+        logging.exception(e)
+        sys.exit(1)
+    except (display_common.AttrSpecError, display_common.ScreenError) as e:
+        # NOTE: Strictly this is not necessarily just a theme error
+        # FIXME: Add test for this - once loading takes place after UI setup
+        print(in_color('red', "\nPossible theme error: {}.".format(e)))
         # Acts as separator between logs
         logging.info("\n\n" + str(e) + "\n\n")
         logging.exception(e)
