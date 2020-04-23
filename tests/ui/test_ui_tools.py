@@ -1235,6 +1235,13 @@ class TestStreamInfoView:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.stream_info_view = StreamInfoView(self.controller, '', '', '')
 
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('STREAM_DESC')})
+    def test_keypress_exit_popup(self, key):
+        size = (200, 20)
+        self.stream_info_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
     def test_keypress_navigation(self, mocker,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
