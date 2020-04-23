@@ -1170,8 +1170,9 @@ class TestHelpMenu:
         self.help_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, key):
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('HELP')})
+    def test_keypress_exit_popup(self, key):
         size = (200, 20)
         self.help_view.keypress(size, key)
         assert self.controller.exit_popup.called
@@ -1256,8 +1257,9 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize('key', keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, key):
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('MSG_INFO')})
+    def test_keypress_exit_popup(self, key):
         size = (200, 20)
         self.msg_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
