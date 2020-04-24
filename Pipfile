@@ -15,7 +15,7 @@ mypy_extensions = ">=0.4"
 pytest = "==5.3.5"
 pytest-mock = "==1.7.1"
 pytest-cov = "==2.5.1"
-pycodestyle = "==2.5.0"
+flake8 = "==3.7.9"
 zipp = "==1.0.0"  # To support Python 3.5
 pudb = "==2017.1.4"
 snakeviz = "==0.4.2"

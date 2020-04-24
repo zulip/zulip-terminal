@@ -10,9 +10,9 @@ matrix:
       install: pip3 install .[linting]
       script: ./tools/run-mypy
     - python: 3.7
-      name: "Linting - PEP8 (pycodestyle)"
+      name: "Linting - PEP8 & more (flake8)"
       install: pip3 install .[linting]
-      script: pycodestyle
+      script: flake8
     - python: 3.5
       name: "Linting - import order (isort)"
       install: pip3 install .[linting]
