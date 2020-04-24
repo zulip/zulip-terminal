@@ -2,7 +2,7 @@
 
 An interactive terminal interface for [Zulip](https://zulipchat.com).
 
-[Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Installation & Running](#Installation--running) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
+[Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
@@ -16,50 +16,46 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 - OSX
 - WSL (On Windows)
 
-## Installation & Running
+## Installation
 
-We recommend installing `zulip-term` in a new python virtual environment (venv); with the required python 3.5+, the following should work on most systems:
+We recommend installing in a dedicated python virtual environment (see below) or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
+
+* **Stable** - Numbered stable releases are available on PyPI as the package [zulip-term](https://pypi.python.org/pypi/zulip-term)
+
+  To install, run a command like: `pip3 install zulip-term`
+
+* **Latest** - The latest development version can be installed from the main git repository
+
+  To install, run a command like: `pip3 install git+https://github.com/zulip/zulip-terminal.git@master`
+
+We also provide some sample Dockerfiles to build docker images in [docker/](https://github.com/zulip/zulip-terminal/tree/master/docker).
+
+### Installing into an isolated Python virtual environment
+
+With the python 3.5+ required for running, the following should work on most systems:
 1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
 2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
-3. `pip3 install zulip-term` (downloads and installs the latest zulip-terminal release from PyPI)
+3. Run one of the install commands above, 
 
-Zulip Terminal installs as `zulip-term`, so you can then run:
-```
-$ zulip-term
-```
+If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the above list again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
 
-If you see further text, like the following, `zulip-term` should be loading!
-```
-Loading with:
-   theme 'default' specified with no config.
-   autohide setting 'no_autohide' specified with no config.
-Welcome to Zulip.
-```
+## Running for the first time
 
-### NOTE: Running in subsequent/different sessions
+Upon first running `zulip-term` it looks for a `zuliprc` file, by default in your home directory, which contains the details to log into a Zulip server.
 
-If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the installation again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
-
-### NOTE: The zuliprc file
-
-Upon first running, `zulip-term` looks for a `zuliprc` file, by default in your home directory.
-
-If it doesn't find one, you have two options:
+If it doesn't find this file, you have two options:
 
 1. `zulip-term` will prompt you for your server, email and password, and create a `zuliprc` file for you in that location
 
-2. You can specify the path to an existing `zuliprc` file using the `-c` or `--config-file` options, eg.
-```
-$ zulip-term -c /path/to/zuliprc
-```
+   **NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
 
-You can obtain a personal zuliprc file from Zulip servers in your account settings, which gives you all the permissions you have in the web app. Bot zuliprc files can be downloaded from the area for each bot, and will have more limited permissions.
+2. Each time you run `zulip-term`, you can specify the path to an alternative `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c /path/to/zuliprc`
 
-**NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
+   Your personal zuliprc file can be obtained from Zulip servers in your account settings in the web application, which gives you all the permissions you have there. Bot zuliprc files can be downloaded from a similar area for each bot, and will have more limited permissions.
 
-### Example zuliprc file
+## Configuration
 
-The `[api]` section of a `zuliprc` file is relatively standard; `zulip-term` also reads extra options from the `[zterm]` section, if they are added:
+The `zuliprc` file contains information to connect to your chat server in the `[api]` section, but also optional configuration for `zulip-term` in the `[zterm]` section:
 
 ```
 [api]
@@ -68,11 +64,11 @@ key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 site=https://realm.zulipchat.com
 
 [zterm]
-# Theme can also be set to 'gruvbox' ('blue' & 'light' are older themes needing work)
+# Alternative themes are gruvbox, light and blue
 theme=default
 # Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
 autohide=autohide
-# Notify defaults to 'disabled', but can be set to 'enabled' to display notifications.
+# Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
 ```
 
