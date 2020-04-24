@@ -7,7 +7,7 @@ import sys
 tools = {
     'Import order (isort)': './tools/run-isort-check',
     'Type consistency (mypy)': './tools/run-mypy',
-    'PEP8 (pycodestyle)': 'pycodestyle',
+    'PEP8 & more (flake8)': 'flake8',
 }
 
 for tool_name, command in tools.items():
