@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Dict, List, Set
+from typing import List, Set
 
 from mypy_extensions import TypedDict
 
