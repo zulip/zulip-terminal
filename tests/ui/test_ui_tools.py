@@ -1,5 +1,6 @@
 import datetime
 from collections import OrderedDict, defaultdict
+from typing import Any, Dict
 
 import pytest
 from bs4 import BeautifulSoup
