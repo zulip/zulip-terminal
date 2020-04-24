@@ -9,8 +9,7 @@ from itertools import chain, combinations
 from re import ASCII, match
 from threading import Thread
 from typing import (
-    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
-    Tuple, Union,
+    Any, Callable, Dict, FrozenSet, Iterable, List, Set, Tuple, Union,
 )
 
 import lxml.html
