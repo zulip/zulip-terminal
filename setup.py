@@ -40,7 +40,7 @@ testing_deps = [
 linting_deps = [
     'isort==4.3.21',
     'mypy==0.770',
-    'pycodestyle==2.5.0',
+    'flake8==3.7.9',
 ]
 
 dev_helper_deps = [
