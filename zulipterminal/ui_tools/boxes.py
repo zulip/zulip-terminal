@@ -8,7 +8,7 @@ from urllib.parse import urljoin, urlparse
 
 import urwid
 from bs4 import BeautifulSoup
-from bs4.element import NavigableString, Tag
+from bs4.element import NavigableString
 from urwid_readline import ReadlineEdit
 
 from zulipterminal import emoji_names
