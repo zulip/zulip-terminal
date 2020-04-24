@@ -1,6 +1,6 @@
 import threading
 import time
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Tuple
 
 import urwid
