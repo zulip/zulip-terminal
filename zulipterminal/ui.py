@@ -1,4 +1,3 @@
-import platform
 import random
 import re
 import time
@@ -7,7 +6,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import urwid
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
-from zulipterminal.config.themes import THEMES
 from zulipterminal.helper import WSL, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (

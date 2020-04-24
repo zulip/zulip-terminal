@@ -2,7 +2,6 @@ import json
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
-from threading import Thread
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
     Tuple, Union,
