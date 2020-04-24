@@ -7,9 +7,7 @@ import pytest
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import (
-    StreamButton, TopicButton, UserButton,
-)
+from zulipterminal.ui_tools.buttons import StreamButton, UserButton
 
 
 @pytest.fixture(autouse=True)

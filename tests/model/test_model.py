@@ -1,5 +1,4 @@
 import json
-from platform import platform
 from typing import Any
 
 import pytest
