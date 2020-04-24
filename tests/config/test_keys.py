@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pytest
 
 from zulipterminal.config import keys
@@ -82,7 +84,7 @@ def test_commands_for_random_tips(mocker):
             'help_text': 'delta',
             'excluded_from_random_tips': True,
             },
-    }  # type: Dict[str, KeyBinding]
+    }  # type: Dict[str, keys.KeyBinding]
     mocker.patch.dict(keys.KEY_BINDINGS, new_key_bindings, clear=True)
     result = keys.commands_for_random_tips()
     assert len(result) == 2
