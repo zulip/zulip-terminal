@@ -43,7 +43,7 @@ class WriteBox(urwid.Pile):
         self.set_editor_mode()
         if email == '' and button is not None:
             email = button.email
-        self.to_write_box = ReadlineEdit(u"To: ", edit_text=email)
+        self.to_write_box = ReadlineEdit("To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
@@ -51,9 +51,9 @@ class WriteBox(urwid.Pile):
             key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
         to_write_box = urwid.LineBox(
-            self.to_write_box, tlcorner=u'─', tline=u'─', lline=u'',
-            trcorner=u'─', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─'
+            self.to_write_box, tlcorner='─', tline='─', lline='',
+            trcorner='─', blcorner='─', rline='',
+            bline='─', brcorner='─'
         )
         self.contents = [
             (to_write_box, self.options()),
@@ -71,22 +71,22 @@ class WriteBox(urwid.Pile):
             key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
         self.stream_write_box = ReadlineEdit(
-            caption=u"Stream:  ",
+            caption="Stream:  ",
             edit_text=caption
         )
-        self.title_write_box = ReadlineEdit(caption=u"Topic:  ",
+        self.title_write_box = ReadlineEdit(caption="Topic:  ",
                                             edit_text=title)
 
         header_write_box = urwid.Columns([
             urwid.LineBox(
-                self.stream_write_box, tlcorner=u'─', tline=u'─', lline=u'',
-                trcorner=u'┬', blcorner=u'─', rline=u'│',
-                bline=u'─', brcorner=u'┴'
+                self.stream_write_box, tlcorner='─', tline='─', lline='',
+                trcorner='┬', blcorner='─', rline='│',
+                bline='─', brcorner='┴'
             ),
             urwid.LineBox(
-                self.title_write_box, tlcorner=u'─', tline=u'─', lline=u'',
-                trcorner=u'─', blcorner=u'─', rline=u'',
-                bline=u'─', brcorner=u'─'
+                self.title_write_box, tlcorner='─', tline='─', lline='',
+                trcorner='─', blcorner='─', rline='',
+                bline='─', brcorner='─'
             ),
         ])
         write_box = [
@@ -804,9 +804,9 @@ class SearchBox(urwid.Pile):
         ])
         self.msg_narrow = urwid.Text("DONT HIDE")
         self.recipient_bar = urwid.LineBox(
-            self.msg_narrow, title=u"Current message recipients",
-            tline=u'─', lline=u'', trcorner=u'─', tlcorner=u'─',
-            blcorner=u'─', rline=u'', bline=u'─', brcorner=u'─')
+            self.msg_narrow, title="Current message recipients",
+            tline='─', lline='', trcorner='─', tlcorner='─',
+            blcorner='─', rline='', bline='─', brcorner='─')
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:

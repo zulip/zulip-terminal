@@ -360,9 +360,9 @@ def index_messages(messages: List[Message],
 
             if msg['type'] == 'private':
                 index['private_msg_ids'].add(msg['id'])
-                recipients = frozenset(set(
+                recipients = frozenset({
                     recipient['id'] for recipient in msg['display_recipient']
-                ))
+                })
 
                 if narrow[0][0] == 'pm_with':
                     narrow_emails = ([model.user_dict[email]['user_id']

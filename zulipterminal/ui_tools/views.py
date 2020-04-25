@@ -257,9 +257,9 @@ class StreamsView(urwid.Frame):
                                                 'SEARCH_STREAMS',
                                                 self.update_streams)
         super().__init__(list_box, header=urwid.LineBox(
-            self.stream_search_box, tlcorner=u'─', tline=u'', lline=u'',
-            trcorner=u'─', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─'
+            self.stream_search_box, tlcorner='─', tline='', lline='',
+            trcorner='─', blcorner='─', rline='',
+            bline='─', brcorner='─'
         ))
         self.search_lock = threading.Lock()
 
@@ -323,9 +323,9 @@ class TopicsView(urwid.Frame):
                                        urwid.Divider('─'),
                                        self.topic_search_box])
         super().__init__(self.list_box, header=urwid.LineBox(
-            self.header_list, tlcorner=u'─', tline=u'', lline=u'',
-            trcorner=u'─', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─'
+            self.header_list, tlcorner='─', tline='', lline='',
+            trcorner='─', blcorner='─', rline='',
+            bline='─', brcorner='─'
         ))
         self.search_lock = threading.Lock()
 
@@ -548,9 +548,9 @@ class RightColumnView(urwid.Frame):
                                           self.update_user_list)
         self.view.user_search = self.user_search
         search_box = urwid.LineBox(
-            self.user_search, tlcorner=u'─', tline=u'', lline=u'',
-            trcorner=u'─', blcorner=u'─', rline=u'',
-            bline=u'─', brcorner=u'─'
+            self.user_search, tlcorner='─', tline='', lline='',
+            trcorner='─', blcorner='─', rline='',
+            bline='─', brcorner='─'
             )
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
@@ -718,9 +718,9 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
-            tlcorner=u'━', tline=u'━', lline=u'',
-            trcorner=u'━', blcorner=u'', rline=u'',
-            bline=u'', brcorner=u'─'
+            tlcorner='━', tline='━', lline='',
+            trcorner='━', blcorner='', rline='',
+            bline='', brcorner='─'
             )
         return w
 
@@ -740,9 +740,9 @@ class LeftColumnView(urwid.Pile):
                                        stream_button)
         w = urwid.LineBox(
             self.view.topic_w, title="Topics",
-            tlcorner=u'━', tline=u'━', lline=u'',
-            trcorner=u'━', blcorner=u'', rline=u'',
-            bline=u'', brcorner=u'─'
+            tlcorner='━', tline='━', lline='',
+            trcorner='━', blcorner='', rline='',
+            bline='', brcorner='─'
             )
         return w
 
@@ -824,8 +824,8 @@ class PopUpConfirmationView(urwid.Overlay):
                  success_callback: Callable[[], bool]):
         self.controller = controller
         self.success_callback = success_callback
-        yes = urwid.Button(u'Yes', self.exit_popup_yes)
-        no = urwid.Button(u'No', self.exit_popup_no)
+        yes = urwid.Button('Yes', self.exit_popup_yes)
+        no = urwid.Button('No', self.exit_popup_no)
         yes._w = urwid.AttrMap(urwid.SelectableIcon(
             'Yes', 4), None, 'selected')
         no._w = urwid.AttrMap(urwid.SelectableIcon(

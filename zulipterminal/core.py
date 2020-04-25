@@ -50,8 +50,7 @@ class Controller:
 
         def spinning_cursor() -> Any:
             while True:
-                for cursor in '|/-\\':
-                    yield cursor
+                yield from '|/-\\'
 
         spinner = spinning_cursor()
         sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
