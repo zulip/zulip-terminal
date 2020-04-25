@@ -282,10 +282,12 @@ class MessageBox(urwid.Pile):
             recipient_list[0]['email'] == self.model.user_email
 
     def stream_header(self) -> Any:
+        stream_topic_separator = '▶'
         bar_color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + bar_color
         stream_title_markup = ('bar', [
-            (bar_color, '{} >'.format(self.stream_name)),
+            (bar_color, '{} {} '.format(self.stream_name,
+                                        stream_topic_separator)),
             ('title', ' {} '.format(self.topic_name))
         ])
         stream_title = urwid.Text(stream_title_markup)
