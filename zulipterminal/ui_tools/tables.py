@@ -116,9 +116,9 @@ def render_table(table_element: Any) -> StyledTableData:
         for column in zip(*cells)
     ]
 
-    top_border = row_with_only_border(u'┌', u'─', u'┬', u'┐', column_widths)
-    middle_border = row_with_only_border(u'├', u'─', u'┼', u'┤', column_widths)
-    bottom_border = row_with_only_border(u'└', u'─', u'┴', u'┘', column_widths,
+    top_border = row_with_only_border('┌', '─', '┬', '┐', column_widths)
+    middle_border = row_with_only_border('├', '─', '┼', '┤', column_widths)
+    bottom_border = row_with_only_border('└', '─', '┴', '┘', column_widths,
                                          newline=False)
 
     # Construct the table, row-by-row.
@@ -127,7 +127,7 @@ def render_table(table_element: Any) -> StyledTableData:
     # Add the header/0th row and the borders that surround it to the table.
     table.extend(top_border)
     table.extend(row_with_styled_content(cells.pop(0), column_alignments,
-                                         column_widths, u'│',
+                                         column_widths, '│',
                                          row_style='table_head'))
     table.extend(middle_border)
 
@@ -135,7 +135,7 @@ def render_table(table_element: Any) -> StyledTableData:
     # end.
     for row in cells:
         table.extend(row_with_styled_content(row, column_alignments,
-                                             column_widths, u'│'))
+                                             column_widths, '│'))
     table.extend(bottom_border)
 
     return table
