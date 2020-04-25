@@ -5,6 +5,7 @@ from typing import Any, Dict
 import pytest
 
 from zulipterminal.config.keys import keys_for_command
+from zulipterminal.helper import UnreadCounts
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -757,6 +758,75 @@ def classified_unread_counts():
             99: 1
         }
     }
+
+
+@pytest.fixture
+def initial_unread_counts():
+    return UnreadCounts(all_msg=0, all_pms=0,
+                        unread_topics=dict(), unread_pms=dict(),
+                        unread_huddles=dict(), streams=dict())
+
+
+@pytest.fixture
+def index_multiple_messages():
+    """
+    Index fixture filled with multiple entries for messages.
+    Private messages have minimal data required to test `set_count`.
+    More can be added if and when required.
+    """
+    return dict(helper_initial_index, **{'messages': {
+        1: {'id': 1, 'type': 'stream', 'subject': 'Topic 1', 'sender_id': 99,
+            'stream_id': 1001, 'display_recipient': 'stream 1', 'flags': []},
+        2: {'id': 2, 'type': 'stream', 'subject': 'Topic 1', 'sender_id': 100,
+            'stream_id': 1001, 'display_recipient': 'stream 1', 'flags': []},
+        3: {'id': 3, 'type': 'stream', 'subject': 'Topic 2', 'sender_id': 98,
+            'stream_id': 1002, 'display_recipient': 'stream 2', 'flags': []},
+        4: {'id': 4, 'type': 'stream', 'subject': 'Topic 3', 'sender_id': 101,
+            'stream_id': 1002, 'display_recipient': 'stream 3', 'flags': []},
+        5: {'id': 5, 'type': 'stream', 'subject': 'Topic 3', 'sender_id': 101,
+            'stream_id': 1002, 'display_recipient': 'stream 3', 'flags': []},
+        6: {'id': 6, 'type': 'stream', 'subject': 'Topic 1', 'sender_id': 101,
+            'stream_id': 1001, 'display_recipient': 'stream 1', 'flags': []},
+        7: {'id': 7, 'type': 'stream', 'subject': 'Topic 1', 'sender_id': 101,
+            'stream_id': 1001, 'display_recipient': 'stream 1', 'flags': []},
+        8: {'id': 8, 'type': 'stream', 'subject': 'Topic 10', 'sender_id': 101,
+            'stream_id': 1003, 'display_recipient': 'stream 10', 'flags': []},
+        9: {'id': 9, 'type': 'stream', 'subject': 'Topic 10', 'sender_id': 101,
+            'stream_id': 1003, 'display_recipient': 'stream 10', 'flags': []},
+        # pms
+        10: {'id': 10, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        11: {'id': 11, 'type': 'private', 'sender_id': 201,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        12: {'id': 12, 'type': 'private', 'sender_id': 202,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        13: {'id': 13, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        14: {'id': 14, 'type': 'private', 'sender_id': 201,
+             'display_recipient': [{'id': 202}, {'id': 201}], 'flags': []},
+        15: {'id': 15, 'type': 'private', 'sender_id': 202,
+             'display_recipient': [{'id': 202}], 'flags': []},
+        16: {'id': 16, 'type': 'private', 'sender_id': 200,
+             'display_recipient': [{'id': 202}, {'id': 200}], 'flags': []},
+        # group-pms
+        17: {'id': 17, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 201}, {'id': 200}]},
+        18: {'id': 18, 'type': 'private', 'sender_id': 200, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 201}]},
+        19: {'id': 19, 'type': 'private', 'sender_id': 201, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 201}, {'id': 200}]},
+        20: {'id': 21, 'type': 'private', 'sender_id': 200, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 201}]},
+        21: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        22: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        23: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199}]},
+        24: {'id': 20, 'type': 'private', 'sender_id': 202, 'flags': [],
+             'display_recipient': [{'id': 202}, {'id': 200}, {'id': 199},
+                                   {'id': 198}]},
+        }})
 
 # --------------- UI Fixtures -----------------------------------------
 
