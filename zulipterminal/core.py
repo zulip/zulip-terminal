@@ -166,7 +166,7 @@ class Controller:
         self.model.msg_view.clear()
         self.model.msg_view.extend(w_list)
         focus_position = 0
-        if focus_position >= 0 and focus_position < len(w_list):
+        if 0 <= focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
 
     def stream_muting_confirmation_popup(self, button: Any) -> None:
@@ -209,7 +209,7 @@ class Controller:
         assert not isinstance(focus_position, set)
 
         self.model.msg_view.clear()
-        if focus_position >= 0 and focus_position < len(w_list):
+        if 0 <= focus_position < len(w_list):
             self.model.msg_view.extend(w_list, focus_position)
         else:
             self.model.msg_view.extend(w_list)
