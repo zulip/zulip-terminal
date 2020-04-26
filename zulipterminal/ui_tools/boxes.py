@@ -1,4 +1,3 @@
-import typing
 from collections import defaultdict
 from datetime import date, datetime
 from sys import platform
