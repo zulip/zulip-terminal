@@ -25,7 +25,7 @@ class TestView:
         assert view.model == self.model
         assert view.pinned_streams == self.model.pinned_streams
         assert view.unpinned_streams == self.model.unpinned_streams
-        assert view.msg_list is None
+        assert view.message_view is None
         self.write_box.assert_called_once_with(view)
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
@@ -113,9 +113,9 @@ class TestView:
         left = mocker.patch('zulipterminal.ui.View.left_column_view')
 
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
-        def just_set_msg_list(self):
-            self.msg_list = mocker.Mock(read_message=lambda: None)
-        monkeypatch.setattr(View, 'middle_column_view', just_set_msg_list)
+        def just_set_message_view(self):
+            self.message_view = mocker.Mock(read_message=lambda: None)
+        monkeypatch.setattr(View, 'middle_column_view', just_set_message_view)
 
         right = mocker.patch('zulipterminal.ui.View.right_column_view')
         col = mocker.patch("zulipterminal.ui.urwid.Columns")
@@ -151,7 +151,7 @@ class TestView:
                 (0, right()),
                 ], focus_column=0),
             mocker.call()._contents.set_focus_changed_callback(
-                view.msg_list.read_message),
+                view.message_view.read_message),
             mocker.call([
                 title_divider(),
                 (title_length, text()),

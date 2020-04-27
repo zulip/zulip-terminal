@@ -32,7 +32,7 @@ class TestController:
         self.notify_enabled = False
         result = Controller(self.config_file, self.theme, 256, self.autohide,
                             self.notify_enabled)
-        result.view.msg_list = mocker.Mock()  # set in View.__init__
+        result.view.message_view = mocker.Mock()  # set in View.__init__
         return result
 
     def test_initialize_controller(self, controller, mocker) -> None:
@@ -76,7 +76,7 @@ class TestController:
                               stream_button, index_stream) -> None:
         controller.model.narrow = []
         controller.model.index = index_stream
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
@@ -90,9 +90,9 @@ class TestController:
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream',
                                             stream_button.stream_name]]
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
-        widget = (controller.view.msg_list.log
+        widget = (controller.view.message_view.log
                   .extend.call_args_list[0][0][0][0])
         stream_id = stream_button.stream_id
         id_list = index_stream['stream_msg_ids_by_stream_id'][stream_id]
@@ -104,7 +104,7 @@ class TestController:
                            ['topic', msg_box.topic_name]]
         controller.model.narrow = []
         controller.model.index = index_topic
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
@@ -115,9 +115,9 @@ class TestController:
         controller.narrow_to_topic(msg_box)
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
-        widget = (controller.view.msg_list.log
+        widget = (controller.view.message_view.log
                   .extend.call_args_list[0][0][0][0])
         stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
         id_list = index_topic['topic_msg_ids'][stream_id][topic_name]
@@ -126,7 +126,7 @@ class TestController:
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):
         controller.model.narrow = []
         controller.model.index = index_user
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.user_id = 5140
         controller.model.user_email = "some@email"
         controller.model.user_dict = {
@@ -136,10 +136,10 @@ class TestController:
         }
         controller.narrow_to_user(user_button)
         assert controller.model.narrow == [["pm_with", user_button.email]]
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
         recipients = frozenset([controller.model.user_id, user_button.user_id])
         assert controller.model.recipients == recipients
-        widget = (controller.view.msg_list.log
+        widget = (controller.view.message_view.log
                   .extend.call_args_list[0][0][0][0])
         id_list = index_user['private_msg_ids_by_user_ids'][recipients]
         assert {widget.original_widget.message['id']} == id_list
@@ -147,7 +147,7 @@ class TestController:
     def test_show_all_messages(self, mocker, controller, index_all_messages):
         controller.model.narrow = [['stream', 'PTEST']]
         controller.model.index = index_all_messages
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.user_email = "some@email"
         controller.model.stream_dict = {
             205: {
@@ -160,9 +160,10 @@ class TestController:
         controller.show_all_messages('')
 
         assert controller.model.narrow == []
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
-        widgets = controller.view.msg_list.log.extend.call_args_list[0][0][0]
+        widgets = (controller.view.message_view.log.extend
+                   .call_args_list[0][0][0])
         id_list = index_all_messages['all_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
@@ -170,15 +171,16 @@ class TestController:
     def test_show_all_pm(self, mocker, controller, index_user):
         controller.model.narrow = []
         controller.model.index = index_user
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.user_email = "some@email"
 
         controller.show_all_pm('')
 
         assert controller.model.narrow == [['is', 'private']]
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
-        widgets = controller.view.msg_list.log.extend.call_args_list[0][0][0]
+        widgets = (controller.view.message_view.log.extend
+                   .call_args_list[0][0][0])
         id_list = index_user['private_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
@@ -194,15 +196,16 @@ class TestController:
                 'color': '#ffffff',
             }
         }
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
 
         controller.show_all_starred('')
 
         assert controller.model.narrow == [['is', 'starred']]
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
         id_list = index_all_starred['starred_msg_ids']
-        widgets = controller.view.msg_list.log.extend.call_args_list[0][0][0]
+        widgets = (controller.view.message_view.log.extend
+                   .call_args_list[0][0][0])
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
@@ -217,15 +220,16 @@ class TestController:
                 'color': '#ffffff',
             }
         }
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
 
         controller.show_all_mentions('')
 
         assert controller.model.narrow == [['is', 'mentioned']]
-        controller.view.msg_list.log.clear.assert_called_once_with()
+        controller.view.message_view.log.clear.assert_called_once_with()
 
         id_list = index_all_mentions['mentioned_msg_ids']
-        widgets = controller.view.msg_list.log.extend.call_args_list[0][0][0]
+        widgets = (controller.view.message_view.log.extend
+                   .call_args_list[0][0][0])
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
@@ -285,7 +289,7 @@ class TestController:
             'zulipterminal.model.Model.get_message_ids_in_current_narrow',
             return_value=msg_ids)
         controller.model.index = {'search': {500}}  # Any initial search index
-        controller.view.msg_list = mocker.patch('urwid.ListBox')
+        controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.narrow = initial_narrow
 
         def set_msg_ids(*args, **kwargs):

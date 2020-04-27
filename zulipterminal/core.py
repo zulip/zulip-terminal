@@ -163,11 +163,11 @@ class Controller:
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         w_list = create_msg_box_list(self.model, msg_id_list)
-        self.view.msg_list.log.clear()
-        self.view.msg_list.log.extend(w_list)
+        self.view.message_view.log.clear()
+        self.view.message_view.log.extend(w_list)
         focus_position = 0
         if 0 <= focus_position < len(w_list):
-            self.view.msg_list.set_focus(focus_position)
+            self.view.message_view.set_focus(focus_position)
 
     def stream_muting_confirmation_popup(self, button: Any) -> None:
         currently_muted = self.model.is_muted_stream(button.stream_id)
@@ -208,11 +208,11 @@ class Controller:
             focus_position = len(w_list) - 1
         assert not isinstance(focus_position, set)
 
-        self.view.msg_list.log.clear()
+        self.view.message_view.log.clear()
         if 0 <= focus_position < len(w_list):
-            self.view.msg_list.log.extend(w_list, focus_position)
+            self.view.message_view.log.extend(w_list, focus_position)
         else:
-            self.view.msg_list.log.extend(w_list)
+            self.view.message_view.log.extend(w_list)
 
         self.exit_editor_mode()
 
