@@ -35,10 +35,10 @@ class TestView:
         return_value = view.left_column_view()
         assert return_value == left_view(view)
 
-    def test_message_view(self, view, mocker):
+    def test_middle_column_view(self, view, mocker):
         middle_view = mocker.patch('zulipterminal.ui.MiddleColumnView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
-        return_value = view.message_view()
+        return_value = view.middle_column_view()
         middle_view.assert_called_once_with(view, view.model,
                                             view.write_box, view.search_box)
         assert view.middle_column == middle_view()
@@ -115,7 +115,7 @@ class TestView:
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
         def just_set_msg_list(self):
             self.msg_list = mocker.Mock(read_message=lambda: None)
-        monkeypatch.setattr(View, 'message_view', just_set_msg_list)
+        monkeypatch.setattr(View, 'middle_column_view', just_set_msg_list)
 
         right = mocker.patch('zulipterminal.ui.View.right_column_view')
         col = mocker.patch("zulipterminal.ui.urwid.Columns")
