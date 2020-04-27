@@ -41,7 +41,6 @@ class TestModel:
     def test_init(self, model, initial_data, user_profile):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
-        assert model.msg_view is None
         assert model.msg_list is None
         assert model.narrow == []
         assert model._have_last_message == {}
