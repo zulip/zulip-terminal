@@ -163,8 +163,8 @@ class Controller:
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         w_list = create_msg_box_list(self.model, msg_id_list)
-        self.model.msg_view.clear()
-        self.model.msg_view.extend(w_list)
+        self.model.msg_list.log.clear()
+        self.model.msg_list.log.extend(w_list)
         focus_position = 0
         if 0 <= focus_position < len(w_list):
             self.model.msg_list.set_focus(focus_position)
@@ -208,11 +208,11 @@ class Controller:
             focus_position = len(w_list) - 1
         assert not isinstance(focus_position, set)
 
-        self.model.msg_view.clear()
+        self.model.msg_list.log.clear()
         if 0 <= focus_position < len(w_list):
-            self.model.msg_view.extend(w_list, focus_position)
+            self.model.msg_list.log.extend(w_list, focus_position)
         else:
-            self.model.msg_view.extend(w_list)
+            self.model.msg_list.log.extend(w_list)
 
         self.exit_editor_mode()
 

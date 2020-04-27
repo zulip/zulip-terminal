@@ -66,7 +66,6 @@ class Model:
         self.controller = controller
         self.client = controller.client
 
-        self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
         self._have_last_message = {}  # type: Dict[str, bool]
