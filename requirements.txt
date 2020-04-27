@@ -4,6 +4,7 @@ pytest==5.3.5
 pytest-cov==2.5.1
 pytest-mock==1.7.1
 flake8==3.7.9
+flake8-quotes==3.0.0
 pudb==2017.1.4
 snakeviz==0.4.2
 gitlint==0.10.0
