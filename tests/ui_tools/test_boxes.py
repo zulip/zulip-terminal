@@ -115,10 +115,10 @@ class TestWriteBox:
                                           text, state, required_typeahead):
         write_box.view.pinned_streams = [
             [stream['name']] for stream in
-            streams_fixture[:len(streams_fixture)//2]]
+            streams_fixture[:len(streams_fixture) // 2]]
         write_box.view.unpinned_streams = [
             [stream['name']] for stream in
-            streams_fixture[len(streams_fixture)//2:]]
+            streams_fixture[len(streams_fixture) // 2:]]
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 

@@ -33,7 +33,7 @@ def test_builtin_theme_completeness(theme_name):
 def test_complete_and_incomplete_themes():
     # These are sorted to ensure reproducibility
     result = (sorted(list(expected_complete_themes)),
-              sorted(list(set(THEMES)-expected_complete_themes)))
+              sorted(list(set(THEMES) - expected_complete_themes)))
     assert result == complete_and_incomplete_themes()
 
 

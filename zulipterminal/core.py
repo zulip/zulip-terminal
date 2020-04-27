@@ -59,7 +59,7 @@ class Controller:
             sys.stdout.write(next_spinner)
             sys.stdout.flush()
             time.sleep(0.1)
-            sys.stdout.write('\b'*len(next_spinner))
+            sys.stdout.write('\b' * len(next_spinner))
 
         self.capture_stdout()
 
@@ -101,8 +101,8 @@ class Controller:
             align='center',
             valign='middle',
             # +2 to both of the following, due to LineBox
-            width=to_show.width+2,
-            height=min(3*rows//4, to_show.height)+2
+            width=to_show.width + 2,
+            height=min(3 * rows // 4, to_show.height) + 2
         )
 
     def exit_popup(self) -> None:
@@ -141,7 +141,7 @@ class Controller:
         currently_muted = self.model.is_muted_stream(button.stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"
         question = urwid.Text(("bold", "Confirm " + type_of_action +
-                               " of stream '" + button.stream_name+"' ?"),
+                               " of stream '" + button.stream_name + "' ?"),
                               "center")
         mute_this_stream = partial(self.model.toggle_stream_muted_status,
                                    button.stream_id)
