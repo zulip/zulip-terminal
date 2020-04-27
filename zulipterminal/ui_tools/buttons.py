@@ -55,7 +55,7 @@ class TopButton(urwid.Button):
         max_caption_length = (self.width_for_text_and_count -
                               len(count_text))
         if len(self._caption) > max_caption_length:
-            caption = (self._caption[:max_caption_length-1] +
+            caption = (self._caption[:max_caption_length - 1] +
                        '\N{HORIZONTAL ELLIPSIS}')
         else:
             caption = self._caption
@@ -66,9 +66,9 @@ class TopButton(urwid.Button):
         # NOTE: Generated text does not include space at end
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
-             '{}{}'.format(caption, num_extra_spaces*' '),
+             '{}{}'.format(caption, num_extra_spaces * ' '),
              ' ', ('unread_count',  count_text)],
-            self.width_for_text_and_count+5),  # cursor location
+            self.width_for_text_and_count + 5),  # cursor location
             self.text_color,
             'selected')
 
@@ -148,7 +148,7 @@ class StreamButton(TopButton):
                 inverse_text = background if background else 'black'
                 break
         view.palette.append((
-            self.color, '', '', '', self.color+', bold', background))
+            self.color, '', '', '', self.color + ', bold', background))
         view.palette.append((
             's' + self.color, '', '', '', inverse_text, self.color))
 

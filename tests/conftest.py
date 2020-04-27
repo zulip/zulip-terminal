@@ -102,7 +102,7 @@ def user_groups_fixture():
             'id': 10 + i,
             'name': 'Group {}'.format(i),
             'description': 'Core developers of Group {}'.format(i),
-            'members': members[i-1],
+            'members': members[i - 1],
         })
     return user_groups
 

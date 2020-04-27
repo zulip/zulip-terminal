@@ -333,7 +333,7 @@ class TestModel:
                                              expected_method):
         full_existing_reactions = [
             dict(er, user={user_key: (model.user_id if er['user'] == 'me'
-                                      else model.user_id+1)})  # non-match
+                                      else model.user_id + 1)})  # non-match
             for er in existing_reactions
         ]
         message = dict(

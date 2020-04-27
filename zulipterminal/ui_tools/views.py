@@ -786,7 +786,7 @@ class PopUpView(urwid.ListBox):
 
 class HelpView(PopUpView):
     def __init__(self, controller: Any) -> None:
-        widths = [(len(binding['help_text'])+4,
+        widths = [(len(binding['help_text']) + 4,
                    len(", ".join(binding['keys'])))
                   for binding in KEY_BINDINGS.values()]
         max_widths = [max(width) for width in zip(*widths)]
@@ -839,7 +839,7 @@ class PopUpConfirmationView(urwid.Overlay):
                 )))
         urwid.Overlay.__init__(self, prompt, self.controller.view,
                                align="left", valign="top",
-                               width=self.controller.view.LEFT_WIDTH+1,
+                               width=self.controller.view.LEFT_WIDTH + 1,
                                height=8)
 
     def exit_popup_yes(self, args: Any) -> None:
@@ -859,7 +859,7 @@ class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, color: str,
                  name: str, desc: str) -> None:
         # TODO: Width & Height handling could be improved
-        self.width = max(len(desc), len("# {}".format(name)))+2
+        self.width = max(len(desc), len("# {}".format(name))) + 2
         self.height = 2
         stream_info_content = [urwid.Text(desc, align='center')]
         super().__init__(controller, stream_info_content, 'STREAM_DESC')
@@ -885,14 +885,14 @@ class MsgInfoView(PopUpView):
             ('Reactions', reactions if msg['reactions'] else '---None---'),
             ])
 
-        widths = [(len(field)+7,
+        widths = [(len(field) + 7,
                   max(len(reaction_users) for reaction_users in data)
                   if isinstance(data, list)
-                  else len(data)+2)
+                  else len(data) + 2)
                   for field, data in msg_info.items()]
         max_widths = [max(width) for width in zip(*widths)]
         self.width = sum(max_widths)
-        self.height = len(msg_info['Reactions'])+4 if msg['reactions'] else 5
+        self.height = len(msg_info['Reactions']) + 4 if msg['reactions'] else 5
 
         msg_info_content = [urwid.AttrWrap(
                 urwid.Columns([
