@@ -120,7 +120,7 @@ class WriteBox(urwid.Pile):
                            if match_group(group_name, text[1:])]
 
         users_list = self.view.users
-        user_typeahead = [prefix_string+'**{}**'.format(user['full_name'])
+        user_typeahead = [prefix_string + '**{}**'.format(user['full_name'])
                           for user in users_list
                           if match_user(user, text[len(prefix_string):])]
         combined_typeahead = group_typeahead + user_typeahead
@@ -438,7 +438,7 @@ class MessageBox(urwid.Pile):
                     element.attrs.get('class', []) == ['emoji']):
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
                 emoji_name = element.attrs.get('title', [])
-                markup.append(('msg_emoji', ":"+emoji_name+":"))
+                markup.append(('msg_emoji', ":" + emoji_name + ":"))
             elif element.name in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
                 text = unrendered_tags[element.name]
@@ -649,7 +649,7 @@ class MessageBox(urwid.Pile):
         self.bq_len = len(blockquote_list)
         for tag in blockquote_list:
             child_list = tag.findChildren(recursive=False)
-            actual_padding = (padding_char + ' ')*pad_count
+            actual_padding = (padding_char + ' ') * pad_count
             if len(child_list) == 1:
                 pad_count = 0
                 child_iterator = child_list

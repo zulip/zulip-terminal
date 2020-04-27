@@ -888,11 +888,11 @@ class Model:
                     # If this is not the last message in the view
                     # update the next message's last_message too.
                     if len(self.msg_list.log) != (msg_pos + 1):
-                        next_msg_w = self.msg_list.log[msg_pos+1]
+                        next_msg_w = self.msg_list.log[msg_pos + 1]
                         msg_w_list = create_msg_box_list(
                             self, [next_msg_w.original_widget.message['id']],
                             last_message=new_msg_w.original_widget.message)
-                        self.msg_list.log[msg_pos+1] = msg_w_list[0]
+                        self.msg_list.log[msg_pos + 1] = msg_w_list[0]
                     self.controller.update_screen()
                     return
 

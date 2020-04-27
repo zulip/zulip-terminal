@@ -165,7 +165,7 @@ class TestMessageView:
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
                                            return_value=(new_msg_widgets +
                                                          [top_widget]))
-        initial_log = [top_widget] + len(other_ids_in_narrow)*["existing"]
+        initial_log = [top_widget] + len(other_ids_in_narrow) * ["existing"]
         msg_view.log = initial_log[:]
 
         msg_view.load_old_messages(0)
@@ -2089,7 +2089,7 @@ class TestTopButton:
                 (prefix + ' ') if prefix else '',
                 short_text,
                 (width - 2 - (2 if prefix else 0) - len(short_text) -
-                 len(count_str))*' ',
+                 len(count_str)) * ' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
@@ -2148,7 +2148,7 @@ class TestStreamButton:
         count_str = '' if count == 0 else str(count)
         expected_text = ' {} {}{}{}'.format(
                 expected_prefix, short_text,
-                (width - 4 - len(short_text) - len(count_str))*' ',
+                (width - 4 - len(short_text) - len(count_str)) * ' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
@@ -2262,7 +2262,7 @@ class TestUserButton:
         count_str = '' if count == 0 else str(count)
         expected_text = ' \N{BULLET} {}{}{}'.format(
                 short_text,
-                (width - 4 - len(short_text) - len(count_str))*' ',
+                (width - 4 - len(short_text) - len(count_str)) * ' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
@@ -2283,7 +2283,7 @@ class TestTopicButton:
             14: {'name': 'GSoC'},
         }
         controller.model.muted_topics = []
-        top_button = mocker.patch(TOPBUTTON+'.__init__')
+        top_button = mocker.patch(TOPBUTTON + '.__init__')
         params = dict(controller=controller,
                       width=width,
                       count=count)

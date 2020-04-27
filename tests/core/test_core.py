@@ -219,7 +219,7 @@ class TestController:
     def test_stream_muting_confirmation_popup(self, mocker, controller,
                                               stream_button, muted_streams,
                                               action):
-        pop_up = mocker.patch(CORE+'.PopUpConfirmationView')
+        pop_up = mocker.patch(CORE + '.PopUpConfirmationView')
         text = mocker.patch(CORE + '.urwid.Text')
         partial = mocker.patch(CORE + '.partial')
         controller.model.muted_streams = muted_streams
