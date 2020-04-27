@@ -38,7 +38,7 @@ class View(urwid.WidgetWrap):
     def left_column_view(self) -> Any:
         return LeftColumnView(View.LEFT_WIDTH, self)
 
-    def message_view(self) -> Any:
+    def middle_column_view(self) -> Any:
         self.middle_column = MiddleColumnView(self, self.model, self.write_box,
                                               self.search_box)
         return urwid.LineBox(self.middle_column, title='Messages',
@@ -104,7 +104,7 @@ class View(urwid.WidgetWrap):
 
     def main_window(self) -> Any:
         self.left_panel = self.left_column_view()
-        self.center_panel = self.message_view()
+        self.center_panel = self.middle_column_view()
         self.right_panel = self.right_column_view()
         if self.controller.autohide:
             body = [
@@ -120,7 +120,8 @@ class View(urwid.WidgetWrap):
             ]
         self.body = urwid.Columns(body, focus_column=0)
 
-        # NOTE: msg_list is None, but message_view is called above and sets it.
+        # NOTE: msg_list is None, but middle_column_view is called above and
+        #       sets it.
         assert self.msg_list is not None
         # NOTE: set_focus_changed_callback is actually called before the
         # focus is set, so the message is not read yet, it will be read when
