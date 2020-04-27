@@ -631,7 +631,7 @@ class MessageBox(urwid.Pile):
         return (None, self.soup2markup(body))
 
     def indent_quoted_content(self, soup: Any, padding_char: str) -> None:
-        '''
+        """
         We indent quoted text by padding them.
         The extent of indentation depends on their level of quoting.
         For example:
@@ -643,7 +643,7 @@ class MessageBox(urwid.Pile):
         </blockquote>       --->        </blockquote>
         <p>Boo</p>                      <p>▒ </p><p>Boo</p>
         </blockquote>                   </blockquote>
-        '''
+        """
         pad_count = 1
         blockquote_list = soup.find_all('blockquote')
         self.bq_len = len(blockquote_list)
