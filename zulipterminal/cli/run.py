@@ -36,9 +36,9 @@ def in_color(color: str, text: str) -> str:
 
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
-    description = '''
+    description = """
         Starts Zulip-Terminal.
-        '''
+        """
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=description,
                                      formatter_class=formatter_class)
