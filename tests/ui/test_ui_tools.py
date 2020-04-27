@@ -795,7 +795,7 @@ class TestMiddleColumnView:
         assert mid_col_view.last_unread_topic is None
         assert mid_col_view.last_unread_pm is None
         assert mid_col_view.search_box == self.search_box
-        assert self.view.msg_list == "MSG_LIST"
+        assert self.view.message_view == "MSG_LIST"
         self.super.assert_called_once_with("MSG_LIST", header=self.search_box,
                                            footer=self.write_box)
 

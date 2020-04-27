@@ -467,15 +467,15 @@ class UsersView(urwid.ListBox):
 class MiddleColumnView(urwid.Frame):
     def __init__(self, view: Any, model: Any,
                  write_box: Any, search_box: Any) -> None:
-        msg_list = MessageView(model, view)
+        message_view = MessageView(model, view)
         self.model = model
         self.controller = model.controller
         self.view = view
         self.last_unread_topic = None
         self.last_unread_pm = None
         self.search_box = search_box
-        view.msg_list = msg_list
-        super().__init__(msg_list, header=search_box, footer=write_box)
+        view.message_view = message_view
+        super().__init__(message_view, header=search_box, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts['unread_topics'].keys())

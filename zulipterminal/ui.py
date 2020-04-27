@@ -31,7 +31,7 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
 
-        self.msg_list = None  # type: Any
+        self.message_view = None  # type: Any
 
         super().__init__(self.main_window())
 
@@ -120,14 +120,14 @@ class View(urwid.WidgetWrap):
             ]
         self.body = urwid.Columns(body, focus_column=0)
 
-        # NOTE: msg_list is None, but middle_column_view is called above and
-        #       sets it.
-        assert self.msg_list is not None
+        # NOTE: message_view is None, but middle_column_view is called above
+        # and sets it.
+        assert self.message_view is not None
         # NOTE: set_focus_changed_callback is actually called before the
         # focus is set, so the message is not read yet, it will be read when
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(
-            self.msg_list.read_message)
+            self.message_view.read_message)
         div_char = '═'
 
         title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(

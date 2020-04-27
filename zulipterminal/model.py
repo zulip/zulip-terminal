@@ -743,7 +743,7 @@ class Model:
 
         if (hasattr(self.controller, 'view')
                 and self._have_last_message[repr(self.narrow)]):
-            msg_log = self.controller.view.msg_list.log
+            msg_log = self.controller.view.message_view.log
             if msg_log:
                 last_message = msg_log[-1].original_widget.message
             else:
@@ -894,17 +894,17 @@ class Model:
         """
         # Update new content in the rendered view
         view = self.controller.view
-        for msg_w in view.msg_list.log:
+        for msg_w in view.message_view.log:
             msg_box = msg_w.original_widget
             if msg_box.message['id'] == msg_id:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
                 if (len(self.narrow) == 2
                         and msg_box.message['subject'] != self.narrow[1][1]):
-                    view.msg_list.log.remove(msg_w)
+                    view.message_view.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.
-                    if not view.msg_list.log:
+                    if not view.message_view.log:
                         msg_w_list = create_msg_box_list(
                                         self, [msg_id],
                                         last_message=msg_box.last_message)
@@ -921,17 +921,17 @@ class Model:
                     return
                 else:
                     new_msg_w = msg_w_list[0]
-                    msg_pos = view.msg_list.log.index(msg_w)
-                    view.msg_list.log[msg_pos] = new_msg_w
+                    msg_pos = view.message_view.log.index(msg_w)
+                    view.message_view.log[msg_pos] = new_msg_w
 
                     # If this is not the last message in the view
                     # update the next message's last_message too.
-                    if len(view.msg_list.log) != (msg_pos + 1):
-                        next_msg_w = view.msg_list.log[msg_pos + 1]
+                    if len(view.message_view.log) != (msg_pos + 1):
+                        next_msg_w = view.message_view.log[msg_pos + 1]
                         msg_w_list = create_msg_box_list(
                             self, [next_msg_w.original_widget.message['id']],
                             last_message=new_msg_w.original_widget.message)
-                        view.msg_list.log[msg_pos + 1] = msg_w_list[0]
+                        view.message_view.log[msg_pos + 1] = msg_w_list[0]
                     self.controller.update_screen()
                     return
 
