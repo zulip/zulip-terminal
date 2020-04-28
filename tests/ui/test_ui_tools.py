@@ -1521,6 +1521,10 @@ class TestMessageBox:
         ('<ul><li>text</li></ul>', ['', '  \N{BULLET} ', '', 'text']),
         ('<ul>\n<li>text</li>\n</ul>',
             ['', '', '  \N{BULLET} ', '', 'text', '']),
+        ('<ol><li>text</li></ol>', ['', '  1. ', '', 'text']),
+        ('<ol>\n<li>text</li>\n</ol>',
+            ['', '', '  1. ', '', 'text', '']),
+        ('<ol start="5"><li>text</li></ol>', ['', '  5. ', '', 'text']),
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
         ('<div class="message_inline_image">'
          '<a href="x"><img src="x"></a></div>', []),
@@ -1545,6 +1549,7 @@ class TestMessageBox:
         'table_with_the_bare_minimum',
         'math', 'math2',
         'ul', 'ul_with_ul_li_newlines',
+        'ol', 'ol_with_ol_li_newlines', 'ol_starting_at_5',
         'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])

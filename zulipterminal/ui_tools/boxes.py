@@ -394,7 +394,7 @@ class MessageBox(urwid.Pile):
         except Exception:
             return ''
 
-    def soup2markup(self, soup: Any) -> List[Any]:
+    def soup2markup(self, soup: Any, **state: Any) -> List[Any]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup = ['']  # type: List[Union[str, Tuple[Optional[str], Any]]]
@@ -495,20 +495,27 @@ class MessageBox(urwid.Pile):
             elif element.name in ('strong', 'em'):
                 # BOLD & ITALIC
                 markup.append(('msg_bold', element.text))
-            elif element.name == 'ul':
-                # LISTS (UL)
+            elif element.name in ('ul', 'ol'):
+                # LISTS (UL & OL)
                 for index in [0, -1]:
                     if element.contents[index] == '\n':
                         element.contents[index].replace_with('')
-                markup.extend(self.soup2markup(element))
+                if element.name == 'ol':
+                    start_number = int(element.attrs.get('start', 1))
+                    state['list_index'] = start_number
+                markup.extend(self.soup2markup(element, **state))
             elif element.name == 'li':
                 # LIST ITEMS (LI)
                 # TODO: Support nested lists
-                markup.append('  \N{BULLET} ')
                 for index in [0, -1]:
                     if element.contents[index] == '\n':
                         element.contents[index].replace_with('')
-                markup.extend(self.soup2markup(element))
+                if 'list_index' in state:
+                    markup.append('  {}. '.format(state['list_index']))
+                    state['list_index'] += 1
+                else:
+                    markup.append('  \N{BULLET} ')
+                markup.extend(self.soup2markup(element, **state))
             elif element.name == 'table':
                 markup.extend(render_table(element))
             else:
