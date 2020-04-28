@@ -3,13 +3,14 @@ import platform
 import shlex
 import subprocess
 import time
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from functools import wraps
 from itertools import chain, combinations
 from re import ASCII, match
 from threading import Thread
 from typing import (
-    Any, Callable, Dict, FrozenSet, Iterable, List, Set, Tuple, Union,
+    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Set, Tuple,
+    TypeVar, Union,
 )
 
 import lxml.html
@@ -458,15 +459,55 @@ def match_emoji(emoji: str, text: str) -> bool:
     return emoji.lower().startswith(text.lower())
 
 
-def match_stream(stream: Any, text: str) -> bool:
+DataT = TypeVar('DataT')
+
+
+def match_stream(data: List[Tuple[DataT, str]], search_text: str,
+                 pinned_streams: List[List[Any]]) -> List[DataT]:
     """
-    True if the stream matches with `text` (case insensitive),
-    False otherwise.
+    Returns a list of DataT (streams) whose words match with the 'text' in the
+    following order:
+    * 1st-word startswith match > 2nd-word startswith match > ... (pinned)
+    * 1st-word startswith match > 2nd-word startswith match > ... (unpinned)
+
+    Note: This function expects `data` to be sorted, in a non-decreasing
+    order, and ordered by their pinning status.
     """
-    stream_name = stream[0].lower()
-    if stream_name.startswith(text.lower()):
-        return True
-    return False
+    pinned_stream_names = [stream[0] for stream in pinned_streams]
+
+    # Assert that the data is sorted, in a non-decreasing order, and ordered by
+    # their pinning status.
+    assert data == sorted(sorted(data, key=lambda data: data[1].lower()),
+                          key=lambda data: data[1] in pinned_stream_names,
+                          reverse=True)
+
+    delimiters = '-_/'
+    trans = str.maketrans(delimiters, len(delimiters) * ' ')
+    stream_splits = [
+        ((datum, [stream_name] + stream_name.translate(trans).split()[1:]))
+        for datum, stream_name in data
+    ]
+
+    matches = OrderedDict([
+        ('pinned', defaultdict(list)),
+        ('unpinned', defaultdict(list)),
+    ])  # type: OrderedDict[str, DefaultDict[int, List[DataT]]]
+
+    for datum, splits in stream_splits:
+        kind = 'pinned' if splits[0] in pinned_stream_names else 'unpinned'
+        for match_position, word in enumerate(splits):
+            if word.lower().startswith(search_text.lower()):
+                matches[kind][match_position].append(datum)
+
+    ordered_matches = []
+    for matched_data in matches.values():
+        if not matched_data:
+            continue
+        for match_position in range(max(matched_data.keys()) + 1):
+            for datum in matched_data.get(match_position, []):
+                if datum not in ordered_matches:
+                    ordered_matches.append(datum)
+    return ordered_matches
 
 
 def match_group(group_name: str, text: str) -> bool:
