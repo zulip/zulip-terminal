@@ -1450,9 +1450,9 @@ class TestMessageBox:
         ('<a href="some/relative_url">{}/some/relative_url</a>'
          .format(SERVER_URL),
             [('msg_link', '{}/some/relative_url'.format(SERVER_URL))]),
-        ('<li>Something', ['  * ', '', 'Something']),
+        ('<li>Something', ['  \N{BULLET} ', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
-            ['  * ', '', 'Something', '  * ', '', 'else']),
+            ['  \N{BULLET} ', '', 'Something', '  \N{BULLET} ', '', 'else']),
         ('<br>', []), ('<br/>', []),
         ('<hr>', ['[RULER NOT RENDERED]']),
         ('<hr/>', ['[RULER NOT RENDERED]']),
@@ -1513,7 +1513,7 @@ class TestMessageBox:
          ]),
         ('<span class="katex-display">some-math</span>', ['some-math']),
         ('<span class="katex">some-math</span>', ['some-math']),
-        ('<ul><li>text</li></ul>', ['', '  * ', '', 'text']),
+        ('<ul><li>text</li></ul>', ['', '  \N{BULLET} ', '', 'text']),
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
         ('<div class="message_inline_image">'
          '<a href="x"><img src="x"></a></div>', []),
