@@ -1451,8 +1451,12 @@ class TestMessageBox:
          .format(SERVER_URL),
             [('msg_link', '{}/some/relative_url'.format(SERVER_URL))]),
         ('<li>Something', ['  \N{BULLET} ', '', 'Something']),
+        ('<li>\n<p>Something', ['  \N{BULLET} ', '', '', '', 'Something']),
         ('<li>Something<li>else',  # NOTE Real items are newline-separated?
             ['  \N{BULLET} ', '', 'Something', '  \N{BULLET} ', '', 'else']),
+        ('<li>\n<p>Something</p>\n</li><li>else',
+            ['  \N{BULLET} ', '', '', '', 'Something', '',
+             '  \N{BULLET} ', '', 'else']),
         ('<br>', []), ('<br/>', []),
         ('<hr>', ['[RULER NOT RENDERED]']),
         ('<hr/>', ['[RULER NOT RENDERED]']),
@@ -1514,6 +1518,8 @@ class TestMessageBox:
         ('<span class="katex-display">some-math</span>', ['some-math']),
         ('<span class="katex">some-math</span>', ['some-math']),
         ('<ul><li>text</li></ul>', ['', '  \N{BULLET} ', '', 'text']),
+        ('<ul>\n<li>text</li>\n</ul>',
+            ['', '', '  \N{BULLET} ', '', 'text', '']),
         ('<del>text</del>', ['', 'text']),  # FIXME Strikethrough
         ('<div class="message_inline_image">'
          '<a href="x"><img src="x"></a></div>', []),
@@ -1529,7 +1535,7 @@ class TestMessageBox:
         'embedded_content',
         'link_sametext', 'link_sameimage', 'link_differenttext',
         'link_userupload', 'link_api', 'link_serverrelative_same',
-        'listitem', 'listitems',
+        'li', 'li_with_li_p_newline', 'two_li', 'two_li_with_li_p_newlines',
         'br', 'br2', 'hr', 'hr2', 'img', 'img2',
         'table_default',
         'table_with_left_and_right_alignments',
@@ -1537,7 +1543,8 @@ class TestMessageBox:
         'table_with_single_column',
         'table_with_the_bare_minimum',
         'math', 'math2',
-        'ul', 'strikethrough_del', 'inline_image', 'inline_ref',
+        'ul', 'ul_with_ul_li_newlines',
+        'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])
     def test_soup2markup(self, content, markup):

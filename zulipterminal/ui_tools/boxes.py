@@ -441,8 +441,8 @@ class MessageBox(urwid.Pile):
                 text = unrendered_tags[element.name]
                 if text:
                     markup.append(unrendered_template.format(text))
-            elif element.name in ('p', 'ul', 'del'):
-                # PARAGRAPH, LISTS, STRIKE-THROUGH
+            elif element.name in ('p', 'del'):
+                # PARAGRAPH, STRIKE-THROUGH
                 markup.extend(self.soup2markup(element))
             elif (element.name == 'span' and element.attrs
                   and 'emoji' in element.attrs.get('class', [])):
@@ -495,10 +495,19 @@ class MessageBox(urwid.Pile):
             elif element.name in ('strong', 'em'):
                 # BOLD & ITALIC
                 markup.append(('msg_bold', element.text))
+            elif element.name == 'ul':
+                # LISTS (UL)
+                for index in [0, -1]:
+                    if element.contents[index] == '\n':
+                        element.contents[index].replace_with('')
+                markup.extend(self.soup2markup(element))
             elif element.name == 'li':
-                # LISTS
+                # LIST ITEMS (LI)
                 # TODO: Support nested lists
                 markup.append('  \N{BULLET} ')
+                for index in [0, -1]:
+                    if element.contents[index] == '\n':
+                        element.contents[index].replace_with('')
                 markup.extend(self.soup2markup(element))
             elif element.name == 'table':
                 markup.extend(render_table(element))
