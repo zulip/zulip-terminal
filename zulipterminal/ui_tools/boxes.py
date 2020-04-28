@@ -498,7 +498,7 @@ class MessageBox(urwid.Pile):
             elif element.name == 'li':
                 # LISTS
                 # TODO: Support nested lists
-                markup.append('  * ')
+                markup.append('  \N{BULLET} ')
                 markup.extend(self.soup2markup(element))
             elif element.name == 'table':
                 markup.extend(render_table(element))
