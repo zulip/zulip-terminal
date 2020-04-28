@@ -409,23 +409,29 @@ class TestStreamsView:
         self.stream_search_box.assert_called_once_with(
             stream_view, 'SEARCH_STREAMS', stream_view.update_streams)
 
-    @pytest.mark.parametrize('new_text, expected_log', [
-        ('f', ['fan', 'FOO', 'foo', 'FOOBAR']),
-        ('a', ['bar', 'fan', 'FOOBAR']),
-        ('bar', ['bar', 'FOOBAR']),
-        ('foo', ['FOO', 'foo', 'FOOBAR']),
-        ('FOO', ['FOO', 'foo', 'FOOBAR']),
-        ('test', ['test here']),
-        ('here', ['test here']),
+    @pytest.mark.parametrize('new_text, expected_log, to_pin', [
+        ('f', ['fan', 'FOO', 'foo', 'FOOBAR'], []),
+        ('bar', ['bar'], []),
+        ('foo', ['FOO', 'foo', 'FOOBAR'], []),
+        ('FOO', ['FOO', 'foo', 'FOOBAR'], []),
+        ('test', ['test here'], []),
+        ('here', ['test here'], []),
+        ('test here', ['test here'], []),
+        # With 'foo' pinned.
+        ('f', ['foo', 'fan', 'FOO', 'FOOBAR'], [['foo'], ]),
+        ('FOO', ['foo', 'FOO', 'FOOBAR'], [['foo'], ]),
     ])
-    def test_update_streams(self, mocker, stream_view, new_text, expected_log):
+    def test_update_streams(self, mocker, stream_view, new_text, expected_log,
+                            to_pin):
         stream_names = [
             'FOO', 'FOOBAR', 'foo', 'fan',
             'boo', 'BOO', 'bar', 'test here',
         ]
         stream_names.sort(key=lambda stream_name: stream_name.lower())
+        self.view.pinned_streams = to_pin
+        stream_names.sort(key=lambda stream_name: stream_name in [
+            stream[0] for stream in to_pin], reverse=True)
         self.view.controller.editor_mode = True
-        new_text = new_text
         search_box = "SEARCH_BOX"
         stream_view.streams_btn_list = [
             mocker.Mock(stream_name=stream_name)

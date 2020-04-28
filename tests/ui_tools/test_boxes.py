@@ -100,28 +100,54 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
-    @pytest.mark.parametrize('text, state, required_typeahead', [
-        ('#Stream', 0, '#**Stream 1**'),
-        ('#Stream', 1, '#**Stream 2**'),
-        ('#S', 0, '#**Secret stream**'),
-        ('#S', 1, '#**Some general stream**'),
-        ('#S', 2, '#**Stream 1**'),
-        ('#S', 3, '#**Stream 2**'),
-        ('#S', -1, '#**Stream 2**'),
-        ('#S', -2, '#**Stream 1**'),
-        ('#S', -3, '#**Some general stream**'),
-        ('#S', -4, '#**Secret stream**'),
-        ('#S', -5, None),
-        ('#So', 0, '#**Some general stream**'),
-        ('#So', 1, None),
-        ('#Se', 0, '#**Secret stream**'),
-        ('#Se', 1, None),
-        ('#St', 0, '#**Stream 1**'),
-        ('#St', 1, '#**Stream 2**'),
-        ('#Stream 1', 0, '#**Stream 1**'),
+    @pytest.mark.parametrize('text, state, required_typeahead, to_pin', [
+        # With no streams pinned.
+        ('#Stream', 0, '#**Stream 1**', []),  # 1st-word startswith match.
+        ('#Stream', 1, '#**Stream 2**', []),  # 1st-word startswith match.
+        ('#Stream', 2, '#**Secret stream**', []),  # 2nd-word startswith match.
+        ('#Stream', 3, '#**Some general stream**', []),  # 3rd-word startswith.
+        ('#S', 0, '#**Secret stream**', []),  # 1st-word startswith match.
+        ('#S', 1, '#**Some general stream**', []),  # 1st-word startswith.
+        ('#S', 2, '#**Stream 1**', []),  # 1st-word startswith match.
+        ('#S', 3, '#**Stream 2**', []),  # 1st-word startswith match.
+        ('#S', -1, '#**Stream 2**', []),
+        ('#S', -2, '#**Stream 1**', []),
+        ('#S', -3, '#**Some general stream**', []),
+        ('#S', -4, '#**Secret stream**', []),
+        ('#S', -5, None, []),
+        ('#So', 0, '#**Some general stream**', []),
+        ('#So', 1, None, []),
+        ('#Se', 0, '#**Secret stream**', []),
+        ('#Se', 1, None, []),
+        ('#St', 0, '#**Stream 1**', []),
+        ('#St', 1, '#**Stream 2**', []),
+        ('#g', 0, '#**Some general stream**', []),
+        ('#g', 1, None, []),
+        ('#Stream 1', 0, '#**Stream 1**', []),  # Complete match.
+        ('#nomatch', 0, None, []),
+        ('#ene', 0, None, []),
+        # With 'Secret stream' pinned.
+        ('#Stream', 0, '#**Secret stream**',
+         [['Secret stream'], ]),  # 2nd-word startswith match (pinned).
+        ('#Stream', 1, '#**Stream 1**',
+         [['Secret stream'], ]),  # 1st-word startswith match (unpinned).
+        ('#Stream', 2, '#**Stream 2**',
+         [['Secret stream'], ]),  # 1st-word startswith match (unpinned).
+        ('#Stream', 3, '#**Some general stream**',
+         [['Secret stream'], ]),  # 3rd-word starstwith match (unpinned).
+        # With 'Stream 1' and 'Secret stream' pinned.
+        ('#Stream', 0, '#**Stream 1**', [['Secret stream'], ['Stream 1'], ]),
+        ('#Stream', 1, '#**Secret stream**', [['Secret stream'],
+                                              ['Stream 1'], ]),
+        ('#Stream', 2, '#**Stream 2**', [['Secret stream'], ['Stream 1'], ]),
+        ('#Stream', 3, '#**Some general stream**', [['Secret stream'],
+                                                    ['Stream 1'], ]),
     ])
     def test_generic_autocomplete_streams(self, write_box, text,
-                                          state, required_typeahead):
+                                          state, required_typeahead, to_pin):
+        for stream in to_pin:
+            write_box.view.unpinned_streams.remove(stream)
+        write_box.view.pinned_streams = to_pin
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 

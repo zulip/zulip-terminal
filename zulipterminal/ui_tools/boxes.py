@@ -129,10 +129,10 @@ class WriteBox(urwid.Pile):
 
     def autocomplete_streams(self, text: str) -> List[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        stream_typeahead = ['#**{}**'.format(stream[0])
-                            for stream in streams_list
-                            if match_stream(stream, text[1:])]
-        return stream_typeahead
+        stream_typeahead = [('#**{}**'.format(stream[0]), stream[0])
+                            for stream in streams_list]
+        return match_stream(stream_typeahead, text[1:],
+                            self.view.pinned_streams)
 
     def autocomplete_emojis(self, text: str) -> List[str]:
         emoji_list = emoji_names.EMOJI_NAMES

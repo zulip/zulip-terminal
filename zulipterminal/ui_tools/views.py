@@ -8,7 +8,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.helper import Message, asynch, match_user
+from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, MentionedButton, PMButton, StarredButton, StreamButton,
@@ -270,12 +270,12 @@ class StreamsView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
         with self.search_lock:
-            new_text = new_text.lower()
-            streams_display = [
-                stream
+            stream_buttons = [
+                (stream, stream.stream_name)
                 for stream in self.streams_btn_list.copy()
-                if new_text in stream.stream_name.lower()
             ]
+            streams_display = match_stream(stream_buttons, new_text,
+                                           self.view.pinned_streams)
             self.log.clear()
             self.log.extend(streams_display)
             self.view.controller.update_screen()
