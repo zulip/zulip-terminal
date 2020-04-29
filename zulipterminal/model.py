@@ -1203,4 +1203,9 @@ class Model:
             for event in response['events']:
                 last_event_id = max(last_event_id, int(event['id']))
                 if event['type'] in self.event_actions:
-                    self.event_actions[event['type']](event)
+                    try:
+                        self.event_actions[event['type']](event)
+                    except Exception:
+                        import sys
+                        (self.controller.
+                         raise_exception_in_main_thread(sys.exc_info()))
