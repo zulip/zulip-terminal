@@ -15,7 +15,7 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    HelpView, MsgInfoView, PopUpConfirmationView, StreamInfoView,
+    HelpView, MsgInfoView, NoticeView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -120,6 +120,9 @@ class Controller:
     def show_stream_info(self, color: str, name: str, desc: str) -> None:
         show_stream_view = StreamInfoView(self, color, name, desc)
         self.show_pop_up(show_stream_view, "# {}".format(name))
+
+    def popup_with_message(self, text: str, width: int, height: int) -> None:
+        self.show_pop_up(NoticeView(self, text, width, height), "NOTICE")
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
