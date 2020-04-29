@@ -5,10 +5,12 @@ import time
 from collections import OrderedDict
 from functools import partial
 from platform import platform
-from typing import Any, List, Optional, Tuple
+from types import TracebackType
+from typing import Any, List, Optional, Tuple, Type
 
 import urwid
 import zulip
+from typing_extensions import Literal
 
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.helper import Message, asynch
@@ -20,6 +22,9 @@ from zulipterminal.ui_tools.views import (
     NoticeView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
+
+
+ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 
 class Controller:
@@ -57,8 +62,31 @@ class Controller:
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
 
+        # data and urwid pipe for inter-thread exception handling
+        self._exception_info = None  # type: Optional[ExceptionInfo]
+        self._exception_pipe = self.loop.watch_pipe(self._raise_exception)
+
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)
+
+    def raise_exception_in_main_thread(self,
+                                       exc_info: ExceptionInfo) -> None:
+        """
+        Sets an exception from another thread, which is cleanly raised
+        from within the Controller thread via _raise_exception
+        """
+        # Exceptions shouldn't occur before the pipe is set
+        assert hasattr(self, '_exception_pipe')
+
+        if isinstance(exc_info, tuple):
+            self._exception_info = exc_info
+        else:
+            self._exception_info = (
+                RuntimeError,
+                "Invalid cross-thread exception info '{}'".format(exc_info),
+                None
+            )
+        os.write(self._exception_pipe, b'1')
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
@@ -328,6 +356,12 @@ class Controller:
     def exit_handler(self, signum: int, frame: Any) -> None:
         self.deregister_client()
         sys.exit(0)
+
+    def _raise_exception(self, *args: Any, **kwargs: Any) -> Literal[True]:
+        if self._exception_info is not None:
+            exc = self._exception_info
+            raise exc[0].with_traceback(exc[1], exc[2])
+        return True  # If don't raise, retain pipe
 
     def main(self) -> None:
         try:

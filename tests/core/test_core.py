@@ -53,8 +53,10 @@ class TestController:
         assert controller.theme == self.theme
 
         assert self.main_loop.call_count == 1
-        controller.loop.watch_pipe.assert_called_once_with(
-            controller.draw_screen)
+        controller.loop.watch_pipe.assert_has_calls([
+            mocker.call(controller.draw_screen),
+            mocker.call(controller._raise_exception)
+        ])
 
     def test_initial_editor_mode(self, controller):
         assert not controller.is_in_editor_mode()
