@@ -505,8 +505,7 @@ def canonicalize_color(color: str) -> str:
         raise ValueError('Unknown format for color "{}"'.format(color))
 
 
-@asynch
-def notify(title: str, html_text: str) -> None:
+def notify(title: str, html_text: str) -> str:
     document = lxml.html.document_fromstring(html_text)
     text = document.text_content()
     quoted_text = shlex.quote(text)
@@ -542,5 +541,10 @@ def notify(title: str, html_text: str) -> None:
         # NOTE: We assert this in tests, but this signals unexpected breakage
         assert len(command_list) == expected_length
 
-        res = subprocess.run(command_list, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.STDOUT)
+        try:
+            subprocess.run(command_list, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        except FileNotFoundError:
+            # This likely means the notification command could not be found
+            return command_list[0]
+    return ""

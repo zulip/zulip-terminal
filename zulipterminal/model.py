@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import zulip
 from mypy_extensions import TypedDict
 
+from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
     Message, asynch, canonicalize_color, classify_unread_counts,
     index_messages, initial_index, notify, set_count,
@@ -79,6 +80,8 @@ class Model:
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
                           uri=urlparse(self.client.base_url))
         self.server_name = ""
+
+        self._notified_user_of_notification_failure = False
 
         self.event_actions = OrderedDict([
             ('message', self._handle_message_event),
@@ -646,13 +649,16 @@ class Model:
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
-    def notify_user(self, message: Message) -> None:
+    def notify_user(self, message: Message) -> str:
+        """
+        return value signifies if notification failed, if it should occur
+        """
         # Check if notifications are enabled by the user.
         # It is disabled by default.
         if not self.controller.notify_enabled:
-            return
+            return ""
         if message['sender_id'] == self.user_id:
-            return
+            return ""
 
         recipient = ''
         if message['type'] == 'private':
@@ -671,9 +677,10 @@ class Model:
                                                 message['subject'])
 
         if recipient:
-            notify((self.server_name + ":\n"
-                    + message['sender_full_name'] + recipient),
-                   message['content'])
+            return notify((self.server_name + ":\n"
+                           + message['sender_full_name'] + recipient),
+                          message['content'])
+        return ""
 
     def _handle_message_event(self, event: Event) -> None:
         """
@@ -699,8 +706,27 @@ class Model:
                     message['sender_id'])
                 self.controller.update_screen()
 
-        # We can notify user regardless of whether UI is rendered or not.
-        self.notify_user(message)
+        # We can notify user regardless of whether UI is rendered or not,
+        # but depend upon the UI to indicate failures.
+        failed_command = self.notify_user(message)
+        if (failed_command
+                and hasattr(self.controller, 'view')
+                and not self._notified_user_of_notification_failure):
+            notice_template = (
+                "You have enabled notifications, but your notification "
+                "command '{}' could not be found."
+                "\n\n"
+                "The application will continue attempting to run this command "
+                "in this session, but will not notify you again."
+                "\n\n"
+                "Press '{}' to close this window."
+            )
+            notice = notice_template.format(failed_command,
+                                            keys_for_command("GO_BACK").pop())
+            self.controller.popup_with_message(notice, width=50, height=11)
+            self.controller.update_screen()
+            self._notified_user_of_notification_failure = True
+
         if hasattr(self.controller, 'view') and self.found_newest:
             self.index = index_messages([message], self, self.index)
             if self.msg_list.log:
