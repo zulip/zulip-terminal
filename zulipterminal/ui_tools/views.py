@@ -791,6 +791,21 @@ class PopUpView(urwid.ListBox):
         return super().keypress(size, key)
 
 
+class NoticeView(PopUpView):
+    def __init__(self, controller: Any,
+                 notice_text: str,
+                 width: int,
+                 height: int) -> None:
+        self.width = width
+        self.height = height
+        widgets = [
+            urwid.Divider(),
+            urwid.Padding(urwid.Text(notice_text), left=1, right=1),
+            urwid.Divider(),
+        ]
+        super().__init__(controller, widgets, 'GO_BACK')
+
+
 class HelpView(PopUpView):
     def __init__(self, controller: Any) -> None:
         widths = [(len(binding['help_text']) + 4,
