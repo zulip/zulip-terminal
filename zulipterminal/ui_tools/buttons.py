@@ -52,11 +52,11 @@ class TopButton(urwid.Button):
 
     def update_widget(self, count_text: str) -> Any:
         # Note that we don't modify self._caption
-        max_caption_length = (self.width_for_text_and_count -
-                              len(count_text))
+        max_caption_length = (self.width_for_text_and_count
+                              - len(count_text))
         if len(self._caption) > max_caption_length:
-            caption = (self._caption[:max_caption_length - 1] +
-                       '\N{HORIZONTAL ELLIPSIS}')
+            caption = (self._caption[:max_caption_length - 1]
+                       + '\N{HORIZONTAL ELLIPSIS}')
         else:
             caption = self._caption
         num_extra_spaces = (
@@ -86,9 +86,9 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("All messages   [" +
-                       keys_for_command("GO_BACK").pop() +  # FIXME
-                       "]")
+        button_text = ("All messages   ["
+                       + keys_for_command("GO_BACK").pop()  # FIXME
+                       + "]")
         super().__init__(controller, button_text,
                          controller.show_all_messages, count=count,
                          prefix_character='',
@@ -97,9 +97,9 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("Private messages [" +
-                       keys_for_command("ALL_PM").pop() +
-                       "]")
+        button_text = ("Private messages ["
+                       + keys_for_command("ALL_PM").pop()
+                       + "]")
         super().__init__(controller, button_text,
                          controller.show_all_pm, count=count,
                          prefix_character='',
@@ -108,9 +108,9 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("Mentions         [" +
-                       keys_for_command("ALL_MENTIONS").pop() +
-                       "]")
+        button_text = ("Mentions         ["
+                       + keys_for_command("ALL_MENTIONS").pop()
+                       + "]")
         super().__init__(controller, button_text,
                          controller.show_all_mentions,
                          width=width,
@@ -120,9 +120,9 @@ class MentionedButton(TopButton):
 
 class StarredButton(TopButton):
     def __init__(self, controller: Any, width: int) -> None:
-        button_text = ("Starred messages [" +
-                       keys_for_command("ALL_STARRED").pop() +
-                       "]")
+        button_text = ("Starred messages ["
+                       + keys_for_command("ALL_STARRED").pop()
+                       + "]")
         super().__init__(controller, button_text,
                          controller.show_all_starred,
                          width=width,

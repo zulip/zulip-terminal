@@ -226,10 +226,10 @@ class TestController:
         controller.loop = mocker.Mock()
 
         controller.stream_muting_confirmation_popup(stream_button)
-        text.assert_called_with(("bold", "Confirm " + action +
-                                 " of stream '" +
-                                 stream_button.stream_name +
-                                 "' ?"), "center")
+        text.assert_called_with(("bold", "Confirm " + action
+                                 + " of stream '"
+                                 + stream_button.stream_name
+                                 + "' ?"), "center")
         pop_up.assert_called_once_with(controller, text(), partial())
 
     @pytest.mark.parametrize('initial_narrow, final_narrow', [
