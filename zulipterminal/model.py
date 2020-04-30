@@ -499,8 +499,8 @@ class Model:
                             if aggregate_status != 'active':
                                 aggregate_status = status
                         if status == 'offline':
-                            if aggregate_status != 'active' and\
-                                    aggregate_status != 'idle':
+                            if (aggregate_status != 'active'
+                                    and aggregate_status != 'idle'):
                                 aggregate_status = status
 
                 status = aggregate_status
@@ -612,8 +612,9 @@ class Model:
                 stream_id = event['stream_id']
 
                 # FIXME: Does this always contain the stream_id?
-                stream_button = self.controller.view.\
-                    stream_id_to_button[stream_id]
+                stream_button = (
+                    self.controller.view.stream_id_to_button[stream_id]
+                )
 
                 if event['value']:  # Unmuting streams
                     self.muted_streams.remove(stream_id)
@@ -630,8 +631,9 @@ class Model:
         """
         if hasattr(self.controller, 'view'):
             # If the user is in pm narrow with the person typing
-            if len(self.narrow) == 1 and self.narrow[0][0] == 'pm_with' and\
-                    event['sender']['email'] in self.narrow[0][1].split(','):
+            narrow = self.narrow
+            if (len(narrow) == 1 and narrow[0][0] == 'pm_with'
+                    and event['sender']['email'] in narrow[0][1].split(',')):
                 if event['op'] == 'start':
                     user = self.user_dict[event['sender']['email']]
                     self.controller.view.set_footer_text([
@@ -715,16 +717,16 @@ class Model:
             if not self.narrow:
                 self.msg_list.log.append(msg_w)
 
-            elif self.narrow[0][1] == 'mentioned' and \
-                    'mentioned' in message['flags']:
+            elif (self.narrow[0][1] == 'mentioned'
+                    and 'mentioned' in message['flags']):
                 self.msg_list.log.append(msg_w)
 
-            elif self.narrow[0][1] == message['type'] and\
-                    len(self.narrow) == 1:
+            elif (self.narrow[0][1] == message['type']
+                    and len(self.narrow) == 1):
                 self.msg_list.log.append(msg_w)
 
-            elif message['type'] == 'stream' and \
-                    self.narrow[0][0] == "stream":
+            elif (message['type'] == 'stream'
+                    and self.narrow[0][0] == "stream"):
                 recipient_stream = message['display_recipient']
                 narrow_stream = self.narrow[0][1]
                 append_to_stream = recipient_stream == narrow_stream
@@ -735,8 +737,8 @@ class Model:
                              and self.narrow[1][1] == message['subject']))):
                     self.msg_list.log.append(msg_w)
 
-            elif message['type'] == 'private' and len(self.narrow) == 1 and\
-                    self.narrow[0][0] == "pm_with":
+            elif (message['type'] == 'private' and len(self.narrow) == 1
+                    and self.narrow[0][0] == "pm_with"):
                 narrow_recipients = self.recipients
                 message_recipients = frozenset(
                     [user['id'] for user in message['display_recipient']])
@@ -778,9 +780,9 @@ class Model:
             # 'subject' is not present in update event if
             # the event didn't have a 'subject' update.
             if 'subject' in event:
+                new_subject = event['subject']
                 for msg_id in event['message_ids']:
-                    self.index['messages'][msg_id]['subject']\
-                        = event['subject']
+                    self.index['messages'][msg_id]['subject'] = new_subject
                     self._update_rendered_view(msg_id)
 
     def _handle_reaction_event(self, event: Event) -> None:
@@ -857,8 +859,8 @@ class Model:
             if msg_box.message['id'] == msg_id:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
-                if len(self.narrow) == 2 and\
-                        msg_box.message['subject'] != self.narrow[1][1]:
+                if (len(self.narrow) == 2
+                        and msg_box.message['subject'] != self.narrow[1][1]):
                     self.msg_list.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.

@@ -256,8 +256,8 @@ class TestView:
         view.keypress(size, key)
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
-        view.stream_w.stream_search_box.set_edit_text.\
-            assert_called_once_with("")
+        (view.stream_w.stream_search_box.set_edit_text
+         .assert_called_once_with(""))
         assert view.controller.editor_mode is True
         assert view.controller.editor == view.stream_w.stream_search_box
 

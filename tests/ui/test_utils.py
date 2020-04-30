@@ -3,8 +3,8 @@ import pytest
 from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
-@pytest.mark.parametrize('msg, narrow, muted_streams, muted_topics,\
-                         muted', [
+@pytest.mark.parametrize(['msg', 'narrow', 'muted_streams', 'muted_topics',
+                          'muted'], [
     (   # PM TEST
         {
             'type': 'private',
@@ -89,8 +89,8 @@ def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
     assert return_value is muted
 
 
-@pytest.mark.parametrize('narrow, messages, focus_msg_id, muted,\
-                          unsubscribed, len_w_list', [
+@pytest.mark.parametrize(['narrow', 'messages', 'focus_msg_id', 'muted',
+                          'unsubscribed', 'len_w_list'], [
     (
         # No muted messages
         [],
