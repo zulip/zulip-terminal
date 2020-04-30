@@ -94,8 +94,8 @@ class MessageView(urwid.ListBox):
             no_update_baseline = set()
 
         self.model.get_messages(num_before=30, num_after=0, anchor=anchor)
-        ids_to_process = (self.model.get_message_ids_in_current_narrow() -
-                          ids_to_keep)
+        ids_to_process = (self.model.get_message_ids_in_current_narrow()
+                          - ids_to_keep)
 
         # Only update if more messages are provided
         if ids_to_process != no_update_baseline:
@@ -561,9 +561,9 @@ class RightColumnView(urwid.Frame):
                          new_text: str="",
                          user_list: Any=None) -> None:
 
-        assert ((user_list is None and search_box is not None) or
-                (user_list is not None and search_box is None and
-                 new_text == ""))
+        assert ((user_list is None and search_box is not None)
+                or (user_list is not None and search_box is None
+                    and new_text == ""))
 
         if not self.view.controller.editor_mode and not user_list:
             return
@@ -747,8 +747,10 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if (is_command_key('SEARCH_STREAMS', key) or
-                is_command_key('SEARCH_TOPICS', key)):
+        if (
+            is_command_key('SEARCH_STREAMS', key)
+            or is_command_key('SEARCH_TOPICS', key)
+           ):
             self.focus_position = 1
             if self.is_in_topic_view:
                 self.view.topic_w.keypress(size, key)
@@ -871,11 +873,11 @@ class MsgInfoView(PopUpView):
 
         if msg['reactions']:
             reactions = sorted(
-                        [reaction['emoji_name'] +
-                            ": " +
-                            reaction['user']['full_name'] +
-                            "\n"
-                            for reaction in msg['reactions']])
+                        [reaction['emoji_name']
+                         + ": "
+                         + reaction['user']['full_name']
+                         + "\n"
+                         for reaction in msg['reactions']])
             reactions[-1] = reactions[-1].rstrip("\n")
 
         msg_info = OrderedDict([

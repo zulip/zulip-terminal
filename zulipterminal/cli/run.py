@@ -117,19 +117,19 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
-    print(in_color('red', "zuliprc file was not found at " + zuliprc_path) +
-          "\nPlease enter your credentials to login into your"
-          " Zulip organization."
-          "\n" +
-          "\nNOTE: The " + in_color('blue', "Zulip URL") +
-          " is where you would go in a web browser to log in to Zulip." +
-          "\nIt often looks like one of the following:" +
-          in_color('green', "\n   your-org.zulipchat.com") +
-          " (Zulip cloud)" +
-          in_color('green', "\n   zulip.your-org.com") +
-          " (self-hosted servers)" +
-          in_color('green', "\n   chat.zulip.org") +
-          " (the Zulip community server)")
+    print(in_color('red', "zuliprc file was not found at " + zuliprc_path)
+          + "\nPlease enter your credentials to login into your"
+            " Zulip organization."
+            "\n"
+            "\nNOTE: The " + in_color('blue', "Zulip URL")
+          + " is where you would go in a web browser to log in to Zulip."
+            "\nIt often looks like one of the following:"
+            "\n   " + in_color('green', "your-org.zulipchat.com")
+          + " (Zulip cloud)"
+            "\n   " + in_color('green', "zulip.your-org.com")
+          + " (self-hosted servers)"
+            "\n   " + in_color('green', "chat.zulip.org")
+          + " (the Zulip community server)")
     realm_url = styled_input('Zulip URL: ')
     if realm_url.startswith("localhost"):
         realm_url = "http://" + realm_url
@@ -145,10 +145,10 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         res, login_id = get_api_key(realm_url)
 
     with open(zuliprc_path, 'w') as f:
-        f.write('[api]' +
-                '\nemail=' + login_id +
-                '\nkey=' + str(res.json()['api_key']) +
-                '\nsite=' + realm_url)
+        f.write('[api]'
+                + '\nemail=' + login_id
+                + '\nkey=' + str(res.json()['api_key'])
+                + '\nsite=' + realm_url)
     print('Generated API key saved at ' + zuliprc_path)
 
 
@@ -174,13 +174,13 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         res = zuliprc.read(zuliprc_path)
         if len(res) == 0:
             print(in_color('red',
-                           "\nZuliprc file could not be accessed at " +
-                           zuliprc_path + "\n"))
+                           "\nZuliprc file could not be accessed at "
+                           + zuliprc_path + "\n"))
             sys.exit(1)
     except configparser.MissingSectionHeaderError:
         print(in_color('red',
-                       "\nFailed to parse zuliprc file at " +
-                       zuliprc_path + "\n"))
+                       "\nFailed to parse zuliprc file at "
+                       + zuliprc_path + "\n"))
         sys.exit(1)
 
     # default settings

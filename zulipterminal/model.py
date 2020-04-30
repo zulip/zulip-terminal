@@ -164,8 +164,8 @@ class Model:
             if pm_with is not None and new_narrow[0][0] == 'pm_with':
                 users = pm_with.split(', ')
                 self.recipients = frozenset(
-                    [self.user_dict[user]['user_id'] for user in users] +
-                    [self.user_id]
+                    [self.user_dict[user]['user_id'] for user in users]
+                    + [self.user_id]
                 )
             else:
                 self.recipients = frozenset()
@@ -254,8 +254,8 @@ class Model:
         existing_reactions = [
             reaction['emoji_code']
             for reaction in message['reactions']
-            if (reaction['user'].get('user_id', None) == self.user_id or
-                reaction['user'].get('id', None) == self.user_id)
+            if (reaction['user'].get('user_id', None) == self.user_id
+                or reaction['user'].get('id', None) == self.user_id)
         ]
         if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
@@ -669,8 +669,8 @@ class Model:
                                                 message['subject'])
 
         if recipient:
-            notify((self.server_name + ":\n" +
-                    message['sender_full_name'] + recipient),
+            notify((self.server_name + ":\n"
+                    + message['sender_full_name'] + recipient),
                    message['content'])
 
     def _handle_message_event(self, event: Event) -> None:
@@ -688,9 +688,9 @@ class Model:
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
-            if (hasattr(self.controller, 'view') and
-                self.controller.view.left_panel.is_in_topic_view and
-                message['stream_id'] == self.controller.view.
+            if (hasattr(self.controller, 'view')
+                and self.controller.view.left_panel.is_in_topic_view
+                and message['stream_id'] == self.controller.view.
                     topic_w.stream_button.stream_id):
                 self.controller.view.topic_w.update_topics_list(
                     message['stream_id'], message['subject'],
@@ -729,10 +729,10 @@ class Model:
                 narrow_stream = self.narrow[0][1]
                 append_to_stream = recipient_stream == narrow_stream
 
-                if append_to_stream and (len(self.narrow) == 1 or
-                                         (len(self.narrow) == 2 and
-                                          self.narrow[1][1] ==
-                                          message['subject'])):
+                if (append_to_stream
+                    and (len(self.narrow) == 1
+                         or (len(self.narrow) == 2
+                             and self.narrow[1][1] == message['subject']))):
                     self.msg_list.log.append(msg_w)
 
             elif message['type'] == 'private' and len(self.narrow) == 1 and\

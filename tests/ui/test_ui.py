@@ -106,8 +106,8 @@ class TestView:
         self.model.server_url = server
         self.model.server_name = server_name
 
-        title_length = (len(email) + len(full_name) +
-                        len(server) + len(server_name) + 11)
+        title_length = (len(email) + len(full_name)
+                        + len(server) + len(server_name) + 11)
 
         view = View(self.controller)
 
