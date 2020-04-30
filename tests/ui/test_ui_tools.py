@@ -559,8 +559,8 @@ class TestTopicsView:
                 ] == expected_log
         self.view.controller.update_screen.assert_called_once_with()
 
-    @pytest.mark.parametrize('topic_name, topic_initial_log,\
-                              topic_final_log', [
+    @pytest.mark.parametrize(['topic_name', 'topic_initial_log',
+                              'topic_final_log'], [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
             ['TOPIC3', 'TOPIC2', 'TOPIC1']),
         ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
@@ -933,8 +933,8 @@ class TestRightColumnView:
 
         right_col_view.view.controller.update_screen.assert_not_called()
 
-    @pytest.mark.parametrize('search_string, assert_list, \
-                              match_return_value', [
+    @pytest.mark.parametrize(['search_string', 'assert_list',
+                              'match_return_value'], [
         ('U', ["USER1", "USER2"], True),
         ('F', [], False)
     ], ids=[
@@ -1712,8 +1712,8 @@ class TestMessageBox:
         assert isinstance(view_components[1], Columns)
         assert isinstance(view_components[2], Padding)
 
-    @pytest.mark.parametrize('msg_narrow, msg_type, assert_header_bar,\
-                              assert_search_bar', [
+    @pytest.mark.parametrize(['msg_narrow', 'msg_type', 'assert_header_bar',
+                              'assert_search_bar'], [
         ([], 0, 'PTEST ▶ ', 'All messages'),
         ([], 1, 'You and ', 'All messages'),
         ([], 2, 'You and ', 'All messages'),
@@ -1843,8 +1843,9 @@ class TestMessageBox:
             assert label[1][1] == 7
 
     @pytest.mark.parametrize('key', keys_for_command('EDIT_MESSAGE'))
-    @pytest.mark.parametrize('to_vary_in_each_message, realm_editing_allowed,\
-                             expect_editing_to_succeed', [
+    @pytest.mark.parametrize(['to_vary_in_each_message',
+                              'realm_editing_allowed',
+                              'expect_editing_to_succeed'], [
         ({'sender_id': 2, 'timestamp': 45}, True, False),
         ({'sender_id': 1, 'timestamp': 1}, True, False),
         ({'sender_id': 1, 'timestamp': 45}, False, False),
@@ -2134,8 +2135,9 @@ class TestStreamButton:
         mocker.patch(STREAMBUTTON + ".mark_muted")
         controller = mocker.Mock()
         controller.model.muted_streams = {}
-        properties = \
-            [caption, 5, '#ffffff', is_private, 'Some Stream Description']
+        properties = [
+            caption, 5, '#ffffff', is_private, 'Some Stream Description'
+        ]
         view_mock = mocker.Mock()
         view_mock.palette = [(None, 'black', 'white')]
         stream_button = StreamButton(properties,
@@ -2153,8 +2155,8 @@ class TestStreamButton:
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
 
-    @pytest.mark.parametrize('stream_id, muted_streams, called_value,\
-                             is_action_muting, updated_all_msgs', [
+    @pytest.mark.parametrize(['stream_id', 'muted_streams', 'called_value',
+                              'is_action_muting', 'updated_all_msgs'], [
         (86, set(), 50, False, 400),
         (86, {86, 205}, None, True, 300),
         (205, {14, 99}, 0, False, 350),
@@ -2189,8 +2191,8 @@ class TestStreamButton:
         if called_value is not None:
             stream_button.update_count.assert_called_once_with(called_value)
         if called_value != 0:
-            stream_button.view.home_button.update_count.\
-                assert_called_once_with(updated_all_msgs)
+            (stream_button.view.home_button.update_count
+             .assert_called_once_with(updated_all_msgs))
         assert stream_button.model.unread_counts['all_msg'] == updated_all_msgs
 
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_TOPIC'))
@@ -2299,8 +2301,8 @@ class TestTopicButton:
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
 
-    @pytest.mark.parametrize('stream_name, title, muted_topics,\
-                              is_muted_called', [
+    @pytest.mark.parametrize(['stream_name', 'title', 'muted_topics',
+                              'is_muted_called'], [
         ('Django', 'topic1', [['Django', 'topic1']], True),
         ('Django', 'topic2', [['Django', 'topic1']], False),
         ('GSoC', 'topic1', [['Django', 'topic1']], False),

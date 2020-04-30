@@ -532,16 +532,17 @@ class TestModel:
     def test_toggle_stream_muted_status(self, mocker, model,
                                         initial_muted_streams, value):
         model.muted_streams = initial_muted_streams
-        model.client.update_subscription_settings.return_value = \
-            {'result': "success"}
+        model.client.update_subscription_settings.return_value = {
+            'result': "success"
+        }
         model.toggle_stream_muted_status(205)
         request = [{
             'stream_id': 205,
             'property': 'is_muted',
             'value': value
         }]
-        model.client.update_subscription_settings.\
-            assert_called_once_with(request)
+        (model.client.update_subscription_settings
+         .assert_called_once_with(request))
 
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
@@ -782,8 +783,8 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
-    @pytest.mark.parametrize('topic_name, topic_order_intial,\
-                             topic_order_final', [
+    @pytest.mark.parametrize(['topic_name', 'topic_order_intial',
+                              'topic_order_final'], [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
                    ['TOPIC3', 'TOPIC2', 'TOPIC1']),
         ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
@@ -804,8 +805,8 @@ class TestModel:
         assert model.index['topics'][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
-    @pytest.mark.parametrize('user_id, vary_each_msg, \
-                              types_when_notify_called', [
+    @pytest.mark.parametrize(['user_id', 'vary_each_msg',
+                              'types_when_notify_called'], [
         (5140, {}, []),  # message_fixture sender_id is 5140
         (5179, {'flags': ['mentioned']}, ['stream', 'private']),
         (5179, {'flags': ['wildcard_mentioned']}, ['stream', 'private']),

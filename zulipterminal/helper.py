@@ -375,9 +375,8 @@ def index_messages(messages: List[Message],
                 (index['stream_msg_ids_by_stream_id'][msg['stream_id']]
                  .add(msg['id']))
 
-        if msg['type'] == 'stream' and len(narrow) == 2 and\
-                narrow[1][1] == msg['subject']:
-
+        if (msg['type'] == 'stream' and len(narrow) == 2
+                and narrow[1][1] == msg['subject']):
             topics_in_stream = index['topic_msg_ids'][msg['stream_id']]
             if not topics_in_stream.get(msg['subject']):
                 topics_in_stream[msg['subject']] = set()
