@@ -171,15 +171,15 @@ class MessageView(urwid.ListBox):
                 return key
 
         elif is_command_key('SCROLL_UP', key) and not self.old_loading:
-            if self.focus is not None and \
-               self.focus_position == 0:
+            if (self.focus is not None
+                    and self.focus_position == 0):
                 return self.keypress(size, 'up')
             else:
                 return super().keypress(size, 'page up')
 
         elif is_command_key('SCROLL_DOWN', key) and not self.old_loading:
-            if self.focus is not None and \
-               self.focus_position == len(self.log) - 1:
+            if (self.focus is not None
+                    and self.focus_position == len(self.log) - 1):
                 return self.keypress(size, 'down')
             else:
                 return super().keypress(size, 'page down')
@@ -593,8 +593,8 @@ class RightColumnView(urwid.Frame):
         users_btn_list = list()
         for user in users:
             # Only include `inactive` users in search result.
-            if user['status'] == 'inactive' and\
-                    not self.view.controller.editor_mode:
+            if (user['status'] == 'inactive'
+                    and not self.view.controller.editor_mode):
                 continue
             unread_count = (self.view.model.unread_counts['unread_pms'].
                             get(user['user_id'], 0))

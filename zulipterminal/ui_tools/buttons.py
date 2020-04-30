@@ -136,8 +136,8 @@ class StreamButton(TopButton):
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        self.stream_name, self.stream_id, self.color, is_private, \
-            self.description = properties
+        (self.stream_name, self.stream_id, self.color, is_private,
+         self.description) = properties
         self.model = controller.model
         self.count = count
         self.view = view
@@ -241,8 +241,8 @@ class TopicButton(TopButton):
                          width=width,
                          count=count)
 
-        if [self.stream_name, self.topic_name] in \
-                controller.model.muted_topics:
+        topic_pair = [self.stream_name, self.topic_name]
+        if topic_pair in controller.model.muted_topics:
             self.mark_muted()
 
     def mark_muted(self) -> None:

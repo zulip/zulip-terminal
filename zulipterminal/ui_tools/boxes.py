@@ -222,8 +222,8 @@ class MessageBox(urwid.Pile):
 
         if self.message['type'] == 'private':
             if self._is_private_message_to_self():
-                self.recipients_names = \
-                    self.message['display_recipient'][0]['full_name']
+                recipient = self.message['display_recipient'][0]
+                self.recipients_names = recipient['full_name']
                 self.recipients_emails = self.model.user_email
             else:
                 self.recipients_names = ', '.join(list(
@@ -247,11 +247,11 @@ class MessageBox(urwid.Pile):
 
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
-        if len(self.model.narrow) == 1 and \
-                self.model.narrow[0][0] == 'pm_with':
+        if (len(self.model.narrow) == 1
+                and self.model.narrow[0][0] == 'pm_with'):
             return False
-        if len(self.model.narrow) == 2 and \
-                self.model.narrow[1][0] == 'topic':
+        if (len(self.model.narrow) == 2
+                and self.model.narrow[1][0] == 'topic'):
             return False
 
         last_msg = self.last_message
@@ -277,8 +277,8 @@ class MessageBox(urwid.Pile):
 
     def _is_private_message_to_self(self) -> bool:
         recipient_list = self.message['display_recipient']
-        return len(recipient_list) == 1 and \
-            recipient_list[0]['email'] == self.model.user_email
+        return (len(recipient_list) == 1
+                and recipient_list[0]['email'] == self.model.user_email)
 
     def stream_header(self) -> Any:
         stream_topic_separator = '▶'
@@ -417,8 +417,8 @@ class MessageBox(urwid.Pile):
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
-                if hasattr(self, 'bq_len') and element == '\n' and \
-                        self.bq_len > 0:
+                if (hasattr(self, 'bq_len') and element == '\n'
+                        and self.bq_len > 0):
                     self.bq_len -= 1
                     continue
                 markup.append(element)
@@ -486,8 +486,8 @@ class MessageBox(urwid.Pile):
                 markup.append((
                     'msg_code', element.text
                 ))
-            elif element.name == 'div' and element.attrs and\
-                    'codehilite' in element.attrs.get('class', []):
+            elif (element.name == 'div' and element.attrs
+                    and 'codehilite' in element.attrs.get('class', [])):
                 # CODE (BLOCK?)
                 markup.append((
                     'msg_code', element.text

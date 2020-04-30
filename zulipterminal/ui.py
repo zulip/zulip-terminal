@@ -149,10 +149,10 @@ class View(urwid.WidgetWrap):
         if self.controller.editor_mode:
             return self.controller.editor.keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif is_command_key('SEARCH_MESSAGES', key) or\
-                is_command_key('NEXT_UNREAD_TOPIC', key) or\
-                is_command_key('NEXT_UNREAD_PM', key) or\
-                is_command_key('PRIVATE_MESSAGE', key):
+        elif (is_command_key('SEARCH_MESSAGES', key)
+                or is_command_key('NEXT_UNREAD_TOPIC', key)
+                or is_command_key('NEXT_UNREAD_PM', key)
+                or is_command_key('PRIVATE_MESSAGE', key)):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
