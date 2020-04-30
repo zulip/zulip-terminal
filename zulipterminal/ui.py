@@ -175,8 +175,8 @@ class View(urwid.WidgetWrap):
             self.controller.editor_mode = True
             self.controller.editor = self.user_search
             return key
-        elif (is_command_key('SEARCH_STREAMS', key) or
-                is_command_key('SEARCH_TOPICS', key)):
+        elif (is_command_key('SEARCH_STREAMS', key)
+              or is_command_key('SEARCH_TOPICS', key)):
             # jump stream search
             self.body.focus_position = 0
             self.left_panel.keypress(size, 'q')

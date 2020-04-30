@@ -257,9 +257,9 @@ class MessageBox(urwid.Pile):
         last_msg = self.last_message
         if self.message['type'] == 'stream':
             return not (
-                last_msg['type'] == 'stream' and
-                self.topic_name == last_msg['subject'] and
-                self.stream_name == last_msg['display_recipient']
+                last_msg['type'] == 'stream'
+                and self.topic_name == last_msg['subject']
+                and self.stream_name == last_msg['display_recipient']
             )
         elif self.message['type'] == 'private':
             recipient_ids = [{recipient['id']
@@ -268,9 +268,9 @@ class MessageBox(urwid.Pile):
                              for message in (self.message, last_msg)
                              if 'display_recipient' in message]
             return not (
-                len(recipient_ids) == 2 and
-                recipient_ids[0] == recipient_ids[1] and
-                last_msg['type'] == 'private'
+                len(recipient_ids) == 2
+                and recipient_ids[0] == recipient_ids[1]
+                and last_msg['type'] == 'private'
             )
         else:
             raise RuntimeError("Invalid message type")
@@ -422,17 +422,17 @@ class MessageBox(urwid.Pile):
                     self.bq_len -= 1
                     continue
                 markup.append(element)
-            elif (element.name == 'div' and element.attrs and
-                    any(cls in element.attrs.get('class', [])
-                        for cls in unrendered_div_classes)):
+            elif (element.name == 'div' and element.attrs
+                  and any(cls in element.attrs.get('class', [])
+                          for cls in unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
-                matching_class = (set(unrendered_div_classes) &
-                                  set(element.attrs.get('class')))
+                matching_class = (set(unrendered_div_classes)
+                                  & set(element.attrs.get('class')))
                 text = unrendered_div_classes[matching_class.pop()]
                 if text:
                     markup.append(unrendered_template.format(text))
-            elif (element.name == 'img' and
-                    element.attrs.get('class', []) == ['emoji']):
+            elif (element.name == 'img'
+                  and element.attrs.get('class', []) == ['emoji']):
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
                 emoji_name = element.attrs.get('title', [])
                 markup.append(('msg_emoji', ":" + emoji_name + ":"))
@@ -444,18 +444,18 @@ class MessageBox(urwid.Pile):
             elif element.name in ('p', 'ul', 'del'):
                 # PARAGRAPH, LISTS, STRIKE-THROUGH
                 markup.extend(self.soup2markup(element))
-            elif (element.name == 'span' and element.attrs and
-                  'emoji' in element.attrs.get('class', [])):
+            elif (element.name == 'span' and element.attrs
+                  and 'emoji' in element.attrs.get('class', [])):
                 # EMOJI
                 markup.append(('msg_emoji', element.text))
-            elif (element.name == 'span' and element.attrs and
-                  ('katex-display' in element.attrs.get('class', []) or
-                   'katex' in element.attrs.get('class', []))):
+            elif (element.name == 'span' and element.attrs
+                  and ('katex-display' in element.attrs.get('class', [])
+                       or 'katex' in element.attrs.get('class', []))):
                 # MATH TEXT
                 markup.append(element.text)
-            elif element.name == 'span' and element.attrs and\
-                    ('user-mention' in element.attrs.get('class', []) or
-                     'user-group-mention' in element.attrs.get('class', [])):
+            elif (element.name == 'span' and element.attrs
+                  and ('user-group-mention' in element.attrs.get('class', [])
+                       or 'user-mention' in element.attrs.get('class', []))):
                 # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('msg_mention', element.text))
             elif element.name == 'a':
@@ -534,13 +534,13 @@ class MessageBox(urwid.Pile):
         different = {  # How this message differs from the previous one
             'recipients': recipient_header is not None,
             'author': message['this']['author'] != message['last']['author'],
-            '24h': (message['last']['datetime'] is not None and
-                    ((message['this']['datetime'] -
-                      message['last']['datetime'])
-                     .days)),
+            '24h': (message['last']['datetime'] is not None
+                    and ((message['this']['datetime']
+                          - message['last']['datetime'])
+                         .days)),
             'timestamp': (
-                message['last']['time'] is not None and
-                message['this']['time'] != message['last']['time']
+                message['last']['time'] is not None
+                and message['this']['time'] != message['last']['time']
             ),
             'star_status': (
                 message['this']['is_starred'] != message['last']['is_starred']
@@ -724,8 +724,10 @@ class MessageBox(urwid.Pile):
         elif is_command_key('TOGGLE_NARROW', key):
             self.model.unset_search_narrow()
             if self.message['type'] == 'private':
-                if (len(self.model.narrow) == 1 and
-                        self.model.narrow[0][0] == 'pm_with'):
+                if (
+                    len(self.model.narrow) == 1
+                    and self.model.narrow[0][0] == 'pm_with'
+                   ):
                     self.model.controller.show_all_pm(self)
                 else:
                     self.model.controller.narrow_to_user(self)
@@ -801,9 +803,9 @@ class SearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = ("Search [" +
-                       ", ".join(keys_for_command("SEARCH_MESSAGES")) +
-                       "]: ")
+        search_text = ("Search ["
+                       + ", ".join(keys_for_command("SEARCH_MESSAGES"))
+                       + "]: ")
         self.text_box = ReadlineEdit(search_text + " ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
@@ -845,9 +847,9 @@ class PanelSearchBox(urwid.Edit):
                  update_function: Callable[..., None]) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = ("Search [" +
-                            ", ".join(keys_for_command(search_command)) +
-                            "]: ")
+        self.search_text = ("Search ["
+                            + ", ".join(keys_for_command(search_command))
+                            + "]: ")
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(edit_text=self.search_text)
 

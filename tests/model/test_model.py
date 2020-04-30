@@ -1220,8 +1220,8 @@ class TestModel:
                           for changed_id in changed_ids]))
 
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
-            assert (model.index['messages'][unchanged_id]['flags'] ==
-                    flags_before)
+            assert (model.index['messages'][unchanged_id]['flags']
+                    == flags_before)
 
         set_count.assert_not_called()
 
@@ -1273,8 +1273,8 @@ class TestModel:
                 model._update_rendered_view.assert_not_called()
 
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
-            assert (model.index['messages'][unchanged_id]['flags'] ==
-                    flags_before)
+            assert (model.index['messages'][unchanged_id]['flags']
+                    == flags_before)
 
         if event_op == 'add':
             set_count.assert_called_once_with(list(changed_ids),

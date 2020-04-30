@@ -23,8 +23,8 @@ def invalid_command(request):
 
 
 def test_keys_for_command(valid_command):
-    assert (keys.KEY_BINDINGS[valid_command]['keys'] ==
-            keys.keys_for_command(valid_command))
+    assert (keys.KEY_BINDINGS[valid_command]['keys']
+            == keys.keys_for_command(valid_command))
 
 
 def test_keys_for_command_invalid_command(invalid_command):

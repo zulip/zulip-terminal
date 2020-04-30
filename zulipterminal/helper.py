@@ -156,8 +156,8 @@ def _set_count_in_view(controller: Any, new_count: int,
                 for stream_button in stream_buttons_log:
                     if stream_button.stream_id == stream_id:
                         # FIXME: Update unread_count[streams]?
-                        stream_button.update_count(stream_button.count +
-                                                   new_count)
+                        stream_button.update_count(stream_button.count
+                                                   + new_count)
                         break
             # FIXME: Update unread_counts['unread_topics']?
             if ([message['display_recipient'], msg_topic] in
@@ -168,8 +168,8 @@ def _set_count_in_view(controller: Any, new_count: int,
                 # We update the respective TopicButton count accordingly.
                 for topic_button in topic_buttons_log:
                     if topic_button.topic_name == msg_topic:
-                        topic_button.update_count(topic_button.count +
-                                                  new_count)
+                        topic_button.update_count(topic_button.count
+                                                  + new_count)
         else:
             for user_button in user_buttons_log:
                 if user_button.user_id == user_id:
@@ -365,8 +365,8 @@ def index_messages(messages: List[Message],
 
                 if narrow[0][0] == 'pm_with':
                     narrow_emails = ([model.user_dict[email]['user_id']
-                                      for email in narrow[0][1].split(', ')] +
-                                     [model.user_id])
+                                      for email in narrow[0][1].split(', ')]
+                                     + [model.user_id])
                     if recipients == frozenset(narrow_emails):
                         (index['private_msg_ids_by_user_ids'][recipients]
                          .add(msg['id']))

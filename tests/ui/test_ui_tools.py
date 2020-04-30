@@ -163,8 +163,8 @@ class TestMessageView:
                             side_effect=[ids_in_narrow,
                                          ids_in_narrow | new_msg_ids])
         create_msg_box_list = mocker.patch(VIEWS + ".create_msg_box_list",
-                                           return_value=(new_msg_widgets +
-                                                         [top_widget]))
+                                           return_value=(new_msg_widgets
+                                                         + [top_widget]))
         initial_log = [top_widget] + len(other_ids_in_narrow) * ["existing"]
         msg_view.log = initial_log[:]
 
@@ -174,8 +174,8 @@ class TestMessageView:
         assert msg_view.log == new_msg_widgets + initial_log
         if messages_fetched:
             create_msg_box_list.assert_called_once_with(msg_view.model,
-                                                        {top_id_in_narrow} |
-                                                        new_msg_ids)
+                                                        {top_id_in_narrow}
+                                                        | new_msg_ids)
             self.model.controller.update_screen.assert_called_once_with()
         else:
             create_msg_box_list.assert_not_called()
@@ -1079,8 +1079,8 @@ class TestLeftColumnView:
                          width=width,
                          view=self.view,
                          count=1)
-             for stream in (self.view.pinned_streams +
-                            self.view.unpinned_streams)])
+             for stream in (self.view.pinned_streams
+                            + self.view.unpinned_streams)])
 
     def test_topics_view(self, mocker, stream_button, width=40):
         mocker.patch(VIEWS + ".LeftColumnView.streams_view")
@@ -1809,8 +1809,8 @@ class TestMessageBox:
 
         assert len(view_components) == 2
         assert isinstance(view_components[0], Columns)
-        assert ([w.text for w in view_components[0].widget_list] ==
-                expected_header)
+        assert ([w.text for w in view_components[0].widget_list]
+                == expected_header)
         assert isinstance(view_components[1], Padding)
 
     @pytest.mark.parametrize('to_vary_in_each_message', [
@@ -2088,8 +2088,8 @@ class TestTopButton:
         expected_text = ' {}{}{}{}'.format(
                 (prefix + ' ') if prefix else '',
                 short_text,
-                (width - 2 - (2 if prefix else 0) - len(short_text) -
-                 len(count_str)) * ' ',
+                (width - 2 - (2 if prefix else 0) - len(short_text)
+                 - len(count_str)) * ' ',
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
