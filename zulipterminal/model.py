@@ -254,10 +254,8 @@ class Model:
         existing_reactions = [
             reaction['emoji_code']
             for reaction in message['reactions']
-            if ('user_id' in reaction['user'] and
-                reaction['user']['user_id'] == self.user_id) or
-               ('id' in reaction['user'] and
-                reaction['user']['id'] == self.user_id)
+            if (reaction['user'].get('user_id', None) == self.user_id or
+                reaction['user'].get('id', None) == self.user_id)
         ]
         if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
@@ -610,8 +608,7 @@ class Model:
         Handle changes in subscription (eg. muting/unmuting streams)
         """
         if hasattr(self.controller, 'view'):
-            if ('property' in event and
-                    event['property'] == 'in_home_view'):
+            if event.get('property', None) == 'in_home_view':
                 stream_id = event['stream_id']
 
                 # FIXME: Does this always contain the stream_id?
