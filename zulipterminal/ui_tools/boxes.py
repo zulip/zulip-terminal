@@ -531,7 +531,13 @@ class MessageBox(urwid.Pile):
                                                   state['list_index']))
                     state['list_index'] += 1
                 else:
-                    markup.append('{}\N{BULLET} '.format('  ' * indent))
+                    chars = [
+                            '\N{BULLET}',
+                            '\N{RING OPERATOR}',    # small hollow
+                            '\N{HYPHEN}',
+                    ]
+                    markup.append('{}{} '.format('  ' * indent,
+                                                 chars[(indent - 1) % 3]))
                 state['list_start'] = False
                 markup.extend(self.soup2markup(element, **state))
             elif element.name == 'table':
