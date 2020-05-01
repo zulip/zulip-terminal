@@ -256,22 +256,22 @@ class MessageBox(urwid.Pile):
 
         last_msg = self.last_message
         if self.message['type'] == 'stream':
-            if (last_msg['type'] == 'stream' and
-                    self.topic_name == last_msg['subject'] and
-                    self.stream_name == last_msg['display_recipient']):
-                return False
-            return True
+            return not (
+                last_msg['type'] == 'stream' and
+                self.topic_name == last_msg['subject'] and
+                self.stream_name == last_msg['display_recipient']
+            )
         elif self.message['type'] == 'private':
             recipient_ids = [{recipient['id']
                               for recipient in message['display_recipient']
                               if 'id' in recipient}
                              for message in (self.message, last_msg)
                              if 'display_recipient' in message]
-            if (len(recipient_ids) == 2 and
-                    recipient_ids[0] == recipient_ids[1] and
-                    last_msg['type'] == 'private'):
-                return False
-            return True
+            return not (
+                len(recipient_ids) == 2 and
+                recipient_ids[0] == recipient_ids[1] and
+                last_msg['type'] == 'private'
+            )
         else:
             raise RuntimeError("Invalid message type")
 
@@ -295,9 +295,6 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
-        if self._is_private_message_to_self():
-            self.recipients_names = \
-                self.message['display_recipient'][0]['full_name']
         title_markup = ('header', [
             ('custom', 'You and '),
             ('custom', self.recipients_names)
@@ -536,15 +533,18 @@ class MessageBox(urwid.Pile):
         }
         different = {  # How this message differs from the previous one
             'recipients': recipient_header is not None,
-            'author': message['last']['author'] != message['this']['author'],
+            'author': message['this']['author'] != message['last']['author'],
             '24h': (message['last']['datetime'] is not None and
                     ((message['this']['datetime'] -
                       message['last']['datetime'])
                      .days)),
-            'timestamp': (message['last']['time'] is not None and
-                          message['this']['time'] != message['last']['time']),
-            'star_status': (message['this']['is_starred'] !=
-                            message['last']['is_starred']),
+            'timestamp': (
+                message['last']['time'] is not None and
+                message['this']['time'] != message['last']['time']
+            ),
+            'star_status': (
+                message['this']['is_starred'] != message['last']['is_starred']
+            ),
         }
         any_differences = any(different.values())
 
