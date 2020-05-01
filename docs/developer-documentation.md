@@ -1,8 +1,9 @@
 **Zulip Terminal** is a light and fast terminal client for [Zulip](https://zulipchat.com). It's written in python and :snake: only.
 
 ## Overview
+
 Zulip Terminal uses [Zulip's API](https://zulipchat.com/api/) to store and retrieve all the information it displays. It has an [MVC structure](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) overall. Here is a description of some of its files:
- 
+
 | File/Folder                                           | Description                                   |
 | ----------------------------------------------------- | --------------------------------------------- |
 |zulipterminal/                                         | Root Folder - Contains all the source files   |
@@ -16,11 +17,14 @@ Zulip Terminal uses [Zulip's API](https://zulipchat.com/api/) to store and retri
 
 Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
 
+
 ## Tests
+
 Tests for zulip-terminal are written using [pytest](https://pytest.org/). You can read the tests in `/tests` folder to learn about writing tests for a new class/function. If you are new to pytest, reading its documentation is definitely recommended.
 
 
 ## Tutorial - Adding typing indicator
+
 This tutorial shows how typing indicator was implemented in the client. The process for adding a new feature to zulip terminal varies greatly depending on the feature. This tutorial is intended to make you familiar with the general process.
 
 Since the typing indicator data for the other user in pm cannot be generated locally, it should be received from the client.
@@ -37,7 +41,7 @@ There are two parts to implementing typing indicator.
 
 We will be implementing the first part. **Receive typing event from server**:
 
-On startup, the app registers for the events on the server which it is willing to handle. To receive updates for `typing` events, we need to add 'typing' to the initially registered events. 
+On startup, the app registers for the events on the server which it is willing to handle. To receive updates for `typing` events, we need to add 'typing' to the initially registered events.
 
 `register_initial_desired_events` in `core.py` is the function responsible for registering the events.
 ``` diff
@@ -59,7 +63,7 @@ On startup, the app registers for the events on the server which it is willing t
 
 Now, to see the type of data server is sending we will write the response from the server to a file.
 
-To do so, we temporarily add the following lines to the function `poll_for_events` in `model.py`. The function uses long polling to stay in contact with the server and continuously receives events from the server. 
+To do so, we temporarily add the following lines to the function `poll_for_events` in `model.py`. The function uses long polling to stay in contact with the server and continuously receives events from the server.
 
 ``` diff
 
@@ -168,9 +172,10 @@ changes the footer text, and this
 ```python
 self.controller.update_screen()
 ```
-updates the screen to display the changes. This fully implements the typing feature. 
+updates the screen to display the changes. This fully implements the typing feature.
 
 ### Writing tests
+
 Now, we update the tests for `register_initial_desired_events` by adding `typing`
 to the event types.
 ```diff
@@ -189,4 +194,4 @@ to the event types.
 
 `test_handle_typing_event` in `test_ui.py` implements testing for `handle_typing_event`. Please read it to understand how to write tests for a new function in zulip terminal.
 
-Thanks for reading the tutorial. See you on the other side now, i.e, pull request side. :smiley: 
+Thanks for reading the tutorial. See you on the other side now, i.e, pull request side. :smiley:
