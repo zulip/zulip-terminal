@@ -11,10 +11,10 @@ I would like you to try out a few of our keyboard shortcuts and send a couple me
 ![An image of working Zulip Terminal](https://camo.githubusercontent.com/d4efe459c212e64ae7c841e5dda288a14837bf1e/68747470733a2f2f64726976652e676f6f676c652e636f6d2f75633f6578706f72743d766965772669643d31746163325053535f47625177587a34476e7a66636f5f68696e5776464f327a61)
 Zulip Terminal is divided into three columns/divisions.
 **The left column** shows list of all the streams you are subscribed to and some buttons for viewing different types of messages.
-**The middle column** displays all the messages in the current narrow. 
+**The middle column** displays all the messages in the current narrow.
 **The right column** shows all the active(green)/idle(yellow)/offline(white) users.
 
-Now that you know what you are looking at, how about checking out some of our features using [keyboard shortcuts](https://github.com/zulip/zulip-terminal#hot-keys)... 
+Now that you know what you are looking at, how about checking out some of our features using [keyboard shortcuts](https://github.com/zulip/zulip-terminal#hot-keys)...
 
 ### Narrowing to a stream
 Narrowing to a stream implies you have set middle column to show messages present in that stream. Let's try narrowing to [# test here](https://chat.zulip.org/#narrow/stream/7-test-here) from zulip terminal. Press <kbd>q</kbd> to focus on  the stream search box in the left column. Type `test here`
