@@ -42,6 +42,7 @@ linting_deps = [
     'mypy==0.770',
     'flake8==3.7.9',
     'flake8-quotes==3.0.0',
+    'flake8-continuation==1.0.5',
 ]
 
 dev_helper_deps = [
