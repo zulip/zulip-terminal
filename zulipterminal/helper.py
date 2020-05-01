@@ -67,7 +67,7 @@ UnreadCounts = TypedDict('UnreadCounts', {
 })
 
 
-def asynch(func: Any) -> Any:
+def asynch(func: Callable[..., None]) -> Callable[..., None]:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
