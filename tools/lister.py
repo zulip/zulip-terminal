@@ -7,8 +7,6 @@ import subprocess
 import sys
 from collections import defaultdict
 
-from six.moves import filter
-
 
 def get_ftype(fpath: str, use_shebang: bool) -> str:
     ext = os.path.splitext(fpath)[1]
