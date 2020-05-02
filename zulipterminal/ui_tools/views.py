@@ -315,6 +315,7 @@ class TopicsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
         self.topics_btn_list = topics_btn_list
         self.stream_button = stream_button
+        self.focus_index_before_search = 0
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(self,
                                                'SEARCH_TOPICS',
@@ -399,9 +400,12 @@ class TopicsView(urwid.Frame):
             self.log.clear()
             self.log.extend(self.topics_btn_list)
             self.set_focus('body')
+            self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
-        return super().keypress(size, key)
+        return_value = super().keypress(size, key)
+        _, self.focus_index_before_search = self.log.get_focus()
+        return return_value
 
 
 class UsersView(urwid.ListBox):
