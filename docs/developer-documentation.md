@@ -6,15 +6,22 @@ Zulip Terminal uses [Zulip's API](https://zulipchat.com/api/) to store and retri
 
 | Folder                 | File                | Description                                              |
 | ---------------------- | ------------------- | -------------------------------------------------------- |
-| zulipterminal/         |                     | Root Folder - Contains all the source files              |
-|                        | core.py             | Runs the app and controls data flow into View            |
+| zulipterminal/         | core.py             | Sets up the model, view and runs the application         |
 |                        | helper.py           | Helper functions used at multiple places                 |
 |                        | model.py            | Fetches and stores data retrieved from server            |
 |                        | ui.py               | Controls where each component is displayed               |
+|                        | version.py          | Keeps track of the latest releases PyPI version          |
 |                        |                     |                                                          |
-| zulipterminal/cli      | run.py              | Runs the app                                             |
+| zulipterminal/cli      | run.py              | Marks the entry point into the application               |
 |                        |                     |                                                          |
-| zulipterminal/ui_tools |                     | Has all the UI elements displayed by View                |
+| zulipterminal/config   | keys.py             | Stores keybindings and their helper functions            |
+|                        | themes.py           | Stores different themes and their colour mappings        |
+|                        |                     |                                                          |
+| zulipterminal/ui_tools | boxes.py            | UI boxes such as WriteBox, MessageBox and SearchBox      |
+|                        | buttons.py          | UI buttons such as Stream, PM, Topic, Home, Starred, etc |
+|                        | tables.py           | Helper functions which render tables in the UI           |
+|                        | utils.py            | MessageBox for every message displayed is created here   |
+|                        | views.py            | UI views such as Streams, Messages, Topics, Help, etc    |
 
 Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
 
