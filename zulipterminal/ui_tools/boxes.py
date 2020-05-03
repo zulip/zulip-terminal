@@ -860,20 +860,22 @@ class PanelSearchBox(urwid.Edit):
                             + ", ".join(keys_for_command(search_command))
                             + "]: ")
         urwid.connect_signal(self, 'change', update_function)
-        super().__init__(edit_text=self.search_text)
+        super().__init__(caption='', edit_text=self.search_text)
 
     def reset_search_text(self) -> None:
+        self.set_caption('')
         self.set_edit_text(self.search_text)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
             self.panel_view.view.controller.editor_mode = False
+            self.set_caption([('filter_results', 'Search Results'), ' '])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
                 self.panel_view.body.set_focus(0)
         elif is_command_key('GO_BACK', key):
             self.panel_view.view.controller.editor_mode = False
-            self.set_edit_text(self.search_text)
+            self.reset_search_text()
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, 'esc')
         return super().keypress(size, key)
