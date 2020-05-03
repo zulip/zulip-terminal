@@ -150,6 +150,8 @@ class TestWriteBox:
 
 
 class TestPanelSearchBox:
+    search_caption = "Search Results "
+
     @pytest.fixture
     def panel_search_box(self, mocker):
         # X is the return from keys_for_command("UNTESTED_TOKEN")
@@ -160,13 +162,16 @@ class TestPanelSearchBox:
 
     def test_init(self, panel_search_box):
         assert panel_search_box.search_text == "Search [X]: "
+        assert panel_search_box.caption == ""
         assert panel_search_box.edit_text == panel_search_box.search_text
 
     def test_reset_search_text(self, panel_search_box):
+        panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 
         panel_search_box.reset_search_text()
 
+        assert panel_search_box.caption == ""
         assert panel_search_box.edit_text == panel_search_box.search_text
 
     @pytest.mark.parametrize("log, expect_body_focus_set", [
@@ -179,11 +184,15 @@ class TestPanelSearchBox:
         size = (20,)
         panel_search_box.panel_view.view.controller.editor_mode = True
         panel_search_box.panel_view.log = log
+        panel_search_box.set_caption("")
         panel_search_box.edit_text = "key words"
 
         panel_search_box.keypress(size, enter_key)
 
         # Update this display
+        # FIXME We can't test for the styled version?
+        # We'd compare to [('filter_results', 'Search Results'), ' ']
+        assert panel_search_box.caption == self.search_caption
         assert panel_search_box.edit_text == "key words"
 
         # Leave editor mode
@@ -202,11 +211,13 @@ class TestPanelSearchBox:
     def test_keypress_GO_BACK(self, panel_search_box, back_key):
         size = (20,)
         panel_search_box.panel_view.view.controller.editor_mode = True
+        panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 
         panel_search_box.keypress(size, back_key)
 
         # Reset display
+        assert panel_search_box.caption == ""
         assert panel_search_box.edit_text == panel_search_box.search_text
 
         # Leave editor mode
