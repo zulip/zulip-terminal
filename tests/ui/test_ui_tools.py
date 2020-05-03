@@ -608,6 +608,7 @@ class TestTopicsView:
         size = (200, 20)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
         topic_view.keypress(size, key)
+        topic_view.set_focus.assert_called_once_with('header')
         topic_view.header_list.set_focus.assert_called_once_with(2)
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
