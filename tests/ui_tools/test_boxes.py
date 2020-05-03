@@ -1,9 +1,10 @@
 import pytest
 
-from zulipterminal.ui_tools.boxes import WriteBox
+from zulipterminal.config.keys import keys_for_command
+from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 
 
-WRITEBOX = "zulipterminal.ui_tools.boxes.WriteBox"
+BOXES = "zulipterminal.ui_tools.boxes"
 
 
 class TestWriteBox:
@@ -146,3 +147,76 @@ class TestWriteBox:
                      EMOJI_NAMES=emojis_fixture)
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
+
+
+class TestPanelSearchBox:
+    @pytest.fixture
+    def panel_search_box(self, mocker):
+        # X is the return from keys_for_command("UNTESTED_TOKEN")
+        mocker.patch(BOXES + ".keys_for_command", return_value="X")
+        panel_view = mocker.Mock()
+        update_func = mocker.Mock()
+        return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
+
+    def test_init(self, panel_search_box):
+        assert panel_search_box.search_text == "Search [X]: "
+        assert panel_search_box.edit_text == panel_search_box.search_text
+
+    def test_reset_search_text(self, panel_search_box):
+        panel_search_box.edit_text = "key words"
+
+        panel_search_box.reset_search_text()
+
+        assert panel_search_box.edit_text == panel_search_box.search_text
+
+    @pytest.mark.parametrize("log, expect_body_focus_set", [
+        ([], False),
+        (["SOMETHING"], True)
+    ])
+    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
+    def test_keypress_ENTER(self, panel_search_box,
+                            enter_key, log, expect_body_focus_set):
+        size = (20,)
+        panel_search_box.panel_view.view.controller.editor_mode = True
+        panel_search_box.panel_view.log = log
+        panel_search_box.edit_text = "key words"
+
+        panel_search_box.keypress(size, enter_key)
+
+        # Update this display
+        assert panel_search_box.edit_text == "key words"
+
+        # Leave editor mode
+        assert panel_search_box.panel_view.view.controller.editor_mode is False
+
+        # Switch focus to body; if have results, move to them
+        panel_search_box.panel_view.set_focus.assert_called_once_with("body")
+        if expect_body_focus_set:
+            (panel_search_box.panel_view.body.set_focus
+             .assert_called_once_with(0))
+        else:
+            (panel_search_box.panel_view.body.set_focus
+             .assert_not_called())
+
+    @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
+    def test_keypress_GO_BACK(self, panel_search_box, back_key):
+        size = (20,)
+        panel_search_box.panel_view.view.controller.editor_mode = True
+        panel_search_box.edit_text = "key words"
+
+        panel_search_box.keypress(size, back_key)
+
+        # Reset display
+        assert panel_search_box.edit_text == panel_search_box.search_text
+
+        # Leave editor mode
+        assert panel_search_box.panel_view.view.controller.editor_mode is False
+
+        # Switch focus to body; focus should return to previous in body
+        panel_search_box.panel_view.set_focus.assert_called_once_with("body")
+
+        # pass keypress back
+        # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
+        #       - should we add a second callback to update the panel?
+        (panel_search_box.panel_view.keypress
+         .assert_called_once_with(size, 'esc'))
