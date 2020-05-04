@@ -1,8 +1,43 @@
 # Zulip-terminal Changelog
 
-## Next Release
+## 0.5.1 - 13 May 2020
 
-No changes yet!
+While not composed of as many significant changes as 0.5.0, this is a meaningful release focusing on message and UI improvements - enjoy!
+
+### HIGHLIGHTS
+- Lists in messages are displayed much more compactly, represent bulleted and numbered styles accurately, and indent appropriately for nested lists!
+- Reactions are rendered more accurately and consistently, and are styled differently if you've reacted
+- Bars adjacent to topic names and private message recipients are colored appropriately and thinner
+- Theme names have changed to *zt_dark*, *zt_light*, *zt_blue* and *gruvbox_dark* (**NOTE** old names will continue working for now)
+- Default (now *zt_dark*) theme colors should work more reliably across terminals
+- Support for color depths other than the previous 256-color mode, including a polished monochrome mode, with new '--color-depth' option
+- Stream/topic/user searches are clearly marked when they are in effect, in line with message search
+
+### Interactivity improvements
+- Move focus fully into topic search box before entering text (don't leave topic selected)
+- After topic search, return to previously selected topic
+- Clearly indicate when a stream/topic/user search is in effect, in line with message search
+
+### Visual improvements
+- Use bullet characters for unordered lists, in place of stars
+- Render numbered lists fully and according to Zulip style (previously rendered as bulleted lists)
+- Support nested lists (bulleted and numbered)
+- Style reaction counts which include yourself differently (inverted colors, typically)
+- Sort reactions alphabetically for consistency
+- Support color depths other than 256-colors; try --color-depth=1 for a retro, high-constrast experience!
+- Improve specificity of colors in default theme, enhancing rendering and consistency in 256 color mode
+- Use triangle symbol (▶) to separate streams and topics, instead of simply '>'
+- The 'bar' extending from topics or private message recipients is now thinner and colored if a stream
+
+### Important bugfixes
+- If notifications are enabled but the external script was not found, cleanly warn the user just once per session and avoid showing a traceback over the screen
+- Names of reactions and inline emoji for the same icon could be different - use emoji list from Zulip server to unify them and remove dependency on emoji package
+- Remove extra newlines present in lists, improving rendering and leading to better use of screen space
+
+### Infrastructure improvements
+- Improve Installation/Running/Configuration in README, including noting how to run a snapshot of the current development version, and that we have Dockerfiles
+- Lint locally and in CI using flake8 (instead of pycodestyle), with continuation & quotes plugins, enforcing stricter, clearer rules on code style
+- Tidy code using pyupgrade
 
 ## 0.5.0 - 16 April 2020
 
