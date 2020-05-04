@@ -1,8 +1,38 @@
 # Zulip-terminal Changelog
 
-## Next Release
+## 0.5.2 - 30 July 2020
 
-No changes yet!
+This release contains the first batch of changes from this year's GSoC students, among other contributors - we're keen to get this out and let you have the improvements available!
+
+### HIGHLIGHTS
+- Links in messages are now shown more clearly with numeric references, with URLs as optional footnotes ('footlinks') and in the message information popup (#703/#618/#735)
+- Typeahead/autocomplete suggestions are now shown dynamically in the footer (#540)
+- The previous stream description popup can now be used to adjust stream properties (muting, pinning) (#695)
+- Added an About popup - check application and server versions while running (#653/#616)
+- Stream search and typeahead suggestions are ordered consistently, based on pinning and word sorting (#530)
+- Popup notifications for streams respect the desktop-notifications setting (#669)
+
+### Interactivity improvements
+- Messages are not marked as read while browsing through messages resulting from a search (#624/#723)
+- On searching with no search text, exit search and focus on the list below (don't perform an empty search) (#551)
+- Require <kbd>esc</kbd> to exit message compose box - avoiding loss of draft upon clicking elsewhere (#720/#652)
+- Autocomplete now triggers correctly with leading text (including parentheses), eg `(#str` (#542)
+
+### Visual improvements
+- Pinned and unpinned streams are shown with a separator while searching (#577)
+- Message reactions are shown clearer in the message information popup (#659)
+- Links within messages are listed in the message information popup, above reactions (#708)
+
+### Important bugfixes
+- Fixed crash on startup, related to looking up unsubscribed streams with unread counts (#694/#706)
+- Fixed crash when trying to send private message from user list (#677)
+- Fix security issue when running in profiling mode (fixed filename in /tmp)
+- Upgraded dependencies, leading to fix for color support in mosh & urxvt (via urwid 2.1.1)
+- Ensure recipient headers are shown in narrow message view (#671/#672)
+- Unread counts and message updating continue to be improved (#711/#697/#696)
+
+### Infrastructure improvements
+- Known working terminal emulators added to `FAQ.md` - moved from `README` into `docs/` (#689)
 
 ## 0.5.1 - 13 May 2020
 
