@@ -1,5 +1,9 @@
 # Zulip-terminal Changelog
 
+## Next Release
+
+No changes yet!
+
 ## 0.5.1 - 13 May 2020
 
 While not composed of as many significant changes as 0.5.0, this is a meaningful release focusing on message and UI improvements - enjoy!
