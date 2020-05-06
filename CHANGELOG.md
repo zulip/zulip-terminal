@@ -1,5 +1,9 @@
 # Zulip-terminal Changelog
 
+## Next Release
+
+No changes yet!
+
 ## 0.5.2 - 30 July 2020
 
 This release contains the first batch of changes from this year's GSoC students, among other contributors - we're keen to get this out and let you have the improvements available!
