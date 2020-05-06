@@ -1,4 +1,4 @@
-ZT_VERSION = '0.5.2'
+ZT_VERSION = '0.5.2+git'
 
 SUPPORTED_SERVER_VERSIONS = [
     ('2.1', None),
