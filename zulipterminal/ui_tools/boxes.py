@@ -497,24 +497,42 @@ class MessageBox(urwid.Pile):
                 markup.append(('msg_bold', element.text))
             elif element.name in ('ul', 'ol'):
                 # LISTS (UL & OL)
-                for index in [0, -1]:
-                    if element.contents[index] == '\n':
-                        element.contents[index].replace_with('')
+                for part in element.contents:
+                    if part == '\n':
+                        part.replace_with('')
+
+                if 'indent_level' not in state:
+                    state['indent_level'] = 1
+                    state['list_start'] = True
+                else:
+                    state['indent_level'] += 1
+                    state['list_start'] = False
                 if element.name == 'ol':
                     start_number = int(element.attrs.get('start', 1))
                     state['list_index'] = start_number
-                markup.extend(self.soup2markup(element, **state))
+                    markup.extend(self.soup2markup(element, **state))
+                    del state['list_index']  # reset at end of this list
+                else:
+                    if 'list_index' in state:
+                        del state['list_index']  # this is unordered
+                    markup.extend(self.soup2markup(element, **state))
+                del state['indent_level']  # reset indents after any list
             elif element.name == 'li':
                 # LIST ITEMS (LI)
-                # TODO: Support nested lists
-                for index in [0, -1]:
-                    if element.contents[index] == '\n':
-                        element.contents[index].replace_with('')
+                for part in element.contents:
+                    if part == '\n':
+                        part.replace_with('')
+                if not state.get('list_start', False):
+                    markup.append('\n')
+
+                indent = state.get('indent_level', 1)
                 if 'list_index' in state:
-                    markup.append('  {}. '.format(state['list_index']))
+                    markup.append('{}{}. '.format('  ' * indent,
+                                                  state['list_index']))
                     state['list_index'] += 1
                 else:
-                    markup.append('  \N{BULLET} ')
+                    markup.append('{}\N{BULLET} '.format('  ' * indent))
+                state['list_start'] = False
                 markup.extend(self.soup2markup(element, **state))
             elif element.name == 'table':
                 markup.extend(render_table(element))
