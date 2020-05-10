@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 import pytest
 from bs4 import BeautifulSoup
-from urwid import AttrWrap, Columns, Padding, Text
+from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import powerset
@@ -1703,7 +1703,6 @@ class TestMessageBox:
     ], ids=['different_stream_before', 'different_topic_before', 'PM_before'])
     def test_main_view_generates_stream_header(self, mocker, message,
                                                to_vary_in_last_message):
-        mocker.patch(VIEWS + ".urwid.Text")
         self.model.stream_dict = {
             5: {
                 'color': '#bd6',
@@ -1713,10 +1712,11 @@ class TestMessageBox:
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 3
-        assert isinstance(view_components[0], AttrWrap)
-        assert view_components[0].get_attr() == 'bar'
-        assert isinstance(view_components[1], Columns)
-        assert isinstance(view_components[2], Padding)
+
+        assert isinstance(view_components[0], Columns)
+
+        assert isinstance(view_components[0][0], Text)
+        assert isinstance(view_components[0][1], Divider)
 
     @pytest.mark.parametrize('message', [
         {
@@ -1761,15 +1761,16 @@ class TestMessageBox:
     ], ids=['larger_pm_group', 'stream_before'])
     def test_main_view_generates_PM_header(self, mocker, message,
                                            to_vary_in_last_message):
-        mocker.patch(VIEWS + ".urwid.Text")
         last_message = dict(message, **to_vary_in_last_message)
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 3
-        assert isinstance(view_components[0], AttrWrap)
-        assert view_components[0].get_attr() == 'bar'
-        assert isinstance(view_components[1], Columns)
-        assert isinstance(view_components[2], Padding)
+
+        assert isinstance(view_components[0], Columns)
+
+        assert isinstance(view_components[0][0], Text)
+        assert isinstance(view_components[0][1], Text)
+        assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize(['msg_narrow', 'msg_type', 'assert_header_bar',
                               'assert_search_bar'], [
@@ -1814,7 +1815,7 @@ class TestMessageBox:
         search_bar = msg_box.top_search_bar()
         header_bar = msg_box.top_header_bar(msg_box)
 
-        assert header_bar.text.startswith(assert_header_bar)
+        assert header_bar[0].text.startswith(assert_header_bar)
         assert search_bar.text_to_fill == assert_search_bar
 
     # Assume recipient (PM/stream/topic) header is unchanged below
