@@ -629,16 +629,16 @@ class MessageBox(urwid.Pile):
         content = self.transform_content()
 
         if self.message['id'] in self.model.index['edited_messages']:
-            edited_label_size = 7
+            edited_label_size = 4
             left_padding = 1
         else:
             edited_label_size = 0
-            left_padding = 8
+            left_padding = 5
 
+        edit_mark = '\N{LOWER RIGHT PENCIL}' + (2 * '\N{HORIZONTAL ELLIPSIS}')
         content = urwid.Padding(
             urwid.Columns([
-                (edited_label_size,
-                 urwid.Text('EDITED')),
+                (edited_label_size, urwid.Text(edit_mark)),
                 urwid.LineBox(
                     urwid.Columns([
                         (1, urwid.Text('')),

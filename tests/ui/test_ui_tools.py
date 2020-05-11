@@ -1889,8 +1889,8 @@ class TestMessageBox:
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
 
-    def test_main_view_generates_EDITED_label(self, mocker,
-                                              messages_successful_response):
+    def test_main_view_generates_edited_message_label(
+            self, mocker, messages_successful_response):
         messages = messages_successful_response['messages']
         for message in messages:
             self.model.index['edited_messages'].add(message['id'])
@@ -1898,8 +1898,8 @@ class TestMessageBox:
             view_components = msg_box.main_view()
 
             label = view_components[0].original_widget.contents[0]
-            assert label[0].text == 'EDITED'
-            assert label[1][1] == 7
+            assert label[0].text == '✎……'
+            assert label[1][1] == 4
 
     @pytest.mark.parametrize('key', keys_for_command('EDIT_MESSAGE'))
     @pytest.mark.parametrize(['to_vary_in_each_message',
