@@ -148,9 +148,9 @@ class StreamButton(TopButton):
                 inverse_text = background if background else 'black'
                 break
         view.palette.append((
-            self.color, '', '', '', self.color + ', bold', background))
+            self.color, '', '', 'bold', self.color + ', bold', background))
         view.palette.append((
-            's' + self.color, '', '', '', inverse_text, self.color))
+            's' + self.color, '', '', 'standout', inverse_text, self.color))
 
         super().__init__(controller,
                          caption=self.stream_name,
