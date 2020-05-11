@@ -296,8 +296,8 @@ class MessageBox(urwid.Pile):
 
     def private_header(self) -> Any:
         title_markup = ('header', [
-            ('custom', 'You and '),
-            ('custom', self.recipients_names)
+            ('general_narrow', 'You and '),
+            ('general_narrow', self.recipients_names)
         ])
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, 'bar')
@@ -345,13 +345,13 @@ class MessageBox(urwid.Pile):
 
         if is_search_narrow:
             title_markup = ('header', [
-                ('custom', text_to_fill),
+                ('general_narrow', text_to_fill),
                 (None, ' '),
                 ('filter_results', 'Search Results')
             ])
         else:
             title_markup = ('header', [
-                ('custom', text_to_fill)
+                ('general_narrow', text_to_fill)
             ])
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, 'bar')
