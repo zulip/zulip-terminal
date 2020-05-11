@@ -19,7 +19,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'user_idle': '',
     'user_offline': '',
     'user_inactive': '',
-    'title': 'standout',
+    'title': 'bold',
     'time': '',
     'bar': 'standout',
     'popup_contrast': 'standout',
@@ -34,7 +34,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'footer': 'standout',
     'starred': 'bold',
     'popup_category': 'bold',
-    'unread_count': '',
+    'unread_count': 'bold',
     'filter_results': 'bold',
 }
 
