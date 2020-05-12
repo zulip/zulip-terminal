@@ -57,8 +57,9 @@ class ModListWalker(urwid.SimpleFocusListWalker):
 
 
 class MessageView(urwid.ListBox):
-    def __init__(self, model: Any) -> None:
+    def __init__(self, model: Any, view: Any) -> None:
         self.model = model
+        self.view = view
         # Initialize for reference
         self.focus_msg = 0
         self.log = ModListWalker(self.main_view())
@@ -74,7 +75,7 @@ class MessageView(urwid.ListBox):
         self.new_loading = False
 
     def main_view(self) -> List[Any]:
-        msg_btn_list = create_msg_box_list(self.model)
+        msg_btn_list = create_msg_box_list(self.model, view=self.view)
         focus_msg = self.model.get_focus_in_current_narrow()
         if focus_msg == set():
             focus_msg = len(msg_btn_list) - 1
@@ -430,7 +431,7 @@ class UsersView(urwid.ListBox):
 class MiddleColumnView(urwid.Frame):
     def __init__(self, view: Any, model: Any,
                  write_box: Any, search_box: Any) -> None:
-        msg_list = MessageView(model)
+        msg_list = MessageView(model, view)
         self.model = model
         self.controller = model.controller
         self.view = view

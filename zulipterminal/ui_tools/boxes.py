@@ -197,8 +197,9 @@ class WriteBox(urwid.Pile):
 class MessageBox(urwid.Pile):
     # type of last_message is Optional[Message], but needs refactoring
     def __init__(self, message: Message, model: Any,
-                 last_message: Any) -> None:
+                 last_message: Any, view: Any) -> None:
         self.model = model
+        self.view = view
         self.message = message
         self.stream_name = ''
         self.stream_id = None  # type: Union[int, None]
@@ -587,14 +588,15 @@ class MessageBox(urwid.Pile):
             ),
         }
         any_differences = any(different.values())
-
+        show_avatar = False
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
             text_keys = ('author', 'star', 'time')
             text = {key: (None, ' ') for key in text_keys}  # type: TextType
 
             if any(different[key] for key in ('recipients', 'author', '24h')):
-                text['author'] = ('name', message['this']['author'])
+                text['author'] = ('name', "\n{}".format(message['this']['author']))
+                show_avatar = True
             if message['this']['is_starred']:
                 text['star'] = ('starred', "*")
             if any(different[key]
@@ -654,12 +656,52 @@ class MessageBox(urwid.Pile):
 
         # Build parts together and return
         parts = [
-            (recipient_header, recipient_header is not None),
             (content_header, any_differences),
             (content, True),
             (reactions, reactions != ''),
         ]
-        return [part for part, condition in parts if condition]
+        pile = urwid.Pile([part for part, condition in parts if condition])
+        
+        avatar = self.get_avatar(show_avatar, message['this']['author'])
+
+        columns = urwid.Columns([(6,avatar), pile])
+        if recipient_header is not None:
+            return [urwid.Text(''), recipient_header, columns]
+        return [columns]
+
+    def get_avatar(self, show_avatar: bool, author: str) -> Any:
+        if not show_avatar or not self.view:
+            return urwid.Text('')
+        for entry in self.view.palette:
+            if entry[0] is None:
+                background = entry[5] if len(entry) > 4 else entry[2]
+                inverse_text = background if background else 'black'
+                break
+        string = '╭───╮\n│ {} │\n╰───╯'.format(author[0])
+        # string = '╭─╮\n╰─╯'.format(author[0])
+        # string = '▆▆▆▆▆\n█████\n▀▀▀▀▀'.format(author[0])
+        color = '#f22'
+        if author == 'King Hamlet':
+            color = '#2f2'
+        if author == 'Prospero from The Tempest':
+            color = '#66e'
+        if author ==  'Zoe':
+            color = '#2aa'
+        if author == 'Outgoing Webhook':
+            color = '#f80'
+        if author == 'Zulip Error Bot':
+            color = '#a43'
+        if author == 'Iago':
+            color = '#ff4'
+
+        self.view.palette.append((color, '', '', '', '{}, bold'.format(color), background))
+        return urwid.Text((color, string))
+        # colors = ['#ff4', '#f22', '#66e']
+        # lines = []
+        # splits = string.split('\n')
+        # for i in range(len(splits)): 
+        #     lines.append(urwid.Text((colors[i], splits[i])))
+        # return urwid.Pile(lines)
 
     def transform_content(self) -> Tuple[None, Any]:
         soup = BeautifulSoup(self.message['content'], 'lxml')

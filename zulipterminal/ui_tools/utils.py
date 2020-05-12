@@ -9,7 +9,8 @@ from zulipterminal.ui_tools.boxes import MessageBox
 def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
                         *,
                         focus_msg_id: Union[None, int]=None,
-                        last_message: Optional[Message]=None) -> List[Any]:
+                        last_message: Optional[Message]=None,
+                        view: Optional[Any]=None) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
     """
@@ -41,7 +42,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
         if msg['id'] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
         w_list.append(urwid.AttrMap(
-                    MessageBox(msg, model, last_msg),
+                    MessageBox(msg, model, last_msg, view),
                     msg_flag,
                     'msg_selected'
         ))
