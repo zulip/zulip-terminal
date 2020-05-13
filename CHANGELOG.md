@@ -4,7 +4,7 @@
 
 No changes yet!
 
-## 0.5.0
+## 0.5.0 - 16 April 2020
 
 This release contains much of the remaining work from last year's GSoC students, and various other contributors - thanks to you all! (almost 200 commits)
 
@@ -46,7 +46,7 @@ If you've been waiting for autocomplete, popup notifications, mentions, better t
 - Use pip instead of pipenv in Travis to improve CI speed
 - Depend upon later versions of zulip, urwid & urwid-readline packages
 
-## 0.4.0
+## 0.4.0 - 22 July 2019
 
 Thanks to the core team and many new contributors for the almost 300 commits since 0.3.1!
 
@@ -137,7 +137,7 @@ Thanks to the core team and many new contributors for the almost 300 commits sin
 - Improve test coverage, fixtures & builds on Travis
 - Simplify UI objects used in left & right panels
 
-## 0.3.1
+## 0.3.1 - 26 December 2018
 
 ### Interactivity improvements
 - Much improved (& configurable on/off) autohide behavior for streams/users panels
@@ -176,8 +176,8 @@ Thanks to the core team and many new contributors for the almost 300 commits sin
 - Higher test coverage
 - Various internal refactoring
 
-## 0.2.1
+## 0.2.1 - 1 October 2018
 ### Bugfix release
 
-## 0.2.0
+## 0.2.0 - 15 July 2018
 ### First PyPI release
