@@ -16,6 +16,9 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 - OSX
 - WSL (On Windows)
 
+## What do you see
+<img src='https://user-images.githubusercontent.com/56690786/82113602-e27c0300-9774-11ea-9631-b5e6ee204a0c.png'>
+
 ## Installation
 
 We recommend installing in a dedicated python virtual environment (see below) or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
