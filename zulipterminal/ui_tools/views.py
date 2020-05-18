@@ -880,8 +880,11 @@ class PopUpConfirmationView(urwid.Overlay):
 class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, color: str,
                  name: str, desc: str) -> None:
-        # TODO: Width & Height handling could be improved
-        self.width = max(len(desc), len("# {}".format(name))) + 2
+        # TODO: Height handling could be improved
+        # Add 4 (for 2 Unicode characters on either side) to the popup title
+        # length to make sure that the title gets displayed even when the
+        # content is shorter than the title length (+4 Unicode characters).
+        self.width = max(len(desc) + 2, len("# {}".format(name)) + 4)
         self.height = 2
         stream_info_content = [urwid.Text(desc, align='center')]
         super().__init__(controller, stream_info_content, 'STREAM_DESC')
