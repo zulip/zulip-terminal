@@ -27,7 +27,10 @@ def long_description():
         return ''
 
     with codecs.open('README.md', encoding='utf8') as f:
-        return f.read()
+        source = f.read()
+
+        # Skip first line (assumed to have title) to reduce duplication
+        return '\n'.join(source.splitlines()[1:])
 
 
 testing_deps = [
@@ -54,7 +57,7 @@ dev_helper_deps = [
 setup(
     name='zulip-term',
     version=ZT_VERSION,
-    description='A terminal-based interface to Zulip chat',
+    description="Zulip's official terminal client",
     long_description=long_description(),
     long_description_content_type='text/markdown',
     url='https://github.com/zulip/zulip-terminal',
