@@ -1,6 +1,4 @@
-# Zulip Terminal (zulip-term)
-
-An interactive terminal interface for [Zulip](https://zulip.com).
+# Zulip Terminal - [Zulip](https://zulip.com)'s official terminal client
 
 [Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](#hot-keys) | [FAQs](https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md) | [Development](#contributor-guidelines)
 
