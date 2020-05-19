@@ -11,13 +11,12 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
+![image](https://user-images.githubusercontent.com/56690786/82284748-5e658d80-99b7-11ea-872f-f7b2bd64ca6b.png)
+
 ## Supported platforms
 - Linux
 - OSX
 - WSL (On Windows)
-
-## What do you see
-<img src='https://user-images.githubusercontent.com/56690786/82113602-e27c0300-9774-11ea-9631-b5e6ee204a0c.png'>
 
 ## Installation
 
