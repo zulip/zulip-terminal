@@ -11,6 +11,9 @@ An interactive terminal interface for [Zulip](https://zulipchat.com).
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
+![Screenshot 2020-05-19 at 9 56 49 AM](https://user-images.githubusercontent.com/56690786/82285402-0760b800-99b9-11ea-9a86-9d3765ea9177.png)
+
+
 ## Supported platforms
 - Linux
 - OSX
