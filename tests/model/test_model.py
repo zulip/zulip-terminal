@@ -820,6 +820,10 @@ class TestModel:
                                            types_when_notify_called):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
+        if 'stream_id' in message_fixture:
+            model.stream_dict.update(
+                {message_fixture['stream_id']: {'desktop_notifications': True}}
+            )
         notify = mocker.patch('zulipterminal.model.notify')
         model.notify_user(message_fixture)
         if message_fixture['type'] in types_when_notify_called:
