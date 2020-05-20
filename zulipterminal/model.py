@@ -671,8 +671,12 @@ class Model:
                 ]
                 target = ', '.join(extra_targets)
             recipient = ' (to {})'.format(target)
-        elif {'mentioned', 'wildcard_mentioned'}.intersection(
-                set(message['flags'])) and message['type'] == 'stream':
+        elif message['type'] == 'stream' and (
+            {'mentioned', 'wildcard_mentioned'}.intersection(
+                set(message['flags'])
+            )
+            or self.stream_dict[message['stream_id']]['desktop_notifications']
+        ):
             recipient = ' (to {} -> {})'.format(message['display_recipient'],
                                                 message['subject'])
 
