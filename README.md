@@ -219,6 +219,10 @@ If you are still facing problems, please discuss it at
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
 for it mentioning your terminal name, version, and OS.
 
+### Mouse does not support X
+
+We think of Zulip Terminal as a keyboard-centric client. Consequently, while functionality via the mouse does work in places, mouse support is not currently a priority for the project (see also [#248](https://www.github.com/zulip/zulip-terminal/issues/248)).
+
 ### Above mentioned hotkeys don't work as described
 
 If any of the above mentioned hotkeys don't work for you, feel free to open an issue or discuss it on [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
