@@ -1,7 +1,7 @@
 import threading
 import time
 from collections import OrderedDict
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 import urwid
 
@@ -767,6 +767,9 @@ class LeftColumnView(urwid.Pile):
         return super().keypress(size, key)
 
 
+PopUpViewTableContent = Sequence[Tuple[str, Sequence[Tuple[str, str]]]]
+
+
 class PopUpView(urwid.ListBox):
     def __init__(self, controller: Any, widgets: List[Any],
                  command: str) -> None:
@@ -774,6 +777,30 @@ class PopUpView(urwid.ListBox):
         self.command = command
         self.log = urwid.SimpleFocusListWalker(widgets)
         super().__init__(self.log)
+
+    @staticmethod
+    def make_table_with_categories(contents: PopUpViewTableContent,
+                                   column_widths: List[int],
+                                   dividechars: int=2) -> List[Any]:
+        """
+        Returns a list of widgets to render a table with different categories.
+        """
+        widgets = []  # type: List[Any]
+        for category, content in contents:
+            if category:
+                if len(widgets) > 0:  # Separate categories with newline.
+                    widgets.append(urwid.Text(''))
+                widgets.append(urwid.Text(('popup_category', category)))
+            for index, row in enumerate(content):
+                label, data = row
+                strip = urwid.Columns([
+                        urwid.Text(label),
+                        (column_widths[1], urwid.Text(data))
+                    ], dividechars=dividechars)
+                widgets.append(urwid.AttrWrap(
+                    strip, None if index % 2 else 'popup_contrast')
+                )
+        return widgets
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key('GO_BACK', key) or is_command_key(self.command, key):
@@ -814,31 +841,21 @@ class HelpView(PopUpView):
         max_widths = [max(width) for width in zip(*widths)]
         self.width = sum(max_widths)
 
-        help_menu_content = []  # type: List[urwid.AttrWrap]
+        help_menu_content = []
         for category in HELP_CATEGORIES:
-            if len(help_menu_content) > 0:  # Separate categories by newline
-                help_menu_content.append(urwid.Text(''))
-
-            help_menu_content.append(urwid.Text(('popup_category',
-                                                 HELP_CATEGORIES[category])))
-
             keys_in_category = (binding for binding in KEY_BINDINGS.values()
                                 if binding['key_category'] == category)
-            for help_item_number, binding in enumerate(keys_in_category):
-                help_menu_content.append(
-                    urwid.AttrWrap(
-                        urwid.Columns([
-                            urwid.Text(binding['help_text']),
-                            (max_widths[1],
-                                urwid.Text(", ".join(binding['keys'])))
-                            ], dividechars=2),
-                        None if help_item_number % 2 else 'popup_contrast'
-                    )
-                )
+            key_bindings = []
+            for binding in keys_in_category:
+                key_bindings.append((binding['help_text'],
+                                     ', '.join(binding['keys'])))
+            help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
-        self.height = len(help_menu_content)
+        widgets = self.make_table_with_categories(help_menu_content,
+                                                  max_widths)
+        self.height = len(widgets)
 
-        super().__init__(controller, help_menu_content, 'HELP')
+        super().__init__(controller, widgets, 'HELP')
 
 
 class PopUpConfirmationView(urwid.Overlay):
