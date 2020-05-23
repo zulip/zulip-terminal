@@ -779,6 +779,22 @@ class PopUpView(urwid.ListBox):
         super().__init__(self.log)
 
     @staticmethod
+    def calculate_table_widths(contents: PopUpViewTableContent,
+                               dividechars: int=2) -> Tuple[int, List[int]]:
+        """
+        Returns a tuple that contains the required width for the popup and a
+        list that has column widths.
+        """
+        strip_widths = []
+        for category, content in contents:
+            for row in content:
+                strip_widths.append(list(map(len, row)))
+        column_widths = [max(width) for width in zip(*strip_widths)]
+
+        popup_width = sum(column_widths) + dividechars
+        return (popup_width, column_widths)
+
+    @staticmethod
     def make_table_with_categories(contents: PopUpViewTableContent,
                                    column_widths: List[int],
                                    dividechars: int=2) -> List[Any]:
@@ -835,12 +851,6 @@ class NoticeView(PopUpView):
 
 class HelpView(PopUpView):
     def __init__(self, controller: Any) -> None:
-        widths = [(len(binding['help_text']) + 4,
-                   len(", ".join(binding['keys'])))
-                  for binding in KEY_BINDINGS.values()]
-        max_widths = [max(width) for width in zip(*widths)]
-        self.width = sum(max_widths)
-
         help_menu_content = []
         for category in HELP_CATEGORIES:
             keys_in_category = (binding for binding in KEY_BINDINGS.values()
@@ -851,8 +861,11 @@ class HelpView(PopUpView):
                                      ', '.join(binding['keys'])))
             help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
+        popup_width, column_widths = self.calculate_table_widths(
+            help_menu_content)
+        self.width = popup_width
         widgets = self.make_table_with_categories(help_menu_content,
-                                                  max_widths)
+                                                  column_widths)
         self.height = len(widgets)
 
         super().__init__(controller, widgets, 'HELP')
