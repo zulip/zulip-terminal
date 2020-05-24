@@ -727,8 +727,12 @@ class Model:
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
 
+        # Index messages before calling set_count.
+        self.index = index_messages([message], self, self.index)
+        if 'read' not in message['flags']:
+            set_count([message['id']], self.controller, 1)
+
         if hasattr(self.controller, 'view') and self.found_newest:
-            self.index = index_messages([message], self, self.index)
             if self.msg_list.log:
                 last_message = self.msg_list.log[-1].original_widget.message
             else:
@@ -770,8 +774,6 @@ class Model:
                     [user['id'] for user in message['display_recipient']])
                 if narrow_recipients == message_recipients:
                     self.msg_list.log.append(msg_w)
-            if 'read' not in message['flags']:
-                set_count([message['id']], self.controller, 1)
             self.controller.update_screen()
 
     def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
