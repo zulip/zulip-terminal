@@ -396,6 +396,17 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['msg']
 
+    def fetch_message_history(self, message_id: int,
+                              ) -> List[Dict[str, Union[int, str]]]:
+        """
+        Fetches message edit history for a message using its ID.
+        """
+        response = self.client.get_message_history(message_id)
+        if response['result'] == 'success':
+            return response['message_history']
+        display_error_if_present(response, self.controller)
+        return list()
+
     def _fetch_topics_in_streams(self, stream_list: Iterable[int]) -> str:
         """
         Fetch all topics with specified stream_id's and

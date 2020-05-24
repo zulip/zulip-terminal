@@ -1665,3 +1665,35 @@ class TestModel:
         return_value = model.is_user_subscribed_to_stream(stream_id)
 
         assert return_value == expected_response
+
+    @pytest.mark.parametrize('response', [{
+        'result': 'success',
+        'msg': '',
+    }])
+    def test_fetch_message_history_success(self, mocker, model,
+                                           message_history, response,
+                                           message_id=1):
+        response['message_history'] = message_history
+        expected_return_value = message_history
+        self.client.get_message_history.return_value = response
+
+        return_value = model.fetch_message_history(message_id)
+
+        self.client.get_message_history.assert_called_once_with(message_id)
+        assert not self.display_error_if_present.called
+        assert return_value == expected_return_value
+
+    @pytest.mark.parametrize('response', [{
+        'result': 'error',
+        'msg': 'Invalid message(s)',
+    }])
+    def test_fetch_message_history_error(self, mocker, model, response,
+                                         message_id=1,
+                                         expected_return_value=list()):
+        self.client.get_message_history.return_value = response
+
+        return_value = model.fetch_message_history(message_id)
+
+        self.client.get_message_history.assert_called_once_with(message_id)
+        assert self.display_error_if_present.called
+        assert return_value == expected_return_value
