@@ -788,11 +788,7 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
-    @pytest.mark.parametrize('found_newest', [
-        (True),
-        pytest.param(False,
-                     marks=pytest.mark.xfail(reason="Unread count bug")),
-        ])
+    @pytest.mark.parametrize('found_newest', [True, False])
     def test__handle_message_event_set_count_found_newest(self, mocker,
                                                           model, initial_index,
                                                           message_fixture,
