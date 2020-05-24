@@ -788,6 +788,34 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
 
+    @pytest.mark.parametrize('found_newest', [
+        (True),
+        pytest.param(False,
+                     marks=pytest.mark.xfail(reason="Unread count bug")),
+        ])
+    def test__handle_message_event_set_count_found_newest(self, mocker,
+                                                          model, initial_index,
+                                                          message_fixture,
+                                                          found_newest):
+        model.notify_user = mocker.Mock()
+        model.msg_list = mocker.Mock(log=[])
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        set_count = mocker.patch('zulipterminal.model.set_count')
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value=initial_index)
+        model.found_newest = found_newest
+        model.index = initial_index
+        event = {'message': message_fixture, 'flags': []}
+
+        model._handle_message_event(event)
+
+        index_msg.assert_called_once_with([event['message']], model,
+                                          model.index)
+        set_count.assert_called_once_with([event['message']['id']],
+                                          self.controller, 1)
+
     @pytest.mark.parametrize(['topic_name', 'topic_order_intial',
                               'topic_order_final'], [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
