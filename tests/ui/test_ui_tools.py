@@ -1716,7 +1716,8 @@ class TestMessageBox:
         assert isinstance(view_components[0], Columns)
 
         assert isinstance(view_components[0][0], Text)
-        assert isinstance(view_components[0][1], Divider)
+        assert isinstance(view_components[0][1], Text)
+        assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize('message', [
         {
