@@ -333,6 +333,42 @@ def zulip_version(request):
     return request.param
 
 
+@pytest.fixture(params=[
+        [{
+            'content': 'Hello!',
+            'timestamp': 1530129122,
+            'topic': 'hello world',
+            'user_id': 1001,
+            # ...
+        }],
+        [{
+            'content': 'Hello!',
+            'timestamp': 1530129122,
+            'topic': 'party at my houz',
+            'user_id': 1001,
+            # ...
+        }, {
+            'content': 'Howdy!',
+            'prev_content': 'Hello!',
+            'prev_topic': 'party at my houz',
+            'timestamp': 1530129134,
+            'topic': 'party at my house',
+            'user_id': 1001,
+            # ...
+        }],
+    ],
+    ids=[
+        'unedited_message',
+        'edited_message',
+    ]
+)
+def message_history(request):
+    """
+    Returns message edit history for a message.
+    """
+    return request.param
+
+
 @pytest.fixture
 def topics():
     return ['Topic 1', 'This is a topic', 'Hello there!']
