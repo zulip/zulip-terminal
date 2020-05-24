@@ -291,7 +291,7 @@ class MessageBox(urwid.Pile):
         ])
         stream_title = urwid.Text(stream_title_markup)
         header = urwid.Columns([
-            (len(stream_title.text), stream_title),
+            ('pack', stream_title),
             urwid.AttrWrap(urwid.Divider('━'), color),
         ])
         header.markup = stream_title_markup
@@ -304,7 +304,7 @@ class MessageBox(urwid.Pile):
         ])
         title = urwid.Text(title_markup)
         header = urwid.Columns([
-            (len(title.text), title),
+            ('pack', title),
             (1, urwid.Text(' ')),
             urwid.AttrWrap(urwid.Divider('━'), 'general_bar'),
         ])
