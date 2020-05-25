@@ -410,11 +410,11 @@ class TestStreamsView:
             stream_view, 'SEARCH_STREAMS', stream_view.update_streams)
 
     @pytest.mark.parametrize('new_text, expected_log', [
-        ('f', ['FOO', 'FOOBAR', 'foo', 'fan']),
-        ('a', ['FOOBAR', 'fan', 'bar']),
-        ('bar', ['FOOBAR', 'bar']),
-        ('foo', ['FOO', 'FOOBAR', 'foo']),
-        ('FOO', ['FOO', 'FOOBAR', 'foo']),
+        ('f', ['fan', 'FOO', 'foo', 'FOOBAR']),
+        ('a', ['bar', 'fan', 'FOOBAR']),
+        ('bar', ['bar', 'FOOBAR']),
+        ('foo', ['FOO', 'foo', 'FOOBAR']),
+        ('FOO', ['FOO', 'foo', 'FOOBAR']),
         ('test', ['test here']),
         ('here', ['test here']),
     ])
@@ -423,6 +423,7 @@ class TestStreamsView:
             'FOO', 'FOOBAR', 'foo', 'fan',
             'boo', 'BOO', 'bar', 'test here',
         ]
+        stream_names.sort(key=lambda stream_name: stream_name.lower())
         self.view.controller.editor_mode = True
         new_text = new_text
         search_box = "SEARCH_BOX"
