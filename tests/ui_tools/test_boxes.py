@@ -22,9 +22,9 @@ class TestWriteBox:
             groups['name'] for groups in user_groups_fixture]
 
         write_box.view.pinned_streams = []
-        write_box.view.unpinned_streams = [
+        write_box.view.unpinned_streams = sorted([
             [stream['name']] for stream in
-            streams_fixture]
+            streams_fixture], key=lambda stream: stream[0].lower())
 
         mocker.patch('zulipterminal.ui_tools.boxes.emoji_names',
                      EMOJI_NAMES=emojis_fixture)
@@ -103,14 +103,14 @@ class TestWriteBox:
     @pytest.mark.parametrize('text, state, required_typeahead', [
         ('#Stream', 0, '#**Stream 1**'),
         ('#Stream', 1, '#**Stream 2**'),
-        ('#S', 0, '#**Some general stream**'),
-        ('#S', 1, '#**Secret stream**'),
+        ('#S', 0, '#**Secret stream**'),
+        ('#S', 1, '#**Some general stream**'),
         ('#S', 2, '#**Stream 1**'),
         ('#S', 3, '#**Stream 2**'),
         ('#S', -1, '#**Stream 2**'),
         ('#S', -2, '#**Stream 1**'),
-        ('#S', -3, '#**Secret stream**'),
-        ('#S', -4, '#**Some general stream**'),
+        ('#S', -3, '#**Some general stream**'),
+        ('#S', -4, '#**Secret stream**'),
         ('#S', -5, None),
         ('#So', 0, '#**Some general stream**'),
         ('#So', 1, None),
