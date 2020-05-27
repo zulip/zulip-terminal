@@ -16,8 +16,8 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    AboutView, EditModeView, HelpView, MsgInfoView, NoticeView,
-    PopUpConfirmationView, StreamInfoView,
+    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
+    NoticeView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -161,6 +161,16 @@ class Controller:
             AboutView(self, 'About', zt_version=ZT_VERSION,
                       server_version=self.model.server_version,
                       server_feature_level=self.model.server_feature_level)
+        )
+
+    def show_edit_history(
+        self, message: Message,
+        message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+        time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        self.show_pop_up(
+            EditHistoryView(self, message, message_links, time_mentions,
+                            'Edit History (up/down scrolls)')
         )
 
     def search_messages(self, text: str) -> None:

@@ -1171,3 +1171,28 @@ class EditModeView(PopUpView):
         if key == ' ':
             key = 'enter'
         return super().keypress(size, key)
+
+
+class EditHistoryView(PopUpView):
+    def __init__(self, controller: Any, message: Message,
+                 message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                 time_mentions: List[Tuple[str, str]],
+                 title: str) -> None:
+        self.controller = controller
+        self.message = message
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        width = 64
+        widgets = []  # type: List[Any]
+        super().__init__(controller, widgets, 'MSG_INFO', width, title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if (is_command_key('GO_BACK', key)
+                or is_command_key('EDIT_HISTORY', key)):
+            self.controller.show_msg_info(
+                msg=self.message,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        return super().keypress(size, key)
