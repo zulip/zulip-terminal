@@ -12,6 +12,7 @@ build/*
 zulip_term.egg-info
 zulip-terminal-tracebacks.log
 zulip-terminal-API-requests.log
+zt_venv/*
 
 .vscode/*
 .DS_Store

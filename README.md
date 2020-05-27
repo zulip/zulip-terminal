@@ -264,11 +264,18 @@ $ pipenv run pip3 install -r requirements.txt
 $ pip3 install -e '.[dev]'
 ```
 
+#### make/pip
+
+This is the newest and simplest approach, if you have `make` installed:
+
+1. `make` (sets up an installed virtual environment in `zt_venv` in the current directory)
+2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+
 ### Development tasks
 
 Once you have a development environment set up, you might find the following useful, depending upon your type of environment:
 
-| Task | Pip | Pipenv |
+| Task | Make & Pip | Pipenv |
 |-|-|-|
 | Run normally | `zulip-term` | `pipenv run zulip-term` |
 | Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
@@ -277,7 +284,11 @@ Once you have a development environment set up, you might find the following use
 | Run all tests | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 
+If using make with pip, running `make` will ensure the development environment is up to date with the specified dependencies, useful after fetching from git and rebasing.
+
 NOTE: The linters and pytest are run in CI (travis) when you submit a pull request (PR), and we expect them to pass before code is merged. Running them locally can speed your development time, but if you have troubles understanding why the linters or pytest are failing, please do push your code to a branch/PR and we can discuss the problems in the PR or on chat.zulip.org.
+
+If using make with pip, there are corresponding make targets for running linting and testing if you wish to use them (`make lint` & `make test`), and before pushing a pull-request (PR) ready for merging you may find it useful to ensure that `make check` runs successfully (which runs both).
 
 NOTE: The lint script runs a number of separate linters to simplify the development workflow, but each individual linter can be run separately if you find this useful.
 
