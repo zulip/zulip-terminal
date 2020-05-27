@@ -1245,14 +1245,23 @@ class EditHistoryView(PopUpView):
         topic = snapshot['topic']
         timestamp = time.ctime(snapshot['timestamp'])[:-5]
 
+        user_id = snapshot.get('user_id')
+        if user_id:
+            author_name = self.controller.model.user_name_from_id(user_id)
+        else:
+            author_name = 'Author N/A'
+        author_prefix = self._get_author_prefix(snapshot, tag)
+        author = '{} by {}'.format(author_prefix, author_name)
+
         header = [
             urwid.Text(('edit_topic', topic)),
             # 18 = max(EditHistoryTag).
             (18, urwid.Text(('edit_tag', tag), align='right')),
         ]
         subheader = [
+            urwid.Text(('edit_author', author)),
             # 19 = len(timestamp).
-            (19, urwid.Text(('edit_time', timestamp))),
+            (19, urwid.Text(('edit_time', timestamp), align='right')),
         ]
 
         edit_block = [
@@ -1264,6 +1273,31 @@ class EditHistoryView(PopUpView):
             urwid.Text(content),
         ]
         return urwid.Pile(edit_block)
+
+    @staticmethod
+    def _get_author_prefix(snapshot: Dict[str, Any],
+                           tag: EditHistoryTag) -> str:
+        if tag == '(Original Version)':
+            return 'Posted'
+
+        # NOTE: The false alarm bit in the subsequent code block is a
+        # workaround for the inconsistency in the message history.
+        content = snapshot['content']
+        topic = snapshot['topic']
+
+        false_alarm_content = content == snapshot.get('prev_content')
+        false_alarm_topic = topic == snapshot.get('prev_topic')
+        if ('prev_topic' in snapshot and 'prev_content' in snapshot
+                and not(false_alarm_content or false_alarm_topic)):
+            author_prefix = 'Content & Topic edited'
+        elif 'prev_content' in snapshot and not false_alarm_content:
+            author_prefix = 'Content edited'
+        elif 'prev_topic' in snapshot and not false_alarm_topic:
+            author_prefix = 'Topic edited'
+        else:
+            author_prefix = 'Edited but no changes made'
+
+        return author_prefix
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (is_command_key('GO_BACK', key)
