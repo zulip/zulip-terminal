@@ -5,8 +5,9 @@ import sys
 
 
 cmds = ["isort"]
+files = ["zulipterminal", "tests", "setup.py"]
 
-result = subprocess.call(cmds + ["--check-only", "--diff"])
+result = subprocess.call(cmds + ["--check-only", "--diff", "--recursive"] + files)
 
 if result == 0:
     print("All files have imports sorted according to rules.")
