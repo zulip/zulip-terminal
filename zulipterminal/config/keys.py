@@ -221,6 +221,12 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'View message information',
         'key_category': 'msg_actions',
     }),
+    ('EDIT_HISTORY', {
+        'keys': {'e'},
+        'help_text': 'View edit history from message information box',
+        'excluded_from_random_tips': True,
+        'key_category': 'msg_actions',
+    }),
     ('STREAM_DESC', {
         'keys': {'i'},
         'help_text': 'View stream information & modify settings',

@@ -166,6 +166,7 @@ source ~/.zshenv
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
 | Show message information                              | <kbd>i</kbd>                                  |
+| View edit history from message information box        | <kbd>e</kbd>                                  |
 
 ### Stream list actions
 | Command                                               | Key Combination                               |
