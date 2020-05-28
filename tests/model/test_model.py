@@ -701,9 +701,8 @@ class TestModel:
                                               model_message_event,
                                               message_fixture):
         model = model_message_event
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
-                                           return_value=["msg_w"])
+        mocker.patch('zulipterminal.model.create_msg_box_list',
+                     return_value=["msg_w"])
         model.msg_list.log = [mocker.Mock()]
         set_count = mocker.patch('zulipterminal.model.set_count')
 
