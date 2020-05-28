@@ -697,7 +697,8 @@ class TestModel:
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
 
-    def test__handle_message_event_with_flags(self, mocker,
+    @pytest.mark.parametrize('flags', [['read', 'mentioned'], [], ])
+    def test__handle_message_event_with_flags(self, mocker, flags,
                                               model_message_event,
                                               message_fixture):
         model = model_message_event
@@ -705,21 +706,15 @@ class TestModel:
                      return_value=["msg_w"])
         model.msg_list.log = [mocker.Mock()]
         set_count = mocker.patch('zulipterminal.model.set_count')
+        event = {'message': message_fixture, 'flags': flags}
 
-        # Test event with flags
-        event = {'message': message_fixture, 'flags': ['read', 'mentioned']}
         model._handle_message_event(event)
-        # set count not called since 'read' flag present.
-        set_count.assert_not_called()
 
-        # Test event without flags
-        model.notify_user.assert_called_once_with(event['message'])
-        model.msg_list.log = [mocker.Mock()]
-        event = {'message': message_fixture, 'flags': []}
-        model._handle_message_event(event)
-        # set count called since the message is unread.
-        set_count.assert_called_once_with([event['message']['id']],
-                                          self.controller, 1)
+        if('read' in flags):
+            set_count.assert_not_called()
+        else:
+            set_count.assert_called_once_with([event['message']['id']],
+                                              self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
