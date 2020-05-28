@@ -660,6 +660,18 @@ class TestModel:
         model.found_newest = True
         return model
 
+    def test__handle_message_event_notify_users(self, mocker,
+                                                model_message_event,
+                                                message_fixture):
+        model = model_message_event
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        event = {'message': message_fixture}
+
+        model._handle_message_event(event)
+        model.notify_user.assert_called_once_with(event['message'])
+
     def test__handle_message_event_with_Falsey_log(self, mocker,
                                                    model_message_event,
                                                    message_fixture):
@@ -672,7 +684,6 @@ class TestModel:
         model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
-        model.notify_user.assert_called_once_with(event['message'])
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=None))
@@ -690,7 +701,6 @@ class TestModel:
         model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 2  # Added "msg_w" element
-        model.notify_user.assert_called_once_with(event['message'])
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = model.msg_list.log[0].original_widget.message
         (create_msg_box_list.
@@ -772,7 +782,6 @@ class TestModel:
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
         model.found_newest = False
-        model.notify_user.assert_called_once_with(response)
         model._handle_message_event(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
