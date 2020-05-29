@@ -781,18 +781,28 @@ class PopUpView(urwid.ListBox):
 
     @staticmethod
     def calculate_table_widths(contents: PopUpViewTableContent,
+                               title_len: int,
                                dividechars: int=2) -> Tuple[int, List[int]]:
         """
         Returns a tuple that contains the required width for the popup and a
         list that has column widths.
         """
+        # Add 4 (for 2 Unicode characters on either side) to the popup title
+        # length to make sure that the title gets displayed even when the
+        # content or the category is shorter than the title length (+4 Unicode
+        # characters).
+        title_width = title_len + 4
+
+        category_width = 0
         strip_widths = []
         for category, content in contents:
+            category_width = max(category_width, len(category))
             for row in content:
                 strip_widths.append(list(map(len, row)))
         column_widths = [max(width) for width in zip(*strip_widths)]
 
-        popup_width = sum(column_widths) + dividechars
+        popup_width = max(sum(column_widths) + dividechars, title_width,
+                          category_width)
         return (popup_width, column_widths)
 
     @staticmethod
@@ -863,7 +873,7 @@ class HelpView(PopUpView):
             help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
         popup_width, column_widths = self.calculate_table_widths(
-            help_menu_content)
+            help_menu_content, len(title))
         widgets = self.make_table_with_categories(help_menu_content,
                                                   column_widths)
         self.height = len(widgets)
