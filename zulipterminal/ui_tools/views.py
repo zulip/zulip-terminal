@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import Any, Callable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import urwid
 
@@ -951,22 +951,23 @@ class MsgInfoView(PopUpView):
     def __init__(self, controller: Any, msg: Message, title: str) -> None:
         self.msg = msg
 
-        if msg['reactions']:
-            reactions = sorted(
-                        [reaction['emoji_name']
-                         + ": "
-                         + reaction['user']['full_name']
-                         + "\n"
-                         for reaction in msg['reactions']])
-            reactions[-1] = reactions[-1].rstrip("\n")
-
         msg_info = [
             ('', [('Date & Time', time.ctime(msg['timestamp'])[:-5]),
                   ('Sender', msg['sender_full_name']),
-                  ('Sender\'s Email ID', msg['sender_email']),
-                  ('Reactions', ''.join(reactions) if msg['reactions']
-                   else '---None---')]),
+                  ('Sender\'s Email ID', msg['sender_email'])]),
         ]
+        if msg['reactions']:
+            reactions = sorted(
+                (reaction['emoji_name'], reaction['user']['full_name'])
+                for reaction in msg['reactions']
+            )
+            grouped_reactions = dict()  # type: Dict[str, str]
+            for reaction, user in reactions:
+                if reaction in grouped_reactions:
+                    grouped_reactions[reaction] += '\n{}'.format(user)
+                else:
+                    grouped_reactions[reaction] = user
+            msg_info.append(('Reactions', list(grouped_reactions.items())))
 
         popup_width, column_widths = self.calculate_table_widths(msg_info,
                                                                  len(title))

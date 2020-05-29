@@ -1330,7 +1330,7 @@ class TestMsgInfoView:
         assert self.controller.exit_popup.called
 
     def test_height_noreactions(self):
-        expected_height = 4
+        expected_height = 3
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -1377,8 +1377,8 @@ class TestMsgInfoView:
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         self.msg_info_view = MsgInfoView(self.controller, varied_message,
                                          'Message Information')
-        # 7 = 3 labels + 4 reactions.
-        expected_height = 7
+        # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
+        expected_height = 9
         assert self.msg_info_view.height == expected_height
 
     def test_keypress_navigation(self, mocker,
