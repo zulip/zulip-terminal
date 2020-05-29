@@ -1,6 +1,5 @@
 import threading
 import time
-from collections import OrderedDict
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 import urwid
@@ -813,7 +812,13 @@ class PopUpView(urwid.ListBox):
         for category, content in contents:
             category_width = max(category_width, len(category))
             for row in content:
-                strip_widths.append(list(map(len, row)))
+                # Measure the longest line if the text is seperated by
+                # newline(s).
+                max_row_lengths = [
+                    len(max(text.split('\n'), key=len))
+                    for text in row
+                ]
+                strip_widths.append(max_row_lengths)
         column_widths = [max(width) for width in zip(*strip_widths)]
 
         popup_width = max(sum(column_widths) + dividechars, title_width,
@@ -954,28 +959,15 @@ class MsgInfoView(PopUpView):
                          for reaction in msg['reactions']])
             reactions[-1] = reactions[-1].rstrip("\n")
 
-        msg_info = OrderedDict([
-            ('Date & Time', time.ctime(msg['timestamp'])[:-5]),
-            ('Sender', msg['sender_full_name']),
-            ('Sender\'s Email ID', msg['sender_email']),
-            ('Reactions', reactions if msg['reactions'] else '---None---'),
-            ])
+        msg_info = [
+            ('', [('Date & Time', time.ctime(msg['timestamp'])[:-5]),
+                  ('Sender', msg['sender_full_name']),
+                  ('Sender\'s Email ID', msg['sender_email']),
+                  ('Reactions', ''.join(reactions) if msg['reactions']
+                   else '---None---')]),
+        ]
 
-        widths = [(len(field) + 7,
-                  max(len(reaction_users) for reaction_users in data)
-                  if isinstance(data, list)
-                  else len(data) + 2)
-                  for field, data in msg_info.items()]
-        max_widths = [max(width) for width in zip(*widths)]
-        width = sum(max_widths)
-
-        msg_info_content = [urwid.AttrWrap(
-                urwid.Columns([
-                    urwid.Text(field),
-                    (max_widths[1], urwid.Text(data))
-                ], dividechars=2),
-                None if index % 2 else 'popup_contrast')
-             for index, (field, data) in enumerate(msg_info.items())]
-
-        super().__init__(controller, msg_info_content, 'MSG_INFO', width,
-                         title)
+        popup_width, column_widths = self.calculate_table_widths(msg_info,
+                                                                 len(title))
+        widgets = self.make_table_with_categories(msg_info, column_widths)
+        super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
