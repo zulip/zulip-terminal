@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import urwid
+from typing_extensions import Literal
 
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
@@ -1173,6 +1174,9 @@ class EditModeView(PopUpView):
         return super().keypress(size, key)
 
 
+EditHistoryTag = Literal['(Current Version)', '(Original Version)', '']
+
+
 class EditHistoryView(PopUpView):
     def __init__(self, controller: Any, message: Message,
                  message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
@@ -1184,7 +1188,57 @@ class EditHistoryView(PopUpView):
         self.time_mentions = time_mentions
         width = 64
         widgets = []  # type: List[Any]
+
+        message_history = self.controller.model.fetch_message_history(
+            message_id=self.message['id'],
+        )
+        for index, snapshot in enumerate(message_history):
+            if len(widgets) > 0:  # Separate edit blocks with newline.
+                widgets.append(urwid.Text(''))
+
+            tag = ''  # type: EditHistoryTag
+            if index == 0:
+                tag = '(Original Version)'
+            elif index == len(message_history) - 1:
+                tag = '(Current Version)'
+
+            widgets.append(self._make_edit_block(snapshot, tag))
+
+        if not widgets:
+            feedback = [
+                'Could not find any message history. See ',
+                ('msg_bold', 'footer'),
+                ' for the error message.',
+            ]
+            widgets.append(urwid.Text(feedback, align='center'))
+
         super().__init__(controller, widgets, 'MSG_INFO', width, title)
+
+    def _make_edit_block(self, snapshot: Dict[str, Any],
+                         tag: EditHistoryTag) -> Any:
+        content = snapshot['content']
+        topic = snapshot['topic']
+        timestamp = time.ctime(snapshot['timestamp'])[:-5]
+
+        header = [
+            urwid.Text(('edit_topic', topic)),
+            # 18 = max(EditHistoryTag).
+            (18, urwid.Text(('edit_tag', tag), align='right')),
+        ]
+        subheader = [
+            # 19 = len(timestamp).
+            (19, urwid.Text(('edit_time', timestamp))),
+        ]
+
+        edit_block = [
+            urwid.AttrWrap(
+                urwid.Columns(header, dividechars=2),
+                'popup_contrast',
+            ),
+            urwid.Columns(subheader, dividechars=2),
+            urwid.Text(content),
+        ]
+        return urwid.Pile(edit_block)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (is_command_key('GO_BACK', key)
