@@ -807,12 +807,20 @@ class TestModel:
     # TODO: Ideally message_fixture would use standardized ids?
     @pytest.mark.parametrize(['user_id', 'vary_each_msg',
                               'types_when_notify_called'], [
-        (5140, {}, []),  # message_fixture sender_id is 5140
-        (5179, {'flags': ['mentioned']}, ['stream', 'private']),
-        (5179, {'flags': ['wildcard_mentioned']}, ['stream', 'private']),
-        (5179, {'flags': []}, ['private']),
-    ], ids=['self_message', 'mentioned_msg', 'wildcard_mentioned',
-            'not_mentioned'])
+        (5140, {'flags': ['mentioned', 'wildcard_mentioned']},
+            []),  # message_fixture sender_id is 5140
+        (5179, {'flags': ['mentioned']},
+            ['stream', 'private']),
+        (5179, {'flags': ['wildcard_mentioned']},
+            ['stream', 'private']),
+        (5179, {'flags': []},
+            ['private']),
+    ], ids=[
+        'not_notified_since_self_message',
+        'notified_stream_and_private_since_directly_mentioned',
+        'notified_stream_and_private_since_wildcard_mentioned',
+        'notified_private_since_private_message',
+    ])
     def test_notify_users_calling_msg_type(self, mocker, model,
                                            message_fixture,
                                            user_id,
@@ -821,7 +829,9 @@ class TestModel:
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
         notify = mocker.patch('zulipterminal.model.notify')
+
         model.notify_user(message_fixture)
+
         if message_fixture['type'] in types_when_notify_called:
             who = message_fixture['type']
             if who == 'stream':
