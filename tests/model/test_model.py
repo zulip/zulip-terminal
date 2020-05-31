@@ -805,33 +805,37 @@ class TestModel:
         assert model.index['topics'][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
-    @pytest.mark.parametrize(['user_id', 'vary_each_msg',
+    @pytest.mark.parametrize(['user_id', 'vary_each_msg', 'stream_setting',
                               'types_when_notify_called'], [
-        (5140, {'flags': ['mentioned', 'wildcard_mentioned']},
+        (5140, {'flags': ['mentioned', 'wildcard_mentioned']}, True,
             []),  # message_fixture sender_id is 5140
-        (5179, {'flags': ['mentioned']},
+        (5179, {'flags': ['mentioned']}, False,
             ['stream', 'private']),
-        (5179, {'flags': ['wildcard_mentioned']},
+        (5179, {'flags': ['wildcard_mentioned']}, False,
             ['stream', 'private']),
-        (5179, {'flags': []},
+        (5179, {'flags': []}, True,
+            ['stream']),
+        (5179, {'flags': []}, False,
             ['private']),
     ], ids=[
         'not_notified_since_self_message',
         'notified_stream_and_private_since_directly_mentioned',
         'notified_stream_and_private_since_wildcard_mentioned',
+        'notified_stream_since_stream_has_desktop_notifications',
         'notified_private_since_private_message',
     ])
     def test_notify_users_calling_msg_type(self, mocker, model,
                                            message_fixture,
                                            user_id,
                                            vary_each_msg,
+                                           stream_setting,
                                            types_when_notify_called):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
         if 'stream_id' in message_fixture:
             model.stream_dict.update(
                 {message_fixture['stream_id']:
-                    {'desktop_notifications': False}}
+                    {'desktop_notifications': stream_setting}}
             )
         notify = mocker.patch('zulipterminal.model.notify')
 
