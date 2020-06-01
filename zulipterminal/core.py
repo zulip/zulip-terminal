@@ -4,7 +4,7 @@ import sys
 import time
 from functools import partial
 from platform import platform
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 import urwid
 import zulip
@@ -88,11 +88,18 @@ class Controller:
     def draw_screen(self, *args: Any, **kwargs: Any) -> None:
         self.loop.draw_screen()
 
+    def maximum_popup_dimensions(self) -> Tuple[int, int]:
+        """
+        Returns 3/4th of the screen estate's columns and rows.
+        """
+        max_cols, max_rows = map(lambda num: 3 * num // 4,
+                                 self.loop.screen.get_cols_rows())
+        return max_cols, max_rows
+
     def show_pop_up(self, to_show: Any) -> None:
         double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
                             rline='║', lline='║',
                             blcorner='╚', bline='═', brcorner='╝')
-        cols, rows = self.loop.screen.get_cols_rows()
         self.loop.widget = urwid.Overlay(
             urwid.LineBox(to_show,
                           to_show.title,
@@ -102,7 +109,7 @@ class Controller:
             valign='middle',
             # +2 to both of the following, due to LineBox
             width=to_show.width + 2,
-            height=min(3 * rows // 4, to_show.height) + 2
+            height=to_show.height + 2,
         )
 
     def exit_popup(self) -> None:
@@ -122,8 +129,8 @@ class Controller:
                                           "# {}".format(name))
         self.show_pop_up(show_stream_view)
 
-    def popup_with_message(self, text: str, width: int, height: int) -> None:
-        self.show_pop_up(NoticeView(self, text, width, height, "NOTICE"))
+    def popup_with_message(self, text: str, width: int) -> None:
+        self.show_pop_up(NoticeView(self, text, width, "NOTICE"))
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

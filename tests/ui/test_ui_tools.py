@@ -1154,10 +1154,13 @@ class TestPopUpView:
     @pytest.fixture(autouse=True)
     def pop_up_view(self, mocker):
         self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         self.command = 'COMMAND'
         self.title = 'Generic title'
         self.width = 16
         self.widget = mocker.Mock()
+        mocker.patch.object(self.widget, 'rows', return_value=1)
         self.widgets = [self.widget, ]
         self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
                                         return_value=[])
@@ -1208,6 +1211,8 @@ class TestHelpMenu:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.help_view = HelpView(self.controller, 'Help Menu')
 
@@ -1279,6 +1284,8 @@ class TestStreamInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.stream_info_view = StreamInfoView(self.controller, color='',
                                                desc='', title='# stream-name')
@@ -1303,6 +1310,8 @@ class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch, message_fixture):
         self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
                                          'Message Information')
@@ -1321,7 +1330,7 @@ class TestMsgInfoView:
         assert self.controller.exit_popup.called
 
     def test_height_noreactions(self):
-        expected_height = 5
+        expected_height = 4
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -1368,7 +1377,8 @@ class TestMsgInfoView:
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         self.msg_info_view = MsgInfoView(self.controller, varied_message,
                                          'Message Information')
-        expected_height = 8
+        # 7 = 3 labels + 4 reactions.
+        expected_height = 7
         assert self.msg_info_view.height == expected_height
 
     def test_keypress_navigation(self, mocker,
