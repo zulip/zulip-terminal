@@ -46,6 +46,10 @@ class TestController:
     def test_initial_editor_mode(self, controller):
         assert not controller.is_in_editor_mode()
 
+    def test_current_editor_error_if_no_editor(self, controller):
+        with pytest.raises(AssertionError):
+            controller.current_editor()
+
     def test_editor_mode_entered_from_initial(self, mocker, controller):
         editor = mocker.Mock()
 
@@ -53,6 +57,12 @@ class TestController:
 
         assert controller.is_in_editor_mode()
         assert controller.current_editor() == editor
+
+    def test_editor_mode_error_on_multiple_enter(self, mocker, controller):
+        controller.enter_editor_mode_with(mocker.Mock())
+
+        with pytest.raises(AssertionError):
+            controller.enter_editor_mode_with(mocker.Mock())
 
     def test_editor_mode_exits_after_entering(self, mocker, controller):
         controller.enter_editor_mode_with(mocker.Mock())
