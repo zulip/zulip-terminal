@@ -771,10 +771,11 @@ PopUpViewTableContent = Sequence[Tuple[str, Sequence[Tuple[str, str]]]]
 
 class PopUpView(urwid.ListBox):
     def __init__(self, controller: Any, widgets: List[Any],
-                 command: str) -> None:
+                 command: str, requested_width: int) -> None:
         self.controller = controller
         self.command = command
         self.log = urwid.SimpleFocusListWalker(widgets)
+        self.width = requested_width
         super().__init__(self.log)
 
     @staticmethod
@@ -838,14 +839,13 @@ class NoticeView(PopUpView):
                  notice_text: str,
                  width: int,
                  height: int) -> None:
-        self.width = width
         self.height = height
         widgets = [
             urwid.Divider(),
             urwid.Padding(urwid.Text(notice_text), left=1, right=1),
             urwid.Divider(),
         ]
-        super().__init__(controller, widgets, 'GO_BACK')
+        super().__init__(controller, widgets, 'GO_BACK', width)
 
 
 class HelpView(PopUpView):
@@ -862,12 +862,11 @@ class HelpView(PopUpView):
 
         popup_width, column_widths = self.calculate_table_widths(
             help_menu_content)
-        self.width = popup_width
         widgets = self.make_table_with_categories(help_menu_content,
                                                   column_widths)
         self.height = len(widgets)
 
-        super().__init__(controller, widgets, 'HELP')
+        super().__init__(controller, widgets, 'HELP', popup_width)
 
 
 class PopUpConfirmationView(urwid.Overlay):
@@ -913,10 +912,10 @@ class StreamInfoView(PopUpView):
         # Add 4 (for 2 Unicode characters on either side) to the popup title
         # length to make sure that the title gets displayed even when the
         # content is shorter than the title length (+4 Unicode characters).
-        self.width = max(len(desc) + 2, len("# {}".format(name)) + 4)
+        width = max(len(desc) + 2, len("# {}".format(name)) + 4)
         self.height = 2
         stream_info_content = [urwid.Text(desc, align='center')]
-        super().__init__(controller, stream_info_content, 'STREAM_DESC')
+        super().__init__(controller, stream_info_content, 'STREAM_DESC', width)
 
 
 class MsgInfoView(PopUpView):
@@ -945,7 +944,7 @@ class MsgInfoView(PopUpView):
                   else len(data) + 2)
                   for field, data in msg_info.items()]
         max_widths = [max(width) for width in zip(*widths)]
-        self.width = sum(max_widths)
+        width = sum(max_widths)
         self.height = len(msg_info['Reactions']) + 4 if msg['reactions'] else 5
 
         msg_info_content = [urwid.AttrWrap(
@@ -956,4 +955,4 @@ class MsgInfoView(PopUpView):
                 None if index % 2 else 'popup_contrast')
              for index, (field, data) in enumerate(msg_info.items())]
 
-        super().__init__(controller, msg_info_content, 'MSG_INFO')
+        super().__init__(controller, msg_info_content, 'MSG_INFO', width)

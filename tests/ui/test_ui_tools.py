@@ -1156,6 +1156,7 @@ class TestPopUpView:
     def pop_up_view(self, mocker):
         self.controller = mocker.Mock()
         self.command = 'COMMAND'
+        self.width = 16
         self.widget = mocker.Mock()
         self.widgets = [self.widget, ]
         self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
@@ -1163,11 +1164,12 @@ class TestPopUpView:
         self.super_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__')
         self.super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.pop_up_view = PopUpView(self.controller, self.widgets,
-                                     self.command)
+                                     self.command, self.width)
 
     def test_init(self):
         assert self.pop_up_view.controller == self.controller
         assert self.pop_up_view.command == self.command
+        assert self.pop_up_view.width == self.width
         self.list_walker.assert_called_once_with(self.widgets)
         self.super_init.assert_called_once_with(self.pop_up_view.log)
 
