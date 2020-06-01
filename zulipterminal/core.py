@@ -34,8 +34,7 @@ class Controller:
         self.autohide = autohide
         self.notify_enabled = notify
 
-        self._editor_mode = False
-        self._editor = None  # type: Any
+        self._editor = None  # type: Optional[Any]
 
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
@@ -47,18 +46,17 @@ class Controller:
         self.model.poll_for_events()
 
     def is_in_editor_mode(self) -> bool:
-        return self._editor_mode
+        return self._editor is not None
 
     def enter_editor_mode_with(self, editor: Any) -> None:
-        # if not in the editor mode already set editor_mode to True.
-        if not self._editor_mode:
-            self._editor_mode = True
-            self._editor = editor
+        assert self._editor is None, "Already in editor mode"
+        self._editor = editor
 
     def exit_editor_mode(self) -> None:
-        self._editor_mode = False
+        self._editor = None
 
     def current_editor(self) -> Any:
+        assert self._editor is not None, "Current editor is None"
         return self._editor
 
     @asynch
