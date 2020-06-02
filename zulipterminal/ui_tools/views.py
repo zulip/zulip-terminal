@@ -7,7 +7,7 @@ import urwid
 from typing_extensions import Literal
 
 from zulipterminal.config.keys import (
-    HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
+    HELP_CATEGORIES, KEY_BINDINGS, is_command_key, keys_for_command,
 )
 from zulipterminal.config.symbols import (
     CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
@@ -1089,12 +1089,24 @@ class MsgInfoView(PopUpView):
                  time_mentions: List[Tuple[str, str]],
                  ) -> None:
         self.msg = msg
+        self.message_links = message_links
+        self.time_mentions = time_mentions
 
         msg_info = [
             ('', [('Date & Time', time.ctime(msg['timestamp'])[:-5]),
                   ('Sender', msg['sender_full_name']),
                   ('Sender\'s Email ID', msg['sender_email'])]),
         ]
+        # Only show the 'Edit History' label for edited messages.
+        self.show_edit_history_label = (
+            self.msg['id'] in controller.model.index['edited_messages']
+            and controller.model.initial_data['realm_allow_edit_history']
+        )
+        if self.show_edit_history_label:
+            keys = ', '.join(map(repr, keys_for_command('EDIT_HISTORY')))
+            msg_info[0][1].append(
+                ('Edit History', 'Press {} to view'.format(keys))
+            )
         # Render the category using the existing table methods if links exist.
         if message_links:
             msg_info.append(('Message Links', []))
@@ -1133,11 +1145,24 @@ class MsgInfoView(PopUpView):
                     MessageLinkButton(controller, caption, link, display_attr)
                 )
 
-            # 5 = 3 labels + 1 newline + 1 'Message Links' category label.
-            widgets = widgets[:5] + message_link_widgets + widgets[5:]
+            # slice_index = Number of labels before message links + 1 newline
+            #               + 1 'Message Links' category label.
+            slice_index = len(msg_info[0][1]) + 2
+            widgets = (widgets[:slice_index] + message_link_widgets
+                       + widgets[slice_index:])
             popup_width = max(popup_width, message_link_width)
 
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if (is_command_key('EDIT_HISTORY', key)
+                and self.show_edit_history_label):
+            self.controller.show_edit_history(
+                message=self.msg,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+        return super().keypress(size, key)
 
 
 class EditModeView(PopUpView):

@@ -1504,6 +1504,12 @@ class TestMsgInfoView:
         mocker.patch.object(self.controller, 'maximum_popup_dimensions',
                             return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        # The subsequent patches (index and initial_data) set
+        # show_edit_history_label to False for this autoused fixture.
+        self.controller.model.index = {'edited_messages': set()}
+        self.controller.model.initial_data = {
+            'realm_allow_edit_history': False,
+        }
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
                                          'Message Information', OrderedDict(),
                                          list())
@@ -1513,6 +1519,45 @@ class TestMsgInfoView:
         size = (200, 20)
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', keys_for_command('EDIT_HISTORY'))
+    @pytest.mark.parametrize('realm_allow_edit_history', [True, False])
+    @pytest.mark.parametrize('edited_message_id', [
+            537286,
+            537287,
+            537288,
+        ],
+        ids=[
+            'stream_message_id',
+            'pm_message_id',
+            'group_pm_message_id',
+        ]
+    )
+    def test_keypress_edit_history(self, message_fixture, key,
+                                   realm_allow_edit_history,
+                                   edited_message_id):
+        size = (200, 20)
+        self.controller.model.index = {
+            'edited_messages': set([edited_message_id]),
+        }
+        self.controller.model.initial_data = {
+            'realm_allow_edit_history': realm_allow_edit_history,
+        }
+        msg_info_view = MsgInfoView(self.controller, message_fixture,
+                                    title='Message Information',
+                                    message_links=OrderedDict(),
+                                    time_mentions=list())
+
+        msg_info_view.keypress(size, key)
+
+        if msg_info_view.show_edit_history_label:
+            self.controller.show_edit_history.assert_called_once_with(
+                message=message_fixture,
+                message_links=OrderedDict(),
+                time_mentions=list(),
+            )
+        else:
+            self.controller.show_edit_history.assert_not_called()
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('MSG_INFO')})
