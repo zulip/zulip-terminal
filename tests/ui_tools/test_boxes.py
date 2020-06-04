@@ -208,7 +208,9 @@ class TestPanelSearchBox:
     def test_keypress_ENTER(self, panel_search_box,
                             enter_key, log, expect_body_focus_set):
         size = (20,)
-        panel_search_box.panel_view.view.controller.editor_mode = True
+        panel_search_box.panel_view.view.controller.is_in_editor_mode = (
+            lambda: True
+        )
         panel_search_box.panel_view.log = log
         panel_search_box.set_caption("")
         panel_search_box.edit_text = "key words"
@@ -222,7 +224,8 @@ class TestPanelSearchBox:
         assert panel_search_box.edit_text == "key words"
 
         # Leave editor mode
-        assert panel_search_box.panel_view.view.controller.editor_mode is False
+        (panel_search_box.panel_view.view.controller.exit_editor_mode
+         .assert_called_once_with())
 
         # Switch focus to body; if have results, move to them
         panel_search_box.panel_view.set_focus.assert_called_once_with("body")
@@ -236,7 +239,9 @@ class TestPanelSearchBox:
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, panel_search_box, back_key):
         size = (20,)
-        panel_search_box.panel_view.view.controller.editor_mode = True
+        panel_search_box.panel_view.view.controller.is_in_editor_mode = (
+            lambda: True
+        )
         panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 
@@ -247,7 +252,8 @@ class TestPanelSearchBox:
         assert panel_search_box.edit_text == panel_search_box.search_text
 
         # Leave editor mode
-        assert panel_search_box.panel_view.view.controller.editor_mode is False
+        (panel_search_box.panel_view.view.controller.exit_editor_mode
+         .assert_called_once_with())
 
         # Switch focus to body; focus should return to previous in body
         panel_search_box.panel_view.set_focus.assert_called_once_with("body")

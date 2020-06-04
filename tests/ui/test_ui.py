@@ -192,19 +192,22 @@ class TestView:
         super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
                                       ".keypress")
 
-        view.controller.editor_mode = False
+        view.controller.is_in_editor_mode = lambda: False
+
         view.keypress(size, key)
+
         super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('key', keys_for_command('ALL_MENTIONS'))
     def test_keypress_ALL_MENTIONS(self, view, mocker, key):
         view.body = mocker.Mock()
         view.body.focus_col = None
-        view.controller.editor_mode = False
+        view.controller.is_in_editor_mode = lambda: False
         size = (20,)
         view.model.controller.show_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
+
         view.model.controller.show_all_mentions.assert_called_once_with(view)
         assert view.body.focus_col == 1
 
@@ -222,16 +225,17 @@ class TestView:
         size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
-        view.controller.editor_mode = False
+        view.controller.is_in_editor_mode = lambda: False
 
         view.body.focus_position = None
 
         view.keypress(size, key)
+
         view.users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
         view.user_search.set_edit_text.assert_called_once_with("")
-        assert view.controller.editor_mode is True
-        assert view.controller.editor == view.user_search
+        (view.controller.enter_editor_mode_with
+         .assert_called_once_with(view.user_search))
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
@@ -249,29 +253,31 @@ class TestView:
         size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
-        view.controller.editor_mode = False
+        view.controller.is_in_editor_mode = lambda: False
 
         view.body.focus_position = None
 
         view.keypress(size, key)
+
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
         (view.stream_w.stream_search_box.set_edit_text
          .assert_called_once_with(""))
-        assert view.controller.editor_mode is True
-        assert view.controller.editor == view.stream_w.stream_search_box
+        (view.controller.enter_editor_mode_with
+         .assert_called_once_with(view.stream_w.stream_search_box))
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
     def test_keypress_edit_mode(self, view, mocker, key):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
-        size = (20,)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
 
-        # Test Edit Mode Keypress
-        view.controller.editor_mode = True
+        view.controller.is_in_editor_mode = lambda: True
         size = (130, 28)
+
         view.keypress(size, key)
-        view.controller.editor.keypress.assert_called_once_with((28,), key)
+
+        (view.controller.current_editor().keypress
+         .assert_called_once_with((28,), key))

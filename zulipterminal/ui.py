@@ -146,8 +146,8 @@ class View(urwid.WidgetWrap):
     # FIXME: The type of size should be urwid_Size; this needs checking
     def keypress(self, size: Tuple[int, int], key: str) -> Optional[str]:
         self.model.new_user_input = True
-        if self.controller.editor_mode:
-            return self.controller.editor.keypress((size[1],), key)
+        if self.controller.is_in_editor_mode():
+            return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
         elif (is_command_key('SEARCH_MESSAGES', key)
                 or is_command_key('NEXT_UNREAD_TOPIC', key)
@@ -172,8 +172,7 @@ class View(urwid.WidgetWrap):
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
-            self.controller.editor_mode = True
-            self.controller.editor = self.user_search
+            self.controller.enter_editor_mode_with(self.user_search)
             return key
         elif (is_command_key('SEARCH_STREAMS', key)
               or is_command_key('SEARCH_TOPICS', key)):
@@ -187,8 +186,7 @@ class View(urwid.WidgetWrap):
             else:
                 search_box = self.stream_w.stream_search_box
             search_box.set_edit_text("")
-            self.controller.editor_mode = True
-            self.controller.editor = search_box
+            self.controller.enter_editor_mode_with(search_box)
             return key
         elif is_command_key('HELP', key):
             # Show help menu

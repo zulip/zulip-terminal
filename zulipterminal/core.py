@@ -34,8 +34,8 @@ class Controller:
         self.autohide = autohide
         self.notify_enabled = notify
 
-        self.editor_mode = False
-        self.editor = None  # type: Any
+        self._editor_mode = False
+        self._editor = None  # type: Any
 
         self.show_loading()
         self.client = zulip.Client(config_file=config_file,
@@ -47,19 +47,19 @@ class Controller:
         self.model.poll_for_events()
 
     def is_in_editor_mode(self) -> bool:
-        return self.editor_mode
+        return self._editor_mode
 
     def enter_editor_mode_with(self, editor: Any) -> None:
         # if not in the editor mode already set editor_mode to True.
-        if not self.editor_mode:
-            self.editor_mode = True
-            self.editor = editor
+        if not self._editor_mode:
+            self._editor_mode = True
+            self._editor = editor
 
     def exit_editor_mode(self) -> None:
-        self.editor_mode = False
+        self._editor_mode = False
 
     def current_editor(self) -> Any:
-        return self.editor
+        return self._editor
 
     @asynch
     def show_loading(self) -> None:
@@ -270,7 +270,7 @@ class Controller:
             self.model.msg_view.extend(w_list, focus_position)
         else:
             self.model.msg_view.extend(w_list)
-        self.editor_mode = False
+        self.exit_editor_mode()
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
