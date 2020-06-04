@@ -102,14 +102,14 @@ class Controller:
     def draw_screen(self, *args: Any, **kwargs: Any) -> None:
         self.loop.draw_screen()
 
-    def show_pop_up(self, to_show: Any, title: str) -> None:
+    def show_pop_up(self, to_show: Any) -> None:
         double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
                             rline='║', lline='║',
                             blcorner='╚', bline='═', brcorner='╝')
         cols, rows = self.loop.screen.get_cols_rows()
         self.loop.widget = urwid.Overlay(
             urwid.LineBox(to_show,
-                          title,
+                          to_show.title,
                           **double_lines),
             self.view,
             align='center',
@@ -123,20 +123,21 @@ class Controller:
         self.loop.widget = self.view
 
     def show_help(self) -> None:
-        help_view = HelpView(self)
-        self.show_pop_up(help_view, "Help Menu (up/down scrolls)")
+        help_view = HelpView(self, "Help Menu (up/down scrolls)")
+        self.show_pop_up(help_view)
 
     def show_msg_info(self, msg: Message) -> None:
-        msg_info_view = MsgInfoView(self, msg)
-        self.show_pop_up(msg_info_view,
-                         "Message Information (up/down scrolls)")
+        msg_info_view = MsgInfoView(self, msg,
+                                    "Message Information (up/down scrolls)")
+        self.show_pop_up(msg_info_view)
 
     def show_stream_info(self, color: str, name: str, desc: str) -> None:
-        show_stream_view = StreamInfoView(self, color, name, desc)
-        self.show_pop_up(show_stream_view, "# {}".format(name))
+        show_stream_view = StreamInfoView(self, color, desc,
+                                          "# {}".format(name))
+        self.show_pop_up(show_stream_view)
 
     def popup_with_message(self, text: str, width: int, height: int) -> None:
-        self.show_pop_up(NoticeView(self, text, width, height), "NOTICE")
+        self.show_pop_up(NoticeView(self, text, width, height, "NOTICE"))
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
