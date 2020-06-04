@@ -43,6 +43,23 @@ class TestController:
         self.model.poll_for_events.assert_called_once_with()
         assert controller.theme == self.theme
 
+    def test_initial_editor_mode(self, controller):
+        assert not controller.is_in_editor_mode()
+
+    def test_editor_mode_entered_from_initial(self, mocker, controller):
+        editor = mocker.Mock()
+
+        controller.enter_editor_mode_with(editor)
+
+        assert controller.is_in_editor_mode()
+        assert controller.current_editor() == editor
+
+    def test_editor_mode_exits_after_entering(self, mocker, controller):
+        controller.enter_editor_mode_with(mocker.Mock())
+        controller.exit_editor_mode()
+
+        assert not controller.is_in_editor_mode()
+
     def test_narrow_to_stream(self, mocker, controller,
                               stream_button, index_stream) -> None:
         controller.model.narrow = []
