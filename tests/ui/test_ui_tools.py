@@ -1155,6 +1155,7 @@ class TestPopUpView:
     def pop_up_view(self, mocker):
         self.controller = mocker.Mock()
         self.command = 'COMMAND'
+        self.title = 'Generic title'
         self.width = 16
         self.widget = mocker.Mock()
         self.widgets = [self.widget, ]
@@ -1163,11 +1164,12 @@ class TestPopUpView:
         self.super_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__')
         self.super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.pop_up_view = PopUpView(self.controller, self.widgets,
-                                     self.command, self.width)
+                                     self.command, self.width, self.title)
 
     def test_init(self):
         assert self.pop_up_view.controller == self.controller
         assert self.pop_up_view.command == self.command
+        assert self.pop_up_view.title == self.title
         assert self.pop_up_view.width == self.width
         self.list_walker.assert_called_once_with(self.widgets)
         self.super_init.assert_called_once_with(self.pop_up_view.log)
@@ -1207,7 +1209,7 @@ class TestHelpMenu:
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.help_view = HelpView(self.controller)
+        self.help_view = HelpView(self.controller, 'Help Menu')
 
     def test_keypress_any_key(self):
         key = "a"
@@ -1278,7 +1280,8 @@ class TestStreamInfoView:
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.stream_info_view = StreamInfoView(self.controller, '', '', '')
+        self.stream_info_view = StreamInfoView(self.controller, color='',
+                                               desc='', title='# stream-name')
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})
@@ -1301,7 +1304,8 @@ class TestMsgInfoView:
     def mock_external_classes(self, mocker, monkeypatch, message_fixture):
         self.controller = mocker.Mock()
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.msg_info_view = MsgInfoView(self.controller, message_fixture)
+        self.msg_info_view = MsgInfoView(self.controller, message_fixture,
+                                         'Message Information')
 
     def test_keypress_any_key(self):
         key = "a"
@@ -1316,8 +1320,7 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_height_noreactions(self, message_fixture):
-        self.msg_info_view = MsgInfoView(self.controller, message_fixture)
+    def test_height_noreactions(self):
         expected_height = 5
         assert self.msg_info_view.height == expected_height
 
@@ -1363,7 +1366,8 @@ class TestMsgInfoView:
         ])
     def test_height_reactions(self, message_fixture, to_vary_in_each_message):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
-        self.msg_info_view = MsgInfoView(self.controller, varied_message)
+        self.msg_info_view = MsgInfoView(self.controller, varied_message,
+                                         'Message Information')
         expected_height = 8
         assert self.msg_info_view.height == expected_height
 
