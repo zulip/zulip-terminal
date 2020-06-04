@@ -33,10 +33,7 @@ class WriteBox(urwid.Pile):
             self.contents.clear()
 
     def set_editor_mode(self) -> None:
-        # if not in the editor mode already set editor_mode to True.
-        if not self.view.controller.editor_mode:
-            self.view.controller.editor_mode = True
-            self.view.controller.editor = self
+        self.view.controller.enter_editor_mode_with(self)
 
     def private_box_view(self, button: Any=None, email: str='') -> None:
         self.set_editor_mode()
@@ -174,7 +171,7 @@ class WriteBox(urwid.Pile):
                     self.keypress(size, 'esc')
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
-            self.view.controller.editor_mode = False
+            self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus('body')
         elif is_command_key('TAB', key):
@@ -873,12 +870,12 @@ class SearchBox(urwid.Pile):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('GO_BACK', key):
             self.text_box.set_edit_text("")
-            self.controller.editor_mode = False
+            self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus('body')
             return key
 
         elif is_command_key('ENTER', key):
-            self.controller.editor_mode = False
+            self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus('body')
             return key
@@ -907,13 +904,13 @@ class PanelSearchBox(urwid.Edit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
-            self.panel_view.view.controller.editor_mode = False
+            self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([('filter_results', 'Search Results'), ' '])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
                 self.panel_view.body.set_focus(0)
         elif is_command_key('GO_BACK', key):
-            self.panel_view.view.controller.editor_mode = False
+            self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, 'esc')

@@ -431,7 +431,7 @@ class TestStreamsView:
         self.view.pinned_streams = to_pin
         stream_names.sort(key=lambda stream_name: stream_name in [
             stream[0] for stream in to_pin], reverse=True)
-        self.view.controller.editor_mode = True
+        self.view.controller.is_in_editor_mode = lambda: True
         search_box = "SEARCH_BOX"
         stream_view.streams_btn_list = [
             mocker.Mock(stream_name=stream_name)
@@ -551,7 +551,7 @@ class TestTopicsView:
             'FOO', 'FOOBAR', 'foo', 'fan',
             'boo', 'BOO', 'bar', '(no topic)',
         ]
-        self.view.controller.editor_mode = True
+        self.view.controller.is_in_editor_mode = lambda: True
         new_text = new_text
         search_box = "SEARCH_BOX"
         topic_view.topics_btn_list = [
@@ -817,8 +817,8 @@ class TestMiddleColumnView:
 
         mid_col_view.keypress(size, key)
 
-        assert mid_col_view.controller.editor_mode is True
-        assert mid_col_view.controller.editor == mid_col_view.search_box
+        (mid_col_view.controller.enter_editor_mode_with
+         .assert_called_once_with(mid_col_view.search_box))
         mid_col_view.set_focus.assert_called_once_with('header')
 
     @pytest.mark.parametrize('enter_key', keys_for_command('ENTER'))
@@ -969,7 +969,7 @@ class TestRightColumnView:
 
     def test_update_user_list_editor_mode(self, mocker, right_col_view):
         right_col_view.view.controller.update_screen = mocker.Mock()
-        right_col_view.view.controller.editor_mode = False
+        right_col_view.view.controller.is_in_editor_mode = lambda: False
 
         right_col_view.update_user_list("SEARCH_BOX", "NEW_TEXT")
 
@@ -984,7 +984,7 @@ class TestRightColumnView:
     ])
     def test_update_user_list(self, right_col_view, mocker,
                               search_string, assert_list, match_return_value):
-        right_col_view.view.controller.editor_mode = True
+        right_col_view.view.controller.is_in_editor_mode = lambda: True
         self.view.users = ["USER1", "USER2"]
         mocker.patch(VIEWS + ".match_user", return_value=match_return_value)
         mocker.patch(VIEWS + ".UsersView")
@@ -1019,7 +1019,7 @@ class TestRightColumnView:
             'user_id': 1,
             'status': status
         }]
-        self.view.controller.editor_mode = editor_mode
+        self.view.controller.is_in_editor_mode = lambda: editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
         right_col_view = RightColumnView(width, self.view)

@@ -265,7 +265,7 @@ class StreamsView(urwid.Frame):
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
-        if not self.view.controller.editor_mode:
+        if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
@@ -332,7 +332,7 @@ class TopicsView(urwid.Frame):
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
-        if not self.view.controller.editor_mode:
+        if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong topics list.
@@ -480,8 +480,7 @@ class MiddleColumnView(urwid.Frame):
             return super().keypress(size, key)
 
         elif is_command_key('SEARCH_MESSAGES', key):
-            self.controller.editor_mode = True
-            self.controller.editor = self.search_box
+            self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus('header')
             return key
 
@@ -570,7 +569,7 @@ class RightColumnView(urwid.Frame):
                 or (user_list is not None and search_box is None
                     and new_text == ""))
 
-        if not self.view.controller.editor_mode and not user_list:
+        if not self.view.controller.is_in_editor_mode() and not user_list:
             return
         if not self.allow_update_user_list and new_text == "":
             return
@@ -599,7 +598,7 @@ class RightColumnView(urwid.Frame):
         for user in users:
             # Only include `inactive` users in search result.
             if (user['status'] == 'inactive'
-                    and not self.view.controller.editor_mode):
+                    and not self.view.controller.is_in_editor_mode()):
                 continue
             unread_count = (self.view.model.unread_counts['unread_pms'].
                             get(user['user_id'], 0))
