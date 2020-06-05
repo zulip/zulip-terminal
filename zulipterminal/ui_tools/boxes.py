@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from datetime import date, datetime
 from sys import platform
 from time import ctime, time
@@ -92,21 +92,22 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def generic_autocomplete(self, text: str, state: int) -> Optional[str]:
-        if text.startswith('@_'):
-            typeahead = self.autocomplete_mentions(text, '@_')
-        elif text.startswith('@'):
-            typeahead = self.autocomplete_mentions(text, '@')
-        elif text.startswith('#'):
-            typeahead = self.autocomplete_streams(text, '#')
-        elif text.startswith(':'):
-            typeahead = self.autocomplete_emojis(text, ':')
-        else:
-            return text
+        autocomplete_map = OrderedDict([
+                ('@_', self.autocomplete_mentions),
+                ('@', self.autocomplete_mentions),
+                ('#', self.autocomplete_streams),
+                (':', self.autocomplete_emojis),
+            ])
 
-        try:
-            return typeahead[state]
-        except (IndexError, TypeError):
-            return None
+        for prefix, autocomplete_func in autocomplete_map.items():
+            if text.startswith(prefix):
+                typeaheads = autocomplete_func(text, prefix)
+                try:
+                    return typeaheads[state]
+                except (IndexError, TypeError):
+                    return None
+
+        return text
 
     def autocomplete_mentions(self, text: str, prefix_string: str
                               ) -> List[str]:
