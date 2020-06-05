@@ -97,9 +97,9 @@ class WriteBox(urwid.Pile):
         elif text.startswith('@'):
             typeahead = self.autocomplete_mentions(text, '@')
         elif text.startswith('#'):
-            typeahead = self.autocomplete_streams(text)
+            typeahead = self.autocomplete_streams(text, '#')
         elif text.startswith(':'):
-            typeahead = self.autocomplete_emojis(text)
+            typeahead = self.autocomplete_emojis(text, ':')
         else:
             return text
 
@@ -124,14 +124,16 @@ class WriteBox(urwid.Pile):
 
         return combined_typeahead
 
-    def autocomplete_streams(self, text: str) -> List[str]:
+    def autocomplete_streams(self, text: str, prefix_string: str
+                             ) -> List[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
         stream_typeahead = [('#**{}**'.format(stream[0]), stream[0])
                             for stream in streams_list]
         return match_stream(stream_typeahead, text[1:],
                             self.view.pinned_streams)
 
-    def autocomplete_emojis(self, text: str) -> List[str]:
+    def autocomplete_emojis(self, text: str, prefix_string: str
+                            ) -> List[str]:
         emoji_list = emoji_names.EMOJI_NAMES
         emoji_typeahead = [':{}:'.format(emoji)
                            for emoji in emoji_list
