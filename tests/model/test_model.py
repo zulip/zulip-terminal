@@ -53,6 +53,10 @@ class TestModel:
                                                    num_after=10,
                                                    anchor=None)
         assert model.initial_data == initial_data
+        assert model.server_version == initial_data['zulip_version']
+        assert model.server_feature_level == (
+            initial_data.get('zulip_feature_level')
+        )
         assert model.user_id == user_profile['user_id']
         assert model.user_full_name == user_profile['full_name']
         assert model.user_email == user_profile['email']
@@ -136,6 +140,7 @@ class TestModel:
             'muted_topics',
             'realm_user',
             'realm_user_groups',
+            'zulip_version',
         ]
         model.client.register.assert_called_once_with(
                 event_types=event_types,
