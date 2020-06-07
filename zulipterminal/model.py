@@ -98,6 +98,11 @@ class Model:
         # lose any updates while messages are being fetched.
         self._update_initial_data()
 
+        self.server_version = self.initial_data['zulip_version']
+        self.server_feature_level = (
+            self.initial_data.get('zulip_feature_level')
+        )
+
         self.users = self.get_all_users()
 
         subscriptions = self.initial_data['subscriptions']
@@ -936,7 +941,10 @@ class Model:
             'update_message_flags',
             'muted_topics',
             'realm_user',  # Enables cross_realm_bots
-            'realm_user_groups'
+            'realm_user_groups',
+            # zulip_version and zulip_feature_level are always returned in
+            # POST /register from Feature level 3.
+            'zulip_version',
         ]
         event_types = list(self.event_actions)
         try:

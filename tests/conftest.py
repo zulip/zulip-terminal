@@ -8,6 +8,7 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, UserButton
+from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION
 
 
 @pytest.fixture(autouse=True)
@@ -467,6 +468,10 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
         'last_event_id': -1,
         'muted_topics': [],
         'realm_user_groups': [],
+        # Deliberately use hard-coded zulip version and feature level to avoid
+        # adding extra tests unnecessarily.
+        'zulip_version': MINIMUM_SUPPORTED_SERVER_VERSION[0],
+        'zulip_feature_level': MINIMUM_SUPPORTED_SERVER_VERSION[1],
     }
 
 
