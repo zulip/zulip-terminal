@@ -81,7 +81,9 @@ class TopButton(urwid.Button):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
             self.activate(key)
-        return super().keypress(size, key)
+            return None
+        else:  # This is in the else clause, to avoid multiple activation
+            return super().keypress(size, key)
 
 
 class HomeButton(TopButton):
