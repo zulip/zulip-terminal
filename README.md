@@ -1,6 +1,6 @@
 # Zulip Terminal (zulip-term)
 
-An interactive terminal interface for [Zulip](https://zulipchat.com).
+An interactive terminal interface for [Zulip](https://zulip.com).
 
 [Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](#hot-keys) | [Troubleshooting](#troubleshooting-common-issues) | [Development](#contributor-guidelines)
 
@@ -240,7 +240,7 @@ Come meet us on the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-
 
 ## Contributor Guidelines
 
-Zulip Terminal is being built by the awesome [Zulip](https://zulipchat.com/team) community.
+Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
 
 To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
