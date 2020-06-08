@@ -2,7 +2,7 @@ Hi, are you new to [Zulip](https://github.com/zulip/zulip)? If so, we recommend 
 
 Now let's help you get started with using zulip terminal. First, go ahead and complete the [installation](https://github.com/zulip/zulip-terminal#installation--running). If you encountered any issues, we have common issues and their solutions listed [here](https://github.com/zulip/zulip-terminal#troubleshooting-common-issues).
 
-If you encountered any issues above or have any queries, feel free to ask for help at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or support@zulipchat.com.
+If you encountered any issues above or have any queries, feel free to ask for help at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or support@zulip.com.
 
 ## Tutorial
 I would like you to try out a few of our keyboard shortcuts and send a couple message to help you get familiar with zulip terminal.
