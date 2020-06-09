@@ -17,6 +17,7 @@ from zulipterminal.ui_tools.views import (
     ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
     RightColumnView, StreamInfoView, StreamsView, TopicsView, UsersView,
 )
+from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
 
 VIEWS = "zulipterminal.ui_tools.views"
@@ -1246,8 +1247,11 @@ class TestAboutView:
         mocker.patch.object(self.controller, 'maximum_popup_dimensions',
                             return_value=(64, 64))
         mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
+        server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
         self.about_view = AboutView(self.controller, 'About',
-                                    zt_version='0.5.1+git')
+                                    zt_version=ZT_VERSION,
+                                    server_version=server_version,
+                                    server_feature_level=server_feature_level)
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('ABOUT')})
@@ -1269,6 +1273,21 @@ class TestAboutView:
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.about_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
+
+    def test_feature_level_content(self, mocker, zulip_version):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
+        server_version, server_feature_level = zulip_version
+
+        about_view = AboutView(self.controller, 'About', zt_version=ZT_VERSION,
+                               server_version=server_version,
+                               server_feature_level=server_feature_level)
+
+        assert len(about_view.feature_level_content) == (
+            1 if server_feature_level else 0
+        )
 
 
 class TestPopUpConfirmationView:

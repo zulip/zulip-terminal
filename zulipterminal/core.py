@@ -148,7 +148,11 @@ class Controller:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"))
 
     def show_about(self) -> None:
-        self.show_pop_up(AboutView(self, 'About', zt_version=ZT_VERSION))
+        self.show_pop_up(
+            AboutView(self, 'About', zt_version=ZT_VERSION,
+                      server_version=self.model.server_version,
+                      server_feature_level=self.model.server_feature_level)
+        )
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages

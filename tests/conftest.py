@@ -8,7 +8,9 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, UserButton
-from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION
+from zulipterminal.version import (
+    MINIMUM_SUPPORTED_SERVER_VERSION, SUPPORTED_SERVER_VERSIONS,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -311,6 +313,19 @@ def messages_successful_response() -> Dict[str, Any]:
         'result': 'success',
         'msg': '',
     })
+
+
+@pytest.fixture(
+    params=SUPPORTED_SERVER_VERSIONS,
+    ids=(lambda param:
+         'server_version:{}-server_feature_level:{}'.format(*param)),
+)
+def zulip_version(request):
+    """
+    Fixture to test different components based on the server version and the
+    feature level.
+    """
+    return request.param
 
 
 @pytest.fixture

@@ -879,10 +879,17 @@ class NoticeView(PopUpView):
 
 
 class AboutView(PopUpView):
-    def __init__(self, controller: Any, title: str, *,
-                 zt_version: str) -> None:
+    def __init__(self, controller: Any, title: str, *, zt_version: str,
+                 server_version: str,
+                 server_feature_level: Optional[int]) -> None:
+        self.feature_level_content = (
+            [('Feature level', str(server_feature_level))]
+            if server_feature_level else []
+        )
         contents = [
             ('Application', [('Zulip Terminal', zt_version)]),
+            ('Server', [('Version', server_version)]
+             + self.feature_level_content),
         ]
 
         popup_width, column_widths = self.calculate_table_widths(contents,
