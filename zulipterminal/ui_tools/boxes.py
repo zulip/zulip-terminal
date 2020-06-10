@@ -149,6 +149,7 @@ class WriteBox(urwid.Pile):
                         topic=self.title_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_id,
+                        propagate_mode="change_one",
                     )
                 else:
                     success = self.model.update_private_message(

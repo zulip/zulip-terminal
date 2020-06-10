@@ -417,12 +417,14 @@ class TestModel:
                                    response, return_value,
                                    content="hi!",
                                    subject='Hello',
+                                   propagate_mode="change_one",
                                    msg_id=1):
         self.client.update_message = mocker.Mock(return_value=response)
 
-        result = model.update_stream_message(subject, msg_id, content)
+        result = model.update_stream_message(subject, msg_id, content,
+                                             propagate_mode)
 
-        req = dict(subject=subject, propagate_mode="change_one",
+        req = dict(subject=subject, propagate_mode=propagate_mode,
                    message_id=msg_id, content=content)
         self.client.update_message.assert_called_once_with(req)
 

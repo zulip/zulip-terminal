@@ -314,12 +314,15 @@ class Model:
         return response['result'] == 'success'
 
     def update_stream_message(self, topic: str, msg_id: int,
-                              content: str) -> bool:
+                              content: str, propagate_mode: str) -> bool:
+        assert (propagate_mode == "change_one"
+                or propagate_mode == "change_all"
+                or propagate_mode == "change_later")
+
         request = {
             "message_id": msg_id,
             "content": content,
-            # TODO: Add support for "change_later" & "change_all"
-            "propagate_mode": "change_one",
+            "propagate_mode": propagate_mode,
             "subject": topic,
         }
         response = self.client.update_message(request)
