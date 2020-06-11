@@ -745,17 +745,20 @@ class MessageBox(urwid.Pile):
 
         return super().mouse_event(size, event, button, col, row, focus)
 
+    def set_view(self) -> None:
+        if self.message['type'] == 'private':
+            self.model.controller.view.write_box.private_box_view(
+                email=self.recipients_emails
+            )
+        elif self.message['type'] == 'stream':
+            self.model.controller.view.write_box.stream_box_view(
+                caption=self.message['display_recipient'],
+                title=self.message['subject']
+            )
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
-            if self.message['type'] == 'private':
-                self.model.controller.view.write_box.private_box_view(
-                    email=self.recipients_emails
-                )
-            elif self.message['type'] == 'stream':
-                self.model.controller.view.write_box.stream_box_view(
-                    caption=self.message['display_recipient'],
-                    title=self.message['subject']
-                )
+            self.set_view()
         elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
