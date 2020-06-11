@@ -280,7 +280,7 @@ $ pipenv --three
 
 ```
 $ pipenv install --dev
-$ pipenv run pip3 install -e .[dev]
+$ pipenv run pip3 install -e '.[dev]'
 ```
 
 4. Install mypy manually (mypy is incompatible with pypy, so we don't have this enabled by default)
@@ -298,7 +298,7 @@ $ pipenv run pip3 install -r requirements.txt
 
 2. Install zulip-term, with the development requirements
 ```
-$ pip3 install -e .[dev]
+$ pip3 install -e '.[dev]'
 ```
 
 ### Development tasks
