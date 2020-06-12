@@ -972,3 +972,9 @@ class MsgInfoView(PopUpView):
                                                                  len(title))
         widgets = self.make_table_with_categories(msg_info, column_widths)
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+class EditModeView(PopUpView):
+    def __init__(self, controller: Any):
+        self.selected_mode = "change_one"
+        widgets = [urwid.Text(self.selected_mode)]
+        super().__init__(controller, widgets, 'GO_BACK', 50, 'Topic edit propogation mode')

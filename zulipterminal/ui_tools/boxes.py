@@ -93,7 +93,7 @@ class WriteBox(urwid.Pile):
 
     def stream_box_edit_view(self, caption: str='', title: str='') -> None:
         self.stream_box_view(caption, title)
-        self.edit_mode = urwid.Text("Mode:  Change all")
+        self.edit_mode = EditModeBox(self.model.controller)
 
         self.header_write_box.widget_list.append(
             urwid.LineBox(
@@ -160,7 +160,7 @@ class WriteBox(urwid.Pile):
                         topic=self.title_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_id,
-                        propagate_mode="change_one",
+                        propagate_mode=self.edit_mode.mode
                     )
                 else:
                     success = self.model.update_private_message(
@@ -196,6 +196,10 @@ class WriteBox(urwid.Pile):
             if self.focus_position == 0 and self.to_write_box is None:
                 if self.contents[0][0].focus_col == 0:
                     self.contents[0][0].focus_col = 1
+                    return key
+                elif(self.contents[0][0].focus_col == 1
+                        and len(self.header_write_box.widget_list) == 3):
+                    self.contents[0][0].focus_col = 2
                     return key
                 else:
                     self.contents[0][0].focus_col = 0
@@ -939,3 +943,20 @@ class PanelSearchBox(urwid.Edit):
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, 'esc')
         return super().keypress(size, key)
+
+
+class EditModeBox(urwid.Text):
+    def __init__(self, controller: Any) -> None:
+        from zulipterminal.ui_tools.views import EditModeView
+        self.controller = controller
+        self.edit_mode_popup = EditModeView(self.controller)
+        self.mode = self.edit_mode_popup.selected_mode
+        super().__init__("Mode: " + self.mode)
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key('ENTER', key):
+            self.controller.show_pop_up(self.edit_mode_popup)
+        return key
