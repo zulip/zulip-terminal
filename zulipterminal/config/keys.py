@@ -18,6 +18,11 @@ KEY_BINDINGS = OrderedDict([
         'excluded_from_random_tips': True,
         'key_category': 'general',
     }),
+    ('ABOUT', {
+        'keys': {'meta ?'},
+        'help_text': 'Show/hide about menu',
+        'key_category': 'general',
+    }),
     ('GO_BACK', {
         'keys': {'esc'},
         'help_text': 'Go Back',

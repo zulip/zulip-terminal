@@ -878,6 +878,20 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, 'GO_BACK', width, title)
 
 
+class AboutView(PopUpView):
+    def __init__(self, controller: Any, title: str, *,
+                 zt_version: str) -> None:
+        contents = [
+            ('Application', [('Zulip Terminal', zt_version)]),
+        ]
+
+        popup_width, column_widths = self.calculate_table_widths(contents,
+                                                                 len(title))
+        widgets = self.make_table_with_categories(contents, column_widths)
+
+        super().__init__(controller, widgets, 'ABOUT', popup_width, title)
+
+
 class HelpView(PopUpView):
     def __init__(self, controller: Any, title: str) -> None:
         help_menu_content = []
