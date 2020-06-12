@@ -948,9 +948,10 @@ class PanelSearchBox(urwid.Edit):
 class EditModeBox(urwid.Text):
     def __init__(self, controller: Any) -> None:
         from zulipterminal.ui_tools.views import EditModeView
+
         self.controller = controller
-        self.edit_mode_popup = EditModeView(self.controller)
-        self.mode = self.edit_mode_popup.selected_mode
+        self.edit_mode_popup = EditModeView(self)
+        self.mode = "change_one"
         super().__init__("Mode: " + self.mode)
 
     def selectable(self) -> bool:
@@ -960,3 +961,7 @@ class EditModeBox(urwid.Text):
         if is_command_key('ENTER', key):
             self.controller.show_pop_up(self.edit_mode_popup)
         return key
+
+    def update_mode(self, new_mode: str) -> None:
+        self.mode = new_mode
+        self.set_text("Mode: " + self.mode)

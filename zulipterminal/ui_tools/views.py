@@ -973,8 +973,24 @@ class MsgInfoView(PopUpView):
         widgets = self.make_table_with_categories(msg_info, column_widths)
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
 
+
 class EditModeView(PopUpView):
-    def __init__(self, controller: Any):
+    def __init__(self, edit_box: Any) -> None:
+        widgets = []  # type: List[Any]
         self.selected_mode = "change_one"
-        widgets = [urwid.Text(self.selected_mode)]
-        super().__init__(controller, widgets, 'GO_BACK', 50, 'Topic edit propogation mode')
+        self.edit_box = edit_box
+
+        change_one = urwid.RadioButton(widgets, "change_one")
+        urwid.connect_signal(change_one, 'change', self.set_selected_mode)
+        change_all = urwid.RadioButton(widgets, "change_all")
+        urwid.connect_signal(change_all, 'change', self.set_selected_mode)
+        change_later = urwid.RadioButton(widgets, "change_later")
+        urwid.connect_signal(change_later, 'change', self.set_selected_mode)
+
+        super().__init__(self.edit_box.controller, widgets, 'GO_BACK', 50,
+                         'Topic edit propogation mode')
+
+    def set_selected_mode(self, button: Any, new_state: bool) -> None:
+        if new_state:
+            self.selected_mode = button.label
+            self.edit_box.update_mode(self.selected_mode)
