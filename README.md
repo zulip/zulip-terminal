@@ -114,6 +114,7 @@ source ~/.zshenv
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
 | Show/hide help menu                                   | <kbd>?</kbd>                                  |
+| Show/hide about menu                                  | <kbd>Meta</kbd> + <kbd>?</kbd>                |
 | Go back                                               | <kbd>esc</kbd>                                |
 | Redraw screen                                         | <kbd>Ctrl</kbd> + <kbd>l</kbd>                |
 | Quit                                                  | <kbd>Ctrl</kbd> + <kbd>C</kbd>                |

@@ -188,6 +188,9 @@ class View(urwid.WidgetWrap):
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
             return key
+        elif is_command_key('ABOUT', key):
+            self.controller.show_about()
+            return key
         elif is_command_key('HELP', key):
             # Show help menu
             self.controller.show_help()
