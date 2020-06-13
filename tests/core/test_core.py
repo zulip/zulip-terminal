@@ -36,8 +36,10 @@ class TestController:
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
         self.footlinks_enabled = True
-        result = Controller(self.config_file, self.theme, 256, self.autohide,
-                            self.notify_enabled, self.footlinks_enabled)
+        self.settings = mocker.Mock()
+        result = Controller(self.config_file, self.theme, 256, self.settings,
+                            self.autohide, self.notify_enabled,
+                            self.footlinks_enabled)
         result.view.message_view = mocker.Mock()  # set in View.__init__
         return result
 
@@ -46,7 +48,7 @@ class TestController:
             config_file=self.config_file,
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
-        self.loading_view.assert_called_once_with(controller)
+        self.loading_view.assert_called_once_with(controller, self.settings)
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.poll_for_events.assert_called_once_with()

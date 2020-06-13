@@ -2709,7 +2709,10 @@ class TestLoadingView:
     @pytest.fixture
     def loading_view(self, mocker):
         self.controller = mocker.Mock()
-        loading_view = LoadingView(self.controller)
+        self.settings = {'theme': ('wombat', 'on commandline'),
+                         'autohide': ('autohide', 'default'),
+                         'footlinks': ('enabled', 'default')}
+        loading_view = LoadingView(self.controller, self.settings)
         return loading_view
 
     def test_init(self, loading_view):

@@ -5,7 +5,7 @@ import time
 from collections import OrderedDict
 from functools import partial
 from platform import platform
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import urwid
 import zulip
@@ -29,7 +29,7 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
-                 color_depth: int,
+                 color_depth: int, settings: Dict[str, Any],
                  autohide: bool, notify: bool, footlinks: bool) -> None:
         self.theme = theme
         self.color_depth = color_depth
@@ -43,7 +43,7 @@ class Controller:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
-        self.loading_view = LoadingView(self)
+        self.loading_view = LoadingView(self, settings)
         self.init_model_view()
 
     @asynch
