@@ -1125,3 +1125,6 @@ class LoadingView(urwid.Filler):
 
     def keypress(self, size: Tuple[int, int], key: str) -> str:
         return key
+
+    def set_spinner(self, spinner: str) -> None:
+        self.base_widget.set_text(self.text + [spinner])

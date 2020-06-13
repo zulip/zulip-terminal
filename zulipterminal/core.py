@@ -273,8 +273,10 @@ class Controller:
                         mentioned=True)
 
     def deregister_client(self) -> None:
-        queue_id = self.model.queue_id
-        self.client.deregister(queue_id, 1.0)
+        # Deregister before model has loaded.
+        if hasattr(self, 'model'):
+            queue_id = self.model.queue_id
+            self.client.deregister(queue_id, 1.0)
 
     def exit_handler(self, signum: int, frame: Any) -> None:
         self.deregister_client()
@@ -282,7 +284,17 @@ class Controller:
 
     @asynch
     def set_main_view(self) -> None:
+        def spinning_cursor() -> Any:
+            while True:
+                for cursor in '|/-\\':
+                    yield cursor
+
+        self.capture_stdout()
+        spinner = spinning_cursor()
+
         while not hasattr(self, 'view'):
+            self.loading_view.set_spinner(next(spinner))
+            self.update_screen()
             time.sleep(0.1)
 
         self.loop.widget = self.view
