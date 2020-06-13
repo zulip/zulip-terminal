@@ -8,6 +8,7 @@ from zulipterminal.version import ZT_VERSION
 
 
 CORE = "zulipterminal.core"
+VIEWS = 'zulipterminal.ui_tools.views'
 
 
 class TestController:
@@ -16,16 +17,19 @@ class TestController:
         mocker.patch('zulipterminal.ui_tools.boxes.MessageBox.footlinks_view')
         self.client = mocker.patch('zulip.Client')
         # Patch init only, in general, allowing specific patching elsewhere
+        self.loading_view = mocker.patch(VIEWS + '.LoadingView.__init__',
+                                         return_value=None)
         self.model = mocker.patch(CORE + '.Model.__init__', return_value=None)
         self.view = mocker.patch(CORE + '.View.__init__', return_value=None)
         self.model.view = self.view
         self.view.focus_col = 1
+        mocker.patch('zulipterminal.core.Controller.capture_stdout')
+        mocker.patch('zulipterminal.core.Controller.update_screen')
 
     @pytest.fixture
     def controller(self, mocker) -> None:
         # Patch these unconditionally to avoid calling in __init__
         self.poll_for_events = mocker.patch(CORE + '.Model.poll_for_events')
-        mocker.patch(CORE + '.Controller.show_loading')
 
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
@@ -42,6 +46,7 @@ class TestController:
             config_file=self.config_file,
             client='ZulipTerminal/' + ZT_VERSION + ' ' + platform(),
         )
+        self.loading_view.assert_called_once_with(controller)
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
         self.poll_for_events.assert_called_once_with()

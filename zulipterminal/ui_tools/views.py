@@ -1110,3 +1110,18 @@ class MsgInfoView(PopUpView):
             popup_width = max(popup_width, message_link_width)
 
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+
+class LoadingView(urwid.Filler):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        self.text = ["Welcome to Zulip.\n\n",
+                     "Loading..."]
+        text_wid = urwid.Text(self.text, 'center')
+        super().__init__(text_wid, 'middle', 'pack')
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        return key
