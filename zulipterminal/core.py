@@ -43,9 +43,11 @@ class Controller:
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
+        self.init_model_view()
+
+    def init_model_view(self) -> None:
         self.model = Model(self)
         self.view = View(self)
-        # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
     def is_in_editor_mode(self) -> bool:
