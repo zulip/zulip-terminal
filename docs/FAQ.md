@@ -1,5 +1,29 @@
 # Frequently Asked Questions (FAQ)
 
+## It doesn't seem to run or display properly in my terminal (emulator)?
+
+We have reports of success on the following terminal emulators:
+
+* xterm
+* uxterm (see xterm)
+* gnome-terminal (https://help.gnome.org/users/gnome-terminal/stable/)
+* kitty (https://sw.kovidgoyal.net/kitty/)
+* Konsole (KDE) (https://konsole.kde.org/)
+* Termite (https://github.com/thestinger/termite)
+* Terminator (https://github.com/gnome-terminator/terminator)
+* iterm2 (https://iterm2.com/) **Mac only**
+* Microsoft/Windows Terminal (https://github.com/Microsoft/Terminal) **Windows only**
+
+Issues have been reported with the following:
+
+* urxvt - **Issues with color rendering**
+* mosh (https://mosh.org/) - **Issues with color rendering**
+* terminal app **Mac only** - **Issues with some default keypresses, including for sending messages** [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
+
+Color issues may be related to the support listed on the urwid page here: http://urwid.org/manual/displayattributes.html#foreground-and-background-settings
+
+Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
+
 ## Unable to render non-ASCII characters
 
 **NOTE** Releases of 0.3.2 onwards should not have this issue, or require this solution.
