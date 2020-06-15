@@ -76,6 +76,14 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
+    project_urls={
+        'Changelog':
+            'https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md',
+        'FAQs':
+            'https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md',
+        'Issues':
+            'https://github.com/zulip/zulip-terminal/issues',
+    },
     python_requires='>=3.5, <3.9',
     keywords='',
     packages=find_packages(exclude=['tests', 'tests.*']),
