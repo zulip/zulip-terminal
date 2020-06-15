@@ -29,7 +29,7 @@ line-length=76
 
 [area-formatting]
 # This is a ZT custom rule; these are excluded from the lower-case area rule
-exclusions=WIP, DEBUG, README, CHANGELOG, LICENSE
+exclusions=WIP, DEBUG, README, CHANGELOG, LICENSE, FAQ
 
 [ignore-by-title]
 # Ignore all rules for commits of which the title matches below
