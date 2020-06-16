@@ -13,7 +13,7 @@ from urwid_readline import ReadlineEdit
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import (
-    Message, match_emoji, match_group, match_stream, match_user,
+    Message, format_string, match_emoji, match_group, match_stream, match_user,
 )
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
@@ -115,14 +115,17 @@ class WriteBox(urwid.Pile):
                               ) -> List[str]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
-        group_typeahead = ['@*{}*'.format(group_name)
-                           for group_name in self.model.user_group_names
-                           if match_group(group_name, text[1:])]
+        groups = [group_name
+                  for group_name in self.model.user_group_names
+                  if match_group(group_name, text[1:])]
+        group_typeahead = format_string(groups, '@*{}*')
 
         users_list = self.view.users
-        user_typeahead = [prefix_string + '**{}**'.format(user['full_name'])
-                          for user in users_list
-                          if match_user(user, text[len(prefix_string):])]
+        users = [user['full_name']
+                 for user in users_list
+                 if match_user(user, text[len(prefix_string):])]
+        user_typeahead = format_string(users, prefix_string + '**{}**')
+
         combined_typeahead = group_typeahead + user_typeahead
 
         return combined_typeahead
@@ -130,17 +133,22 @@ class WriteBox(urwid.Pile):
     def autocomplete_streams(self, text: str, prefix_string: str
                              ) -> List[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        stream_typeahead = [('#**{}**'.format(stream[0]), stream[0])
-                            for stream in streams_list]
-        return match_stream(stream_typeahead, text[1:],
+        streams = [stream[0]
+                   for stream in streams_list]
+        stream_typeahead = format_string(streams, '#**{}**')
+        stream_data = list(zip(stream_typeahead, streams))
+
+        return match_stream(stream_data, text[1:],
                             self.view.pinned_streams)
 
     def autocomplete_emojis(self, text: str, prefix_string: str
                             ) -> List[str]:
         emoji_list = emoji_names.EMOJI_NAMES
-        emoji_typeahead = [':{}:'.format(emoji)
-                           for emoji in emoji_list
-                           if match_emoji(emoji, text[1:])]
+        emojis = [emoji
+                  for emoji in emoji_list
+                  if match_emoji(emoji, text[1:])]
+        emoji_typeahead = format_string(emojis, ':{}:')
+
         return emoji_typeahead
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
