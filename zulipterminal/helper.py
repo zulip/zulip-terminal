@@ -518,6 +518,13 @@ def match_group(group_name: str, text: str) -> bool:
     return group_name.lower().startswith(text.lower())
 
 
+def format_string(names: List[str], wrapping_text: str) -> List[str]:
+    """
+    Wrap a list of names using the wrapping characters for typeahead
+    """
+    return [wrapping_text.format(name) for name in names]
+
+
 def powerset(iterable: Iterable[Any],
              map_func: Callable[[Any], Any]=set) -> List[Any]:
     """
