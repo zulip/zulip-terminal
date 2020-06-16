@@ -93,7 +93,7 @@ class View(urwid.WidgetWrap):
         else:
             footer_text = [' [No matches found]']
 
-        self.set_footer_text(footer_text, duration=3)
+        self.set_footer_text(footer_text)
 
     def footer_view(self) -> Any:
         text_header = self.get_random_help()

@@ -25,6 +25,7 @@ class WriteBox(urwid.Pile):
         self.model = view.model
         self.view = view
         self.msg_edit_id = None  # type: Optional[int]
+        self.is_in_typeahead_mode = False
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -103,6 +104,7 @@ class WriteBox(urwid.Pile):
 
         for prefix, autocomplete_func in autocomplete_map.items():
             if text.startswith(prefix):
+                self.is_in_typeahead_mode = True
                 typeaheads, suggestions = autocomplete_func(text, prefix)
                 fewer_typeaheads = typeaheads[:num_suggestions]
                 reduced_suggestions = suggestions[:num_suggestions]
@@ -163,6 +165,13 @@ class WriteBox(urwid.Pile):
         return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if self.is_in_typeahead_mode:
+            if not (is_command_key('AUTOCOMPLETE', key)
+                    or is_command_key('AUTOCOMPLETE_REVERSE', key)):
+                # set default footer when done with autocomplete
+                self.is_in_typeahead_mode = False
+                self.view.set_footer_text()
+
         if is_command_key('SEND_MESSAGE', key):
             if self.msg_edit_id:
                 if not self.to_write_box:

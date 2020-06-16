@@ -203,6 +203,35 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize(['key', 'current_typeahead_mode',
+                              'expected_typeahead_mode',
+                              'expect_footer_was_reset'], [
+        # footer does not reset
+        (keys_for_command('AUTOCOMPLETE').pop(), False, False, False),
+        (keys_for_command('AUTOCOMPLETE_REVERSE').pop(), False, False, False),
+        (keys_for_command('AUTOCOMPLETE').pop(), True, True, False),
+        (keys_for_command('AUTOCOMPLETE_REVERSE').pop(), True, True, False),
+        # footer resets
+        (keys_for_command('GO_BACK').pop(), True, False, True),
+        ('space', True, False, True),
+        ('k', True, False, True),
+    ])
+    def test_keypress_typeahead_mode_autocomplete_key(self, mocker, write_box,
+                                                      current_typeahead_mode,
+                                                      expected_typeahead_mode,
+                                                      expect_footer_was_reset,
+                                                      key):
+        write_box.is_in_typeahead_mode = current_typeahead_mode
+        size = (20,)
+
+        write_box.keypress(size, key)
+
+        assert write_box.is_in_typeahead_mode == expected_typeahead_mode
+        if expect_footer_was_reset:
+            self.view.set_footer_text.assert_called_once_with()
+        else:
+            self.view.set_footer_text.assert_not_called()
+
 
 class TestPanelSearchBox:
     search_caption = "Search Results "
