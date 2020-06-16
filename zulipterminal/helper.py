@@ -463,10 +463,11 @@ DataT = TypeVar('DataT')
 
 
 def match_stream(data: List[Tuple[DataT, str]], search_text: str,
-                 pinned_streams: List[List[Any]]) -> List[DataT]:
+                 pinned_streams: List[List[Any]]
+                 ) -> Tuple[List[DataT], List[str]]:
     """
-    Returns a list of DataT (streams) whose words match with the 'text' in the
-    following order:
+    Returns a list of DataT (streams) and a list of their corresponding names
+    whose words match with the 'text' in the following order:
     * 1st-word startswith match > 2nd-word startswith match > ... (pinned)
     * 1st-word startswith match > 2nd-word startswith match > ... (unpinned)
 
@@ -491,23 +492,26 @@ def match_stream(data: List[Tuple[DataT, str]], search_text: str,
     matches = OrderedDict([
         ('pinned', defaultdict(list)),
         ('unpinned', defaultdict(list)),
-    ])  # type: OrderedDict[str, DefaultDict[int, List[DataT]]]
+    ])  # type: OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]
 
     for datum, splits in stream_splits:
-        kind = 'pinned' if splits[0] in pinned_stream_names else 'unpinned'
+        stream_name = splits[0]
+        kind = 'pinned' if stream_name in pinned_stream_names else 'unpinned'
         for match_position, word in enumerate(splits):
             if word.lower().startswith(search_text.lower()):
-                matches[kind][match_position].append(datum)
+                matches[kind][match_position].append((datum, stream_name))
 
     ordered_matches = []
+    ordered_names = []
     for matched_data in matches.values():
         if not matched_data:
             continue
         for match_position in range(max(matched_data.keys()) + 1):
-            for datum in matched_data.get(match_position, []):
+            for datum, name in matched_data.get(match_position, []):
                 if datum not in ordered_matches:
                     ordered_matches.append(datum)
-    return ordered_matches
+                    ordered_names.append(name)
+    return ordered_matches, ordered_names
 
 
 def match_group(group_name: str, text: str) -> bool:
