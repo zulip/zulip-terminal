@@ -43,6 +43,35 @@ class TestWriteBox:
                                             state):
         return_val = write_box.generic_autocomplete(text, state)
         assert return_val == text
+        write_box.view.set_typeahead_footer.assert_not_called()
+
+    @pytest.mark.parametrize('text, state, footer_text', [
+        # mentions
+        ('@Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
+        ('@_Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
+        ('@Human', None, ['Human Myself', 'Human 1', 'Human 2']),
+        ('@NoMatch', None, []),
+        # streams
+        ('#Stream', 0, ['Stream 1', 'Stream 2', 'Secret stream',
+                        'Some general stream']),
+        ('#Stream', None, ['Stream 1', 'Stream 2', 'Secret stream',
+                           'Some general stream']),
+        ('#NoMatch', None, []),
+        # emojis
+        (':smi', 0, ['smile', 'smiley', 'smirk']),
+        (':smi', None, ['smile', 'smiley', 'smirk']),
+        (':NoMatch', None, []),
+    ])
+    def test_generic_autocomplete_set_footer(self, mocker, write_box,
+                                             state, footer_text, text):
+        write_box.view.set_typeahead_footer = mocker.patch(
+                                'zulipterminal.ui.View.set_typeahead_footer')
+        write_box.generic_autocomplete(text, state)
+
+        write_box.view.set_typeahead_footer.assert_called_once_with(
+                                                    footer_text,
+                                                    state,
+                                                    False)
 
     @pytest.mark.parametrize('text, state, required_typeahead', [
         ('@Human', 0, '@**Human Myself**'),

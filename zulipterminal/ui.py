@@ -77,6 +77,24 @@ class View(urwid.WidgetWrap):
             time.sleep(duration)
             self.set_footer_text()
 
+    @asynch
+    def set_typeahead_footer(self, suggestions: List[str],
+                             state: Optional[int],
+                             is_truncated: bool) -> None:
+        if suggestions:
+            # Wrap by space.
+            footer_text = [' ' + s + ' '
+                           for s in suggestions]  # type: List[Any]
+            if state is not None:
+                footer_text[state] = ('code', footer_text[state])
+            if is_truncated:
+                footer_text += [' [more] ']
+            footer_text.insert(0, [' '])  # Add leading space.
+        else:
+            footer_text = [' [No matches found]']
+
+        self.set_footer_text(footer_text, duration=3)
+
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), 'footer')

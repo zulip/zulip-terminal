@@ -81,6 +81,29 @@ class TestView:
         mock_sleep.assert_called_once_with(duration)
         assert view.controller.update_screen.call_count == 2
 
+    @pytest.mark.parametrize('suggestions, state, truncated, footer_text', [
+        ([], None, False, [' [No matches found]']),
+        (['some', 'text'], None, False, [[' '], ' some ', ' text ']),
+        (['some', 'text'], None, True,
+         [[' '], ' some ', ' text ', ' [more] ']),
+        (['some', 'text'], 0, False, [[' '], ('code', ' some '), ' text ']),
+        (['some', 'text'], 0, True,
+         [[' '], ('code', ' some '), ' text ', ' [more] ']),
+        (['some', 'text'], -1, False, [[' '], ' some ', ('code', ' text ')]),
+    ], ids=[
+        'no_matches',
+        'no_highlight',
+        'no_highlight_truncated',
+        'first_suggestion_highlighted',
+        'first_suggestion_highlighted_truncated',
+        'last_suggestion_highlighted',
+        ])
+    def test_set_typeahead_footer(self, mocker, view, state, suggestions,
+                                  truncated, footer_text):
+        set_footer_text = mocker.patch('zulipterminal.ui.View.set_footer_text')
+        view.set_typeahead_footer(suggestions, state, truncated)
+        set_footer_text.assert_called_once_with(footer_text, duration=3)
+
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
         assert isinstance(footer.text, str)

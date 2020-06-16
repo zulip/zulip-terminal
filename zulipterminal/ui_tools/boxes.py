@@ -103,19 +103,25 @@ class WriteBox(urwid.Pile):
 
         for prefix, autocomplete_func in autocomplete_map.items():
             if text.startswith(prefix):
-                typeaheads = autocomplete_func(text, prefix)
+                typeaheads, suggestions = autocomplete_func(text, prefix)
                 fewer_typeaheads = typeaheads[:num_suggestions]
+                reduced_suggestions = suggestions[:num_suggestions]
+                is_truncated = len(fewer_typeaheads) != len(typeaheads)
 
                 if (state is not None and state < len(fewer_typeaheads)
                         and state >= -len(fewer_typeaheads)):
-                    return fewer_typeaheads[state]
+                    typeahead = fewer_typeaheads[state]  # type: Optional[str]
                 else:
-                    return None
+                    typeahead = None
+                    state = None
+                self.view.set_typeahead_footer(reduced_suggestions,
+                                               state, is_truncated)
+                return typeahead
 
         return text
 
     def autocomplete_mentions(self, text: str, prefix_string: str
-                              ) -> List[str]:
+                              ) -> Tuple[List[str], List[str]]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
         groups = [group_name
@@ -130,29 +136,31 @@ class WriteBox(urwid.Pile):
         user_typeahead = format_string(users, prefix_string + '**{}**')
 
         combined_typeahead = group_typeahead + user_typeahead
+        combined_names = groups + users
 
-        return combined_typeahead
+        return combined_typeahead, combined_names
 
     def autocomplete_streams(self, text: str, prefix_string: str
-                             ) -> List[str]:
+                             ) -> Tuple[List[str], List[str]]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
         streams = [stream[0]
                    for stream in streams_list]
         stream_typeahead = format_string(streams, '#**{}**')
         stream_data = list(zip(stream_typeahead, streams))
 
-        return match_stream(stream_data, text[1:],
-                            self.view.pinned_streams)[0]
+        matched_data = match_stream(stream_data, text[1:],
+                                    self.view.pinned_streams)
+        return matched_data
 
     def autocomplete_emojis(self, text: str, prefix_string: str
-                            ) -> List[str]:
+                            ) -> Tuple[List[str], List[str]]:
         emoji_list = emoji_names.EMOJI_NAMES
         emojis = [emoji
                   for emoji in emoji_list
                   if match_emoji(emoji, text[1:])]
         emoji_typeahead = format_string(emojis, ':{}:')
 
-        return emoji_typeahead
+        return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('SEND_MESSAGE', key):
