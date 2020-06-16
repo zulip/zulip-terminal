@@ -274,7 +274,7 @@ class StreamsView(urwid.Frame):
                 for stream in self.streams_btn_list.copy()
             ]
             streams_display = match_stream(stream_buttons, new_text,
-                                           self.view.pinned_streams)
+                                           self.view.pinned_streams)[0]
             self.log.clear()
             self.log.extend(streams_display)
             self.view.controller.update_screen()
