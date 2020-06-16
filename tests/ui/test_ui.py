@@ -102,7 +102,7 @@ class TestView:
                                   truncated, footer_text):
         set_footer_text = mocker.patch('zulipterminal.ui.View.set_footer_text')
         view.set_typeahead_footer(suggestions, state, truncated)
-        set_footer_text.assert_called_once_with(footer_text, duration=3)
+        set_footer_text.assert_called_once_with(footer_text)
 
     def test_footer_view(self, mocker, view):
         footer = view.footer_view()
