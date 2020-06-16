@@ -92,6 +92,7 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def generic_autocomplete(self, text: str, state: int) -> Optional[str]:
+        num_suggestions = 10
         autocomplete_map = OrderedDict([
                 ('@_', self.autocomplete_mentions),
                 ('@', self.autocomplete_mentions),
@@ -102,8 +103,9 @@ class WriteBox(urwid.Pile):
         for prefix, autocomplete_func in autocomplete_map.items():
             if text.startswith(prefix):
                 typeaheads = autocomplete_func(text, prefix)
+                fewer_typeaheads = typeaheads[:num_suggestions]
                 try:
-                    return typeaheads[state]
+                    return fewer_typeaheads[state]
                 except (IndexError, TypeError):
                     return None
 
