@@ -19,6 +19,10 @@ An interactive terminal interface for [Zulip](https://zulip.com).
 - OSX
 - WSL (On Windows)
 
+## Supported Server Versions
+
+The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#id7). It may still work with earlier versions.
+
 ## Installation
 
 We recommend installing in a dedicated python virtual environment (see below) or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
