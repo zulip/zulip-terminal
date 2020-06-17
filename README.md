@@ -197,6 +197,10 @@ source ~/.zshenv
 
 **Note:** You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.
 
+## Supported Server Versions
+
+The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#id7). Though, it may still work with earlier versions.
+
 ## Contributor Guidelines
 
 Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
