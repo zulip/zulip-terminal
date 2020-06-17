@@ -1398,6 +1398,7 @@ class TestStreamInfoView:
         self.controller = mocker.Mock()
         mocker.patch.object(self.controller, 'maximum_popup_dimensions',
                             return_value=(64, 64))
+        self.controller.model.is_muted_stream.return_value = False
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         stream_id = 10
         self.controller.model.stream_dict = {stream_id: {'name': 'books',
@@ -1418,6 +1419,17 @@ class TestStreamInfoView:
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.stream_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
+
+    @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
+    def test_checkbox_toggle_mute_stream(self, mocker, key):
+        mute_checkbox = self.stream_info_view.widgets[3]
+        toggle_mute_status = self.controller.model.toggle_stream_muted_status
+        stream_id = self.stream_info_view.stream_id
+        size = (20, 20)
+
+        mute_checkbox.keypress(size, key)
+
+        toggle_mute_status.assert_called_once_with(stream_id)
 
 
 class TestMsgInfoView:

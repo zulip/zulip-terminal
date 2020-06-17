@@ -1001,16 +1001,32 @@ class PopUpConfirmationView(urwid.Overlay):
 
 class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, stream_id: int) -> None:
+        self.stream_id = stream_id
+        self.controller = controller
         stream = controller.model.stream_dict[stream_id]
         title = '# {}'.format(stream['name'])
         desc = stream['description']
-        stream_info_content = [('', [desc])]
+        stream_info_content = [('', [desc]), ('Stream settings', [])]
         popup_width, column_widths = self.calculate_table_widths(
             stream_info_content, len(title))
-        widgets = self.make_table_with_categories(stream_info_content,
-                                                  column_widths)
-        super().__init__(controller, widgets, 'STREAM_DESC', popup_width,
+
+        muted_setting = urwid.CheckBox(label="Muted",
+                                       state=controller.model.is_muted_stream(
+                                           stream_id),
+                                       checked_symbol='✓')
+        urwid.connect_signal(muted_setting, 'change', self.toggle_mute_status)
+
+        # Manual because calculate_table_widths does not support checkboxes.
+        # Add 4 to checkbox label to accomodate the checkbox itself.
+        popup_width = max(popup_width, len(muted_setting.label) + 4)
+        self.widgets = self.make_table_with_categories(stream_info_content,
+                                                       column_widths)
+        self.widgets.append(muted_setting)
+        super().__init__(controller, self.widgets, 'STREAM_DESC', popup_width,
                          title)
+
+    def toggle_mute_status(self, button: Any, new_state: bool) -> None:
+        self.controller.model.toggle_stream_muted_status(self.stream_id)
 
 
 class MsgInfoView(PopUpView):
