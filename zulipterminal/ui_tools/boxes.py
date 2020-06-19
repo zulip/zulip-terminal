@@ -1,4 +1,4 @@
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from datetime import date, datetime
 from sys import platform
 from time import ctime, time
@@ -92,22 +92,21 @@ class WriteBox(urwid.Pile):
         self.contents = write_box
 
     def generic_autocomplete(self, text: str, state: int) -> Optional[str]:
-        autocomplete_map = OrderedDict([
-                ('@_', self.autocomplete_mentions),
-                ('@', self.autocomplete_mentions),
-                ('#', self.autocomplete_streams),
-                (':', self.autocomplete_emojis),
-            ])
+        if text.startswith('@_'):
+            typeahead = self.autocomplete_mentions(text, '@_')
+        elif text.startswith('@'):
+            typeahead = self.autocomplete_mentions(text, '@')
+        elif text.startswith('#'):
+            typeahead = self.autocomplete_streams(text)
+        elif text.startswith(':'):
+            typeahead = self.autocomplete_emojis(text)
+        else:
+            return text
 
-        for prefix, autocomplete_func in autocomplete_map.items():
-            if text.startswith(prefix):
-                typeaheads = autocomplete_func(text, prefix)
-                try:
-                    return typeaheads[state]
-                except (IndexError, TypeError):
-                    return None
-
-        return text
+        try:
+            return typeahead[state]
+        except (IndexError, TypeError):
+            return None
 
     def autocomplete_mentions(self, text: str, prefix_string: str
                               ) -> List[str]:
@@ -125,16 +124,14 @@ class WriteBox(urwid.Pile):
 
         return combined_typeahead
 
-    def autocomplete_streams(self, text: str, prefix_string: str
-                             ) -> List[str]:
+    def autocomplete_streams(self, text: str) -> List[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
         stream_typeahead = [('#**{}**'.format(stream[0]), stream[0])
                             for stream in streams_list]
         return match_stream(stream_typeahead, text[1:],
                             self.view.pinned_streams)
 
-    def autocomplete_emojis(self, text: str, prefix_string: str
-                            ) -> List[str]:
+    def autocomplete_emojis(self, text: str) -> List[str]:
         emoji_list = emoji_names.EMOJI_NAMES
         emoji_typeahead = [':{}:'.format(emoji)
                            for emoji in emoji_list
@@ -871,7 +868,9 @@ class SearchBox(urwid.Pile):
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key('GO_BACK', key):
+        if (is_command_key('GO_BACK', key) or is_command_key('ENTER', key)
+                and (self.text_box.edit_text == ""
+                     or self.text_box.edit_text.isspace())):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus('body')
@@ -906,15 +905,18 @@ class PanelSearchBox(urwid.Edit):
         self.set_edit_text(self.search_text)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key('ENTER', key):
+        if (is_command_key('GO_BACK', key) or is_command_key('ENTER', key)
+                and (self.get_edit_text() == ''
+                     or self.get_edit_text().isspace())):
+            self.panel_view.view.controller.exit_editor_mode()
+            self.reset_search_text()
+            self.panel_view.set_focus("body")
+            self.panel_view.keypress(size, 'esc')
+
+        elif is_command_key('ENTER', key):
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([('filter_results', 'Search Results'), ' '])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
                 self.panel_view.body.set_focus(0)
-        elif is_command_key('GO_BACK', key):
-            self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
-            self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, 'esc')
         return super().keypress(size, key)

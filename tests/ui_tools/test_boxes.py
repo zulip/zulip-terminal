@@ -236,6 +236,35 @@ class TestPanelSearchBox:
             (panel_search_box.panel_view.body.set_focus
              .assert_not_called())
 
+    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
+    def test_keypress_ENTER_empty_string(self, panel_search_box,
+                                         enter_key):
+        size = (20,)
+        panel_search_box.panel_view.view.controller.is_in_editor_mode = (
+            lambda: True
+        )
+        panel_search_box.set_caption("")
+        panel_search_box.edit_text = ""
+
+        panel_search_box.keypress(size, enter_key)
+
+        # Reset display
+        assert panel_search_box.caption == ""
+        assert panel_search_box.edit_text == panel_search_box.search_text
+
+        # Leave editor mode
+        (panel_search_box.panel_view.view.controller.exit_editor_mode
+         .assert_called_once_with())
+
+        # Switch focus to body; focus should return to previous in body
+        panel_search_box.panel_view.set_focus.assert_called_once_with("body")
+
+        # pass keypress back
+        # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
+        #       - should we add a second callback to update the panel?
+        (panel_search_box.panel_view.keypress
+         .assert_called_once_with(size, 'esc'))
+
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, panel_search_box, back_key):
         size = (20,)
