@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from typing import Any
 
 import pytest
@@ -1405,8 +1406,9 @@ class TestModel:
     ], ids=[
         'remove_19', 'add_30'
     ])
-    def test__handle_subscription_event(self, model, mocker, stream_button,
-                                        event, final_muted_streams):
+    def test__handle_subscription_event_mute_streams(self, model, mocker,
+                                                     stream_button, event,
+                                                     final_muted_streams):
         model.muted_streams = {15, 19}
         model.controller.view.stream_id_to_button = {
             event['stream_id']: stream_button  # stream id is known
@@ -1423,6 +1425,53 @@ class TestModel:
             mark_unmuted.assert_called_once_with()
         else:
             mark_muted.assert_called_once_with()
+        model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize(['event', 'expected_pinned_streams',
+                             'expected_unpinned_streams'], [
+        (
+            {
+                'property': 'pin_to_top',
+                'stream_id': 6,
+                'value': True
+            },
+            [['design', 8], ['all', 6]],
+            []
+        ),
+        (
+            {
+                'property': 'pin_to_top',
+                'stream_id': 8,
+                'value': False
+            },
+            [],
+            [['design', 8], ['all', 6]]
+        ),
+    ], ids=[
+        'pin_stream',
+        'unpin_stream',
+    ])
+    def test__handle_subscription_event_pin_streams(
+                                    self, model, mocker,
+                                    stream_button, event,
+                                    expected_pinned_streams,
+                                    expected_unpinned_streams,
+                                    initial_pinned_streams=[['design', 8]],
+                                    initial_unpinned_streams=[['all', 6]]
+    ):
+        model.controller.view.stream_id_to_button = {
+            event['stream_id']: stream_button
+        }
+        model.pinned_streams = deepcopy(initial_pinned_streams)
+        model.unpinned_streams = deepcopy(initial_unpinned_streams)
+
+        model._handle_subscription_event(event)
+
+        assert sorted(model.pinned_streams) == sorted(expected_pinned_streams)
+        assert sorted(model.unpinned_streams) == sorted(
+                                            expected_unpinned_streams)
+        update_left_panel = model.controller.view.left_panel.update_structure
+        update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [

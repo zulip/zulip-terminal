@@ -782,6 +782,17 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
+    def update_structure(self) -> None:
+        self.stream_v = self.streams_view()
+        if self.is_in_topic_view:
+            return
+
+        self.left_column_structure = [
+            (self.menu_v, ('given', 4)),
+            (self.stream_v, ('weight', 1)),
+        ]
+        self.contents = self.left_column_structure
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
             is_command_key('SEARCH_STREAMS', key)
