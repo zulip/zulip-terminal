@@ -12,6 +12,7 @@ from urwid_readline import ReadlineEdit
 
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream, match_user,
 )
@@ -334,12 +335,11 @@ class MessageBox(urwid.Pile):
                 and recipient_list[0]['email'] == self.model.user_email)
 
     def stream_header(self) -> Any:
-        stream_topic_separator = '▶'
         color = self.model.stream_dict[self.stream_id]['color']
         bar_color = 's' + color
         stream_title_markup = ('bar', [
             (bar_color, '{} {} '.format(self.stream_name,
-                                        stream_topic_separator)),
+                                        STREAM_TOPIC_SEPARATOR)),
             ('title', ' {}'.format(self.topic_name))
         ])
         stream_title = urwid.Text(stream_title_markup)

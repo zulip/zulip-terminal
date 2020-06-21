@@ -1,0 +1,1 @@
+STREAM_TOPIC_SEPARATOR = '▶'

@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -1971,11 +1972,15 @@ class TestMessageBox:
 
     @pytest.mark.parametrize(['msg_narrow', 'msg_type', 'assert_header_bar',
                               'assert_search_bar'], [
-        ([], 0, 'PTEST ▶ ', 'All messages'),
+        ([], 0, "PTEST {} ".format(STREAM_TOPIC_SEPARATOR),
+         'All messages'),
         ([], 1, 'You and ', 'All messages'),
         ([], 2, 'You and ', 'All messages'),
-        ([['stream', 'PTEST']], 0, 'PTEST ▶ ', ('bar', [('s#bd6', 'PTEST')])),
-        ([['stream', 'PTEST'], ['topic', 'b']], 0, 'PTEST ▶',
+        ([['stream', 'PTEST']], 0,
+         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR),
+         ('bar', [('s#bd6', 'PTEST')])),
+        ([['stream', 'PTEST'], ['topic', 'b']], 0,
+         'PTEST {}'.format(STREAM_TOPIC_SEPARATOR),
          ('bar', [('s#bd6', 'PTEST'), ('s#bd6', ': topic narrow')])),
         ([['is', 'private']], 1, 'You and ', 'All private messages'),
         ([['is', 'private']], 2, 'You and ', 'All private messages'),
@@ -1983,13 +1988,17 @@ class TestMessageBox:
          'Private conversation'),
         ([['pm_with', 'boo@zulip.com, bar@zulip.com']], 2, 'You and ',
          'Group private conversation'),
-        ([['is', 'starred']], 0, 'PTEST ▶ ', 'Starred messages'),
+        ([['is', 'starred']], 0,
+         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR),
+         'Starred messages'),
         ([['is', 'starred']], 1, 'You and ', 'Starred messages'),
         ([['is', 'starred']], 2, 'You and ', 'Starred messages'),
         ([['is', 'starred'], ['search', 'FOO']], 1, 'You and ',
          'Starred messages'),
-        ([['search', 'FOO']], 0, 'PTEST ▶ ', 'All messages'),
-        ([['is', 'mentioned']], 0, 'PTEST ▶ ', 'Mentions'),
+        ([['search', 'FOO']], 0,
+         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR), 'All messages'),
+        ([['is', 'mentioned']], 0,
+         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR), 'Mentions'),
         ([['is', 'mentioned']], 1, 'You and ', 'Mentions'),
         ([['is', 'mentioned']], 2, 'You and ', 'Mentions'),
         ([['is', 'mentioned'], ['search', 'FOO']], 1, 'You and ',
