@@ -117,29 +117,31 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
         but updates `unread_counts` (which can update the model
         if it's passed in, but is not tied to it).
     """
-    for message in changed_messages:
-        if message['type'] == 'stream':
-            key = (message['stream_id'], message['subject'])
-            unreads = unread_counts['unread_topics']
-        # self-pm has only one display_recipient
-        # 1-1 pms have 2 display_recipient
-        elif len(message['display_recipient']) <= 2:
-            key = message['sender_id']  # type: ignore
-            unreads = unread_counts['unread_pms']  # type: ignore
-        else:  # If it's a group pm
-            key = frozenset(  # type: ignore
-                recipient['id'] for recipient in message['display_recipient']
-            )
-            unreads = unread_counts['unread_huddles']  # type: ignore
+    # broader unread counts (for all_* and streams) are updated
+    # later conditionally in _set_count_in_view.
+    KeyT = TypeVar('KeyT')
 
-        # broader unread counts (for all_* and streams) are updated
-        # later conditionally.
+    def update_unreads(unreads: Dict[KeyT, int], key: KeyT) -> None:
         if key in unreads:
             unreads[key] += new_count
             if unreads[key] == 0:
                 unreads.pop(key)
         elif new_count == 1:
             unreads[key] = new_count
+
+    for message in changed_messages:
+        if message['type'] == 'stream':
+            stream_id = message['stream_id']
+            update_unreads(unread_counts['unread_topics'],
+                           (stream_id, message['subject']))
+        # self-pm has only one display_recipient
+        # 1-1 pms have 2 display_recipient
+        elif len(message['display_recipient']) <= 2:
+            update_unreads(unread_counts['unread_pms'], message['sender_id'])
+        else:  # If it's a group pm
+            update_unreads(unread_counts['unread_huddles'],
+                           frozenset(recipient['id'] for recipient
+                                     in message['display_recipient']))
 
 
 def _set_count_in_view(controller: Any, new_count: int,
