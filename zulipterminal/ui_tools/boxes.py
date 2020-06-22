@@ -228,8 +228,8 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_id:
                     success = self.model.update_stream_message(
                         topic=topic,
+                        message_id=self.msg_edit_id,
                         content=self.msg_write_box.edit_text,
-                        msg_id=self.msg_edit_id,
                     )
                 else:
                     success = self.model.send_stream_message(

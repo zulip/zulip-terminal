@@ -477,19 +477,19 @@ class TestModel:
         ({'result': 'success'}, True),
         ({'result': 'some_failure'}, False),
     ])
+    @pytest.mark.parametrize('vary_in_msg', [
+        ({'message_id': 1, 'content': 'hi!', 'topic': 'Some topic'}),
+        ({'message_id': 1, 'topic': 'Topic change'}),
+    ])
     def test_update_stream_message(self, mocker, model,
                                    response, return_value,
-                                   content="hi!",
-                                   subject='Hello',
-                                   msg_id=1):
+                                   vary_in_msg):
         self.client.update_message = mocker.Mock(return_value=response)
 
-        result = model.update_stream_message(subject, msg_id, content)
+        result = model.update_stream_message(**vary_in_msg)
 
-        req = dict(subject=subject, propagate_mode="change_one",
-                   message_id=msg_id, content=content)
+        req = dict(propagate_mode="change_one", **vary_in_msg)
         self.client.update_message.assert_called_once_with(req)
-
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)

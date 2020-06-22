@@ -283,7 +283,7 @@ class TestWriteBox:
             write_box.model.update_stream_message.assert_called_once_with(
                         topic=topic_sent_to_server,
                         content=write_box.msg_write_box.edit_text,
-                        msg_id=msg_edit_id,
+                        message_id=msg_edit_id,
                     )
         else:
             write_box.model.send_stream_message.assert_called_once_with(

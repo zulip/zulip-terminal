@@ -336,15 +336,17 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
-    def update_stream_message(self, topic: str, msg_id: int,
-                              content: str) -> bool:
+    def update_stream_message(self, topic: str, message_id: int,
+                              content: Optional[str]=None) -> bool:
         request = {
-            "message_id": msg_id,
-            "content": content,
+            "message_id": message_id,
             # TODO: Add support for "change_later" & "change_all"
             "propagate_mode": "change_one",
-            "subject": topic,
+            "topic": topic,
         }
+        if content is not None:
+            request['content'] = content
+
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
