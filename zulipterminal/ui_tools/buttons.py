@@ -164,7 +164,7 @@ class StreamButton(TopButton):
 
         # Mark muted streams 'M' during button creation.
         if self.model.is_muted_stream(self.stream_id):
-            self.mark_muted()
+            self.update_widget('M')
 
     def mark_muted(self) -> None:
         self.update_widget('M')
