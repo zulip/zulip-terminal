@@ -325,15 +325,18 @@ class TestWriteBox:
                               "initial_focus_col",
                               "expected_focus_position",
                               "expected_focus_col",
-                              "box_type"], [
-        (0, 0, 0, 1, "stream"),
-        (0, 1, 1, 0, "stream"),
-        (1, 0, 0, 0, "stream"),
-        (0, 0, 1, 0, "private"),
-        (1, 0, 0, 0, "private"),
+                              "box_type",
+                              "msg_body_edit_enabled"], [
+        (0, 0, 0, 1, "stream", True),
+        (0, 1, 1, 0, "stream", True),
+        (0, 1, 0, 1, "stream", False),
+        (1, 0, 0, 0, "stream", True),
+        (0, 0, 1, 0, "private", True),
+        (1, 0, 0, 0, "private", True),
     ], ids=[
         'stream_name_to_topic_box',
         'topic_to_message_box',
+        'topic_edit_only',
         'message_to_stream_name_box',
         'recipient_to_message_box',
         'message_to_recipient_box',
@@ -345,6 +348,7 @@ class TestWriteBox:
                                           expected_focus_position,
                                           initial_focus_col,
                                           expected_focus_col, box_type,
+                                          msg_body_edit_enabled,
                                           mocker, stream_id=10):
         if box_type == "stream":
             write_box.stream_box_view(stream_id)
@@ -352,6 +356,7 @@ class TestWriteBox:
             write_box.private_box_view()
         size = (20,)
         write_box.focus_position = initial_focus_position
+        write_box.msg_body_edit_enabled = msg_body_edit_enabled
         write_box.contents[0][0].focus_col = initial_focus_col
         write_box.model.get_invalid_recipient_emails.return_value = []
         write_box.model.user_dict = mocker.MagicMock()

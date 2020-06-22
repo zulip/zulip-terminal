@@ -35,6 +35,7 @@ class WriteBox(urwid.Pile):
         self.is_in_typeahead_mode = False
         self.stream_id = None  # type: Optional[int]
         self.recipient_user_ids = []  # type: List[int]
+        self.msg_body_edit_enabled = True
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -226,11 +227,12 @@ class WriteBox(urwid.Pile):
                     topic = self.title_write_box.edit_text
 
                 if self.msg_edit_id:
-                    success = self.model.update_stream_message(
-                        topic=topic,
-                        message_id=self.msg_edit_id,
-                        content=self.msg_write_box.edit_text,
-                    )
+                    args = dict(message_id=self.msg_edit_id,
+                                topic=topic)
+                    if self.msg_body_edit_enabled:
+                        args['content'] = self.msg_write_box.edit_text
+
+                    success = self.model.update_stream_message(**args)
                 else:
                     success = self.model.send_stream_message(
                         stream=self.stream_write_box.edit_text,
@@ -255,11 +257,14 @@ class WriteBox(urwid.Pile):
                     self.keypress(size, 'esc')
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
+            self.msg_body_edit_enabled = True
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus('body')
         elif is_command_key('CYCLE_COMPOSE_FOCUS', key):
             if len(self.contents) == 0:
+                return key
+            if not self.msg_body_edit_enabled:
                 return key
             header = self.contents[0][0]
             # toggle focus position
@@ -1058,11 +1063,20 @@ class MessageBox(urwid.Pile):
             time_since_msg_sent = time() - self.message['timestamp']
             edit_time_limit = self.model.initial_data[
                     'realm_message_content_edit_limit_seconds']
+            msg_body_edit_enabled = True
             if time_since_msg_sent >= edit_time_limit:
-                self.model.controller.view.set_footer_text(
-                        " Time Limit for editing the message has"
-                        " been exceeded.", 3)
-                return key
+                if self.message['type'] == 'private':
+                    self.model.controller.view.set_footer_text(
+                            " Time Limit for editing the message has"
+                            " been exceeded.", 3)
+                    return key
+                elif self.message['type'] == 'stream':
+                    self.model.controller.view.set_footer_text(
+                            " Only topic editing allowed."
+                            " Time Limit for editing the message body has"
+                            " been exceeded.", 3)
+                    msg_body_edit_enabled = False
+
             self.keypress(size, 'enter')
             msg_id = self.message['id']
             msg = self.model.client.get_raw_message(msg_id)['raw_content']
@@ -1070,6 +1084,12 @@ class MessageBox(urwid.Pile):
             write_box.msg_edit_id = msg_id
             write_box.msg_write_box.set_edit_text(msg)
             write_box.msg_write_box.set_edit_pos(len(msg))
+            write_box.msg_body_edit_enabled = msg_body_edit_enabled
+            # Set focus to topic box if message body editing is disabled.
+            if not msg_body_edit_enabled:
+                write_box.focus_position = 0
+                write_box.contents[0][0].focus_col = 1
+
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
             self.model.controller.show_msg_info(self.message,
