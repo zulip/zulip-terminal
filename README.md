@@ -174,7 +174,7 @@ source ~/.zshenv
 ### Composing a message
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
-| Toggle focus box in compose box                       | <kbd>tab</kbd>                                |
+| Cycle through recipient and content boxes             | <kbd>tab</kbd>                                |
 | Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
 | Autocomplete @mentions, #stream_names and :emoji:     | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
 | Cycle through autocomplete suggestions in reverse     | <kbd>Ctrl</kbd> + <kbd>r</kbd>                |

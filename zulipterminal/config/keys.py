@@ -99,9 +99,9 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'New message to a person or group of people',
         'key_category': 'msg_actions',
     }),
-    ('TAB', {
+    ('CYCLE_COMPOSE_FOCUS', {
         'keys': {'tab'},
-        'help_text': 'Toggle focus box in compose box',
+        'help_text': 'Cycle through recipient and content boxes',
         'key_category': 'msg_compose',
     }),
     ('SEND_MESSAGE', {
