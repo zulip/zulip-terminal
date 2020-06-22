@@ -2443,9 +2443,8 @@ class TestStreamButton:
     def test_text_content(self, mocker,
                           is_private, expected_prefix,
                           width, count, short_text, caption='caption'):
-        mocker.patch(STREAMBUTTON + ".mark_muted")
         controller = mocker.Mock()
-        controller.model.muted_streams = {}
+        controller.model.is_muted_stream.return_value = False
         properties = [
             caption, 5, '#ffffff', is_private, 'Some Stream Description'
         ]

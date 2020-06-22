@@ -451,7 +451,8 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
             unread_counts['streams'][stream_id] = count
         else:
             unread_counts['streams'][stream_id] += count
-        unread_counts['all_msg'] += count
+        if stream_id not in model.muted_streams:
+            unread_counts['all_msg'] += count
 
     # store unread count of group pms in `unread_huddles`
     for group_pm in unread_msg_counts['huddles']:
