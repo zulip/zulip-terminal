@@ -321,6 +321,46 @@ class TestWriteBox:
         else:
             self.view.set_footer_text.assert_not_called()
 
+    @pytest.mark.parametrize(["initial_focus_position",
+                              "initial_focus_col",
+                              "expected_focus_position",
+                              "expected_focus_col",
+                              "box_type"], [
+        (0, 0, 0, 1, "stream"),
+        (0, 1, 1, 0, "stream"),
+        (1, 0, 0, 0, "stream"),
+        (0, 0, 1, 0, "private"),
+        (1, 0, 0, 0, "private"),
+    ], ids=[
+        'stream_name_to_topic_box',
+        'topic_to_message_box',
+        'message_to_stream_name_box',
+        'recipient_to_message_box',
+        'message_to_recipient_box',
+    ])
+    @pytest.mark.parametrize("tab_key",
+                             keys_for_command("CYCLE_COMPOSE_FOCUS"))
+    def test_keypress_CYCLE_COMPOSE_FOCUS(self, write_box, tab_key,
+                                          initial_focus_position,
+                                          expected_focus_position,
+                                          initial_focus_col,
+                                          expected_focus_col, box_type,
+                                          mocker, stream_id=10):
+        if box_type == "stream":
+            write_box.stream_box_view(stream_id)
+        else:
+            write_box.private_box_view()
+        size = (20,)
+        write_box.focus_position = initial_focus_position
+        write_box.contents[0][0].focus_col = initial_focus_col
+        write_box.model.get_invalid_recipient_emails.return_value = []
+        write_box.model.user_dict = mocker.MagicMock()
+
+        write_box.keypress(size, tab_key)
+
+        assert write_box.focus_position == expected_focus_position
+        assert write_box.contents[0][0].focus_col == expected_focus_col
+
 
 class TestPanelSearchBox:
     search_caption = "Search Results "
