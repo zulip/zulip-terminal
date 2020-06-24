@@ -1232,7 +1232,10 @@ class MsgInfoView(PopUpView):
         msg_info = [
             ('', [('Date & Time', date_and_time),
                   ('Sender', msg['sender_full_name']),
-                  ('Sender\'s Email ID', msg['sender_email'])]),
+                  ('Sender\'s Email ID', msg['sender_email']),
+                  ('View message in the web browser', 'Press {}'.format(
+                   ', '.join(map(repr, keys_for_command('VIEW_IN_BROWSER'))))),
+                  ]),
         ]
         # Only show the 'Edit History' label for edited messages.
         self.show_edit_history_label = (
@@ -1303,6 +1306,8 @@ class MsgInfoView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
+        elif is_command_key('VIEW_IN_BROWSER', key):
+            self.controller.view_in_browser(self.msg['id'])
         return super().keypress(size, key)
 
 

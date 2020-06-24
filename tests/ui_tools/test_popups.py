@@ -504,8 +504,17 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
+    @pytest.mark.parametrize('key', keys_for_command('VIEW_IN_BROWSER'))
+    def test_keypress_view_in_browser(self, widget_size, message_fixture, key):
+        size = widget_size(self.msg_info_view)
+
+        self.msg_info_view.keypress(size, key)
+
+        (self.controller.view_in_browser.
+         assert_called_once_with(message_fixture['id']))
+
     def test_height_noreactions(self):
-        expected_height = 3
+        expected_height = 4
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -553,8 +562,9 @@ class TestMsgInfoView:
         self.msg_info_view = MsgInfoView(self.controller, varied_message,
                                          'Message Information', OrderedDict(),
                                          list())
-        # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
-        expected_height = 9
+        # 10 = 4 labels + 1 blank line + 1 'Reactions' (category) + 4
+        # reactions (excluding 'Message Links').
+        expected_height = 10
         assert self.msg_info_view.height == expected_height
 
     def test_keypress_navigation(self, mocker, widget_size,
