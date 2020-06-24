@@ -200,28 +200,34 @@ class TestPanelSearchBox:
         assert panel_search_box.caption == ""
         assert panel_search_box.edit_text == panel_search_box.search_text
 
-    @pytest.mark.parametrize("log, expect_body_focus_set", [
-        ([], False),
-        (["SOMETHING"], True)
+    @pytest.mark.parametrize("log, expect_body_focus_set, edit_text", [
+        ([], False, ""),
+        ([], False, "some search with no results"),
+        (["SOMETHING"], True, "key words")
     ])
     @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
     def test_keypress_ENTER(self, panel_search_box,
-                            enter_key, log, expect_body_focus_set):
+                            enter_key, log, expect_body_focus_set, edit_text):
         size = (20,)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = (
             lambda: True
         )
         panel_search_box.panel_view.log = log
         panel_search_box.set_caption("")
-        panel_search_box.edit_text = "key words"
+        panel_search_box.edit_text = edit_text
 
         panel_search_box.keypress(size, enter_key)
 
         # Update this display
         # FIXME We can't test for the styled version?
         # We'd compare to [('filter_results', 'Search Results'), ' ']
-        assert panel_search_box.caption == self.search_caption
-        assert panel_search_box.edit_text == "key words"
+        # If search is an 'empty' search
+        if edit_text == "":
+            assert panel_search_box.caption == ""
+            assert panel_search_box.edit_text == panel_search_box.search_text
+        else:
+            assert panel_search_box.caption == self.search_caption
+            assert panel_search_box.edit_text == edit_text
 
         # Leave editor mode
         (panel_search_box.panel_view.view.controller.exit_editor_mode
