@@ -212,7 +212,9 @@ class View(urwid.WidgetWrap):
             key = 'page down'
         elif is_command_key('GO_TO_BOTTOM', key):
             key = 'end'
-        return super().keypress(size, key)
+        retval = super().keypress(size, key)
+        self.model.previous_narrow_key = key
+        return retval
 
 
 class Screen(urwid.raw_display.Screen):
