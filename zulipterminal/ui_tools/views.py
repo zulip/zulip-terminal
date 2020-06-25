@@ -1307,7 +1307,7 @@ class MsgInfoView(PopUpView):
                 time_mentions=self.time_mentions,
             )
         elif is_command_key('VIEW_IN_BROWSER', key):
-            self.controller.view_in_browser(self.msg['id'])
+            self.controller.view_in_browser(self.msg)
         return super().keypress(size, key)
 
 

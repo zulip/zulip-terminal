@@ -272,17 +272,20 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_view_in_browser(self, mocker, controller):
+    @pytest.mark.parametrize('server_url', [
+        'https://chat.zulip.org/',
+        'https://foo.zulipchat.com/',
+    ])
+    def test_view_in_browser(self, mocker, controller, message_fixture,
+                             server_url):
         # Set DISPLAY environ to be able to run test in Travis
         os.environ['DISPLAY'] = ':0'
-        mock_open = mocker.patch('webbrowser.open', mocker.Mock())
-        message_id = 123456
-        controller.model.server_url = 'https://foo.zulipchat.com/'
-        controller.view_in_browser(message_id)
-        assert mock_open.call_count == 1
-        url = mock_open.call_args[0][0]
-        assert url.startswith(controller.model.server_url)
-        assert url.endswith('/{}'.format(message_id))
+        controller.model.server_url = server_url
+        mocked_open = mocker.patch(CORE + '.webbrowser.open')
+
+        controller.view_in_browser(message_fixture)
+
+        mocked_open.assert_called_once_with(controller.url)
 
     def test_main(self, mocker, controller):
         controller.view.palette = {
