@@ -871,7 +871,8 @@ class SearchBox(urwid.Pile):
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key('GO_BACK', key):
+        if (is_command_key('GO_BACK', key) or is_command_key('ENTER', key)
+                and self.text_box.edit_text == ''):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus('body')
@@ -906,15 +907,16 @@ class PanelSearchBox(urwid.Edit):
         self.set_edit_text(self.search_text)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key('ENTER', key):
+        if (is_command_key('ENTER', key) and self.get_edit_text() == ''
+                or is_command_key('GO_BACK', key)):
+            self.panel_view.view.controller.exit_editor_mode()
+            self.reset_search_text()
+            self.panel_view.set_focus("body")
+            self.panel_view.keypress(size, 'esc')
+        elif is_command_key('ENTER', key):
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([('filter_results', 'Search Results'), ' '])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
                 self.panel_view.body.set_focus(0)
-        elif is_command_key('GO_BACK', key):
-            self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
-            self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, 'esc')
         return super().keypress(size, key)
