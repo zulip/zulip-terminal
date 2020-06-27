@@ -61,13 +61,13 @@ class WriteBox(urwid.Pile):
             key=keys_for_command('AUTOCOMPLETE').pop(),
             key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
-        to_write_box = urwid.LineBox(
+        self.header_write_box = urwid.LineBox(
             self.to_write_box, tlcorner='─', tline='─', lline='',
             trcorner='─', blcorner='─', rline='',
             bline='─', brcorner='─'
         )
         self.contents = [
-            (to_write_box, self.options()),
+            (self.header_write_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
         self.focus_position = 1
@@ -102,7 +102,7 @@ class WriteBox(urwid.Pile):
             key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
         )
 
-        header_write_box = urwid.Columns([
+        self.header_write_box = urwid.Columns([
             urwid.LineBox(
                 self.stream_write_box, tlcorner='─', tline='─', lline='',
                 trcorner='┬', blcorner='─', rline='│',
@@ -115,7 +115,7 @@ class WriteBox(urwid.Pile):
             ),
         ])
         write_box = [
-            (header_write_box, self.options()),
+            (self.header_write_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
