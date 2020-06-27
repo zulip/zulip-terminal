@@ -5,6 +5,7 @@ from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 
 
 BOXES = "zulipterminal.ui_tools.boxes"
+BUTTONS = "zulipterminal.ui_tools.buttons"
 
 
 class TestWriteBox:
@@ -484,6 +485,7 @@ class TestWriteBox:
                                           mocker, stream_id=10):
         if box_type == "stream":
             if message_being_edited:
+                mocker.patch(BOXES + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
                 write_box.msg_edit_id = 10
             else:

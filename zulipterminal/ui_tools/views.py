@@ -1141,7 +1141,33 @@ class MsgInfoView(PopUpView):
 
 class EditModeView(PopUpView):
     def __init__(self, controller: Any, button: Any):
-        self.selected_mode = button.mode
-        widgets = [urwid.Text(edit_mode_captions[self.selected_mode])]
-        super().__init__(controller, widgets, 'ENTER', 50,
+        self.edit_mode_button = button
+        self.widgets = []  # type: List[urwid.RadioButton]
+
+        for mode in ['change_one', 'change_later', 'change_all']:
+            self.add_radio_button(mode)
+        super().__init__(controller, self.widgets, 'ENTER', 62,
                          'Topic edit propagation mode')
+        # Set cursor to marked checkbox.
+        for i in range(len(self.widgets)):
+            if self.widgets[i].state:
+                self.set_focus(i)
+
+    def set_selected_mode(self, button: Any, new_state: bool,
+                          mode: str) -> None:
+        if new_state:
+            self.edit_mode_button.set_selected_mode(mode)
+
+    def add_radio_button(self, mode: str) -> None:
+        state = mode == self.edit_mode_button.mode
+        radio_button = urwid.RadioButton(self.widgets,
+                                         edit_mode_captions[mode],
+                                         state=state)
+        urwid.connect_signal(radio_button, 'change', self.set_selected_mode,
+                             mode)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        # Use space to select radio-button and exit popup too.
+        if key == ' ':
+            key = 'enter'
+        return super().keypress(size, key)

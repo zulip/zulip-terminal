@@ -487,7 +487,7 @@ class EditModeButton(urwid.Button):
         self.width = width
         super().__init__(label="",
                          on_press=controller.show_topic_edit_mode)
-        self.set_selected_mode('change_one')
+        self.set_selected_mode('change_later')  # set default mode
 
     def set_selected_mode(self, mode: str) -> None:
         self.mode = mode
