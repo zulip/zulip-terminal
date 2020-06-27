@@ -9,7 +9,7 @@ from typing import (
 from urllib.parse import urlparse
 
 import zulip
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
@@ -50,6 +50,8 @@ Event = TypedDict('Event', {
     'value': bool,
     'message_ids': List[int]  # Present when subject of msg(s) is updated
 }, total=False)  # Each Event will only have a subset of these
+
+EditPropagateMode = Literal['change_one', 'change_all', 'change_later']
 
 OFFLINE_THRESHOLD_SECS = 140
 
@@ -337,11 +339,11 @@ class Model:
         return response['result'] == 'success'
 
     def update_stream_message(self, topic: str, message_id: int,
+                              propagate_mode: EditPropagateMode,
                               content: Optional[str]=None) -> bool:
         request = {
             "message_id": message_id,
-            # TODO: Add support for "change_later" & "change_all"
-            "propagate_mode": "change_one",
+            "propagate_mode": propagate_mode,
             "topic": topic,
         }
         if content is not None:

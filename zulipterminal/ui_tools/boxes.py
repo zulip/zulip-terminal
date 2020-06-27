@@ -228,7 +228,8 @@ class WriteBox(urwid.Pile):
 
                 if self.msg_edit_id:
                     args = dict(message_id=self.msg_edit_id,
-                                topic=topic)
+                                topic=topic,
+                                propagate_mode="change_one")
                     if self.msg_body_edit_enabled:
                         args['content'] = self.msg_write_box.edit_text
 

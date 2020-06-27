@@ -267,7 +267,8 @@ class TestWriteBox:
     @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
     def test_keypress_SEND_MESSAGE_no_topic(self, mocker, write_box,
                                             msg_edit_id, topic_entered_by_user,
-                                            topic_sent_to_server, key):
+                                            topic_sent_to_server, key,
+                                            propagate_mode='change_one'):
         write_box.stream_write_box = mocker.Mock()
         write_box.msg_write_box = mocker.Mock(edit_text='')
         write_box.title_write_box = mocker.Mock(
@@ -284,12 +285,13 @@ class TestWriteBox:
                         topic=topic_sent_to_server,
                         content=write_box.msg_write_box.edit_text,
                         message_id=msg_edit_id,
+                        propagate_mode=propagate_mode,
                     )
         else:
             write_box.model.send_stream_message.assert_called_once_with(
                         stream=write_box.stream_write_box.edit_text,
                         topic=topic_sent_to_server,
-                        content=write_box.msg_write_box.edit_text
+                        content=write_box.msg_write_box.edit_text,
                     )
 
     @pytest.mark.parametrize(['key', 'current_typeahead_mode',
