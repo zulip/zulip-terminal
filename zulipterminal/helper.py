@@ -100,6 +100,8 @@ UnreadCounts = TypedDict('UnreadCounts', {
 })
 edit_mode_captions = {
         'change_one': 'Edit only this message topic',
+        'change_all': 'Edit all messages to this topic',
+        'change_later': 'Edit later messages to this topic',
 }
 
 
