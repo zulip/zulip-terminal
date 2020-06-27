@@ -120,6 +120,18 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+    def stream_box_edit_view(self, stream_id: int, caption: str='',
+                             title: str='') -> None:
+        self.stream_box_view(stream_id, caption, title)
+        self.edit_mode = urwid.Text('Edit current topic only.')
+
+        self.header_write_box.widget_list.append(
+            urwid.LineBox(
+                self.edit_mode, tlcorner='┬', tline='─', lline='│',
+                trcorner='─', blcorner='┴', rline='',
+                bline='─', brcorner='─'
+            ))
+
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:
         topic_names = self.model.topics_in_stream(self.stream_id)
@@ -331,8 +343,6 @@ class WriteBox(urwid.Pile):
         elif is_command_key('CYCLE_COMPOSE_FOCUS', key):
             if len(self.contents) == 0:
                 return key
-            if not self.msg_body_edit_enabled:
-                return key
             header = self.contents[0][0]
             # toggle focus position
             if self.focus_position == 0:
@@ -357,6 +367,16 @@ class WriteBox(urwid.Pile):
 
                         header.focus_col = 1
                         return key
+                    elif header.focus_col == 1 and self.msg_edit_id:
+                        header.focus_col = 2
+                        return key
+                    elif header.focus_col == 2:
+                        if self.msg_body_edit_enabled:
+                            header.focus_col = 0
+                            self.focus_position = 1
+                        else:
+                            header.focus_col = 1
+                        return key
                     else:
                         header.focus_col = 0
                 else:
@@ -374,6 +394,8 @@ class WriteBox(urwid.Pile):
                     self.recipient_user_ids = [users[email]['user_id']
                                                for email in recipient_emails]
 
+            if not self.msg_body_edit_enabled:
+                return key
             self.focus_position = self.focus_position == 0
             header.focus_col = 0
 
@@ -1151,7 +1173,14 @@ class MessageBox(urwid.Pile):
                             " been exceeded.", 3)
                     msg_body_edit_enabled = False
 
-            self.keypress(size, 'enter')
+            if self.message['type'] == 'private':
+                self.keypress(size, 'enter')
+            elif self.message['type'] == 'stream':
+                self.model.controller.view.write_box.stream_box_edit_view(
+                    stream_id=self.stream_id,
+                    caption=self.message['display_recipient'],
+                    title=self.message['subject']
+                )
             msg_id = self.message['id']
             msg = self.model.client.get_raw_message(msg_id)['raw_content']
             write_box = self.model.controller.view.write_box
