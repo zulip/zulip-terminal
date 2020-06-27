@@ -445,18 +445,29 @@ class TestWriteBox:
                               "expected_focus_position",
                               "expected_focus_col",
                               "box_type",
-                              "msg_body_edit_enabled"], [
-        (0, 0, 0, 1, "stream", True),
-        (0, 1, 1, 0, "stream", True),
-        (0, 1, 0, 1, "stream", False),
-        (1, 0, 0, 0, "stream", True),
-        (0, 0, 1, 0, "private", True),
-        (1, 0, 0, 0, "private", True),
+                              "msg_body_edit_enabled",
+                              "message_being_edited"], [
+        (0, 0, 0, 1, "stream", True, False),
+        (0, 1, 1, 0, "stream", True, False),
+        (0, 1, 0, 2, "stream", False, True),
+        (0, 2, 0, 1, "stream", False, True),
+        (1, 0, 0, 0, "stream", True, False),
+        (0, 0, 0, 1, "stream", True, True),
+        (0, 1, 0, 2, "stream", True, True),
+        (0, 2, 1, 0, "stream", True, True),
+        (1, 0, 0, 0, "stream", True, True),
+        (0, 0, 1, 0, "private", True, False),
+        (1, 0, 0, 0, "private", True, False),
     ], ids=[
         'stream_name_to_topic_box',
         'topic_to_message_box',
-        'topic_edit_only',
+        'topic_edit_only-topic_to_edit_mode_box',
+        'topic_edit_only-edit_mode_to_topic_box',
         'message_to_stream_name_box',
+        'edit_box-stream_name_to_topic_box',
+        'edit_box-topic_to_edit_mode_box',
+        'edit_box-edit_mode_to_message_box',
+        'edit_box-message_to_stream_name_box',
         'recipient_to_message_box',
         'message_to_recipient_box',
     ])
@@ -468,9 +479,14 @@ class TestWriteBox:
                                           initial_focus_col,
                                           expected_focus_col, box_type,
                                           msg_body_edit_enabled,
+                                          message_being_edited,
                                           mocker, stream_id=10):
         if box_type == "stream":
-            write_box.stream_box_view(stream_id)
+            if message_being_edited:
+                write_box.stream_box_edit_view(stream_id)
+                write_box.msg_edit_id = 10
+            else:
+                write_box.stream_box_view(stream_id)
         else:
             write_box.private_box_view()
         size = (20,)
