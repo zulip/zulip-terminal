@@ -15,7 +15,8 @@ from zulipterminal.ui_tools.buttons import (
 from zulipterminal.ui_tools.views import (
     AboutView, HelpView, LeftColumnView, MessageView, MiddleColumnView,
     ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
-    RightColumnView, StreamInfoView, StreamsView, TopicsView, UsersView,
+    RightColumnView, StreamInfoView, StreamsView, StreamsViewDivider,
+    TopicsView, UsersView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
@@ -390,6 +391,15 @@ class TestMessageView:
         msg_view.read_message(1)
         self.model.mark_message_ids_as_read.assert_called_once_with(
             [message_fixture['id']])
+
+
+class TestStreamsViewDivider:
+    def test_init(self):
+        streams_view_divider = StreamsViewDivider()
+
+        assert isinstance(streams_view_divider, Divider)
+        assert streams_view_divider.stream_id == -1
+        assert streams_view_divider.stream_name == ''
 
 
 class TestStreamsView:
@@ -1107,13 +1117,13 @@ class TestLeftColumnView:
         stream_button = mocker.patch(VIEWS + '.StreamButton')
         stream_view = mocker.patch(VIEWS + '.StreamsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
-        divider = mocker.patch(VIEWS + '.urwid.Divider')
+        divider = mocker.patch(VIEWS + '.StreamsViewDivider')
         mocker.patch(STREAMBUTTON + ".mark_muted")
 
         left_col_view = LeftColumnView(width, self.view)
 
         if pinned:
-            divider.assert_called_once_with('-')
+            assert divider.called
         else:
             divider.assert_not_called()
 
