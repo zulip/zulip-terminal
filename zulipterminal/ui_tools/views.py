@@ -245,6 +245,18 @@ class MessageView(urwid.ListBox):
         self.model.mark_message_ids_as_read(read_msg_ids)
 
 
+class StreamsViewDivider(urwid.Divider):
+    """
+    A custom urwid.Divider to visually separate pinned and unpinned streams.
+    """
+    def __init__(self) -> None:
+        # FIXME: Necessary since the divider is treated as a StreamButton.
+        # NOTE: This is specifically for stream search to work correctly.
+        self.stream_id = -1
+        self.stream_name = ''
+        super().__init__(div_char='-')
+
+
 class StreamsView(urwid.Frame):
     def __init__(self, streams_btn_list: List[Any], view: Any) -> None:
         self.view = view
@@ -696,14 +708,7 @@ class LeftColumnView(urwid.Pile):
                 ) for stream in self.view.pinned_streams]
 
         if len(streams_btn_list):
-            unpinned_divider = urwid.Divider("-")
-
-            # FIXME Necessary since the divider is treated as a StreamButton
-            # NOTE: This is specifically for stream search to work correctly
-            unpinned_divider.stream_id = -1
-            unpinned_divider.stream_name = ''
-
-            streams_btn_list += [unpinned_divider]
+            streams_btn_list += [StreamsViewDivider()]
 
         streams_btn_list += [
                 StreamButton(
