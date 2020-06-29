@@ -117,7 +117,7 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
         but updates `unread_counts` (which can update the model
         if it's passed in, but is not tied to it).
     """
-    # broader unread counts (for all_* and streams) are updated
+    # broader unread counts (for all_*) are updated
     # later conditionally in _set_count_in_view.
     KeyT = TypeVar('KeyT')
 
@@ -134,6 +134,7 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
             stream_id = message['stream_id']
             update_unreads(unread_counts['unread_topics'],
                            (stream_id, message['subject']))
+            update_unreads(unread_counts['streams'], stream_id)
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(message['display_recipient']) <= 2:
@@ -183,7 +184,6 @@ def _set_count_in_view(controller: Any, new_count: int,
             else:
                 for stream_button in stream_buttons_log:
                     if stream_button.stream_id == stream_id:
-                        # FIXME: Update unread_count[streams]?
                         stream_button.update_count(stream_button.count
                                                    + new_count)
                         break
