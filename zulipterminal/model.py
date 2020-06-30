@@ -117,7 +117,8 @@ class Model:
         self.user_group_by_id = {}  # type: Dict[int, Dict[str, Any]]
         self.user_group_names = self._group_info_from_realm_user_groups(groups)
 
-        self.unread_counts = classify_unread_counts(self)
+        unread_data = classify_unread_counts(self)
+        self.unread_counts, self.index['unread_msgs'] = unread_data
 
         self.fetch_all_topics(workers=5)
 
@@ -736,9 +737,28 @@ class Model:
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
 
-        # Index messages before calling set_count.
         self.index = index_messages([message], self, self.index)
         if 'read' not in message['flags']:
+            if message['type'] == 'stream':
+                unread_data = {'type': 'stream', 'display_recipient':
+                               message['display_recipient'],
+                               'stream_id': message['stream_id'],
+                               'subject': message['subject'],
+                               'flags': message['flags']}
+            elif len(message['display_recipient']) <= 2:
+                # pm and self-pm
+                unread_data = {'type': 'private',
+                               'sender_id': message['sender_id'],
+                               'flags': message['flags']}
+            else:
+                # huddles
+                message_recipients = frozenset(
+                    [user['id'] for user in message['display_recipient']])
+                unread_data = {'type': 'private',
+                               'display_recipient': message_recipients,
+                               'flags': message['flags']}
+            self.index['unread_msgs'].update(
+                            {int(message['id']): unread_data})
             set_count([message['id']], self.controller, 1)
 
         if hasattr(self.controller, 'view') and self.found_newest:
@@ -883,8 +903,7 @@ class Model:
             self._update_rendered_view(message_id)
 
         if event['operation'] == 'add' and flag_to_change == 'read':
-            set_count(list(message_ids_to_mark & indexed_message_ids),
-                      self.controller, -1)
+            set_count(list(message_ids_to_mark), self.controller, -1)
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
