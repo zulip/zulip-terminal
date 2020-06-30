@@ -21,7 +21,31 @@ MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
 WSL = 'microsoft' in platform.release().lower()
 
-Message = Dict[str, Any]
+Message = TypedDict('Message', {
+    'id': int,
+    'sender_id': int,
+    'content': str,
+    'recipient_id': int,
+    'timestamp': int,
+    'client': str,
+    'subject': str,  # Only for stream msgs.
+    'topic_links': List[str],
+    'is_me_message': bool,
+    'reactions': List[Dict[str, Any]],
+    'submessages': List[Dict[str, Any]],
+    'flags': List[str],
+    'sender_full_name': str,
+    'sender_short_name': str,
+    'sender_email': str,
+    'sender_realm_str': str,
+    'display_recipient': Any,
+    'type': str,
+    'stream_id': int,  # Only for stream msgs.
+    'avatar_url': str,
+    'content_type': str,
+    'match_content': str,  # If keyword search specified in narrow params.
+    'match_subject': str,  # If keyword search specified in narrow params.
+  }, total=False)
 
 Index = TypedDict('Index', {
     'pointer': Dict[str, Union[int, Set[None]]],  # narrow_str, message_id
@@ -53,7 +77,8 @@ initial_index = Index(
     edited_messages=set(),
     topics=defaultdict(list),
     search=set(),
-    messages=defaultdict(dict),
+    # mypy bug: https://github.com/python/mypy/issues/7217
+    messages=defaultdict(lambda: Message()),
 )
 
 
@@ -99,7 +124,7 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(message['display_recipient']) <= 2:
-            key = message['sender_id']
+            key = message['sender_id']  # type: ignore
             unreads = unread_counts['unread_pms']  # type: ignore
         else:  # If it's a group pm
             key = frozenset(  # type: ignore
