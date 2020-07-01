@@ -422,6 +422,7 @@ class TestStreamsView:
             stream_view, 'SEARCH_STREAMS', stream_view.update_streams)
 
     @pytest.mark.parametrize('new_text, expected_log, to_pin', [
+        # NOTE: '' represents StreamsViewDivider's stream name.
         ('f', ['fan', 'FOO', 'foo', 'FOOBAR'], []),
         ('bar', ['bar'], []),
         ('foo', ['FOO', 'foo', 'FOOBAR'], []),
@@ -430,8 +431,10 @@ class TestStreamsView:
         ('here', ['test here'], []),
         ('test here', ['test here'], []),
         # With 'foo' pinned.
-        ('f', ['foo', 'fan', 'FOO', 'FOOBAR'], [['foo'], ]),
-        ('FOO', ['foo', 'FOO', 'FOOBAR'], [['foo'], ]),
+        ('f', ['foo', '', 'fan', 'FOO', 'FOOBAR'], [['foo'], ]),
+        ('FOO', ['foo', '', 'FOO', 'FOOBAR'], [['foo'], ]),
+        # With 'bar' pinned.
+        ('bar', ['bar'], [['bar'], ]),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log,
                             to_pin):

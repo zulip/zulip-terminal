@@ -287,6 +287,25 @@ class StreamsView(urwid.Frame):
             ]
             streams_display = match_stream(stream_buttons, new_text,
                                            self.view.pinned_streams)[0]
+
+            # Add a divider to separate pinned streams from the rest.
+            pinned_stream_names = [
+                stream[0]
+                for stream in self.view.pinned_streams
+            ]
+            first_unpinned_index = len(streams_display)
+            for index, stream in enumerate(streams_display):
+                if stream.stream_name not in pinned_stream_names:
+                    first_unpinned_index = index
+                    break
+            if first_unpinned_index not in [0, len(streams_display)]:
+                # Do not add a divider when it is already present. This can
+                # happen when new_text=''.
+                if not isinstance(streams_display[first_unpinned_index],
+                                  StreamsViewDivider):
+                    streams_display.insert(first_unpinned_index,
+                                           StreamsViewDivider())
+
             self.log.clear()
             self.log.extend(streams_display)
             self.view.controller.update_screen()
