@@ -151,12 +151,16 @@ class Controller:
 
     def show_emoji_picker(self, message: Message) -> None:
         emoji_picker_view = EmojiPickerView(self, "Add/Remove reactions",
-                                            ['thumbs-up'])
+                                            ['thumbs_up'], message)
         self.show_pop_up(emoji_picker_view)
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
         self.show_pop_up(show_stream_view)
+
+    def toggle_message_reaction(self, button: Any) -> None:
+        self.model.react_to_message(button.message,
+                                    button.emoji_name)
 
     def popup_with_message(self, text: str, width: int) -> None:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"))

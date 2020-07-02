@@ -17,7 +17,8 @@ from zulipterminal.helper import (
 )
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
-    HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
+    EmojiButton, HomeButton, MentionedButton, MessageLinkButton, PMButton,
+    StarredButton,
     StreamButton, TopicButton, UnreadPMButton, UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -1338,10 +1339,17 @@ class EditHistoryView(PopUpView):
         return super().keypress(size, key)
 
 class EmojiPickerView(PopUpView):
-    def __init__(self, controller: Any, title: str, emoji_names: List[str]
-                 ) -> None:
-        width = 40
-        self.emoji_names = emoji_names
-        self.emoji_btns = [urwid.Text(emoji_name)
-                           for emoji_name in self.emoji_names]
-        super().__init__(controller, self.emoji_btns, 'GO_BACK', width, title)
+    def __init__(self, controller: Any, title: str, emoji_names: List[str],
+                 message: Message) -> None:
+        self.width = 40
+        self.message = message
+        self.controller = controller
+        emoji_buttons = self.generate_emoji_buttons(emoji_names)
+        super().__init__(controller, emoji_buttons, 'GO_BACK', self.width,
+                         title)
+
+    def generate_emoji_buttons(self, emoji_names: List[str]
+                               ) -> List[EmojiButton]:
+        return [EmojiButton(self.controller, self.width, emoji_name,
+                            self.message)
+                for emoji_name in emoji_names]

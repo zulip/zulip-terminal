@@ -7,7 +7,7 @@ from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.helper import (
-    StreamData, edit_mode_captions, hash_util_decode,
+    Message, StreamData, edit_mode_captions, hash_util_decode,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -488,3 +488,13 @@ class EditModeButton(urwid.Button):
         self.mode = mode
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             edit_mode_captions[self.mode], self.width), None, 'selected')
+class EmojiButton(TopButton):
+    def __init__(self, controller: Any, width: int, emoji_name: str,
+                 message: Message) -> None:
+        self.emoji_name = emoji_name
+        self.message = message
+        super().__init__(controller=controller,
+                         caption=emoji_name,
+                         prefix_character='',
+                         show_function=controller.toggle_message_reaction,
+                         width=width)
