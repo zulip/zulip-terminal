@@ -1244,6 +1244,9 @@ class MessageBox(urwid.Pile):
             self.model.controller.show_msg_info(self.message,
                                                 self.message_links,
                                                 self.time_mentions)
+            self.model.controller.show_msg_info(self.message)
+        elif is_command_key('ADD_REACTION', key):
+            self.model.controller.show_emoji_picker(self.message)
         return key
 
 

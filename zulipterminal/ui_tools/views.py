@@ -1336,3 +1336,12 @@ class EditHistoryView(PopUpView):
             )
             return key
         return super().keypress(size, key)
+
+class EmojiPickerView(PopUpView):
+    def __init__(self, controller: Any, title: str, emoji_names: List[str]
+                 ) -> None:
+        width = 40
+        self.emoji_names = emoji_names
+        self.emoji_btns = [urwid.Text(emoji_name)
+                           for emoji_name in self.emoji_names]
+        super().__init__(controller, self.emoji_btns, 'GO_BACK', width, title)

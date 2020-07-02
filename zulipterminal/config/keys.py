@@ -133,6 +133,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Cycle through autocomplete suggestions in reverse',
         'key_category': 'msg_compose',
     }),
+    ('ADD_REACTION', {
+        'keys': {':'},
+        'help_text': 'Add reaction to current message',
+        'key_category': 'msg_actions',
+    }),
     ('STREAM_NARROW', {
         'keys': ['s'],
         'help_text': 'Narrow to the stream of the current message',

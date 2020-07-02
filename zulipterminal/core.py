@@ -16,8 +16,8 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    NoticeView, PopUpConfirmationView, StreamInfoView,
+    AboutView, EditHistoryView, EditModeView, EmojiPickerView, HelpView,
+    MsgInfoView, NoticeView, PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -148,6 +148,11 @@ class Controller:
                                     "Message Information (up/down scrolls)",
                                     message_links, time_mentions)
         self.show_pop_up(msg_info_view)
+
+    def show_emoji_picker(self, message: Message) -> None:
+        emoji_picker_view = EmojiPickerView(self, "Add/Remove reactions",
+                                            ['thumbs-up'])
+        self.show_pop_up(emoji_picker_view)
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
