@@ -1920,6 +1920,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
+        elif is_command_key("ADD_REACTION", key):
+            self.model.controller.show_emoji_picker(self.message)
         return key
 
 
@@ -2017,7 +2019,9 @@ class PanelSearchBox(urwid.Edit):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
+            # Don't call 'Esc' when inside a popup search-box.
+            if not self.panel_view.view.controller.is_any_popup_open():
+                self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])

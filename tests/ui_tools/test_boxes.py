@@ -1515,6 +1515,7 @@ class TestPanelSearchBox:
     def test_keypress_GO_BACK(self, panel_search_box, back_key, widget_size):
         size = widget_size(panel_search_box)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = lambda: True
+        panel_search_box.panel_view.view.controller.is_any_popup_open = lambda: False
         panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 

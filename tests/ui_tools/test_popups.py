@@ -11,6 +11,7 @@ from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
+    EmojiPickerView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -1296,3 +1297,40 @@ class TestStreamMembersView:
         self.controller.show_stream_info.assert_called_once_with(
             stream_id=stream_id,
         )
+
+
+class TestEmojiPickerView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, message_fixture):
+        self.controller = mocker.Mock()
+        self.view = self.controller.view
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(MODULE + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.emoji_picker_view = EmojiPickerView(
+            self.controller,
+            "ADD EMOJI",
+            [("zulip", "4", [])],
+            message_fixture,
+            self.view,
+        )
+
+    @pytest.mark.parametrize("key", keys_for_command("SEARCH_EMOJIS"))
+    def test_keypress_search_emoji(self, key, widget_size):
+        size = widget_size(self.emoji_picker_view)
+        self.controller.is_in_editor_mode.return_value = False
+
+        self.emoji_picker_view.keypress(size, key)
+
+        assert self.emoji_picker_view.get_focus() == "header"
+
+    @pytest.mark.parametrize(
+        "key", {*keys_for_command("GO_BACK"), *keys_for_command("ADD_REACTION")}
+    )
+    def test_keypress_exit_called(self, key, widget_size):
+        size = widget_size(self.emoji_picker_view)
+
+        self.emoji_picker_view.keypress(size, key)
+
+        assert self.controller.exit_popup.called

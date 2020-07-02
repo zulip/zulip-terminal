@@ -40,6 +40,7 @@ from zulipterminal.helper import (
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    EmojiButton,
     HomeButton,
     MentionedButton,
     MessageLinkButton,
@@ -1900,5 +1901,103 @@ class FullRawMsgView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
+            return key
+        return super().keypress(size, key)
+
+
+class EmojiPickerView(PopUpView):
+    """
+    Displays Emoji Picker view for messages.
+    """
+
+    def __init__(
+        self,
+        controller: Any,
+        title: str,
+        emoji_units: List[Tuple[str, str, List[str]]],
+        message: Message,
+        view: Any,
+    ) -> None:
+        self.view = view
+        self.message = message
+        self.controller = controller
+        self.selected_emojis: Dict[str, str] = {}
+        emoji_buttons = self.generate_emoji_buttons(emoji_units)
+        width = max(len(button.label) for button in emoji_buttons)
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        popup_width = min(max_cols, width)
+        self.emoji_search = PanelSearchBox(
+            self, "SEARCH_EMOJIS", self.update_emoji_list
+        )
+        search_box = urwid.LineBox(
+            self.emoji_search,
+            tlcorner="─",
+            tline="",
+            lline="",
+            trcorner="─",
+            blcorner="─",
+            rline="",
+            bline="─",
+            brcorner="─",
+        )
+        self.empty_search = False
+        super().__init__(
+            controller,
+            emoji_buttons,
+            "ADD_REACTION",
+            popup_width,
+            title,
+            header=search_box,
+        )
+        self.set_focus("header")
+        self.controller.enter_editor_mode_with(self.emoji_search)
+
+    @asynch
+    def update_emoji_list(
+        self,
+        search_box: Any = None,
+        new_text: Optional[str] = None,
+        emoji_list: Any = None,
+    ) -> None:
+        pass
+
+    def is_selected_emoji(self, emoji_name: str) -> bool:
+        return emoji_name in self.selected_emojis.values()
+
+    def add_or_remove_selected_emoji(self, emoji_code: str, emoji_name: str) -> None:
+        if emoji_name in self.selected_emojis.values():
+            self.selected_emojis.pop(emoji_code, None)
+        else:
+            self.selected_emojis.update({emoji_code: emoji_name})
+
+    def generate_emoji_buttons(
+        self, emoji_units: List[Tuple[str, str, List[str]]]
+    ) -> List[EmojiButton]:
+        return [
+            EmojiButton(
+                controller=self.controller,
+                emoji_unit=emoji_unit,
+                message=self.message,
+                is_selected=self.is_selected_emoji,
+                toggle_selection=self.add_or_remove_selected_emoji,
+            )
+            for emoji_unit in emoji_units
+        ]
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if (
+            is_command_key("SEARCH_EMOJIS", key)
+            and not self.controller.is_in_editor_mode()
+        ):
+            self.set_focus("header")
+            self.emoji_search.set_caption(" ")
+            self.controller.enter_editor_mode_with(self.emoji_search)
+            return key
+        elif is_command_key("GO_BACK", key) or is_command_key("ADD_REACTION", key):
+            for emoji_code, emoji_name in self.selected_emojis.items():
+                self.controller.model.toggle_message_reaction(self.message, emoji_name)
+            self.emoji_search.reset_search_text()
+            self.controller.exit_editor_mode()
+            self.controller.exit_popup()
             return key
         return super().keypress(size, key)

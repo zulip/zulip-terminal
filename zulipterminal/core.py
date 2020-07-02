@@ -26,6 +26,7 @@ from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
+    EmojiPickerView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -274,6 +275,16 @@ class Controller:
             time_mentions,
         )
         self.show_pop_up(msg_info_view, "area:msg")
+
+    def show_emoji_picker(self, message: Message) -> None:
+        emoji_picker_view = EmojiPickerView(
+            self,
+            "Add/Remove Emojis",
+            [("+1", "1f44d", ["thumbs_up", "like"])],
+            message,
+            self.view,
+        )
+        self.show_pop_up(emoji_picker_view, "area:msg")
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
