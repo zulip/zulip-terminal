@@ -279,6 +279,15 @@ class Model:
                         user_list=self.users)
             time.sleep(60)
 
+    def user_has_reacted_to_msg(self, emoji_name: str, message: Message
+                                ) -> bool:
+        for reaction in message['reactions']:
+            if(reaction['emoji_name'] == emoji_name
+                and (reaction['user'].get('user_id', None) == self.user_id
+                     or reaction['user'].get('id', None) == self.user_id)):
+                return True
+        return False
+
     @asynch
     def react_to_message(self,
                          message: Message,

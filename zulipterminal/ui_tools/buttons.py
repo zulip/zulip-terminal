@@ -491,6 +491,7 @@ class EditModeButton(urwid.Button):
 class EmojiButton(TopButton):
     def __init__(self, controller: Any, width: int, emoji_name: str,
                  message: Message) -> None:
+        self.controller = controller
         self.emoji_name = emoji_name
         self.message = message
         super().__init__(controller=controller,
@@ -498,3 +499,18 @@ class EmojiButton(TopButton):
                          prefix_character='',
                          show_function=controller.toggle_message_reaction,
                          width=width)
+        if self.user_has_reacted_to_msg():
+            self.update_widget('✓ ')
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key('ENTER', key):
+            # Note that this is called before toggle_message_reaction.
+            if self.user_has_reacted_to_msg():
+                self.update_widget('')
+            else:
+                self.update_widget('✓ ')
+        return super().keypress(size, key)
+
+    def user_has_reacted_to_msg(self) -> bool:
+        return self.controller.model.user_has_reacted_to_msg(self.emoji_name,
+                                                             self.message)
