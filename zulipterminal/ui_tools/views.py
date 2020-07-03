@@ -878,7 +878,6 @@ class PopUpView(urwid.Frame):
             footer = urwid.ListBox(urwid.SimpleFocusListWalker(footer))
 
         super().__init__(self.log, header=header, footer=footer)
-        print(self.get_focus(), flush=True)
 
     @staticmethod
     def calculate_popup_height(body: List[Any], header: List[Any],
@@ -1345,9 +1344,42 @@ class EmojiPickerView(PopUpView):
         self.width = 40
         self.message = message
         self.controller = controller
+        self.emoji_names = emoji_names
         emoji_buttons = self.generate_emoji_buttons(emoji_names)
-        super().__init__(controller, emoji_buttons, 'GO_BACK', self.width,
-                         title)
+
+        search_box = urwid.Edit(caption=' Search [{}] '.format(
+                                keys_for_command('ADD_REACTION').pop()))
+        urwid.connect_signal(search_box, 'change', self.update_emoji_list)
+        super().__init__(controller, [search_box], 'GO_BACK', self.width,
+                         title, header=None, footer=emoji_buttons)
+        self.focus_position = 'body'
+        controller.enter_editor_mode_with(self)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key('ENTER', key):
+            if self.controller.is_in_editor_mode():
+                self.controller.exit_editor_mode()
+                self.set_focus('footer')
+                return key
+        elif is_command_key('GO_BACK', key):
+            self.controller.exit_editor_mode()
+        elif is_command_key('ADD_REACTION', key):
+            self.controller.enter_editor_mode_with(self)
+            self.set_focus('body')
+            return key
+        return super().keypress(size, key)
+
+    def update_emoji_list(self, search_box: Any, new_text: str) -> None:
+        matching_emojis = []
+        for emoji in self.emoji_names:
+            if emoji.startswith(new_text):
+                matching_emojis.append(emoji)
+        emoji_buttons = self.generate_emoji_buttons(matching_emojis)
+
+        self.contents['footer'] = (urwid.ListBox(
+                                 urwid.SimpleFocusListWalker(
+                                     emoji_buttons)), None)
+        self.controller.update_screen()
 
     def generate_emoji_buttons(self, emoji_names: List[str]
                                ) -> List[EmojiButton]:
