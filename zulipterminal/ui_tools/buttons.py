@@ -513,4 +513,5 @@ class EmojiButton(TopButton):
 
     def user_has_reacted_to_msg(self) -> bool:
         return self.controller.model.user_has_reacted_to_msg(self.emoji_name,
-                                                             self.message)
+                                                             self.message,
+                                                             'emoji_name')

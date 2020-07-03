@@ -279,10 +279,12 @@ class Model:
                         user_list=self.users)
             time.sleep(60)
 
-    def user_has_reacted_to_msg(self, emoji_name: str, message: Message
-                                ) -> bool:
+    def user_has_reacted_to_msg(self, emoji_attr: str, message: Message,
+                                key: str) -> bool:
+        assert key in ('emoji_name', 'emoji_code')
+
         for reaction in message['reactions']:
-            if(reaction['emoji_name'] == emoji_name
+            if(reaction[key] == emoji_attr
                 and (reaction['user'].get('user_id', None) == self.user_id
                      or reaction['user'].get('id', None) == self.user_id)):
                 return True
@@ -301,13 +303,8 @@ class Model:
             emoji_code=self.active_emoji_data[reaction_to_toggle]['code'],
             reaction_type=self.active_emoji_data[reaction_to_toggle]['type'],
             message_id=str(message['id']))
-        existing_reactions = [
-            reaction['emoji_code']
-            for reaction in message['reactions']
-            if (reaction['user'].get('user_id', None) == self.user_id
-                or reaction['user'].get('id', None) == self.user_id)
-        ]
-        if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
+        if(self.user_has_reacted_to_msg(reaction_to_toggle_spec['emoji_code'],
+                                        message, 'emoji_code')):
             response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
             response = self.client.add_reaction(reaction_to_toggle_spec)
