@@ -358,21 +358,34 @@ class Model:
 
     @asynch
     def react_to_message(self, message: Message, reaction_to_toggle: str) -> None:
-        # FIXME Only support thumbs_up for now
-        assert reaction_to_toggle == "thumbs_up"
+        # Check if reaction_to_toggle is a valid original/alias
+        assert reaction_to_toggle in self.all_emoji_names
+
+        for emoji_name, emoji_data in self.active_emoji_data.items():
+            if (
+                reaction_to_toggle == emoji_name
+                or reaction_to_toggle in emoji_data["aliases"]
+            ):
+                # Found the emoji to toggle. Store its code/type and dont check further
+                emoji_code = emoji_data["code"]
+                emoji_type = emoji_data["type"]
+                break
 
         reaction_to_toggle_spec = dict(
-            emoji_name="thumbs_up",
-            emoji_code="1f44d",
-            reaction_type="unicode_emoji",
+            emoji_name=reaction_to_toggle,
+            emoji_code=emoji_code,
+            reaction_type=emoji_type,
             message_id=str(message["id"]),
         )
+        # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
+        # check both the reaction.user.{user_id/id} fields too for pre v3 support.
         existing_reactions = [
             reaction["emoji_code"]
             for reaction in message["reactions"]
             if (
-                reaction["user"].get("user_id", None) == self.user_id
-                or reaction["user"].get("id", None) == self.user_id
+                reaction.get("user", {}).get("user_id", None) == self.user_id
+                or reaction.get("user", {}).get("id", None) == self.user_id
+                or reaction.get("user_id", None) == self.user_id
             )
         ]
         if reaction_to_toggle_spec["emoji_code"] in existing_reactions:

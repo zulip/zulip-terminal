@@ -327,6 +327,7 @@ def unicode_emojis():
             ("smile", {"code": "263a", "aliases": [], "type": "unicode_emoji"}),
             ("smiley", {"code": "1f603", "aliases": [], "type": "unicode_emoji"}),
             ("smirk", {"code": "1f60f", "aliases": ["smug"], "type": "unicode_emoji"}),
+            ("thumbs_up", {"code": "1f44d", "aliases": [], "type": "unicode_emoji"}),
         ]
     )
 

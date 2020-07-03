@@ -760,8 +760,8 @@ class TestWriteBox:
             (":jok", 0, ":joker:"),
             (":", 0, ":happy:"),
             (":", 1, ":joker:"),
-            (":", -2, ":smiley:"),
-            (":", -1, ":smirk:"),
+            (":", -3, ":smiley:"),
+            (":", -2, ":smirk:"),
             (":nomatch", 0, None),
             (":nomatch", -1, None),
             # Complex autocomplete prefixes.

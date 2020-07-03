@@ -441,44 +441,103 @@ class TestModel:
         assert model.index["topics"][stream_id] == return_value
         assert model.index["topics"][stream_id] is not return_value
 
-    @pytest.mark.parametrize("user_key", ["user_id", "id"])
+    # pre server v3 provide user_id or id as a property within user key
+    # post server v3 provide user_id as a property outside the user key
+    @pytest.mark.parametrize("user_key", ["user_id", "id", None])
     @pytest.mark.parametrize(
-        "msg_id, existing_reactions, expected_method",
+        "emoji_unit, existing_reactions, expected_method",
         [
-            (5, [], "POST"),
-            (5, [dict(user="me", emoji_code="1f44d")], "DELETE"),
-            (5, [dict(user="not me", emoji_code="1f44d")], "POST"),
-            (5, [dict(user="me", emoji_code="1f614")], "POST"),
-            (5, [dict(user="not me", emoji_code="1f614")], "POST"),
+            case(
+                ("thumbs_up", "1f44d", "unicode_emoji"),
+                [],
+                "POST",
+                id="add_unicode_original_no_existing_emoji",
+            ),
+            case(
+                ("singing", "3", "realm_emoji"),
+                [],
+                "POST",
+                id="add_realm_original_no_existing_emoji",
+            ),
+            case(
+                ("joy_cat", "1f639", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f44d")],
+                "POST",
+                id="add_unicode_original_mine_existing_different_emoji",
+            ),
+            case(
+                ("zulip", "zulip", "zulip_extra_emoji"),
+                [dict(user="me", emoji_code="1f639")],
+                "POST",
+                id="add_zulip_original_mine_existing_different_emoji",
+            ),
+            case(
+                ("rock_on", "1f918", "unicode_emoji"),
+                [dict(user="not me", emoji_code="1f918")],
+                "POST",
+                id="add_unicode_original_others_existing_same_emoji",
+            ),
+            case(
+                ("grinning", "1f600", "unicode_emoji"),
+                [dict(user="mot me", emoji_code="1f600")],
+                "POST",
+                id="add_unicode_alias_others_existing_same_emoji",
+            ),
+            case(
+                ("smiley", "1f603", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f603")],
+                "DELETE",
+                id="remove_unicode_original_mine_existing_same_emoji",
+            ),
+            case(
+                ("smug", "1f60f", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f60f")],
+                "DELETE",
+                id="remove_unicode_alias_mine_existing_same_emoji",
+            ),
+            case(
+                ("zulip", "zulip", "zulip_extra_emoji"),
+                [dict(user="me", emoji_code="zulip")],
+                "DELETE",
+                id="remove_zulip_original_mine_existing_same_emoji",
+            ),
         ],
     )
-    def test_react_to_message_with_thumbs_up(
-        self, mocker, model, user_key, msg_id, existing_reactions, expected_method
+    def test_react_to_message_with_valid_emoji(
+        self,
+        mocker,
+        model,
+        user_key,
+        emoji_unit,
+        existing_reactions,
+        expected_method,
+        msg_id=5,
     ):
-        # Map 'user' to running user_id or an arbitrary other (+1)
+        # Map 'id' to running user_id or an arbitrary other (+1)
+        id = (
+            model.user_id
+            if existing_reactions and existing_reactions[0]["user"] == "me"
+            else model.user_id + 1
+        )
         full_existing_reactions = [
-            dict(
-                er,
-                user={
-                    user_key: (
-                        model.user_id if er["user"] == "me" else model.user_id + 1
-                    )
-                },
-            )
+            dict(er, user={user_key: id})
+            if user_key is not None
+            else dict(user_id=id, emoji_code=er["emoji_code"])
             for er in existing_reactions
         ]
         message = dict(id=msg_id, reactions=full_existing_reactions)
+        emoji_name, emoji_code, emoji_type = emoji_unit
         reaction_spec = dict(
-            emoji_name="thumbs_up",
-            reaction_type="unicode_emoji",
-            emoji_code="1f44d",
+            emoji_name=emoji_name,
+            reaction_type=emoji_type,
+            emoji_code=emoji_code,
             message_id=str(msg_id),
         )
         response = mocker.Mock()
         model.client.add_reaction.return_value = response
         model.client.remove_reaction.return_value = response
 
-        model.react_to_message(message, "thumbs_up")
+        model.react_to_message(message, emoji_name)
 
         if expected_method == "POST":
             model.client.add_reaction.assert_called_once_with(reaction_spec)
@@ -488,7 +547,7 @@ class TestModel:
             model.client.add_reaction.assert_not_called()
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-    def test_react_to_message_for_not_thumbs_up(self, model):
+    def test_react_to_message_with_invalid_emoji(self, model):
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), "x")
 
