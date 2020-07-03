@@ -1345,7 +1345,8 @@ class DeleteReactionView(PopUpView):
         self.controller = controller
         self.message = message
         widgets = [urwid.CheckBox(reaction['emoji_name'], state=True,
-                                  checked_symbol='✓')
+                                  checked_symbol='✓',
+                                  on_state_change=self.remove_reaction)
                    for reaction in message['reactions']
                    if(controller.model.user_has_reacted_to_msg(
                                         reaction['emoji_name'], message,
@@ -1358,6 +1359,16 @@ class DeleteReactionView(PopUpView):
         if is_command_key('GO_LEFT', key):
             self.controller.show_emoji_picker(self.message)
         return super().keypress(size, key)
+
+    def remove_reaction(self, checkbox: Any, state: bool) -> None:
+        if not state:
+            self.controller.model.react_to_message(self.message,
+                                                   checkbox.get_label())
+            check_boxes = self.contents['body'][0].body
+            check_boxes.remove(checkbox)
+            removed_check_boxes = urwid.ListBox(
+                                    urwid.SimpleFocusListWalker(check_boxes))
+            self.contents['body'] = (removed_check_boxes, None)
 
 
 class EmojiPickerView(PopUpView):

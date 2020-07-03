@@ -164,6 +164,7 @@ class Controller:
         show_stream_view = StreamInfoView(self, stream_id)
         self.show_pop_up(show_stream_view)
 
+    # TODO: remove
     def toggle_message_reaction(self, button: Any) -> None:
         self.model.react_to_message(button.message,
                                     button.emoji_name)
