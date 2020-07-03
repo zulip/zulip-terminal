@@ -294,8 +294,6 @@ class Model:
     def react_to_message(self,
                          message: Message,
                          reaction_to_toggle: str) -> None:
-        # FIXME Only support thumbs_up for now
-        assert reaction_to_toggle == 'thumbs_up'
         assert reaction_to_toggle in self.active_emoji_data
 
         reaction_to_toggle_spec = dict(

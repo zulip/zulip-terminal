@@ -151,7 +151,8 @@ class Controller:
 
     def show_emoji_picker(self, message: Message) -> None:
         emoji_picker_view = EmojiPickerView(self, "Add/Remove reactions",
-                                            ['thumbs_up'], message)
+                                            list(self.model.active_emoji_data.keys()),
+                                                 message)
         self.show_pop_up(emoji_picker_view)
 
     def show_stream_info(self, stream_id: int) -> None:

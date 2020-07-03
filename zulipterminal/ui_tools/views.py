@@ -1352,4 +1352,4 @@ class EmojiPickerView(PopUpView):
                                ) -> List[EmojiButton]:
         return [EmojiButton(self.controller, self.width, emoji_name,
                             self.message)
-                for emoji_name in emoji_names]
+                for emoji_name in emoji_names[:10]]
