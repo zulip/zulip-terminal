@@ -1338,6 +1338,28 @@ class EditHistoryView(PopUpView):
             return key
         return super().keypress(size, key)
 
+class DeleteReactionView(PopUpView):
+    def __init__(self, controller: Any, title: str, message: Message
+                 ) -> None:
+        self.width = 30
+        self.controller = controller
+        self.message = message
+        widgets = [urwid.CheckBox(reaction['emoji_name'], state=True,
+                                  checked_symbol='✓')
+                   for reaction in message['reactions']
+                   if(controller.model.user_has_reacted_to_msg(
+                                        reaction['emoji_name'], message,
+                                        'emoji_name'))]
+        widgets = sorted(list(set(widgets)), key=lambda cb: cb.label)  # remove duplicates
+        super().__init__(controller, widgets, 'GO_BACK', self.width,
+                         title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key('GO_LEFT', key):
+            self.controller.show_emoji_picker(self.message)
+        return super().keypress(size, key)
+
+
 class EmojiPickerView(PopUpView):
     def __init__(self, controller: Any, title: str, emoji_names: List[str],
                  message: Message) -> None:
@@ -1363,6 +1385,9 @@ class EmojiPickerView(PopUpView):
                 return key
         elif is_command_key('GO_BACK', key):
             self.controller.exit_editor_mode()
+        elif(is_command_key('GO_RIGHT', key) 
+                and not self.controller.is_in_editor_mode()):
+            self.controller.show_delete_reaction(self.message)
         elif is_command_key('ADD_REACTION', key):
             self.controller.enter_editor_mode_with(self)
             self.set_focus('body')
