@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import os
 
-from zulipterminal.emoji_dict import EMOJI_NAME_MAPS
+from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
 
 
-INPUT_FILE = "zulipterminal/emoji_dict.py"
-OUTPUT_FILE = "zulipterminal/emoji_names.py"
+INPUT_FILE = "zulipterminal/unicode_emoji_dict.py"
+OUTPUT_FILE = "zulipterminal/unicode_emojis.py"
 
 emoji_dict = EMOJI_NAME_MAPS
 
@@ -17,9 +17,10 @@ for emoji_names in emoji_dict.values():
 emoji_list.sort()
 
 with open(OUTPUT_FILE, "w") as f:
-    f.write('# Generated automatically by tools/convert-emoji-names\n')
+    f.write('# Generated automatically by '
+            'tools/convert-unicode-emoji-data\n')
     f.write('# Do not modify.\n\n')
-    f.write('EMOJI_NAMES = [\n')
+    f.write('EMOJI_DATA = [\n')
     for listitem in emoji_list:
         f.write('    \'%s\',\n' % listitem)
     f.write(']\n')

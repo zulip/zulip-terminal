@@ -1,7 +1,7 @@
-# Generated automatically by tools/convert-emoji-names
+# Generated automatically by tools/convert-unicode-emoji-data
 # Do not modify.
 
-EMOJI_NAMES = [
+EMOJI_DATA = [
     '+1',
     '-1',
     '100',
