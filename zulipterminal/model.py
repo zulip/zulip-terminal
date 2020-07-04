@@ -138,7 +138,11 @@ class Model:
         self.unread_counts = classify_unread_counts(self)
 
         self._draft = None  # type: Optional[Message]
-        self.active_emoji_data = unicode_emojis.EMOJI_DATA
+        unicode_emoji_data = unicode_emojis.EMOJI_DATA
+        for name, data in unicode_emoji_data.items():
+            data['type'] = 'unicode_emoji'
+
+        self.active_emoji_data = unicode_emoji_data
 
         self.new_user_input = True
         self._start_presence_updates()
