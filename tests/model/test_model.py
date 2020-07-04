@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 from copy import deepcopy
 from typing import Any
 
@@ -25,7 +26,7 @@ class TestModel:
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile,
-              unicode_emojis):
+              unicode_emojis, custom_emojis):
         mocker.patch('zulipterminal.model.Model.get_messages',
                      return_value='')
         self.client.register.return_value = initial_data
@@ -41,11 +42,13 @@ class TestModel:
         self.client.get_profile.return_value = user_profile
         mocker.patch('zulipterminal.model.unicode_emojis',
                      EMOJI_DATA=unicode_emojis)
+        mocker.patch('zulipterminal.model.Model.fetch_custom_emojis',
+                     return_value=custom_emojis)
         model = Model(self.controller)
         return model
 
     def test_init(self, model, initial_data, user_profile,
-                  unicode_emojis):
+                  unicode_emojis, custom_emojis):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.narrow == []
@@ -75,7 +78,10 @@ class TestModel:
         assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
-        assert model.active_emoji_data == unicode_emojis
+        assert model.active_emoji_data == OrderedDict(sorted(
+            {**unicode_emojis, **custom_emojis}.items(), key=lambda e: e[0]))
+        # Custom emoji replaces unicode emoji with same name.
+        assert model.active_emoji_data['joker']['type'] == 'realm_emoji'
 
     @pytest.mark.parametrize(['server_response', 'locally_processed_data',
                               'zulip_feature_level'], [
@@ -1745,3 +1751,42 @@ class TestModel:
 
         with pytest.raises(RuntimeError, match='Invalid user ID.'):
             model.user_name_from_id(user_id)
+
+    @pytest.mark.parametrize('response', [
+        {
+            # Omitting source_url, author_id (server version 3.0),
+            # author (server version < 3.0) from response since they
+            # are not used.
+            'emoji': {
+                '100': {
+                    'deactivated': False,
+                    'id': '100',
+                    'name': 'urwid',
+                },
+                '20': {
+                    'deactivated': False,
+                    'id': '20',
+                    'name': 'snape',
+                },
+                '3': {
+                    'deactivated': False,
+                    'id': '3',
+                    'name': 'dancing',
+                },
+                '81': {  # Not included in custom_emojis because deactivated.
+                    'deactivated': True,
+                    'id': '81',
+                    'name': 'green_tick',
+                },
+            },
+            'msg': '',
+            'result': 'success'
+        }
+    ])
+    def test_fetch_custom_emojis(self, mocker, model, custom_emojis,
+                                 response):
+        self.client.get_realm_emoji.return_value = response
+
+        fetched_custom_emojis = model.fetch_custom_emojis()
+
+        assert fetched_custom_emojis == custom_emojis
