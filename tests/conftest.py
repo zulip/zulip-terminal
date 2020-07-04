@@ -183,7 +183,7 @@ def streams_fixture():
 
 
 @pytest.fixture
-def emojis_fixture():
+def unicode_emojis():
     return [
         'happy',
         'joker',

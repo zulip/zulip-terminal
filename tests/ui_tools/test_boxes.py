@@ -17,7 +17,7 @@ class TestWriteBox:
 
     @pytest.fixture()
     def write_box(self, mocker, users_fixture, user_groups_fixture,
-                  streams_fixture, emojis_fixture):
+                  streams_fixture, unicode_emojis):
         write_box = WriteBox(self.view)
         write_box.view.users = users_fixture
         write_box.model.user_group_names = [
@@ -28,8 +28,8 @@ class TestWriteBox:
             {'name': stream['name']} for stream in
             streams_fixture], key=lambda stream: stream['name'].lower())
 
-        mocker.patch('zulipterminal.ui_tools.boxes.emoji_names',
-                     EMOJI_NAMES=emojis_fixture)
+        mocker.patch('zulipterminal.ui_tools.boxes.unicode_emojis',
+                     EMOJI_DATA=unicode_emojis)
         return write_box
 
     def test_init(self, write_box):
