@@ -141,8 +141,10 @@ class Model:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
-
-        self.active_emoji_data = unicode_emoji_data
+        custom_emoji_data = self.fetch_custom_emojis()
+        all_emoji_data = {**unicode_emoji_data, **custom_emoji_data}.items()
+        self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
+                                                    key=lambda e: e[0]))
 
         self.new_user_input = True
         self._start_presence_updates()
@@ -368,6 +370,15 @@ class Model:
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
+
+    def fetch_custom_emojis(self) -> Dict[str, Dict[str, str]]:
+        response = self.client.get_realm_emoji()
+        custom_emojis = {emoji['name']: {'code': emoji_code,
+                                         'type': 'realm_emoji'}
+                         for emoji_code, emoji in response['emoji'].items()
+                         if not emoji['deactivated']}
+        display_error_if_present(response, self.controller)
+        return custom_emojis
 
     def get_messages(self, *,
                      num_after: int, num_before: int,

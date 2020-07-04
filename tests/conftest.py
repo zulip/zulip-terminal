@@ -183,6 +183,16 @@ def streams_fixture():
 
 
 @pytest.fixture
+def custom_emojis():
+    return OrderedDict([
+        ('urwid', {'code': '100', 'type': 'realm_emoji'}),
+        ('dancing', {'code': '3', 'type': 'realm_emoji'}),
+        ('snape', {'code': '20', 'type': 'realm_emoji'}),
+        ('joker', {'code': '202020', 'type': 'realm_emoji'}),
+    ])
+
+
+@pytest.fixture
 def unicode_emojis():
     return OrderedDict([
         ('happy', {'code': '1f600', 'type': 'unicode_emoji'}),
