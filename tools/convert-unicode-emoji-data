@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
+
+# Convert emoji file downloaded using tools/fetch-unicode-emoji-data
+# into what is required by ZT.
+
 import os
 
 from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
+from collections import OrderedDict
 
 
 INPUT_FILE = "zulipterminal/unicode_emoji_dict.py"
@@ -9,21 +14,25 @@ OUTPUT_FILE = "zulipterminal/unicode_emojis.py"
 
 emoji_dict = EMOJI_NAME_MAPS
 
-emoji_list = []
-for emoji_names in emoji_dict.values():
-    emoji_list.append(emoji_names['canonical_name'])
-    emoji_list.extend(emoji_names['aliases'])
+emoji_map = {}
+for emoji_code, emoji_names in emoji_dict.items():
+    emoji_map[emoji_names['canonical_name']] = emoji_code
+    for emoji in emoji_names['aliases']:
+        emoji_map[emoji] = emoji_code
 
-emoji_list.sort()
+ordered_emojis = OrderedDict(sorted(emoji_map.items()))
 
 with open(OUTPUT_FILE, "w") as f:
+    f.write('from collections import OrderedDict\n\n\n')
     f.write('# Generated automatically by '
             'tools/convert-unicode-emoji-data\n')
     f.write('# Do not modify.\n\n')
-    f.write('EMOJI_DATA = [\n')
-    for listitem in emoji_list:
-        f.write('    \'%s\',\n' % listitem)
-    f.write(']\n')
+    f.write('EMOJI_DATA = OrderedDict([\n')
+    for emoji_code, emoji_name in ordered_emojis.items():
+        # {'smile': {'code': '263a'}}
+        f.write("    ('%s', {'code': '%s'}),\n" % (emoji_code,
+                                                   emoji_name))
+    f.write('])\n')
 
 print("Emoji list saved in {}".format(OUTPUT_FILE))
 if os.path.exists(INPUT_FILE):

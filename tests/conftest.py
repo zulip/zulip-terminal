@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from typing import Any, Dict
 
@@ -184,15 +184,15 @@ def streams_fixture():
 
 @pytest.fixture
 def unicode_emojis():
-    return [
-        'happy',
-        'joker',
-        'joy_cat',
-        'rock_on',
-        'smile',
-        'smiley',
-        'smirk',
-        ]
+    return OrderedDict([
+        ('happy', {'code': '1f600', 'type': 'unicode_emoji'}),
+        ('joker', {'code': '1f0cf', 'type': 'unicode_emoji'}),
+        ('joy_cat', {'code': '1f639', 'type': 'unicode_emoji'}),
+        ('rock_on', {'code': '1f918', 'type': 'unicode_emoji'}),
+        ('smile', {'code': '263a', 'type': 'unicode_emoji'}),
+        ('smiley', {'code': '1f603', 'type': 'unicode_emoji'}),
+        ('smirk', {'code': '1f60f', 'type': 'unicode_emoji'}),
+    ])
 
 
 stream_msg_template = {
