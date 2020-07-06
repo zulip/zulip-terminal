@@ -855,30 +855,43 @@ PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str,
                                                            Tuple[str, str]]]]]
 
 
-class PopUpView(urwid.ListBox):
-    def __init__(self, controller: Any, widgets: List[Any],
-                 command: str, requested_width: int, title: str) -> None:
+class PopUpView(urwid.Frame):
+    def __init__(self, controller: Any, body: List[Any],
+                 command: str, requested_width: int, title: str,
+                 header: List[Any]=None, footer: List[Any]=None) -> None:
         self.controller = controller
         self.command = command
         self.title = title
-        self.log = urwid.SimpleFocusListWalker(widgets)
+        self.log = urwid.ListBox(urwid.SimpleFocusListWalker(body))
 
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         self.width = min(max_cols, requested_width)
 
-        height = self.calculate_popup_height(widgets, self.width)
+        height = self.calculate_popup_height(body, header, footer,
+                                             self.width)
         self.height = min(max_rows, height)
+        if header:
+            header = urwid.ListBox(urwid.SimpleFocusListWalker(header))
+        if footer:
+            footer = urwid.ListBox(urwid.SimpleFocusListWalker(footer))
 
-        super().__init__(self.log)
+        super().__init__(self.log, header=header, footer=footer)
+        print(self.get_focus(), flush=True)
 
     @staticmethod
-    def calculate_popup_height(widgets: List[Any], popup_width: int) -> int:
+    def calculate_popup_height(body: List[Any], header: List[Any],
+                               footer: List[Any], popup_width: int) -> int:
         """
         Returns popup height. The popup height is calculated using urwid's
         .rows method on every widget.
         """
-        return sum(widget.rows((popup_width, )) for widget in widgets)
+        body_height = sum(widget.rows((popup_width, )) for widget in body)
+        header_height = sum(widget.rows((popup_width, ))
+                            for widget in header) if header else 0
+        footer_height = sum(widget.rows((popup_width, ))
+                            for widget in footer) if footer else 0
+        return body_height + header_height + footer_height
 
     @staticmethod
     def calculate_table_widths(contents: PopUpViewTableContent,

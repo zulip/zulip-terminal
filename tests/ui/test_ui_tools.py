@@ -1251,6 +1251,304 @@ class TestLeftColumnView:
         ])
 
 
+class TestPopUpView:
+    @pytest.fixture(autouse=True)
+    def pop_up_view(self, mocker):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        self.command = 'COMMAND'
+        self.title = 'Generic title'
+        self.width = 16
+        self.header = mocker.Mock()
+        self.footer = mocker.Mock()
+        self.widget = mocker.Mock()
+        mocker.patch.object(self.widget, 'rows', return_value=1)
+        self.widgets = [self.widget, ]
+        self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
+                                        return_value=[])
+        self.list_box_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__',
+                                          return_value=None)
+        self.super_init = mocker.patch(VIEWS + '.urwid.Frame.__init__')
+        self.super_keypress = mocker.patch(VIEWS + '.urwid.Frame.keypress')
+        self.pop_up_view = PopUpView(self.controller, self.widgets,
+                                     self.command, self.width, self.title,
+                                     self.header, self.footer)
+
+    def test_init(self):
+        assert self.pop_up_view.controller == self.controller
+        assert self.pop_up_view.command == self.command
+        assert self.pop_up_view.title == self.title
+        assert self.pop_up_view.width == self.width
+        self.list_walker.assert_called_once_with(self.widgets)
+        self.list_box_init.assert_called_once_with([])
+        self.super_init.assert_called_once_with(self.pop_up_view.log,
+                                                header=self.header,
+                                                footer=self.footer)
+
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
+    def test_keypress_GO_BACK(self, key):
+        size = (200, 20)
+        self.pop_up_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_command_key(self, mocker):
+        size = (200, 20)
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key: command == self.command
+        ))
+        self.pop_up_view.keypress(size, 'cmd_key')
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        # Patch `is_command_key` to not raise an 'Invalid Command' exception
+        # when its parameters are (self.command, key) as there is no
+        # self.command='COMMAND' command in keys.py.
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key:
+            False if command == self.command
+            else is_command_key(command, key)
+        ))
+        self.pop_up_view.keypress(size, key)
+        self.super_keypress.assert_called_once_with(size, expected_key)
+
+
+class TestHelpMenu:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.help_view = HelpView(self.controller, 'Help Menu')
+
+    def test_keypress_any_key(self):
+        key = "a"
+        size = (200, 20)
+        self.help_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('HELP')})
+    def test_keypress_exit_popup(self, key):
+        size = (200, 20)
+        self.help_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.help_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
+class TestAboutView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
+        server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
+        self.about_view = AboutView(self.controller, 'About',
+                                    zt_version=ZT_VERSION,
+                                    server_version=server_version,
+                                    server_feature_level=server_feature_level)
+
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('ABOUT')})
+    def test_keypress_exit_popup(self, key):
+        size = (200, 20)
+        self.about_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_exit_popup_invalid_key(self):
+        key = 'a'
+        size = (200, 20)
+        self.about_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.about_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+    def test_feature_level_content(self, mocker, zulip_version):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
+        server_version, server_feature_level = zulip_version
+
+        about_view = AboutView(self.controller, 'About', zt_version=ZT_VERSION,
+                               server_version=server_version,
+                               server_feature_level=server_feature_level)
+
+        assert len(about_view.feature_level_content) == (
+            1 if server_feature_level else 0
+        )
+
+
+class TestPopUpConfirmationView:
+    @pytest.fixture
+    def popup_view(self, mocker, stream_button):
+        self.controller = mocker.Mock()
+        self.controller.view.LEFT_WIDTH = 27
+        self.callback = mocker.Mock()
+        self.list_walker = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                        return_value=[])
+        self.divider = mocker.patch(VIEWS + '.urwid.Divider')
+        self.text = mocker.patch(VIEWS + '.urwid.Text')
+        self.wrapper_w = mocker.patch(VIEWS + '.urwid.WidgetWrap')
+        return PopUpConfirmationView(
+            self.controller,
+            self.text,
+            self.callback,
+        )
+
+    def test_init(self, popup_view):
+        assert popup_view.controller == self.controller
+        assert popup_view.success_callback == self.callback
+        self.divider.assert_called_once_with()
+        self.list_walker.assert_called_once_with(
+            [self.text, self.divider(), self.wrapper_w()])
+
+    def test_exit_popup_yes(self, mocker, popup_view):
+        popup_view.exit_popup_yes(mocker.Mock())
+        self.callback.assert_called_once_with()
+        assert self.controller.exit_popup.called
+
+    def test_exit_popup_no(self, mocker, popup_view):
+        popup_view.exit_popup_no(mocker.Mock())
+        self.callback.assert_not_called()
+        assert self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
+    def test_exit_popup_GO_BACK(self, mocker, popup_view, key):
+        size = (20, 20)
+        popup_view.keypress(size, key)
+        self.callback.assert_not_called()
+        assert self.controller.exit_popup.called
+
+
+class TestStreamInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.stream_info_view = StreamInfoView(self.controller, color='',
+                                               desc='', title='# stream-name')
+
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('STREAM_DESC')})
+    def test_keypress_exit_popup(self, key):
+        size = (200, 20)
+        self.stream_info_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.stream_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
+class TestMsgInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch, message_fixture):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.msg_info_view = MsgInfoView(self.controller, message_fixture,
+                                         'Message Information')
+
+    def test_keypress_any_key(self):
+        key = "a"
+        size = (200, 20)
+        self.msg_info_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('MSG_INFO')})
+    def test_keypress_exit_popup(self, key):
+        size = (200, 20)
+        self.msg_info_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_height_noreactions(self):
+        expected_height = 3
+        assert self.msg_info_view.height == expected_height
+
+    # FIXME This is the same parametrize as MessageBox:test_reactions_view
+    @pytest.mark.parametrize('to_vary_in_each_message', [
+        {'reactions': [{
+                'emoji_name': 'thumbs_up',
+                'emoji_code': '1f44d',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'AARON@zulip.com',
+                    'full_name': 'aaron',
+                    'id': 1,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'heart',
+                'emoji_code': '2764',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }]}
+        ])
+    def test_height_reactions(self, message_fixture, to_vary_in_each_message):
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        self.msg_info_view = MsgInfoView(self.controller, varied_message,
+                                         'Message Information')
+        # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
+        expected_height = 9
+        assert self.msg_info_view.height == expected_height
+
+    def test_keypress_navigation(self, mocker,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = (200, 20)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.msg_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
