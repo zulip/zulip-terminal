@@ -205,6 +205,9 @@ class MessageBox(urwid.Pile):
         self.topic_name = ''
         self.email = ''
         self.user_id = None  # type: Union[int, None]
+        self.message_links = (
+            OrderedDict()
+        )   # type: OrderedDict[str, Tuple[str, int]]
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -402,6 +405,28 @@ class MessageBox(urwid.Pile):
         except Exception:
             return ''
 
+    # Use quotes as a workaround for OrderedDict typing issue.
+    # See https://github.com/python/mypy/issues/6904.
+    def footlinks_view(
+        self, message_links: 'OrderedDict[str, Tuple[str, int]]',
+    ) -> Any:
+        footlinks = []
+        for link, (text, index) in message_links.items():
+            footlinks.extend([
+                '{}:'.format(index),
+                ' ',
+                ('msg_link', link),
+                '\n',
+            ])
+
+        if not footlinks:
+            return None
+
+        footlinks[-1] = footlinks[-1][:-1]  # Remove the last newline.
+        return urwid.Padding(urwid.Text(footlinks),
+                             align='left', left=8, width=('relative', 100),
+                             min_width=10, right=2)
+
     def soup2markup(self, soup: Any, **state: Any) -> List[Any]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
@@ -468,22 +493,39 @@ class MessageBox(urwid.Pile):
                 markup.append(('msg_mention', element.text))
             elif element.name == 'a':
                 # LINKS
-                link = element.attrs['href']
+                # Use rstrip to avoid anomalies and edge cases like
+                # https://google.com vs https://google.com/.
+                link = element.attrs['href'].rstrip('/')
                 text = element.img['src'] if element.img else element.text
+                text = text.rstrip('/')
 
                 parsed_link = urlparse(link)
                 if not parsed_link.scheme:  # => relative link
                     # Prepend org url to convert it to an absolute link
                     link = urljoin(self.model.server_url, link)
 
-                if link == text:
-                    # If the link and text are same
-                    # usually the case when user just pastes
-                    # a link then just display the link
-                    markup.append(('msg_link', text))
+                text = text if text else link
+
+                # Detect duplicate links to save screen real estate.
+                if link not in self.message_links:
+                    self.message_links[link] = (
+                        text, len(self.message_links) + 1
+                    )
                 else:
-                    markup.append(
-                        ('msg_link', '[' + text + ']' + '(' + link + ')'))
+                    # Append the text if its link already exist with a
+                    # different text.
+                    saved_text, saved_link_index = self.message_links[link]
+                    if saved_text != text:
+                        self.message_links[link] = (
+                            '{}, {}'.format(saved_text, text),
+                            saved_link_index,
+                        )
+
+                markup.extend([
+                    ('msg_link', text),
+                    ' ',
+                    '[{}]'.format(self.message_links[link][1]),
+                ])
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
@@ -660,11 +702,15 @@ class MessageBox(urwid.Pile):
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])
 
+        # Footlinks.
+        footlinks = self.footlinks_view(self.message_links)
+
         # Build parts together and return
         parts = [
             (recipient_header, recipient_header is not None),
             (content_header, any_differences),
             (content, True),
+            (footlinks, footlinks is not None),
             (reactions, reactions != ''),
         ]
         return [part for part, condition in parts if condition]
