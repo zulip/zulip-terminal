@@ -1486,6 +1486,7 @@ class TestMessageBox:
         assert msg_box.last_message == defaultdict(dict)
         for field, invalid_default in set_fields:
             assert getattr(msg_box, field) != invalid_default
+        assert msg_box.message_links == OrderedDict()
 
     def test_init_fails_with_bad_message_type(self):
         message = dict(type='BLAH')
@@ -1528,17 +1529,40 @@ class TestMessageBox:
         ('<blockquote>stuff', [('msg_quote', ['', 'stuff'])]),
         ('<div class="message_embed">',
             ['[EMBEDDED CONTENT NOT RENDERED]']),  # FIXME Unsupported
-        ('<a href="http://foo">http://foo</a>', [('msg_link', 'http://foo')]),
+        # TODO: Generate test cases to work with both soup2markup and
+        # footlinks_view.
+        ('<a href="http://foo">Foo</a><a href="https://bar.org">Bar</a>',
+         [('msg_link', 'Foo'), ' ', '[1]',
+          ('msg_link', 'Bar'), ' ', '[2]']),
+        ('<a href="http://foo">Foo</a><a href="http://foo">Another foo</a>',
+         [('msg_link', 'Foo'), ' ', '[1]',
+          ('msg_link', 'Another foo'), ' ', '[1]']),
+        ('<a href="http://foo">Foo</a><a href="https://bar.org">Bar</a>'
+         '<a href="http://foo">Foo</a><a href="https://bar.org">Bar</a>',
+         [('msg_link', 'Foo'), ' ', '[1]',
+          ('msg_link', 'Bar'), ' ', '[2]',
+          ('msg_link', 'Foo'), ' ', '[1]',
+          ('msg_link', 'Bar'), ' ', '[2]']),
+        ('<a href="http://baz.com/">http://baz.com/</a>',
+         [('msg_link', 'http://baz.com'), ' ', '[1]']),
+        ('<a href="http://foo.com/">Foo</a><a href="http://foo.com">Foo</a>',
+         [('msg_link', 'Foo'), ' ', '[1]',
+          ('msg_link', 'Foo'), ' ', '[1]']),
+        ('<a href="http://foo">http://foo</a>',
+         [('msg_link', 'http://foo'), ' ', '[1]']),
         ('<a href="http://foo/bar.png">http://foo/bar.png</a>',
-            [('msg_link', 'http://foo/bar.png')]),
-        ('<a href="http://foo">bar</a>', [('msg_link', '[bar](http://foo)')]),
+         [('msg_link', 'http://foo/bar.png'), ' ',  '[1]']),
+        ('<a href="http://foo">bar</a>',
+         [('msg_link', 'bar'), ' ', '[1]']),
         ('<a href="/user_uploads/blah"',
-            [('msg_link', '[]({}/user_uploads/blah)'.format(SERVER_URL))]),
+         [('msg_link', '{}/user_uploads/blah'.format(SERVER_URL)), ' ',
+          '[1]']),
         ('<a href="/api"',
-            [('msg_link', '[]({}/api)'.format(SERVER_URL))]),
+         [('msg_link', '{}/api'.format(SERVER_URL)), ' ',  '[1]']),
         ('<a href="some/relative_url">{}/some/relative_url</a>'
          .format(SERVER_URL),
-            [('msg_link', '{}/some/relative_url'.format(SERVER_URL))]),
+         [('msg_link', '{}/some/relative_url'.format(SERVER_URL)), ' ',
+          '[1]']),
         ('<li>Something', ['\n', '  \N{BULLET} ', '', 'Something']),
         ('<li></li>', ['\n', '  \N{BULLET} ', '']),
         ('<li>\n<p>Something',
@@ -1637,6 +1661,8 @@ class TestMessageBox:
         'empty', 'p', 'user-mention', 'group-mention', 'code', 'codehilite',
         'strong', 'em', 'blockquote',
         'embedded_content',
+        'link_two', 'link_samelinkdifferentname', 'link_duplicatelink',
+        'link_trailingslash', 'link_trailingslashduplicatelink',
         'link_sametext', 'link_sameimage', 'link_differenttext',
         'link_userupload', 'link_api', 'link_serverrelative_same',
         'li', 'empty_li', 'li_with_li_p_newline', 'two_li',
@@ -2060,7 +2086,7 @@ class TestMessageBox:
             <p>C</p>""", "░ A\n░ B\n\nC"),
         ("""<blockquote>
                 <p><a href='https://chat.zulip.org/'</a>czo</p>
-            </blockquote>""", "░ [czo](https://chat.zulip.org/)\n"),
+            </blockquote>""", "░ czo [1]\n"),
         pytest.param("""<blockquote>
                             <blockquote>
                                 <p>A<br>
@@ -2154,6 +2180,57 @@ class TestMessageBox:
             ('reaction', 13), (None, 1),
             ('reaction_mine', 9),
         ]
+
+    @pytest.mark.parametrize(['message_links', 'expected_text',
+                              'expected_attrib'], [
+            (OrderedDict([
+                ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1)),
+             ]),
+             '1: https://github.com/zulip/zulip-terminal/pull/1',
+             [(None, 3), ('msg_link', 46)]),
+            (OrderedDict([
+                ('https://foo.com', ('Foo!', 1)),
+                ('https://bar.com', ('Bar!', 2)),
+             ]),
+             '1: https://foo.com\n2: https://bar.com',
+             [(None, 3), ('msg_link', 15), (None, 4), ('msg_link', 15)]),
+            (OrderedDict([
+                ('https://example.com', ('https://example.com', 1)),
+                ('http://example.com', ('http://example.com', 2)),
+             ]),
+             '1: https://example.com\n2: http://example.com',
+             [(None, 3), ('msg_link', 19), (None, 4), ('msg_link', 18)]),
+            (OrderedDict([
+                ('https://foo.com', ('https://foo.com, Text', 1)),
+                ('https://bar.com', ('Text, https://bar.com', 2)),
+             ]),
+             '1: https://foo.com\n2: https://bar.com',
+             [(None, 3), ('msg_link', 15), (None, 4), ('msg_link', 15)]),
+            (OrderedDict([
+                ('https://foo.com', ('Foo!', 1)),
+                ('http://example.com', ('example.com', 2)),
+                ('https://bar.com', ('Bar!', 3)),
+             ]),
+             '1: https://foo.com\n2: http://example.com\n3: https://bar.com',
+             [(None, 3), ('msg_link', 15), (None, 4), ('msg_link', 18),
+              (None, 4), ('msg_link', 15)]),
+        ],
+        ids=[
+            'one_footlink',
+            'more_than_one_footlink',
+            'similar_link_and_text',
+            'different_link_and_text',
+            'http_default_scheme',
+        ]
+    )
+    def test_footlinks_view(self, message_fixture, message_links,
+                            expected_text, expected_attrib):
+        msg_box = MessageBox(message_fixture, self.model, None)
+
+        footlinks = msg_box.footlinks_view(message_links)
+
+        assert footlinks.original_widget.text == expected_text
+        assert footlinks.original_widget.attrib == expected_attrib
 
     @pytest.mark.parametrize(
         'key', keys_for_command('ENTER'),
