@@ -29,6 +29,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'reaction_mine': 'standout',
     'msg_mention': 'bold',
     'msg_link': '',
+    'msg_link_index': 'bold',
     'msg_quote': 'underline',
     'msg_code': 'bold',
     'msg_bold': 'bold',
@@ -69,6 +70,7 @@ WHITEBOLD = '%s, bold' % WHITE
 DARKBLUE = 'h24'  # faded_blue
 DARKRED = 'h88'  # faded_red
 LIGHTBLUE = 'h109'  # bright_blue
+LIGHTBLUEBOLD = '%s, bold' % LIGHTBLUE
 YELLOW = 'h172'  # neutral_yellow
 YELLOWBOLD = '%s, bold' % YELLOW
 LIGHTGREEN = 'h142'  # bright_green
@@ -129,6 +131,8 @@ THEMES = {
          None,             DEF['light_red:bold'],     DEF['black']),
         ('msg_link',       'light blue',              'black',
          None,             DEF['light_blue'],         DEF['black']),
+        ('msg_link_index', 'light blue, bold',        'black',
+         None,             DEF['light_blue:bold'],    DEF['black']),
         ('msg_quote',      'brown',                   'black',
          None,             DEF['brown'],              DEF['black']),
         ('msg_code',       'black',                   'white',
@@ -193,6 +197,8 @@ THEMES = {
          None,             LIGHTREDBOLD,      BLACK),
         ('msg_link',       'light blue',      'black',
          None,             LIGHTBLUE,         BLACK),
+        ('msg_link_index', 'light blue, bold', 'black',
+         None,             LIGHTBLUEBOLD,     BLACK),
         ('msg_quote',      'brown',           'black',
          None,             'brown',           BLACK),
         ('msg_code',       'black',           'white',
@@ -234,6 +240,7 @@ THEMES = {
         ('reaction_mine',  'white',           'light magenta'),
         ('msg_mention',    'light red, bold', 'white'),
         ('msg_link',       'dark blue',       'white'),
+        ('msg_link_index', 'dark blue, bold', 'white'),
         ('msg_quote',      'black',           'brown'),
         ('msg_code',       'black',           'light gray'),
         ('msg_bold',       'white, bold',     'dark gray'),
@@ -266,6 +273,7 @@ THEMES = {
         ('reaction_mine',  'light blue',      'dark magenta'),
         ('msg_mention',    'light red, bold', 'light blue'),
         ('msg_link',       'dark blue',       'light gray'),
+        ('msg_link_index', 'dark blue, bold', 'light gray'),
         ('msg_quote',      'brown',           'dark blue'),
         ('msg_code',       'dark blue',       'white'),
         ('msg_bold',       'white, bold',     'dark blue'),
