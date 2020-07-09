@@ -874,8 +874,8 @@ class PopUpView(urwid.ListBox):
             for index, row in enumerate(content):
                 label, data = row
                 strip = urwid.Columns([
-                        urwid.Text(label),
-                        (column_widths[1], urwid.Text(data))
+                        (column_widths[0], urwid.Text(label)),
+                        urwid.Text(data)
                     ], dividechars=dividechars)
                 widgets.append(urwid.AttrWrap(
                     strip, None if index % 2 else 'popup_contrast')
