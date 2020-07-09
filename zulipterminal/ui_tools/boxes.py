@@ -443,7 +443,7 @@ class MessageBox(urwid.Pile):
         footlinks = []
         for link, (text, index) in message_links.items():
             footlinks.extend([
-                '{}:'.format(index),
+                ('msg_link_index', '{}:'.format(index)),
                 ' ',
                 ('msg_link', link),
                 '\n',
@@ -554,7 +554,8 @@ class MessageBox(urwid.Pile):
                 markup.extend([
                     ('msg_link', text),
                     ' ',
-                    '[{}]'.format(self.message_links[link][1]),
+                    ('msg_link_index',
+                     '[{}]'.format(self.message_links[link][1])),
                 ])
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
