@@ -603,7 +603,7 @@ class RightColumnView(urwid.Frame):
 
     @asynch
     def update_user_list(self, search_box: Any=None,
-                         new_text: str="",
+                         new_text: Optional[str]=None,
                          user_list: Any=None) -> None:
         """
         Updates user list via PanelSearchBox and _start_presence_updates.
@@ -611,7 +611,7 @@ class RightColumnView(urwid.Frame):
         assert (
             (user_list is None and search_box is not None)  # PanelSearchBox.
             or (user_list is not None and search_box is None
-                and new_text == "")  # _start_presence_updates.
+                and new_text is None)  # _start_presence_updates.
         )
 
         # Return if the method is called by PanelSearchBox (urwid.Edit) while
@@ -623,7 +623,7 @@ class RightColumnView(urwid.Frame):
 
         # Return if the method is called from _start_presence_updates while the
         # search, via PanelSearchBox, is active.
-        if not self.allow_update_user_list and new_text == "":
+        if not self.allow_update_user_list and new_text is None:
             return
 
         # wait for any previously started search to finish to avoid
