@@ -283,6 +283,8 @@ class StreamsView(urwid.Frame):
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
+        new_text = new_text.lstrip()
+
         if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
@@ -369,6 +371,8 @@ class TopicsView(urwid.Frame):
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
+        new_text = new_text.lstrip()
+
         if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
@@ -625,6 +629,9 @@ class RightColumnView(urwid.Frame):
         # search, via PanelSearchBox, is active.
         if not self.allow_update_user_list and new_text is None:
             return
+
+        if new_text is not None:
+            new_text = new_text.lstrip()
 
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
