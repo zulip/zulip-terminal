@@ -317,6 +317,7 @@ class StreamsView(urwid.Frame):
 
             self.log.clear()
             self.log.extend(streams_display)
+            self.stream_search_box.reset_active_search_focus()
             self.view.controller.update_screen()
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
@@ -386,6 +387,7 @@ class TopicsView(urwid.Frame):
             ]
             self.log.clear()
             self.log.extend(topics_to_display)
+            self.topic_search_box.reset_active_search_focus()
             self.view.controller.update_screen()
 
     def update_topics_list(self, stream_id: int, topic_name: str,

@@ -1212,6 +1212,13 @@ class PanelSearchBox(urwid.Edit):
         self.set_caption('')
         self.set_edit_text(self.search_text)
 
+    def reset_active_search_focus(self) -> None:
+        """
+        Sets focus to the start on every callback to update_function.
+        """
+        if len(self.panel_view.log):
+            self.panel_view.body.set_focus(0)
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if ((is_command_key('ENTER', key)
              and self.get_edit_text().lstrip() == '')
