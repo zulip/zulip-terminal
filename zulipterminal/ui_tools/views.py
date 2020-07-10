@@ -605,15 +605,27 @@ class RightColumnView(urwid.Frame):
     def update_user_list(self, search_box: Any=None,
                          new_text: str="",
                          user_list: Any=None) -> None:
+        """
+        Updates user list via PanelSearchBox and _start_presence_updates.
+        """
+        assert (
+            (user_list is None and search_box is not None)  # PanelSearchBox.
+            or (user_list is not None and search_box is None
+                and new_text == "")  # _start_presence_updates.
+        )
 
-        assert ((user_list is None and search_box is not None)
-                or (user_list is not None and search_box is None
-                    and new_text == ""))
-
+        # Return if the method is called by PanelSearchBox (urwid.Edit) while
+        # the search is inactive and user_list is None.
+        # NOTE: The additional not user_list check is to not false trap
+        # _start_presence_updates but allow it to update the user list.
         if not self.view.controller.is_in_editor_mode() and not user_list:
             return
+
+        # Return if the method is called from _start_presence_updates while the
+        # search, via PanelSearchBox, is active.
         if not self.allow_update_user_list and new_text == "":
             return
+
         # wait for any previously started search to finish to avoid
         # displaying wrong user list.
         with self.search_lock:
