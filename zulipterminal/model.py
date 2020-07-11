@@ -69,6 +69,8 @@ class Model:
         self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
+        self.previous_narrow = None
+        self.previous_narrow_key = None
         self.found_newest = False
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]

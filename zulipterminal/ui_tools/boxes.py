@@ -801,19 +801,35 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_stream(self)
         elif is_command_key('TOGGLE_NARROW', key):
             self.model.unset_search_narrow()
-            if self.message['type'] == 'private':
-                if (
-                    len(self.model.narrow) == 1
-                    and self.model.narrow[0][0] == 'pm_with'
-                   ):
-                    self.model.controller.show_all_pm(self)
-                else:
-                    self.model.controller.narrow_to_user(self)
-            elif self.message['type'] == 'stream':
-                if len(self.model.narrow) > 1:  # in a topic
-                    self.model.controller.narrow_to_stream(self)
-                else:
-                    self.model.controller.narrow_to_topic(self)
+            if (self.model.previous_narrow is not None
+                    and self.model.previous_narrow_key == 'z'):
+                if len(self.model.previous_narrow) == 1:
+                    if self.model.previous_narrow[0][1] == 'private':
+                        self.model.controller.show_all_pm(self)
+                    elif self.model.previous_narrow[0][1] == 'mentioned':
+                        self.model.controller.show_all_mentions(self)
+                    elif self.model.previous_narrow[0][1] == 'starred':
+                        self.model.controller.show_all_starred(self)
+                    else:
+                        self.model.controller.narrow_to_stream(self)
+                elif len(self.model.previous_narrow) == 0:
+                    self.model.controller.show_all_messages(self)
+                self.model.previous_narrow = None
+            else:
+                self.model.previous_narrow = self.model.narrow
+                if self.message['type'] == 'private':
+                    if (
+                        len(self.model.narrow) == 1
+                        and self.model.narrow[0][0] == 'pm_with'
+                       ):
+                        self.model.controller.show_all_pm(self)
+                    else:
+                        self.model.controller.narrow_to_user(self)
+                elif self.message['type'] == 'stream':
+                    if len(self.model.narrow) > 1:  # in a topic
+                        self.model.controller.narrow_to_stream(self)
+                    else:
+                        self.model.controller.narrow_to_topic(self)
         elif is_command_key('TOPIC_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
