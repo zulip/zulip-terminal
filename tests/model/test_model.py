@@ -650,78 +650,81 @@ class TestModel:
         assert pinned == []  # FIXME generalize/parametrize
         assert unpinned == streams  # FIXME generalize/parametrize
 
-    def test__handle_message_event_with_Falsey_log(self, mocker,
-                                                   model, message_fixture):
-        model.found_newest = True
+    @pytest.fixture
+    def model_message_event(self, mocker, model):
         mocker.patch('zulipterminal.model.Model._update_topic_index')
-        index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+        mocker.patch('zulipterminal.model.index_messages',
+                     return_value={})
         model.msg_list = mocker.Mock(log=[])
+        model.notify_user = mocker.Mock()
+        model.found_newest = True
+        return model
+
+    def test__handle_message_event_notify_users(self, mocker,
+                                                model_message_event,
+                                                message_fixture):
+        model = model_message_event
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
-        model.notify_user = mocker.Mock()
+        event = {'message': message_fixture}
+
+        model._handle_message_event(event)
+        model.notify_user.assert_called_once_with(event['message'])
+
+    def test__handle_message_event_with_Falsey_log(self, mocker,
+                                                   model_message_event,
+                                                   message_fixture):
+        model = model_message_event
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
         event = {'message': message_fixture}
 
         model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 1  # Added "msg_w" element
-        model.notify_user.assert_called_once_with(event['message'])
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=None))
 
     def test__handle_message_event_with_valid_log(self, mocker,
-                                                  model, message_fixture):
-        model.found_newest = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
-        index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
-        model.msg_list = mocker.Mock(log=[mocker.Mock()])
+                                                  model_message_event,
+                                                  message_fixture):
+        model = model_message_event
+        model.msg_list.log = [mocker.Mock()]
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
-        model.notify_user = mocker.Mock()
         event = {'message': message_fixture}
 
         model._handle_message_event(event)
 
         assert len(model.msg_list.log) == 2  # Added "msg_w" element
-        model.notify_user.assert_called_once_with(event['message'])
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = model.msg_list.log[0].original_widget.message
         (create_msg_box_list.
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
 
-    def test__handle_message_event_with_flags(self, mocker,
-                                              model, message_fixture):
-        model.found_newest = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
-        index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
-        model.msg_list = mocker.Mock()
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
-                                           return_value=["msg_w"])
-        model.notify_user = mocker.Mock()
+    @pytest.mark.parametrize('flags', [['read', 'mentioned'], [], ])
+    def test__handle_message_event_with_flags(self, mocker, flags,
+                                              model_message_event,
+                                              message_fixture):
+        model = model_message_event
+        mocker.patch('zulipterminal.model.create_msg_box_list',
+                     return_value=["msg_w"])
         model.msg_list.log = [mocker.Mock()]
         set_count = mocker.patch('zulipterminal.model.set_count')
+        event = {'message': message_fixture, 'flags': flags}
 
-        # Test event with flags
-        event = {'message': message_fixture, 'flags': ['read', 'mentioned']}
         model._handle_message_event(event)
-        # set count not called since 'read' flag present.
-        set_count.assert_not_called()
 
-        # Test event without flags
-        model.notify_user.assert_called_once_with(event['message'])
-        model.msg_list.log = [mocker.Mock()]
-        event = {'message': message_fixture, 'flags': []}
-        model._handle_message_event(event)
-        # set count called since the message is unread.
-        set_count.assert_called_once_with([event['message']['id']],
-                                          self.controller, 1)
+        if('read' in flags):
+            set_count.assert_not_called()
+        else:
+            set_count.assert_called_once_with([event['message']['id']],
+                                              self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
@@ -760,17 +763,13 @@ class TestModel:
             'user_pm_x_does_not_appear_in_narrow_without_x',
             'mentioned_msg_in_mentioned_msg_narrow'])
     def test__handle_message_event(self, mocker, user_profile, response,
-                                   narrow, recipients, model, log):
-        model.found_newest = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
-        index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                   narrow, recipients, log,
+                                   model_message_event):
+        model = model_message_event
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         set_count = mocker.patch('zulipterminal.model.set_count')
-        model.msg_list = mocker.Mock(log=[])
-        model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile['user_id']
@@ -783,10 +782,33 @@ class TestModel:
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
         model.found_newest = False
-        model.notify_user.assert_called_once_with(response)
         model._handle_message_event(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert model.msg_list.log == log
+
+    @pytest.mark.parametrize('found_newest', [True, False])
+    def test__handle_message_event_set_count_found_newest(self, mocker,
+                                                          model_message_event,
+                                                          initial_index,
+                                                          message_fixture,
+                                                          found_newest):
+        model = model_message_event
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list',
+                                           return_value=["msg_w"])
+        set_count = mocker.patch('zulipterminal.model.set_count')
+        index_msg = mocker.patch('zulipterminal.model.index_messages',
+                                 return_value=initial_index)
+        model.found_newest = found_newest
+        model.index = initial_index
+        event = {'message': message_fixture, 'flags': []}
+
+        model._handle_message_event(event)
+
+        index_msg.assert_called_once_with([event['message']], model,
+                                          model.index)
+        set_count.assert_called_once_with([event['message']['id']],
+                                          self.controller, 1)
 
     @pytest.mark.parametrize(['topic_name', 'topic_order_intial',
                               'topic_order_final'], [
