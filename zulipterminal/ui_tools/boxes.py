@@ -506,6 +506,23 @@ class MessageBox(urwid.Pile):
 
                 text = text if text else link
 
+                # Only use the last segment if the text is redundant.
+                # NOTE: The 'without scheme' excerpt is to deal with the case
+                # where a user puts a link without any scheme and the server
+                # uses http as the default scheme but keeps the text as-is.
+                # For instance, see how example.com/some/path becomes
+                # <a href="http://example.com">example.com/some/path</a>.
+                link_without_scheme, text_without_scheme = [
+                    data.split('://')[1] if '://' in data else data
+                    for data in [link, text]
+                ]   # Split on '://' is for cases where text == link.
+                if link_without_scheme == text_without_scheme:
+                    segment = text.split('/')[-1]
+                    # Replace text with its last segment if the segment has
+                    # something significant than simply the 'domain name'.
+                    if segment != text_without_scheme:
+                        text = segment
+
                 # Detect duplicate links to save screen real estate.
                 if link not in self.message_links:
                     self.message_links[link] = (
