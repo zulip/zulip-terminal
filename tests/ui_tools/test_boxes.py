@@ -123,6 +123,24 @@ class TestWriteBox:
         ('@_', 3, None),  # Reached last match
         ('@_', 4, None),  # Beyond end
         ('@_', -1, '@_**Human 2**'),
+        # Complex autocomplete prefixes.
+        ('(@H', 0, '(@**Human Myself**'),
+        ('(@H', 1, '(@**Human 1**'),
+        ('-@G', 0, '-@*Group 1*'),
+        ('-@G', 1, '-@*Group 2*'),
+        ('_@H', 0, '_@**Human Myself**'),
+        ('_@G', 0, '_@*Group 1*'),
+        ('@@H', 0, '@@**Human Myself**'),
+        (':@H', 0, ':@**Human Myself**'),
+        ('#@H', 0, '#@**Human Myself**'),
+        ('@_@H', 0, '@_@**Human Myself**'),
+        ('>@_H', 0, '>@_**Human Myself**'),
+        ('>@_H', 1, '>@_**Human 1**'),
+        ('@_@_H', 0, '@_@_**Human Myself**'),
+        ('@@_H', 0, '@@_**Human Myself**'),
+        (':@_H', 0, ':@_**Human Myself**'),
+        ('#@_H', 0, '#@_**Human Myself**'),
+        ('@@_H', 0, '@@_**Human Myself**'),
     ])
     def test_generic_autocomplete_mentions(self, write_box, text,
                                            required_typeahead, state):
@@ -155,6 +173,13 @@ class TestWriteBox:
         ('#Stream 1', 0, '#**Stream 1**', []),  # Complete match.
         ('#nomatch', 0, None, []),
         ('#ene', 0, None, []),
+        # Complex autocomplete prefixes.
+        ('[#Stream', 0, '[#**Stream 1**', []),
+        ('(#Stream', 1, '(#**Stream 2**', []),
+        ('@#Stream', 0, '@#**Stream 1**', []),
+        ('@_#Stream', 0, '@_#**Stream 1**', []),
+        (':#Stream', 0, ':#**Stream 1**', []),
+        ('##Stream', 0, '##**Stream 1**', []),
         # With 'Secret stream' pinned.
         ('#Stream', 0, '#**Secret stream**',
          [['Secret stream'], ]),  # 2nd-word startswith match (pinned).
@@ -197,6 +222,12 @@ class TestWriteBox:
         (':', -1, ':smirk:'),
         (':nomatch', 0, None),
         (':nomatch', -1, None),
+        # Complex autocomplete prefixes.
+        ('(:smi', 0, '(:smile:'),
+        ('&:smi', 1, '&:smiley:'),
+        ('@:smi', 0, '@:smile:'),
+        ('@_:smi', 0, '@_:smile:'),
+        ('#:smi', 0, '#:smile:'),
         ])
     def test_generic_autocomplete_emojis(self, write_box, text,
                                          mocker, state, required_typeahead):
