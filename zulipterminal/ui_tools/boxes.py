@@ -102,25 +102,45 @@ class WriteBox(urwid.Pile):
                 (':', self.autocomplete_emojis),
             ])
 
-        for prefix, autocomplete_func in autocomplete_map.items():
-            if text.startswith(prefix):
-                self.is_in_typeahead_mode = True
-                typeaheads, suggestions = autocomplete_func(text, prefix)
-                fewer_typeaheads = typeaheads[:num_suggestions]
-                reduced_suggestions = suggestions[:num_suggestions]
-                is_truncated = len(fewer_typeaheads) != len(typeaheads)
+        # Look in a reverse order to find the last autocomplete prefix used in
+        # the text. For instance, if text='@#example', use '#' as the prefix.
+        reversed_text = text[::-1]
+        for reverse_index, char in enumerate(reversed_text):
+            # Patch for silent mentions.
+            if (char == '_' and reverse_index + 1 < len(reversed_text)
+                    and reversed_text[reverse_index + 1] == '@'):
+                char = '@_'
 
-                if (state is not None and state < len(fewer_typeaheads)
-                        and state >= -len(fewer_typeaheads)):
-                    typeahead = fewer_typeaheads[state]  # type: Optional[str]
-                else:
-                    typeahead = None
-                    state = None
-                self.view.set_typeahead_footer(reduced_suggestions,
-                                               state, is_truncated)
-                return typeahead
+            if char in autocomplete_map:
+                prefix = char
+                autocomplete_func = autocomplete_map[prefix]
+                prefix_index = max(text.rfind(prefix), 0)
+                break
+        else:
+            # Return text if it doesn't have any of the autocomplete prefixes.
+            return text
 
-        return text
+        # NOTE: The following block only executes if any of the autocomplete
+        # prefixes exist.
+        self.is_in_typeahead_mode = True
+        typeaheads, suggestions = (
+            autocomplete_func(text[prefix_index:], prefix)
+        )
+        fewer_typeaheads = typeaheads[:num_suggestions]
+        reduced_suggestions = suggestions[:num_suggestions]
+        is_truncated = len(fewer_typeaheads) != len(typeaheads)
+
+        if (state is not None and state < len(fewer_typeaheads)
+                and state >= -len(fewer_typeaheads)):
+            typeahead = fewer_typeaheads[state]  # type: Optional[str]
+            if typeahead:
+                typeahead = text[:prefix_index] + typeahead
+        else:
+            typeahead = None
+            state = None
+        self.view.set_typeahead_footer(reduced_suggestions,
+                                       state, is_truncated)
+        return typeahead
 
     def autocomplete_mentions(self, text: str, prefix_string: str
                               ) -> Tuple[List[str], List[str]]:
