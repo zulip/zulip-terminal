@@ -535,11 +535,10 @@ class TestModel:
     ], ids=['muting_205', 'unmuting_205', 'first_muted_205',
             'last_unmuted_205'])
     def test_toggle_stream_muted_status(self, mocker, model,
-                                        initial_muted_streams, value):
+                                        initial_muted_streams, value,
+                                        response={'result': 'success'}):
         model.muted_streams = initial_muted_streams
-        model.client.update_subscription_settings.return_value = {
-            'result': "success"
-        }
+        model.client.update_subscription_settings.return_value = response
         model.toggle_stream_muted_status(205)
         request = [{
             'stream_id': 205,
