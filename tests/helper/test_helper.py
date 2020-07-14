@@ -2,8 +2,8 @@ import pytest
 
 import zulipterminal.helper
 from zulipterminal.helper import (
-    canonicalize_color, classify_unread_counts, index_messages, notify,
-    powerset,
+    KeypressCounter, canonicalize_color, classify_unread_counts,
+    index_messages, notify, powerset,
 )
 
 
@@ -280,3 +280,30 @@ def test_notify_quotes(monkeypatch, mocker,
     assert len(params[0][0][0]) == cmd_length
 
     # NOTE: If there is a quoting error, we may get a ValueError too
+
+
+class TestKeypressCounter:
+
+    @pytest.fixture()
+    def keypress_counter(self):
+        return KeypressCounter()
+
+    def test_init(self, keypress_counter):
+        assert keypress_counter.key == dict(name='', count=0)
+
+    @pytest.mark.parametrize('key, previous_key_state, pressed_too_often', [
+            ('ctrl s', {'name': '', 'count': 0}, False),
+            ('ctrl s', {'name': 'ctrl s', 'count': 2}, False),
+            ('ctrl s', {'name': 'ctrl s', 'count': 30}, True),
+            ('left', {'name': 'ctrl s', 'count': 2}, False),
+            ('left', {'name': 'ctrl s', 'count': 30}, False),
+            ('up', {'name': '', 'count': 0}, False),
+            ('down', {'name': '', 'count': 0}, False),
+    ])
+    def test_pressed_too_often(self, keypress_counter, key, previous_key_state,
+                               pressed_too_often):
+        keypress_counter.key = previous_key_state
+
+        return_value = keypress_counter.pressed_too_often(key)
+
+        assert return_value == pressed_too_often

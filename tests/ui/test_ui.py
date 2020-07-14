@@ -342,3 +342,26 @@ class TestView:
             assert return_value == key
         else:
             assert return_value == 'super_key'
+
+    @pytest.mark.parametrize('pressed_too_often', [True, False])
+    def test_keypress_multiple_presses(self, mocker, view, pressed_too_often,
+                                       key='ctrl s'):
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
+        mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress",
+                     return_value='super_key')
+        view.keypress_counter = mocker.Mock()
+        view.middle_column = mocker.Mock()
+        view.controller.is_in_editor_mode = lambda: False
+        view.keypress_counter.pressed_too_often.return_value = (
+                pressed_too_often
+        )
+        size = (20,)
+
+        return_value = view.keypress(size, key)
+
+        if pressed_too_often:
+            assert return_value == key
+            view.set_footer_text.assert_called_once_with(
+                            '\'{}\' pressed too often.'.format(key), 3)
+        else:
+            assert return_value == 'super_key'

@@ -9,7 +9,7 @@ from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE, LIST_TITLE_BAR_LINE,
 )
-from zulipterminal.helper import WSL, asynch
+from zulipterminal.helper import WSL, KeypressCounter, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView, MiddleColumnView, RightColumnView,
@@ -33,6 +33,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
+        self.keypress_counter = KeypressCounter()
 
         self.message_view = None  # type: Any
 
@@ -175,6 +176,9 @@ class View(urwid.WidgetWrap):
     # FIXME: The type of size should be urwid_Size; this needs checking
     def keypress(self, size: Tuple[int, int], key: str) -> Optional[str]:
         self.model.new_user_input = True
+        if self.keypress_counter.pressed_too_often(key):
+            self.set_footer_text('\'{}\' pressed too often.'.format(key), 3)
+            return key
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
         # Ignore keypress if messages being loaded.
