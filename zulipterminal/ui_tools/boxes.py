@@ -207,7 +207,7 @@ class MessageBox(urwid.Pile):
         self.user_id = None  # type: Union[int, None]
         self.message_links = (
             OrderedDict()
-        )   # type: OrderedDict[str, Tuple[str, int]]
+        )   # type: OrderedDict[str, Tuple[str, int, bool]]
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -408,10 +408,13 @@ class MessageBox(urwid.Pile):
     # Use quotes as a workaround for OrderedDict typing issue.
     # See https://github.com/python/mypy/issues/6904.
     def footlinks_view(
-        self, message_links: 'OrderedDict[str, Tuple[str, int]]',
+        self, message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
     ) -> Any:
         footlinks = []
-        for link, (text, index) in message_links.items():
+        for link, (text, index, show_footlink) in message_links.items():
+            if not show_footlink:
+                continue
+
             footlinks.extend([
                 ('msg_link_index', '{}:'.format(index)),
                 ' ',
@@ -506,6 +509,7 @@ class MessageBox(urwid.Pile):
 
                 text = text if text else link
 
+                show_footlink = True
                 # Only use the last segment if the text is redundant.
                 # NOTE: The 'without scheme' excerpt is to deal with the case
                 # where a user puts a link without any scheme and the server
@@ -522,20 +526,27 @@ class MessageBox(urwid.Pile):
                     # something significant than simply the 'domain name'.
                     if segment != text_without_scheme:
                         text = segment
+                    else:
+                        # Do not show as a footlink as the text is sufficient
+                        # to represent the link.
+                        show_footlink = False
 
                 # Detect duplicate links to save screen real estate.
                 if link not in self.message_links:
                     self.message_links[link] = (
-                        text, len(self.message_links) + 1
+                        text, len(self.message_links) + 1, show_footlink
                     )
                 else:
                     # Append the text if its link already exist with a
                     # different text.
-                    saved_text, saved_link_index = self.message_links[link]
+                    saved_text, saved_link_index, saved_footlink_status = (
+                        self.message_links[link]
+                    )
                     if saved_text != text:
                         self.message_links[link] = (
                             '{}, {}'.format(saved_text, text),
                             saved_link_index,
+                            show_footlink or saved_footlink_status,
                         )
 
                 markup.extend([

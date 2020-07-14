@@ -2180,39 +2180,38 @@ class TestMessageBox:
     @pytest.mark.parametrize(['message_links', 'expected_text',
                               'expected_attrib'], [
             (OrderedDict([
-                ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1)),
+                ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1,
+                                                                    True)),
              ]),
              '1: https://github.com/zulip/zulip-terminal/pull/1',
              [('msg_link_index', 2), (None, 1), ('msg_link', 46)]),
             (OrderedDict([
-                ('https://foo.com', ('Foo!', 1)),
-                ('https://bar.com', ('Bar!', 2)),
+                ('https://foo.com', ('Foo!', 1, True)),
+                ('https://bar.com', ('Bar!', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
             (OrderedDict([
-                ('https://example.com', ('https://example.com', 1)),
-                ('http://example.com', ('http://example.com', 2)),
+                ('https://example.com', ('https://example.com', 1, False)),
+                ('http://example.com', ('http://example.com', 2, False)),
              ]),
-             '1: https://example.com\n2: http://example.com',
-             [('msg_link_index', 2), (None, 1), ('msg_link', 19), (None, 1),
-              ('msg_link_index', 2), (None, 1), ('msg_link', 18)]),
+             None,
+             None),
             (OrderedDict([
-                ('https://foo.com', ('https://foo.com, Text', 1)),
-                ('https://bar.com', ('Text, https://bar.com', 2)),
+                ('https://foo.com', ('https://foo.com, Text', 1, True)),
+                ('https://bar.com', ('Text, https://bar.com', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
             (OrderedDict([
-                ('https://foo.com', ('Foo!', 1)),
-                ('http://example.com', ('example.com', 2)),
-                ('https://bar.com', ('Bar!', 3)),
+                ('https://foo.com', ('Foo!', 1, True)),
+                ('http://example.com', ('example.com', 2, False)),
+                ('https://bar.com', ('Bar!', 3, True)),
              ]),
-             '1: https://foo.com\n2: http://example.com\n3: https://bar.com',
+             '1: https://foo.com\n3: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
-              ('msg_link_index', 2), (None, 1), ('msg_link', 18), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
         ],
         ids=[
@@ -2229,8 +2228,12 @@ class TestMessageBox:
 
         footlinks = msg_box.footlinks_view(message_links)
 
-        assert footlinks.original_widget.text == expected_text
-        assert footlinks.original_widget.attrib == expected_attrib
+        if expected_text:
+            assert footlinks.original_widget.text == expected_text
+            assert footlinks.original_widget.attrib == expected_attrib
+        else:
+            assert footlinks is None
+            assert not hasattr(footlinks, 'original_widget')
 
     @pytest.mark.parametrize(
         'key', keys_for_command('ENTER'),
