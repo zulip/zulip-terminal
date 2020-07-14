@@ -2,8 +2,8 @@ import pytest
 
 import zulipterminal.helper
 from zulipterminal.helper import (
-    canonicalize_color, classify_unread_counts, index_messages, notify,
-    powerset,
+    canonicalize_color, classify_unread_counts, display_error_if_present,
+    index_messages, notify, powerset,
 )
 
 
@@ -280,3 +280,19 @@ def test_notify_quotes(monkeypatch, mocker,
     assert len(params[0][0][0]) == cmd_length
 
     # NOTE: If there is a quoting error, we may get a ValueError too
+
+
+@pytest.mark.parametrize(['response', 'footer_updated'], [
+    ({'result': 'error', 'msg': 'Request failed.'}, True),
+    ({'result': 'success', 'msg': 'msg content'}, False),
+])
+def test_display_error_if_present(mocker, response, footer_updated):
+    controller = mocker.Mock()
+    set_footer_text = controller.view.set_footer_text
+
+    display_error_if_present(response, controller)
+
+    if footer_updated:
+        set_footer_text.assert_called_once_with(response['msg'], 3)
+    else:
+        set_footer_text.assert_not_called()

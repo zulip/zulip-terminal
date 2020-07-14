@@ -14,7 +14,7 @@ from mypy_extensions import TypedDict
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
     Message, asynch, canonicalize_color, classify_unread_counts,
-    index_messages, initial_index, notify, set_count,
+    display_error_if_present, index_messages, initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -274,6 +274,7 @@ class Model:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
             response = self.client.add_reaction(reaction_to_toggle_spec)
+        display_error_if_present(response, self.controller)
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:
@@ -283,16 +284,18 @@ class Model:
         else:
             request = dict(base_request, op='add')
         response = self.client.update_message_flags(request)
+        display_error_if_present(response, self.controller)
 
     @asynch
     def mark_message_ids_as_read(self, id_list: List[int]) -> None:
         if not id_list:
             return
-        self.client.update_message_flags({
+        response = self.client.update_message_flags({
             'messages': id_list,
             'flag': 'read',
             'op': 'add',
         })
+        display_error_if_present(response, self.controller)
 
     def send_private_message(self, recipients: str,
                              content: str) -> bool:
@@ -302,6 +305,7 @@ class Model:
             'content': content,
         }
         response = self.client.send_message(request)
+        display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
     def send_stream_message(self, stream: str, topic: str,
@@ -313,6 +317,7 @@ class Model:
             'content': content,
         }
         response = self.client.send_message(request)
+        display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
@@ -321,6 +326,7 @@ class Model:
             "content": content,
         }
         response = self.client.update_message(request)
+        display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
     def update_stream_message(self, topic: str, msg_id: int,
@@ -333,6 +339,7 @@ class Model:
             "subject": topic,
         }
         response = self.client.update_message(request)
+        display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
     def get_messages(self, *,
@@ -366,6 +373,7 @@ class Model:
                 self._have_last_message[narrow_str] = (
                     len(response['messages']) < query_range)
             return ""
+        display_error_if_present(response, self.controller)
         return response['msg']
 
     def get_topics_in_stream(self, stream_list: Iterable[int]) -> str:
@@ -380,6 +388,7 @@ class Model:
                 self.index['topics'][stream_id] = [topic['name'] for
                                                    topic in response['topics']]
             else:
+                display_error_if_present(response, self.controller)
                 return response['msg']
         return ""
 
@@ -619,6 +628,7 @@ class Model:
             # True for muting and False for unmuting.
         }]
         response = self.client.update_subscription_settings(request)
+        display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
     def is_pinned_stream(self, stream_id: int) -> bool:
