@@ -558,7 +558,6 @@ class TestModel:
     ])
     def test_toggle_message_star_status(self, mocker, model, flags_before,
                                         expected_operator):
-        mocker.patch('zulip.Client')
         message = {
             'id': 99,
             'flags': flags_before,
