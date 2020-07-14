@@ -177,6 +177,12 @@ class View(urwid.WidgetWrap):
         self.model.new_user_input = True
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
+        # Ignore keypress if messages being loaded.
+        if((is_command_key('GO_UP', key)
+            and self.middle_column.body.old_loading)
+           or (is_command_key('GO_DOWN', key)
+               and self.middle_column.body.new_loading)):
+            return key
         # Redirect commands to message_view.
         elif (is_command_key('SEARCH_MESSAGES', key)
                 or is_command_key('NEXT_UNREAD_TOPIC', key)
