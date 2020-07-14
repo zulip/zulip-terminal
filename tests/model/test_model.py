@@ -19,6 +19,8 @@ class TestModel:
                                    'Controller.client')
         self.client.base_url = 'chat.zulip.zulip'
         mocker.patch('zulipterminal.model.Model._start_presence_updates')
+        self.display_error_if_present = mocker.patch(
+                            'zulipterminal.model.display_error_if_present')
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile):
@@ -322,6 +324,9 @@ class TestModel:
         self.client.get_stream_topics.assert_called_once_with(23)
         assert model.index['topics'] == expected_index
         assert result == return_value
+        if response['result'] != 'success':
+            (self.display_error_if_present.
+             assert_called_once_with(response, self.controller))
 
     @pytest.mark.parametrize("user_key", ['user_id', 'id'])
     @pytest.mark.parametrize("msg_id, existing_reactions, expected_method", [
@@ -331,7 +336,7 @@ class TestModel:
         (5, [dict(user='me', emoji_code='1f614')], 'POST'),
         (5, [dict(user='not me', emoji_code='1f614')], 'POST'),
     ])
-    def test_react_to_message_with_thumbs_up(self, model,
+    def test_react_to_message_with_thumbs_up(self, mocker, model,
                                              user_key,
                                              msg_id,
                                              existing_reactions,
@@ -349,6 +354,9 @@ class TestModel:
             reaction_type='unicode_emoji',
             emoji_code='1f44d',
             message_id=str(msg_id))
+        response = mocker.Mock()
+        model.client.add_reaction.return_value = response
+        model.client.remove_reaction.return_value = response
 
         model.react_to_message(message, 'thumbs_up')
 
@@ -358,6 +366,8 @@ class TestModel:
         elif expected_method == 'DELETE':
             model.client.remove_reaction.assert_called_once_with(reaction_spec)
             model.client.add_reaction.assert_not_called()
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     def test_react_to_message_for_not_thumbs_up(self, model):
         with pytest.raises(AssertionError):
@@ -379,6 +389,8 @@ class TestModel:
         self.client.send_message.assert_called_once_with(req)
 
         assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
@@ -396,6 +408,8 @@ class TestModel:
         self.client.send_message.assert_called_once_with(req)
 
         assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
@@ -413,6 +427,8 @@ class TestModel:
         self.client.update_message.assert_called_once_with(req)
 
         assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
@@ -432,6 +448,8 @@ class TestModel:
         self.client.update_message.assert_called_once_with(req)
 
         assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(self, mocker, messages_successful_response,
@@ -547,6 +565,8 @@ class TestModel:
         }]
         (model.client.update_subscription_settings
          .assert_called_once_with(request))
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     @pytest.mark.parametrize('flags_before, expected_operator', [
         ([], 'add'),
@@ -557,6 +577,8 @@ class TestModel:
     ])
     def test_toggle_message_star_status(self, mocker, model, flags_before,
                                         expected_operator):
+        response = mocker.Mock()
+        model.client.update_message_flags.return_value = response
         message = {
             'id': 99,
             'flags': flags_before,
@@ -569,6 +591,8 @@ class TestModel:
             'op': expected_operator
         }
         model.client.update_message_flags.assert_called_once_with(request)
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
 
     def test_mark_message_ids_as_read(self, model, mocker: Any) -> None:
         mock_api_query = mocker.patch('zulipterminal.core.Controller'

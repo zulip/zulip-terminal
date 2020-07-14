@@ -630,3 +630,9 @@ def notify(title: str, html_text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
+
+
+def display_error_if_present(response: Dict[str, Any], controller: Any
+                             ) -> None:
+    if response['result'] == 'error':
+        controller.view.set_footer_text(response['msg'], 3)
