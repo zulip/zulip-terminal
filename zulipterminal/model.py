@@ -69,7 +69,7 @@ class Model:
         self.msg_view = None  # type: Any
         self.msg_list = None  # type: Any
         self.narrow = []  # type: List[Any]
-        self._have_last_message = False
+        self._have_last_message = {}  # type: Dict[str, bool]
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
@@ -349,16 +349,17 @@ class Model:
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
+            narrow_str = repr(self.narrow)
             if first_anchor and response['anchor'] != 10000000000000000:
-                self.index['pointer'][repr(self.narrow)] = response['anchor']
+                self.index['pointer'][narrow_str] = response['anchor']
             if 'found_newest' in response:
-                self._have_last_message = response['found_newest']
+                self._have_last_message[narrow_str] = response['found_newest']
             else:
                 # Older versions of the server does not contain the
                 # 'found_newest' flag. Instead, we use this logic:
                 query_range = num_after + num_before + 1
-                self._have_last_message = (len(response['messages'])
-                                           < query_range)
+                self._have_last_message[narrow_str] = (
+                    len(response['messages']) < query_range)
             return ""
         return response['msg']
 
@@ -742,7 +743,8 @@ class Model:
         if 'read' not in message['flags']:
             set_count([message['id']], self.controller, 1)
 
-        if hasattr(self.controller, 'view') and self._have_last_message:
+        if (hasattr(self.controller, 'view')
+                and self._have_last_message[repr(self.narrow)]):
             if self.msg_list.log:
                 last_message = self.msg_list.log[-1].original_widget.message
             else:
