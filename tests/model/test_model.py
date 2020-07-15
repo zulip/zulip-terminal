@@ -44,7 +44,7 @@ class TestModel:
         assert model.msg_view is None
         assert model.msg_list is None
         assert model.narrow == []
-        assert model.found_newest is False
+        assert model._have_last_message is False
         assert model.stream_id == -1
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
@@ -467,7 +467,7 @@ class TestModel:
         anchor = messages_successful_response['anchor']
         if anchor < 10000000000000000:
             assert model.index['pointer'][repr(model.narrow)] == anchor
-        assert model.found_newest is True
+        assert model._have_last_message is True
 
     def test_get_message_false_first_anchor(
             self, mocker, messages_successful_response, index_all_messages,
@@ -502,9 +502,10 @@ class TestModel:
         assert model.index['pointer'][repr(model.narrow)] == 0
 
         # TEST `query_range` < no of messages received
-        model.found_newest = False  # RESET model.found_newest value
+        # RESET model._have_last_message value
+        model._have_last_message = False
         model.get_messages(num_after=0, num_before=0, anchor=0)
-        assert model.found_newest is False
+        assert model._have_last_message is False
 
     # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(self, mocker, error_response,
@@ -652,7 +653,7 @@ class TestModel:
 
     def test__handle_message_event_with_Falsey_log(self, mocker,
                                                    model, message_fixture):
-        model.found_newest = True
+        model._have_last_message = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -673,7 +674,7 @@ class TestModel:
 
     def test__handle_message_event_with_valid_log(self, mocker,
                                                   model, message_fixture):
-        model.found_newest = True
+        model._have_last_message = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -696,7 +697,7 @@ class TestModel:
 
     def test__handle_message_event_with_flags(self, mocker,
                                               model, message_fixture):
-        model.found_newest = True
+        model._have_last_message = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -761,7 +762,7 @@ class TestModel:
             'mentioned_msg_in_mentioned_msg_narrow'])
     def test__handle_message_event(self, mocker, user_profile, response,
                                    narrow, recipients, model, log):
-        model.found_newest = True
+        model._have_last_message = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
@@ -782,7 +783,7 @@ class TestModel:
         assert model.msg_list.log == log
         set_count.assert_called_once_with([response['id']], self.controller, 1)
 
-        model.found_newest = False
+        model._have_last_message = False
         model.notify_user.assert_called_once_with(response)
         model._handle_message_event(event)
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
