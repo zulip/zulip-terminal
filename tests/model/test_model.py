@@ -466,7 +466,7 @@ class TestModel:
         assert model.index == index_all_messages
         anchor = messages_successful_response['anchor']
         if anchor < 10000000000000000:
-            assert model.index['pointer'][str(model.narrow)] == anchor
+            assert model.index['pointer'][repr(model.narrow)] == anchor
         assert model.found_newest is True
 
     def test_get_message_false_first_anchor(
@@ -499,7 +499,7 @@ class TestModel:
         self.client.get_messages.return_value = messages_successful_response
         # anchor should have remained the same
         anchor = messages_successful_response['anchor']
-        assert model.index['pointer'][str(model.narrow)] == 0
+        assert model.index['pointer'][repr(model.narrow)] == 0
 
         # TEST `query_range` < no of messages received
         model.found_newest = False  # RESET model.found_newest value
