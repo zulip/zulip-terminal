@@ -159,7 +159,6 @@ class Controller:
         self.model.index['search'].clear()
         self.model.set_search_narrow(text)
 
-        self.model.found_newest = False
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
@@ -186,8 +185,6 @@ class Controller:
         already_narrowed = self.model.set_narrow(**narrow)
         if already_narrowed:
             return
-
-        self.model.found_newest = False
 
         # store the steam id in the model (required for get_message_ids...)
         if hasattr(button, 'stream_id'):  # FIXME Include in set_narrow?
