@@ -129,10 +129,10 @@ class Model:
         Returns the focus in the current narrow.
         For no existing focus this returns {}, otherwise the message ID.
         """
-        return self.index['pointer'][str(self.narrow)]
+        return self.index['pointer'][repr(self.narrow)]
 
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
-        self.index['pointer'][str(self.narrow)] = focus_message
+        self.index['pointer'][repr(self.narrow)] = focus_message
 
     def is_search_narrow(self) -> bool:
         """
@@ -350,7 +350,7 @@ class Model:
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
             if first_anchor and response['anchor'] != 10000000000000000:
-                self.index['pointer'][str(self.narrow)] = response['anchor']
+                self.index['pointer'][repr(self.narrow)] = response['anchor']
             if 'found_newest' in response:
                 self.found_newest = response['found_newest']
             else:
