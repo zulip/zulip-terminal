@@ -322,6 +322,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.set_focus")
         mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
         msg_view = MessageView(self.model)
+        msg_view.model.is_search_narrow = lambda: False
         msg_view.log = mocker.Mock()
         msg_view.body = mocker.Mock()
         msg_w = mocker.MagicMock()
@@ -368,12 +369,29 @@ class TestMessageView:
 
         self.model.mark_message_ids_as_read.assert_not_called()
 
+    def test_read_message_search_narrow(self, mocker, msg_box):
+        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
+        mocker.patch(VIEWS + ".MessageView.set_focus")
+        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
+        msg_view = MessageView(self.model)
+        msg_view.model.controller.view = mocker.Mock()
+        msg_w = mocker.Mock()
+        msg_view.body = mocker.Mock()
+        msg_view.body.get_focus.return_value = (msg_w, 0)
+        msg_view.model.is_search_narrow = lambda: True
+
+        msg_view.read_message()
+
+        assert msg_view.update_search_box_narrow.called
+        assert not self.model.mark_message_ids_as_read.called
+
     def test_read_message_last_unread_message_focused(self, mocker,
                                                       message_fixture,
                                                       empty_index, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.set_focus")
         msg_view = MessageView(self.model)
+        msg_view.model.is_search_narrow = lambda: False
         msg_view.log = [0, 1]
         msg_view.body = mocker.Mock()
         msg_view.update_search_box_narrow = mocker.Mock()
