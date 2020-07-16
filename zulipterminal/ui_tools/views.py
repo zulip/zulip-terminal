@@ -222,6 +222,11 @@ class MessageView(urwid.ListBox):
         if msg_w is None:
             return
         self.update_search_box_narrow(msg_w.original_widget)
+
+        # Do not read messages in any search narrow.
+        if self.model.is_search_narrow():
+            return
+
         # If this the last message in the view and focus is set on this message
         # then read the message.
         last_message_focused = (curr_pos == len(self.log) - 1)
