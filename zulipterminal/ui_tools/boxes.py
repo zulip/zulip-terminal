@@ -833,6 +833,8 @@ class MessageBox(urwid.Pile):
                     col: int, row: int, focus: bool) -> bool:
         if event == 'mouse press':
             if button == 1:
+                if self.model.controller.is_in_editor_mode():
+                    return True
                 self.keypress(size, keys_for_command('ENTER').pop())
                 return True
         elif event == 'mouse drag':
