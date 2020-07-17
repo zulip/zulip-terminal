@@ -445,13 +445,17 @@ class TopicsView(urwid.Frame):
 
 
 class UsersView(urwid.ListBox):
-    def __init__(self, users_btn_list: List[Any]) -> None:
+    def __init__(self, controller: Any, users_btn_list: List[Any]) -> None:
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
+        self.controller = controller
         super().__init__(self.log)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
+            if button == 1:
+                if self.controller.is_in_editor_mode():
+                    return True
             if button == 4:
                 for _ in range(5):
                     self.keypress(size, 'up')
@@ -647,7 +651,7 @@ class RightColumnView(urwid.Frame):
                     count=unread_count
                 )
             )
-        user_w = UsersView(users_btn_list)
+        user_w = UsersView(self.view.controller, users_btn_list)
         # Donot reset them while searching.
         if reset_default_view_users:
             self.users_btn_list = users_btn_list
@@ -662,7 +666,8 @@ class RightColumnView(urwid.Frame):
         elif is_command_key('GO_BACK', key):
             self.user_search.reset_search_text()
             self.allow_update_user_list = True
-            self.body = UsersView(self.users_btn_list)
+            self.body = UsersView(self.view.controller,
+                                  self.users_btn_list)
             self.set_body(self.body)
             self.set_focus('body')
             self.view.controller.update_screen()

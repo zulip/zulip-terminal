@@ -31,6 +31,14 @@ BOXES = "zulipterminal.ui_tools.boxes"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
+@pytest.fixture(
+    params=[True, False],
+    ids=['ignore_mouse_click', 'handle_mouse_click']
+)
+def compose_box_is_open(request):
+    return request.param
+
+
 class TestModListWalker:
     @pytest.fixture
     def mod_walker(self):
@@ -704,7 +712,8 @@ class TestUsersView:
     @pytest.fixture
     def user_view(self, mocker):
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        return UsersView("USER_BTN_LIST")
+        controller = mocker.Mock()
+        return UsersView(controller, "USER_BTN_LIST")
 
     def test_mouse_event(self, mocker, user_view):
         mocker.patch.object(user_view, 'keypress')
@@ -720,15 +729,31 @@ class TestUsersView:
         user_view.mouse_event(size, "mouse press", 5, col, row, focus)
         user_view.keypress.assert_called_with(size, "down")
 
+    def test_mouse_event_left_click(self, mocker, user_view,
+                                    compose_box_is_open):
+        super_mouse_event = mocker.patch(
+                        'zulipterminal.ui.urwid.ListBox.mouse_event')
+        user_view.controller.is_in_editor_mode.return_value = (
+                compose_box_is_open
+        )
+        size = (20, )
+        focus = mocker.Mock()
+
+        user_view.mouse_event(size, 'mouse press', 1, 1, 1, focus)
+
+        if compose_box_is_open:
+            super_mouse_event.assert_not_called()
+        else:
+            super_mouse_event.assert_called_once_with(size, 'mouse press', 1,
+                                                      1, 1, focus)
+
     @pytest.mark.parametrize('event, button', [
             ('mouse release', 0),
-            ('mouse press', 1),
             ('mouse press', 3),
             ('mouse release', 4),
         ],
         ids=[
             'unsupported_mouse_release_action',
-            'unsupported_left_click_mouse_press_action',
             'unsupported_right_click_mouse_press_action',
             'invalid_event_button_combination',
         ]
@@ -1066,7 +1091,8 @@ class TestRightColumnView:
                 color='user_' + self.view.users[0]['status'],
                 count=1
             )
-        users_view.assert_called_once_with(right_col_view.users_btn_list)
+        users_view.assert_called_once_with(self.view.controller,
+                                           right_col_view.users_btn_list)
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
@@ -2270,17 +2296,25 @@ class TestMessageBox:
         'key', keys_for_command('ENTER'),
         ids=lambda param: 'left_click-key:{}'.format(param)
     )
-    def test_mouse_event_left_click(self, mocker, msg_box, key):
+    def test_mouse_event_left_click(self, mocker, msg_box, key,
+                                    compose_box_is_open):
         size = (20, )
         col = 1
         row = 1
         focus = mocker.Mock()
         mocker.patch(BOXES + '.keys_for_command', return_value=[key])
         mocker.patch.object(msg_box, 'keypress')
+        msg_box.model = mocker.Mock()
+        msg_box.model.controller.is_in_editor_mode.return_value = (
+                compose_box_is_open
+        )
 
         msg_box.mouse_event(size, 'mouse press', 1, col, row, focus)
 
-        msg_box.keypress.assert_called_once_with(size, key)
+        if compose_box_is_open:
+            msg_box.keypress.assert_not_called()
+        else:
+            msg_box.keypress.assert_called_once_with(size, key)
 
 
 class TestTopButton:
