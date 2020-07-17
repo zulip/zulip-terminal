@@ -1000,8 +1000,10 @@ class PopUpConfirmationView(urwid.Overlay):
 
 
 class StreamInfoView(PopUpView):
-    def __init__(self, controller: Any, color: str,
-                 desc: str, title: str) -> None:
+    def __init__(self, controller: Any, stream_id: int) -> None:
+        stream = controller.model.stream_dict[stream_id]
+        title = '# {}'.format(stream['name'])
+        desc = stream['description']
         stream_info_content = [('', [desc])]
         popup_width, column_widths = self.calculate_table_widths(
             stream_info_content, len(title))

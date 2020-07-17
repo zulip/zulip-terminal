@@ -1399,8 +1399,10 @@ class TestStreamInfoView:
         mocker.patch.object(self.controller, 'maximum_popup_dimensions',
                             return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.stream_info_view = StreamInfoView(self.controller, color='',
-                                               desc='', title='# stream-name')
+        stream_id = 10
+        self.controller.model.stream_dict = {stream_id: {'name': 'books',
+                                                         'description': 'hey'}}
+        self.stream_info_view = StreamInfoView(self.controller, stream_id)
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})

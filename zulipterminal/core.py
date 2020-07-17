@@ -143,9 +143,8 @@ class Controller:
                                     message_links)
         self.show_pop_up(msg_info_view)
 
-    def show_stream_info(self, color: str, name: str, desc: str) -> None:
-        show_stream_view = StreamInfoView(self, color, desc,
-                                          "# {}".format(name))
+    def show_stream_info(self, stream_id: int) -> None:
+        show_stream_view = StreamInfoView(self, stream_id)
         self.show_pop_up(show_stream_view)
 
     def popup_with_message(self, text: str, width: int) -> None:
