@@ -194,8 +194,7 @@ class StreamButton(TopButton):
         elif is_command_key('TOGGLE_MUTE_STREAM', key):
             self.controller.stream_muting_confirmation_popup(self)
         elif is_command_key('STREAM_DESC', key):
-            self.model.controller.show_stream_info(
-                self.color, self.stream_name, self.description)
+            self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
 
 
