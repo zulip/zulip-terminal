@@ -1026,18 +1026,29 @@ class StreamInfoView(PopUpView):
                                            stream_id),
                                        checked_symbol='✓')
         urwid.connect_signal(muted_setting, 'change', self.toggle_mute_status)
+        pinned_state = controller.model.is_pinned_stream(stream_id)
+        pinned_setting = urwid.CheckBox(label="Pinned to top",
+                                        state=pinned_state,
+                                        checked_symbol='✓')
+        urwid.connect_signal(pinned_setting, 'change',
+                             self.toggle_pinned_status)
 
         # Manual because calculate_table_widths does not support checkboxes.
         # Add 4 to checkbox label to accomodate the checkbox itself.
-        popup_width = max(popup_width, len(muted_setting.label) + 4)
+        popup_width = max(popup_width, len(muted_setting.label) + 4,
+                          len(pinned_setting.label) + 4)
         self.widgets = self.make_table_with_categories(stream_info_content,
                                                        column_widths)
         self.widgets.append(muted_setting)
+        self.widgets.append(pinned_setting)
         super().__init__(controller, self.widgets, 'STREAM_DESC', popup_width,
                          title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
         self.controller.model.toggle_stream_muted_status(self.stream_id)
+
+    def toggle_pinned_status(self, button: Any, new_state: bool) -> None:
+        self.controller.model.toggle_stream_pinned_status(self.stream_id)
 
 
 class MsgInfoView(PopUpView):

@@ -621,6 +621,18 @@ class Model:
         response = self.client.update_subscription_settings(request)
         return response['result'] == 'success'
 
+    def is_pinned_stream(self, stream_id: int) -> bool:
+        return stream_id in list(stream[1] for stream in self.pinned_streams)
+
+    def toggle_stream_pinned_status(self, stream_id: int) -> bool:
+        request = [{
+            'stream_id': stream_id,
+            'property': 'pin_to_top',
+            'value': not self.is_pinned_stream(stream_id)
+        }]
+        response = self.client.update_subscription_settings(request)
+        return response['result'] == 'success'
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting,
