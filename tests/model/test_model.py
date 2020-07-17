@@ -1312,6 +1312,31 @@ class TestModel:
         elif event_op == 'remove':
             set_count.assert_not_called()
 
+    @pytest.mark.parametrize('pinned_streams, pin_to_top', [
+        ([['all', 2]], True),
+        ([['design', 1], ['all', 2]], False),
+        ([], True),
+        ([['design', 1]], False),
+    ], ids=['pinning', 'unpinning', 'first_pinned',
+            'last_unpinned'])
+    def test_toggle_stream_pinned_status(self, mocker, model,
+                                         pinned_streams, pin_to_top,
+                                         stream_id=1):
+        model.pinned_streams = deepcopy(pinned_streams)
+        model.client.update_subscription_settings.return_value = {
+            'result': "success"
+        }
+
+        model.toggle_stream_pinned_status(stream_id)
+
+        request = [{
+            'stream_id': stream_id,
+            'property': 'pin_to_top',
+            'value': pin_to_top
+        }]
+        (model.client.update_subscription_settings
+         .assert_called_once_with(request))
+
     @pytest.mark.parametrize('narrow, event, called', [
         # Not in PM Narrow
         ([], {}, False),
