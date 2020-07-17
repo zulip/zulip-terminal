@@ -1,3 +1,6 @@
+import time
+from concurrent.futures import ThreadPoolExecutor
+
 import pytest
 
 from zulipterminal.config.keys import keys_for_command
@@ -85,6 +88,20 @@ class TestView:
 
         mock_sleep.assert_called_once_with(duration)
         view.set_footer_text.assert_called_once_with()
+
+    def test__reset_footer_text_multiple_reset_attempts(self, view,
+                                                        mocker):
+        time.sleep = mocker.Mock(side_effect=time.sleep)
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
+
+        # Multiple simultaneous calls for resetting footer.
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            executor.submit(view._reset_footer_text, duration=0.5)
+            executor.submit(view._reset_footer_text, duration=0.5)
+            executor.submit(view._reset_footer_text, duration=0.5)
+
+        view.set_footer_text.assert_called_once_with()
+        assert time.sleep.call_count == 3
 
     @pytest.mark.parametrize('suggestions, state, truncated, footer_text', [
         ([], None, False, [' [No matches found]']),

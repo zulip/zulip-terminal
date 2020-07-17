@@ -1,3 +1,4 @@
+import queue
 import random
 import re
 import time
@@ -33,6 +34,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
+        self.footer_reset_threads = queue.Queue()  # type: queue.Queue[float]
 
         self.message_view = None  # type: Any
 
@@ -86,8 +88,12 @@ class View(urwid.WidgetWrap):
     @asynch
     def _reset_footer_text(self, duration: float) -> None:
         assert duration > 0
+        self.footer_reset_threads.put(duration)
         time.sleep(duration)
-        self.set_footer_text()
+        self.footer_reset_threads.get()
+
+        if self.footer_reset_threads.empty():
+            self.set_footer_text()
 
     @asynch
     def set_typeahead_footer(self, suggestions: List[str],
