@@ -81,9 +81,13 @@ class View(urwid.WidgetWrap):
         self._w.footer.set_text(text)
         self.controller.update_screen()
         if duration is not None:
-            assert duration > 0
-            time.sleep(duration)
-            self.set_footer_text()
+            self._reset_footer_text(duration)
+
+    @asynch
+    def _reset_footer_text(self, duration: float) -> None:
+        assert duration > 0
+        time.sleep(duration)
+        self.set_footer_text()
 
     @asynch
     def set_typeahead_footer(self, suggestions: List[str],

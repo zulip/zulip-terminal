@@ -69,18 +69,22 @@ class TestView:
 
     def test_set_footer_text_with_duration(self, view, mocker,
                                            custom_text="custom", duration=5.3):
-        mocker.patch('zulipterminal.ui.View.get_random_help',
-                     return_value=['some help text'])
-        mock_sleep = mocker.patch('time.sleep')
+        mocker.patch('zulipterminal.ui.View._reset_footer_text')
 
         view.set_footer_text([custom_text], duration)
 
-        view._w.footer.set_text.assert_has_calls([
-            mocker.call([custom_text]),
-            mocker.call(['some help text'])
-        ])
+        view._w.footer.set_text.assert_called_once_with([custom_text])
+        view.controller.update_screen.assert_called_once_with()
+        view._reset_footer_text.assert_called_once_with(duration)
+
+    def test__reset_footer_text(self, view, mocker, duration=46.2):
+        mock_sleep = mocker.patch('time.sleep')
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
+
+        view._reset_footer_text(duration)
+
         mock_sleep.assert_called_once_with(duration)
-        assert view.controller.update_screen.call_count == 2
+        view.set_footer_text.assert_called_once_with()
 
     @pytest.mark.parametrize('suggestions, state, truncated, footer_text', [
         ([], None, False, [' [No matches found]']),
