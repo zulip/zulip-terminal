@@ -476,7 +476,7 @@ class MessageBox(urwid.Pile):
             return None
 
         footlinks[-1] = footlinks[-1][:-1]  # Remove the last newline.
-        return urwid.Padding(urwid.Text(footlinks),
+        return urwid.Padding(urwid.Text(footlinks, wrap='ellipsis'),
                              align='left', left=8, width=('relative', 100),
                              min_width=10, right=2)
 

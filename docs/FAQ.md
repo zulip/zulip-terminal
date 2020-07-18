@@ -45,6 +45,10 @@ If you are still facing problems, please discuss it at
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
 for it mentioning your terminal name, version, and OS.
 
+## Links don't render completely as a footlink
+
+Links that don't fit on one line are cropped with an ellipsis in the footlinks, since typically they are not recognized as a link across multiple lines in terminal emulators, copy/pasting can be challenging, and this also saves screen real estate. However, they will become visible with each message if you can widen your terminal window, and they're rendered completely in the Message Information view (see also [#622](https://www.github.com/zulip/zulip-terminal/issues/622)).
+
 ## Mouse does not support *performing some action/feature*
 
 We think of Zulip Terminal as a keyboard-centric client. Consequently, while functionality via the mouse does work in places, mouse support is not currently a priority for the project (see also [#248](https://www.github.com/zulip/zulip-terminal/issues/248)).
