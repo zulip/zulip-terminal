@@ -1,5 +1,6 @@
 import threading
 import time
+from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import urwid
@@ -1000,7 +1001,9 @@ class StreamInfoView(PopUpView):
 
 
 class MsgInfoView(PopUpView):
-    def __init__(self, controller: Any, msg: Message, title: str) -> None:
+    def __init__(self, controller: Any, msg: Message, title: str,
+                 message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                 ) -> None:
         self.msg = msg
 
         msg_info = [
@@ -1008,6 +1011,9 @@ class MsgInfoView(PopUpView):
                   ('Sender', msg['sender_full_name']),
                   ('Sender\'s Email ID', msg['sender_email'])]),
         ]
+        # Render the category using the existing table methods if links exist.
+        if message_links:
+            msg_info.append(('Message Links', []))
         if msg['reactions']:
             reactions = sorted(
                 (reaction['emoji_name'], reaction['user']['full_name'])
@@ -1024,4 +1030,25 @@ class MsgInfoView(PopUpView):
         popup_width, column_widths = self.calculate_table_widths(msg_info,
                                                                  len(title))
         widgets = self.make_table_with_categories(msg_info, column_widths)
+
+        if message_links:
+            message_link_widgets = []
+            message_link_width = 0
+            for index, link in enumerate(message_links):
+                text, link_index, _ = message_links[link]
+                caption = '{}: {}\n{}'.format(link_index, text, link)
+                message_link_width = max(
+                    message_link_width,
+                    len(max(caption.split('\n'), key=len))
+                )
+
+                display_attr = None if index % 2 else 'popup_contrast'
+                message_link_widgets.append(
+                    urwid.AttrMap(urwid.Text(caption), display_attr)
+                )
+
+            # 5 = 3 labels + 1 newline + 1 'Message Links' category label.
+            widgets = widgets[:5] + message_link_widgets + widgets[5:]
+            popup_width = max(popup_width, message_link_width)
+
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)

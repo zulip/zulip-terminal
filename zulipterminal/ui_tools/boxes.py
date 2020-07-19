@@ -968,7 +968,8 @@ class MessageBox(urwid.Pile):
             write_box.msg_write_box.set_edit_pos(len(msg))
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
-            self.model.controller.show_msg_info(self.message)
+            self.model.controller.show_msg_info(self.message,
+                                                self.message_links)
         return key
 
 

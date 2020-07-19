@@ -1426,7 +1426,7 @@ class TestMsgInfoView:
                             return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
-                                         'Message Information')
+                                         'Message Information', OrderedDict())
 
     def test_keypress_any_key(self):
         key = "a"
@@ -1488,7 +1488,7 @@ class TestMsgInfoView:
     def test_height_reactions(self, message_fixture, to_vary_in_each_message):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         self.msg_info_view = MsgInfoView(self.controller, varied_message,
-                                         'Message Information')
+                                         'Message Information', OrderedDict())
         # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
         expected_height = 9
         assert self.msg_info_view.height == expected_height

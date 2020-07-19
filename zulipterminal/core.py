@@ -2,6 +2,7 @@ import os
 import signal
 import sys
 import time
+from collections import OrderedDict
 from functools import partial
 from platform import platform
 from typing import Any, Optional, Tuple
@@ -134,9 +135,12 @@ class Controller:
         help_view = HelpView(self, "Help Menu (up/down scrolls)")
         self.show_pop_up(help_view)
 
-    def show_msg_info(self, msg: Message) -> None:
+    def show_msg_info(self, msg: Message,
+                      message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                      ) -> None:
         msg_info_view = MsgInfoView(self, msg,
-                                    "Message Information (up/down scrolls)")
+                                    "Message Information (up/down scrolls)",
+                                    message_links)
         self.show_pop_up(msg_info_view)
 
     def show_stream_info(self, color: str, name: str, desc: str) -> None:
