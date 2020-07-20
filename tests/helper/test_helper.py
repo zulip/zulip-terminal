@@ -3,7 +3,7 @@ import pytest
 import zulipterminal.helper
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, display_error_if_present,
-    index_messages, notify, powerset,
+    hash_util_decode, index_messages, notify, powerset,
 )
 
 
@@ -301,3 +301,16 @@ def test_display_error_if_present(mocker, response, footer_updated):
         set_footer_text.assert_called_once_with(response['msg'], 3)
     else:
         set_footer_text.assert_not_called()
+
+
+@pytest.mark.parametrize('quoted_string, expected_unquoted_string', [
+    ('(no.20topic)', '(no topic)'),
+    ('.3Cstrong.3Exss.3C.2Fstrong.3E', '<strong>xss</strong>'),
+    ('.23test-here.20.23T1.20.23T2.20.23T3', '#test-here #T1 #T2 #T3'),
+    ('.2Edot', '.dot'),
+    ('.3Aparty_parrot.3A', ':party_parrot:'),
+])
+def test_hash_util_decode(quoted_string, expected_unquoted_string):
+    return_value = hash_util_decode(quoted_string)
+
+    assert return_value == expected_unquoted_string

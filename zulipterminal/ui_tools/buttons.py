@@ -1,9 +1,12 @@
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+import re
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
+from urllib.parse import urljoin, urlparse
 
 import urwid
+from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import StreamData
+from zulipterminal.helper import StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -254,10 +257,23 @@ class UnreadPMButton(urwid.Button):
         self.email = email
 
 
+DecodedStream = TypedDict('DecodedStream', {
+    'stream_id': Optional[int],
+    'stream_name': Optional[str],
+})
+
+ParsedNarrowLink = TypedDict('ParsedNarrowLink', {
+    'narrow': str,
+    'stream': DecodedStream,
+}, total=False)
+
+
 class MessageLinkButton(urwid.Button):
     def __init__(self, controller: Any, caption: str, link: str,
                  display_attr: Optional[str]) -> None:
         self.controller = controller
+        self.model = self.controller.model
+        self.view = self.controller.view
         self.link = link
 
         super().__init__('')
@@ -277,3 +293,122 @@ class MessageLinkButton(urwid.Button):
         """
         Classifies and handles link.
         """
+        server_url = self.model.server_url
+        if self.link.startswith(urljoin(server_url, '/#narrow/')):
+            self.handle_narrow_link()
+
+    @staticmethod
+    def _decode_stream_data(encoded_stream_data: str) -> DecodedStream:
+        """
+        Returns a dict with optional stream ID and stream name.
+        """
+        # Modern links come patched with the stream ID and '-' as delimiters.
+        if re.match('^[0-9]+-', encoded_stream_data):
+            stream_id, *_ = encoded_stream_data.split('-')
+            # Given how encode_stream() in zerver/lib/url_encoding.py
+            # replaces ' ' with '-' in the stream name, skip extracting the
+            # stream name to avoid any ambiguity.
+            return DecodedStream(stream_id=int(stream_id), stream_name=None)
+        else:
+            # Deprecated links did not start with the stream ID.
+            stream_name = hash_util_decode(encoded_stream_data)
+            return DecodedStream(stream_id=None, stream_name=stream_name)
+
+    @classmethod
+    def _parse_narrow_link(cls, link: str) -> ParsedNarrowLink:
+        """
+        Returns either a dict with narrow parameters for supported links or an
+        empty dict.
+        """
+        # NOTE: The optional stream_id link version is deprecated. The extended
+        # support is for old messages.
+        # We expect the fragment to be one of the following types:
+        # a. narrow/stream/[{stream_id}-]{stream-name}
+        # b. narrow/stream/[{stream_id}-]{stream-name}/near/{message_id}
+        # c. narrow/stream/[{stream_id}-]{stream-name}/topic/
+        #    {encoded.20topic.20name}
+        # d. narrow/stream/[{stream_id}-]{stream-name}/topic/
+        #    {encoded.20topic.20name}/near/{message_id}
+        fragments = urlparse(link.rstrip('/')).fragment.split('/')
+        len_fragments = len(fragments)
+        parsed_link = ParsedNarrowLink()
+
+        if len_fragments == 3 and fragments[1] == 'stream':
+            stream_data = cls._decode_stream_data(fragments[2])
+            parsed_link = dict(narrow='stream', stream=stream_data)
+
+        return parsed_link
+
+    def _validate_and_patch_stream_data(self,
+                                        parsed_link: ParsedNarrowLink) -> str:
+        """
+        Validates stream data and patches the optional value in the nested
+        DecodedStream dict.
+        """
+        stream_id = parsed_link['stream']['stream_id']
+        stream_name = parsed_link['stream']['stream_name']
+        assert (
+            (stream_id is None and stream_name is not None)
+            or (stream_id is not None and stream_name is None)
+        )
+
+        model = self.model
+        # Validate stream ID and name.
+        if ((stream_id and not model.is_user_subscribed_to_stream(stream_id))
+                or (stream_name and not model.is_valid_stream(stream_name))):
+            # TODO: Narrow to the concerened stream in a 'preview' mode or
+            # report whether the stream id is invalid instead.
+            return 'The stream seems to be either unknown or unsubscribed'
+
+        # Patch the optional value.
+        if not stream_id:
+            stream_id = cast(int, model.stream_id_from_name(stream_name))
+            parsed_link['stream']['stream_id'] = stream_id
+        else:
+            stream_name = cast(str, model.stream_dict[stream_id]['name'])
+            parsed_link['stream']['stream_name'] = stream_name
+
+        return ''
+
+    def _validate_narrow_link(self, parsed_link: ParsedNarrowLink) -> str:
+        """
+        Returns either an empty string for a successful validation or an
+        appropriate validation error.
+        """
+        if not parsed_link:
+            return 'The narrow link seems to be either broken or unsupported'
+
+        # Validate stream data.
+        if 'stream' in parsed_link:
+            error = self._validate_and_patch_stream_data(parsed_link)
+            if error:
+                return error
+
+        return ''
+
+    def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
+        """
+        Switches narrow via narrow_to_* methods.
+        """
+        narrow = parsed_link['narrow']
+        if 'stream' == narrow:
+            self.stream_id = parsed_link['stream']['stream_id']
+            self.stream_name = parsed_link['stream']['stream_name']
+            self.controller.narrow_to_stream(self)
+
+    def handle_narrow_link(self) -> None:
+        """
+        Narrows to the respective narrow if the narrow link is valid or updates
+        the footer with an appropriate validation error message.
+        """
+        parsed_link = self._parse_narrow_link(self.link)
+        error = self._validate_narrow_link(parsed_link)
+
+        if error:
+            self.view.set_footer_text(' {}'.format(error), duration=3)
+        else:
+            self._switch_narrow_to(parsed_link)
+
+            # Exit pop-up if MessageLinkButton exists in one.
+            if isinstance(self.controller.loop.widget, urwid.Overlay):
+                self.controller.exit_popup()

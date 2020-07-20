@@ -11,6 +11,7 @@ from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Set, Tuple,
     TypeVar, Union,
 )
+from urllib.parse import unquote
 
 import lxml.html
 from typing_extensions import TypedDict
@@ -629,3 +630,13 @@ def display_error_if_present(response: Dict[str, Any], controller: Any
                              ) -> None:
     if response['result'] == 'error' and hasattr(controller, 'view'):
         controller.view.set_footer_text(response['msg'], 3)
+
+
+def hash_util_decode(string: str) -> str:
+    """
+    Returns a decoded string given a hash_util_encode() [present in
+    zulip/zulip's zerver/lib/url_encoding.py] encoded string.
+    """
+    # Acknowledge custom string replacements in zulip/zulip's
+    # zerver/lib/url_encoding.py before unquote.
+    return unquote(string.replace('.', '%'))
