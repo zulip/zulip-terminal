@@ -147,7 +147,8 @@ class TestModel:
                 event_types=event_types,
                 fetch_event_types=fetch_event_types,
                 apply_markdown=True,
-                client_gravatar=True)
+                client_gravatar=True,
+                include_subscribers=True)
 
     @pytest.mark.parametrize('msg_id', [1, 5, set()])
     @pytest.mark.parametrize('narrow', [
@@ -1525,6 +1526,25 @@ class TestModel:
         update_left_panel = model.controller.view.left_panel.update_structure
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize('event, expected_subscribers', [
+        ({'type': 'subscription', 'op': 'peer_add',
+          'stream_id': 99, 'user_id': 12}, [1001, 11, 12]),
+        ({'type': 'subscription', 'op': 'peer_remove',
+          'stream_id': 2, 'user_id': 12}, [1001, 11]),
+    ], ids=[
+        'user_subscribed_to_stream',
+        'user_unsubscribed_from_stream',
+    ])
+    def test__handle_subscription_event_subscribers(self, model, mocker,
+                                                    stream_dict, event,
+                                                    expected_subscribers):
+        model.stream_dict = stream_dict
+
+        model._handle_subscription_event(event)
+
+        new_subscribers = model.stream_dict[event['stream_id']]['subscribers']
+        assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [
         ({1},   1, True),

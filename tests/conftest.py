@@ -134,6 +134,7 @@ general_stream = {
     'stream_weekly_traffic': 0,
     'push_notifications': False,
     'email_address': 'general@example.comm',
+    'subscribers': [1001, 11, 12]
 }
 
 # This is a private stream;
@@ -152,6 +153,7 @@ secret_stream = {
     'desktop_notifications': False,
     'stream_weekly_traffic': 0,
     'push_notifications': False,
+    'subscribers': [1001, 11]
 }
 
 
@@ -173,6 +175,7 @@ def streams_fixture():
             'stream_weekly_traffic': 0,
             'push_notifications': False,
             'email_address': 'stream{}@example.com'.format(i),
+            'subscribers': [1001, 11, 12]
         })
     return deepcopy(streams)
 
