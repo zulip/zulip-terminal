@@ -161,8 +161,8 @@ class WriteBox(urwid.Pile):
                  if match_user(user, text[len(prefix_string):])]
         user_typeahead = format_string(users, prefix_string + '**{}**')
 
-        combined_typeahead = group_typeahead + user_typeahead
-        combined_names = groups + users
+        combined_typeahead = user_typeahead + group_typeahead
+        combined_names = users + groups
 
         return combined_typeahead, combined_names
 
