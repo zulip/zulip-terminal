@@ -1,8 +1,9 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 import urwid
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.helper import StreamData
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -133,13 +134,17 @@ class StarredButton(TopButton):
 
 
 class StreamButton(TopButton):
-    def __init__(self, properties: List[Any],
+    def __init__(self, properties: StreamData,
                  controller: Any, view: Any, width: int,
                  count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        (self.stream_name, self.stream_id, self.color, is_private,
-         self.description) = properties
+        self.stream_name = properties['name']
+        self.stream_id = properties['id']
+        self.color = properties['color']
+        is_private = properties['invite_only']
+        self.description = properties['description']
+
         self.model = controller.model
         self.count = count
         self.view = view

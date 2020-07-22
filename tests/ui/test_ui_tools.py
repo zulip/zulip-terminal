@@ -464,10 +464,10 @@ class TestStreamsView:
         ('here', ['test here'], []),
         ('test here', ['test here'], []),
         # With 'foo' pinned.
-        ('f', ['foo', '', 'fan', 'FOO', 'FOOBAR'], [['foo'], ]),
-        ('FOO', ['foo', '', 'FOO', 'FOOBAR'], [['foo'], ]),
+        ('f', ['foo', '', 'fan', 'FOO', 'FOOBAR'], ['foo', ]),
+        ('FOO', ['foo', '', 'FOO', 'FOOBAR'], ['foo', ]),
         # With 'bar' pinned.
-        ('bar', ['bar'], [['bar'], ]),
+        ('bar', ['bar'], ['bar', ]),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log,
                             to_pin):
@@ -476,9 +476,9 @@ class TestStreamsView:
             'boo', 'BOO', 'bar', 'test here',
         ]
         stream_names.sort(key=lambda stream_name: stream_name.lower())
-        self.view.pinned_streams = to_pin
+        self.view.pinned_streams = [{'name': name} for name in to_pin]
         stream_names.sort(key=lambda stream_name: stream_name in [
-            stream[0] for stream in to_pin], reverse=True)
+            stream for stream in to_pin], reverse=True)
         self.view.controller.is_in_editor_mode = lambda: True
         search_box = "SEARCH_BOX"
         stream_view.streams_btn_list = [
@@ -1168,8 +1168,10 @@ class TestLeftColumnView:
 
     @pytest.mark.parametrize('pinned', powerset([1, 2, 99, 1000]))
     def test_streams_view(self, mocker, streams, pinned, width=40):
-        self.view.unpinned_streams = [s for s in streams if s[1] not in pinned]
-        self.view.pinned_streams = [s for s in streams if s[1] in pinned]
+        self.view.unpinned_streams = [s for s in streams
+                                      if s['id'] not in pinned]
+        self.view.pinned_streams = [s for s in streams
+                                    if s['id'] in pinned]
         stream_button = mocker.patch(VIEWS + '.StreamButton')
         stream_view = mocker.patch(VIEWS + '.StreamsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
@@ -2513,9 +2515,11 @@ class TestStreamButton:
                           width, count, short_text, caption='caption'):
         controller = mocker.Mock()
         controller.model.is_muted_stream.return_value = False
-        properties = [
-            caption, 5, '#ffffff', is_private, 'Some Stream Description'
-        ]
+        controller.model.muted_streams = {}
+        properties = {'name': caption, 'id': 5, 'color': '#ffffff',
+                      'invite_only': is_private,
+                      'description': 'Some Stream Description'}
+
         view_mock = mocker.Mock()
         view_mock.palette = [(None, 'black', 'white')]
         stream_button = StreamButton(properties,

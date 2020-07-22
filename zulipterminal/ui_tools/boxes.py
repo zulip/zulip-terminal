@@ -133,7 +133,7 @@ class WriteBox(urwid.Pile):
     def _stream_box_autocomplete(self, text: str, state: Optional[int]
                                  ) -> Optional[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream[0]
+        streams = [stream['name']
                    for stream in streams_list]
 
         # match_streams takes stream names and typeaheads,
@@ -237,7 +237,7 @@ class WriteBox(urwid.Pile):
     def autocomplete_streams(self, text: str, prefix_string: str
                              ) -> Tuple[List[str], List[str]]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream[0]
+        streams = [stream['name']
                    for stream in streams_list]
         stream_typeahead = format_string(streams, '#**{}**')
         stream_data = list(zip(stream_typeahead, streams))

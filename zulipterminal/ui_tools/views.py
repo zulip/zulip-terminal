@@ -298,7 +298,7 @@ class StreamsView(urwid.Frame):
 
             # Add a divider to separate pinned streams from the rest.
             pinned_stream_names = [
-                stream[0]
+                stream['name']
                 for stream in self.view.pinned_streams
             ]
             first_unpinned_index = len(streams_display)
@@ -748,7 +748,8 @@ class LeftColumnView(urwid.Pile):
                     controller=self.controller,
                     view=self.view,
                     width=self.width,
-                    count=self.model.unread_counts['streams'].get(stream[1], 0)
+                    count=self.model.unread_counts['streams'].get(
+                                    stream['id'], 0)
                 ) for stream in self.view.pinned_streams]
 
         if len(streams_btn_list):
@@ -760,7 +761,8 @@ class LeftColumnView(urwid.Pile):
                     controller=self.controller,
                     view=self.view,
                     width=self.width,
-                    count=self.model.unread_counts['streams'].get(stream[1], 0)
+                    count=self.model.unread_counts['streams'].get(
+                                    stream['id'], 0)
                 ) for stream in self.view.unpinned_streams]
 
         self.view.stream_id_to_button = {stream.stream_id: stream
