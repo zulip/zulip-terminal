@@ -470,6 +470,24 @@ class Model:
             ]
             raise ServerConnectionFailure(", ".join(failure_text))
 
+    def get_other_subscribers_in_stream(self, stream_id: Optional[int]=None,
+                                        stream_name: Optional[str]=None,
+                                        ) -> List[int]:
+        assert stream_id is not None or stream_name is not None
+
+        if stream_id:
+            assert stream_id in self.stream_dict
+
+            return [sub
+                    for sub in self.stream_dict[stream_id]['subscribers']
+                    if sub != self.user_id]
+        else:
+            return [sub
+                    for _, stream in self.stream_dict.items()
+                    for sub in stream['subscribers']
+                    if stream['name'] == stream_name
+                    if sub != self.user_id]
+
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data['presences']
