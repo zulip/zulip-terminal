@@ -13,7 +13,7 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
-    Message, asynch, canonicalize_color, classify_unread_counts,
+    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
     display_error_if_present, index_messages, initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -60,11 +60,11 @@ class ServerConnectionFailure(Exception):
     pass
 
 
-def sort_streams(streams: List[List[str]]) -> None:
+def sort_streams(streams: List[StreamData]) -> None:
     """
     Used for sorting model.pinned_streams and model.unpinned_streams.
     """
-    streams.sort(key=lambda s: s[0].lower())
+    streams.sort(key=lambda s: s['name'].lower())
 
 
 class Model:
@@ -592,18 +592,23 @@ class Model:
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], Set[int], List[List[str]], List[List[str]]]:
-        stream_keys = ('name', 'stream_id', 'color',
-                       'invite_only', 'description')
+    ) -> Tuple[Dict[int, Any], Set[int], List[StreamData], List[StreamData]]:
 
+        def make_reduced_stream_data(stream: Dict[str, Any]) -> StreamData:
+            # stream_id has been changed to id.
+            return StreamData({'name': stream['name'],
+                               'id': stream['stream_id'],
+                               'color': stream['color'],
+                               'invite_only': stream['invite_only'],
+                               'description': stream['description']})
         # Canonicalize color formats, since zulip server versions may use
         # different formats
         for subscription in subscriptions:
             subscription['color'] = canonicalize_color(subscription['color'])
 
-        pinned_streams = [[stream[key] for key in stream_keys]
+        pinned_streams = [make_reduced_stream_data(stream)
                           for stream in subscriptions if stream['pin_to_top']]
-        unpinned_streams = [[stream[key] for key in stream_keys]
+        unpinned_streams = [make_reduced_stream_data(stream)
                             for stream in subscriptions
                             if not stream['pin_to_top']]
         sort_streams(pinned_streams)
@@ -653,7 +658,7 @@ class Model:
         raise RuntimeError("Invalid stream name.")
 
     def is_pinned_stream(self, stream_id: int) -> bool:
-        return stream_id in list(stream[1] for stream in self.pinned_streams)
+        return stream_id in [stream['id'] for stream in self.pinned_streams]
 
     def toggle_stream_pinned_status(self, stream_id: int) -> bool:
         request = [{
@@ -672,12 +677,12 @@ class Model:
         Handle changes in subscription (eg. muting/unmuting,
                                         pinning/unpinning streams)
         """
-        def get_stream_by_id(streams: List[List[Any]], stream_id: int
-                             ) -> List[Any]:
+        def get_stream_by_id(streams: List[StreamData], stream_id: int
+                             ) -> StreamData:
             for stream in streams:
-                if stream[1] == stream_id:
+                if stream['id'] == stream_id:
                     return stream
-            return []
+            raise RuntimeError("Invalid stream id.")
 
         if event['op'] == 'update':
             if hasattr(self.controller, 'view'):

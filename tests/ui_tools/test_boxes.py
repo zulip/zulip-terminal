@@ -23,8 +23,8 @@ class TestWriteBox:
 
         write_box.view.pinned_streams = []
         write_box.view.unpinned_streams = sorted([
-            [stream['name']] for stream in
-            streams_fixture], key=lambda stream: stream[0].lower())
+            {'name': stream['name']} for stream in
+            streams_fixture], key=lambda stream: stream['name'].lower())
 
         mocker.patch('zulipterminal.ui_tools.boxes.emoji_names',
                      EMOJI_NAMES=emojis_fixture)
@@ -199,26 +199,27 @@ class TestWriteBox:
         ('##Stream', 0, '##**Stream 1**', []),
         # With 'Secret stream' pinned.
         ('#Stream', 0, '#**Secret stream**',
-         [['Secret stream'], ]),  # 2nd-word startswith match (pinned).
+         ['Secret stream', ]),  # 2nd-word startswith match (pinned).
         ('#Stream', 1, '#**Stream 1**',
-         [['Secret stream'], ]),  # 1st-word startswith match (unpinned).
+         ['Secret stream', ]),  # 1st-word startswith match (unpinned).
         ('#Stream', 2, '#**Stream 2**',
-         [['Secret stream'], ]),  # 1st-word startswith match (unpinned).
+         ['Secret stream', ]),  # 1st-word startswith match (unpinned).
         ('#Stream', 3, '#**Some general stream**',
-         [['Secret stream'], ]),  # 3rd-word starstwith match (unpinned).
+         ['Secret stream', ]),  # 3rd-word starstwith match (unpinned).
         # With 'Stream 1' and 'Secret stream' pinned.
-        ('#Stream', 0, '#**Stream 1**', [['Secret stream'], ['Stream 1'], ]),
-        ('#Stream', 1, '#**Secret stream**', [['Secret stream'],
-                                              ['Stream 1'], ]),
-        ('#Stream', 2, '#**Stream 2**', [['Secret stream'], ['Stream 1'], ]),
-        ('#Stream', 3, '#**Some general stream**', [['Secret stream'],
-                                                    ['Stream 1'], ]),
+        ('#Stream', 0, '#**Stream 1**', ['Secret stream', 'Stream 1', ]),
+        ('#Stream', 1, '#**Secret stream**', ['Secret stream',
+                                              'Stream 1', ]),
+        ('#Stream', 2, '#**Stream 2**', ['Secret stream', 'Stream 1', ]),
+        ('#Stream', 3, '#**Some general stream**', ['Secret stream',
+                                                    'Stream 1', ]),
     ])
     def test_generic_autocomplete_streams(self, write_box, text,
                                           state, required_typeahead, to_pin):
-        for stream in to_pin:
+        streams_to_pin = [{'name': stream_name} for stream_name in to_pin]
+        for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
-        write_box.view.pinned_streams = to_pin
+        write_box.view.pinned_streams = streams_to_pin
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
@@ -254,12 +255,12 @@ class TestWriteBox:
     @pytest.mark.parametrize(['text', 'state', 'to_pin', 'matching_streams'], [
         ('', 1, [], ['Secret stream', 'Some general stream',
                      'Stream 1', 'Stream 2']),
-        ('', 1, [['Stream 2']], ['Stream 2', 'Secret stream',
-                                 'Some general stream', 'Stream 1']),
+        ('', 1, ['Stream 2'], ['Stream 2', 'Secret stream',
+                               'Some general stream', 'Stream 1']),
         ('St', 1, [], ['Stream 1', 'Stream 2', 'Secret stream',
                        'Some general stream']),
-        ('St', 1, [['Stream 2']], ['Stream 2', 'Stream 1',
-                                   'Secret stream', 'Some general stream']),
+        ('St', 1, ['Stream 2'], ['Stream 2', 'Stream 1',
+                                 'Secret stream', 'Some general stream']),
     ], ids=[
         'no_search_text',
         'no_search_text_with_pinned_stream',
@@ -268,9 +269,10 @@ class TestWriteBox:
     ])
     def test__stream_box_autocomplete(self, mocker, write_box, text, state,
                                       to_pin, matching_streams):
-        for stream in to_pin:
+        streams_to_pin = [{'name': stream_name} for stream_name in to_pin]
+        for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
-        write_box.view.pinned_streams = to_pin
+        write_box.view.pinned_streams = streams_to_pin
         _process_typeaheads = mocker.patch(BOXES
                                            + '.WriteBox._process_typeaheads')
 

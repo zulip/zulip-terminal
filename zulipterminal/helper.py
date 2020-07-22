@@ -20,6 +20,14 @@ MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
 WSL = 'microsoft' in platform.release().lower()
 
+StreamData = TypedDict('StreamData', {
+    'name': str,
+    'id': int,
+    'color': str,
+    'invite_only': bool,
+    'description': str,
+})
+
 Message = TypedDict('Message', {
     'id': int,
     'sender_id': int,
@@ -496,7 +504,7 @@ DataT = TypeVar('DataT')
 
 
 def match_stream(data: List[Tuple[DataT, str]], search_text: str,
-                 pinned_streams: List[List[Any]]
+                 pinned_streams: List[StreamData]
                  ) -> Tuple[List[DataT], List[str]]:
     """
     Returns a list of DataT (streams) and a list of their corresponding names
@@ -507,7 +515,7 @@ def match_stream(data: List[Tuple[DataT, str]], search_text: str,
     Note: This function expects `data` to be sorted, in a non-decreasing
     order, and ordered by their pinning status.
     """
-    pinned_stream_names = [stream[0] for stream in pinned_streams]
+    pinned_stream_names = [stream['name'] for stream in pinned_streams]
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.

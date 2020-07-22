@@ -1387,10 +1387,10 @@ class TestModel:
             set_count.assert_not_called()
 
     @pytest.mark.parametrize('pinned_streams, pin_to_top', [
-        ([['all', 2]], True),
-        ([['design', 1], ['all', 2]], False),
+        ([{'name': 'all', 'id': 2}], True),
+        ([{'name': 'design', 'id': 1}, {'name': 'all', 'id': 2}], False),
         ([], True),
-        ([['design', 1]], False),
+        ([{'name': 'design', 'id': 1}], False),
     ], ids=['pinning', 'unpinning', 'first_pinned',
             'last_unpinned'])
     def test_toggle_stream_pinned_status(self, mocker, model,
@@ -1541,7 +1541,7 @@ class TestModel:
                 'stream_id': 6,
                 'value': True
             },
-            [['design', 8], ['all', 6]],
+            [{'name': 'design', 'id': 8}, {'name': 'all', 'id': 6}],
             []
         ),
         (
@@ -1552,7 +1552,7 @@ class TestModel:
                 'value': False
             },
             [],
-            [['design', 8], ['all', 6]]
+            [{'name': 'design', 'id': 8}, {'name': 'all', 'id': 6}]
         ),
     ], ids=[
         'pin_stream',
@@ -1563,9 +1563,14 @@ class TestModel:
                                     stream_button, event,
                                     expected_pinned_streams,
                                     expected_unpinned_streams,
-                                    initial_pinned_streams=[['design', 8]],
-                                    initial_unpinned_streams=[['all', 6]]
+                                    initial_pinned_streams=[
+                                        {'name': 'design', 'id': 8}],
+                                    initial_unpinned_streams=[
+                                        {'name': 'all', 'id': 6}]
     ):
+        def set_from_list_of_dict(data):
+            return set(tuple(sorted(d.items())) for d in data)
+
         model.controller.view.stream_id_to_button = {
             event['stream_id']: stream_button
         }
@@ -1574,9 +1579,10 @@ class TestModel:
 
         model._handle_subscription_event(event)
 
-        assert sorted(model.pinned_streams) == sorted(expected_pinned_streams)
-        assert sorted(model.unpinned_streams) == sorted(
-                                            expected_unpinned_streams)
+        assert (set_from_list_of_dict(model.pinned_streams)
+                == set_from_list_of_dict(expected_pinned_streams))
+        assert (set_from_list_of_dict(model.unpinned_streams)
+                == set_from_list_of_dict(expected_unpinned_streams))
         update_left_panel = model.controller.view.left_panel.update_structure
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
