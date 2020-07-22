@@ -147,6 +147,23 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize('text, state, required_typeahead, recipients', [
+        ('@', 0, '@**Human 2**', [12]),
+        ('@', 1, '@**Human Myself**', [12]),
+        ('@', 2, '@**Human 1**', [12]),
+        ('@', -1, '@*Group 4*', [12]),
+        ('@', 0, '@**Human 1**', [11, 12]),
+        ('@', 1, '@**Human 2**', [11, 12]),
+        ('@', 2, '@**Human Myself**', [11, 12]),
+        ('@', -1, '@*Group 4*', [11, 12]),
+    ])
+    def test_generic_autocomplete_mentions_subscribers(self, write_box, text,
+                                                       required_typeahead,
+                                                       state, recipients):
+        write_box.recipient_user_ids = recipients
+        typeahead_string = write_box.generic_autocomplete(text, state)
+        assert typeahead_string == required_typeahead
+
     @pytest.mark.parametrize('text, state, required_typeahead, to_pin', [
         # With no streams pinned.
         ('#Stream', 0, '#**Stream 1**', []),  # 1st-word startswith match.

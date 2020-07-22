@@ -151,6 +151,7 @@ class TestController:
         controller.model.index = index_all_messages
         controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.user_email = "some@email"
+        controller.model.user_id = 1
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
@@ -174,6 +175,7 @@ class TestController:
         controller.model.narrow = []
         controller.model.index = index_user
         controller.view.message_view = mocker.patch('urwid.ListBox')
+        controller.model.user_id = 1
         controller.model.user_email = "some@email"
 
         controller.show_all_pm('')
@@ -191,6 +193,7 @@ class TestController:
         controller.model.narrow = []
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
+        controller.model.user_id = 1
         controller.model.muted_topics = []  # FIXME Expand upon this
         controller.model.user_email = "some@email"
         controller.model.stream_dict = {
@@ -217,6 +220,7 @@ class TestController:
         controller.model.muted_streams = set()  # FIXME Expand upon this
         controller.model.muted_topics = []  # FIXME Expand upon this
         controller.model.user_email = "some@email"
+        controller.model.user_id = 1
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
