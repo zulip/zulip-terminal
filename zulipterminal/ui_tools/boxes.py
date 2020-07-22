@@ -30,6 +30,7 @@ class WriteBox(urwid.Pile):
         self.view = view
         self.msg_edit_id = None  # type: Optional[int]
         self.is_in_typeahead_mode = False
+        self.recipient_user_ids = []  # type: List[int]
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -40,8 +41,11 @@ class WriteBox(urwid.Pile):
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
-    def private_box_view(self, button: Any=None, email: str='') -> None:
+    def private_box_view(self, button: Any=None, email: str='',
+                         recipient_user_ids: Optional[List[int]]=None) -> None:
         self.set_editor_mode()
+        if recipient_user_ids:
+            self.recipient_user_ids = recipient_user_ids
         if email == '' and button is not None:
             email = button.email
         self.to_write_box = ReadlineEdit("To: ", edit_text=email)
@@ -156,13 +160,23 @@ class WriteBox(urwid.Pile):
         group_typeahead = format_string(groups, '@*{}*')
 
         users_list = self.view.users
-        users = [user['full_name']
-                 for user in users_list
-                 if match_user(user, text[len(prefix_string):])]
-        user_typeahead = format_string(users, prefix_string + '**{}**')
+        matching_users = [user
+                          for user in users_list
+                          if match_user(user, text[len(prefix_string):])]
+        matching_ids = set([user['user_id'] for user in matching_users])
+        matching_recipient_ids = (set(self.recipient_user_ids)
+                                  & set(matching_ids))
+        # Display subscribed users/recipients first.
+        sorted_matching_users = sorted(matching_users,
+                                       key=lambda user: user['user_id']
+                                       in matching_recipient_ids,
+                                       reverse=True)
+
+        user_names = [user['full_name'] for user in sorted_matching_users]
+        user_typeahead = format_string(user_names, prefix_string + '**{}**')
 
         combined_typeahead = user_typeahead + group_typeahead
-        combined_names = users + groups
+        combined_names = user_names + groups
 
         return combined_typeahead, combined_names
 
@@ -259,6 +273,9 @@ class WriteBox(urwid.Pile):
                                                 + ', '.join(invalid_emails))
                         self.view.set_footer_text(invalid_emails_error, 3)
                         return key
+                    users = self.model.user_dict
+                    self.recipient_user_ids = [users[email]['user_id']
+                                               for email in recipient_emails]
 
             self.focus_position = self.focus_position == 0
             header.focus_col = 0
@@ -301,6 +318,7 @@ class MessageBox(urwid.Pile):
                 recipient = self.message['display_recipient'][0]
                 self.recipients_names = recipient['full_name']
                 self.recipients_emails = self.model.user_email
+                self.recipient_ids = self.model.user_id
             else:
                 self.recipients_names = ', '.join(list(
                             recipient['full_name']
@@ -312,6 +330,9 @@ class MessageBox(urwid.Pile):
                             for recipient in self.message['display_recipient']
                             if recipient['email'] != self.model.user_email
                         ))
+                self.recipient_ids = [recipient['id'] for recipient
+                                      in self.message['display_recipient']
+                                      if recipient['id'] != self.model.user_id]
 
         # mouse_event helper variable
         self.displaying_selection_hint = False
@@ -902,7 +923,8 @@ class MessageBox(urwid.Pile):
         if is_command_key('ENTER', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.recipients_emails
+                    email=self.recipients_emails,
+                    recipient_user_ids=self.recipient_ids,
                 )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
@@ -912,7 +934,8 @@ class MessageBox(urwid.Pile):
         elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.recipients_emails
+                    email=self.recipients_emails,
+                    recipient_user_ids=self.recipient_ids,
                 )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_view(
@@ -946,8 +969,10 @@ class MessageBox(urwid.Pile):
         elif is_command_key('GO_BACK', key):
             self.model.controller.show_all_messages(self)
         elif is_command_key('REPLY_AUTHOR', key):
+            # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
-                email=self.message['sender_email']
+                email=self.message['sender_email'],
+                recipient_user_ids=[self.message['sender_id']],
             )
         elif is_command_key('MENTION_REPLY', key):
             self.keypress(size, 'enter')
