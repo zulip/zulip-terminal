@@ -107,13 +107,13 @@ class TestWriteBox:
         ('@Gro', 1, '@*Group 2*'),
         ('@Grou', 1, '@*Group 2*'),
         # Expected sequence of autocompletes from '@'
-        ('@', 0, '@*Group 1*'),
-        ('@', 1, '@*Group 2*'),
-        ('@', 2, '@*Group 3*'),
-        ('@', 3, '@*Group 4*'),
-        ('@', 4, '@**Human Myself**'),
-        ('@', 5, '@**Human 1**'),
-        ('@', 6, '@**Human 2**'),
+        ('@', 0, '@**Human Myself**'),
+        ('@', 1, '@**Human 1**'),
+        ('@', 2, '@**Human 2**'),
+        ('@', 3, '@*Group 1*'),
+        ('@', 4, '@*Group 2*'),
+        ('@', 5, '@*Group 3*'),
+        ('@', 6, '@*Group 4*'),
         ('@', 7, None),  # Reached last match
         ('@', 8, None),  # Beyond end
         # Expected sequence of autocompletes from '@_'
