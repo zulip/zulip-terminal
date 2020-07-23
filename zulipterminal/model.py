@@ -57,6 +57,13 @@ class ServerConnectionFailure(Exception):
     pass
 
 
+def sort_streams(streams: List[List[str]]) -> None:
+    """
+    Used for sorting model.pinned_streams and model.unpinned_streams.
+    """
+    streams.sort(key=lambda s: s[0].lower())
+
+
 class Model:
     """
     A class responsible for storing the data to be displayed.
@@ -570,6 +577,13 @@ class Model:
         for subscription in subscriptions:
             subscription['color'] = canonicalize_color(subscription['color'])
 
+        pinned_streams = [[stream[key] for key in stream_keys]
+                          for stream in subscriptions if stream['pin_to_top']]
+        unpinned_streams = [[stream[key] for key in stream_keys]
+                            for stream in subscriptions
+                            if not stream['pin_to_top']]
+        sort_streams(pinned_streams)
+        sort_streams(unpinned_streams)
         # Mapping of stream-id to all available stream info
         # Stream IDs for muted streams
         # Limited stream info sorted by name (used in display)
@@ -577,12 +591,8 @@ class Model:
             {stream['stream_id']: stream for stream in subscriptions},
             {stream['stream_id'] for stream in subscriptions
              if stream['in_home_view'] is False},
-            sorted([[stream[key] for key in stream_keys]
-                    for stream in subscriptions if stream['pin_to_top']],
-                   key=lambda s: s[0].lower()),
-            sorted([[stream[key] for key in stream_keys]
-                    for stream in subscriptions if not stream['pin_to_top']],
-                   key=lambda s: s[0].lower())
+            pinned_streams,
+            unpinned_streams,
         )
 
     def _group_info_from_realm_user_groups(self,
