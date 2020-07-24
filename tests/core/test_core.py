@@ -13,6 +13,7 @@ CORE = "zulipterminal.core"
 class TestController:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: Any) -> None:
+        mocker.patch('zulipterminal.ui_tools.boxes.MessageBox.footlinks_view')
         self.client = mocker.patch('zulip.Client')
         # Patch init only, in general, allowing specific patching elsewhere
         self.model = mocker.patch(CORE + '.Model.__init__', return_value=None)
@@ -30,8 +31,9 @@ class TestController:
         self.theme = 'default'
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.footlinks_enabled = True
         result = Controller(self.config_file, self.theme, 256, self.autohide,
-                            self.notify_enabled)
+                            self.notify_enabled, self.footlinks_enabled)
         result.view.message_view = mocker.Mock()  # set in View.__init__
         return result
 

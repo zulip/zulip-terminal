@@ -30,11 +30,12 @@ class Controller:
 
     def __init__(self, config_file: str, theme: ThemeSpec,
                  color_depth: int,
-                 autohide: bool, notify: bool) -> None:
+                 autohide: bool, notify: bool, footlinks: bool) -> None:
         self.theme = theme
         self.color_depth = color_depth
         self.autohide = autohide
         self.notify_enabled = notify
+        self.footlinks_enabled = footlinks
 
         self._editor = None  # type: Optional[Any]
 

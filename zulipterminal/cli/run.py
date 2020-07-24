@@ -189,6 +189,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         'theme': ('zt_dark', NO_CONFIG),
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
+        'footlinks': ('enabled', NO_CONFIG),
     }
 
     if 'zterm' in zuliprc:
@@ -269,11 +270,14 @@ def main(options: Optional[List[str]]=None) -> None:
                            format(", ".join(complete))))
         print("   autohide setting '{}' specified {}."
               .format(*zterm['autohide']))
+        print("   footlinks setting '{}' specified {}."
+              .format(*zterm['footlinks']))
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
+            'footlinks': ['enabled', 'disabled'],
         }
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():
