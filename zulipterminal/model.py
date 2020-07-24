@@ -655,44 +655,47 @@ class Model:
                     return stream
             return []
 
-        if hasattr(self.controller, 'view'):
-            if event.get('property', None) == 'in_home_view':
-                stream_id = event['stream_id']
+        if event['op'] == 'update':
+            if hasattr(self.controller, 'view'):
+                if event.get('property', None) == 'in_home_view':
+                    stream_id = event['stream_id']
 
-                # FIXME: Does this always contain the stream_id?
-                stream_button = (
-                    self.controller.view.stream_id_to_button[stream_id]
-                )
+                    # FIXME: Does this always contain the stream_id?
+                    stream_button = (
+                        self.controller.view.stream_id_to_button[stream_id]
+                    )
 
-                if event['value']:  # Unmuting streams
-                    self.muted_streams.remove(stream_id)
-                    stream_button.mark_unmuted()
-                else:  # Muting streams
-                    self.muted_streams.add(stream_id)
-                    stream_button.mark_muted()
-                self.controller.update_screen()
-            elif event.get('property', None) == 'pin_to_top':
-                stream_id = event['stream_id']
+                    if event['value']:  # Unmuting streams
+                        self.muted_streams.remove(stream_id)
+                        stream_button.mark_unmuted()
+                    else:  # Muting streams
+                        self.muted_streams.add(stream_id)
+                        stream_button.mark_muted()
+                    self.controller.update_screen()
+                elif event.get('property', None) == 'pin_to_top':
+                    stream_id = event['stream_id']
 
-                # FIXME: Does this always contain the stream_id?
-                stream_button = (
-                    self.controller.view.stream_id_to_button[stream_id]
-                )
+                    # FIXME: Does this always contain the stream_id?
+                    stream_button = (
+                        self.controller.view.stream_id_to_button[stream_id]
+                    )
 
-                if event['value']:
-                    stream = get_stream_by_id(self.unpinned_streams, stream_id)
-                    if stream:
-                        self.unpinned_streams.remove(stream)
-                        self.pinned_streams.append(stream)
-                else:
-                    stream = get_stream_by_id(self.pinned_streams, stream_id)
-                    if stream:
-                        self.pinned_streams.remove(stream)
-                        self.unpinned_streams.append(stream)
-                sort_streams(self.unpinned_streams)
-                sort_streams(self.pinned_streams)
-                self.controller.view.left_panel.update_structure()
-                self.controller.update_screen()
+                    if event['value']:
+                        stream = get_stream_by_id(self.unpinned_streams,
+                                                  stream_id)
+                        if stream:
+                            self.unpinned_streams.remove(stream)
+                            self.pinned_streams.append(stream)
+                    else:
+                        stream = get_stream_by_id(self.pinned_streams,
+                                                  stream_id)
+                        if stream:
+                            self.pinned_streams.remove(stream)
+                            self.unpinned_streams.append(stream)
+                    sort_streams(self.unpinned_streams)
+                    sort_streams(self.pinned_streams)
+                    self.controller.view.left_panel.update_structure()
+                    self.controller.update_screen()
 
     def _handle_typing_event(self, event: Event) -> None:
         """
