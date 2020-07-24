@@ -234,15 +234,16 @@ class WriteBox(urwid.Pile):
         elif is_command_key('TAB', key):
             if len(self.contents) == 0:
                 return key
+            header = self.contents[0][0]
             # toggle focus position
             if self.focus_position == 0 and self.to_write_box is None:
-                if self.contents[0][0].focus_col == 0:
-                    self.contents[0][0].focus_col = 1
+                if header.focus_col == 0:
+                    header.focus_col = 1
                     return key
                 else:
-                    self.contents[0][0].focus_col = 0
+                    header.focus_col = 0
             self.focus_position = self.focus_position == 0
-            self.contents[0][0].focus_col = 0
+            header.focus_col = 0
 
         key = super().keypress(size, key)
         return key
