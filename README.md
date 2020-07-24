@@ -75,6 +75,8 @@ site=https://realm.zulipchat.com
 theme=default
 # Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
 autohide=autohide
+# Footlinks default to 'enabled', but can be set to 'disabled' to hide footlinks.
+footlinks=disabled
 # Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
 ```
