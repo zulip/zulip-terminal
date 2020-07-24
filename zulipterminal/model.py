@@ -654,6 +654,18 @@ class Model:
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
+    def get_invalid_recipient_emails(self, recipient_emails: List[str]
+                                     ) -> List[str]:
+
+        return [email for email in recipient_emails
+                if email not in self.user_dict]
+
+    def is_valid_stream(self, stream_name: str) -> bool:
+        for stream in self.stream_dict.values():
+            if stream['name'] == stream_name:
+                return True
+        return False
+
     def notify_user(self, message: Message) -> str:
         """
         return value signifies if notification failed, if it should occur
