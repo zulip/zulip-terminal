@@ -13,7 +13,8 @@ from urwid_readline import ReadlineEdit
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
-    MESSAGE_CONTENT_MARKER, QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR,
+    MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
+    STREAM_TOPIC_SEPARATOR,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream, match_user,
@@ -348,7 +349,8 @@ class MessageBox(urwid.Pile):
         header = urwid.Columns([
             ('pack', stream_title),
             (1, urwid.Text((color, ' '))),
-            urwid.AttrWrap(urwid.Divider('━'), color),
+            urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER),
+                           color),
         ])
         header.markup = stream_title_markup
         return header
@@ -362,7 +364,8 @@ class MessageBox(urwid.Pile):
         header = urwid.Columns([
             ('pack', title),
             (1, urwid.Text(('general_bar', ' '))),
-            urwid.AttrWrap(urwid.Divider('━'), 'general_bar'),
+            urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER),
+                           'general_bar'),
         ])
         header.markup = title_markup
         return header
