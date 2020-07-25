@@ -12,7 +12,9 @@ from urwid_readline import ReadlineEdit
 
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
+from zulipterminal.config.symbols import (
+    MESSAGE_CONTENT_MARKER, STREAM_TOPIC_SEPARATOR,
+)
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream, match_user,
 )
@@ -754,7 +756,6 @@ class MessageBox(urwid.Pile):
                 '<strong>' + self.message['sender_full_name'] + '</strong>', 1)
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        active_char = '▒'  # Options are '█', '▓', '▒', '░'
         content = self.transform_content()
 
         if self.message['id'] in self.model.index['edited_messages']:
@@ -772,7 +773,8 @@ class MessageBox(urwid.Pile):
                     urwid.Columns([
                         (1, urwid.Text('')),
                         urwid.Text(content),
-                    ]), tline='', bline='', rline='', lline=active_char
+                    ]), tline='', bline='', rline='',
+                    lline=MESSAGE_CONTENT_MARKER
                 )
             ]),
             align='left', left=left_padding,
