@@ -7,7 +7,9 @@ from bs4 import BeautifulSoup
 from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
+from zulipterminal.config.symbols import (
+    QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR,
+)
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
@@ -2153,14 +2155,14 @@ class TestMessageBox:
         ("""<blockquote>
                 <p>A</p>
             </blockquote>
-            <p>B</p>""", "░ A\n\nB"),
+            <p>B</p>""", "{} A\n\nB"),
         ("""<blockquote>
                 <blockquote>
                     <p>A</p>
                 </blockquote>
                 <p>B</p>
             </blockquote>
-            <p>C</p>""", "░ ░ A\n\n░ B\n\nC"),
+            <p>C</p>""", "{} {} A\n\n{} B\n\nC"),
         ("""<blockquote>
                 <blockquote>
                     <blockquote>
@@ -2170,21 +2172,21 @@ class TestMessageBox:
                 </blockquote>
                 <p>C</p>
             </blockquote>
-            <p>D</p>""", "░ ░ ░ A\n\n░ ░ B\n\n░ C\n\nD"),
+            <p>D</p>""", "{} {} {} A\n\n{} {} B\n\n{} C\n\nD"),
         ("""<blockquote>
                 <p>A<br/>B</p>
             </blockquote>
-            <p>C</p>""", "░ A\n░ B\n\nC"),
+            <p>C</p>""", "{} A\n{} B\n\nC"),
         ("""<blockquote>
                 <p><a href='https://chat.zulip.org/'</a>czo</p>
-            </blockquote>""", "░ czo [1]\n"),
+            </blockquote>""", "{} czo [1]\n"),
         pytest.param("""<blockquote>
                             <blockquote>
                                 <p>A<br>
                                 B</p>
                             </blockquote>
                         </blockquote>
-            """, "░ ░ A\n░ ░ B",
+            """, "{} {} A\n{} {} B",
                      marks=pytest.mark.xfail(reason="rendered_bug")),
         pytest.param("""<blockquote>
                             <blockquote>
@@ -2195,7 +2197,7 @@ class TestMessageBox:
                                 <p>C</p>
                             </blockquote>
                         </blockquote>
-        """, "░ ░ A\n░ B\n░ ░ C",
+        """, "{} {} A\n{} B\n{} {} C",
                      marks=pytest.mark.xfail(reason="rendered_bug")),
     ], ids=[
         "quoted level 1",
@@ -2208,6 +2210,7 @@ class TestMessageBox:
     ])
     def test_transform_content(self, mocker, raw_html, expected_content,
                                messages_successful_response):
+        expected_content = expected_content.replace('{}', QUOTED_TEXT_MARKER)
         message = messages_successful_response['messages'][0]
         msg_box = MessageBox(message, self.model, message)
         msg_box.message['content'] = raw_html

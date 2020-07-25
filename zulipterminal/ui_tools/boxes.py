@@ -13,7 +13,7 @@ from urwid_readline import ReadlineEdit
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
-    MESSAGE_CONTENT_MARKER, STREAM_TOPIC_SEPARATOR,
+    MESSAGE_CONTENT_MARKER, QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream, match_user,
@@ -800,8 +800,7 @@ class MessageBox(urwid.Pile):
         soup = BeautifulSoup(self.message['content'], 'lxml')
         body = soup.find(name='body')
         if body and body.find(name='blockquote'):
-            padding_char = '░'
-            self.indent_quoted_content(soup, padding_char)
+            self.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
         return (None, self.soup2markup(body))
 
