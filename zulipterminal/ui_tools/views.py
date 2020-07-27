@@ -8,7 +8,9 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.config.symbols import CHECK_MARK, PINNED_STREAMS_DIVIDER
+from zulipterminal.config.symbols import (
+    CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
+)
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -755,8 +757,10 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
-            tlcorner='━', tline='━', lline='',
-            trcorner='━', blcorner='', rline='',
+            tlcorner=LIST_TITLE_BAR_LINE,
+            tline=LIST_TITLE_BAR_LINE,
+            trcorner=LIST_TITLE_BAR_LINE,
+            blcorner='', rline='', lline='',
             bline='', brcorner='─'
             )
         return w
@@ -777,8 +781,10 @@ class LeftColumnView(urwid.Pile):
                                        stream_button)
         w = urwid.LineBox(
             self.view.topic_w, title="Topics",
-            tlcorner='━', tline='━', lline='',
-            trcorner='━', blcorner='', rline='',
+            tlcorner=LIST_TITLE_BAR_LINE,
+            tline=LIST_TITLE_BAR_LINE,
+            trcorner=LIST_TITLE_BAR_LINE,
+            blcorner='', rline='', lline='',
             bline='', brcorner='─'
             )
         return w
