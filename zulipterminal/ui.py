@@ -6,6 +6,7 @@ from typing import Any, List, Optional, Tuple
 import urwid
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
+from zulipterminal.config.symbols import APPLICATION_TITLE_BAR_LINE
 from zulipterminal.helper import WSL, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
@@ -128,7 +129,6 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(
             self.message_view.read_message)
-        div_char = '═'
 
         title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
                      full_name=self.model.user_full_name,
@@ -137,9 +137,9 @@ class View(urwid.WidgetWrap):
                      url=self.model.server_url)
 
         title_bar = urwid.Columns([
-            urwid.Divider(div_char=div_char),
+            urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
             (len(title_text), urwid.Text([title_text])),
-            urwid.Divider(div_char=div_char),
+            urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
         ])
 
         w = urwid.Frame(self.body, title_bar, focus_part='body',
