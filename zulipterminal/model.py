@@ -15,8 +15,8 @@ from typing_extensions import Literal, TypedDict
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
     Message, StreamData, asynch, canonicalize_color, canonicalize_topic,
-    classify_unread_counts, display_error_if_present, index_messages,
-    initial_index, notify, set_count,
+    classify_unread_counts, compare_lowercase, display_error_if_present,
+    index_messages, initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -911,7 +911,8 @@ class Model:
                 if (append_to_stream
                     and (len(self.narrow) == 1
                          or (len(self.narrow) == 2
-                             and self.narrow[1][1] == message['subject']))):
+                             and compare_lowercase(self.narrow[1][1],
+                                                   message['subject'])))):
                     msg_log.append(msg_w)
 
             elif (message['type'] == 'private' and len(self.narrow) == 1
@@ -1040,7 +1041,8 @@ class Model:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
                 if (len(self.narrow) == 2
-                        and msg_box.message['subject'] != self.narrow[1][1]):
+                        and not compare_lowercase(msg_box.message['subject'],
+                                                  self.narrow[1][1])):
                     view.message_view.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.
