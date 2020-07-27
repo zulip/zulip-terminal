@@ -93,7 +93,7 @@ UnreadCounts = TypedDict('UnreadCounts', {
     'all_msg': int,
     'all_pms': int,
     'all_mentions': int,
-    'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
+    'unread_topics': Dict[Tuple[int, str], int],  # stream_id, canonical topic
     'unread_pms': Dict[int, int],  # sender_id
     'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
     'streams': Dict[int, int],  # stream_id
@@ -139,8 +139,10 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
     for message in changed_messages:
         if message['type'] == 'stream':
             stream_id = message['stream_id']
+            # Use lowercase topic names in unread_topics to backup the
+            # invariant in index.
             update_unreads(unread_counts['unread_topics'],
-                           (stream_id, message['subject']))
+                           (stream_id, canonicalize_topic(message['subject'])))
             update_unreads(unread_counts['streams'], stream_id)
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
@@ -201,7 +203,7 @@ def _set_count_in_view(controller: Any, new_count: int,
                 # If topic_view is open for incoming messages's stream,
                 # We update the respective TopicButton count accordingly.
                 for topic_button in topic_buttons_log:
-                    if topic_button.topic_name == msg_topic:
+                    if compare_lowercase(topic_button.topic_name, msg_topic):
                         topic_button.update_count(topic_button.count
                                                   + new_count)
         else:
@@ -459,8 +461,10 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
             continue
         if model.is_muted_topic(stream_id, stream['topic']):
             continue
-        stream_topic = (stream_id, stream['topic'])
-        unread_counts['unread_topics'][stream_topic] = count
+        stream_topic = (stream_id, canonicalize_topic(stream['topic']))
+        unread_counts['unread_topics'][stream_topic] = (
+            count + unread_counts['unread_topics'].get(stream_topic, 0)
+        )
         if not unread_counts['streams'].get(stream_id):
             unread_counts['streams'][stream_id] = count
         else:

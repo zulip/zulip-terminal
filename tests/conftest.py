@@ -800,8 +800,8 @@ def classified_unread_counts():
         'all_msg': 12,
         'all_pms': 8,
         'unread_topics': {
-            (1000, 'Some general unread topic'): 3,
-            (99, 'Some private unread topic'): 1
+            (1000, 'some general unread topic'): 3,
+            (99, 'some private unread topic'): 1
         },
         'unread_pms': {
             1: 2,

@@ -11,7 +11,9 @@ from zulipterminal.config.keys import (
 from zulipterminal.config.symbols import (
     CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
 )
-from zulipterminal.helper import Message, asynch, match_stream, match_user
+from zulipterminal.helper import (
+    Message, asynch, canonicalize_topic, match_stream, match_user,
+)
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
@@ -790,7 +792,7 @@ class LeftColumnView(urwid.Pile):
                 controller=self.controller,
                 width=self.width,
                 count=self.model.unread_counts['unread_topics'].
-                get((stream_id, topic), 0)
+                get((stream_id, canonicalize_topic(topic)), 0)
             )
             for topic in topics
         ]
