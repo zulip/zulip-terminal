@@ -6,7 +6,9 @@ from typing import Any, List, Optional, Tuple
 import urwid
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
-from zulipterminal.config.symbols import APPLICATION_TITLE_BAR_LINE
+from zulipterminal.config.symbols import (
+    APPLICATION_TITLE_BAR_LINE, LIST_TITLE_BAR_LINE,
+)
 from zulipterminal.helper import WSL, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
@@ -43,15 +45,17 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(self, self.model, self.write_box,
                                               self.search_box)
         return urwid.LineBox(self.middle_column, title='Messages',
-                             bline='', tline='━',
-                             trcorner='│', tlcorner='│')
+                             tline=LIST_TITLE_BAR_LINE,
+                             bline='', trcorner='│', tlcorner='│')
 
     def right_column_view(self) -> Any:
         self.users_view = RightColumnView(View.RIGHT_WIDTH, self)
         return urwid.LineBox(
             self.users_view, title="Users",
-            tlcorner='━', tline='━', lline='',
-            trcorner='━', blcorner='─', rline='',
+            tlcorner=LIST_TITLE_BAR_LINE,
+            tline=LIST_TITLE_BAR_LINE,
+            trcorner=LIST_TITLE_BAR_LINE,
+            lline='', blcorner='─', rline='',
             bline='', brcorner=''
         )
 
