@@ -8,7 +8,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
-from zulipterminal.config.symbols import CHECK_MARK
+from zulipterminal.config.symbols import CHECK_MARK, PINNED_STREAMS_DIVIDER
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -259,7 +259,7 @@ class StreamsViewDivider(urwid.Divider):
         # NOTE: This is specifically for stream search to work correctly.
         self.stream_id = -1
         self.stream_name = ''
-        super().__init__(div_char='-')
+        super().__init__(div_char=PINNED_STREAMS_DIVIDER)
 
 
 class StreamsView(urwid.Frame):
