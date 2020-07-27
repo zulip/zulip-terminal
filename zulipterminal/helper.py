@@ -245,6 +245,7 @@ def index_messages(messages: List[Message],
     {
         'pointer': {
             '[]': 30  # str(ZulipModel.narrow)
+            # NOTE: canonicalize_topic() is used for indexing.
             '[["stream", "verona"]]': 32,
             ...
         }

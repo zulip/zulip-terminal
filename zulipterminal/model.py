@@ -2,6 +2,7 @@ import json
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
+from copy import deepcopy
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
     Tuple, Union,
@@ -139,15 +140,26 @@ class Model:
         self.new_user_input = True
         self._start_presence_updates()
 
+    def narrow_with_canonical_topic(self) -> List[Any]:
+        """
+        Returns the narrow with its topic name replaced with the invariant
+        version that we maintain locally.
+        """
+        narrow = deepcopy(self.narrow)
+        if len(narrow) == 2 and narrow[1][0] == 'topic':
+            narrow[1][1] = canonicalize_topic(narrow[1][1])
+        return narrow
+
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
         Returns the focus in the current narrow.
         For no existing focus this returns {}, otherwise the message ID.
         """
-        return self.index['pointer'][repr(self.narrow)]
+        return self.index['pointer'][repr(self.narrow_with_canonical_topic())]
 
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
-        self.index['pointer'][repr(self.narrow)] = focus_message
+        narrow_str = repr(self.narrow_with_canonical_topic())
+        self.index['pointer'][narrow_str] = focus_message
 
     def is_search_narrow(self) -> bool:
         """
@@ -373,7 +385,7 @@ class Model:
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
-            narrow_str = repr(self.narrow)
+            narrow_str = repr(self.narrow_with_canonical_topic())
             if first_anchor and response['anchor'] != 10000000000000000:
                 self.index['pointer'][narrow_str] = response['anchor']
             if 'found_newest' in response:
@@ -863,8 +875,9 @@ class Model:
         if 'read' not in message['flags']:
             set_count([message['id']], self.controller, 1)
 
+        narrow_str = repr(self.narrow_with_canonical_topic())
         if (hasattr(self.controller, 'view')
-                and self._have_last_message[repr(self.narrow)]):
+                and self._have_last_message[narrow_str]):
             msg_log = self.controller.view.message_view.log
             if msg_log:
                 last_message = msg_log[-1].original_widget.message
