@@ -212,7 +212,7 @@ KEY_BINDINGS = OrderedDict([
     }),
     ('STREAM_DESC', {
         'keys': {'i'},
-        'help_text': 'View stream description',
+        'help_text': 'View stream information & modify settings',
         'key_category': 'stream_list',
     }),
     ('REDRAW', {
