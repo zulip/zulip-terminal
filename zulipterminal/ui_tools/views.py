@@ -8,6 +8,7 @@ import urwid
 from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key,
 )
+from zulipterminal.config.symbols import CHECK_MARK
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1024,12 +1025,12 @@ class StreamInfoView(PopUpView):
         muted_setting = urwid.CheckBox(label="Muted",
                                        state=controller.model.is_muted_stream(
                                            stream_id),
-                                       checked_symbol='✓')
+                                       checked_symbol=CHECK_MARK)
         urwid.connect_signal(muted_setting, 'change', self.toggle_mute_status)
         pinned_state = controller.model.is_pinned_stream(stream_id)
         pinned_setting = urwid.CheckBox(label="Pinned to top",
                                         state=pinned_state,
-                                        checked_symbol='✓')
+                                        checked_symbol=CHECK_MARK)
         urwid.connect_signal(pinned_setting, 'change',
                              self.toggle_pinned_status)
 
