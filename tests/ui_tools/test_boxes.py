@@ -251,6 +251,53 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize(['text', 'state', 'to_pin', 'matching_streams'], [
+        ('', 1, [], ['Secret stream', 'Some general stream',
+                     'Stream 1', 'Stream 2']),
+        ('', 1, [['Stream 2']], ['Stream 2', 'Secret stream',
+                                 'Some general stream', 'Stream 1']),
+        ('St', 1, [], ['Stream 1', 'Stream 2', 'Secret stream',
+                       'Some general stream']),
+        ('St', 1, [['Stream 2']], ['Stream 2', 'Stream 1',
+                                   'Secret stream', 'Some general stream']),
+    ], ids=[
+        'no_search_text',
+        'no_search_text_with_pinned_stream',
+        'single_word_search_text',
+        'single_word_search_text_with_pinned_stream',
+    ])
+    def test__stream_box_autocomplete(self, mocker, write_box, text, state,
+                                      to_pin, matching_streams):
+        for stream in to_pin:
+            write_box.view.unpinned_streams.remove(stream)
+        write_box.view.pinned_streams = to_pin
+        _process_typeaheads = mocker.patch(BOXES
+                                           + '.WriteBox._process_typeaheads')
+
+        write_box._stream_box_autocomplete(text, state)
+
+        _process_typeaheads.assert_called_once_with(matching_streams, state,
+                                                    matching_streams)
+
+    @pytest.mark.parametrize('text, expected_text', [
+        ('Som', 'Some general stream'),
+        pytest.param('Some gen', 'Some general stream',
+                     marks=pytest.mark.xfail(
+                         reason="Lacking urwid-readline support")),
+    ])
+    def test__stream_box_autocomplete_with_spaces(self, mocker, write_box,
+                                                  text, expected_text):
+        write_box.stream_box_view(1000)
+        write_box.contents[0][0][0].set_edit_text(text)
+        write_box.contents[0][0][0].set_edit_pos(len(text))
+        write_box.focus_position = 0
+        write_box.contents[0][0].focus_col = 0
+        size = (20,)
+
+        write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
+
+        assert write_box.contents[0][0][0].edit_text == expected_text
+
     @pytest.mark.parametrize(['suggestions', 'state', 'expected_state',
                               'expected_typeahead', 'is_truncated'], [
       (['zero', 'one', 'two'], 1, 1, '*one*', False),
