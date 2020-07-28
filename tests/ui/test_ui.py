@@ -76,6 +76,15 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == (line_box(), right_tab())
 
+    def test_set_footer_text_same_test(
+        self, view: View, mocker: MockerFixture, text: List[str] = ["heya"]
+    ) -> None:
+        view._w.footer.text = text
+
+        view.set_footer_text(text)
+
+        view._w.footer.set_text.assert_not_called()
+
     def test_set_footer_text_default(self, view: View, mocker: MockerFixture) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
 

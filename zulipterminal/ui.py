@@ -103,6 +103,11 @@ class View(urwid.WidgetWrap):
         style: str = "footer",
         duration: Optional[float] = None,
     ) -> None:
+        # Avoid updating repeatedly (then pausing and showing default text)
+        # This is simple, though doesn't avoid starting one thread for each call
+        if text_list == self._w.footer.text:
+            return
+
         if text_list is None:
             text = self.get_random_help()
         else:
