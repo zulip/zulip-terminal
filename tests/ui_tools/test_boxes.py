@@ -298,6 +298,44 @@ class TestWriteBox:
 
         assert write_box.contents[0][0][0].edit_text == expected_text
 
+    @pytest.mark.parametrize(['text', 'matching_topics'], [
+        ('', ['Topic 1', 'This is a topic', 'Hello there!']),
+        ('Th', ['This is a topic']),
+    ], ids=[
+        'no_search_text',
+        'single_word_search_text',
+    ])
+    def test__topic_box_autocomplete(self, mocker, write_box, text, topics,
+                                     matching_topics, state=1):
+        write_box.model.topics_in_stream.return_value = topics
+        _process_typeaheads = mocker.patch(BOXES
+                                           + '.WriteBox._process_typeaheads')
+
+        write_box._topic_box_autocomplete(text, state)
+
+        _process_typeaheads.assert_called_once_with(matching_topics, state,
+                                                    matching_topics)
+
+    @pytest.mark.parametrize('text, expected_text', [
+        ('Th', 'This is a topic'),
+        pytest.param('This i', 'This is a topic', marks=pytest.mark.xfail(
+                             reason="Lacking urwid-readline support")),
+    ])
+    def test__topic_box_autocomplete_with_spaces(self, mocker, write_box,
+                                                 text, expected_text,
+                                                 topics):
+        write_box.stream_box_view(1000)
+        write_box.model.topics_in_stream.return_value = topics
+        write_box.contents[0][0][1].set_edit_text(text)
+        write_box.contents[0][0][1].set_edit_pos(len(text))
+        write_box.focus_position = 0
+        write_box.contents[0][0].focus_col = 1
+        size = (20,)
+
+        write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
+
+        assert write_box.contents[0][0][1].edit_text == expected_text
+
     @pytest.mark.parametrize(['suggestions', 'state', 'expected_state',
                               'expected_typeahead', 'is_truncated'], [
       (['zero', 'one', 'two'], 1, 1, '*one*', False),

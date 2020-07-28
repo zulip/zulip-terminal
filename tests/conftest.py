@@ -332,6 +332,11 @@ def zulip_version(request):
 
 
 @pytest.fixture
+def topics():
+    return ['Topic 1', 'This is a topic', 'Hello there!']
+
+
+@pytest.fixture
 def initial_data(logged_on_user, users_fixture, streams_fixture):
     """
     Response from /register API request.

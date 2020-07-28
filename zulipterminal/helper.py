@@ -487,6 +487,11 @@ def match_emoji(emoji: str, text: str) -> bool:
     return emoji.lower().startswith(text.lower())
 
 
+def match_topics(topic_names: List[str], search_text: str) -> List[str]:
+    return [name for name in topic_names
+            if name.lower().startswith(search_text.lower())]
+
+
 DataT = TypeVar('DataT')
 
 
