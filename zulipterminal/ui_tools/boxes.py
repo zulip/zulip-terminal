@@ -88,6 +88,11 @@ class WriteBox(urwid.Pile):
             caption="Stream:  ",
             edit_text=caption
         )
+        self.stream_write_box.enable_autocomplete(
+            func=self._stream_box_autocomplete,
+            key=keys_for_command('AUTOCOMPLETE').pop(),
+            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+        )
         self.title_write_box = ReadlineEdit(caption="Topic:  ",
                                             edit_text=title)
 
@@ -108,6 +113,23 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
+
+    def _stream_box_autocomplete(self, text: str, state: Optional[int]
+                                 ) -> Optional[str]:
+        streams_list = self.view.pinned_streams + self.view.unpinned_streams
+        streams = [stream[0]
+                   for stream in streams_list]
+
+        # match_streams takes stream names and typeaheads,
+        # but we don't have typeaheads here.
+        # FIXME: Refactor match_stream
+        stream_data = list(zip(streams, streams))
+        matched_streams = match_stream(stream_data, text,
+                                       self.view.pinned_streams)
+
+        # matched_streams[0] and matched_streams[1] contains the same data.
+        return self._process_typeaheads(matched_streams[0], state,
+                                        matched_streams[1])
 
     def generic_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
