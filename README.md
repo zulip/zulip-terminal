@@ -172,31 +172,31 @@ source ~/.zshenv
 | Show stream information & modify settings             | <kbd>i</kbd>                                  |
 
 ### Composing a message
-| Command                                               | Key Combination                               |
-| ----------------------------------------------------- | --------------------------------------------- |
-| Cycle through recipient and content boxes             | <kbd>tab</kbd>                                |
-| Send a message                                        | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
-| Autocomplete @mentions, #stream_names and :emoji:     | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
-| Cycle through autocomplete suggestions in reverse     | <kbd>Ctrl</kbd> + <kbd>r</kbd>                |
-| Jump to the beginning of line                         | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
-| Jump backward one character                           | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
-| Jump backward one word                                | <kbd>Meta</kbd> + <kbd>B</kbd>                |
-| Delete one character                                  | <kbd>Ctrl</kbd> + <kbd>D</kbd>                |
-| Delete one word                                       | <kbd>Meta</kbd> + <kbd>D</kbd>                |
-| Jump to the end of line                               | <kbd>Ctrl</kbd> + <kbd>E</kbd>                |
-| Jump forward one character                            | <kbd>Ctrl</kbd> + <kbd>F</kbd> / <kbd>→</kbd> |
-| Jump forward one word                                 | <kbd>Meta</kbd> + <kbd>F</kbd>                |
-| Delete previous character                             | <kbd>Ctrl</kbd> + <kbd>H</kbd>                |
-| Transpose characters                                  | <kbd>Ctrl</kbd> + <kbd>T</kbd>                |
-| Kill (cut) forwards to the end of the line            | <kbd>Ctrl</kbd> + <kbd>K</kbd>                |
-| Kill (cut) backwards to the start of the line         | <kbd>Ctrl</kbd> + <kbd>U</kbd>                |
-| Kill (cut) forwards to the end of the current word    | <kbd>Meta</kbd> + <kbd>D</kbd>                |
-| Kill (cut) backwards to the start of the current word | <kbd>Ctrl</kbd> + <kbd>W</kbd>                |
-| Paste last kill                                       | <kbd>Ctrl</kbd> + <kbd>Y</kbd>                |
-| Undo last action                                      | <kbd>Ctrl</kbd> + <kbd>_</kbd>                |
-| Jump to previous line                                 | <kbd>Ctrl</kbd> + <kbd>P</kbd> / <kbd>↑</kbd> |
-| Jump to next line                                     | <kbd>Ctrl</kbd> + <kbd>N</kbd> / <kbd>↓</kbd> |
-| Clear compose box                                     | <kbd>Ctrl</kbd> + <kbd>L</kbd>                |
+| Command                                                   | Key Combination                               |
+| -----------------------------------------------------     | --------------------------------------------- |
+| Cycle through recipient and content boxes                 | <kbd>tab</kbd>                                |
+| Send a message                                            | <kbd>Alt Enter</kbd> / <kbd>Ctrl d</kbd>      |
+| Autocomplete @mentions, #stream_names, :emoji: and topics | <kbd>Ctrl</kbd> + <kbd>f</kbd>                |
+| Cycle through autocomplete suggestions in reverse         | <kbd>Ctrl</kbd> + <kbd>r</kbd>                |
+| Jump to the beginning of line                             | <kbd>Ctrl</kbd> + <kbd>A</kbd>                |
+| Jump backward one character                               | <kbd>Ctrl</kbd> + <kbd>B</kbd> / <kbd>←</kbd> |
+| Jump backward one word                                    | <kbd>Meta</kbd> + <kbd>B</kbd>                |
+| Delete one character                                      | <kbd>Ctrl</kbd> + <kbd>D</kbd>                |
+| Delete one word                                           | <kbd>Meta</kbd> + <kbd>D</kbd>                |
+| Jump to the end of line                                   | <kbd>Ctrl</kbd> + <kbd>E</kbd>                |
+| Jump forward one character                                | <kbd>Ctrl</kbd> + <kbd>F</kbd> / <kbd>→</kbd> |
+| Jump forward one word                                     | <kbd>Meta</kbd> + <kbd>F</kbd>                |
+| Delete previous character                                 | <kbd>Ctrl</kbd> + <kbd>H</kbd>                |
+| Transpose characters                                      | <kbd>Ctrl</kbd> + <kbd>T</kbd>                |
+| Kill (cut) forwards to the end of the line                | <kbd>Ctrl</kbd> + <kbd>K</kbd>                |
+| Kill (cut) backwards to the start of the line             | <kbd>Ctrl</kbd> + <kbd>U</kbd>                |
+| Kill (cut) forwards to the end of the current word        | <kbd>Meta</kbd> + <kbd>D</kbd>                |
+| Kill (cut) backwards to the start of the current word     | <kbd>Ctrl</kbd> + <kbd>W</kbd>                |
+| Paste last kill                                           | <kbd>Ctrl</kbd> + <kbd>Y</kbd>                |
+| Undo last action                                          | <kbd>Ctrl</kbd> + <kbd>_</kbd>                |
+| Jump to previous line                                     | <kbd>Ctrl</kbd> + <kbd>P</kbd> / <kbd>↑</kbd> |
+| Jump to next line                                         | <kbd>Ctrl</kbd> + <kbd>N</kbd> / <kbd>↓</kbd> |
+| Clear compose box                                         | <kbd>Ctrl</kbd> + <kbd>L</kbd>                |
 
 
 **Note:** You can use `arrows`, `home`, `end`, `Page up` and `Page down` keys to move around in Zulip-Terminal.

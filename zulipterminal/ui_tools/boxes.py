@@ -20,7 +20,8 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, match_emoji, match_group, match_stream, match_user,
+    Message, format_string, match_emoji, match_group, match_stream,
+    match_topics, match_user,
 )
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
@@ -95,6 +96,11 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box = ReadlineEdit(caption="Topic:  ",
                                             edit_text=title)
+        self.title_write_box.enable_autocomplete(
+            func=self._topic_box_autocomplete,
+            key=keys_for_command('AUTOCOMPLETE').pop(),
+            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+        )
 
         header_write_box = urwid.Columns([
             urwid.LineBox(
@@ -113,6 +119,16 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
+
+    def _topic_box_autocomplete(self, text: str, state: Optional[int]
+                                ) -> Optional[str]:
+        topic_names = self.model.topics_in_stream(self.stream_id)
+
+        topic_typeaheads = match_topics(topic_names, text)
+
+        # Typeaheads and suggestions are the same.
+        return self._process_typeaheads(topic_typeaheads, state,
+                                        topic_typeaheads)
 
     def _stream_box_autocomplete(self, text: str, state: Optional[int]
                                  ) -> Optional[str]:
