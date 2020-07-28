@@ -111,7 +111,6 @@ class WriteBox(urwid.Pile):
 
     def generic_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
-        num_suggestions = 10
         autocomplete_map = OrderedDict([
                 ('@_', self.autocomplete_mentions),
                 ('@', self.autocomplete_mentions),
@@ -139,10 +138,10 @@ class WriteBox(urwid.Pile):
 
         # NOTE: The following block only executes if any of the autocomplete
         # prefixes exist.
-        self.is_in_typeahead_mode = True
         typeaheads, suggestions = (
             autocomplete_func(text[prefix_index:], prefix)
         )
+        num_suggestions = 10
         fewer_typeaheads = typeaheads[:num_suggestions]
         reduced_suggestions = suggestions[:num_suggestions]
         is_truncated = len(fewer_typeaheads) != len(typeaheads)
@@ -150,13 +149,14 @@ class WriteBox(urwid.Pile):
         if (state is not None and state < len(fewer_typeaheads)
                 and state >= -len(fewer_typeaheads)):
             typeahead = fewer_typeaheads[state]  # type: Optional[str]
-            if typeahead:
-                typeahead = text[:prefix_index] + typeahead
         else:
             typeahead = None
             state = None
+        self.is_in_typeahead_mode = True
         self.view.set_typeahead_footer(reduced_suggestions,
                                        state, is_truncated)
+        if typeahead:
+            typeahead = text[:prefix_index] + typeahead
         return typeahead
 
     def autocomplete_mentions(self, text: str, prefix_string: str
