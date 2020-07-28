@@ -141,6 +141,15 @@ class WriteBox(urwid.Pile):
         typeaheads, suggestions = (
             autocomplete_func(text[prefix_index:], prefix)
         )
+
+        typeahead = self._process_typeaheads(typeaheads, state,
+                                             suggestions)
+        if typeahead:
+            typeahead = text[:prefix_index] + typeahead
+        return typeahead
+
+    def _process_typeaheads(self, typeaheads: List[str], state: Optional[int],
+                            suggestions: List[str]) -> Optional[str]:
         num_suggestions = 10
         fewer_typeaheads = typeaheads[:num_suggestions]
         reduced_suggestions = suggestions[:num_suggestions]
@@ -155,8 +164,6 @@ class WriteBox(urwid.Pile):
         self.is_in_typeahead_mode = True
         self.view.set_typeahead_footer(reduced_suggestions,
                                        state, is_truncated)
-        if typeahead:
-            typeahead = text[:prefix_index] + typeahead
         return typeahead
 
     def autocomplete_mentions(self, text: str, prefix_string: str

@@ -251,6 +251,36 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize(['suggestions', 'state', 'expected_state',
+                              'expected_typeahead', 'is_truncated'], [
+      (['zero', 'one', 'two'], 1, 1, '*one*', False),
+      (['zero', 'one', 'two'] * 4, 1, 1, '*one*', True),
+      (['zero', 'one', 'two'], None, None, None, False),
+      (['zero', 'one', 'two'], 5, None, None, False),
+      (['zero', 'one', 'two'], -5, None, None, False),
+     ], ids=[
+        'fewer_than_10_typeaheads',
+        'more_than_10_typeaheads',
+        'invalid_state-None',
+        'invalid_state-greater_than_possible_index',
+        'invalid_state-less_than_possible_index',
+    ])
+    def test__process_typeaheads(self, write_box, suggestions, state,
+                                 expected_state, expected_typeahead,
+                                 is_truncated, mocker):
+        write_box.view.set_typeahead_footer = mocker.patch(
+                                'zulipterminal.ui.View.set_typeahead_footer')
+        # Use an example formatting to differentiate between
+        # typeaheads and suggestions.
+        typeaheads = ['*{}*'.format(s) for s in suggestions]
+
+        typeahead = write_box._process_typeaheads(typeaheads, state,
+                                                  suggestions)
+
+        assert typeahead == expected_typeahead
+        write_box.view.set_typeahead_footer.assert_called_once_with(
+                            suggestions[:10], expected_state, is_truncated)
+
     @pytest.mark.parametrize('topic_entered_by_user, topic_sent_to_server', [
         ('', '(no topic)'),
         ('hello', 'hello'),
