@@ -16,6 +16,8 @@ from typing import (
 import lxml.html
 from mypy_extensions import TypedDict
 
+from zulipterminal.config.keys import is_command_key
+
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
@@ -631,3 +633,30 @@ def notify(title: str, html_text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
+
+
+class KeypressCounter:
+    def __init__(self) -> None:
+        self.key = dict(name='', count=0)  # type: Dict[str, Any]
+
+    def pressed_too_often(self, key_to_track: str) -> bool:
+        """
+        Used to track 'holding-down' of keys which causes rapid
+        triggering of actions leading to rate limiting.
+        Only tracks the current key being pressed.
+        """
+        # Handled separately in View.reached_end_of_message_view
+        if(is_command_key('GO_DOWN', key_to_track)
+                or is_command_key('GO_UP', key_to_track)):
+            self.key = dict(name='', count=0)
+            return False
+
+        if key_to_track == self.key['name']:
+            self.key['count'] += 1
+        else:
+            self.key['name'] = key_to_track
+            self.key['count'] = 0
+
+        if self.key['count'] > 15:
+            return True
+        return False

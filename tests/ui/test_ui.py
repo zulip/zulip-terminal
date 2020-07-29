@@ -15,7 +15,7 @@ class TestView:
 
     @pytest.fixture
     def view(self, mocker):
-        main_window = mocker.patch('zulipterminal.ui.View.main_window')
+        self.main_window = mocker.patch('zulipterminal.ui.View.main_window')
         return View(self.controller)
 
     def test_init(self, mocker):
@@ -216,6 +216,9 @@ class TestView:
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
+        view.middle_column = mocker.Mock()
+        view.middle_column.body.old_loading = False
+        view.middle_column.body.new_loading = False
         size = (20,)
 
         super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
@@ -310,3 +313,55 @@ class TestView:
 
         (view.controller.current_editor().keypress
          .assert_called_once_with((28,), key))
+
+    @pytest.mark.parametrize('key, old_loading, new_loading', [
+            (keys_for_command('GO_UP').pop(), True, False),
+            (keys_for_command('GO_DOWN').pop(), False, True),
+            (keys_for_command('GO_UP').pop(), False, False),
+            (keys_for_command('GO_DOWN').pop(), False, False),
+    ], ids=[
+            'loading_old_messages',
+            'loading_new_messages',
+            'scroll_up',
+            'scroll_down',
+    ])
+    def test_keypress_message_loading(self, view, mocker, key, old_loading,
+                                      new_loading):
+        mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress",
+                     return_value='super_key')
+        view.middle_column = mocker.Mock()
+        view.middle_column.body.new_loading = new_loading
+        view.middle_column.body.old_loading = old_loading
+        view.controller.is_in_editor_mode = lambda: False
+        size = (20,)
+
+        return_value = view.keypress(size, key)
+
+        # if loading message
+        if old_loading or new_loading:
+            assert return_value == key
+        else:
+            assert return_value == 'super_key'
+
+    @pytest.mark.parametrize('pressed_too_often', [True, False])
+    def test_keypress_multiple_presses(self, mocker, view, pressed_too_often,
+                                       key='ctrl s'):
+        mocker.patch('zulipterminal.ui.View.set_footer_text')
+        mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress",
+                     return_value='super_key')
+        view.keypress_counter = mocker.Mock()
+        view.middle_column = mocker.Mock()
+        view.controller.is_in_editor_mode = lambda: False
+        view.keypress_counter.pressed_too_often.return_value = (
+                pressed_too_often
+        )
+        size = (20,)
+
+        return_value = view.keypress(size, key)
+
+        if pressed_too_often:
+            assert return_value == key
+            view.set_footer_text.assert_called_once_with(
+                            '\'{}\' pressed too often.'.format(key), 3)
+        else:
+            assert return_value == 'super_key'
