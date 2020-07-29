@@ -1,5 +1,5 @@
 urwid==2.1.0
-zulip==0.6.3
+zulip>=0.7.0
 pytest==5.3.5
 pytest-cov==2.5.1
 pytest-mock==1.7.1
