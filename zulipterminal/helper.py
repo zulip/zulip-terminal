@@ -1,6 +1,5 @@
 import os
 import platform
-import shlex
 import subprocess
 import time
 from collections import OrderedDict, defaultdict
@@ -591,39 +590,21 @@ def canonicalize_color(color: str) -> str:
 def notify(title: str, html_text: str) -> str:
     document = lxml.html.document_fromstring(html_text)
     text = document.text_content()
-    quoted_text = shlex.quote(text)
-
-    quoted_title = shlex.quote(title)
 
     command_list = None
-    if WSL:  # NOTE Tested and should work!
-        # Escaping of quotes in powershell is done using ` instead of \
-        escaped_text = text.replace('\'', '`\'').replace('\"', '`\"')
-        quoted_text = '\"' + escaped_text + '\"'
+    if MACOS:
         command_list = [
-            'powershell.exe',
-            "New-BurntToastNotification -Text {}, {}"
-            .format(quoted_title, quoted_text)
+            "osascript",
+            "-e", "on run(argv)",
+            "-e", "return display notification item 1 of argv with title "
+            'item 2 of argv sound name "ZT_NOTIFICATION_SOUND"',
+            "-e", "end",
+            "--", text, title
         ]
-        expected_length = 2
-    elif MACOS:  # NOTE Tested and should work!
-        command_list = shlex.split(
-            "osascript -e "
-            "'display notification \"\'{}\'\" with title \"\'{}\'\" "
-            " sound name \"ZT_NOTIFICATION_SOUND\"'"
-            .format(quoted_text, quoted_title)
-        )
-        expected_length = 3
     elif LINUX:
-        command_list = shlex.split(
-            'notify-send {} {}'.format(quoted_title, quoted_text)
-        )
-        expected_length = 3
+        command_list = ["notify-send", "--", title, text]
 
     if command_list is not None:
-        # NOTE: We assert this in tests, but this signals unexpected breakage
-        assert len(command_list) == expected_length
-
         try:
             subprocess.run(command_list, stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)

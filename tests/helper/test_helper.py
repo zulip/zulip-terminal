@@ -236,7 +236,8 @@ def test_invalid_color_format(mocker, color):
 
 
 @pytest.mark.parametrize('OS, is_notification_sent', [
-    ([True, False, False], True),  # OS: [WSL, MACOS, LINUX]
+    pytest.param([True, False, False], True,  # OS: [WSL, MACOS, LINUX]
+                 marks=pytest.mark.xfail(reason="WSL notify disabled")),
     ([False, True, False], True),
     ([False, False, True], True),
     ([False, False, False], False),  # Unsupported OS
@@ -259,9 +260,10 @@ def test_notify(mocker, OS, is_notification_sent):
     "X", 'Spaced title', "'", '"'
 ], ids=["X", "spaced_title", "single", "double"])
 @pytest.mark.parametrize('OS, cmd_length', [
-    ('LINUX', 3),
-    ('MACOS', 3),
-    ('WSL', 2)
+    ('LINUX', 4),
+    ('MACOS', 10),
+    pytest.param('WSL', 2,
+                 marks=pytest.mark.xfail(reason="WSL notify disabled"))
 ])
 def test_notify_quotes(monkeypatch, mocker,
                        OS, cmd_length, title, text):
