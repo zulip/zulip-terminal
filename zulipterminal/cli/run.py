@@ -344,10 +344,18 @@ def main(options: Optional[List[str]]=None) -> None:
     finally:
         if args.profile:
             prof.disable()
-            prof.dump_stats("/tmp/profile.data")
-            print("Profile data saved to /tmp/profile.data")
-            print("You can visualize it using e.g."
-                  "`snakeviz /tmp/profile.data`")
+            import tempfile
+            with tempfile.NamedTemporaryFile(prefix="zulip_term_profile.",
+                                             suffix=".dat",
+                                             delete=False) as profile_file:
+                profile_path = profile_file.name
+            # Dump stats only after temporary file is closed (for Win NT+ case)
+            prof.dump_stats(profile_path)
+            print(
+                "Profile data saved to {0}.\n"
+                "You can visualize it using e.g. `snakeviz {0}`"
+                .format(profile_path)
+            )
 
         sys.exit(1)
 
