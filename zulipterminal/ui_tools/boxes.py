@@ -626,11 +626,19 @@ class MessageBox(urwid.Pile):
                     for data in [link, text]
                 ]   # Split on '://' is for cases where text == link.
                 if link_without_scheme == text_without_scheme:
-                    segment = text.split('/')[-1]
-                    # Replace text with its last segment if the segment has
-                    # something significant than simply the 'domain name'.
-                    if segment != text_without_scheme:
-                        text = segment
+                    last_segment = text.split('/')[-1]
+                    if '.' in last_segment:
+                        new_text = last_segment  # Filename.
+                    elif text.startswith(self.model.server_url):
+                        # Relative URL.
+                        new_text = text.split(self.model.server_url)[-1]
+                    else:
+                        new_text = (
+                            parsed_link.netloc if parsed_link.netloc
+                            else text.split('/')[0]
+                        )  # Domain name.
+                    if new_text != text_without_scheme:
+                        text = new_text
                     else:
                         # Do not show as a footlink as the text is sufficient
                         # to represent the link.

@@ -1630,15 +1630,15 @@ class TestMessageBox:
          [('msg_link', 'bar.png'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="http://foo">bar</a>',
          [('msg_link', 'bar'), ' ', ('msg_link_index', '[1]')]),
-        ('<a href="/user_uploads/blah"',
-         [('msg_link', 'blah'), ' ', ('msg_link_index', '[1]')]),
+        ('<a href="/user_uploads/blah.gif"',
+         [('msg_link', 'blah.gif'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="/api"',
-         [('msg_link', 'api'), ' ', ('msg_link_index', '[1]')]),
+         [('msg_link', '/api'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="some/relative_url">{}/some/relative_url</a>'
          .format(SERVER_URL),
-         [('msg_link', 'relative_url'), ' ', ('msg_link_index', '[1]')]),
+         [('msg_link', '/some/relative_url'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="http://foo.com/bar">foo.com/bar</a>',
-         [('msg_link', 'bar'), ' ', ('msg_link_index', '[1]')]),
+         [('msg_link', 'foo.com'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="http://foo.com">foo.com</a>'
          '<a href="http://foo.com">http://foo.com</a>'
          '<a href="https://foo.com">https://foo.com</a>'
