@@ -1,5 +1,11 @@
 # Frequently Asked Questions (FAQ)
 
+## Colors appear mismatched, don't change with theme, or look strange
+
+Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
+
+**NOTE** If you have color issues, also note that urwid version 2.1.1 should have fixed these for various terminal emulators (including rxvt, urxvt, mosh and Terminal.app), so please ensure you are running the latest Zulip Terminal release and at least this urwid version before reporting issues.
+
 ## It doesn't seem to run or display properly in my terminal (emulator)?
 
 We have reports of success on the following terminal emulators:
