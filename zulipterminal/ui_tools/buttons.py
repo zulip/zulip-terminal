@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 import urwid
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.helper import StreamData
+from zulipterminal.helper import StreamData, edit_mode_captions
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -277,3 +277,18 @@ class MessageLinkButton(urwid.Button):
         """
         Classifies and handles link.
         """
+        pass
+
+
+class EditModeButton(urwid.Button):
+    def __init__(self, controller: Any, width: int) -> None:
+        self.controller = controller
+        self.width = width
+        super().__init__(label="",
+                         on_press=controller.show_topic_edit_mode)
+        self.set_selected_mode('change_one')
+
+    def set_selected_mode(self, mode: str) -> None:
+        self.mode = mode
+        self._w = urwid.AttrMap(urwid.SelectableIcon(
+            edit_mode_captions[self.mode], self.width), None, 'selected')

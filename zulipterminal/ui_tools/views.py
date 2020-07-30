@@ -11,7 +11,9 @@ from zulipterminal.config.keys import (
 from zulipterminal.config.symbols import (
     CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
 )
-from zulipterminal.helper import Message, asynch, match_stream, match_user
+from zulipterminal.helper import (
+    Message, asynch, edit_mode_captions, match_stream, match_user,
+)
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
@@ -1131,3 +1133,11 @@ class MsgInfoView(PopUpView):
             popup_width = max(popup_width, message_link_width)
 
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+
+class EditModeView(PopUpView):
+    def __init__(self, controller: Any, button: Any):
+        self.selected_mode = button.mode
+        widgets = [urwid.Text(edit_mode_captions[self.selected_mode])]
+        super().__init__(controller, widgets, 'ENTER', 50,
+                         'Topic edit propogation mode')

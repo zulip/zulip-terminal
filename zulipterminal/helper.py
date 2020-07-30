@@ -98,6 +98,9 @@ UnreadCounts = TypedDict('UnreadCounts', {
     'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
     'streams': Dict[int, int],  # stream_id
 })
+edit_mode_captions = {
+        'change_one': 'Edit only this message topic',
+}
 
 
 def asynch(func: Callable[..., None]) -> Callable[..., None]:

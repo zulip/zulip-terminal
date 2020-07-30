@@ -394,6 +394,7 @@ class TestWriteBox:
         write_box.to_write_box = None
         size = (20,)
         write_box.msg_edit_id = msg_edit_id
+        write_box.edit_mode_button = mocker.Mock(mode=propagate_mode)
 
         write_box.keypress(size, key)
 

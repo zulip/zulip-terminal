@@ -23,6 +23,7 @@ from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream,
     match_topics, match_user,
 )
+from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
 
@@ -123,11 +124,11 @@ class WriteBox(urwid.Pile):
     def stream_box_edit_view(self, stream_id: int, caption: str='',
                              title: str='') -> None:
         self.stream_box_view(stream_id, caption, title)
-        self.edit_mode = urwid.Text('Edit current topic only.')
+        self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(
             urwid.LineBox(
-                self.edit_mode, tlcorner='┬', tline='─', lline='│',
+                self.edit_mode_button, tlcorner='┬', tline='─', lline='│',
                 trcorner='─', blcorner='┴', rline='',
                 bline='─', brcorner='─'
             ))
@@ -286,7 +287,7 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_id:
                     args = dict(message_id=self.msg_edit_id,
                                 topic=topic,
-                                propagate_mode="change_one")
+                                propagate_mode=self.edit_mode_button.mode)
                     if self.msg_body_edit_enabled:
                         args['content'] = self.msg_write_box.edit_text
 
