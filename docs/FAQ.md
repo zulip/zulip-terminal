@@ -6,6 +6,8 @@ We have reports of success on the following terminal emulators:
 
 * xterm
 * uxterm (see xterm)
+* rxvt
+* urxvt
 * gnome-terminal (https://help.gnome.org/users/gnome-terminal/stable/)
 * kitty (https://sw.kovidgoyal.net/kitty/)
 * Konsole (KDE) (https://konsole.kde.org/)
@@ -13,14 +15,11 @@ We have reports of success on the following terminal emulators:
 * Terminator (https://github.com/gnome-terminator/terminator)
 * iterm2 (https://iterm2.com/) **Mac only**
 * Microsoft/Windows Terminal (https://github.com/Microsoft/Terminal) **Windows only**
+* mosh (https://mosh.org/)
 
 Issues have been reported with the following:
 
-* urxvt - **Issues with color rendering**
-* mosh (https://mosh.org/) - **Issues with color rendering**
 * terminal app **Mac only** - **Issues with some default keypresses, including for sending messages** [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
-
-Color issues may be related to the support listed on the urwid page here: http://urwid.org/manual/displayattributes.html#foreground-and-background-settings
 
 Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
 
