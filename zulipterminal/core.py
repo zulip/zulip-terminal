@@ -16,8 +16,8 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    AboutView, HelpView, MsgInfoView, NoticeView, PopUpConfirmationView,
-    StreamInfoView,
+    AboutView, EditModeView, HelpView, MsgInfoView, NoticeView,
+    PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -136,6 +136,9 @@ class Controller:
     def show_help(self) -> None:
         help_view = HelpView(self, "Help Menu (up/down scrolls)")
         self.show_pop_up(help_view)
+
+    def show_topic_edit_mode(self, button: Any) -> None:
+        self.show_pop_up(EditModeView(self, button))
 
     def show_msg_info(self, msg: Message,
                       message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
