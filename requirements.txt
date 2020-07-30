@@ -13,6 +13,6 @@ mypy==0.770
 isort==4.3.21
 urwid_readline>=0.11
 beautifulsoup4>=4.9.0
-lxml==4.2.3
+lxml>=4.5.2
 
 zipp==1.0.0  # To support Python 3.5

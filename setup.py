@@ -109,7 +109,7 @@ setup(
         'zulip>=0.7.0',
         'urwid_readline>=0.11',
         'beautifulsoup4>=4.9.0',
-        'lxml==4.2.3',
+        'lxml>=4.5.2',
         'mypy_extensions>=0.4',
     ],
 )
