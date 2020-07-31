@@ -2506,46 +2506,6 @@ class TestStreamButton:
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
 
-    @pytest.mark.parametrize(['stream_id', 'muted_streams', 'called_value',
-                              'is_action_muting', 'updated_all_msgs'], [
-        (86, set(), 50, False, 400),
-        (86, {86, 205}, None, True, 300),
-        (205, {14, 99}, 0, False, 350),
-    ], ids=[
-        'unmuting stream 86 - 204 unreads',
-        'muting stream 86',
-        'unmuting stream 205 - 0 unreads',
-    ])
-    def test_mark_stream_muted(self, mocker, stream_button, is_action_muting,
-                               stream_id, muted_streams, called_value,
-                               updated_all_msgs) -> None:
-        stream_button.stream_id = stream_id
-        stream_button.count = 50  # Override value in fixture
-        update_count = mocker.patch(TOPBUTTON + ".update_count")
-        stream_button.controller.model.unread_counts = {
-            'streams': {
-                86: 50,
-                14: 34,
-            },
-            'all_msg': 350,
-        }
-        stream_button.controller.model.is_muted_stream = (
-            mocker.Mock(return_value=(stream_id in muted_streams))
-        )
-        stream_button.view.home_button.update_count = mocker.Mock()
-
-        if is_action_muting:
-            stream_button.mark_muted()
-        else:
-            stream_button.mark_unmuted()
-
-        if called_value is not None:
-            stream_button.update_count.assert_called_once_with(called_value)
-        if called_value != 0:
-            (stream_button.view.home_button.update_count
-             .assert_called_once_with(updated_all_msgs))
-        assert stream_button.model.unread_counts['all_msg'] == updated_all_msgs
-
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_TOPIC'))
     def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button, key):
         size = (200, 20)

@@ -168,20 +168,13 @@ class StreamButton(TopButton):
 
     def mark_muted(self) -> None:
         self.update_widget('M')
-        self.model.unread_counts['all_msg'] -= self.count
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
-    def mark_unmuted(self) -> None:
-        if self.stream_id in self.model.unread_counts['streams']:
-            unmuted_count = self.model.unread_counts['streams'][self.stream_id]
-            self.update_count(unmuted_count)
-            self.model.unread_counts['all_msg'] += self.count
-            self.view.home_button.update_count(
-                self.model.unread_counts['all_msg'])
-        else:
-            # All messages in this stream are read.
-            self.update_count(0)
+    def mark_unmuted(self, unread_count: int) -> None:
+        self.update_count(unread_count)
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('TOGGLE_TOPIC', key):
