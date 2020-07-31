@@ -1197,14 +1197,14 @@ class TestLeftColumnView:
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
         topic_list = ['TOPIC1', 'TOPIC2', 'TOPIC3']
         unread_count_list = [34, 100, 0]
-        self.view.model.index = {
-            'topics': {
-                205: topic_list,
-            }
-        }
+        self.view.model.topics_in_stream = (
+            mocker.Mock(return_value=topic_list)
+        )
         left_col_view = LeftColumnView(width, self.view)
+
         left_col_view.topics_view(stream_button)
 
+        self.view.model.topics_in_stream.assert_called_once_with(205)
         topic_button.assert_has_calls([
             mocker.call(stream_id=205,
                         topic=topic,

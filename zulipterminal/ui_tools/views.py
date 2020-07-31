@@ -767,6 +767,7 @@ class LeftColumnView(urwid.Pile):
 
     def topics_view(self, stream_button: Any) -> Any:
         stream_id = stream_button.stream_id
+        topics = self.model.topics_in_stream(stream_id)
         topics_btn_list = [
             TopicButton(
                 stream_id=stream_id,
@@ -775,7 +776,9 @@ class LeftColumnView(urwid.Pile):
                 width=self.width,
                 count=self.model.unread_counts['unread_topics'].
                 get((stream_id, topic), 0)
-            ) for topic in self.model.index['topics'][stream_id]]
+            )
+            for topic in topics
+        ]
 
         self.view.topic_w = TopicsView(topics_btn_list, self.view,
                                        stream_button)

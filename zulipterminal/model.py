@@ -124,8 +124,6 @@ class Model:
 
         self.unread_counts = classify_unread_counts(self)
 
-        self.fetch_all_topics(workers=5)
-
         self.new_user_input = True
         self._start_presence_updates()
 
@@ -392,36 +390,21 @@ class Model:
                 return response['msg']
         return ""
 
+    def topics_in_stream(self, stream_id: int) -> List[str]:
+        """
+        Returns a list of topic names for stream_id from the index.
+        """
+        if not self.index['topics'][stream_id]:
+            self._fetch_topics_in_streams([stream_id])
+
+        return self.index['topics'][stream_id]
+
     @staticmethod
     def exception_safe_result(future: 'Future[str]') -> str:
         try:
             return future.result()
         except zulip.ZulipError as e:
             return str(e)
-
-    def fetch_all_topics(self, workers: int) -> None:
-        """
-        Distribute stream ids across threads in order to fetch
-        topics concurrently.
-        """
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            list_of_streams = list(self.stream_dict.keys())
-            thread_objects = {
-                i: executor.submit(self._fetch_topics_in_streams,
-                                   list_of_streams[i::workers])
-                for i in range(workers)
-            }  # type: Dict[int, Future[str]]
-            wait(thread_objects.values())
-
-        results = {
-            str(name): self.exception_safe_result(thread_object)
-            for name, thread_object in thread_objects.items()
-        }  # type: Dict[str, str]
-        if any(results.values()):
-            failures = ['fetch_topics[{}]'.format(name)
-                        for name, result in results.items()
-                        if result]
-            raise ServerConnectionFailure(", ".join(failures))
 
     def is_muted_stream(self, stream_id: int) -> bool:
         return stream_id in self.muted_streams
@@ -853,7 +836,7 @@ class Model:
         Update topic order in index based on incoming message.
         Helper method called by _handle_message_event
         """
-        topic_index = self.index['topics'][stream_id]
+        topic_index = self.topics_in_stream(stream_id)
         for topic_iterator, topic in enumerate(topic_index):
             if topic == topic_name:
                 topic_index.insert(0, topic_index.pop(topic_iterator))
