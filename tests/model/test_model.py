@@ -119,7 +119,6 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_messages',
                      return_value='')
         mocker.patch('zulipterminal.model.Model.get_all_users')
-        mocker.patch('zulipterminal.model.Model.fetch_all_topics')
         self.client.register.return_value = initial_data
 
         model = Model(self.controller)
@@ -327,6 +326,21 @@ class TestModel:
         if response['result'] != 'success':
             (self.display_error_if_present.
              assert_called_once_with(response, self.controller))
+
+    @pytest.mark.parametrize('topics_index, fetched', [
+        (['test'], False),
+        ([], True),
+    ])
+    def test_topics_in_stream(self, mocker, model, topics_index, fetched,
+                              stream_id=1):
+        model.index['topics'][stream_id] = topics_index
+        model._fetch_topics_in_streams = mocker.Mock()
+
+        return_value = model.topics_in_stream(stream_id)
+
+        assert model._fetch_topics_in_streams.called == fetched
+        assert model.index['topics'][stream_id] == return_value
+        assert model.index['topics'][stream_id] is return_value
 
     @pytest.mark.parametrize("user_key", ['user_id', 'id'])
     @pytest.mark.parametrize("msg_id, existing_reactions, expected_method", [
@@ -812,7 +826,7 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert self.controller.view.message_view.log == log
 
-    @pytest.mark.parametrize(['topic_name', 'topic_order_intial',
+    @pytest.mark.parametrize(['topic_name', 'topic_order_initial',
                               'topic_order_final'], [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
                    ['TOPIC3', 'TOPIC2', 'TOPIC1']),
@@ -823,14 +837,20 @@ class TestModel:
         ('TOPIC1', [], ['TOPIC1'])
     ], ids=['reorder_topic3', 'topic1_discussion_continues', 'new_topic4',
             'first_topic_1'])
-    def test__update_topic_index(self, topic_name, topic_order_intial,
-                                 topic_order_final, model):
+    def test__update_topic_index(self, topic_name, topic_order_initial,
+                                 topic_order_final, model, mocker):
         model.index = {
             'topics': {
-                86: topic_order_intial,
+                86: topic_order_initial,
             }
         }
+        model.topics_in_stream = (
+            mocker.Mock(return_value=topic_order_initial)
+        )
+
         model._update_topic_index(86, topic_name)
+
+        model.topics_in_stream.assert_called_once_with(86)
         assert model.index['topics'][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
