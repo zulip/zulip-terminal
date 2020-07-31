@@ -1510,6 +1510,8 @@ class TestModel:
                                                      stream_button, event,
                                                      final_muted_streams):
         model.muted_streams = {15, 19}
+        model.unread_counts = {'all_msg': 300,
+                               'streams': {event['stream_id']: 99}}
         model.controller.view.stream_id_to_button = {
             event['stream_id']: stream_button  # stream id is known
         }
@@ -1522,9 +1524,11 @@ class TestModel:
 
         assert model.muted_streams == final_muted_streams
         if event['value']:
-            mark_unmuted.assert_called_once_with()
+            mark_unmuted.assert_called_once_with(99)
+            assert model.unread_counts['all_msg'] == 399
         else:
             mark_muted.assert_called_once_with()
+            assert model.unread_counts['all_msg'] == 201
         model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(['event', 'expected_pinned_streams',

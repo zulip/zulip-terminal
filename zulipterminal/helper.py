@@ -422,7 +422,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         unread_topics=dict(),
         unread_pms=dict(),
         unread_huddles=dict(),
-        streams=dict(),
+        streams=defaultdict(int),
     )
 
     mentions_count = len(unread_msg_counts['mentions'])

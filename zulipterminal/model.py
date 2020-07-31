@@ -682,11 +682,14 @@ class Model:
                         self.controller.view.stream_id_to_button[stream_id]
                     )
 
+                    unread_count = self.unread_counts['streams'][stream_id]
                     if event['value']:  # Unmuting streams
                         self.muted_streams.remove(stream_id)
-                        stream_button.mark_unmuted()
+                        self.unread_counts['all_msg'] += unread_count
+                        stream_button.mark_unmuted(unread_count)
                     else:  # Muting streams
                         self.muted_streams.add(stream_id)
+                        self.unread_counts['all_msg'] -= unread_count
                         stream_button.mark_muted()
                     self.controller.update_screen()
                 elif event.get('property', None) == 'pin_to_top':
