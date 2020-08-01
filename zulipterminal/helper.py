@@ -187,8 +187,7 @@ def _set_count_in_view(controller: Any, new_count: int,
                                                    + new_count)
                         break
             # FIXME: Update unread_counts['unread_topics']?
-            if ([message['display_recipient'], msg_topic] in
-                    controller.model.muted_topics):
+            if controller.model.is_muted_topic(stream_id, msg_topic):
                 add_to_counts = False
             if is_open_topic_view and stream_id == toggled_stream_id:
                 # If topic_view is open for incoming messages's stream,
@@ -441,8 +440,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         # unsubscribed streams may be in unreads, but not in stream_dict
         if stream_id not in model.stream_dict:
             continue
-        if [model.stream_dict[stream_id]['name'],
-                stream['topic']] in model.muted_topics:
+        if model.is_muted_topic(stream_id, stream['topic']):
             continue
         stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count

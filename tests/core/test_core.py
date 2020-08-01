@@ -85,7 +85,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = []
-        controller.model.muted_topics = []
+        controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
         controller.narrow_to_stream(stream_button)
 
@@ -113,7 +113,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = []
-        controller.model.muted_topics = []
+        controller.model.is_muted_topic = mocker.Mock(return_value=False)
         controller.narrow_to_topic(msg_box)
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
@@ -158,7 +158,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = []
-        controller.model.muted_topics = []
+        controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
         controller.show_all_messages('')
 
@@ -194,7 +194,8 @@ class TestController:
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
         controller.model.user_id = 1
-        controller.model.muted_topics = []  # FIXME Expand upon this
+        # FIXME: Expand upon is_muted_topic().
+        controller.model.is_muted_topic = mocker.Mock(return_value=False)
         controller.model.user_email = "some@email"
         controller.model.stream_dict = {
             205: {
@@ -218,7 +219,8 @@ class TestController:
         controller.model.narrow = []
         controller.model.index = index_all_mentions
         controller.model.muted_streams = set()  # FIXME Expand upon this
-        controller.model.muted_topics = []  # FIXME Expand upon this
+        # FIXME: Expand upon is_muted_topic().
+        controller.model.is_muted_topic = mocker.Mock(return_value=False)
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
         controller.model.stream_dict = {

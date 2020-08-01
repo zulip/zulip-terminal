@@ -242,8 +242,7 @@ class TopicButton(TopButton):
                          width=width,
                          count=count)
 
-        topic_pair = [self.stream_name, self.topic_name]
-        if topic_pair in controller.model.muted_topics:
+        if controller.model.is_muted_topic(self.stream_id, self.topic_name):
             self.mark_muted()
 
     def mark_muted(self) -> None:

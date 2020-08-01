@@ -3,8 +3,8 @@ import pytest
 from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
-@pytest.mark.parametrize(['msg', 'narrow', 'muted_streams', 'muted_topics',
-                          'muted'], [
+@pytest.mark.parametrize(['msg', 'narrow', 'muted_streams',
+                          'is_muted_topic_return_value', 'muted'], [
     (   # PM TEST
         {
             'type': 'private',
@@ -12,10 +12,7 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
         },
         [],
         [1, 2],
-        [
-            ['foo', 'boo foo'],
-            ['boo', 'foo boo'],
-        ],
+        False,
         False
     ),
     (
@@ -25,10 +22,7 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
         },
         [['stream', 'foo'], ['topic', 'boo']],
         [1, 2],
-        [
-            ['foo', 'boo foo'],
-            ['boo', 'foo boo'],
-        ],
+        False,
         False
     ),
     (
@@ -39,52 +33,41 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
         },
         [['stream', 'foo']],
         [1, 2],
-        [
-            ['foo', 'boo foo'],
-            ['boo', 'foo boo'],
-        ],
+        False,
         True
     ),
     (
         {
             'type': 'stream',
             'stream_id': 2,
-            'display_recipient': 'boo',
-            'subject': 'foo boo',
             # ...
         },
         [],
         [1, 2],
-        [
-            ['foo', 'boo foo'],
-            ['boo', 'foo boo'],
-        ],
+        True,
         True
     ),
     (
         {
             'type': 'stream',
             'stream_id': 3,
-            'display_recipient': 'zoo',
             'subject': 'foo koo',
             # ...
         },
         [],
         [1, 2],
-        [
-            ['foo', 'boo foo'],
-            ['boo', 'foo boo'],
-        ],
+        False,
         False
     ),
 ])
-def test_is_muted(mocker, msg, narrow, muted_streams, muted_topics, muted):
+def test_is_muted(mocker, msg, narrow, muted_streams,
+                  is_muted_topic_return_value, muted):
     model = mocker.Mock()
     model.is_muted_stream = (
         mocker.Mock(return_value=(msg.get('stream_id', '') in muted_streams))
     )
     model.narrow = narrow
-    model.muted_topics = muted_topics
+    model.is_muted_topic.return_value = is_muted_topic_return_value
     return_value = is_muted(msg, model)
     assert return_value is muted
 

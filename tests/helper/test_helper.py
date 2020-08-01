@@ -212,7 +212,10 @@ def test_classify_unread_counts(mocker, initial_data, stream_dict,
     model = mocker.Mock()
     model.stream_dict = stream_dict
     model.initial_data = initial_data
-    model.muted_topics = muted_topics
+    model.is_muted_topic = mocker.Mock(side_effect=(
+        lambda stream_id, topic:
+        [model.stream_dict[stream_id]['name'], topic] in muted_topics
+    ))
     model.muted_streams = muted_streams
     assert classify_unread_counts(model) == dict(classified_unread_counts,
                                                  **vary_in_unreads)

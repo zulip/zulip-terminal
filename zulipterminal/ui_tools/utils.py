@@ -60,7 +60,7 @@ def is_muted(msg: Message, model: Any) -> bool:
         return False
     elif model.is_muted_stream(msg['stream_id']):
         return True
-    elif [msg['display_recipient'], msg['subject']] in model.muted_topics:
+    elif model.is_muted_topic(msg['stream_id'], msg['subject']):
         return True
     return False
 
