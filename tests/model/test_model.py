@@ -1602,7 +1602,7 @@ class TestModel:
     ])
     def test_is_muted_topic(self, topic, is_muted, stream_dict, model):
         model.stream_dict = stream_dict
-        model.muted_topics = [
+        model._muted_topics = [
             ['Stream 2', 'muted topic'],
             ['Stream 1', 'muted stream muted topic'],
         ]
