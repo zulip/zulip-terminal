@@ -1578,17 +1578,18 @@ class TestModel:
         assert model.is_muted_stream(stream_id) == is_muted
 
     @pytest.mark.parametrize('topic, is_muted', [
-        ((1, 'stream muted & unmuted topic'), True),
+        ((1, 'stream muted & unmuted topic'), False),
         ((2, 'muted topic'), True),
         ((1, 'muted stream muted topic'), True),
         ((2, 'unmuted topic'), False),
     ])
     def test_is_muted_topic(self, topic, is_muted, stream_dict, model):
         model.stream_dict = stream_dict
-        model.muted_streams = [1]
         model.muted_topics = [
             ['Stream 2', 'muted topic'],
             ['Stream 1', 'muted stream muted topic'],
         ]
-        assert model.is_muted_topic(stream_id=topic[0],
-                                    topic=topic[1]) == is_muted
+
+        return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
+
+        assert return_value == is_muted
