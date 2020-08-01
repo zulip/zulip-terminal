@@ -411,8 +411,9 @@ class Model:
         return stream_id in self.muted_streams
 
     def is_muted_topic(self, stream_id: int, topic: str) -> bool:
-        if stream_id in self.muted_streams:
-            return True
+        """
+        Returns True if topic is muted via muted_topics.
+        """
         stream_name = self.stream_dict[stream_id]['name']
         topic_to_search = [stream_name, topic]  # type: List[str]
         return topic_to_search in self.muted_topics
