@@ -315,11 +315,11 @@ class TestModel:
         ({'result': 'failure', 'msg': 'Some Error', 'topics': []},
          {23: []}, 'Some Error')
     ])
-    def test_get_topics_in_streams(self, mocker, response, model, return_value,
-                                   expected_index) -> None:
+    def test__fetch_topics_in_streams(self, mocker, response, model,
+                                      return_value, expected_index) -> None:
         self.client.get_stream_topics = mocker.Mock(return_value=response)
 
-        result = model.get_topics_in_stream([23])
+        result = model._fetch_topics_in_streams([23])
 
         self.client.get_stream_topics.assert_called_once_with(23)
         assert model.index['topics'] == expected_index

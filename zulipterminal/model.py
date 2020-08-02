@@ -377,7 +377,7 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['msg']
 
-    def get_topics_in_stream(self, stream_list: Iterable[int]) -> str:
+    def _fetch_topics_in_streams(self, stream_list: Iterable[int]) -> str:
         """
         Fetch all topics with specified stream_id's and
         index their names (Version 1)
@@ -408,7 +408,7 @@ class Model:
         with ThreadPoolExecutor(max_workers=workers) as executor:
             list_of_streams = list(self.stream_dict.keys())
             thread_objects = {
-                i: executor.submit(self.get_topics_in_stream,
+                i: executor.submit(self._fetch_topics_in_streams,
                                    list_of_streams[i::workers])
                 for i in range(workers)
             }  # type: Dict[int, Future[str]]
