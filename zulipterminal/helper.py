@@ -616,5 +616,5 @@ def notify(title: str, html_text: str) -> str:
 
 def display_error_if_present(response: Dict[str, Any], controller: Any
                              ) -> None:
-    if response['result'] == 'error':
+    if response['result'] == 'error' and hasattr(controller, 'view'):
         controller.view.set_footer_text(response['msg'], 3)
