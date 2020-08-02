@@ -18,8 +18,21 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
 
-LOG_FILENAME = 'zulip-terminal-tracebacks.log'
-logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
+TRACEBACK_LOG_FILENAME = 'zulip-terminal-tracebacks.log'
+API_CALL_LOG_FILENAME = 'zulip-terminal-API-requests.log'
+
+# Create a logger for this application
+zt_logger = logging.getLogger(__name__)
+zt_logger.setLevel(logging.DEBUG)
+zt_logfile_handler = logging.FileHandler(
+    TRACEBACK_LOG_FILENAME,
+    delay=True,  # Don't open the file until there's a logging event
+)
+zt_logger.addHandler(zt_logfile_handler)
+
+# Route requests details (API calls) to separate file
+requests_logger = logging.getLogger("urllib3")
+requests_logger.setLevel(logging.DEBUG)
 
 
 def in_color(color: str, text: str) -> str:
@@ -211,6 +224,14 @@ def main(options: Optional[List[str]]=None) -> None:
 
     set_encoding('utf-8')
 
+    if args.debug:
+        print("NOTE: Debug mode enabled; API calls being logged to {}."
+              .format(in_color("blue", API_CALL_LOG_FILENAME)))
+        requests_logfile_handler = logging.FileHandler(API_CALL_LOG_FILENAME)
+        requests_logger.addHandler(requests_logfile_handler)
+    else:
+        requests_logger.addHandler(logging.NullHandler())
+
     if args.profile:
         import cProfile
         prof = cProfile.Profile()
@@ -305,20 +326,20 @@ def main(options: Optional[List[str]]=None) -> None:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))
         # Acts as separator between logs
-        logging.info("\n\n" + str(e) + "\n\n")
-        logging.exception(e)
+        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.exception(e)
         sys.exit(1)
     except (display_common.AttrSpecError, display_common.ScreenError) as e:
         # NOTE: Strictly this is not necessarily just a theme error
         # FIXME: Add test for this - once loading takes place after UI setup
         print(in_color('red', "\nPossible theme error: {}.".format(e)))
         # Acts as separator between logs
-        logging.info("\n\n" + str(e) + "\n\n")
-        logging.exception(e)
+        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.exception(e)
         sys.exit(1)
     except Exception as e:
-        logging.info("\n\n" + str(e) + "\n\n")
-        logging.exception(e)
+        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.exception(e)
         if args.debug:
             sys.stdout.flush()
             traceback.print_exc(file=sys.stderr)
@@ -333,8 +354,8 @@ def main(options: Optional[List[str]]=None) -> None:
                   file=sys.stderr)
 
         print(in_color("red", "\nZulip Terminal has crashed!"
-                       "\nPlease refer to " + LOG_FILENAME + " for full log of"
-                       " the error."), file=sys.stderr)
+                       "\nPlease refer to " + TRACEBACK_LOG_FILENAME
+                       + " for full log of the error."), file=sys.stderr)
         print("You can ask for help at:", file=sys.stderr)
         print("https://chat.zulip.org/#narrow/stream/206-zulip-terminal",
               file=sys.stderr)

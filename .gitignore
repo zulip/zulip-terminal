@@ -11,6 +11,7 @@ dist/*
 build/*
 zulip_term.egg-info
 zulip-terminal-tracebacks.log
+zulip-terminal-API-requests.log
 
 .vscode/*
 .DS_Store
