@@ -89,15 +89,6 @@ commands can be found for other linux systems as well.
 sudo apt-get install libnotify-bin
 ```
 
-#### WSL
-
-Run powershell as **admin** and run these commands to install dependencies for showing notifications:
-
-```
-set-executionpolicy remotesigned
-Install-Module -Name BurntToast
-```
-
 #### OSX
 
 No additional package is required to enable notifications in OS X. However to have a notification sound, set the following variable (based on your type of shell). The sound value (here Ping) can be any one of the `.aiff` files found at `/System/Library/Sounds` or `~/Library/Sounds`.
