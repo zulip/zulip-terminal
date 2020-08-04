@@ -340,7 +340,7 @@ class TestModel:
 
         assert model._fetch_topics_in_streams.called == fetched
         assert model.index['topics'][stream_id] == return_value
-        assert model.index['topics'][stream_id] is return_value
+        assert model.index['topics'][stream_id] is not return_value
 
     @pytest.mark.parametrize("user_key", ['user_id', 'id'])
     @pytest.mark.parametrize("msg_id, existing_reactions, expected_method", [

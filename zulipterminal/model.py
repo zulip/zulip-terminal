@@ -398,7 +398,7 @@ class Model:
         if not self.index['topics'][stream_id]:
             self._fetch_topics_in_streams([stream_id])
 
-        return self.index['topics'][stream_id]
+        return list(self.index['topics'][stream_id])
 
     @staticmethod
     def exception_safe_result(future: 'Future[str]') -> str:
@@ -785,6 +785,11 @@ class Model:
         message['flags'] = event.get('flags', [])
         # We need to update the topic order in index, unconditionally.
         if message['type'] == 'stream':
+            # NOTE: The subsequent helper only updates the topic index based
+            # on the message event not the UI (the UI is updated in a
+            # consecutive block independently). However, it is critical to keep
+            # the topics index synchronized as it used whenever the topics list
+            # view is reconstructed later.
             self._update_topic_index(message['stream_id'],
                                      message['subject'])
             # If the topic view is toggled for incoming message's
@@ -876,14 +881,18 @@ class Model:
         Update topic order in index based on incoming message.
         Helper method called by _handle_message_event
         """
-        topic_index = self.topics_in_stream(stream_id)
-        for topic_iterator, topic in enumerate(topic_index):
+        topic_list = self.topics_in_stream(stream_id)
+        for topic_iterator, topic in enumerate(topic_list):
             if topic == topic_name:
-                topic_index.insert(0, topic_index.pop(topic_iterator))
-                return
-        # No previous topics with same topic names are found
-        # hence, it must be a new topic.
-        topic_index.insert(0, topic_name)
+                topic_list.insert(0, topic_list.pop(topic_iterator))
+                break
+        else:
+            # No previous topics with same topic names are found
+            # hence, it must be a new topic.
+            topic_list.insert(0, topic_name)
+
+        # Update the index.
+        self.index['topics'][stream_id] = topic_list
 
     def _handle_update_message_event(self, event: Event) -> None:
         """
