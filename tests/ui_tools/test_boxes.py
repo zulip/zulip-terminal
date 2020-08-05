@@ -251,6 +251,47 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize('topic_entered_by_user, topic_sent_to_server', [
+        ('', '(no topic)'),
+        ('hello', 'hello'),
+        ('  ', '(no topic)'),
+    ], ids=[
+        'empty_topic',
+        'non_empty_topic',
+        'topic_with_whitespace',
+    ])
+    @pytest.mark.parametrize('msg_edit_id', [10, None], ids=[
+        'update_message',
+        'send_message',
+    ])
+    @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
+    def test_keypress_SEND_MESSAGE_no_topic(self, mocker, write_box,
+                                            msg_edit_id, topic_entered_by_user,
+                                            topic_sent_to_server, key):
+        write_box.stream_write_box = mocker.Mock()
+        write_box.msg_write_box = mocker.Mock(edit_text='')
+        write_box.title_write_box = mocker.Mock(
+            edit_text=topic_entered_by_user
+        )
+        write_box.to_write_box = None
+        size = (20,)
+        write_box.msg_edit_id = msg_edit_id
+
+        write_box.keypress(size, key)
+
+        if msg_edit_id:
+            write_box.model.update_stream_message.assert_called_once_with(
+                        topic=topic_sent_to_server,
+                        content=write_box.msg_write_box.edit_text,
+                        msg_id=msg_edit_id,
+                    )
+        else:
+            write_box.model.send_stream_message.assert_called_once_with(
+                        stream=write_box.stream_write_box.edit_text,
+                        topic=topic_sent_to_server,
+                        content=write_box.msg_write_box.edit_text
+                    )
+
     @pytest.mark.parametrize(['key', 'current_typeahead_mode',
                               'expected_typeahead_mode',
                               'expect_footer_was_reset'], [

@@ -1,3 +1,4 @@
+import re
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime
 from sys import platform
@@ -215,16 +216,21 @@ class WriteBox(urwid.Pile):
 
         if is_command_key('SEND_MESSAGE', key):
             if not self.to_write_box:
+                if re.fullmatch(r'\s*', self.title_write_box.edit_text):
+                    topic = '(no topic)'
+                else:
+                    topic = self.title_write_box.edit_text
+
                 if self.msg_edit_id:
                     success = self.model.update_stream_message(
-                        topic=self.title_write_box.edit_text,
+                        topic=topic,
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_id,
                     )
                 else:
                     success = self.model.send_stream_message(
                         stream=self.stream_write_box.edit_text,
-                        topic=self.title_write_box.edit_text,
+                        topic=topic,
                         content=self.msg_write_box.edit_text
                     )
             else:
