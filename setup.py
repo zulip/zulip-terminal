@@ -111,5 +111,7 @@ setup(
         'beautifulsoup4>=4.9.0',
         'lxml>=4.5.2',
         'typing_extensions>=3.7',
+        'python-dateutil>=2.8.1',
+        'tzlocal>=2.1',
     ],
 )
