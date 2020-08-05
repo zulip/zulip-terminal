@@ -214,24 +214,24 @@ class WriteBox(urwid.Pile):
                 self.view.set_footer_text()
 
         if is_command_key('SEND_MESSAGE', key):
-            if self.msg_edit_id:
-                if not self.to_write_box:
+            if not self.to_write_box:
+                if self.msg_edit_id:
                     success = self.model.update_stream_message(
                         topic=self.title_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_id,
                     )
                 else:
-                    success = self.model.update_private_message(
-                        content=self.msg_write_box.edit_text,
-                        msg_id=self.msg_edit_id,
-                    )
-            else:
-                if not self.to_write_box:
                     success = self.model.send_stream_message(
                         stream=self.stream_write_box.edit_text,
                         topic=self.title_write_box.edit_text,
                         content=self.msg_write_box.edit_text
+                    )
+            else:
+                if self.msg_edit_id:
+                    success = self.model.update_private_message(
+                        content=self.msg_write_box.edit_text,
+                        msg_id=self.msg_edit_id,
                     )
                 else:
                     success = self.model.send_private_message(
