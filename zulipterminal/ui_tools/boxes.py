@@ -319,7 +319,14 @@ class WriteBox(urwid.Pile):
                     if header.focus_col == 0:
                         stream_name = header[0].edit_text
                         if not self.model.is_valid_stream(stream_name):
-                            self.view.set_footer_text("Invalid stream name", 3)
+                            invalid_stream_error = (
+                                'Invalid stream name.'
+                                ' Use {} or {} to autocomplete.'
+                                .format(keys_for_command('AUTOCOMPLETE').pop(),
+                                        keys_for_command('AUTOCOMPLETE'
+                                                         '_REVERSE').pop())
+                            )
+                            self.view.set_footer_text(invalid_stream_error, 3)
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                                                     stream_name=stream_name)
