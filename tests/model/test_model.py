@@ -72,6 +72,35 @@ class TestModel:
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
 
+    @pytest.mark.parametrize(['server_response', 'locally_processed_data',
+                              'zulip_feature_level'], [
+            (
+                [['Stream 1', 'muted stream muted topic']],
+                {('Stream 1', 'muted stream muted topic'): None},
+                None,
+            ),
+            (
+                [['Stream 2', 'muted topic', 1530129122]],
+                {('Stream 2', 'muted topic'): 1530129122},
+                1,
+            ),
+        ],
+        ids=[
+            'zulip_feature_level:None',
+            'zulip_feature_level:1',
+        ]
+    )
+    def test_init_muted_topics(self, mocker, initial_data, server_response,
+                               locally_processed_data, zulip_feature_level):
+        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
+        initial_data['zulip_feature_level'] = zulip_feature_level
+        initial_data['muted_topics'] = server_response
+        self.client.register = mocker.Mock(return_value=initial_data)
+
+        model = Model(self.controller)
+
+        assert model._muted_topics == locally_processed_data
+
     def test_init_InvalidAPIKey_response(self, mocker, initial_data):
         # Both network calls indicate the same response
         mocker.patch('zulipterminal.model.Model.get_messages',
@@ -1583,12 +1612,10 @@ class TestModel:
         ((1, 'muted stream muted topic'), True),
         ((2, 'unmuted topic'), False),
     ])
-    def test_is_muted_topic(self, topic, is_muted, stream_dict, model):
+    def test_is_muted_topic(self, topic, is_muted, stream_dict, model,
+                            processed_muted_topics):
         model.stream_dict = stream_dict
-        model._muted_topics = [
-            ['Stream 2', 'muted topic'],
-            ['Stream 1', 'muted stream muted topic'],
-        ]
+        model._muted_topics = processed_muted_topics
 
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
 
