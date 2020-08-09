@@ -752,6 +752,28 @@ def stream_dict(streams_fixture):
     return {stream['stream_id']: stream for stream in streams_fixture}
 
 
+@pytest.fixture(params=[
+        {
+            ('Stream 1', 'muted stream muted topic'): None,
+            ('Stream 2', 'muted topic'): None,
+        },
+        {
+            ('Stream 1', 'muted stream muted topic'): 1530129122,
+            ('Stream 2', 'muted topic'): 1530129122,
+        },
+    ],
+    ids=[
+        'zulip_feature_level:None',
+        'zulip_feature_level:1',
+    ]
+)
+def processed_muted_topics(request):
+    """
+    Locally processed muted topics data (see _muted_topics in Model.__init__).
+    """
+    return request.param
+
+
 @pytest.fixture
 def classified_unread_counts():
     """

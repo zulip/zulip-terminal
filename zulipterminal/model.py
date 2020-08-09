@@ -116,8 +116,16 @@ class Model:
         (self.stream_dict, self.muted_streams,
          self.pinned_streams, self.unpinned_streams) = stream_data
 
-        self._muted_topics = (
-            self.initial_data['muted_topics'])  # type: List[List[str]]
+        # NOTE: The expected response has been upgraded from
+        # [stream_name, topic] to [stream_name, topic, date_muted] in
+        # feature level 1, server version 3.0.
+        muted_topics = self.initial_data['muted_topics']
+        assert set(map(len, muted_topics)) in (set(), {2}, {3})
+        self._muted_topics = {
+            (stream_name, topic): (None if self.server_feature_level is None
+                                   else date_muted[0])
+            for stream_name, topic, *date_muted in muted_topics
+        }  # type: Dict[Tuple[str, str], Optional[int]]
 
         groups = self.initial_data['realm_user_groups']
         self.user_group_by_id = {}  # type: Dict[int, Dict[str, Any]]
@@ -415,8 +423,8 @@ class Model:
         Returns True if topic is muted via muted_topics.
         """
         stream_name = self.stream_dict[stream_id]['name']
-        topic_to_search = [stream_name, topic]  # type: List[str]
-        return topic_to_search in self._muted_topics
+        topic_to_search = (stream_name, topic)
+        return topic_to_search in self._muted_topics.keys()
 
     def _update_initial_data(self) -> None:
         # Thread Processes to reduce start time.
