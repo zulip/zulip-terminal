@@ -110,6 +110,6 @@ setup(
         'urwid_readline>=0.11',
         'beautifulsoup4>=4.9.0',
         'lxml>=4.5.2',
-        'mypy_extensions>=0.4',
+        'typing_extensions>=3.7',
     ],
 )
