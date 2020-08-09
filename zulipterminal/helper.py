@@ -14,7 +14,7 @@ from typing import (
 from urllib.parse import unquote
 
 import lxml.html
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 
 MACOS = platform.system() == "Darwin"
@@ -28,6 +28,13 @@ StreamData = TypedDict('StreamData', {
     'invite_only': bool,
     'description': str,
 })
+
+EmojiData = TypedDict('EmojiData', {
+    'code': str,
+    'type': Literal['realm_emoji', 'unicode_emoji'],
+})
+
+NamedEmojiData = Dict[str, EmojiData]
 
 Message = TypedDict('Message', {
     'id': int,
