@@ -9,7 +9,7 @@ from typing import (
 from urllib.parse import urlparse
 
 import zulip
-from mypy_extensions import TypedDict
+from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (

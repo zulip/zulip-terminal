@@ -13,7 +13,7 @@ from typing import (
 )
 
 import lxml.html
-from mypy_extensions import TypedDict
+from typing_extensions import TypedDict
 
 
 MACOS = platform.system() == "Darwin"

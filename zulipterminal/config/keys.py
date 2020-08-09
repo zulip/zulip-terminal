@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import List, Set
 
-from mypy_extensions import TypedDict
+from typing_extensions import TypedDict
 
 
 KeyBinding = TypedDict('KeyBinding', {
