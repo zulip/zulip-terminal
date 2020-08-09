@@ -698,10 +698,12 @@ class Model:
                     sort_streams(self.pinned_streams)
                     self.controller.view.left_panel.update_structure()
                     self.controller.update_screen()
-        elif event['op'] == 'peer_add':
+        elif (event['op'] == 'peer_add'
+              and event['stream_id'] in self.stream_dict):
             subscribers = self.stream_dict[event['stream_id']]['subscribers']
             subscribers.append(event['user_id'])
-        elif event['op'] == 'peer_remove':
+        elif (event['op'] == 'peer_remove'
+              and event['stream_id'] in self.stream_dict):
             subscribers = self.stream_dict[event['stream_id']]['subscribers']
             subscribers.remove(event['user_id'])
 
