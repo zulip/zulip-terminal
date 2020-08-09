@@ -1566,6 +1566,23 @@ class TestModel:
         new_subscribers = model.stream_dict[event['stream_id']]['subscribers']
         assert new_subscribers == expected_subscribers
 
+    @pytest.mark.parametrize('event', [
+        ({'type': 'subscription', 'op': 'peer_add',
+          'stream_id': 462, 'user_id': 12}),
+        ({'type': 'subscription', 'op': 'peer_remove',
+          'stream_id': 462, 'user_id': 12}),
+    ], ids=[
+        'peer_subscribed_to_stream_that_user_is_unsubscribed_to',
+        'peer_unsubscribed_from_stream_that_user_is_unsubscribed_to',
+    ])
+    def test__handle_subscription_event_subscribers_to_unsubscribed_streams(
+                            self, model, mocker, stream_dict, event):
+        model.stream_dict = deepcopy(stream_dict)
+
+        model._handle_subscription_event(event)
+
+        assert model.stream_dict == stream_dict
+
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [
         ({1},   1, True),
         ({1},   2, False),
