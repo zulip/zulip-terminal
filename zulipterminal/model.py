@@ -5,7 +5,7 @@ from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
-    Tuple, Union,
+    Tuple, Union, cast,
 )
 from urllib.parse import urlparse
 
@@ -15,8 +15,9 @@ from typing_extensions import Literal, TypedDict
 from zulipterminal import unicode_emojis
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
-    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
-    display_error_if_present, index_messages, initial_index, notify, set_count,
+    Message, NamedEmojiData, StreamData, asynch, canonicalize_color,
+    classify_unread_counts, display_error_if_present, index_messages,
+    initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -141,8 +142,10 @@ class Model:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
+        typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
         custom_emoji_data = self.fetch_custom_emojis()
-        all_emoji_data = {**unicode_emoji_data, **custom_emoji_data}.items()
+        all_emoji_data = {**typed_unicode_emoji_data,
+                          **custom_emoji_data}.items()
         self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
                                                     key=lambda e: e[0]))
 
@@ -371,12 +374,12 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
-    def fetch_custom_emojis(self) -> Dict[str, Dict[str, str]]:
+    def fetch_custom_emojis(self) -> NamedEmojiData:
         response = self.client.get_realm_emoji()
         custom_emojis = {emoji['name']: {'code': emoji_code,
                                          'type': 'realm_emoji'}
                          for emoji_code, emoji in response['emoji'].items()
-                         if not emoji['deactivated']}
+                         if not emoji['deactivated']}  # type: NamedEmojiData
         display_error_if_present(response, self.controller)
         return custom_emojis
 
