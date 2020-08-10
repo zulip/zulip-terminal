@@ -3,12 +3,13 @@ from collections import OrderedDict, defaultdict
 from typing import Any, Dict
 
 import pytest
+import pytz
 from bs4 import BeautifulSoup
 from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
-    QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR,
+    QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -1723,6 +1724,15 @@ class TestMessageBox:
             '│ ', (None,  '       '), ' │\n',
             '└─', '───────', '─┘',
          ]),
+        ('<time datetime="2020-08-07T04:30:00Z"> Fri, Aug 7 2020, 10:00AM IST'
+         '</time>', [(
+            'msg_time',
+            ' {} Fri, Aug 7 2020, 10:00 (IST) '.format(TIME_MENTION_MARKER)
+         )]),
+        ('<time datetime="2020-08-11T16:32:58Z"> 1597163578</time>', [(
+            'msg_time',
+            ' {} Tue, Aug 11 2020, 22:02 (IST) '.format(TIME_MENTION_MARKER)
+         )]),
         ('<span class="katex-display">some-math</span>', ['some-math']),
         ('<span class="katex">some-math</span>', ['some-math']),
         ('<ul><li>text</li></ul>', ['', '  \N{BULLET} ', '', 'text']),
@@ -1758,13 +1768,16 @@ class TestMessageBox:
         'table_with_center_and_right_alignments',
         'table_with_single_column',
         'table_with_the_bare_minimum',
+        'time_human_readable_input', 'time_UNIX_timestamp_input',
         'math', 'math2',
         'ul', 'ul_with_ul_li_newlines',
         'ol', 'ol_with_ol_li_newlines', 'ol_starting_at_5',
         'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])
-    def test_soup2markup(self, content, markup):
+    def test_soup2markup(self, content, markup, mocker):
+        mocker.patch(BOXES + '.get_localzone',
+                     return_value=pytz.timezone('Asia/Kolkata'))
         message = dict(display_recipient=['x'], stream_id=5, subject='hi',
                        sender_email='foo@zulip.com', id=4, sender_id=4209,
                        type='stream',  # NOTE Output should not vary with PM

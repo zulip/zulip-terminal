@@ -6,16 +6,18 @@ from time import ctime, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
+import dateutil.parser
 import urwid
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
 from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
-    STREAM_TOPIC_SEPARATOR,
+    STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream, match_user,
@@ -740,6 +742,24 @@ class MessageBox(urwid.Pile):
                 markup.extend(self.soup2markup(element, **state))
             elif element.name == 'table':
                 markup.extend(render_table(element))
+            elif element.name == 'time':
+                # New in feature level 16, server version 3.0.
+                # Render time in current user's local time zone.
+                timestamp = element.get('datetime')
+
+                # This should not happen. Regardless, we are interested in
+                # debugging and reporting it to zulip/zulip if it does.
+                assert timestamp is not None, 'Could not find datetime attr'
+
+                utc_time = dateutil.parser.parse(timestamp)
+                local_time = utc_time.astimezone(get_localzone())
+                # TODO: Address 12-hour format support with application-wide
+                # support for different formats.
+                time_string = local_time.strftime('%a, %b %-d %Y, %-H:%M (%Z)')
+                markup.append((
+                    'msg_time',
+                    ' {} {} '.format(TIME_MENTION_MARKER, time_string)
+                ))
             else:
                 markup.extend(self.soup2markup(element))
         return markup
