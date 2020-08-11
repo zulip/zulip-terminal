@@ -280,8 +280,6 @@ def main(options: Optional[List[str]]=None) -> None:
                 "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0])
             )
 
-        print("Loading with:")
-        print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use[0] in incomplete:
             print(in_color('yellow',
@@ -289,10 +287,6 @@ def main(options: Optional[List[str]]=None) -> None:
                            "results may vary!\n"
                            "      (you could try: {})".
                            format(", ".join(complete))))
-        print("   autohide setting '{}' specified {}."
-              .format(*zterm['autohide']))
-        print("   footlinks setting '{}' specified {}."
-              .format(*zterm['footlinks']))
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
@@ -318,9 +312,14 @@ def main(options: Optional[List[str]]=None) -> None:
         else:
             theme_data = THEMES[theme_to_use[0]]
 
+        settings = {'theme': theme_to_use,
+                    'autohide': zterm['autohide'],
+                    'footlinks': zterm['footlinks']}
+
         Controller(zuliprc_path,
                    theme_data,
                    int(args.color_depth),
+                   settings,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',

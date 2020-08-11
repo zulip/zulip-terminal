@@ -5,7 +5,7 @@ import time
 from collections import OrderedDict
 from functools import partial
 from platform import platform
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import urwid
 import zulip
@@ -16,8 +16,8 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    AboutView, HelpView, MsgInfoView, NoticeView, PopUpConfirmationView,
-    StreamInfoView,
+    AboutView, HelpView, LoadingView, MsgInfoView, NoticeView,
+    PopUpConfirmationView, StreamInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -29,7 +29,7 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
-                 color_depth: int,
+                 color_depth: int, settings: Dict[str, Any],
                  autohide: bool, notify: bool, footlinks: bool) -> None:
         self.theme = theme
         self.color_depth = color_depth
@@ -39,13 +39,17 @@ class Controller:
 
         self._editor = None  # type: Optional[Any]
 
-        self.show_loading()
+        self.capture_stdout()
         self.client = zulip.Client(config_file=config_file,
                                    client='ZulipTerminal/{} {}'.
                                           format(ZT_VERSION, platform()))
+        self.loading_view = LoadingView(self, settings)
+        self.init_model_view()
+
+    @asynch
+    def init_model_view(self) -> None:
         self.model = Model(self)
         self.view = View(self)
-        # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
     def is_in_editor_mode(self) -> bool:
@@ -61,24 +65,6 @@ class Controller:
     def current_editor(self) -> Any:
         assert self._editor is not None, "Current editor is None"
         return self._editor
-
-    @asynch
-    def show_loading(self) -> None:
-
-        def spinning_cursor() -> Any:
-            while True:
-                yield from '|/-\\'
-
-        spinner = spinning_cursor()
-        sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
-        while not hasattr(self, 'view'):
-            next_spinner = "Loading " + next(spinner)
-            sys.stdout.write(next_spinner)
-            sys.stdout.flush()
-            time.sleep(0.1)
-            sys.stdout.write('\b' * len(next_spinner))
-
-        self.capture_stdout()
 
     def capture_stdout(self, path: str='debug.log') -> None:
         if hasattr(self, '_stdout'):
@@ -287,17 +273,38 @@ class Controller:
                         mentioned=True)
 
     def deregister_client(self) -> None:
-        queue_id = self.model.queue_id
-        self.client.deregister(queue_id, 1.0)
+        # Deregister before model has loaded.
+        if hasattr(self, 'model'):
+            queue_id = self.model.queue_id
+            self.client.deregister(queue_id, 1.0)
 
     def exit_handler(self, signum: int, frame: Any) -> None:
         self.deregister_client()
         sys.exit(0)
 
+    @asynch
+    def set_main_view(self) -> None:
+        def spinning_cursor() -> Any:
+            while True:
+                for cursor in '|/-\\':
+                    yield cursor
+
+        self.capture_stdout()
+        spinner = spinning_cursor()
+
+        while not hasattr(self, 'view'):
+            self.loading_view.set_spinner(next(spinner))
+            self.update_screen()
+            time.sleep(0.1)
+
+        self.loop.widget = self.view
+        self.loop.screen.register_palette(self.theme)
+        self.update_screen()
+
     def main(self) -> None:
         screen = Screen()
         screen.set_terminal_properties(colors=self.color_depth)
-        self.loop = urwid.MainLoop(self.view,
+        self.loop = urwid.MainLoop(self.loading_view,
                                    self.theme,
                                    screen=screen)
         self.update_pipe = self.loop.watch_pipe(self.draw_screen)
@@ -313,6 +320,7 @@ class Controller:
                 'quit': 'undefined',  # Disable ^\, ^4
             }
             old_signal_list = screen.tty_signal_keys(**disabled_keys)
+            self.set_main_view()
             self.loop.run()
 
         except Exception:

@@ -1113,3 +1113,28 @@ class MsgInfoView(PopUpView):
             popup_width = max(popup_width, message_link_width)
 
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+
+class LoadingView(urwid.Filler):
+    def __init__(self, controller: Any, settings: Dict[str, Any]) -> None:
+        self.controller = controller
+        self.text = [('user_active', "Welcome to Zulip.\n\n\n"),
+                     "Loading with:\n",
+                     "theme '{}' specified {}.\n".format(*settings['theme']),
+                     "autohide setting '{}' specified {}.\n"
+                     .format(*settings['autohide']),
+                     "footlinks setting '{}' specified {}.\n\n"
+                     .format(*settings['footlinks']),
+                     "Loading..."]
+        text_wid = urwid.Text(self.text)
+        padding = urwid.Padding(text_wid, 'center', ('relative', 50))
+        super().__init__(padding, 'middle', 'pack')
+
+    def selectable(self) -> bool:
+        return True
+
+    def keypress(self, size: Tuple[int, int], key: str) -> str:
+        return key
+
+    def set_spinner(self, spinner: str) -> None:
+        self.body.base_widget.set_text(self.text + [spinner])

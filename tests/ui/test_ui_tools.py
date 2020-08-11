@@ -17,10 +17,10 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    AboutView, HelpView, LeftColumnView, MessageView, MiddleColumnView,
-    ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
-    RightColumnView, StreamInfoView, StreamsView, StreamsViewDivider,
-    TopicsView, UsersView,
+    AboutView, HelpView, LeftColumnView, LoadingView, MessageView,
+    MiddleColumnView, ModListWalker, MsgInfoView, PopUpConfirmationView,
+    PopUpView, RightColumnView, StreamInfoView, StreamsView,
+    StreamsViewDivider, TopicsView, UsersView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
@@ -2716,3 +2716,17 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+
+class TestLoadingView:
+    @pytest.fixture
+    def loading_view(self, mocker):
+        self.controller = mocker.Mock()
+        self.settings = {'theme': ('wombat', 'on commandline'),
+                         'autohide': ('autohide', 'default'),
+                         'footlinks': ('enabled', 'default')}
+        loading_view = LoadingView(self.controller, self.settings)
+        return loading_view
+
+    def test_init(self, loading_view):
+        assert loading_view.controller == self.controller
