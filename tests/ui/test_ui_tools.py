@@ -2679,34 +2679,24 @@ class TestTopicButton:
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
 
-    @pytest.mark.parametrize(['stream_name', 'title',
-                              'is_muted_topic_return_value',
-                              'is_muted_called'], [
-        ('Django', 'topic1', True, True),
-        ('Django', 'topic2', False, False),
-        ('GSoC', 'topic1', False, False),
-    ], ids=[
-        # Assuming 'Django', 'topic1' is muted via muted_topics.
-        'stream_and_topic_match',
-        'topic_mismatch',
-        'stream_mismatch',
+    @pytest.mark.parametrize(['is_muted_topic_return_value',
+                              'is_mark_muted_called'], [
+        (True, True),
+        (False, False),
     ])
-    def test_init_calls_mark_muted(self, mocker, stream_name, title,
-                                   is_muted_topic_return_value,
-                                   is_muted_called):
-        mark_muted = mocker.patch(
-            'zulipterminal.ui_tools.buttons.TopicButton.mark_muted')
+    def test_init_calls_mark_muted(self, mocker, is_muted_topic_return_value,
+                                   is_mark_muted_called):
+        mocker.patch('zulipterminal.ui_tools.buttons.TopicButton.mark_muted')
         controller = mocker.Mock()
         controller.model.is_muted_topic = (
             mocker.Mock(return_value=is_muted_topic_return_value)
         )
         controller.model.stream_dict = {
-            205: {'name': stream_name}
+            205: {'name': 'Stream 1'}
         }
+
         topic_button = TopicButton(stream_id=205,
-                                   topic=title, controller=controller,
+                                   topic='Topic', controller=controller,
                                    width=40, count=0)
-        if is_muted_called:
-            mark_muted.assert_called_once_with()
-        else:
-            mark_muted.assert_not_called()
+
+        assert topic_button.mark_muted.called == is_mark_muted_called
