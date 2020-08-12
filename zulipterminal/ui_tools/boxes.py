@@ -312,6 +312,7 @@ class MessageBox(urwid.Pile):
         self.message_links = (
             OrderedDict()
         )   # type: OrderedDict[str, Tuple[str, int, bool]]
+        self.time_mentions = list()  # type: List[Tuple[str, str]]
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -760,6 +761,11 @@ class MessageBox(urwid.Pile):
                     'msg_time',
                     ' {} {} '.format(TIME_MENTION_MARKER, time_string)
                 ))
+
+                source_text = (
+                    'Original text was {}'.format(element.text.strip())
+                )
+                self.time_mentions.append((time_string, source_text))
             else:
                 markup.extend(self.soup2markup(element))
         return markup
@@ -1063,7 +1069,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
             self.model.controller.show_msg_info(self.message,
-                                                self.message_links)
+                                                self.message_links,
+                                                self.time_mentions)
         return key
 
 

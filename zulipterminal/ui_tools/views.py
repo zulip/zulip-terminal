@@ -1064,6 +1064,7 @@ class StreamInfoView(PopUpView):
 class MsgInfoView(PopUpView):
     def __init__(self, controller: Any, msg: Message, title: str,
                  message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                 time_mentions: List[Tuple[str, str]],
                  ) -> None:
         self.msg = msg
 
@@ -1075,6 +1076,8 @@ class MsgInfoView(PopUpView):
         # Render the category using the existing table methods if links exist.
         if message_links:
             msg_info.append(('Message Links', []))
+        if time_mentions:
+            msg_info.append(('Time mentions', time_mentions))
         if msg['reactions']:
             reactions = sorted(
                 (reaction['emoji_name'], reaction['user']['full_name'])
