@@ -29,6 +29,11 @@ KEY_BINDINGS = OrderedDict([
         'excluded_from_random_tips': False,
         'key_category': 'general',
     }),
+    ('OPEN_DRAFT', {
+        'keys': {'d'},
+        'help_text': 'Open draft message saved in this session',
+        'key_category': 'general',
+    }),
     ('GO_UP', {
         'keys': {'k', 'up'},
         'help_text': 'Go up/Previous message',
@@ -107,6 +112,11 @@ KEY_BINDINGS = OrderedDict([
     ('SEND_MESSAGE', {
         'keys': {'meta enter', 'ctrl d'},
         'help_text': 'Send a message',
+        'key_category': 'msg_compose',
+    }),
+    ('SAVE_AS_DRAFT', {
+        'keys': {'meta s'},
+        'help_text': 'Save current message as a draft',
         'key_category': 'msg_compose',
     }),
     ('AUTOCOMPLETE', {

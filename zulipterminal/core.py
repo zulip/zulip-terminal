@@ -174,6 +174,12 @@ class Controller:
         if 0 <= focus_position < len(w_list):
             self.view.message_view.set_focus(focus_position)
 
+    def save_draft_confirmation_popup(self, message: Message) -> None:
+        question = urwid.Text('Save this message as a draft?'
+                              ' (This will overwrite the existing draft.)')
+        save_draft = partial(self.model.save_draft, message)
+        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
+
     def stream_muting_confirmation_popup(self, button: Any) -> None:
         currently_muted = self.model.is_muted_stream(button.stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"

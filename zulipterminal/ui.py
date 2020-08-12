@@ -217,6 +217,27 @@ class View(urwid.WidgetWrap):
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
             return key
+        elif is_command_key('OPEN_DRAFT', key):
+            saved_draft = self.model.session_draft_message()
+            if saved_draft:
+                if saved_draft['type'] == 'stream':
+                    self.write_box.stream_box_view(
+                        caption=saved_draft['display_recipient'],
+                        title=saved_draft['subject'],
+                        stream_id=saved_draft['stream_id'],
+                    )
+                elif saved_draft['type'] == 'private':
+                    self.write_box.private_box_view(
+                        email=saved_draft['display_recipient'],
+                    )
+                content = saved_draft['content']
+                self.write_box.msg_write_box.edit_text = content
+                self.write_box.msg_write_box.edit_pos = len(content)
+                self.middle_column.set_focus('footer')
+            else:
+                self.set_footer_text('No draft message was saved in'
+                                     ' this session.', 3)
+            return key
         elif is_command_key('ABOUT', key):
             self.controller.show_about()
             return key

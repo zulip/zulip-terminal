@@ -2,6 +2,7 @@ import json
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
+from copy import deepcopy
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
     Tuple, Union,
@@ -135,6 +136,7 @@ class Model:
 
         self.unread_counts = classify_unread_counts(self)
 
+        self._draft = None  # type: Optional[Message]
         self.new_user_input = True
         self._start_presence_updates()
 
@@ -284,6 +286,13 @@ class Model:
         else:
             response = self.client.add_reaction(reaction_to_toggle_spec)
         display_error_if_present(response, self.controller)
+
+    def session_draft_message(self) -> Optional[Message]:
+        return deepcopy(self._draft)
+
+    def save_draft(self, message: Message) -> None:
+        self._draft = deepcopy(message)
+        self.controller.view.set_footer_text("Saved message as draft", 3)
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:

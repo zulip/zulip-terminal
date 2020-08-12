@@ -307,6 +307,27 @@ class WriteBox(urwid.Pile):
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus('body')
+        elif is_command_key('SAVE_AS_DRAFT', key):
+            if not self.msg_edit_id:
+                if self.to_write_box:
+                    message = Message(
+                            display_recipient=self.to_write_box.edit_text,
+                            content=self.msg_write_box.edit_text,
+                            type='private',
+                    )
+                elif self.stream_id:
+                    message = Message(
+                        display_recipient=self.stream_write_box.edit_text,
+                        content=self.msg_write_box.edit_text,
+                        subject=self.title_write_box.edit_text,
+                        stream_id=self.stream_id,
+                        type='stream',
+                    )
+                saved_draft = self.model.session_draft_message()
+                if not saved_draft:
+                    self.model.save_draft(message)
+                elif message != saved_draft:
+                    self.view.controller.save_draft_confirmation_popup(message)
         elif is_command_key('CYCLE_COMPOSE_FOCUS', key):
             if len(self.contents) == 0:
                 return key
