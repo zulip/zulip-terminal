@@ -5,7 +5,7 @@ import time
 from collections import OrderedDict
 from functools import partial
 from platform import platform
-from typing import Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import urwid
 import zulip
@@ -138,10 +138,11 @@ class Controller:
 
     def show_msg_info(self, msg: Message,
                       message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                      time_mentions: List[Tuple[str, str]],
                       ) -> None:
         msg_info_view = MsgInfoView(self, msg,
                                     "Message Information (up/down scrolls)",
-                                    message_links)
+                                    message_links, time_mentions)
         self.show_pop_up(msg_info_view)
 
     def show_stream_info(self, stream_id: int) -> None:
