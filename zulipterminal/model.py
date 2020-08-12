@@ -642,6 +642,12 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
+    def stream_id_from_name(self, stream_name: str) -> int:
+        for stream_id, stream in self.stream_dict.items():
+            if stream['name'] == stream_name:
+                return stream_id
+        raise RuntimeError("Invalid stream name.")
+
     def is_pinned_stream(self, stream_id: int) -> bool:
         return stream_id in list(stream[1] for stream in self.pinned_streams)
 

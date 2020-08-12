@@ -33,6 +33,7 @@ class WriteBox(urwid.Pile):
         self.view = view
         self.msg_edit_id = None  # type: Optional[int]
         self.is_in_typeahead_mode = False
+        self.stream_id = None  # type: Optional[int]
         self.recipient_user_ids = []  # type: List[int]
 
     def main_view(self, new: bool) -> Any:
@@ -72,6 +73,7 @@ class WriteBox(urwid.Pile):
     def stream_box_view(self, stream_id: int, caption: str='', title: str='',
                         ) -> None:
         self.set_editor_mode()
+        self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
                                             stream_id=stream_id)
         self.to_write_box = None
@@ -271,6 +273,8 @@ class WriteBox(urwid.Pile):
                         user_ids = self.model.get_other_subscribers_in_stream(
                                                     stream_name=stream_name)
                         self.recipient_user_ids = user_ids
+                        self.stream_id = self.model.stream_id_by_name(
+                                                                stream_name)
 
                         header.focus_col = 1
                         return key
