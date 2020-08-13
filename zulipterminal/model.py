@@ -640,7 +640,7 @@ class Model:
         user_group_names.sort(key=str.lower)
         return user_group_names
 
-    def toggle_stream_muted_status(self, stream_id: int) -> bool:
+    def toggle_stream_muted_status(self, stream_id: int) -> None:
         request = [{
             'stream_id': stream_id,
             'property': 'is_muted',
@@ -649,7 +649,6 @@ class Model:
         }]
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)
-        return response['result'] == 'success'
 
     def stream_id_from_name(self, stream_name: str) -> int:
         for stream_id, stream in self.stream_dict.items():
