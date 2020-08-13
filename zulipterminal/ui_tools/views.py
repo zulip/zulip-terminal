@@ -1001,7 +1001,7 @@ class HelpView(PopUpView):
 
 class PopUpConfirmationView(urwid.Overlay):
     def __init__(self, controller: Any, question: Any,
-                 success_callback: Callable[[], bool]):
+                 success_callback: Callable[[], None]):
         self.controller = controller
         self.success_callback = success_callback
         yes = urwid.Button('Yes', self.exit_popup_yes)
