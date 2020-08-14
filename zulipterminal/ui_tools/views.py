@@ -14,8 +14,8 @@ from zulipterminal.config.symbols import (
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
-    HomeButton, MentionedButton, PMButton, StarredButton, StreamButton,
-    TopicButton, UnreadPMButton, UserButton,
+    HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
+    StreamButton, TopicButton, UnreadPMButton, UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
@@ -1108,7 +1108,7 @@ class MsgInfoView(PopUpView):
 
                 display_attr = None if index % 2 else 'popup_contrast'
                 message_link_widgets.append(
-                    urwid.AttrMap(urwid.Text(caption), display_attr)
+                    MessageLinkButton(controller, caption, link, display_attr)
                 )
 
             # 5 = 3 labels + 1 newline + 1 'Message Links' category label.

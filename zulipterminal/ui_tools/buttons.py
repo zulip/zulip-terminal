@@ -247,3 +247,29 @@ class UnreadPMButton(urwid.Button):
     def __init__(self, user_id: int, email: str) -> None:
         self.user_id = user_id
         self.email = email
+
+
+class MessageLinkButton(urwid.Button):
+    def __init__(self, controller: Any, caption: str, link: str,
+                 display_attr: Optional[str]) -> None:
+        self.controller = controller
+        self.link = link
+
+        super().__init__('')
+        self.update_widget(caption, display_attr)
+        urwid.connect_signal(self, 'click', callback=self.handle_link)
+
+    def update_widget(self, caption: str,
+                      display_attr: Optional[str]=None) -> None:
+        """
+        Overrides the existing button widget for custom styling.
+        """
+        # Set cursor position next to len(caption) to avoid the cursor.
+        icon = urwid.SelectableIcon(caption, cursor_position=len(caption) + 1)
+        self._w = urwid.AttrMap(icon, display_attr, focus_map='selected')
+
+    def handle_link(self, *_: Any) -> None:
+        """
+        Classifies and handles link.
+        """
+        pass
