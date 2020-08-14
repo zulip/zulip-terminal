@@ -273,7 +273,7 @@ class WriteBox(urwid.Pile):
                         user_ids = self.model.get_other_subscribers_in_stream(
                                                     stream_name=stream_name)
                         self.recipient_user_ids = user_ids
-                        self.stream_id = self.model.stream_id_by_name(
+                        self.stream_id = self.model.stream_id_from_name(
                                                                 stream_name)
 
                         header.focus_col = 1
