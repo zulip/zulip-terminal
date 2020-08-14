@@ -68,6 +68,6 @@ def is_muted(msg: Message, model: Any) -> bool:
 def is_unsubscribed_message(msg: Message, model: Any) -> bool:
     if msg['type'] == 'private':
         return False
-    if msg['stream_id'] not in model.stream_dict:
+    if not model.is_user_subscribed_to_stream(msg['stream_id']):
         return True
     return False

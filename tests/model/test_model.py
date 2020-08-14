@@ -1641,3 +1641,20 @@ class TestModel:
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
 
         assert return_value == is_muted
+
+    @pytest.mark.parametrize('stream_id, expected_response', [
+            (1, True),
+            (462, False),
+        ],
+        ids=[
+            'subscribed_stream',
+            'unsubscribed_stream',
+        ]
+    )
+    def test_is_user_subscribed_to_stream(self, model, stream_dict, stream_id,
+                                          expected_response):
+        model.stream_dict = stream_dict
+
+        return_value = model.is_user_subscribed_to_stream(stream_id)
+
+        assert return_value == expected_response

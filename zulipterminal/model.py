@@ -468,7 +468,7 @@ class Model:
         assert stream_id is not None or stream_name is not None
 
         if stream_id:
-            assert stream_id in self.stream_dict
+            assert self.is_user_subscribed_to_stream(stream_id)
 
             return [sub
                     for sub in self.stream_dict[stream_id]['subscribers']
@@ -660,6 +660,9 @@ class Model:
         response = self.client.update_subscription_settings(request)
         return response['result'] == 'success'
 
+    def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
+        return stream_id in self.stream_dict
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting,
@@ -717,11 +720,11 @@ class Model:
                     self.controller.view.left_panel.update_structure()
                     self.controller.update_screen()
         elif (event['op'] == 'peer_add'
-              and event['stream_id'] in self.stream_dict):
+              and self.is_user_subscribed_to_stream(event['stream_id'])):
             subscribers = self.stream_dict[event['stream_id']]['subscribers']
             subscribers.append(event['user_id'])
         elif (event['op'] == 'peer_remove'
-              and event['stream_id'] in self.stream_dict):
+              and self.is_user_subscribed_to_stream(event['stream_id'])):
             subscribers = self.stream_dict[event['stream_id']]['subscribers']
             subscribers.remove(event['user_id'])
 

@@ -437,8 +437,8 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
-        # unsubscribed streams may be in unreads, but not in stream_dict
-        if stream_id not in model.stream_dict:
+        # unsubscribed streams may be in raw unreads, but are not tracked
+        if not model.is_user_subscribed_to_stream(stream_id):
             continue
         if model.is_muted_topic(stream_id, stream['topic']):
             continue
