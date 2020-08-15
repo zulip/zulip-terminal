@@ -103,16 +103,23 @@ class TestMessageLinkButton:
         (SERVER_URL + '/#narrow/stream/Stream.201',
          {'narrow': 'stream',
           'stream': {'stream_id': None, 'stream_name': 'Stream 1'}}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/foo.20bar',
+         {'narrow': 'stream:topic', 'topic_name': 'foo bar',
+          'stream': {'stream_id': 1, 'stream_name': None}}),
         (SERVER_URL + '/#narrow/foo',
          {}),
         (SERVER_URL + '/#narrow/stream/',
+         {}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/',
          {}),
         ],
         ids=[
             'modern_stream_narrow_link',
             'deprecated_stream_narrow_link',
+            'topic_narrow_link',
             'invalid_narrow_link_1',
             'invalid_narrow_link_2',
+            'invalid_narrow_link_3',
         ]
     )
     def test__parse_narrow_link(self, link, expected_parsed_link):
@@ -125,6 +132,7 @@ class TestMessageLinkButton:
             'parsed_link',
             'is_user_subscribed_to_stream',
             'is_valid_stream',
+            'topics_in_stream',
             'expected_error'
         ],
         [
@@ -132,23 +140,40 @@ class TestMessageLinkButton:
               'stream': {'stream_id': 1, 'stream_name': None}},
              True,
              None,
+             None,
              ''),
             ({'narrow': 'stream',
               'stream': {'stream_id': 462, 'stream_name': None}},
              False,
+             None,
              None,
              'The stream seems to be either unknown or unsubscribed'),
             ({'narrow': 'stream',
               'stream': {'stream_id': None, 'stream_name': 'Stream 1'}},
              None,
              True,
+             None,
              ''),
             ({'narrow': 'stream',
               'stream': {'stream_id': None, 'stream_name': 'foo'}},
              None,
              False,
+             None,
              'The stream seems to be either unknown or unsubscribed'),
+            ({'narrow': 'stream:topic', 'topic_name': 'Valid',
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             ['Valid'],
+             ''),
+            ({'narrow': 'stream:topic', 'topic_name': 'Invalid',
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             [],
+             'Invalid topic name'),
             ({},
+             None,
              None,
              None,
              'The narrow link seems to be either broken or unsupported'),
@@ -158,18 +183,22 @@ class TestMessageLinkButton:
             'invalid_modern_stream_narrow_parsed_link',
             'valid_deprecated_stream_narrow_parsed_link',
             'invalid_deprecated_stream_narrow_parsed_link',
+            'valid_topic_narrow_parsed_link',
+            'invalid_topic_narrow_parsed_link',
             'invalid_narrow_link',
         ]
     )
     def test__validate_narrow_link(self, stream_dict, parsed_link,
                                    is_user_subscribed_to_stream,
                                    is_valid_stream,
+                                   topics_in_stream,
                                    expected_error):
         self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
         )
         self.controller.model.is_valid_stream.return_value = is_valid_stream
+        self.controller.model.topics_in_stream.return_value = topics_in_stream
         mocked_button = self.message_link_button()
 
         return_value = mocked_button._validate_narrow_link(parsed_link)
@@ -237,17 +266,25 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize([
             'parsed_link',
             'narrow_to_stream_called',
+            'narrow_to_topic_called',
         ],
         [
             ({'narrow': 'stream',
               'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
+             True,
+             False),
+            ({'narrow': 'stream:topic', 'topic_name': 'Foo',
+              'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
+             False,
              True),
         ],
         ids=[
             'stream_narrow',
+            'topic_narrow',
         ]
     )
     def test__switch_narrow_to(self, parsed_link, narrow_to_stream_called,
+                               narrow_to_topic_called,
                                ):
         mocked_button = self.message_link_button()
 
@@ -255,6 +292,8 @@ class TestMessageLinkButton:
 
         assert (mocked_button.controller.narrow_to_stream.called
                 == narrow_to_stream_called)
+        assert (mocked_button.controller.narrow_to_topic.called
+                == narrow_to_topic_called)
 
     @pytest.mark.parametrize(['error', 'set_footer_text_called',
                               '_switch_narrow_to_called',
