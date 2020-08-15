@@ -265,6 +265,7 @@ DecodedStream = TypedDict('DecodedStream', {
 ParsedNarrowLink = TypedDict('ParsedNarrowLink', {
     'narrow': str,
     'stream': DecodedStream,
+    'topic_name': str,
 }, total=False)
 
 
@@ -337,6 +338,13 @@ class MessageLinkButton(urwid.Button):
             stream_data = cls._decode_stream_data(fragments[2])
             parsed_link = dict(narrow='stream', stream=stream_data)
 
+        elif (len_fragments == 5 and fragments[1] == 'stream'
+                and fragments[3] == 'topic'):
+            stream_data = cls._decode_stream_data(fragments[2])
+            topic_name = hash_util_decode(fragments[4])
+            parsed_link = dict(narrow='stream:topic', stream=stream_data,
+                               topic_name=topic_name)
+
         return parsed_link
 
     def _validate_and_patch_stream_data(self,
@@ -384,6 +392,14 @@ class MessageLinkButton(urwid.Button):
             if error:
                 return error
 
+        # Validate topic name.
+        if 'topic_name' in parsed_link:
+            topic_name = parsed_link['topic_name']
+            stream_id = parsed_link['stream']['stream_id']
+
+            if topic_name not in self.model.topics_in_stream(stream_id):
+                return 'Invalid topic name'
+
         return ''
 
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
@@ -395,6 +411,11 @@ class MessageLinkButton(urwid.Button):
             self.stream_id = parsed_link['stream']['stream_id']
             self.stream_name = parsed_link['stream']['stream_name']
             self.controller.narrow_to_stream(self)
+        elif 'stream:topic' == narrow:
+            self.stream_id = parsed_link['stream']['stream_id']
+            self.stream_name = parsed_link['stream']['stream_name']
+            self.topic_name = parsed_link['topic_name']
+            self.controller.narrow_to_topic(self)
 
     def handle_narrow_link(self) -> None:
         """
