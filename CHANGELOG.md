@@ -1,8 +1,119 @@
 # Zulip-terminal Changelog
 
-## Next Release
+## 0.6.0 - 28 January 2021
 
-No changes yet!
+This release contains the second set of contributions from our two 2020
+[GSoC](https://summerofcode.withgoogle.com/) students, as well as
+[Hacktoberfest](https://hacktoberfest.digitalocean.com/) participants and a
+range of various other contributors - thanks to them
+[all](https://github.com/zulip/zulip-terminal/graphs/contributors?from=2020-07-30&to=2021-01-28&type=c)
+for raising the standard of the project once again!
+
+Now is a great time to give the project a try, with more features than ever and
+the newly-added 'explore mode' (`--explore` on the command-line) ensuring that
+no messages get marked as read in your client while you're just giving it a
+try!
+
+### IMPORTANT NOTES
+
+This release fixes a security issue, so we strongly recommend upgrading immediately.
+
+#### Python 3.5
+This will be the last release with support for python 3.5, for which support
+has now ended upstream (see #838).
+
+#### Customized installs
+If you've customized your install by editing themes or keys, be sure to back
+these up before upgrading and then carefully integrate them.
+
+### HIGHLIGHTS
+- Message composition feels a lot cleaner!
+  - new design for entering message recipients, with stream & topic autocomplete available
+  - interactive feedback shows whether recipients are valid on edit/autocomplete (<kbd>ctrl</kbd>-<kbd>f</kbd>/<kbd>ctrl</kbd>-<kbd>r</kbd>) and/or <kbd>tab</kbd>
+- Editing of sent messages is much more feature-complete!
+  - most editing modes are supported - rename partial or full topics
+  - message edit history is accessible via Message information popup
+- Jump (narrow) to linked streams or topics in messages via the Message information popup!
+  - new quoted messages include the original author and contextual links
+- Session-only draft feature supports pausing composition to review other messages (<kbd>meta</kbd>-<kbd>s</kbd> / <kbd>d</kbd>)
+- Improved popup design including theming by popup category, with more information accessible in popups
+- Various smaller updates to match existing and new features from Zulip 3.x
+  - time mentions and organization emoji in messages, re-styled user list, 'no topic' messages, ...
+
+### Interactivity improvements
+- Message editing:
+  - All topic-editing modes are now available (change-one, change-later and change-all) (#675)
+  - Editing of a message topic is now possible after the server-specified time (#675)
+- Message composition:
+  - Message recipients (streams, users in PMs) are now checked for validity (#738, #823, #865)
+  - Destination stream and topic names can now also be autocompleted (#746)
+  - Addition of session-only single draft feature (#772)
+  - Messages with no topic are handled as per the webapp - they can be blank and convert to `(no topic)` (#754/#757)
+  - Autocompleted emoji now include organization-specific (and zulip) emoji, loaded at startup (#710)
+  - User mention autocomplete shows users involved in the conversation before others (#730)
+  - Quoting messages uses the same format as the latest webapp, including author and link to original location (#854/#514)
+  - Private message typing events now sent to server (#845/#884/#593)
+  - Support `*` or `**` at start of mentions, improving experience with repeat autocomplete/edits and selection of only user-groups (#794, #732)
+- General UI:
+  - Internal stream/topic links in the message information popup can be used to narrow to those streams/topics (#708)
+  - Stop accepting leading spaces in search boxes (#784)
+  - Support <kbd>a</kbd> for showing all messages, as in recent versions of the web-app (#805)
+- Options/configuration:
+  - Added `--explore` command-line option for 'explore mode', where messages are not marked as read (#787)
+  - Added `--list-themes` command-line option to show available themes (with default) (#803, #807)
+  - Support setting color depth in zuliprc files (#808/601)
+
+### Visual improvements
+- Much improved compose box design: (#783)
+  - Simpler horizontal-only bounding lines (#852/#629)
+  - Stream/topic titles are replaced by a stream-colored `#` or `P` character (for public/private streams) and an `▶` arrow to the topic (#865)
+- Popups are refreshed and show more information:
+  - All popups have an improved contrasting layout using block elements, color-themed by type (#853)
+  - The About popup now has separate sections for the Application, Server, and Application configuration (#821)
+  - Stream Information popup now allows access to stream membership and weekly message counts (#856, #878)
+  - Message edit-history (if present) can now be viewed in a popup from the Message Information popup (#663)
+- Message rendering:
+  - Time mentions (Zulip server 3.0+) are now shown, and detailed in the Message Information popup (#691/#765/#771)
+  - No-text links render as either a final filename, internal link, or domain name (instead of simply the end of the URL) (#742/#750)
+- The user list more closely resembles the webapp:
+  - `(you)` is shown next to yourself (#798/#437)
+  - Instead of dots, differently-filled circles are used to indicate varying activity levels (#817)
+- Muted streams and topics are now styled differently, including their muted status (#802)
+
+### Important bugfixes
+- Avoid unnecessary repeated reconnect attempts (#866)
+- User search fully updates after backspacing to an empty search (#700)
+- Muted topics are again indicated correctly using Zulip server 3.0 (or feature level 1+) (#744)
+- Ensure view is rendered before displaying errors from server (#761)
+- Topics are fetched on-demand rather than on startup, lowering startup time and server load (#493/#759)
+- Various bugs fixed where streams were assumed to be subscribed (eg #795)
+- Indicate to user if the zuliprc file could not be written (#801)
+- In case of unexpected errors handling events, log them and allow other events to be processed (#819)
+- Update topic list upon renaming of topics (#785, #832)
+
+### User documentation updates
+- README updates:
+  - About section added to improve project summary, feature status and limitations (#860)
+  - Note added regarding using an insecure/self-signed-cert server setup (#788)
+  - Note improved for handling passwords (#818)
+  - Text corrected regarding (lack of) notifications support on WSL (#835)
+- New FAQ sections:
+  - Are there any themes available, other than the default one?
+  - When are messages marked as having been read? (#789)
+  - How do I access multiple servers? (#820)
+
+### Infrastructure improvements
+- Dockerfile improvements, including options to build images from current git (#571)
+- Log files generated less in general use - API calls only in debug mode, tracebacks only on exceptions (#760)
+- Unicode symbols used in the interface are isolated into one source file for easier customization
+- Use `typing_extensions` module instead of `mypy_extensions` for `TypedDict` & `Literal` (#769)
+- Initial support for development environment using make (#777)
+- Add CPython 3.9 support to installation range and to CI (#815)
+- Various improvements to development notes, eg. commit style, pytest tips, file overview (#820, #857)
+- Various improvements to support newer server versions
+  - peer_add/peer_remove events for feature level 35+ (#814)
+  - new standardized `op` field in later server versions (#786/#790)
+- CI migrated from Travis to GitHub Actions; CodeQL testing added (#831, #869, #872, #875)
 
 ## 0.5.2 - 30 July 2020
 
@@ -223,9 +334,9 @@ Thanks to the core team and many new contributors for the almost 300 commits sin
 - Much improved (& configurable on/off) autohide behavior for streams/users panels
 - Toggle thumbs-up reactions to messages (<kbd>+</kbd>)
 - Toggle star status of messages (<kbd>*</kbd> or <kbd>ctrl</kbd>+<kbd>s</kbd>)
-- Narrow to starred messges (<kbd>f</kbd>, or via new button)
+- Narrow to starred messages (<kbd>f</kbd>, or via new button)
 - Reply mentioning sender (<kbd>@</kbd>)
-- Reply quoting mesage (<kbd>></kbd>)
+- Reply quoting message (<kbd>></kbd>)
 - Use enter to reply to a message
 - Disable responding to suspend (<kbd>ctrl</kbd>+<kbd>z</kbd>), since cannot resume (yet)
 - Disable responding to <kbd>ctrl</kbd>+<kbd>s</kbd> for flow control, enabling use with starring
