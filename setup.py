@@ -52,6 +52,8 @@ dev_helper_deps = [
     'pudb==2017.1.4',
     'snakeviz==0.4.2',
     'gitlint>=0.10',
+    'autopep8~=1.5.4',
+    'autoflake~=1.3.1',
 ]
 
 setup(
