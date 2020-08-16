@@ -1,4 +1,4 @@
-.PHONY: install-devel check lint test venv
+.PHONY: install-devel check lint test check-clean-tree fix force-fix venv
 
 # NOTE: ZT_VENV and BASEPYTHON are advanced undocumented features
 # Customize your venv name by running make as "ZT_VENV=my_venv_name make <command>"
@@ -23,6 +23,20 @@ lint: venv
 
 test: venv
 	@pytest
+
+### FIX FILES ###
+
+check-clean-tree:
+	@git diff --exit-code --quiet || (echo 'Tree is not clean - commit changes in git first' && false)
+
+fix: check-clean-tree
+	@make force-fix
+
+force-fix: venv
+	@echo "=== Auto-fixing files ==="
+	isort --recursive $(SOURCES)
+	autopep8 --recursive --in-place $(SOURCES)
+	autoflake --recursive --in-place $(SOURCES)
 
 ### VENV SETUP ###
 # Short name for file dependency
