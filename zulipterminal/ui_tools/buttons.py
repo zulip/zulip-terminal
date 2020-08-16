@@ -272,4 +272,3 @@ class MessageLinkButton(urwid.Button):
         """
         Classifies and handles link.
         """
-        pass

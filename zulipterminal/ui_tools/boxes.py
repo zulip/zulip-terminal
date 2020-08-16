@@ -1198,6 +1198,7 @@ class PanelSearchBox(urwid.Edit):
     """
     Search Box to search panel views in real-time.
     """
+
     def __init__(self, panel_view: Any, search_command: str,
                  update_function: Callable[..., None]) -> None:
         self.panel_view = panel_view

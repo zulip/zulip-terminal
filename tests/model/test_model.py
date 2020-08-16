@@ -283,7 +283,7 @@ class TestModel:
             }
         }, {0, 1}),
         ([['stream', 'FOO'],
-         ['topic', 'BOO']], {
+          ['topic', 'BOO']], {
              'topic_msg_ids': {
                  1: {
                      'BOO': {0, 1}
@@ -291,7 +291,7 @@ class TestModel:
              }
          }, {0, 1}),
         ([['stream', 'FOO'],  # Covers one empty-set case
-         ['topic', 'BOOBOO']], {
+          ['topic', 'BOOBOO']], {
              'topic_msg_ids': {
                  1: {
                      'BOO': {0, 1}
@@ -859,11 +859,11 @@ class TestModel:
     @pytest.mark.parametrize(['topic_name', 'topic_order_initial',
                               'topic_order_final'], [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
-                   ['TOPIC3', 'TOPIC2', 'TOPIC1']),
+         ['TOPIC3', 'TOPIC2', 'TOPIC1']),
         ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
-                   ['TOPIC1', 'TOPIC2', 'TOPIC3']),
+         ['TOPIC1', 'TOPIC2', 'TOPIC3']),
         ('TOPIC4', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
-                   ['TOPIC4', 'TOPIC1', 'TOPIC2', 'TOPIC3']),
+         ['TOPIC4', 'TOPIC1', 'TOPIC2', 'TOPIC3']),
         ('TOPIC1', [], ['TOPIC1'])
     ], ids=['reorder_topic3', 'topic1_discussion_continues', 'new_topic4',
             'first_topic_1'])
@@ -1321,7 +1321,7 @@ class TestModel:
             assert model.index['messages'][changed_id]['flags'] == flags_after
         (model._update_rendered_view.
          assert_has_calls([mocker.call(changed_id)
-                          for changed_id in changed_ids]))
+                           for changed_id in changed_ids]))
 
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
             assert (model.index['messages'][unchanged_id]['flags']
@@ -1533,7 +1533,7 @@ class TestModel:
         model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(['event', 'expected_pinned_streams',
-                             'expected_unpinned_streams'], [
+                              'expected_unpinned_streams'], [
         (
             {
                 'property': 'pin_to_top',

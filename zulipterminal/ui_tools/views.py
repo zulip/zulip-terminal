@@ -256,6 +256,7 @@ class StreamsViewDivider(urwid.Divider):
     """
     A custom urwid.Divider to visually separate pinned and unpinned streams.
     """
+
     def __init__(self) -> None:
         # FIXME: Necessary since the divider is treated as a StreamButton.
         # NOTE: This is specifically for stream search to work correctly.
