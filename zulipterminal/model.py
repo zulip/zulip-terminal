@@ -609,6 +609,17 @@ class Model:
 
         return user_list
 
+    def user_name_from_id(self, user_id: int) -> str:
+        """
+        Returns user's full name given their ID.
+        """
+        user_email = self.user_id_email_dict.get(user_id)
+
+        if not user_email:
+            raise RuntimeError('Invalid user ID.')
+
+        return self.user_dict[user_email]['full_name']
+
     @staticmethod
     def _stream_info_from_subscriptions(
             subscriptions: List[Dict[str, Any]]
