@@ -1697,3 +1697,20 @@ class TestModel:
         self.client.get_message_history.assert_called_once_with(message_id)
         assert self.display_error_if_present.called
         assert return_value == expected_return_value
+
+    @pytest.mark.parametrize('user_id, full_name', [(1001, 'Human Myself')])
+    def test_user_name_from_id_valid(self, model, user_dict, user_id,
+                                     full_name):
+        model.user_id_email_dict = {1001: 'FOOBOO@gmail.com'}
+        model.user_dict = user_dict
+
+        return_value = model.user_name_from_id(user_id)
+
+        assert return_value == full_name
+
+    @pytest.mark.parametrize('user_id', [-1])
+    def test_user_name_from_id_invalid(self, model, user_id):
+        model.user_id_email_dict = {1001: 'FOOBOO@gmail.com'}
+
+        with pytest.raises(RuntimeError, match='Invalid user ID.'):
+            model.user_name_from_id(user_id)
