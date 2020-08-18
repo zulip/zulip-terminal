@@ -14,7 +14,6 @@ from bs4.element import NavigableString
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
-from zulipterminal import unicode_emojis
 from zulipterminal.config.keys import (
     is_command_key, keys_for_command, primary_key_for_command,
 )
@@ -303,7 +302,7 @@ class WriteBox(urwid.Pile):
 
     def autocomplete_emojis(self, text: str, prefix_string: str
                             ) -> Tuple[List[str], List[str]]:
-        emoji_list = unicode_emojis.EMOJI_DATA
+        emoji_list = self.model.active_emoji_data
         emojis = [emoji
                   for emoji in emoji_list
                   if match_emoji(emoji, text[1:])]
