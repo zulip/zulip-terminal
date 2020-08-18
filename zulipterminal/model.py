@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 import zulip
 from typing_extensions import Literal, TypedDict
 
+from zulipterminal import unicode_emojis
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
     Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
@@ -137,6 +138,8 @@ class Model:
         self.unread_counts = classify_unread_counts(self)
 
         self._draft = None  # type: Optional[Message]
+        self.active_emoji_data = unicode_emojis.EMOJI_DATA
+
         self.new_user_input = True
         self._start_presence_updates()
 

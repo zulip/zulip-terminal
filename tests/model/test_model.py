@@ -24,7 +24,8 @@ class TestModel:
                             'zulipterminal.model.display_error_if_present')
 
     @pytest.fixture
-    def model(self, mocker, initial_data, user_profile):
+    def model(self, mocker, initial_data, user_profile,
+              unicode_emojis):
         mocker.patch('zulipterminal.model.Model.get_messages',
                      return_value='')
         self.client.register.return_value = initial_data
@@ -38,10 +39,13 @@ class TestModel:
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
         self.client.get_profile.return_value = user_profile
+        mocker.patch('zulipterminal.model.unicode_emojis',
+                     EMOJI_DATA=unicode_emojis)
         model = Model(self.controller)
         return model
 
-    def test_init(self, model, initial_data, user_profile):
+    def test_init(self, model, initial_data, user_profile,
+                  unicode_emojis):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.narrow == []
@@ -71,6 +75,7 @@ class TestModel:
         assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
+        assert model.active_emoji_data == unicode_emojis
 
     @pytest.mark.parametrize(['server_response', 'locally_processed_data',
                               'zulip_feature_level'], [
