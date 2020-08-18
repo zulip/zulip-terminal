@@ -144,8 +144,12 @@ class Model:
             data['type'] = 'unicode_emoji'
         typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
         custom_emoji_data = self.fetch_custom_emojis()
+        zulip_extra_emoji = {
+                'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
+        }  # type: NamedEmojiData
         all_emoji_data = {**typed_unicode_emoji_data,
-                          **custom_emoji_data}.items()
+                          **custom_emoji_data,
+                          **zulip_extra_emoji}.items()
         self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
                                                     key=lambda e: e[0]))
 

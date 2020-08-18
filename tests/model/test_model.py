@@ -78,10 +78,17 @@ class TestModel:
         assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
+        zulip_emoji = {
+                'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
+        }
         assert model.active_emoji_data == OrderedDict(sorted(
-            {**unicode_emojis, **custom_emojis}.items(), key=lambda e: e[0]))
+            {**unicode_emojis, **custom_emojis, **zulip_emoji}.items(),
+            key=lambda e: e[0]
+        ))
         # Custom emoji replaces unicode emoji with same name.
         assert model.active_emoji_data['joker']['type'] == 'realm_emoji'
+        # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
+        assert model.active_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
 
     @pytest.mark.parametrize(['server_response', 'locally_processed_data',
                               'zulip_feature_level'], [
