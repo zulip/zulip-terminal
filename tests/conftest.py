@@ -189,6 +189,7 @@ def custom_emojis():
         ('dancing', {'code': '3', 'type': 'realm_emoji'}),
         ('snape', {'code': '20', 'type': 'realm_emoji'}),
         ('joker', {'code': '202020', 'type': 'realm_emoji'}),
+        ('zulip', {'code': '12345', 'type': 'realm_emoji'}),
     ])
 
 

@@ -31,7 +31,8 @@ StreamData = TypedDict('StreamData', {
 
 EmojiData = TypedDict('EmojiData', {
     'code': str,
-    'type': Literal['realm_emoji', 'unicode_emoji'],
+    'type': Literal['realm_emoji', 'unicode_emoji',
+                    'zulip_extra_emoji'],
 })
 
 NamedEmojiData = Dict[str, EmojiData]
