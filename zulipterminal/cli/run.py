@@ -294,13 +294,12 @@ def main(options: Optional[List[str]]=None) -> None:
         print("   footlinks setting '{}' specified {}."
               .format(*zterm['footlinks']))
         # For binary settings
-        # Specify setting in order True, False
+        # Specify setting in order 1, 0
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
-            'footlinks': ['enabled', 'disabled'],
         }
-        boolean_settings = dict()  # type: Dict[str, bool]
+        int_settings = dict()  # type: Dict[str, int]
         for setting, valid_values in valid_settings.items():
             if zterm[setting][0] not in valid_values:
                 print("Invalid {} setting '{}' was specified {}."
@@ -310,7 +309,12 @@ def main(options: Optional[List[str]]=None) -> None:
                     print("  ", option)
                 print("Specify the {} option in zuliprc file.".format(setting))
                 sys.exit(1)
-            boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
+            int_settings[setting] = int(zterm[setting][0] == valid_values[0])
+
+        # For threshold settings
+        footlinks_threshold = zterm['footlinks_threshold'][0]
+        if footlinks_threshold.isnumeric():
+            int_settings['footlinks_threshold'] = int(footlinks_threshold)
 
         color_depth = int(args.color_depth)
         if color_depth == 1:
@@ -321,7 +325,7 @@ def main(options: Optional[List[str]]=None) -> None:
         Controller(zuliprc_path,
                    theme_data,
                    int(args.color_depth),
-                   **boolean_settings).main()
+                   **int_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',
                        "\nError connecting to Zulip server: {}.".format(e)))

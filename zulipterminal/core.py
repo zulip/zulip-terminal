@@ -28,14 +28,15 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme: ThemeSpec,
-                 color_depth: int,
-                 autohide: bool, notify: bool, footlinks: bool) -> None:
+    def __init__(
+        self, config_file: str, theme: ThemeSpec, color_depth: int,
+        autohide: int, notify: int, footlinks_threshold: int
+    ) -> None:
         self.theme = theme
         self.color_depth = color_depth
         self.autohide = autohide
         self.notify_enabled = notify
-        self.footlinks_enabled = footlinks
+        self.footlinks_threshold = footlinks_threshold
 
         self._editor = None  # type: Optional[Any]
 
