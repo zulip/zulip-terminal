@@ -96,6 +96,15 @@ class TestMessageLinkButton:
 
         assert return_value == expected_response
 
+    @pytest.mark.parametrize('message_id, expected_return_value', [
+        ('1', 1),
+        ('foo', None),
+    ])
+    def test__decode_message_id(self, message_id, expected_return_value):
+        return_value = MessageLinkButton._decode_message_id(message_id)
+
+        assert return_value == expected_return_value
+
     @pytest.mark.parametrize('link, expected_parsed_link', [
         (SERVER_URL + '/#narrow/stream/1-Stream-1',
          {'narrow': 'stream',
@@ -106,20 +115,34 @@ class TestMessageLinkButton:
         (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/foo.20bar',
          {'narrow': 'stream:topic', 'topic_name': 'foo bar',
           'stream': {'stream_id': 1, 'stream_name': None}}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1/near/1',
+         {'narrow': 'stream:near',  'message_id': 1,
+          'stream': {'stream_id': 1, 'stream_name': None}}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/foo/near/1',
+         {'narrow': 'stream:topic:near', 'topic_name': 'foo', 'message_id': 1,
+          'stream': {'stream_id': 1, 'stream_name': None}}),
         (SERVER_URL + '/#narrow/foo',
          {}),
         (SERVER_URL + '/#narrow/stream/',
          {}),
         (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/',
          {}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1//near/',
+         {}),
+        (SERVER_URL + '/#narrow/stream/1-Stream-1/topic/foo/near/',
+         {}),
         ],
         ids=[
             'modern_stream_narrow_link',
             'deprecated_stream_narrow_link',
             'topic_narrow_link',
+            'stream_near_narrow_link',
+            'topic_near_narrow_link',
             'invalid_narrow_link_1',
             'invalid_narrow_link_2',
             'invalid_narrow_link_3',
+            'invalid_narrow_link_4',
+            'invalid_narrow_link_5',
         ]
     )
     def test__parse_narrow_link(self, link, expected_parsed_link):
@@ -172,6 +195,32 @@ class TestMessageLinkButton:
              None,
              [],
              'Invalid topic name'),
+            ({'narrow': 'stream:near', 'message_id': 1,
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             None,
+             ''),
+            ({'narrow': 'stream:near', 'message_id': None,
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             None,
+             'Invalid message ID'),
+            ({'narrow': 'stream:topic:near', 'topic_name': 'Valid',
+              'message_id': 1,
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             ['Valid'],
+             ''),
+            ({'narrow': 'stream:topic:near', 'topic_name': 'Valid',
+              'message_id': None,
+              'stream': {'stream_id': 1, 'stream_name': None}},
+             True,
+             None,
+             ['Valid'],
+             'Invalid message ID'),
             ({},
              None,
              None,
@@ -185,6 +234,10 @@ class TestMessageLinkButton:
             'invalid_deprecated_stream_narrow_parsed_link',
             'valid_topic_narrow_parsed_link',
             'invalid_topic_narrow_parsed_link',
+            'valid_stream_near_narrow_parsed_link',
+            'invalid_stream_near_narrow_parsed_link',
+            'valid_topic_near_narrow_parsed_link',
+            'invalid_topic_near_narrow_parsed_link',
             'invalid_narrow_link',
         ]
     )
@@ -277,10 +330,21 @@ class TestMessageLinkButton:
               'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
              False,
              True),
+            ({'narrow': 'stream:near', 'message_id': 1,
+              'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
+             True,
+             False),
+            ({'narrow': 'stream:topic:near', 'topic_name': 'Foo',
+              'message_id': 1,
+              'stream': {'stream_id': 1, 'stream_name': 'Stream 1'}},
+             False,
+             True),
         ],
         ids=[
             'stream_narrow',
             'topic_narrow',
+            'stream_near_narrow',
+            'topic_near_narrow',
         ]
     )
     def test__switch_narrow_to(self, parsed_link, narrow_to_stream_called,

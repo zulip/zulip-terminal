@@ -266,6 +266,7 @@ ParsedNarrowLink = TypedDict('ParsedNarrowLink', {
     'narrow': str,
     'stream': DecodedStream,
     'topic_name': str,
+    'message_id': Optional[int],
 }, total=False)
 
 
@@ -315,6 +316,16 @@ class MessageLinkButton(urwid.Button):
             stream_name = hash_util_decode(encoded_stream_data)
             return DecodedStream(stream_id=None, stream_name=stream_name)
 
+    @staticmethod
+    def _decode_message_id(message_id: str) -> Optional[int]:
+        """
+        Returns either the compatible near message ID or None.
+        """
+        try:
+            return int(message_id)
+        except ValueError:
+            return None
+
     @classmethod
     def _parse_narrow_link(cls, link: str) -> ParsedNarrowLink:
         """
@@ -344,6 +355,21 @@ class MessageLinkButton(urwid.Button):
             topic_name = hash_util_decode(fragments[4])
             parsed_link = dict(narrow='stream:topic', stream=stream_data,
                                topic_name=topic_name)
+
+        elif (len_fragments == 5 and fragments[1] == 'stream'
+                and fragments[3] == 'near'):
+            stream_data = cls._decode_stream_data(fragments[2])
+            message_id = cls._decode_message_id(fragments[4])
+            parsed_link = dict(narrow='stream:near', stream=stream_data,
+                               message_id=message_id)
+
+        elif (len_fragments == 7 and fragments[1] == 'stream'
+                and fragments[3] == 'topic' and fragments[5] == 'near'):
+            stream_data = cls._decode_stream_data(fragments[2])
+            topic_name = hash_util_decode(fragments[4])
+            message_id = cls._decode_message_id(fragments[6])
+            parsed_link = dict(narrow='stream:topic:near', stream=stream_data,
+                               topic_name=topic_name, message_id=message_id)
 
         return parsed_link
 
@@ -400,6 +426,13 @@ class MessageLinkButton(urwid.Button):
             if topic_name not in self.model.topics_in_stream(stream_id):
                 return 'Invalid topic name'
 
+        # Validate message ID for near.
+        if 'near' in parsed_link['narrow']:
+            message_id = parsed_link.get('message_id')
+
+            if message_id is None:
+                return 'Invalid message ID'
+
         return ''
 
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
@@ -411,10 +444,21 @@ class MessageLinkButton(urwid.Button):
             self.stream_id = parsed_link['stream']['stream_id']
             self.stream_name = parsed_link['stream']['stream_name']
             self.controller.narrow_to_stream(self)
+        elif 'stream:near' == narrow:
+            self.stream_id = parsed_link['stream']['stream_id']
+            self.stream_name = parsed_link['stream']['stream_name']
+            self.message = dict(id=parsed_link['message_id'])
+            self.controller.narrow_to_stream(self)
         elif 'stream:topic' == narrow:
             self.stream_id = parsed_link['stream']['stream_id']
             self.stream_name = parsed_link['stream']['stream_name']
             self.topic_name = parsed_link['topic_name']
+            self.controller.narrow_to_topic(self)
+        elif 'stream:topic:near' == narrow:
+            self.stream_id = parsed_link['stream']['stream_id']
+            self.stream_name = parsed_link['stream']['stream_name']
+            self.topic_name = parsed_link['topic_name']
+            self.message = dict(id=parsed_link['message_id'])
             self.controller.narrow_to_topic(self)
 
     def handle_narrow_link(self) -> None:
