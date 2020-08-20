@@ -1103,6 +1103,10 @@ class MsgInfoView(PopUpView):
             and controller.model.initial_data['realm_allow_edit_history']
         )
         if self.show_edit_history_label:
+            msg_info[0][1][0] = (
+                'Date & Time (Original)', time.ctime(msg['timestamp'])[:-5]
+            )
+
             keys = ', '.join(map(repr, keys_for_command('EDIT_HISTORY')))
             msg_info[0][1].append(
                 ('Edit History', 'Press {} to view'.format(keys))
