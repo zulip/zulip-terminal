@@ -13,8 +13,9 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
-    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
-    display_error_if_present, index_messages, initial_index, notify, set_count,
+    Message, StreamData, asynch, canonicalize_color, canonicalize_topic,
+    classify_unread_counts, display_error_if_present, index_messages,
+    initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -219,7 +220,7 @@ class Model:
             if len(narrow) == 1:
                 ids = index['stream_msg_ids_by_stream_id'][stream_id]
             elif len(narrow) == 2:
-                topic = narrow[1][1]
+                topic = canonicalize_topic(narrow[1][1])
                 ids = index['topic_msg_ids'][stream_id].get(topic, set())
         elif narrow[0][1] == 'private':
             ids = index['private_msg_ids']

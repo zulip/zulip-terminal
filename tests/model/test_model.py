@@ -286,7 +286,8 @@ class TestModel:
           ['topic', 'BOO']], {
              'topic_msg_ids': {
                  1: {
-                     'BOO': {0, 1}
+                     # NOTE: Use canonicalized topic name for indexing.
+                     'boo': {0, 1}
                  }
              }
          }, {0, 1}),
@@ -294,7 +295,8 @@ class TestModel:
           ['topic', 'BOOBOO']], {
              'topic_msg_ids': {
                  1: {
-                     'BOO': {0, 1}
+                     # NOTE: Use canonicalized topic name for indexing.
+                     'boo': {0, 1}
                  }
              }
          }, set()),

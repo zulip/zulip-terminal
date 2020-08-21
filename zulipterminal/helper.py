@@ -250,6 +250,7 @@ def index_messages(messages: List[Message],
         }
         'topic_msg_ids': {
             123: {    # stream_id
+                # NOTE: canonicalize_topic() is used for indexing.
                 'topic name': {
                     51234,  # message id
                     56454,
@@ -412,8 +413,13 @@ def index_messages(messages: List[Message],
         if msg['type'] == 'stream' and len(narrow) == 2:
             narrow_topic = narrow[1][1]
             message_topic = msg['subject']
-            if narrow_topic == message_topic:
+            # The comparison is in lowercase to avoid missing other case
+            # sensitive topic variants. For instance, case, CASE, cAsE.
+            if compare_lowercase(narrow_topic, message_topic):
                 topics_in_stream = index['topic_msg_ids'][msg['stream_id']]
+                # To have an invariant, use canonicalize_topic() to index IDs
+                # in topic_msg_ids.
+                message_topic = canonicalize_topic(message_topic)
                 if not topics_in_stream.get(message_topic):
                     topics_in_stream[message_topic] = set()
                 topics_in_stream[message_topic].add(msg['id'])
@@ -631,3 +637,15 @@ def display_error_if_present(response: Dict[str, Any], controller: Any
                              ) -> None:
     if response['result'] == 'error' and hasattr(controller, 'view'):
         controller.view.set_footer_text(response['msg'], 3)
+
+
+def canonicalize_topic(topic_name: str) -> str:
+    """
+    Returns a canonicalized topic name to be used for indexing and lookups
+    locally.
+    """
+    return topic_name.lower()
+
+
+def compare_lowercase(a: str, b: str) -> bool:
+    return a.lower() == b.lower()
