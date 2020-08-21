@@ -126,8 +126,9 @@ class Model:
         muted_topics = self.initial_data['muted_topics']
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
         self._muted_topics = {
-            (stream_name, topic): (None if self.server_feature_level is None
-                                   else date_muted[0])
+            (stream_name, canonicalize_topic(topic)): (
+                None if self.server_feature_level is None else date_muted[0]
+            )
             for stream_name, topic, *date_muted in muted_topics
         }  # type: Dict[Tuple[str, str], Optional[int]]
 
@@ -440,7 +441,7 @@ class Model:
         Returns True if topic is muted via muted_topics.
         """
         stream_name = self.stream_dict[stream_id]['name']
-        topic_to_search = (stream_name, topic)
+        topic_to_search = (stream_name, canonicalize_topic(topic))
         return topic_to_search in self._muted_topics.keys()
 
     def _update_initial_data(self) -> None:
