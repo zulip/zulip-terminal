@@ -410,6 +410,11 @@ class Model:
         for stream_id in stream_list:
             response = self.client.get_stream_topics(stream_id)
             if response['result'] == 'success':
+                # NOTE: The server only sends the latest topic name version for
+                # case sensitive topic names.
+                # See (https://github.com/zulip/zulip/blob
+                # /2e5f860d41bb441597f7f088a477d5946cab4b13/zerver/lib
+                # /topic.py#L144).
                 self.index['topics'][stream_id] = [topic['name'] for
                                                    topic in response['topics']]
             else:
@@ -931,8 +936,10 @@ class Model:
         """
         topic_list = self.topics_in_stream(stream_id)
         for topic_iterator, topic in enumerate(topic_list):
-            if topic == topic_name:
-                topic_list.insert(0, topic_list.pop(topic_iterator))
+            if compare_lowercase(topic, topic_name):
+                topic_list.pop(topic_iterator)
+                # Use the latest topic name version to update.
+                topic_list.insert(0, topic_name)
                 break
         else:
             # No previous topics with same topic names are found
