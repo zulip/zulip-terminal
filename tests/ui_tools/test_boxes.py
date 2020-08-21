@@ -1,4 +1,5 @@
 import pytest
+from pytest import param
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
@@ -529,6 +530,27 @@ class TestPanelSearchBox:
 
         assert panel_search_box.caption == ""
         assert panel_search_box.edit_text == panel_search_box.search_text
+
+    @pytest.mark.parametrize("search_text, entered_string, expected_result", [
+        # NOTE: In both backspace cases it is not validated (backspace is not
+        #       shown), but still is handled during editing as normal
+        # NOTE: Unicode backspace case likely doesn't get triggered
+        param('', 'backspace', False, id="no_text-disallow_urwid_backspace"),
+        param('', '\u0008', False, id="no_text-disallow_unicode_backspace"),
+        param('', '\u2003', False, id="no_text-disallow_unicode_em_space"),
+        param('', 'x', True, id="no_text-allow_entry_of_x"),
+        param('', '\u0394', True, id="no_text-allow_entry_of_delta"),
+        param('', ' ', False, id="no_text-disallow_entry_of_space"),
+        param('x', ' ', True, id="text-allow_entry_of_space"),
+        param('x', 'backspace', False, id="text-disallow_urwid_backspace"),
+    ])
+    def test_valid_char(self, panel_search_box,
+                        search_text, entered_string, expected_result):
+        panel_search_box.edit_text = search_text
+
+        result = panel_search_box.valid_char(entered_string)
+
+        assert result == expected_result
 
     @pytest.mark.parametrize("log, expect_body_focus_set", [
         ([], False),

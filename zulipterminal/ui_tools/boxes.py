@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime
 from sys import platform
@@ -1263,6 +1264,20 @@ class PanelSearchBox(urwid.Edit):
     def reset_search_text(self) -> None:
         self.set_caption('')
         self.set_edit_text(self.search_text)
+
+    def valid_char(self, ch: str) -> bool:
+        # This method 'strips' leading space *before* entering it in the box
+        if self.edit_text:
+            # Use regular validation if already have text
+            return super().valid_char(ch)
+        elif len(ch) != 1:
+            # urwid expands some unicode to strings to be useful
+            # (so we need to work around eg 'backspace')
+            return False
+        else:
+            # Skip unicode 'Control characters' and 'space Zeperators'
+            # This includes various invalid characters and complex spaces
+            return unicodedata.category(ch) not in ('Cc', 'Zs')
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if ((is_command_key('ENTER', key) and self.get_edit_text() == '')
