@@ -1012,9 +1012,21 @@ class Model:
             # the event didn't have a 'subject' update.
             if 'subject' in event:
                 new_subject = event['subject']
+                stream_id = event['stream_id']
                 for msg_id in event['message_ids']:
                     self.index['messages'][msg_id]['subject'] = new_subject
                     self._update_rendered_view(msg_id)
+                if stream_id in self.index['topics']:
+                    # If topic view is open, reload list else reset cache.
+                    if (hasattr(self.controller, 'view')
+                        and self.controller.view.left_panel.
+                            stream_is_in_topic_view(message['stream_id'])):
+                        self._fetch_topics_in_streams([stream_id])
+                        self.controller.view.left_panel.show_topics_view(
+                                self.controller.view.topic_w.stream_button)
+                        self.controller.update_screen()
+                    else:
+                        self.index['topics'][stream_id] = []
 
     def _handle_reaction_event(self, event: Event) -> None:
         """

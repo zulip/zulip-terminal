@@ -967,79 +967,96 @@ class TestModel:
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
-    @pytest.mark.parametrize('response, update_call_count, new_index', [
+    @pytest.mark.parametrize(['response', 'update_call_count', 'new_index',
+                              'topic_view_enabled'], [
         ({  # Only subject of 1 message is updated.
             'message_id': 1,
             'subject': 'new subject',
+            'stream_id': 10,
             'message_ids': [1],
         }, 1, {
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'new subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1}
-        }),
+            'edited_messages': {1},
+            'topics': {10: []},
+        }, False),
         ({  # Subject of 2 messages is updated
             'message_id': 1,
             'subject': 'new subject',
+            'stream_id': 10,
             'message_ids': [1, 2],
         }, 2, {
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'new subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'new subject'
                 }},
-            'edited_messages': {1}
-        }),
+            'edited_messages': {1},
+            'topics': {10: []},
+        }, False),
         ({  # Message content is updated
             'message_id': 1,
+            'stream_id': 10,
             'rendered_content': '<p>new content</p>',
         }, 1, {
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': '<p>new content</p>',
                     'subject': 'old subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1}
-        }),
+            'edited_messages': {1},
+            'topics': {10: ['old subject']},
+        }, False),
         ({  # Both message content and subject is updated.
             'message_id': 1,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'stream_id': 10,
             'message_ids': [1],
         }, 2, {
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': '<p>new content</p>',
                     'subject': 'new subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1}
-        }),
+            'edited_messages': {1},
+            'topics': {10: []},
+        }, False),
         ({  # Some new type of update which we don't handle yet.
             'message_id': 1,
             'foo': 'boo',
@@ -1047,55 +1064,99 @@ class TestModel:
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': {1}
-        }),
+            'edited_messages': {1},
+            'topics': {10: ['old subject']},
+        }, False),
         ({  # message_id not present in index.
             'message_id': 3,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'stream_id': 10,
             'message_ids': [3],
         }, 0, {
             'messages': {
                 1: {
                     'id': 1,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 },
                 2: {
                     'id': 2,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject'
                 }},
-            'edited_messages': set()
-        }),
+            'edited_messages': set(),
+            'topics': {10: ['old subject']},
+        }, False),
+        ({  # Message content is updated and topic view is enabled.
+            'message_id': 1,
+            'rendered_content': '<p>new content</p>',
+            'subject': 'new subject',
+            'stream_id': 10,
+            'message_ids': [1],
+        }, 2, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'stream_id': 10,
+                    'content': '<p>new content</p>',
+                    'subject': 'new subject'
+                },
+                2: {
+                    'id': 2,
+                    'stream_id': 10,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': {1},
+            # _fetch_topics_in_streams will update this.
+            'topics': {10: ['old subject']},
+        }, True),
     ])
     def test__handle_update_message_event(self, mocker, model,
                                           response, new_index,
-                                          update_call_count):
+                                          update_call_count,
+                                          topic_view_enabled):
         model.index = {
             'messages': {
                 message_id: {
                     'id': message_id,
+                    'stream_id': 10,
                     'content': 'old content',
                     'subject': 'old subject',
                 } for message_id in [1, 2]
             },
-            'edited_messages': set()
+            'edited_messages': set(),
+            'topics': {10: ['old subject']},
         }
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        fetch_topics = mocker.patch(
+                    'zulipterminal.model.Model._fetch_topics_in_streams')
+        (model.controller.view.left_panel.stream_is_in_topic_view.
+            return_value) = topic_view_enabled
 
         model._handle_update_message_event(response)
 
         assert model.index == new_index
         assert model._update_rendered_view.call_count == update_call_count
+        if topic_view_enabled:
+            fetch_topics.assert_called_once_with([response['stream_id']])
+            stream_button = model.controller.view.topic_w.stream_button
+            (model.controller.view.left_panel.show_topics_view.
+                assert_called_once_with(stream_button))
+            model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize('subject, narrow, new_log_len', [
         ('foo', [['stream', 'boo'], ['topic', 'foo']], 2),
