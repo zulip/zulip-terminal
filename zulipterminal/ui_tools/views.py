@@ -429,11 +429,7 @@ class TopicsView(urwid.Frame):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('TOGGLE_TOPIC', key):
             # Exit topic view
-            self.view.left_panel.contents[1] = (
-                self.view.left_panel.stream_v,
-                self.view.left_panel.options(height_type="weight")
-                )
-            self.view.left_panel.is_in_topic_view = False
+            self.view.left_panel.show_stream_view()
         elif is_command_key('GO_RIGHT', key):
             self.view.show_left_panel(visible=False)
             self.view.body.focus_col = 1
@@ -816,13 +812,22 @@ class LeftColumnView(urwid.Pile):
 
     def update_stream_view(self) -> None:
         self.stream_v = self.streams_view()
-        if self.is_in_topic_view:
-            return
+        if not self.is_in_topic_view:
+            self.show_stream_view()
 
-        self.contents = [
-            (self.menu_v, ('given', 4)),
-            (self.stream_v, ('weight', 1)),
-        ]
+    def show_stream_view(self) -> None:
+        self.is_in_topic_view = False
+        self.contents[1] = (
+            self.stream_v,
+            self.options(height_type="weight")
+        )
+
+    def show_topic_view(self, stream_button: Any) -> None:
+        self.is_in_topic_view = True
+        self.contents[1] = (
+            self.topics_view(stream_button),
+            self.options(height_type="weight")
+        )
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (

@@ -671,10 +671,8 @@ class TestTopicsView:
         size = widget_size(topic_view)
         mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.left_panel = mocker.Mock()
-        topic_view.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
         topic_view.keypress(size, key)
-        (topic_view.view.left_panel.
-            options.assert_called_once_with(height_type="weight"))
+        topic_view.view.left_panel.show_stream_view.assert_called_once_with()
 
     @pytest.mark.parametrize('key', keys_for_command('GO_RIGHT'))
     def test_keypress_GO_RIGHT(self, mocker, topic_view, key, widget_size):
@@ -2649,13 +2647,10 @@ class TestStreamButton:
                                          widget_size):
         size = widget_size(stream_button)
         stream_button.view.left_panel = mocker.Mock()
-        stream_button.view.left_panel.is_in_topic_view = None
-        stream_button.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
         stream_button.keypress(size, key)
 
-        assert stream_button.view.left_panel.is_in_topic_view is True
-        (stream_button.view.left_panel.
-            options.assert_called_once_with(height_type="weight"))
+        stream_button.view.left_panel.show_topic_view.assert_called_once_with(
+                                                stream_button)
 
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_MUTE_STREAM'))
     def test_keypress_TOGGLE_MUTE_STREAM(self, mocker, stream_button, key,
