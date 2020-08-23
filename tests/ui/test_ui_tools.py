@@ -1315,7 +1315,7 @@ class TestMessageBox:
         assert msg_box.recipients_emails == 'foo@zulip.com'
         msg_box._is_private_message_to_self.assert_called_once_with()
 
-    @pytest.mark.parametrize('content, markup', [
+    @pytest.mark.parametrize('content, expected_markup', [
         ('', []),
         ('<p>hi</p>', ['', 'hi']),
         ('<span class="user-mention">@Bob Smith',
@@ -1498,25 +1498,21 @@ class TestMessageBox:
         'strikethrough_del', 'inline_image', 'inline_ref',
         'emoji', 'preview-twitter', 'zulip_extra_emoji', 'custom_emoji'
     ])
-    def test_soup2markup(self, content, markup, mocker):
+    def test_soup2markup(self, content, expected_markup, mocker):
         mocker.patch(BOXES + '.get_localzone',
                      return_value=pytz.timezone('Asia/Kolkata'))
-        message = dict(display_recipient=['x'], stream_id=5, subject='hi',
-                       sender_email='foo@zulip.com', id=4, sender_id=4209,
-                       type='stream',  # NOTE Output should not vary with PM
-                       flags=[], content=content, sender_full_name='bob smith',
-                       is_me_message=False, timestamp=99, reactions=[])
-        self.model.stream_dict = {
-            5: {  # matches stream_id above
-                'color': '#bd6',
-            },
-        }
-        self.model.server_url = SERVER_URL
         # NOTE Absence of previous (last) message should not affect markup
-        msg_box = MessageBox(message, self.model, None)
+        soup = BeautifulSoup(content, 'lxml').find(name='body')
+        metadata = dict(
+            server_url=SERVER_URL,
+            message_links=OrderedDict(),
+            time_mentions=list(),
+            bq_len=0,
+        )
 
-        soup = BeautifulSoup(message['content'], 'lxml').find(name='body')
-        assert msg_box.soup2markup(soup) == [''] + markup
+        markup, *_ = MessageBox.soup2markup(soup, metadata)
+
+        assert markup == [''] + expected_markup
 
     @pytest.mark.parametrize('message, last_message', [
         ({
@@ -1953,13 +1949,11 @@ class TestMessageBox:
         "multi-line level 2",
         "quoted level 2-1-2",
     ])
-    def test_transform_content(self, mocker, raw_html, expected_content,
-                               messages_successful_response):
+    def test_transform_content(self, mocker, raw_html, expected_content):
         expected_content = expected_content.replace('{}', QUOTED_TEXT_MARKER)
-        message = messages_successful_response['messages'][0]
-        msg_box = MessageBox(message, self.model, message)
-        msg_box.message['content'] = raw_html
-        content = msg_box.transform_content()
+
+        content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
+
         rendered_text = Text(content)
         assert rendered_text.text == expected_content
 
