@@ -884,12 +884,17 @@ class MessageBox(urwid.Pile):
                              align='left', left=8, width=('relative', 100),
                              min_width=10, right=2)
 
-    def soup2markup(self, soup: Any, **state: Any) -> List[Any]:
+    @classmethod
+    def soup2markup(cls, soup: Any, metadata: Dict[str, Any],
+                    **state: Any
+                    ) -> Tuple[List[Any],
+                               'OrderedDict[str, Tuple[str, int, bool]]',
+                               List[Tuple[str, str]]]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = ['']
         if soup is None:  # This is not iterable, so return promptly
-            return markup
+            return markup, metadata['message_links'], metadata['time_mentions']
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             'br': '',  # No indicator of absence
@@ -907,9 +912,8 @@ class MessageBox(urwid.Pile):
         for element in soup:
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
-                if (hasattr(self, 'bq_len') and element == '\n'
-                        and self.bq_len > 0):
-                    self.bq_len -= 1
+                if element == '\n' and metadata.get('bq_len', 0) > 0:
+                    metadata['bq_len'] -= 1
                     continue
                 markup.append(element)
             elif (element.name == 'div' and element.attrs
@@ -933,7 +937,7 @@ class MessageBox(urwid.Pile):
                     markup.append(unrendered_template.format(text))
             elif element.name in ('p', 'del'):
                 # PARAGRAPH, STRIKE-THROUGH
-                markup.extend(self.soup2markup(element))
+                markup.extend(cls.soup2markup(element, metadata)[0])
             elif (element.name == 'span' and element.attrs
                   and 'emoji' in element.attrs.get('class', [])):
                 # EMOJI
@@ -959,7 +963,7 @@ class MessageBox(urwid.Pile):
                 parsed_link = urlparse(link)
                 if not parsed_link.scheme:  # => relative link
                     # Prepend org url to convert it to an absolute link
-                    link = urljoin(self.model.server_url, link)
+                    link = urljoin(metadata['server_url'], link)
 
                 text = text if text else link
 
@@ -978,9 +982,9 @@ class MessageBox(urwid.Pile):
                     last_segment = text.split('/')[-1]
                     if '.' in last_segment:
                         new_text = last_segment  # Filename.
-                    elif text.startswith(self.model.server_url):
+                    elif text.startswith(metadata['server_url']):
                         # Relative URL.
-                        new_text = text.split(self.model.server_url)[-1]
+                        new_text = text.split(metadata['server_url'])[-1]
                     else:
                         new_text = (
                             parsed_link.netloc if parsed_link.netloc
@@ -994,18 +998,18 @@ class MessageBox(urwid.Pile):
                         show_footlink = False
 
                 # Detect duplicate links to save screen real estate.
-                if link not in self.message_links:
-                    self.message_links[link] = (
-                        text, len(self.message_links) + 1, show_footlink
+                if link not in metadata['message_links']:
+                    metadata['message_links'][link] = (
+                        text, len(metadata['message_links']) + 1, show_footlink
                     )
                 else:
                     # Append the text if its link already exist with a
                     # different text.
                     saved_text, saved_link_index, saved_footlink_status = (
-                        self.message_links[link]
+                        metadata['message_links'][link]
                     )
                     if saved_text != text:
-                        self.message_links[link] = (
+                        metadata['message_links'][link] = (
                             f"{saved_text}, {text}",
                             saved_link_index,
                             show_footlink or saved_footlink_status,
@@ -1014,12 +1018,13 @@ class MessageBox(urwid.Pile):
                 markup.extend([
                     ('msg_link', text),
                     ' ',
-                    ('msg_link_index', f"[{self.message_links[link][1]}]"),
+                    ('msg_link_index',
+                     f"[{metadata['message_links'][link][1]}]"),
                 ])
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
-                    'msg_quote', self.soup2markup(element)
+                    'msg_quote', cls.soup2markup(element, metadata)[0]
                 ))
             elif element.name == 'code':
                 # CODE (INLINE?)
@@ -1050,12 +1055,14 @@ class MessageBox(urwid.Pile):
                 if element.name == 'ol':
                     start_number = int(element.attrs.get('start', 1))
                     state['list_index'] = start_number
-                    markup.extend(self.soup2markup(element, **state))
+                    markup.extend(cls.soup2markup(element, metadata,
+                                                  **state)[0])
                     del state['list_index']  # reset at end of this list
                 else:
                     if 'list_index' in state:
                         del state['list_index']  # this is unordered
-                    markup.extend(self.soup2markup(element, **state))
+                    markup.extend(cls.soup2markup(element, metadata,
+                                                  **state)[0])
                 del state['indent_level']  # reset indents after any list
             elif element.name == 'li':
                 # LIST ITEMS (LI)
@@ -1077,7 +1084,7 @@ class MessageBox(urwid.Pile):
                     ]
                     markup.append(f"{'  ' * indent}{chars[(indent - 1) % 3]} ")
                 state['list_start'] = False
-                markup.extend(self.soup2markup(element, **state))
+                markup.extend(cls.soup2markup(element, metadata, **state)[0])
             elif element.name == 'table':
                 markup.extend(render_table(element))
             elif element.name == 'time':
@@ -1101,10 +1108,10 @@ class MessageBox(urwid.Pile):
                 source_text = (
                     f"Original text was {element.text.strip()}"
                 )
-                self.time_mentions.append((time_string, source_text))
+                metadata['time_mentions'].append((time_string, source_text))
             else:
-                markup.extend(self.soup2markup(element))
-        return markup
+                markup.extend(cls.soup2markup(element, metadata)[0])
+        return markup, metadata['message_links'], metadata['time_mentions']
 
     def main_view(self) -> List[Any]:
 
@@ -1188,7 +1195,10 @@ class MessageBox(urwid.Pile):
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content = self.transform_content()
+        content, self.message_links, self.time_mentions = (
+            self.transform_content(self.message['content'],
+                                   self.model.server_url)
+        )
 
         if self.message['id'] in self.model.index['edited_messages']:
             edited_label_size = 7
@@ -1228,15 +1238,30 @@ class MessageBox(urwid.Pile):
         ]
         return [part for part, condition in parts if condition]
 
-    def transform_content(self) -> Tuple[None, Any]:
-        soup = BeautifulSoup(self.message['content'], 'lxml')
+    @classmethod
+    def transform_content(cls, content: Any, server_url: str,
+                          ) -> Tuple[Tuple[None, Any],
+                                     'OrderedDict[str, Tuple[str, int, bool]]',
+                                     List[Tuple[str, str]]]:
+        soup = BeautifulSoup(content, 'lxml')
         body = soup.find(name='body')
+
+        metadata = dict(
+            server_url=server_url,
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )  # type: Dict[str, Any]
+
         if body and body.find(name='blockquote'):
-            self.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
+            metadata['bq_len'] = (
+                cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
+            )
 
-        return (None, self.soup2markup(body))
+        markup, message_links, time_mentions = cls.soup2markup(body, metadata)
+        return (None, markup), message_links, time_mentions
 
-    def indent_quoted_content(self, soup: Any, padding_char: str) -> None:
+    @staticmethod
+    def indent_quoted_content(soup: Any, padding_char: str) -> int:
         """
         We indent quoted text by padding them.
         The extent of indentation depends on their level of quoting.
@@ -1252,7 +1277,7 @@ class MessageBox(urwid.Pile):
         """
         pad_count = 1
         blockquote_list = soup.find_all('blockquote')
-        self.bq_len = len(blockquote_list)
+        bq_len = len(blockquote_list)
         for tag in blockquote_list:
             child_list = tag.findChildren(recursive=False)
             actual_padding = f"{padding_char} " * pad_count
@@ -1276,6 +1301,7 @@ class MessageBox(urwid.Pile):
                             next_s.replace_with(insert_tag)
                 child.insert_before(new_tag)
             pad_count += 1
+        return bq_len
 
     def selectable(self) -> bool:
         # Returning True, indicates that this widget

@@ -9,6 +9,8 @@ from zulipterminal.version import ZT_VERSION
 
 CORE = "zulipterminal.core"
 
+SERVER_URL = "https://chat.zulip.zulip"
+
 
 class TestController:
     @pytest.fixture(autouse=True)
@@ -41,6 +43,7 @@ class TestController:
                             self.in_explore_mode, self.autohide,
                             self.notify_enabled)
         result.view.message_view = mocker.Mock()  # set in View.__init__
+        result.model.server_url = SERVER_URL
         return result
 
     def test_initialize_controller(self, controller, mocker) -> None:
