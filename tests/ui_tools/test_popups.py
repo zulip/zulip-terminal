@@ -577,7 +577,7 @@ class TestStreamInfoView:
             self.stream_id: {
                 'name': 'books',
                 'invite_only': False,
-                'description': 'hey',
+                'rendered_description': '<p>Hey</p>',
                 'subscribers': [],
                 'stream_weekly_traffic': 123,
             }
@@ -597,6 +597,34 @@ class TestStreamInfoView:
         self.controller.show_stream_members.assert_called_once_with(
             stream_id=self.stream_id,
         )
+
+    @pytest.mark.parametrize('rendered_description, expected_markup', [
+        (
+            '<p>Simple</p>',
+            (None, ['', '', 'Simple']),
+        ),
+        (
+            '<p>A city in Italy <a href="http://genericlink.com">ABC</a>'
+            '<strong>Bold</strong>',
+            (None, ['', '', 'A city in Italy ', ('msg_link', 'ABC'), ' ',
+                    ('msg_link_index', '[1]'), ('msg_bold', 'Bold')]),
+        ),
+    ])
+    def test_markup_descrption(self, rendered_description, expected_markup,
+                               stream_id=10):
+        self.controller.model.stream_dict = {
+            stream_id: {
+                'name': 'ZT',
+                'invite_only': False,
+                'subscribers': [],
+                'stream_weekly_traffic': 123,
+                'rendered_description': rendered_description,
+            }
+        }
+
+        stream_info_view = StreamInfoView(self.controller, stream_id)
+
+        assert stream_info_view.markup_desc == expected_markup
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})
