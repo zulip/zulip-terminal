@@ -17,7 +17,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.helper import (
     Message, asynch, edit_mode_captions, match_stream, match_user,
 )
-from zulipterminal.ui_tools.boxes import PanelSearchBox
+from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
     StreamButton, TopicButton, UnreadPMButton, UserButton,
@@ -1087,18 +1087,22 @@ class StreamInfoView(PopUpView):
         stream_marker = (STREAM_MARKER_PRIVATE if stream['invite_only']
                          else STREAM_MARKER_PUBLIC)
         title = '{} {}'.format(stream_marker, stream['name'])
+        rendered_desc = stream['rendered_description']
+        self.markup_desc, *_ = MessageBox.transform_content(
+            rendered_desc,
+            self.controller.model.server_url,
+        )
+        desc = urwid.Text(self.markup_desc)
 
-        desc = stream['description']
+        stream_info_content = [
+            ('Stream Details', [
+                ('Weekly Message Count', str(weekly_msg_count)),
+                ('Stream Members', '{} (Press {} to view list)'.format(
+                  total_members, member_keys)),
+            ]),
+            ('Stream settings', []),
+        ]  # type: PopUpViewTableContent
 
-        stream_info_content = [('', [desc]),
-                               ('Stream Details', [
-                                   ('Weekly Message Count',
-                                    str(weekly_msg_count)),
-                                   ('Stream Members',
-                                    '{} (Press {} to view list)'.format(
-                                        total_members, member_keys))
-                               ]),
-                               ('Stream settings', [])]
         popup_width, column_widths = self.calculate_table_widths(
             stream_info_content, len(title))
 
@@ -1117,9 +1121,14 @@ class StreamInfoView(PopUpView):
         # Manual because calculate_table_widths does not support checkboxes.
         # Add 4 to checkbox label to accomodate the checkbox itself.
         popup_width = max(popup_width, len(muted_setting.label) + 4,
-                          len(pinned_setting.label) + 4)
+                          len(pinned_setting.label) + 4, desc.pack()[0])
         self.widgets = self.make_table_with_categories(stream_info_content,
                                                        column_widths)
+
+        # Stream description.
+        self.widgets.insert(0, desc)
+        self.widgets.insert(1, urwid.Text(''))  # Add a newline.
+
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
         super().__init__(controller, self.widgets, 'STREAM_DESC', popup_width,
