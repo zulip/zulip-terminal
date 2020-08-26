@@ -85,6 +85,9 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                                 help='Don\'t autohide list of '
                                      'users and streams.')
 
+    parser.add_argument('-e', '--explore', action='store_true',
+                        help='Do not mark messages as read in the session.')
+
     parser.add_argument('-v',
                         '--version',
                         action='store_true',
@@ -321,6 +324,7 @@ def main(options: Optional[List[str]]=None) -> None:
         Controller(zuliprc_path,
                    theme_data,
                    int(args.color_depth),
+                   args.explore,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         print(in_color('red',

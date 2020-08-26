@@ -225,6 +225,10 @@ class MessageView(urwid.ListBox):
             return
         self.update_search_box_narrow(msg_w.original_widget)
 
+        # Do not read messages in explore mode.
+        if self.model.controller.in_explore_mode:
+            return
+
         # Do not read messages in any search narrow.
         if self.model.is_search_narrow():
             return

@@ -29,10 +29,11 @@ class Controller:
     """
 
     def __init__(self, config_file: str, theme: ThemeSpec,
-                 color_depth: int,
+                 color_depth: int, in_explore_mode: bool,
                  autohide: bool, notify: bool, footlinks: bool) -> None:
         self.theme = theme
         self.color_depth = color_depth
+        self.in_explore_mode = in_explore_mode
         self.autohide = autohide
         self.notify_enabled = notify
         self.footlinks_enabled = footlinks

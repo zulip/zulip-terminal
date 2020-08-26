@@ -62,6 +62,7 @@ def test_main_help(capsys, options):
         '--autohide',
         '--no-autohide',
         '-v, --version',
+        '-e, --explore',
         '--color-depth'
     }
     optional_argument_lines = {line[2:] for line in lines
