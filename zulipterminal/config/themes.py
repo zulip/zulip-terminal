@@ -35,6 +35,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     "msg_code": "bold",
     "msg_bold": "bold",
     "msg_time": "bold",
+    "msg_spoiler": "bold",
     "footer": "standout",
     "footer_contrast": "standout",
     "starred": "bold",
@@ -95,6 +96,7 @@ LIGHTBLUEBOLD = f"{LIGHTBLUE}, bold"
 YELLOW = "h172"  # neutral_yellow
 YELLOWBOLD = f"{YELLOW}, bold"
 LIGHTGREEN = "h142"  # bright_green
+LIGHTGREENBOLD = "%s, bold" % LIGHTGREEN
 LIGHTRED = "h167"  # bright_red
 LIGHTREDBOLD = f"{LIGHTRED}, bold"
 GRAY = "h244"  # gray_244
@@ -115,6 +117,7 @@ LIGHTBLUEBOLD24 = f"{LIGHTBLUE24}, bold"
 YELLOW24 = "#d79921"  # neutral_yellow
 YELLOWBOLD24 = f"{YELLOW24}, bold"
 LIGHTGREEN24 = "#b8bb26"  # bright_green
+LIGHTGREENBOLD24 = f"{LIGHTGREEN24}, bold"
 LIGHTRED24 = "#fb4934"  # bright_red
 LIGHTREDBOLD24 = f"{LIGHTRED24}, bold"
 GRAY24 = "#928374"  # gray_244
@@ -188,6 +191,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             DEF['white:bold'],         DEF['black']),
         ('msg_time',       'black',                   'white',
          None,             DEF['black'],              DEF['white']),
+        ('msg_spoiler',    'light green, bold',       'black',
+         None,             DEF['light_green:bold'],   DEF['black']),
         ('footer',         'black',                   'light gray',
          None,             DEF['black'],              DEF['light_gray']),
         ('footer_contrast', 'white',                  'black',
@@ -292,6 +297,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             WHITEBOLD,         BLACK),
         ('msg_time',       'black',           'white',
          None,             BLACK,             WHITE),
+        ('msg_spoiler',    'light green, bold', 'black',
+         None,             LIGHTGREENBOLD,    BLACK),
         ('footer',         'black',           'light gray',
          None,             BLACK,             LIGHTGRAY),
         ('footer_contrast', 'white',          'black',
@@ -396,6 +403,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             WHITEBOLD24,       BLACK24),
         ('msg_time',       'black',           'white',
          None,             BLACK24,           WHITE24),
+        ('msg_spoiler',    'light green, bold', 'black',
+         None,             LIGHTGREENBOLD24,  BLACK24),
         ('footer',         'black',           'light gray',
          None,             BLACK24,           LIGHTGRAY24),
         ('footer_contrast', 'white',          'black',
@@ -471,6 +480,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_code',       'black',           'light gray'),
         ('msg_bold',       'white, bold',     'dark gray'),
         ('msg_time',       'white',           'dark gray'),
+        ('msg_spoiler',    'light green, bold', 'white'),
         ('footer',         'white',           'dark gray'),
         ('footer_contrast', 'black',          'white'),
         ('starred',        'light red, bold', 'white'),
@@ -523,6 +533,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_code',       'dark blue',       'white'),
         ('msg_bold',       'white, bold',     'dark blue'),
         ('msg_time',       'dark blue',       'white'),
+        ('msg_spoiler',    'light green, bold', 'light blue'),
         ('footer',         'white',           'dark gray'),
         ('footer_contrast', 'black',          'white'),
         ('starred',        'light red, bold', 'light blue'),

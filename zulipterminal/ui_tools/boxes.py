@@ -45,7 +45,7 @@ from zulipterminal.helper import (
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
-from zulipterminal.ui_tools.tables import render_table
+from zulipterminal.ui_tools.tables import render_table, row_with_only_border
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -1200,6 +1200,45 @@ class MessageBox(urwid.Pile):
 
                 source_text = f"Original text was {tag_text.strip()}"
                 metadata["time_mentions"].append((time_string, source_text))
+            elif (
+                element.name == "div"
+                and element.attrs
+                and "spoiler-block" in element.attrs.get("class", [])
+            ):
+                # SPOILERS
+                # Spoiler header.
+                header = element.find(class_="spoiler-header")
+                # Remove all the newlines.
+                header.contents = [part for part in header.contents if part != "\n"]
+
+                # Patch header with the deafult header content if it is empty.
+                if not header.contents:
+                    default = BeautifulSoup("<p>Spoiler</p>", "html.parser")
+                    header.contents.append(default)
+
+                processed_header = cls.soup2markup(header, metadata)[0]
+                processed_header_len = sum(
+                    len(part[1]) if isinstance(part, tuple) else len(part)
+                    for part in processed_header
+                )
+                marker = "Spoiler:"
+
+                widths = [len(marker), processed_header_len]
+                top_border = row_with_only_border("┌", "─", "┬", "┐", widths)
+                bottom_border = row_with_only_border(
+                    "└", "─", "┴", "┘", widths, newline=False
+                )
+                markup.extend(top_border)
+                markup.extend(
+                    [
+                        "│ ",
+                        ("msg_spoiler", marker),
+                        " │ ",
+                        *processed_header,
+                        " │\n",
+                    ]
+                )
+                markup.extend(bottom_border)
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
         return markup, metadata["message_links"], metadata["time_mentions"]
