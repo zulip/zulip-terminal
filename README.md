@@ -58,6 +58,8 @@ If it doesn't find this file, you have two options:
 
    Your personal zuliprc file can be obtained from Zulip servers in your account settings in the web application, which gives you all the permissions you have there. Bot zuliprc files can be downloaded from a similar area for each bot, and will have more limited permissions.
 
+We suggest running `zulip-term` using the `-e` or `--explore` option (in explore mode) when you are trying Zulip Terminal for the first time, where we intentionally do not mark messages as read.
+
 ## Configuration
 
 The `zuliprc` file contains information to connect to your chat server in the `[api]` section, but also optional configuration for `zulip-term` in the `[zterm]` section:

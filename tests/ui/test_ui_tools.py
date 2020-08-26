@@ -338,6 +338,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
+        msg_view.model.controller.in_explore_mode = False
         msg_view.log = mocker.Mock()
         msg_view.body = mocker.Mock()
         msg_w = mocker.MagicMock()
@@ -384,6 +385,22 @@ class TestMessageView:
 
         self.model.mark_message_ids_as_read.assert_not_called()
 
+    def test_read_message_in_explore_mode(self, mocker, msg_box):
+        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
+        mocker.patch(VIEWS + ".MessageView.set_focus")
+        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
+        msg_view = MessageView(self.model, self.view)
+        msg_w = mocker.Mock()
+        msg_view.body = mocker.Mock()
+        msg_view.body.get_focus.return_value = (msg_w, 0)
+        msg_view.model.is_search_narrow = lambda: False
+        msg_view.model.controller.in_explore_mode = True
+
+        msg_view.read_message()
+
+        assert msg_view.update_search_box_narrow.called
+        assert not self.model.mark_message_ids_as_read.called
+
     def test_read_message_search_narrow(self, mocker, msg_box):
         mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
         mocker.patch(VIEWS + ".MessageView.set_focus")
@@ -394,6 +411,7 @@ class TestMessageView:
         msg_view.body = mocker.Mock()
         msg_view.body.get_focus.return_value = (msg_w, 0)
         msg_view.model.is_search_narrow = lambda: True
+        msg_view.model.controller.in_explore_mode = False
 
         msg_view.read_message()
 
@@ -407,6 +425,7 @@ class TestMessageView:
         mocker.patch(VIEWS + ".MessageView.set_focus")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
+        msg_view.model.controller.in_explore_mode = False
         msg_view.log = [0, 1]
         msg_view.body = mocker.Mock()
         msg_view.update_search_box_narrow = mocker.Mock()

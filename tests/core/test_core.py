@@ -29,10 +29,12 @@ class TestController:
 
         self.config_file = 'path/to/zuliprc'
         self.theme = 'default'
+        self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
         self.footlinks_enabled = True
-        result = Controller(self.config_file, self.theme, 256, self.autohide,
+        result = Controller(self.config_file, self.theme, 256,
+                            self.in_explore_mode, self.autohide,
                             self.notify_enabled, self.footlinks_enabled)
         result.view.message_view = mocker.Mock()  # set in View.__init__
         return result
