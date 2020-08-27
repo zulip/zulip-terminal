@@ -20,8 +20,8 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, match_emoji, match_group, match_stream,
-    match_topics, match_user,
+    Message, compare_lowercase, format_string, match_emoji, match_group,
+    match_stream, match_topics, match_user,
 )
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
@@ -453,7 +453,7 @@ class MessageBox(urwid.Pile):
         if self.message['type'] == 'stream':
             return not (
                 last_msg['type'] == 'stream'
-                and self.topic_name == last_msg['subject']
+                and compare_lowercase(self.topic_name, last_msg['subject'])
                 and self.stream_name == last_msg['display_recipient']
             )
         elif self.message['type'] == 'private':

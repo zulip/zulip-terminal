@@ -11,7 +11,10 @@ from zulipterminal.config.keys import (
 from zulipterminal.config.symbols import (
     CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
 )
-from zulipterminal.helper import Message, asynch, match_stream, match_user
+from zulipterminal.helper import (
+    Message, asynch, canonicalize_topic, compare_lowercase, match_stream,
+    match_user,
+)
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
@@ -394,8 +397,20 @@ class TopicsView(urwid.Frame):
         # More recent topics are found towards the beginning
         # of the list.
         for topic_iterator, topic_button in enumerate(self.log):
-            if topic_button.topic_name == topic_name:
-                self.log.insert(0, self.log.pop(topic_iterator))
+            if compare_lowercase(topic_button.topic_name, topic_name):
+                updated_topic_button = self.log.pop(topic_iterator)
+                # Use the latest topic name version to update the topic list if
+                # it has been updated.
+                if topic_button.topic_name != topic_name:
+                    updated_topic_button = TopicButton(
+                        stream_id=stream_id,
+                        topic=topic_name,
+                        controller=self.view.controller,
+                        width=self.view.LEFT_WIDTH,
+                        count=self.view.model.unread_counts['unread_topics'].
+                        get((stream_id, canonicalize_topic(topic_name)), 0),
+                    )
+                self.log.insert(0, updated_topic_button)
                 self.list_box.set_focus_valign('bottom')
                 if sender_id == self.view.model.user_id:
                     self.list_box.set_focus(0)
@@ -794,7 +809,7 @@ class LeftColumnView(urwid.Pile):
                 controller=self.controller,
                 width=self.width,
                 count=self.model.unread_counts['unread_topics'].
-                get((stream_id, topic), 0)
+                get((stream_id, canonicalize_topic(topic)), 0)
             )
             for topic in topics
         ]

@@ -551,7 +551,8 @@ def index_topic(empty_index):
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
     """
-    diff = {'topic_msg_ids': defaultdict(dict, {205: {'Test': {537286}}})}
+    # NOTE: Use canonicalized topic name for indexing.
+    diff = {'topic_msg_ids': defaultdict(dict, {205: {'test': {537286}}})}
     return dict(empty_index, **diff)
 
 
@@ -799,8 +800,8 @@ def classified_unread_counts():
         'all_msg': 12,
         'all_pms': 8,
         'unread_topics': {
-            (1000, 'Some general unread topic'): 3,
-            (99, 'Some private unread topic'): 1
+            (1000, 'some general unread topic'): 3,
+            (99, 'some private unread topic'): 1
         },
         'unread_pms': {
             1: 2,

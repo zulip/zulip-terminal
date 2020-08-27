@@ -124,7 +124,8 @@ class TestController:
         widget = (controller.view.message_view.log
                   .extend.call_args_list[0][0][0][0])
         stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
-        id_list = index_topic['topic_msg_ids'][stream_id][topic_name]
+        # NOTE: Use canonicalized topic name for lookup.
+        id_list = index_topic['topic_msg_ids'][stream_id][topic_name.lower()]
         assert {widget.original_widget.message['id']} == id_list
 
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):

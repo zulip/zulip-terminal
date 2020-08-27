@@ -1163,8 +1163,8 @@ class TestLeftColumnView:
                 1000: 1,
             },
             'unread_topics': {
-                (205, 'TOPIC1'): 34,
-                (205, 'TOPIC2'): 100,
+                (205, 'topic1'): 34,
+                (205, 'topic2'): 100,
             },
             'all_mentions': 1,
         }
@@ -1219,7 +1219,7 @@ class TestLeftColumnView:
         topic_button = mocker.patch(VIEWS + '.TopicButton')
         topics_view = mocker.patch(VIEWS + '.TopicsView')
         line_box = mocker.patch(VIEWS + '.urwid.LineBox')
-        topic_list = ['TOPIC1', 'TOPIC2', 'TOPIC3']
+        topic_list = ['topic1', 'topic2', 'topic3']
         unread_count_list = [34, 100, 0]
         self.view.model.topics_in_stream = (
             mocker.Mock(return_value=topic_list)

@@ -189,16 +189,16 @@ def test_powerset(iterable, map_func, expected_powerset):
 
 
 @pytest.mark.parametrize('muted_streams, muted_topics, vary_in_unreads', [
-    ([99], [['Some general stream', 'Some general unread topic']], {
+    ([99], [['Some general stream', 'some general unread topic']], {
         'all_msg': 8,
         'streams': {99: 1},
-        'unread_topics': {(99, 'Some private unread topic'): 1},
+        'unread_topics': {(99, 'some private unread topic'): 1},
         'all_mentions': 0,
     }),
-    ([1000], [['Secret stream', 'Some private unread topic']], {
+    ([1000], [['Secret stream', 'some private unread topic']], {
         'all_msg': 8,
         'streams': {1000: 3},
-        'unread_topics': {(1000, 'Some general unread topic'): 3},
+        'unread_topics': {(1000, 'some general unread topic'): 3},
         'all_mentions': 0,
     }),
     ([1], [], {'all_mentions': 0})
@@ -214,7 +214,7 @@ def test_classify_unread_counts(mocker, initial_data, stream_dict,
     model.initial_data = initial_data
     model.is_muted_topic = mocker.Mock(side_effect=(
         lambda stream_id, topic:
-        [model.stream_dict[stream_id]['name'], topic] in muted_topics
+        [model.stream_dict[stream_id]['name'], topic.lower()] in muted_topics
     ))
     model.muted_streams = muted_streams
     assert classify_unread_counts(model) == dict(classified_unread_counts,

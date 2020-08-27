@@ -14,8 +14,9 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
-    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
-    display_error_if_present, index_messages, initial_index, notify, set_count,
+    Message, StreamData, asynch, canonicalize_color, canonicalize_topic,
+    classify_unread_counts, compare_lowercase, display_error_if_present,
+    index_messages, initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -125,8 +126,9 @@ class Model:
         muted_topics = self.initial_data['muted_topics']
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
         self._muted_topics = {
-            (stream_name, topic): (None if self.server_feature_level is None
-                                   else date_muted[0])
+            (stream_name, canonicalize_topic(topic)): (
+                None if self.server_feature_level is None else date_muted[0]
+            )
             for stream_name, topic, *date_muted in muted_topics
         }  # type: Dict[Tuple[str, str], Optional[int]]
 
@@ -140,15 +142,26 @@ class Model:
         self.new_user_input = True
         self._start_presence_updates()
 
+    def narrow_with_canonical_topic(self) -> List[Any]:
+        """
+        Returns the narrow with its topic name replaced with the invariant
+        version that we maintain locally.
+        """
+        narrow = deepcopy(self.narrow)
+        if len(narrow) == 2 and narrow[1][0] == 'topic':
+            narrow[1][1] = canonicalize_topic(narrow[1][1])
+        return narrow
+
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
         Returns the focus in the current narrow.
         For no existing focus this returns {}, otherwise the message ID.
         """
-        return self.index['pointer'][repr(self.narrow)]
+        return self.index['pointer'][repr(self.narrow_with_canonical_topic())]
 
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
-        self.index['pointer'][repr(self.narrow)] = focus_message
+        narrow_str = repr(self.narrow_with_canonical_topic())
+        self.index['pointer'][narrow_str] = focus_message
 
     def is_search_narrow(self) -> bool:
         """
@@ -221,7 +234,7 @@ class Model:
             if len(narrow) == 1:
                 ids = index['stream_msg_ids_by_stream_id'][stream_id]
             elif len(narrow) == 2:
-                topic = narrow[1][1]
+                topic = canonicalize_topic(narrow[1][1])
                 ids = index['topic_msg_ids'][stream_id].get(topic, set())
         elif narrow[0][1] == 'private':
             ids = index['private_msg_ids']
@@ -381,7 +394,7 @@ class Model:
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             self.index = index_messages(response['messages'], self, self.index)
-            narrow_str = repr(self.narrow)
+            narrow_str = repr(self.narrow_with_canonical_topic())
             if first_anchor and response['anchor'] != 10000000000000000:
                 self.index['pointer'][narrow_str] = response['anchor']
             if 'found_newest' in response:
@@ -405,6 +418,11 @@ class Model:
         for stream_id in stream_list:
             response = self.client.get_stream_topics(stream_id)
             if response['result'] == 'success':
+                # NOTE: The server only sends the latest topic name version for
+                # case sensitive topic names.
+                # See (https://github.com/zulip/zulip/blob
+                # /2e5f860d41bb441597f7f088a477d5946cab4b13/zerver/lib
+                # /topic.py#L144).
                 self.index['topics'][stream_id] = [topic['name'] for
                                                    topic in response['topics']]
             else:
@@ -436,7 +454,7 @@ class Model:
         Returns True if topic is muted via muted_topics.
         """
         stream_name = self.stream_dict[stream_id]['name']
-        topic_to_search = (stream_name, topic)
+        topic_to_search = (stream_name, canonicalize_topic(topic))
         return topic_to_search in self._muted_topics.keys()
 
     def _update_initial_data(self) -> None:
@@ -870,8 +888,9 @@ class Model:
         if 'read' not in message['flags']:
             set_count([message['id']], self.controller, 1)
 
+        narrow_str = repr(self.narrow_with_canonical_topic())
         if (hasattr(self.controller, 'view')
-                and self._have_last_message[repr(self.narrow)]):
+                and self._have_last_message[narrow_str]):
             msg_log = self.controller.view.message_view.log
             if msg_log:
                 last_message = msg_log[-1].original_widget.message
@@ -904,7 +923,8 @@ class Model:
                 if (append_to_stream
                     and (len(self.narrow) == 1
                          or (len(self.narrow) == 2
-                             and self.narrow[1][1] == message['subject']))):
+                             and compare_lowercase(self.narrow[1][1],
+                                                   message['subject'])))):
                     msg_log.append(msg_w)
 
             elif (message['type'] == 'private' and len(self.narrow) == 1
@@ -923,8 +943,10 @@ class Model:
         """
         topic_list = self.topics_in_stream(stream_id)
         for topic_iterator, topic in enumerate(topic_list):
-            if topic == topic_name:
-                topic_list.insert(0, topic_list.pop(topic_iterator))
+            if compare_lowercase(topic, topic_name):
+                topic_list.pop(topic_iterator)
+                # Use the latest topic name version to update.
+                topic_list.insert(0, topic_name)
                 break
         else:
             # No previous topics with same topic names are found
@@ -1033,7 +1055,8 @@ class Model:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
                 if (len(self.narrow) == 2
-                        and msg_box.message['subject'] != self.narrow[1][1]):
+                        and not compare_lowercase(msg_box.message['subject'],
+                                                  self.narrow[1][1])):
                     view.message_view.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.
