@@ -256,14 +256,20 @@ class TestMessageView:
         ("mouse press", 4, "up"),
         ("mouse press", 5, "down"),
     ])
-    def test_mouse_event(self, mocker, msg_view, event, button, keypress):
+    def test_mouse_event(self, mocker, msg_view, event, button, keypress,
+                         widget_size):
         mocker.patch.object(msg_view, "keypress")
-        msg_view.mouse_event((20,), event, button, 0, 0, mocker.Mock())
-        msg_view.keypress.assert_called_once_with((20,), keypress)
+        size = widget_size(msg_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
+        msg_view.mouse_event(size, event, button, 0, 0, mocker.Mock())
+        msg_view.keypress.assert_called_once_with(size, keypress)
 
     @pytest.mark.parametrize('key', keys_for_command('GO_DOWN'))
-    def test_keypress_GO_DOWN(self, mocker, msg_view, key):
-        size = (20,)
+    def test_keypress_GO_DOWN(self, mocker, msg_view, key, widget_size):
+        size = widget_size(msg_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         msg_view.new_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
@@ -275,8 +281,11 @@ class TestMessageView:
         msg_view.set_focus_valign.assert_called_once_with('middle')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_DOWN'))
-    def test_keypress_GO_DOWN_exception(self, mocker, msg_view, key):
-        size = (20,)
+    def test_keypress_GO_DOWN_exception(self, mocker, msg_view, key,
+                                        widget_size):
+        size = widget_size(msg_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         msg_view.new_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
@@ -296,8 +305,10 @@ class TestMessageView:
         assert return_value == key
 
     @pytest.mark.parametrize('key', keys_for_command('GO_UP'))
-    def test_keypress_GO_UP(self, mocker, msg_view, key):
-        size = (20,)
+    def test_keypress_GO_UP(self, mocker, msg_view, key, widget_size):
+        size = widget_size(msg_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
         msg_view.old_loading = False
@@ -309,8 +320,11 @@ class TestMessageView:
         msg_view.set_focus_valign.assert_called_once_with('middle')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_UP'))
-    def test_keypress_GO_UP_exception(self, mocker, msg_view, key):
-        size = (20,)
+    def test_keypress_GO_UP_exception(self, mocker, msg_view, key,
+                                      widget_size):
+        size = widget_size(msg_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
         msg_view.old_loading = False
@@ -525,15 +539,20 @@ class TestStreamsView:
         stream_view.keypress.assert_called_with(size, "down")
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
-    def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key):
-        size = (20,)
+    def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key,
+                                     widget_size):
+        size = widget_size(stream_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch.object(stream_view, 'set_focus')
         stream_view.keypress(size, key)
         stream_view.set_focus.assert_called_once_with("header")
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_keypress_GO_BACK(self, mocker, stream_view, key):
-        size = (20,)
+    def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
+        size = widget_size(stream_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch.object(stream_view, 'set_focus')
         mocker.patch.object(stream_view.stream_search_box, 'reset_search_text')
         stream_view.keypress(size, key)
@@ -550,6 +569,7 @@ class TestStreamsView:
         (4, 'BOO'),
     ])
     def test_return_to_focus_after_search(self, mocker, stream_view,
+                                          widget_size,
                                           current_focus, stream,
                                           search_streams_key, go_back_key):
         # Initialize log
@@ -565,11 +585,12 @@ class TestStreamsView:
         previous_focus_stream_name = stream
 
         # Toggle Stream Search
-        size = (20,)
+        size = widget_size(stream_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         stream_view.keypress(size, search_streams_key)
 
         # Exit Stream Search
-        size = (20,)
         stream_view.keypress(size, go_back_key)
 
         # Obtain new stream focus
@@ -713,6 +734,7 @@ class TestTopicsView:
         (4, 'BOO'),
     ])
     def test_return_to_focus_after_search(self, mocker, topic_view,
+                                          widget_size,
                                           current_focus, topic,
                                           search_topics_key, go_back_key):
         # Initialize log
@@ -728,11 +750,12 @@ class TestTopicsView:
         previous_focus_topic_name = topic
 
         # Toggle Search
-        size = (20,)
+        size = widget_size(topic_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         topic_view.keypress(size, search_topics_key)
 
         # Exit Search
-        size = (20,)
         topic_view.keypress(size, go_back_key)
 
         # Obtain new focus
@@ -765,14 +788,16 @@ class TestUsersView:
         user_view.mouse_event(size, "mouse press", 5, col, row, focus)
         user_view.keypress.assert_called_with(size, "down")
 
-    def test_mouse_event_left_click(self, mocker, user_view,
+    def test_mouse_event_left_click(self, mocker, user_view, widget_size,
                                     compose_box_is_open):
         super_mouse_event = mocker.patch(
                         'zulipterminal.ui.urwid.ListBox.mouse_event')
         user_view.controller.is_in_editor_mode.return_value = (
                 compose_box_is_open
         )
-        size = (20, )
+        size = widget_size(user_view)
+        assert size != (20, ), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         focus = mocker.Mock()
 
         user_view.mouse_event(size, 'mouse press', 1, 1, 1, focus)
@@ -884,8 +909,10 @@ class TestMiddleColumnView:
         assert mid_col_view.last_unread_pm is None
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_keypress_GO_BACK(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_GO_BACK(self, mid_col_view, mocker, key, widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.header')
         mocker.patch(VIEWS + '.MiddleColumnView.footer')
         mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
@@ -898,15 +925,21 @@ class TestMiddleColumnView:
         self.super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_MESSAGES'))
-    def test_keypress_focus_header(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_focus_header(self, mid_col_view, mocker, key,
+                                   widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mid_col_view.focus_part = 'header'
         mid_col_view.keypress(size, key)
         self.super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_MESSAGES'))
-    def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key,
+                                      widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         mocker.patch(VIEWS + '.MiddleColumnView.set_focus')
 
@@ -919,9 +952,11 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize('enter_key', keys_for_command('ENTER'))
     @pytest.mark.parametrize('reply_message_key',
                              keys_for_command('REPLY_MESSAGE'))
-    def test_keypress_REPLY_MESSAGE(self, mid_col_view, mocker,
+    def test_keypress_REPLY_MESSAGE(self, mid_col_view, mocker, widget_size,
                                     reply_message_key, enter_key):
-        size = (20,)
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.body')
         mocker.patch(VIEWS + '.MiddleColumnView.footer')
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
@@ -934,8 +969,11 @@ class TestMiddleColumnView:
         assert mid_col_view.footer.focus_position == 1
 
     @pytest.mark.parametrize('key', keys_for_command('STREAM_MESSAGE'))
-    def test_keypress_STREAM_MESSAGE(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_STREAM_MESSAGE(self, mid_col_view, mocker, key,
+                                     widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.body')
         mocker.patch(VIEWS + '.MiddleColumnView.footer')
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
@@ -948,8 +986,11 @@ class TestMiddleColumnView:
         assert mid_col_view.footer.focus_position == 0
 
     @pytest.mark.parametrize('key', keys_for_command('REPLY_AUTHOR'))
-    def test_keypress_REPLY_AUTHOR(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_REPLY_AUTHOR(self, mid_col_view, mocker, key,
+                                   widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.body')
         mocker.patch(VIEWS + '.MiddleColumnView.footer')
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
@@ -963,8 +1004,11 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_TOPIC'))
     def test_keypress_NEXT_UNREAD_TOPIC_stream(self, mid_col_view, mocker,
+                                               widget_size,
                                                key):
-        size = (20,)
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         topic_btn = mocker.patch(VIEWS + '.TopicButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
@@ -979,8 +1023,11 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_TOPIC'))
     def test_keypress_NEXT_UNREAD_TOPIC_no_stream(self, mid_col_view, mocker,
+                                                  widget_size,
                                                   key):
-        size = (20,)
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         topic_btn = mocker.patch(VIEWS + '.TopicButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
@@ -990,8 +1037,11 @@ class TestMiddleColumnView:
         assert return_value == key
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_PM'))
-    def test_keypress_NEXT_UNREAD_PM_stream(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_NEXT_UNREAD_PM_stream(self, mid_col_view, mocker, key,
+                                            widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
@@ -1005,8 +1055,11 @@ class TestMiddleColumnView:
         )
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_PM'))
-    def test_keypress_NEXT_UNREAD_PM_no_pm(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_NEXT_UNREAD_PM_no_pm(self, mid_col_view, mocker, key,
+                                           widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
@@ -1016,8 +1069,11 @@ class TestMiddleColumnView:
         assert return_value == key
 
     @pytest.mark.parametrize('key', keys_for_command('PRIVATE_MESSAGE'))
-    def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key,
+                                      widget_size):
+        size = widget_size(mid_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
         pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
@@ -1133,15 +1189,20 @@ class TestRightColumnView:
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
-    def test_keypress_SEARCH_PEOPLE(self, right_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_SEARCH_PEOPLE(self, right_col_view, mocker, key,
+                                    widget_size):
+        size = widget_size(right_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         right_col_view.keypress(size, key)
         right_col_view.set_focus.assert_called_once_with('header')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_keypress_GO_BACK(self, right_col_view, mocker, key):
-        size = (20,)
+    def test_keypress_GO_BACK(self, right_col_view, mocker, key, widget_size):
+        size = widget_size(right_col_view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         mocker.patch(VIEWS + ".UsersView")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch(VIEWS + ".RightColumnView.set_body")
@@ -1452,10 +1513,12 @@ class TestEditModeView:
         (2, 'change_all'),
     ])
     @pytest.mark.parametrize('key', keys_for_command('ENTER'))
-    def test_select_edit_mode(self, mocker, edit_mode_view,
+    def test_select_edit_mode(self, mocker, edit_mode_view, widget_size,
                               index_in_widgets, mode, key):
         radio_button = edit_mode_view.widgets[index_in_widgets]
-        size = (20, 20)
+        size = widget_size(radio_button)
+        assert size != (20, 20), 'Incorrect size for a Flow widget'
+        assert size == (20,)
 
         radio_button.keypress(size, key)
 
@@ -1495,22 +1558,26 @@ class TestStreamInfoView:
         super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
-    def test_checkbox_toggle_mute_stream(self, mocker, key):
+    def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
         mute_checkbox = self.stream_info_view.widgets[3]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
-        size = (20, 20)
+        size = widget_size(mute_checkbox)
+        assert size != (20, 20), 'Incorrect size for a Flow widget'
+        assert size == (20,)
 
         mute_checkbox.keypress(size, key)
 
         toggle_mute_status.assert_called_once_with(stream_id)
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
-    def test_checkbox_toggle_pin_stream(self, mocker, key):
+    def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
         pin_checkbox = self.stream_info_view.widgets[4]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
-        size = (20, 20)
+        size = widget_size(pin_checkbox)
+        assert size != (20, 20), 'Incorrect size for a Flow widget'
+        assert size == (20,)
 
         pin_checkbox.keypress(size, key)
 
@@ -2654,8 +2721,11 @@ class TestStreamButton:
         assert text[0] == expected_text
 
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_TOPIC'))
-    def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button, key):
-        size = (200, 20)
+    def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button, key,
+                                         widget_size):
+        size = widget_size(stream_button)
+        assert size != (200, 20), 'Incorrect size for a Flow widget'
+        assert size == (20, )
         stream_button.view.left_panel = mocker.Mock()
         stream_button.view.left_panel.is_in_topic_view = None
         stream_button.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]

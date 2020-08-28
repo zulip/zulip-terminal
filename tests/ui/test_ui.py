@@ -16,6 +16,9 @@ class TestView:
     @pytest.fixture
     def view(self, mocker):
         main_window = mocker.patch('zulipterminal.ui.View.main_window')
+        # View is an urwid.Frame instance, a Box widget.
+        mocker.patch('zulipterminal.ui.View.sizing',
+                     return_value=frozenset({'box'}))
         return View(self.controller)
 
     def test_init(self, mocker):
@@ -210,13 +213,15 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    def test_keypress_normal_mode_navigation(self, view, mocker,
+    def test_keypress_normal_mode_navigation(self, view, mocker, widget_size,
                                              navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
-        size = (20,)
+        size = widget_size(view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
 
         super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
                                       ".keypress")
@@ -228,11 +233,13 @@ class TestView:
         super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize('key', keys_for_command('ALL_MENTIONS'))
-    def test_keypress_ALL_MENTIONS(self, view, mocker, key):
+    def test_keypress_ALL_MENTIONS(self, view, mocker, key, widget_size):
         view.body = mocker.Mock()
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
-        size = (20,)
+        size = widget_size(view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
         view.model.controller.show_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
@@ -243,7 +250,8 @@ class TestView:
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
-    def test_keypress_autohide_users(self, view, mocker, autohide, key):
+    def test_keypress_autohide_users(self, view, mocker, autohide, key,
+                                     widget_size):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.controller.autohide = autohide
@@ -251,7 +259,9 @@ class TestView:
         view.user_search = mocker.Mock()
         view.left_panel = mocker.Mock()
         view.right_panel = mocker.Mock()
-        size = (20,)
+        size = widget_size(view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
@@ -269,7 +279,8 @@ class TestView:
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
-    def test_keypress_autohide_streams(self, view, mocker, autohide, key):
+    def test_keypress_autohide_streams(self, view, mocker, autohide, key,
+                                       widget_size):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.stream_search_box = mocker.Mock()
@@ -279,7 +290,9 @@ class TestView:
         view.left_panel = mocker.Mock()
         view.left_panel.is_in_topic_view = False
         view.right_panel = mocker.Mock()
-        size = (20,)
+        size = widget_size(view)
+        assert size != (20,), 'Incorrect size used for a Box widget'
+        assert size == (200, 20)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
