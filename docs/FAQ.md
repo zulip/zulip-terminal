@@ -29,6 +29,18 @@ Issues have been reported with the following:
 
 Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
 
+## When are messages marked as having been read?
+
+The approach currently taken is that that a message is marked read when
+* it has been selected *or*
+* it is a message that you have sent
+
+Unlike the web and mobile apps, we **don't** currently mark as read based on visibility, eg. if you have a message selected and all newer messages are also visible. This makes the marking-read process more explicit, balanced against needing to scroll through messages to mark them. Our styling is intended to promote moving onto unread messages to more easily read them.
+
+In contrast, like with the web app, we don't mark messages as read while in a search - but if you go to a message visible in a search within a topic or stream context then it will be marked as read, just like normal.
+
+An additional feature to other front-ends is **explore mode**, which can be enabled when starting the application (with `-e` or `--explore`); this allows browsing through all your messages and interacting within the application like normal, with the exception that messages are never marked as read. Other than providing a means to test the application with no change in state (ie. *explore* it), this can be useful to scan through your messages quickly when you intend to return to look at them properly later.
+
 ## Unable to render non-ASCII characters
 
 **NOTE** Releases of 0.3.2 onwards should not have this issue, or require this solution.
