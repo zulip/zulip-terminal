@@ -875,3 +875,20 @@ def navigation_key_expected_key_pair(request):
     The expected key is the one which is passed to the super `keypress` calls.
     """
     return request.param
+
+
+@pytest.fixture
+def widget_size():
+    """
+    Returns widget size for any widget.
+    """
+    def _widget_size(widget):
+        widget_type, *_ = widget.sizing()
+        if widget_type == 'box':
+            return (200, 20)
+        elif widget_type == 'flow':
+            return (20, )
+        else:
+            None
+
+    return _widget_size
