@@ -37,7 +37,7 @@ Event = TypedDict('Event', {
     'rendered_content': str,
     # update_message_flags:
     'messages': List[int],
-    'operation': str,
+    'operation': str,  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
     'flag': str,
     'all': bool,
     # message:
@@ -1012,6 +1012,12 @@ class Model:
         """
         Handle change to message flags (eg. starred, read)
         """
+        if (self.server_feature_level is None
+                or self.server_feature_level < 32):
+            operation = event['operation']
+        else:
+            operation = event['op']
+
         if event['all']:  # FIXME Should handle eventually
             return
 
@@ -1019,7 +1025,7 @@ class Model:
         if flag_to_change not in {'starred', 'read'}:
             return
 
-        if flag_to_change == 'read' and event['operation'] == 'remove':
+        if flag_to_change == 'read' and operation == 'remove':
             return
 
         indexed_message_ids = set(self.index['messages'])
@@ -1027,10 +1033,10 @@ class Model:
 
         for message_id in message_ids_to_mark & indexed_message_ids:
             msg = self.index['messages'][message_id]
-            if event['operation'] == 'add':
+            if operation == 'add':
                 if flag_to_change not in msg['flags']:
                     msg['flags'].append(flag_to_change)
-            elif event['operation'] == 'remove':
+            elif operation == 'remove':
                 if flag_to_change in msg['flags']:
                     msg['flags'].remove(flag_to_change)
             else:
@@ -1039,7 +1045,7 @@ class Model:
             self.index['messages'][message_id] = msg
             self._update_rendered_view(message_id)
 
-        if event['operation'] == 'add' and flag_to_change == 'read':
+        if operation == 'add' and flag_to_change == 'read':
             set_count(list(message_ids_to_mark & indexed_message_ids),
                       self.controller, -1)
 
