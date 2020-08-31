@@ -1491,8 +1491,10 @@ class TestPopUpConfirmationView:
         assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_exit_popup_GO_BACK(self, mocker, popup_view, key):
-        size = (20, 20)
+    def test_exit_popup_GO_BACK(self, mocker, popup_view, key, widget_size):
+        size = widget_size(popup_view)
+        assert size != (20, 20), 'Different box size value'
+        assert size == (200, 20)
         popup_view.keypress(size, key)
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called

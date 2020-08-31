@@ -309,7 +309,7 @@ class TestView:
          .assert_called_once_with(view.stream_w.stream_search_box))
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
-    def test_keypress_edit_mode(self, view, mocker, key):
+    def test_keypress_edit_mode(self, view, mocker, key, widget_size):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -317,9 +317,11 @@ class TestView:
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
 
         view.controller.is_in_editor_mode = lambda: True
-        size = (130, 28)
+        size = widget_size(view)
+        assert size != (130, 28), 'Different box size value'
+        assert size == (200, 20)
 
         view.keypress(size, key)
 
         (view.controller.current_editor().keypress
-         .assert_called_once_with((28,), key))
+         .assert_called_once_with((size[1], ), key))
