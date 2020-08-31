@@ -6,7 +6,9 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
-from zulipterminal.config.symbols import USER_ADMIN_MARKER, USER_OWNER_MARKER
+from zulipterminal.config.symbols import (
+    USER_ADMIN_MARKER, USER_GUEST_MARKER, USER_OWNER_MARKER,
+)
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -219,6 +221,7 @@ class UserButton(TopButton):
             'user': '\N{BULLET}',
             'owner': USER_OWNER_MARKER,
             'admin': USER_ADMIN_MARKER,
+            'guest': USER_GUEST_MARKER,
         }[user.get('org_status', 'user')]
 
         super().__init__(controller,

@@ -579,6 +579,8 @@ class Model:
                 org_status = 'owner'  # type: UserStatusInOrg
             elif user['is_admin']:
                 org_status = 'admin'
+            elif user['is_guest']:
+                org_status = 'guest'
             else:
                 org_status = 'user'
 

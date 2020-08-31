@@ -19,7 +19,7 @@ from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER, USER_ADMIN_MARKER,
-    USER_OWNER_MARKER,
+    USER_GUEST_MARKER, USER_OWNER_MARKER,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream,
@@ -971,6 +971,7 @@ class MessageBox(urwid.Pile):
                     'user': '',
                     'owner': ' ' + USER_OWNER_MARKER,
                     'admin': ' ' + USER_ADMIN_MARKER,
+                    'guest': ' ' + USER_GUEST_MARKER,
                 }
                 text['author'] = (
                     'name',

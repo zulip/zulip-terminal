@@ -12,3 +12,4 @@ LIST_TITLE_BAR_LINE = '━'
 TIME_MENTION_MARKER = '⏱ '  # Other tested options are: '⧗' and '⧖'.
 USER_ADMIN_MARKER = '★'
 USER_OWNER_MARKER = '✪'
+USER_GUEST_MARKER = '⛔'
