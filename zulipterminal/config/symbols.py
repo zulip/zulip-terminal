@@ -13,3 +13,4 @@ TIME_MENTION_MARKER = '⏱ '  # Other tested options are: '⧗' and '⧖'.
 USER_ADMIN_MARKER = '★'
 USER_OWNER_MARKER = '✪'
 USER_GUEST_MARKER = '⛔'
+USER_BOT_MARKER = '♟'

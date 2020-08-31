@@ -21,7 +21,7 @@ MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
 WSL = 'microsoft' in platform.release().lower()
 
-UserStatusInOrg = Literal['user', 'admin', 'owner', 'guest']
+UserStatusInOrg = Literal['user', 'admin', 'owner', 'guest', 'bot']
 
 StreamData = TypedDict('StreamData', {
     'name': str,

@@ -581,6 +581,8 @@ class Model:
                 org_status = 'admin'
             elif user['is_guest']:
                 org_status = 'guest'
+            elif user['is_bot']:
+                org_status = 'bot'
             else:
                 org_status = 'user'
 
