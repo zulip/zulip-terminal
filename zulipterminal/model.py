@@ -505,6 +505,11 @@ class Model:
                     if stream['name'] == stream_name
                     if sub != self.user_id]
 
+    def organization_user_role(self, user_id: int) -> UserStatusInOrg:
+        assert user_id is not None
+        email = self.user_id_email_dict[user_id]
+        return self.user_dict[email].get('org_status', 'user')
+
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data['presences']
