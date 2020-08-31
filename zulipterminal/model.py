@@ -14,8 +14,9 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
-    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
-    display_error_if_present, index_messages, initial_index, notify, set_count,
+    Message, StreamData, UserStatusInOrg, asynch, canonicalize_color,
+    classify_unread_counts, display_error_if_present, index_messages,
+    initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -568,11 +569,20 @@ class Model:
                 # as 'inactive'. They will not be displayed in the
                 # user's list by default (only in the search list).
                 status = 'inactive'
+
+            if user['is_owner']:
+                org_status = 'owner'  # type: UserStatusInOrg
+            elif user['is_admin']:
+                org_status = 'admin'
+            else:
+                org_status = 'user'
+
             self.user_dict[email] = {
                 'full_name': user['full_name'],
                 'email': email,
                 'user_id': user['user_id'],
                 'status': status,
+                'org_status': org_status,
             }
             self.user_id_email_dict[user['user_id']] = email
 
