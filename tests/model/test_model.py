@@ -1252,9 +1252,25 @@ class TestModel:
         model._handle_reaction_event(response)
         assert len(model.index['messages'][1]['reactions']) == 1
 
-    def test_update_star_status_no_index(self, mocker, model):
+    @pytest.fixture(params=[
+        ('op', 32),  # At server feature level 32, event uses standard field
+        ('operation', 31),
+        ('operation', None),
+    ])
+    def update_message_flags_operation(self, request):
+        return request.param
+
+    def test_update_star_status_no_index(self, mocker, model,
+                                         update_message_flags_operation):
+        operation, model.server_feature_level = update_message_flags_operation
+
         model.index = dict(messages={})  # Not indexed
-        event = dict(messages=[1], flag='starred', all=False, operation='add')
+        event = {
+            'messages': [1],
+            'flag': 'starred',
+            'all': False,
+            operation: 'add'
+        }
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
@@ -1264,13 +1280,17 @@ class TestModel:
         model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
-    def test_update_star_status_invalid_operation(self, mocker, model):
+    def test_update_star_status_invalid_operation(
+            self, mocker, model, update_message_flags_operation,
+    ):
+        operation, model.server_feature_level = update_message_flags_operation
+
         model.index = dict(messages={1: {'flags': None}})  # Minimal
         event = {
             'messages': [1],
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': 'OTHER',  # not 'add' or 'remove'
+            operation: 'OTHER',  # not 'add' or 'remove'
             'all': False,
         }
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
@@ -1301,14 +1321,17 @@ class TestModel:
     ])
     def test_update_star_status(self, mocker, model, event_op,
                                 event_message_ids, indexed_ids,
-                                flags_before, flags_after):
+                                flags_before, flags_after,
+                                update_message_flags_operation):
+        operation, model.server_feature_level = update_message_flags_operation
+
         model.index = dict(messages={msg_id: {'flags': flags_before}
                                      for msg_id in indexed_ids})
         event = {
             'messages': event_message_ids,
             'type': 'update_message_flags',
             'flag': 'starred',
-            'operation': event_op,
+            operation: event_op,
             'all': False,
         }
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
@@ -1350,14 +1373,17 @@ class TestModel:
     ])
     def test_update_read_status(self, mocker, model, event_op,
                                 event_message_ids, indexed_ids,
-                                flags_before, flags_after):
+                                flags_before, flags_after,
+                                update_message_flags_operation):
+        operation, model.server_feature_level = update_message_flags_operation
+
         model.index = dict(messages={msg_id: {'flags': flags_before}
                                      for msg_id in indexed_ids})
         event = {
             'messages': event_message_ids,
             'type': 'update_message_flags',
             'flag': 'read',
-            'operation': event_op,
+            operation: event_op,
             'all': False,
         }
 
