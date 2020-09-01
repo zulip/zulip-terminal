@@ -172,21 +172,30 @@ class WriteBox(urwid.Pile):
 
         # Look in a reverse order to find the last autocomplete prefix used in
         # the text. For instance, if text='@#example', use '#' as the prefix.
-        reversed_text = text[::-1]
-        for reverse_index, char in enumerate(reversed_text):
-            # Patch for silent mentions.
-            if (char == '_' and reverse_index + 1 < len(reversed_text)
-                    and reversed_text[reverse_index + 1] == '@'):
-                char = '@_'
-
-            if char in autocomplete_map:
-                prefix = char
-                autocomplete_func = autocomplete_map[prefix]
-                prefix_index = max(text.rfind(prefix), 0)
-                break
-        else:
-            # Return text if it doesn't have any of the autocomplete prefixes.
+        # FIXME: Mentions can actually start with '#', and streams with
+        #        anything; this implementation simply chooses the right-most
+        #        match of the longest length
+        prefix_indices = {
+            prefix: text.rfind(prefix)
+            for prefix in autocomplete_map
+        }
+        found_prefix_indices = {
+            prefix: index
+            for prefix, index in prefix_indices.items()
+            if index > -1
+        }
+        # Return text if it doesn't have any of the autocomplete prefixes.
+        if not found_prefix_indices:
             return text
+
+        # Use latest longest matching prefix (so @_ wins vs @)
+        prefix_index = max(found_prefix_indices.values())
+        prefix = max(
+            (len(prefix), prefix)
+            for prefix, index in found_prefix_indices.items()
+            if index == prefix_index
+        )[1]
+        autocomplete_func = autocomplete_map[prefix]
 
         # NOTE: The following block only executes if any of the autocomplete
         # prefixes exist.
