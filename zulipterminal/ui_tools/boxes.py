@@ -167,6 +167,7 @@ class WriteBox(urwid.Pile):
                 ('@_', self.autocomplete_mentions),
                 ('@', self.autocomplete_mentions),
                 ('#', self.autocomplete_streams),
+                ('#**', self.autocomplete_streams),
                 (':', self.autocomplete_emojis),
             ])
 
@@ -265,7 +266,9 @@ class WriteBox(urwid.Pile):
         stream_typeahead = format_string(streams, '#**{}**')
         stream_data = list(zip(stream_typeahead, streams))
 
-        matched_data = match_stream(stream_data, text[1:],
+        prefix_length = len(prefix_string)
+
+        matched_data = match_stream(stream_data, text[prefix_length:],
                                     self.view.pinned_streams)
         return matched_data
 

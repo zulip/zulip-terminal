@@ -56,6 +56,9 @@ class TestWriteBox:
         # streams
         ('#Stream', 0, ['Stream 1', 'Stream 2', 'Secret stream',
                         'Some general stream']),
+        ('#*Stream', None, []),  # NOTE: Optional single star fails
+        ('#**Stream', 0, ['Stream 1', 'Stream 2', 'Secret stream',
+                          'Some general stream']),  # Optional 2-stars
         ('#Stream', None, ['Stream 1', 'Stream 2', 'Secret stream',
                            'Some general stream']),
         ('#NoMatch', None, []),
@@ -199,6 +202,8 @@ class TestWriteBox:
         ('@_#Stream', 0, '@_#**Stream 1**', []),
         (':#Stream', 0, ':#**Stream 1**', []),
         ('##Stream', 0, '##**Stream 1**', []),
+        ('##*Stream', 0, None, []),  # NOTE: Optional single star fails
+        ('##**Stream', 0, '##**Stream 1**', []),  # Optional 2-stars
         # With 'Secret stream' pinned.
         ('#Stream', 0, '#**Secret stream**',
          ['Secret stream', ]),  # 2nd-word startswith match (pinned).
