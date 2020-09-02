@@ -232,11 +232,21 @@ class WriteBox(urwid.Pile):
                               ) -> Tuple[List[str], List[str]]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
-        groups = [group_name
-                  for group_name in self.model.user_group_names
-                  if match_group(group_name, text[1:])]
-        group_typeahead = format_string(groups, '@*{}*')
 
+        user_typeahead, user_names = self.autocomplete_users(
+            text, prefix_string
+        )
+        group_typeahead, groups = self.autocomplete_groups(
+            text, prefix_string
+        )
+
+        combined_typeahead = user_typeahead + group_typeahead
+        combined_names = user_names + groups
+
+        return combined_typeahead, combined_names
+
+    def autocomplete_users(self, text: str, prefix_string: str
+                           ) -> Tuple[List[str], List[str]]:
         users_list = self.view.users
         matching_users = [user
                           for user in users_list
@@ -253,10 +263,15 @@ class WriteBox(urwid.Pile):
         user_names = [user['full_name'] for user in sorted_matching_users]
         user_typeahead = format_string(user_names, prefix_string + '**{}**')
 
-        combined_typeahead = user_typeahead + group_typeahead
-        combined_names = user_names + groups
+        return user_typeahead, user_names
 
-        return combined_typeahead, combined_names
+    def autocomplete_groups(self, text: str, prefix_string: str
+                            ) -> Tuple[List[str], List[str]]:
+        groups = [group_name
+                  for group_name in self.model.user_group_names
+                  if match_group(group_name, text[1:])]
+        group_typeahead = format_string(groups, '@*{}*')
+        return group_typeahead, groups
 
     def autocomplete_streams(self, text: str, prefix_string: str
                              ) -> Tuple[List[str], List[str]]:
