@@ -164,7 +164,8 @@ class WriteBox(urwid.Pile):
     def generic_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
         autocomplete_map = OrderedDict([
-                ('@_', self.autocomplete_mentions),
+                ('@_', self.autocomplete_users),
+                ('@_**', self.autocomplete_users),
                 ('@', self.autocomplete_mentions),
                 ('#', self.autocomplete_streams),
                 ('#**', self.autocomplete_streams),
@@ -261,7 +262,12 @@ class WriteBox(urwid.Pile):
                                        reverse=True)
 
         user_names = [user['full_name'] for user in sorted_matching_users]
-        user_typeahead = format_string(user_names, prefix_string + '**{}**')
+        extra_prefix = "{}{}".format(
+            '*' if prefix_string[-1] != '*' else '',
+            '*' if prefix_string[-2:] != '**' else '',
+        )
+        user_typeahead = format_string(user_names,
+                                       prefix_string + extra_prefix + '{}**')
 
         return user_typeahead, user_names
 

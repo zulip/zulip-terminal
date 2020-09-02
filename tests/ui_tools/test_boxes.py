@@ -51,6 +51,8 @@ class TestWriteBox:
         # mentions
         ('@Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
         ('@_Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
+        ('@_*Human', None, []),  # NOTE: Optional single star fails
+        ('@_**Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
         ('@Human', None, ['Human Myself', 'Human 1', 'Human 2']),
         ('@NoMatch', None, []),
         # streams
@@ -146,6 +148,8 @@ class TestWriteBox:
         (':@_H', 0, ':@_**Human Myself**'),
         ('#@_H', 0, '#@_**Human Myself**'),
         ('@@_H', 0, '@@_**Human Myself**'),
+        ('@@_*H', 0, None),  # Optional single star fails
+        ('@@_**H', 0, '@@_**Human Myself**'),  # Optional stars
     ])
     def test_generic_autocomplete_mentions(self, write_box, text,
                                            required_typeahead, state):
