@@ -167,6 +167,8 @@ class WriteBox(urwid.Pile):
                 ('@_', self.autocomplete_users),
                 ('@_**', self.autocomplete_users),
                 ('@', self.autocomplete_mentions),
+                ('@*', self.autocomplete_groups),
+                ('@**', self.autocomplete_users),
                 ('#', self.autocomplete_streams),
                 ('#**', self.autocomplete_streams),
                 (':', self.autocomplete_emojis),
@@ -273,10 +275,14 @@ class WriteBox(urwid.Pile):
 
     def autocomplete_groups(self, text: str, prefix_string: str
                             ) -> Tuple[List[str], List[str]]:
+        prefix_length = len(prefix_string)
         groups = [group_name
                   for group_name in self.model.user_group_names
-                  if match_group(group_name, text[1:])]
-        group_typeahead = format_string(groups, '@*{}*')
+                  if match_group(group_name, text[prefix_length:])]
+
+        extra_prefix = '*' if prefix_string[-1] != '*' else ''
+        group_typeahead = format_string(groups,
+                                        prefix_string + extra_prefix + '{}*')
         return group_typeahead, groups
 
     def autocomplete_streams(self, text: str, prefix_string: str

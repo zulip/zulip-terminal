@@ -48,8 +48,15 @@ class TestWriteBox:
         write_box.view.set_typeahead_footer.assert_not_called()
 
     @pytest.mark.parametrize('text, state, footer_text', [
+        # no-text mentions
+        ('@', 0,
+            ['Human Myself', 'Human 1', 'Human 2',
+             'Group 1', 'Group 2', 'Group 3', 'Group 4']),
+        ('@*', 0, ['Group 1', 'Group 2', 'Group 3', 'Group 4']),
+        ('@**', 0, ['Human Myself', 'Human 1', 'Human 2']),
         # mentions
         ('@Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
+        ('@**Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
         ('@_Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
         ('@_*Human', None, []),  # NOTE: Optional single star fails
         ('@_**Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
@@ -123,6 +130,19 @@ class TestWriteBox:
         ('@', 6, '@*Group 4*'),
         ('@', 7, None),  # Reached last match
         ('@', 8, None),  # Beyond end
+        # Expected sequence of autocompletes from '@**' (no groups)
+        ('@**', 0, '@**Human Myself**'),
+        ('@**', 1, '@**Human 1**'),
+        ('@**', 2, '@**Human 2**'),
+        ('@**', 3, None),  # Reached last match
+        ('@**', 4, None),  # Beyond end
+        # Expected sequence of autocompletes from '@*' (only groups)
+        ('@*', 0, '@*Group 1*'),
+        ('@*', 1, '@*Group 2*'),
+        ('@*', 2, '@*Group 3*'),
+        ('@*', 3, '@*Group 4*'),
+        ('@*', 4, None),  # Reached last match
+        ('@*', 5, None),  # Beyond end
         # Expected sequence of autocompletes from '@_'
         ('@_', 0, '@_**Human Myself**'),  # NOTE: No silent group mention
         ('@_', 1, '@_**Human 1**'),
