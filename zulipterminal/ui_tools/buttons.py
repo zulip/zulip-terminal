@@ -11,7 +11,7 @@ from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
-from zulipterminal.helper import Message, StreamData, hash_util_decode
+from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -426,6 +426,11 @@ class MessageLinkButton(urwid.Button):
         server_url = self.model.server_url
         if self.link.startswith(urljoin(server_url, "/#narrow/")):
             self.handle_narrow_link()
+        elif self.link.startswith(urljoin(server_url, "/user_uploads/")):
+            # Exit pop-up promptly, let the media download in the background.
+            if self.controller.is_any_popup_open():
+                self.controller.exit_popup()
+            process_media(self.controller, self.link)
 
     @staticmethod
     def _decode_stream_data(encoded_stream_data: str) -> DecodedStream:

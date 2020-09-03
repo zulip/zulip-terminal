@@ -493,11 +493,15 @@ class TestMessageLinkButton:
         assert isinstance(mocked_button._w, AttrMap)
 
     @pytest.mark.parametrize(
-        "link, handle_narrow_link_called",
         [
-            (SERVER_URL + "/#narrow/stream/1-Stream-1", True),
-            (SERVER_URL + "/user_uploads/some/path/image.png", False),
-            ("https://foo.com", False),
+            "link",
+            "handle_narrow_link_called",
+            "process_media_called",
+        ],
+        [
+            (SERVER_URL + "/#narrow/stream/1-Stream-1", True, False),
+            (SERVER_URL + "/user_uploads/some/path/image.png", False, True),
+            ("https://foo.com", False, False),
         ],
         ids=[
             "internal_narrow_link",
@@ -506,15 +510,22 @@ class TestMessageLinkButton:
         ],
     )
     def test_handle_link(
-        self, mocker: MockerFixture, link: str, handle_narrow_link_called: bool
+        self,
+        mocker: MockerFixture,
+        link: str,
+        handle_narrow_link_called: bool,
+        process_media_called: bool,
     ) -> None:
         self.controller.model.server_url = SERVER_URL
         self.handle_narrow_link = mocker.patch(MSGLINKBUTTON + ".handle_narrow_link")
+        self.controller.loop.widget = mocker.Mock(spec=Overlay)
+        self.process_media = mocker.patch(MODULE + ".process_media")
         mocked_button = self.message_link_button(link=link)
 
         mocked_button.handle_link()
 
         assert self.handle_narrow_link.called == handle_narrow_link_called
+        assert self.process_media.called == process_media_called
 
     @pytest.mark.parametrize(
         "stream_data, expected_response",

@@ -35,7 +35,11 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
-from zulipterminal.platform_code import normalized_file_path, successful_GUI_return_code
+from zulipterminal.platform_code import (
+    PLATFORM,
+    normalized_file_path,
+    successful_GUI_return_code,
+)
 
 
 class StreamData(TypedDict):
@@ -719,6 +723,34 @@ def suppress_output() -> Iterator[None]:
     finally:
         os.dup2(stdout, 1)
         os.dup2(stderr, 2)
+
+
+@asynch
+def process_media(controller: Any, link: str) -> None:
+    """
+    Helper to process media links.
+    """
+    if not link:
+        controller.report_error("The media link is empty")
+        return
+
+    media_path = download_media(controller, link)
+    tool = ""
+
+    # TODO: Add support for other platforms as well.
+    if PLATFORM == "WSL":
+        tool = "explorer.exe"
+        # Modifying path to backward slashes instead of forward slashes
+        media_path = media_path.replace("/", "\\")
+    elif PLATFORM == "Linux":
+        tool = "xdg-open"
+    elif PLATFORM == "MacOS":
+        tool = "open"
+    else:
+        controller.report_error("Media not supported for this platform")
+        return
+
+    open_media(controller, tool, media_path)
 
 
 def download_media(controller: Any, url: str) -> str:
