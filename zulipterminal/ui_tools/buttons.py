@@ -7,7 +7,7 @@ from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.helper import (
-    StreamData, edit_mode_captions, hash_util_decode,
+    StreamData, edit_mode_captions, hash_util_decode, process_media,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -300,6 +300,11 @@ class MessageLinkButton(urwid.Button):
         server_url = self.model.server_url
         if self.link.startswith(urljoin(server_url, '/#narrow/')):
             self.handle_narrow_link()
+        elif self.link.startswith(urljoin(server_url, '/user_uploads/')):
+            # Exit pop-up promptly, let the media download in the background.
+            if isinstance(self.controller.loop.widget, urwid.Overlay):
+                self.controller.exit_popup()
+            process_media(self.controller, self.link)
 
     @staticmethod
     def _decode_stream_data(encoded_stream_data: str) -> DecodedStream:

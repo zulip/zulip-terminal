@@ -59,11 +59,12 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize([
             'link',
             'handle_narrow_link_called',
+            'process_media_called',
         ],
         [
-            (SERVER_URL + '/#narrow/stream/1-Stream-1', True),
-            (SERVER_URL + '/user_uploads/some/path/image.png', False),
-            ('https://foo.com', False),
+            (SERVER_URL + '/#narrow/stream/1-Stream-1', True, False),
+            (SERVER_URL + '/user_uploads/some/path/image.png', False, True),
+            ('https://foo.com', False, False),
         ],
         ids=[
             'internal_narrow_link',
@@ -71,16 +72,20 @@ class TestMessageLinkButton:
             'external_link',
         ]
     )
-    def test_handle_link(self, mocker, link, handle_narrow_link_called):
+    def test_handle_link(self, mocker, link, handle_narrow_link_called,
+                         process_media_called):
         self.controller.model.server_url = SERVER_URL
+        self.controller.loop.widget = mocker.Mock(spec=Overlay)
         self.handle_narrow_link = (
             mocker.patch(BUTTONS + '.MessageLinkButton.handle_narrow_link')
         )
+        self.process_media = mocker.patch(BUTTONS + '.process_media')
         mocked_button = self.message_link_button(link=link)
 
         mocked_button.handle_link()
 
         assert self.handle_narrow_link.called == handle_narrow_link_called
+        assert self.process_media.called == process_media_called
 
     @pytest.mark.parametrize('stream_data, expected_response', [
             ('206-zulip-terminal', dict(stream_id=206, stream_name=None)),
