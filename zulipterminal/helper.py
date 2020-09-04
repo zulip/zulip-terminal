@@ -665,6 +665,11 @@ def process_media(controller: Any, media_link: str) -> None:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:  # Filter out keep-alive new chunks.
                     f.write(chunk)
+                    controller.view.set_footer_text([
+                        ' Downloading ', ('bold', media_name),
+                    ])
+        controller.view.set_footer_text([' Downloaded ', ('bold', media_name)],
+                                        duration=3)
 
     if LINUX:
         command = 'xdg-open'
