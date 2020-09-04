@@ -3,7 +3,7 @@ import subprocess
 import time
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
-from functools import wraps
+from functools import partial, wraps
 from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
 from tempfile import NamedTemporaryFile
@@ -734,7 +734,10 @@ def process_media(controller: Any, link: str) -> None:
         controller.report_error("The media link is empty")
         return
 
-    media_path = download_media(controller, link)
+    show_download_status = partial(
+        controller.view.set_footer_text, "Downloading your media..."
+    )
+    media_path = download_media(controller, link, show_download_status)
     tool = ""
 
     # TODO: Add support for other platforms as well.
@@ -753,7 +756,9 @@ def process_media(controller: Any, link: str) -> None:
     open_media(controller, tool, media_path)
 
 
-def download_media(controller: Any, url: str) -> str:
+def download_media(
+    controller: Any, url: str, show_download_status: Callable[..., None]
+) -> str:
     """
     Helper to download media from given link. Returns the path to downloaded media.
     """
@@ -771,8 +776,11 @@ def download_media(controller: Any, url: str) -> str:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:  # Filter out keep-alive new chunks.
                     file.write(chunk)
+                    show_download_status()
 
+        controller.report_success([" Downloaded ", ("bold", media_name)])
         return normalized_file_path(local_path)
+
     return ""
 
 

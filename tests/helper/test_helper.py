@@ -489,6 +489,7 @@ def test_download_media(
 ) -> None:
     mocker.patch(MODULE + ".requests")
     mocker.patch(MODULE + ".open")
+    callback = mocker.patch("zulipterminal.ui.View.set_footer_text")
     (
         mocker.patch(
             MODULE + ".NamedTemporaryFile"
@@ -496,7 +497,7 @@ def test_download_media(
     ) = media_path
     controller = mocker.Mock()
 
-    assert media_path == download_media(controller, url)
+    assert media_path == download_media(controller, url, callback)
 
 
 @pytest.mark.parametrize(
