@@ -761,7 +761,7 @@ def process_media(controller: Any, link: str) -> None:
         controller.report_error("Media not supported for this platform")
         return
 
-    open_media(controller, tool, media_path)
+    controller.show_media_confirmation_popup(open_media, tool, media_path)
 
 
 def download_media(
