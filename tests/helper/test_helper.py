@@ -506,7 +506,7 @@ def test_download_media(
 
 
 @pytest.mark.parametrize(
-    "platform, download_media_called, open_media_called, tool, modified_media_path",
+    "platform, download_media_called, show_media_called, tool, modified_media_path",
     [
         ("Linux", True, True, "xdg-open", "/path/to/media"),
         ("MacOS", True, True, "open", "/path/to/media"),
@@ -524,7 +524,7 @@ def test_process_media(
     mocker: MockerFixture,
     platform: str,
     download_media_called: bool,
-    open_media_called: bool,
+    show_media_called: bool,
     tool: str,
     modified_media_path: str,
     media_path: str = "/path/to/media",
@@ -536,13 +536,16 @@ def test_process_media(
     )
     mocked_open_media = mocker.patch(MODULE + ".open_media")
     mocker.patch(MODULE + ".PLATFORM", platform)
+    mocker.patch("zulipterminal.core.Controller.show_media_confirmation_popup")
 
     process_media(controller, link)
 
     assert mocked_download_media.called == download_media_called
-    assert mocked_open_media.called == open_media_called
-    if open_media_called:
-        mocked_open_media.assert_called_once_with(controller, tool, modified_media_path)
+    assert controller.show_media_confirmation_popup.called == show_media_called
+    if show_media_called:
+        controller.show_media_confirmation_popup.assert_called_once_with(
+            mocked_open_media, tool, modified_media_path
+        )
 
 
 def test_process_media_empty_url(
@@ -552,12 +555,12 @@ def test_process_media_empty_url(
     controller = mocker.Mock()
     mocker.patch("zulipterminal.core.Controller.report_error")
     mocked_download_media = mocker.patch(MODULE + ".download_media")
-    mocked_open_media = mocker.patch(MODULE + ".open_media")
+    mocker.patch("zulipterminal.core.Controller.show_media_confirmation_popup")
 
     process_media(controller, link)
 
     mocked_download_media.assert_not_called()
-    mocked_open_media.assert_not_called()
+    controller.show_media_confirmation_popup.assert_not_called()
     controller.report_error.assert_called_once_with("The media link is empty")
 
 
