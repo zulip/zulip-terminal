@@ -678,7 +678,7 @@ def process_media(controller: Any, media_link: str) -> None:
     elif MACOS:
         command = 'open'
 
-    open_media(controller, command, media_path)
+    controller.show_media_confirmation_popup(open_media, command, media_path)
 
 
 @asynch

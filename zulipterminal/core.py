@@ -173,6 +173,16 @@ class Controller:
                             'Edit History (up/down scrolls)')
         )
 
+    def show_media_confirmation_popup(self, func: Any, command: str,
+                                      media_path: str) -> None:
+        callback = partial(func, self, command, media_path)
+        question = urwid.Text([
+            'Your requested media has been downloaded at ',
+            ('bold', media_path),
+            '. Do you want to view it?'
+        ])
+        self.loop.widget = PopUpConfirmationView(self, question, callback)
+
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
         self.model.index['search'].clear()

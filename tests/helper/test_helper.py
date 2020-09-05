@@ -329,12 +329,12 @@ def test_process_media(mocker, media_path='/tmp/zt-somerandomtext-image.png',
     # The command, which is platform dependent, does not matter for the test.
     mocker.patch('zulipterminal.helper.LINUX', True)
     controller = mocker.Mock()
-    mocked_open_media = mocker.patch('zulipterminal.helper.open_media')
 
     process_media(controller, media_link)
 
-    mocked_open_media.assert_called_once_with(controller, 'xdg-open',
-                                              media_path)
+    controller.show_media_confirmation_popup.assert_called_once_with(
+        open_media, 'xdg-open', media_path
+    )
 
 
 @pytest.mark.parametrize('returncode, error', [
