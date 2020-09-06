@@ -23,13 +23,13 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
     last_msg = last_message
     muted_msgs = 0  # No of messages that are muted.
     for msg in message_list:
+        if is_unsubscribed_message(msg, model):
+            continue
         # Remove messages of muted topics / streams.
         if is_muted(msg, model):
             muted_msgs += 1
             if model.narrow == []:  # Don't show in 'All messages'.
                 continue
-        if is_unsubscribed_message(msg, model):
-            continue
         msg_flag = 'unread'  # type: Union[str, None]
         flags = msg.get('flags')
         # update_messages sends messages with no flags
