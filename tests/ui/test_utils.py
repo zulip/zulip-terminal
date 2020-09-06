@@ -144,9 +144,13 @@ def test_create_msg_box_list(mocker, narrow, messages, focus_msg_id,
     msg_box = mocker.patch('zulipterminal.ui_tools.utils.MessageBox')
     mocker.patch('zulipterminal.ui_tools.utils.urwid.AttrMap',
                  return_value='MSG')
-    mocker.patch('zulipterminal.ui_tools.utils.is_muted', return_value=muted)
+    mock_muted = mocker.patch('zulipterminal.ui_tools.utils.is_muted',
+                              return_value=muted)
     mocker.patch('zulipterminal.ui_tools.utils.is_unsubscribed_message',
                  return_value=unsubscribed)
+
     return_value = create_msg_box_list(model, messages,
                                        focus_msg_id=focus_msg_id)
+
     assert len(return_value) == len_w_list
+    assert mock_muted.called is not unsubscribed
