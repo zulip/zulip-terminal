@@ -586,9 +586,10 @@ class TestPanelSearchBox:
         (["SOMETHING"], True)
     ])
     @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
-    def test_keypress_ENTER(self, panel_search_box,
+    def test_keypress_ENTER(self, panel_search_box, widget_size,
                             enter_key, log, expect_body_focus_set):
-        size = (20,)
+        size = widget_size(panel_search_box)
+        assert size == (20, )
         panel_search_box.panel_view.view.controller.is_in_editor_mode = (
             lambda: True
         )
@@ -618,8 +619,9 @@ class TestPanelSearchBox:
              .assert_not_called())
 
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, panel_search_box, back_key):
-        size = (20,)
+    def test_keypress_GO_BACK(self, panel_search_box, back_key, widget_size):
+        size = widget_size(panel_search_box)
+        assert size == (20,)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = (
             lambda: True
         )
