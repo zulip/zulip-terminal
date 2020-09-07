@@ -509,9 +509,10 @@ class TestStreamsView:
                 ] == expected_log
         self.view.controller.update_screen.assert_called_once_with()
 
-    def test_mouse_event(self, mocker, stream_view):
+    def test_mouse_event(self, mocker, stream_view, widget_size):
         mocker.patch.object(stream_view, 'keypress')
-        size = (200, 20)
+        size = widget_size(stream_view)
+        assert size == (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
@@ -661,8 +662,10 @@ class TestTopicsView:
         set_focus_valign.assert_called_once_with('bottom')
 
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_TOPIC'))
-    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view, key):
-        size = (200, 20)
+    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view, key,
+                                        widget_size):
+        size = widget_size(topic_view)
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.left_panel = mocker.Mock()
         topic_view.view.left_panel.contents = [mocker.Mock(), mocker.Mock()]
@@ -671,8 +674,9 @@ class TestTopicsView:
             options.assert_called_once_with(height_type="weight"))
 
     @pytest.mark.parametrize('key', keys_for_command('GO_RIGHT'))
-    def test_keypress_GO_RIGHT(self, mocker, topic_view, key):
-        size = (200, 20)
+    def test_keypress_GO_RIGHT(self, mocker, topic_view, key, widget_size):
+        size = widget_size(topic_view)
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.urwid.Frame.keypress')
         topic_view.view.body.focus_col = None
         topic_view.keypress(size, key)
@@ -680,16 +684,19 @@ class TestTopicsView:
         topic_view.view.show_left_panel.assert_called_once_with(visible=False)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_TOPICS'))
-    def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key):
-        size = (200, 20)
+    def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key,
+                                    widget_size):
+        size = widget_size(topic_view)
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
         topic_view.keypress(size, key)
         topic_view.set_focus.assert_called_once_with('header')
         topic_view.header_list.set_focus.assert_called_once_with(2)
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_keypress_GO_BACK(self, mocker, topic_view, key):
-        size = (200, 20)
+    def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
+        size = widget_size(topic_view)
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
         mocker.patch.object(topic_view.topic_search_box, 'reset_search_text')
         topic_view.keypress(size, key)
@@ -743,9 +750,10 @@ class TestUsersView:
         controller = mocker.Mock()
         return UsersView(controller, "USER_BTN_LIST")
 
-    def test_mouse_event(self, mocker, user_view):
+    def test_mouse_event(self, mocker, user_view, widget_size):
         mocker.patch.object(user_view, 'keypress')
-        size = (200, 20)
+        size = widget_size(user_view)
+        assert size == (200, 20)
         col = 1
         row = 1
         focus = "WIDGET"
@@ -786,8 +794,9 @@ class TestUsersView:
             'invalid_event_button_combination',
         ]
     )
-    def test_mouse_event_invalid(self, user_view, event, button):
-        size = (200, 20)
+    def test_mouse_event_invalid(self, user_view, event, button, widget_size):
+        size = widget_size(user_view)
+        assert size == (200, 20)
         col = 1
         row = 1
         focus = 'WIDGET'
@@ -1267,23 +1276,26 @@ class TestPopUpView:
         self.super_init.assert_called_once_with(self.pop_up_view.log)
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
-    def test_keypress_GO_BACK(self, key):
-        size = (200, 20)
+    def test_keypress_GO_BACK(self, key, widget_size):
+        size = widget_size(self.pop_up_view)
+        assert size == (200, 20)
         self.pop_up_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_command_key(self, mocker):
-        size = (200, 20)
+    def test_keypress_command_key(self, mocker, widget_size):
+        size = widget_size(self.pop_up_view)
+        assert size == (200, 20)
         mocker.patch(VIEWS + '.is_command_key', side_effect=(
             lambda command, key: command == self.command
         ))
         self.pop_up_view.keypress(size, 'cmd_key')
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(self, mocker,
+    def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
-        size = (200, 20)
+        size = widget_size(self.pop_up_view)
+        assert size == (200, 20)
         # Patch `is_command_key` to not raise an 'Invalid Command' exception
         # when its parameters are (self.command, key) as there is no
         # self.command='COMMAND' command in keys.py.
@@ -1305,23 +1317,26 @@ class TestHelpMenu:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.help_view = HelpView(self.controller, 'Help Menu')
 
-    def test_keypress_any_key(self):
+    def test_keypress_any_key(self, widget_size):
         key = "a"
-        size = (200, 20)
+        size = widget_size(self.help_view)
+        assert size == (200, 20)
         self.help_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('HELP')})
-    def test_keypress_exit_popup(self, key):
-        size = (200, 20)
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.help_view)
+        assert size == (200, 20)
         self.help_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(self, mocker,
+    def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
-        size = (200, 20)
+        size = widget_size(self.help_view)
+        assert size == (200, 20)
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.help_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
@@ -1342,21 +1357,24 @@ class TestAboutView:
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('ABOUT')})
-    def test_keypress_exit_popup(self, key):
-        size = (200, 20)
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.about_view)
+        assert size == (200, 20)
         self.about_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_exit_popup_invalid_key(self):
+    def test_keypress_exit_popup_invalid_key(self, widget_size):
         key = 'a'
-        size = (200, 20)
+        size = widget_size(self.about_view)
+        assert size == (200, 20)
         self.about_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    def test_keypress_navigation(self, mocker,
+    def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
-        size = (200, 20)
+        size = widget_size(self.about_view)
+        assert size == (200, 20)
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.about_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
@@ -1461,15 +1479,17 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})
-    def test_keypress_exit_popup(self, key):
-        size = (200, 20)
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.stream_info_view)
+        assert size == (200, 20)
         self.stream_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(self, mocker,
+    def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
-        size = (200, 20)
+        size = widget_size(self.stream_info_view)
+        assert size == (200, 20)
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.stream_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
@@ -1514,9 +1534,10 @@ class TestMsgInfoView:
                                          'Message Information', OrderedDict(),
                                          list())
 
-    def test_keypress_any_key(self):
+    def test_keypress_any_key(self, widget_size):
         key = "a"
-        size = (200, 20)
+        size = widget_size(self.msg_info_view)
+        assert size == (200, 20)
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
@@ -1533,10 +1554,9 @@ class TestMsgInfoView:
             'group_pm_message_id',
         ]
     )
-    def test_keypress_edit_history(self, message_fixture, key,
+    def test_keypress_edit_history(self, message_fixture, key, widget_size,
                                    realm_allow_edit_history,
                                    edited_message_id):
-        size = (200, 20)
         self.controller.model.index = {
             'edited_messages': set([edited_message_id]),
         }
@@ -1547,6 +1567,8 @@ class TestMsgInfoView:
                                     title='Message Information',
                                     message_links=OrderedDict(),
                                     time_mentions=list())
+        size = widget_size(msg_info_view)
+        assert size == (200, 20)
 
         msg_info_view.keypress(size, key)
 
@@ -1561,8 +1583,9 @@ class TestMsgInfoView:
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('MSG_INFO')})
-    def test_keypress_exit_popup(self, key):
-        size = (200, 20)
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.msg_info_view)
+        assert size == (200, 20)
         self.msg_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
@@ -1619,10 +1642,11 @@ class TestMsgInfoView:
         expected_height = 9
         assert self.msg_info_view.height == expected_height
 
-    def test_keypress_navigation(self, mocker,
+    def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
-        size = (200, 20)
+        size = widget_size(self.msg_info_view)
+        assert size == (200, 20)
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.msg_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
@@ -2640,8 +2664,10 @@ class TestStreamButton:
             options.assert_called_once_with(height_type="weight"))
 
     @pytest.mark.parametrize('key', keys_for_command('TOGGLE_MUTE_STREAM'))
-    def test_keypress_TOGGLE_MUTE_STREAM(self, mocker, stream_button, key):
-        size = (20,)
+    def test_keypress_TOGGLE_MUTE_STREAM(self, mocker, stream_button, key,
+                                         widget_size):
+        size = widget_size(stream_button)
+        assert size == (20,)
         pop_up = mocker.patch(
             'zulipterminal.core.Controller.stream_muting_confirmation_popup')
         stream_button.keypress(size, key)
@@ -2705,7 +2731,7 @@ class TestUserButton:
     @pytest.mark.parametrize('enter_key', keys_for_command('ENTER'))
     def test_activate_called_once_on_keypress(
         self,
-        mocker, enter_key,
+        mocker, enter_key, widget_size,
         caption="some user", width=30, email='some_email', user_id=5,
     ):
         user = {
@@ -2713,7 +2739,6 @@ class TestUserButton:
             'user_id': user_id,
             'full_name': caption,
         }  # type: Dict[str, Any]
-        size = (20,)
         activate = mocker.patch(BUTTONS + ".UserButton.activate")
         user_button = UserButton(user,
                                  controller=mocker.Mock(),
@@ -2721,6 +2746,8 @@ class TestUserButton:
                                  width=width,
                                  color=mocker.Mock(),
                                  count=mocker.Mock())
+        size = widget_size(user_button)
+        assert size == (20,)
 
         user_button.keypress(size, enter_key)
 
