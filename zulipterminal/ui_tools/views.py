@@ -713,11 +713,11 @@ class LeftColumnView(urwid.Pile):
         self.stream_v = self.streams_view()
 
         self.is_in_topic_view = False
-        self.left_column_structure = [
+        contents = [
             (4, self.menu_v),
             self.stream_v
         ]
-        super().__init__(self.left_column_structure)
+        super().__init__(contents)
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get('all_msg', 0)
@@ -819,11 +819,10 @@ class LeftColumnView(urwid.Pile):
         if self.is_in_topic_view:
             return
 
-        self.left_column_structure = [
+        self.contents = [
             (self.menu_v, ('given', 4)),
             (self.stream_v, ('weight', 1)),
         ]
-        self.contents = self.left_column_structure
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
