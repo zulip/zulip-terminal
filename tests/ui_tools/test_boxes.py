@@ -327,7 +327,6 @@ class TestWriteBox:
         write_box.focus_position = 0
         write_box.contents[0][0].focus_col = 0
         size = widget_size(write_box)
-        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
 
@@ -367,7 +366,6 @@ class TestWriteBox:
         write_box.focus_position = 0
         write_box.contents[0][0].focus_col = 1
         size = widget_size(write_box)
-        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
 
@@ -429,7 +427,6 @@ class TestWriteBox:
         )
         write_box.to_write_box = None
         size = widget_size(write_box)
-        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         write_box.msg_edit_id = msg_edit_id
         write_box.edit_mode_button = mocker.Mock(mode=propagate_mode)
 
@@ -470,7 +467,6 @@ class TestWriteBox:
                                                       key):
         write_box.is_in_typeahead_mode = current_typeahead_mode
         size = widget_size(write_box)
-        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, key)
 
@@ -532,7 +528,6 @@ class TestWriteBox:
         else:
             write_box.private_box_view()
         size = widget_size(write_box)
-        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         write_box.focus_position = initial_focus_position
         write_box.msg_body_edit_enabled = msg_body_edit_enabled
         write_box.contents[0][0].focus_col = initial_focus_col
@@ -599,7 +594,6 @@ class TestPanelSearchBox:
     def test_keypress_ENTER(self, panel_search_box, widget_size,
                             enter_key, log, expect_body_focus_set):
         size = widget_size(panel_search_box)
-        assert size == (20, )
         panel_search_box.panel_view.view.controller.is_in_editor_mode = (
             lambda: True
         )
@@ -631,7 +625,6 @@ class TestPanelSearchBox:
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, panel_search_box, back_key, widget_size):
         size = widget_size(panel_search_box)
-        assert size == (20,)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = (
             lambda: True
         )

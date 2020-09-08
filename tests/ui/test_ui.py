@@ -220,8 +220,6 @@ class TestView:
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
         size = widget_size(view)
-        assert size != (20,), 'Incorrect size used for a Box widget'
-        assert size == (200, 20)
 
         super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
                                       ".keypress")
@@ -238,8 +236,6 @@ class TestView:
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
-        assert size != (20,), 'Incorrect size used for a Box widget'
-        assert size == (200, 20)
         view.model.controller.show_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
@@ -260,8 +256,6 @@ class TestView:
         view.left_panel = mocker.Mock()
         view.right_panel = mocker.Mock()
         size = widget_size(view)
-        assert size != (20,), 'Incorrect size used for a Box widget'
-        assert size == (200, 20)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
@@ -291,8 +285,6 @@ class TestView:
         view.left_panel.is_in_topic_view = False
         view.right_panel = mocker.Mock()
         size = widget_size(view)
-        assert size != (20,), 'Incorrect size used for a Box widget'
-        assert size == (200, 20)
 
         super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
@@ -318,8 +310,6 @@ class TestView:
 
         view.controller.is_in_editor_mode = lambda: True
         size = widget_size(view)
-        assert size != (130, 28), 'Different box size value'
-        assert size == (200, 20)
 
         view.keypress(size, key)
 
