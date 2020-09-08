@@ -44,7 +44,6 @@ class TestEditHistoryView:
     @pytest.mark.parametrize('key', keys_for_command('MSG_INFO'))
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.edit_history_view)
-        assert size == (200, 20)
 
         self.edit_history_view.keypress(size, key)
 
@@ -52,7 +51,6 @@ class TestEditHistoryView:
 
     def test_keypress_exit_popup_invalid_key(self, widget_size):
         size = widget_size(self.edit_history_view)
-        assert size == (200, 20)
         key = 'a'
 
         self.edit_history_view.keypress(size, key)
@@ -63,7 +61,6 @@ class TestEditHistoryView:
                                      *keys_for_command('GO_BACK')})
     def test_keypress_show_msg_info(self, key, widget_size):
         size = widget_size(self.edit_history_view)
-        assert size == (200, 20)
 
         self.edit_history_view.keypress(size, key)
 
@@ -76,7 +73,6 @@ class TestEditHistoryView:
     def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         size = widget_size(self.edit_history_view)
-        assert size == (200, 20)
         key, expected_key = navigation_key_expected_key_pair
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
 
