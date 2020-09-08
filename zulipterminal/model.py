@@ -781,7 +781,7 @@ class Model:
                             self.unpinned_streams.append(stream)
                     sort_streams(self.unpinned_streams)
                     sort_streams(self.pinned_streams)
-                    self.controller.view.left_panel.update_structure()
+                    self.controller.view.left_panel.update_stream_view()
                     self.controller.update_screen()
         elif (event['op'] == 'peer_add'
               and self.is_user_subscribed_to_stream(event['stream_id'])):

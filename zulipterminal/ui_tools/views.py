@@ -814,7 +814,7 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
-    def update_structure(self) -> None:
+    def update_stream_view(self) -> None:
         self.stream_v = self.streams_view()
         if self.is_in_topic_view:
             return

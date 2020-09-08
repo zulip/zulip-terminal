@@ -1627,7 +1627,7 @@ class TestModel:
                 == set_from_list_of_dict(expected_pinned_streams))
         assert (set_from_list_of_dict(model.unpinned_streams)
                 == set_from_list_of_dict(expected_unpinned_streams))
-        update_left_panel = model.controller.view.left_panel.update_structure
+        update_left_panel = model.controller.view.left_panel.update_stream_view
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
 
