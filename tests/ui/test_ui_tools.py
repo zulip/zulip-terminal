@@ -2257,15 +2257,16 @@ class TestMessageBox:
             'topic_edit_only_after_time_limit',
             'editing_not_allowed',
             'all_conditions_met'])
-    def test_keypress_EDIT_MESSAGE(self, mocker, message_fixture,
+    def test_keypress_EDIT_MESSAGE(self, mocker, message_fixture, widget_size,
                                    expect_editing_to_succeed,
                                    to_vary_in_each_message,
                                    realm_editing_allowed,
                                    msg_body_edit_enabled,
                                    key):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
-        size = (20,)
         msg_box = MessageBox(varied_message, self.model, message_fixture)
+        size = widget_size(msg_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         msg_box.model.user_id = 1
         msg_box.model.initial_data = {
             'realm_allow_message_editing': realm_editing_allowed,
@@ -2497,9 +2498,10 @@ class TestMessageBox:
         'key', keys_for_command('ENTER'),
         ids=lambda param: 'left_click-key:{}'.format(param)
     )
-    def test_mouse_event_left_click(self, mocker, msg_box, key,
+    def test_mouse_event_left_click(self, mocker, msg_box, key, widget_size,
                                     compose_box_is_open):
-        size = (20, )
+        size = widget_size(msg_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         col = 1
         row = 1
         focus = mocker.Mock()

@@ -319,13 +319,15 @@ class TestWriteBox:
                          reason="Lacking urwid-readline support")),
     ])
     def test__stream_box_autocomplete_with_spaces(self, mocker, write_box,
+                                                  widget_size,
                                                   text, expected_text):
         write_box.stream_box_view(1000)
         write_box.contents[0][0][0].set_edit_text(text)
         write_box.contents[0][0][0].set_edit_pos(len(text))
         write_box.focus_position = 0
         write_box.contents[0][0].focus_col = 0
-        size = (20,)
+        size = widget_size(write_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
 
@@ -355,6 +357,7 @@ class TestWriteBox:
                              reason="Lacking urwid-readline support")),
     ])
     def test__topic_box_autocomplete_with_spaces(self, mocker, write_box,
+                                                 widget_size,
                                                  text, expected_text,
                                                  topics):
         write_box.stream_box_view(1000)
@@ -363,7 +366,8 @@ class TestWriteBox:
         write_box.contents[0][0][1].set_edit_pos(len(text))
         write_box.focus_position = 0
         write_box.contents[0][0].focus_col = 1
-        size = (20,)
+        size = widget_size(write_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
 
@@ -416,6 +420,7 @@ class TestWriteBox:
     def test_keypress_SEND_MESSAGE_no_topic(self, mocker, write_box,
                                             msg_edit_id, topic_entered_by_user,
                                             topic_sent_to_server, key,
+                                            widget_size,
                                             propagate_mode='change_one'):
         write_box.stream_write_box = mocker.Mock()
         write_box.msg_write_box = mocker.Mock(edit_text='')
@@ -423,7 +428,8 @@ class TestWriteBox:
             edit_text=topic_entered_by_user
         )
         write_box.to_write_box = None
-        size = (20,)
+        size = widget_size(write_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         write_box.msg_edit_id = msg_edit_id
         write_box.edit_mode_button = mocker.Mock(mode=propagate_mode)
 
@@ -457,12 +463,14 @@ class TestWriteBox:
         ('k', True, False, True),
     ])
     def test_keypress_typeahead_mode_autocomplete_key(self, mocker, write_box,
+                                                      widget_size,
                                                       current_typeahead_mode,
                                                       expected_typeahead_mode,
                                                       expect_footer_was_reset,
                                                       key):
         write_box.is_in_typeahead_mode = current_typeahead_mode
-        size = (20,)
+        size = widget_size(write_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
 
         write_box.keypress(size, key)
 
@@ -512,6 +520,7 @@ class TestWriteBox:
                                           expected_focus_col, box_type,
                                           msg_body_edit_enabled,
                                           message_being_edited,
+                                          widget_size,
                                           mocker, stream_id=10):
         if box_type == "stream":
             if message_being_edited:
@@ -522,7 +531,8 @@ class TestWriteBox:
                 write_box.stream_box_view(stream_id)
         else:
             write_box.private_box_view()
-        size = (20,)
+        size = widget_size(write_box)
+        assert size in [(200, 20), (20, )], 'Box/Flow widget'
         write_box.focus_position = initial_focus_position
         write_box.msg_body_edit_enabled = msg_body_edit_enabled
         write_box.contents[0][0].focus_col = initial_focus_col
