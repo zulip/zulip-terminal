@@ -882,14 +882,14 @@ class Model:
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
-            if (hasattr(self.controller, 'view')
-                and self.controller.view.left_panel.is_in_topic_view
-                and message['stream_id'] == self.controller.view.
-                    topic_w.stream_button.stream_id):
-                self.controller.view.topic_w.update_topics_list(
-                    message['stream_id'], message['subject'],
-                    message['sender_id'])
-                self.controller.update_screen()
+            if hasattr(self.controller, 'view'):
+                view = self.controller.view
+                if (view.left_panel.is_in_topic_view_with_stream_id(
+                        message['stream_id'])):
+                    view.topic_w.update_topics_list(
+                        message['stream_id'], message['subject'],
+                        message['sender_id'])
+                    self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not,
         # but depend upon the UI to indicate failures.

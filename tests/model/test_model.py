@@ -856,6 +856,8 @@ class TestModel:
                                            return_value=["msg_w"])
         set_count = mocker.patch('zulipterminal.model.set_count')
         self.controller.view.message_view = mocker.Mock(log=[])
+        (self.controller.view.left_panel.is_in_topic_view_with_stream_id.
+            return_value) = False
         model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients

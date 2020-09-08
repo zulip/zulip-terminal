@@ -810,6 +810,12 @@ class LeftColumnView(urwid.Pile):
             )
         return w
 
+    def is_in_topic_view_with_stream_id(self, stream_id: int) -> bool:
+        return (
+            self.is_in_topic_view
+            and stream_id == self.view.topic_w.stream_button.stream_id
+        )
+
     def update_stream_view(self) -> None:
         self.stream_v = self.streams_view()
         if not self.is_in_topic_view:
