@@ -1006,9 +1006,13 @@ class HelpView(PopUpView):
         super().__init__(controller, widgets, 'HELP', popup_width, title)
 
 
+PopUpConfirmationViewLocation = Literal['top-left', 'center']
+
+
 class PopUpConfirmationView(urwid.Overlay):
     def __init__(self, controller: Any, question: Any,
-                 success_callback: Callable[[], None]):
+                 success_callback: Callable[[], None],
+                 location: PopUpConfirmationViewLocation='top-left'):
         self.controller = controller
         self.success_callback = success_callback
         yes = urwid.Button('Yes', self.exit_popup_yes)
@@ -1019,15 +1023,31 @@ class PopUpConfirmationView(urwid.Overlay):
             'No', 4), None, 'selected')
         display_widget = urwid.GridFlow([yes, no], 3, 5, 1, 'center')
         wrapped_widget = urwid.WidgetWrap(display_widget)
+        widgets = [question, urwid.Divider(), wrapped_widget]
         prompt = urwid.LineBox(
             urwid.ListBox(
                 urwid.SimpleFocusListWalker(
-                    [question, urwid.Divider(), wrapped_widget]
+                    widgets
                 )))
-        urwid.Overlay.__init__(self, prompt, self.controller.view,
-                               align="left", valign="top",
-                               width=self.controller.view.LEFT_WIDTH + 1,
-                               height=8)
+
+        if location == 'top-left':
+            align = 'left'
+            valign = 'top'
+            width = self.controller.view.LEFT_WIDTH + 1
+            height = 8
+        else:
+            align = 'center'
+            valign = 'middle'
+
+            max_cols, max_rows = controller.maximum_popup_dimensions()
+            # +2 to compensate for the LineBox characters.
+            width = min(max_cols,
+                        max(question.pack()[0], len('Yes'), len('No'))) + 2
+            height = min(max_rows,
+                         sum(widget.rows((width,)) for widget in widgets)) + 2
+
+        urwid.Overlay.__init__(self, prompt, self.controller.view, align=align,
+                               valign=valign, width=width, height=height)
 
     def exit_popup_yes(self, args: Any) -> None:
         self.success_callback()

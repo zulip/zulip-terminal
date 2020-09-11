@@ -181,7 +181,8 @@ class Controller:
             ('bold', media_path),
             '. Do you want to view it?'
         ])
-        self.loop.widget = PopUpConfirmationView(self, question, callback)
+        self.loop.widget = PopUpConfirmationView(self, question, callback,
+                                                 location='center')
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
