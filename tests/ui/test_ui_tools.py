@@ -1128,7 +1128,8 @@ class TestRightColumnView:
                 view=self.view,
                 width=width,
                 color='user_' + self.view.users[0]['status'],
-                count=1
+                count=1,
+                is_current_user=False
             )
         users_view.assert_called_once_with(self.view.controller,
                                            right_col_view.users_btn_list)

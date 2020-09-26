@@ -659,6 +659,7 @@ class RightColumnView(urwid.Frame):
                 continue
             unread_count = (self.view.model.unread_counts['unread_pms'].
                             get(user['user_id'], 0))
+            is_current_user = (user['user_id'] == self.view.model.user_id)
             users_btn_list.append(
                 UserButton(
                     user,
@@ -666,7 +667,8 @@ class RightColumnView(urwid.Frame):
                     view=self.view,
                     width=self.width,
                     color='user_' + user['status'],
-                    count=unread_count
+                    count=unread_count,
+                    is_current_user=is_current_user
                 )
             )
         user_w = UsersView(self.view.controller, users_btn_list)

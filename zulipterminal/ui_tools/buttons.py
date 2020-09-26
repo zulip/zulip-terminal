@@ -199,8 +199,8 @@ class StreamButton(TopButton):
 class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,
                  view: Any, width: int,
-                 color: Optional[str]=None, count: int=0
-                 ) -> None:
+                 color: Optional[str]=None, count: int=0,
+                 is_current_user: bool=False) -> None:
         # Properties accessed externally
         self.email = user['email']
         self.user_id = user['user_id']
@@ -217,6 +217,8 @@ class UserButton(TopButton):
                          text_color=color,
                          width=width,
                          count=count)
+        if is_current_user:
+            self.update_widget(('current_user', '(you)'))
 
     def _narrow_with_compose(self, button: Any) -> None:
         # Switches directly to composing with user

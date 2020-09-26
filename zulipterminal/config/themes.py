@@ -53,6 +53,7 @@ DEF_base = dict(
     dark_blue='#24a',
     dark_cyan='#088',
     dark_gray='#666',
+    light_gray='#ccc',
     light_red='#f00',
     light_green='#0f0',
     dark_green='#080',
@@ -166,6 +167,8 @@ THEMES = {
          None,             DEF['yellow'],             DEF['black']),
         ('edit_time',      'light blue',              'black',
          None,             DEF['light_blue'],         DEF['black']),
+        ('current_user',   'white',                   'black',
+         None,             DEF['white'],              DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -242,6 +245,8 @@ THEMES = {
          None,             YELLOW,            BLACK),
         ('edit_time',      'light blue',      'black',
          None,             LIGHTBLUE,         BLACK),
+        ('current_user',   'white',           'black',
+         None,             WHITE,             BLACK),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -280,6 +285,7 @@ THEMES = {
         ('edit_tag',       'white',           'dark gray'),
         ('edit_author',    'dark green',      'white'),
         ('edit_time',      'dark blue',       'white'),
+        ('current_user',   'dark gray',       'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -318,6 +324,7 @@ THEMES = {
         ('edit_tag',       'white',           'dark blue'),
         ('edit_author',    'dark gray',       'light blue'),
         ('edit_time',      'dark blue',       'light blue'),
+        ('current_user',   'light gray',      'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
