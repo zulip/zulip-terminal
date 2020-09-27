@@ -6,7 +6,6 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
-from zulipterminal.config.symbols import MUTE_MARKER
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -49,7 +48,8 @@ class TopButton(urwid.Button):
         self.controller = controller
         urwid.connect_signal(self, 'click', self.activate)
 
-    def update_count(self, count: int, text_color: Optional[str]=None) -> None:
+    def update_count(self, count: int, text_color: Optional[str]=None,
+                     unread_count_color: str='unread_count') -> None:
         new_color = self.original_color if text_color is None else text_color
 
         self.count = count
@@ -57,7 +57,7 @@ class TopButton(urwid.Button):
             count_text = ''
         else:
             count_text = str(count)
-        self.update_widget(('unread_count', count_text), new_color)
+        self.update_widget((unread_count_color, count_text), new_color)
 
     def update_widget(self, count_text: Tuple[str, str],
                       text_color: Optional[str]) -> Any:
@@ -181,7 +181,7 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('muted', MUTE_MARKER), 'muted')
+        self.update_count(self.count, 'muted', 'muted')
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
@@ -252,7 +252,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('muted',  MUTE_MARKER), 'muted')
+        self.update_count(self.count, 'muted', 'muted')
     # TODO: Handle event-based approach for topic-muting.
 
 

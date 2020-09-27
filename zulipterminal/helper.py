@@ -194,7 +194,8 @@ def _set_count_in_view(controller: Any, new_count: int,
             continue
 
         msg_type = message['type']
-        add_to_counts = True
+        text_color = None
+        unread_count_color = 'unread_count'
         if 'mentioned' in message['flags']:
             unread_counts['all_mentions'] += new_count
             all_mentioned.update_count(unread_counts['all_mentions'])
@@ -203,23 +204,28 @@ def _set_count_in_view(controller: Any, new_count: int,
             stream_id = message['stream_id']
             msg_topic = message['subject']
             if controller.model.is_muted_stream(stream_id):
-                add_to_counts = False  # if muted, don't add to eg. all_msg
-            else:
-                for stream_button in stream_buttons_log:
-                    if stream_button.stream_id == stream_id:
-                        stream_button.update_count(stream_button.count
-                                                   + new_count)
-                        break
+                controller.model.add_to_counts = False
+                # if muted, don't add to eg. all_msg
+                text_color = 'muted'
+                unread_count_color = 'muted'
+            for stream_button in stream_buttons_log:
+                if stream_button.stream_id == stream_id:
+                    stream_button.update_count(stream_button.count
+                                               + new_count, text_color,
+                                               unread_count_color)
             # FIXME: Update unread_counts['unread_topics']?
             if controller.model.is_muted_topic(stream_id, msg_topic):
-                add_to_counts = False
+                controller.model.add_to_counts = False
+                text_color = 'muted'
+                unread_count_color = 'muted'
             if is_open_topic_view and stream_id == toggled_stream_id:
                 # If topic_view is open for incoming messages's stream,
                 # We update the respective TopicButton count accordingly.
                 for topic_button in topic_buttons_log:
                     if topic_button.topic_name == msg_topic:
                         topic_button.update_count(topic_button.count
-                                                  + new_count)
+                                                  + new_count, text_color,
+                                                  unread_count_color)
         else:
             for user_button in user_buttons_log:
                 if user_button.user_id == user_id:
@@ -228,7 +234,7 @@ def _set_count_in_view(controller: Any, new_count: int,
             unread_counts['all_pms'] += new_count
             all_pm.update_count(unread_counts['all_pms'])
 
-        if add_to_counts:
+        if controller.model.add_to_counts:
             unread_counts['all_msg'] += new_count
             all_msg.update_count(unread_counts['all_msg'])
 
