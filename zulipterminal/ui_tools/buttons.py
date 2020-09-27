@@ -42,22 +42,25 @@ class TopButton(urwid.Button):
         # Space either side, at least one space between
         self.width_for_text_and_count = width - 3 - prefix_length
 
-        self.text_color = text_color
+        self.original_color = text_color
         self.show_function = show_function
         super().__init__("")
-        self.update_count(count)
+        self.update_count(count, text_color)
         self.controller = controller
         urwid.connect_signal(self, 'click', self.activate)
 
-    def update_count(self, count: int) -> None:
+    def update_count(self, count: int, text_color: Optional[str]=None) -> None:
+        new_color = self.original_color if text_color is None else text_color
+
         self.count = count
         if count == 0:
             count_text = ''
         else:
             count_text = str(count)
-        self.update_widget(('unread_count', count_text))
+        self.update_widget(('unread_count', count_text), new_color)
 
-    def update_widget(self, count_text: Tuple[str, str]) -> Any:
+    def update_widget(self, count_text: Tuple[str, str],
+                      text_color: Optional[str]) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count
                               - len(count_text[1]))
@@ -74,9 +77,9 @@ class TopButton(urwid.Button):
         self._w = urwid.AttrMap(urwid.SelectableIcon(
             [' ', self.prefix_character, self.post_prefix_spacing,
              '{}{}'.format(caption, num_extra_spaces * ' '),
-             ' ', ('unread_count',  count_text)],
+             ' ', count_text],
             self.width_for_text_and_count + 5),  # cursor location
-            self.text_color,
+            text_color,
             'selected')
 
     def activate(self, key: Any) -> None:
@@ -178,7 +181,7 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count', MUTE_MARKER))
+        self.update_widget(('muted', MUTE_MARKER), 'muted')
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
@@ -219,7 +222,7 @@ class UserButton(TopButton):
                          width=width,
                          count=count)
         if is_current_user:
-            self.update_widget(('current_user', '(you)'))
+            self.update_widget(('current_user', '(you)'), color)
 
     def _narrow_with_compose(self, button: Any) -> None:
         # Switches directly to composing with user
@@ -248,7 +251,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count',  MUTE_MARKER))
+        self.update_widget(('muted',  MUTE_MARKER), 'muted')
     # TODO: Handle event-based approach for topic-muting.
 
 
