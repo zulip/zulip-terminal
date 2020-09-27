@@ -160,12 +160,17 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(in_color('red', "\nIncorrect Email(or Username) or Password!\n"))
         res, login_id = get_api_key(realm_url)
 
-    with open(zuliprc_path, 'w') as f:
-        f.write('[api]'
-                + '\nemail=' + login_id
-                + '\nkey=' + str(res.json()['api_key'])
-                + '\nsite=' + realm_url)
-    print('Generated API key saved at ' + zuliprc_path)
+    try:
+        with open(zuliprc_path, 'w') as f:
+            f.write('[api]'
+                    + '\nemail=' + login_id
+                    + '\nkey=' + str(res.json()['api_key'])
+                    + '\nsite=' + realm_url)
+        print('Generated API key saved at ' + zuliprc_path)
+    except OSError as ex:
+        print(in_color('red', ex.__class__.__name__
+              + ": zuliprc could not be created at " + zuliprc_path))
+        sys.exit(1)
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
