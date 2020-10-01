@@ -5,9 +5,9 @@ USER zulip
 WORKDIR /home/zulip
 
 RUN set -ex; python3 -m venv zulip-terminal-venv \
-&& . zulip-terminal-venv/bin/activate \
-&& pip3 --disable-pip-version-check install zulip-term \
-&& rm -rf /home/zulip/.cache
+    && . zulip-terminal-venv/bin/activate \
+    && pip3 --disable-pip-version-check install zulip-term \
+    && rm -rf /home/zulip/.cache
 
 FROM python:3.7-slim-buster
 
