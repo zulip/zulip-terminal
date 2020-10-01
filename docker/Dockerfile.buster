@@ -4,8 +4,8 @@ RUN useradd --user-group --create-home zulip
 USER zulip
 WORKDIR /home/zulip
 
-RUN set -ex; python3 -m venv zulip-terminal-venv \
-    && . zulip-terminal-venv/bin/activate \
+RUN set -ex; python3 -m venv zt_venv \
+    && . zt_venv/bin/activate \
     && pip3 --disable-pip-version-check install zulip-term \
     && rm -rf /home/zulip/.cache
 
@@ -15,5 +15,5 @@ RUN useradd --user-group --create-home zulip
 COPY --from=builder --chown=zulip:zulip /home/zulip /home/zulip
 USER zulip
 WORKDIR /home/zulip
-ENTRYPOINT ["/home/zulip/zulip-terminal-venv/bin/zulip-term"]
+ENTRYPOINT ["/home/zulip/zt_venv/bin/zulip-term"]
 CMD ["--config-file", "/.zulip/zuliprc"]

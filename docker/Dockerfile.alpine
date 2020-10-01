@@ -8,8 +8,8 @@ RUN addgroup -S zulipgr \
 USER zulip
 WORKDIR /home/zulip
 
-RUN set -ex; python3 -m venv zulip-terminal-venv \
-    && source zulip-terminal-venv/bin/activate \
+RUN set -ex; python3 -m venv zt_venv \
+    && source zt_venv/bin/activate \
     && pip3 --disable-pip-version-check install zulip-term \
     && rm -rf /home/zulip/.cache
 
@@ -23,5 +23,5 @@ RUN addgroup -S zulipgr \
 COPY --from=builder --chown=zulip:zulipgr /home/zulip /home/zulip
 USER zulip
 WORKDIR /home/zulip
-ENTRYPOINT ["/home/zulip/zulip-terminal-venv/bin/zulip-term"]
+ENTRYPOINT ["/home/zulip/zt_venv/bin/zulip-term"]
 CMD ["--config-file", "/.zulip/zuliprc"]
