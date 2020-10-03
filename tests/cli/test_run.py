@@ -1,3 +1,6 @@
+import builtins
+import os
+
 import pytest
 
 from zulipterminal.cli.run import (
@@ -184,3 +187,59 @@ def test_main_multiple_autohide_options(capsys, options):
     expected = ("error: argument {}: not allowed "
                 "with argument {}".format(options[1], options[0]))
     assert lines == expected
+
+
+# NOTE: Fixture is necessary to ensure unreadable dir is garbage-collected
+# See pytest issue #7821
+@pytest.fixture
+def unreadable_dir(tmpdir):
+    unreadable_dir = tmpdir.mkdir("unreadable")
+    unreadable_dir.chmod(0)
+    if os.access(str(unreadable_dir), os.R_OK):
+        # Docker container or similar
+        pytest.skip("Directory was still readable")
+
+    yield tmpdir, unreadable_dir
+
+    unreadable_dir.chmod(0o755)
+
+
+@pytest.mark.parametrize("path_to_use, expected_exception", [
+    ("unreadable", "PermissionError"),
+    ("goodnewhome", "FileNotFoundError"),
+], ids=[
+    "valid_path_but_cannot_be_written_to",
+    "path_does_not_exist"
+])
+def test_main_cannot_write_zuliprc_given_good_credentials(
+    monkeypatch, capsys, mocker,
+    unreadable_dir,
+    path_to_use, expected_exception,
+):
+    tmpdir, unusable_path = unreadable_dir
+
+    # This is default base path to use
+    zuliprc_path = os.path.join(str(tmpdir), path_to_use)
+    monkeypatch.setenv("HOME", zuliprc_path)
+
+    # Give some arbitrary input and fake that it's always valid
+    mocker.patch.object(builtins, 'input', lambda _: 'text\n')
+    mocker.patch("zulipterminal.cli.run.get_api_key",
+                 return_value=(mocker.Mock(status_code=200), None))
+
+    with pytest.raises(SystemExit):
+        main([])
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+
+    expected_line = (
+        "\x1b[91m"
+        "{}: zuliprc could not be created at {}"
+        "\x1b[0m"
+        .format(
+            expected_exception,
+            os.path.join(zuliprc_path, "zuliprc")
+        )
+    )
+    assert lines[-1] == expected_line
