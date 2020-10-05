@@ -1160,7 +1160,7 @@ class MessageBox(urwid.Pile):
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_topic(self)
-        elif is_command_key('GO_BACK', key):
+        elif is_command_key('ALL_MESSAGES', key):
             self.model.controller.show_all_messages(self)
         elif is_command_key('REPLY_AUTHOR', key):
             # All subscribers from recipient_ids are not needed here.

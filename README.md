@@ -136,6 +136,7 @@ source ~/.zshenv
 | Scroll up                                             | <kbd>PgUp</kbd> / <kbd>K</kbd>                |
 | Scroll down                                           | <kbd>PgDn</kbd> / <kbd>J</kbd>                |
 | Go to the last message                                | <kbd>G</kbd> / <kbd>end</kbd>                 |
+| Narrow to all messages                                | <kbd>a</kbd> / <kbd>esc</kbd>                 |
 | Narrow to all private messages                        | <kbd>P</kbd>                                  |
 | Narrow to all starred messages                        | <kbd>f</kbd>                                  |
 | Narrow to messages in which you're mentioned          | <kbd>#</kbd>                                  |
