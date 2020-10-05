@@ -151,6 +151,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Toggle topics in a stream',
         'key_category': 'stream_list',
     }),
+    ('ALL_MESSAGES', {
+        'keys': {'a', 'esc'},
+        'help_text': 'Narrow to all messages',
+        'key_category': 'navigation',
+    }),
     ('ALL_PM', {
         'keys': {'P'},
         'help_text': 'Narrow to all private messages',

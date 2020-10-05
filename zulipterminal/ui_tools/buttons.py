@@ -94,8 +94,8 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("All messages   ["
-                       + keys_for_command("GO_BACK").pop()  # FIXME
+        button_text = ("All messages     ["
+                       + keys_for_command("ALL_MESSAGES").pop(0)
                        + "]")
         super().__init__(controller, button_text,
                          controller.show_all_messages, count=count,
