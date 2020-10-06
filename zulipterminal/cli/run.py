@@ -257,37 +257,6 @@ def main(options: Optional[List[str]]=None) -> None:
     else:
         zuliprc_path = '~/zuliprc'
 
-    if args.list_themes:
-        zterm = parse_zuliprc(zuliprc_path)
-
-        if args.theme:
-            theme_to_be_used = (args.theme)
-        else:
-            theme_to_be_used = zterm['theme'][0]
-
-        available_themes = all_themes()
-        default_index = available_themes.index('zt_dark')
-        available_themes[default_index] += " [default theme]"
-        theme_aliases = aliased_themes()
-
-        print('Themes available:-')
-        for i in available_themes:
-            if theme_to_be_used in i:
-                index = available_themes.index(i)
-                available_themes[index] += " [user preference]"
-                i = available_themes[index]
-            print('    {}'.format(i))
-
-        print("")
-        print("You can change the theme temporarily using -t <theme>,")
-        print("or permanently by configuring the theme in zuliprc file:-")
-        print(in_color("yellow", "\n[zterm]"))
-        print(in_color("yellow", "theme=")
-              + in_color("cyan", "theme_name\n")
-              + "\n(where 'theme_name' is the name of the theme you want)")
-
-        sys.exit(0)
-
     try:
         zterm = parse_zuliprc(zuliprc_path)
 
@@ -321,6 +290,25 @@ def main(options: Optional[List[str]]=None) -> None:
                 real_theme_name,
                 "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0])
             )
+
+        if args.list_themes:
+            print('Themes available:-')
+            for theme in available_themes:
+                suffix = ""
+                if theme == "zt_dark":
+                    suffix += " [default theme]"
+                if theme_to_use[0] in theme:
+                    suffix += " [user preference]"
+                print('  ', theme, suffix)
+
+            print("You can change the theme temporarily using -t <theme>,")
+            print("or permanently by configuring the theme in zuliprc file:-")
+            print(in_color("yellow", "\n[zterm]"))
+            print(in_color("yellow", "theme=")
+                  + in_color("cyan", "theme_name\n")
+                  + "\n(where 'theme_name' is the name of the theme you want)")
+
+            sys.exit(0)
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
