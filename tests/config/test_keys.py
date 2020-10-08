@@ -23,7 +23,7 @@ def invalid_command(request):
 
 
 def test_keys_for_command(valid_command):
-    assert (keys.KEY_BINDINGS[valid_command]['keys']
+    assert (sorted(keys.KEY_BINDINGS[valid_command]['keys'])
             == keys.keys_for_command(valid_command))
 
 
@@ -35,8 +35,8 @@ def test_keys_for_command_invalid_command(invalid_command):
 def test_keys_for_command_identity(valid_command):
     """
     Ensures that each call to keys_for_command returns the original keys in a
-    new set which validates that the original keys don't get altered elsewhere
-    unintentionally.
+    new sorted list which validates that the original keys don't get altered
+    elsewhere unintentionally.
     """
     assert id(keys.KEY_BINDINGS[valid_command]['keys']) \
         != id(keys.keys_for_command(valid_command))
@@ -48,7 +48,7 @@ def test_is_command_key_matching_keys(valid_command):
 
 
 def test_is_command_key_nonmatching_keys(valid_command):
-    keys_to_test = USED_KEYS - keys.keys_for_command(valid_command)
+    keys_to_test = USED_KEYS - set(keys.keys_for_command(valid_command))
     for key in keys_to_test:
         assert not keys.is_command_key(valid_command, key)
 

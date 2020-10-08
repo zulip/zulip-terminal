@@ -324,12 +324,12 @@ def is_command_key(command: str, key: str) -> bool:
         raise InvalidCommand(command)
 
 
-def keys_for_command(command: str) -> Set[str]:
+def keys_for_command(command: str) -> List[str]:
     """
     Returns the actual keys for a given mapped command
     """
     try:
-        return set(KEY_BINDINGS[command]['keys'])
+        return sorted(KEY_BINDINGS[command]['keys'])
     except KeyError as exception:
         raise InvalidCommand(command)
 
