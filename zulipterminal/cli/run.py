@@ -253,8 +253,10 @@ def main(options: Optional[List[str]]=None) -> None:
         sys.exit(0)
 
     if args.list_themes:
-        print('Themes available:-',)
-        print('\n'.join(all_themes()))
+        available_themes = all_themes()
+        print('Themes available:-')
+        for i in available_themes:
+            print('    {}'.format(i))
         sys.exit(0)
 
     if args.config_file:
