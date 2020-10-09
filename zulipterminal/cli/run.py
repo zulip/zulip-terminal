@@ -62,6 +62,9 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                              'organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
                         help='choose color theme. (e.g. blue, light)')
+    parser.add_argument('--list-themes',
+                        action="store_true",
+                        help='list all the color themes.')
     parser.add_argument('--color-depth',
                         choices=['1', '16', '256'], default=256,
                         help="Force the color depth (default 256).")
@@ -247,6 +250,11 @@ def main(options: Optional[List[str]]=None) -> None:
 
     if args.version:
         print('Zulip Terminal ' + ZT_VERSION)
+        sys.exit(0)
+
+    if args.list_themes:
+        print('Themes available:-',)
+        print('\n'.join(all_themes()))
         sys.exit(0)
 
     if args.config_file:
