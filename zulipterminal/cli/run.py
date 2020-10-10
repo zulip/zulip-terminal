@@ -274,15 +274,23 @@ def main(options: Optional[List[str]]=None) -> None:
             theme_to_use[0] in available_themes
             or theme_to_use[0] in theme_aliases
         )
-        if not is_valid_theme:
-            print("Invalid theme '{}' was specified {}."
-                  .format(*theme_to_use))
+        if not is_valid_theme or args.list_themes:
+            exit_code = 0
+            if not is_valid_theme:
+                print("Invalid theme '{}' was specified {}."
+                      .format(*theme_to_use))
+                exit_code = 1
             print("The following themes are available:")
             for theme in available_themes:
-                print("  ", theme)
+                suffix = ""
+                if theme == "zt_dark":
+                    suffix += "[default theme]"
+                if theme_to_use[0] == theme:
+                    suffix += "[user preference]"
+                print("  ", theme, suffix)
             print("Specify theme in zuliprc file or override "
                   "using -t/--theme options on command line.")
-            sys.exit(1)
+            sys.exit(exit_code)
         if theme_to_use[0] not in available_themes:
             # theme must be an alias, as it is valid
             real_theme_name = theme_aliases[theme_to_use[0]]
@@ -290,25 +298,6 @@ def main(options: Optional[List[str]]=None) -> None:
                 real_theme_name,
                 "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0])
             )
-
-        if args.list_themes:
-            print('Themes available:-')
-            for theme in available_themes:
-                suffix = ""
-                if theme == "zt_dark":
-                    suffix += " [default theme]"
-                if theme_to_use[0] in theme:
-                    suffix += " [user preference]"
-                print('  ', theme, suffix)
-
-            print("You can change the theme temporarily using -t <theme>,")
-            print("or permanently by configuring the theme in zuliprc file:-")
-            print(in_color("yellow", "\n[zterm]"))
-            print(in_color("yellow", "theme=")
-                  + in_color("cyan", "theme_name\n")
-                  + "\n(where 'theme_name' is the name of the theme you want)")
-
-            sys.exit(0)
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
