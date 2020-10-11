@@ -15,7 +15,9 @@ from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
 from zulipterminal import emoji_names
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import (
+    is_command_key, keys_for_command, primary_key_for_command,
+)
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
@@ -60,8 +62,8 @@ class WriteBox(urwid.Pile):
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop(),
-            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
         self.header_write_box = urwid.LineBox(
             self.to_write_box, tlcorner='─', tline='─', lline='',
@@ -84,8 +86,8 @@ class WriteBox(urwid.Pile):
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop(),
-            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
         self.stream_write_box = ReadlineEdit(
             caption="Stream:  ",
@@ -93,15 +95,15 @@ class WriteBox(urwid.Pile):
         )
         self.stream_write_box.enable_autocomplete(
             func=self._stream_box_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop(),
-            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
         self.title_write_box = ReadlineEdit(caption="Topic:  ",
                                             edit_text=title)
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
-            key=keys_for_command('AUTOCOMPLETE').pop(),
-            key_reverse=keys_for_command('AUTOCOMPLETE_REVERSE').pop()
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
 
         self.header_write_box = urwid.Columns([
@@ -394,9 +396,13 @@ class WriteBox(urwid.Pile):
                             invalid_stream_error = (
                                 'Invalid stream name.'
                                 ' Use {} or {} to autocomplete.'
-                                .format(keys_for_command('AUTOCOMPLETE').pop(),
-                                        keys_for_command('AUTOCOMPLETE'
-                                                         '_REVERSE').pop())
+                                .format(primary_key_for_command(
+                                            'AUTOCOMPLETE'
+                                        ),
+                                        primary_key_for_command(
+                                            'AUTOCOMPLETE'
+                                            '_REVERSE'
+                                        ))
                             )
                             self.view.set_footer_text(invalid_stream_error, 3)
                             return key
@@ -1095,7 +1101,7 @@ class MessageBox(urwid.Pile):
             if button == 1:
                 if self.model.controller.is_in_editor_mode():
                     return True
-                self.keypress(size, keys_for_command('ENTER').pop())
+                self.keypress(size, primary_key_for_command('ENTER'))
                 return True
         elif event == 'mouse drag':
             selection_key = "Fn + Alt" if platform == "darwin" else "Shift"

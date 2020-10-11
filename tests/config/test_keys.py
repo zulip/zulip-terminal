@@ -27,6 +27,11 @@ def test_keys_for_command(valid_command):
             == keys.keys_for_command(valid_command))
 
 
+def test_primary_key_for_command(valid_command):
+    assert (keys.KEY_BINDINGS[valid_command]['keys'][0]
+            == keys.primary_key_for_command(valid_command))
+
+
 def test_keys_for_command_invalid_command(invalid_command):
     with pytest.raises(keys.InvalidCommand):
         keys.keys_for_command(invalid_command)
