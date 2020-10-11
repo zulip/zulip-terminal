@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse
 import urwid
 from typing_extensions import TypedDict
 
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -95,7 +95,7 @@ class TopButton(urwid.Button):
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
         button_text = ("All messages     ["
-                       + keys_for_command("ALL_MESSAGES").pop(0)
+                       + primary_key_for_command("ALL_MESSAGES")
                        + "]")
         super().__init__(controller, button_text,
                          controller.show_all_messages, count=count,
@@ -106,7 +106,7 @@ class HomeButton(TopButton):
 class PMButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
         button_text = ("Private messages ["
-                       + keys_for_command("ALL_PM").pop()
+                       + primary_key_for_command("ALL_PM")
                        + "]")
         super().__init__(controller, button_text,
                          controller.show_all_pm, count=count,
@@ -117,7 +117,7 @@ class PMButton(TopButton):
 class MentionedButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
         button_text = ("Mentions         ["
-                       + keys_for_command("ALL_MENTIONS").pop()
+                       + primary_key_for_command("ALL_MENTIONS")
                        + "]")
         super().__init__(controller, button_text,
                          controller.show_all_mentions,
@@ -129,7 +129,7 @@ class MentionedButton(TopButton):
 class StarredButton(TopButton):
     def __init__(self, controller: Any, width: int) -> None:
         button_text = ("Starred messages ["
-                       + keys_for_command("ALL_STARRED").pop()
+                       + primary_key_for_command("ALL_STARRED")
                        + "]")
         super().__init__(controller, button_text,
                          controller.show_all_starred,

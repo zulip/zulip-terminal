@@ -12,6 +12,9 @@ KeyBinding = TypedDict('KeyBinding', {
 }, total=False)
 
 KEY_BINDINGS = OrderedDict([
+    # Key that is displayed in the UI is determined by the method
+    # primary_key_for_command. (Currently the first key in the list)
+
     ('HELP', {
         'keys': ['?'],
         'help_text': 'Show/hide help menu',
@@ -337,6 +340,13 @@ def keys_for_command(command: str) -> List[str]:
         return list(KEY_BINDINGS[command]['keys'])
     except KeyError as exception:
         raise InvalidCommand(command)
+
+
+def primary_key_for_command(command: str) -> str:
+    """
+    Primary Key is the key that will be displayed eg. in the UI
+    """
+    return keys_for_command(command).pop(0)
 
 
 def commands_for_random_tips() -> List[KeyBinding]:

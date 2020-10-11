@@ -1,7 +1,7 @@
 import pytest
 from pytest import param
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 
 
@@ -328,7 +328,7 @@ class TestWriteBox:
         write_box.contents[0][0].focus_col = 0
         size = widget_size(write_box)
 
-        write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
+        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
 
         assert write_box.contents[0][0][0].edit_text == expected_text
 
@@ -367,7 +367,7 @@ class TestWriteBox:
         write_box.contents[0][0].focus_col = 1
         size = widget_size(write_box)
 
-        write_box.keypress(size, keys_for_command('AUTOCOMPLETE').pop())
+        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
 
         assert write_box.contents[0][0][1].edit_text == expected_text
 
@@ -450,12 +450,12 @@ class TestWriteBox:
                               'expected_typeahead_mode',
                               'expect_footer_was_reset'], [
         # footer does not reset
-        (keys_for_command('AUTOCOMPLETE').pop(), False, False, False),
-        (keys_for_command('AUTOCOMPLETE_REVERSE').pop(), False, False, False),
-        (keys_for_command('AUTOCOMPLETE').pop(), True, True, False),
-        (keys_for_command('AUTOCOMPLETE_REVERSE').pop(), True, True, False),
+        (primary_key_for_command('AUTOCOMPLETE'), False, False, False),
+        (primary_key_for_command('AUTOCOMPLETE_REVERSE'), False, False, False),
+        (primary_key_for_command('AUTOCOMPLETE'), True, True, False),
+        (primary_key_for_command('AUTOCOMPLETE_REVERSE'), True, True, False),
         # footer resets
-        (keys_for_command('GO_BACK').pop(), True, False, True),
+        (primary_key_for_command('GO_BACK'), True, False, True),
         ('space', True, False, True),
         ('k', True, False, True),
     ])

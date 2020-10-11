@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 import zulip
 from typing_extensions import Literal, TypedDict
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
     display_error_if_present, index_messages, initial_index, notify, set_count,
@@ -882,7 +882,7 @@ class Model:
                 "Press '{}' to close this window."
             )
             notice = notice_template.format(failed_command,
-                                            keys_for_command("GO_BACK").pop())
+                                            primary_key_for_command("GO_BACK"))
             self.controller.popup_with_message(notice, width=50)
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
