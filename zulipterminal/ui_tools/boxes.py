@@ -18,7 +18,8 @@ from zulipterminal import emoji_names
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
-    STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
+    STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER, USER_ADMIN_MARKER,
+    USER_BOT_MARKER, USER_GUEST_MARKER, USER_OWNER_MARKER,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream,
@@ -468,6 +469,7 @@ class MessageBox(urwid.Pile):
             self.stream_name = self.message['display_recipient']
             self.stream_id = self.message['stream_id']
             self.topic_name = self.message['subject']
+            self.user_id = self.message['sender_id']
         elif self.message['type'] == 'private':
             self.email = self.message['sender_email']
             self.user_id = self.message['sender_id']
@@ -964,7 +966,18 @@ class MessageBox(urwid.Pile):
             text = {key: (None, ' ') for key in text_keys}  # type: TextType
 
             if any(different[key] for key in ('recipients', 'author', '24h')):
-                text['author'] = ('name', message['this']['author'])
+                author_status = self.model.organization_user_role(self.user_id)
+                suffix_lookup = {
+                    'user': '',
+                    'owner': ' ' + USER_OWNER_MARKER,
+                    'admin': ' ' + USER_ADMIN_MARKER,
+                    'guest': ' ' + USER_GUEST_MARKER,
+                    'bot': ' ' + USER_BOT_MARKER,
+                }
+                text['author'] = (
+                    'name',
+                    message['this']['author'] + suffix_lookup[author_status]
+                )
             if message['this']['is_starred']:
                 text['star'] = ('starred', "*")
             if any(different[key]

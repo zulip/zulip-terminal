@@ -14,8 +14,9 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import (
-    Message, StreamData, asynch, canonicalize_color, classify_unread_counts,
-    display_error_if_present, index_messages, initial_index, notify, set_count,
+    Message, StreamData, UserStatusInOrg, asynch, canonicalize_color,
+    classify_unread_counts, display_error_if_present, index_messages,
+    initial_index, notify, set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
@@ -504,6 +505,11 @@ class Model:
                     if stream['name'] == stream_name
                     if sub != self.user_id]
 
+    def organization_user_role(self, user_id: int) -> UserStatusInOrg:
+        assert user_id is not None
+        email = self.user_id_email_dict[user_id]
+        return self.user_dict[email].get('org_status', 'user')
+
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data['presences']
@@ -568,11 +574,24 @@ class Model:
                 # as 'inactive'. They will not be displayed in the
                 # user's list by default (only in the search list).
                 status = 'inactive'
+
+            if user['is_owner']:
+                org_status = 'owner'  # type: UserStatusInOrg
+            elif user['is_admin']:
+                org_status = 'admin'
+            elif user['is_guest']:
+                org_status = 'guest'
+            elif user['is_bot']:
+                org_status = 'bot'
+            else:
+                org_status = 'user'
+
             self.user_dict[email] = {
                 'full_name': user['full_name'],
                 'email': email,
                 'user_id': user['user_id'],
                 'status': status,
+                'org_status': org_status,
             }
             self.user_id_email_dict[user['user_id']] = email
 

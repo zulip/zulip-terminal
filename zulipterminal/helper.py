@@ -14,12 +14,14 @@ from typing import (
 from urllib.parse import unquote
 
 import lxml.html
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
 WSL = 'microsoft' in platform.release().lower()
+
+UserStatusInOrg = Literal['user', 'admin', 'owner', 'guest', 'bot']
 
 StreamData = TypedDict('StreamData', {
     'name': str,

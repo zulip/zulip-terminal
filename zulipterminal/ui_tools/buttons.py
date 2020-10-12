@@ -6,6 +6,9 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.symbols import (
+    USER_ADMIN_MARKER, USER_BOT_MARKER, USER_GUEST_MARKER, USER_OWNER_MARKER,
+)
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -214,10 +217,18 @@ class UserButton(TopButton):
         # FIXME Is this still needed?
         self.recipients = frozenset({self.user_id, view.model.user_id})
 
+        character = {
+            'user': '\N{BULLET}',
+            'owner': USER_OWNER_MARKER,
+            'admin': USER_ADMIN_MARKER,
+            'guest': USER_GUEST_MARKER,
+            'bot': USER_BOT_MARKER,
+        }[user.get('org_status', 'user')]
+
         super().__init__(controller,
                          caption=user['full_name'],
                          show_function=self._narrow_with_compose,
-                         prefix_character=(color, '\N{BULLET}'),
+                         prefix_character=(color, character),
                          text_color=color,
                          width=width,
                          count=count)
