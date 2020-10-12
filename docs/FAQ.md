@@ -29,6 +29,23 @@ Issues have been reported with the following:
 
 Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
 
+## Are there any themes available, other than the default one?
+
+Yes. There are four supported themes:
+- `zt_dark` (alias: `default`)
+- `gruvbox_dark` (alias: `gruvbox`)
+- `zt_light` (alias: `light`)
+- `zt_blue` (alias: `blue`)
+
+You can specify one of them on the command-line using the command-line option `--theme <theme>` or `-t <theme>` (where _theme_ is the name of the theme, or its alias). You can also specify it in the `zuliprc` file like this:
+```
+[zterm]
+theme=<theme_name>
+```
+(where _theme_name_ is the name of theme or its alias).
+
+**NOTE** Theme aliases are likely to be deprecated in the future, so we recommend using the full theme names.
+
 ## When are messages marked as having been read?
 
 The approach currently taken is that that a message is marked read when
