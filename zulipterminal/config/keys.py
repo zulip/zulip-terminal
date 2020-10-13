@@ -1,11 +1,11 @@
 from collections import OrderedDict
-from typing import List, Set
+from typing import List
 
 from typing_extensions import TypedDict
 
 
 KeyBinding = TypedDict('KeyBinding', {
-    'keys': Set[str],
+    'keys': List[str],
     'help_text': str,
     'excluded_from_random_tips': bool,
     'key_category': str,
@@ -13,292 +13,292 @@ KeyBinding = TypedDict('KeyBinding', {
 
 KEY_BINDINGS = OrderedDict([
     ('HELP', {
-        'keys': {'?'},
+        'keys': ['?'],
         'help_text': 'Show/hide help menu',
         'excluded_from_random_tips': True,
         'key_category': 'general',
     }),
     ('ABOUT', {
-        'keys': {'meta ?'},
+        'keys': ['meta ?'],
         'help_text': 'Show/hide about menu',
         'key_category': 'general',
     }),
     ('GO_BACK', {
-        'keys': {'esc'},
+        'keys': ['esc'],
         'help_text': 'Go Back',
         'excluded_from_random_tips': False,
         'key_category': 'general',
     }),
     ('OPEN_DRAFT', {
-        'keys': {'d'},
+        'keys': ['d'],
         'help_text': 'Open draft message saved in this session',
         'key_category': 'general',
     }),
     ('GO_UP', {
-        'keys': {'k', 'up'},
+        'keys': ['k', 'up'],
         'help_text': 'Go up/Previous message',
         'key_category': 'navigation',
     }),
     ('GO_DOWN', {
-        'keys': {'j', 'down'},
+        'keys': ['j', 'down'],
         'help_text': 'Go down/Next message',
         'key_category': 'navigation',
     }),
     ('GO_LEFT', {
-        'keys': {'h', 'left'},
+        'keys': ['h', 'left'],
         'help_text': 'Go left',
         'key_category': 'navigation',
     }),
     ('GO_RIGHT', {
-        'keys': {'l', 'right'},
+        'keys': ['l', 'right'],
         'help_text': 'Go right',
         'key_category': 'navigation',
     }),
     ('SCROLL_UP', {
-        'keys': {'K', 'page up'},
+        'keys': ['K', 'page up'],
         'help_text': 'Scroll up',
         'key_category': 'navigation',
     }),
     ('SCROLL_DOWN', {
-        'keys': {'J', 'page down'},
+        'keys': ['J', 'page down'],
         'help_text': 'Scroll down',
         'key_category': 'navigation',
     }),
     ('GO_TO_BOTTOM', {
-        'keys': {'G', 'end'},
+        'keys': ['G', 'end'],
         'help_text': 'Go to bottom/last message in view',
         'key_category': 'navigation',
     }),
     ('REPLY_MESSAGE', {
-        'keys': {'r', 'enter'},
+        'keys': ['r', 'enter'],
         'help_text': 'Reply to the current message',
         'key_category': 'msg_actions',
     }),
     ('MENTION_REPLY', {
-        'keys': {'@'},
+        'keys': ['@'],
         'help_text': 'Reply mentioning the sender of the current message',
         'key_category': 'msg_actions',
     }),
     ('QUOTE_REPLY', {
-        'keys': {'>'},
+        'keys': ['>'],
         'help_text': 'Reply quoting the current message text',
         'key_category': 'msg_actions',
     }),
     ('REPLY_AUTHOR', {
-        'keys': {'R'},
+        'keys': ['R'],
         'help_text': 'Reply privately to the sender of the current message',
         'key_category': 'msg_actions',
     }),
     ('EDIT_MESSAGE', {
-        'keys': {'e'},
+        'keys': ['e'],
         'help_text': "Edit current message's text or topic",
         'key_category': 'msg_actions'
     }),
     ('STREAM_MESSAGE', {
-        'keys': {'c'},
+        'keys': ['c'],
         'help_text': 'New message to a stream',
         'key_category': 'msg_actions',
     }),
     ('PRIVATE_MESSAGE', {
-        'keys': {'x'},
+        'keys': ['x'],
         'help_text': 'New message to a person or group of people',
         'key_category': 'msg_actions',
     }),
     ('CYCLE_COMPOSE_FOCUS', {
-        'keys': {'tab'},
+        'keys': ['tab'],
         'help_text': 'Cycle through recipient and content boxes',
         'key_category': 'msg_compose',
     }),
     ('SEND_MESSAGE', {
-        'keys': {'meta enter', 'ctrl d'},
+        'keys': ['meta enter', 'ctrl d'],
         'help_text': 'Send a message',
         'key_category': 'msg_compose',
     }),
     ('SAVE_AS_DRAFT', {
-        'keys': {'meta s'},
+        'keys': ['meta s'],
         'help_text': 'Save current message as a draft',
         'key_category': 'msg_compose',
     }),
     ('AUTOCOMPLETE', {
-        'keys': {'ctrl f'},
+        'keys': ['ctrl f'],
         'help_text': ('Autocomplete @mentions, #stream_names, :emoji:'
                       ' and topics'),
         'key_category': 'msg_compose',
     }),
     ('AUTOCOMPLETE_REVERSE', {
-        'keys': {'ctrl r'},
+        'keys': ['ctrl r'],
         'help_text': 'Cycle through autocomplete suggestions in reverse',
         'key_category': 'msg_compose',
     }),
     ('STREAM_NARROW', {
-        'keys': {'s'},
+        'keys': ['s'],
         'help_text': 'Narrow to the stream of the current message',
         'key_category': 'msg_actions',
     }),
     ('TOPIC_NARROW', {
-        'keys': {'S'},
+        'keys': ['S'],
         'help_text': 'Narrow to the topic of the current message',
         'key_category': 'msg_actions',
     }),
     ('TOGGLE_NARROW', {
-        'keys': {'z'},
+        'keys': ['z'],
         'help_text':
             'Narrow to a topic/private-chat, or stream/all-private-messages',
         'key_category': 'msg_actions',
     }),
     ('TOGGLE_TOPIC', {
-        'keys': {'t'},
+        'keys': ['t'],
         'help_text': 'Toggle topics in a stream',
         'key_category': 'stream_list',
     }),
     ('ALL_MESSAGES', {
-        'keys': {'a', 'esc'},
+        'keys': ['a', 'esc'],
         'help_text': 'Narrow to all messages',
         'key_category': 'navigation',
     }),
     ('ALL_PM', {
-        'keys': {'P'},
+        'keys': ['P'],
         'help_text': 'Narrow to all private messages',
         'key_category': 'navigation',
     }),
     ('ALL_STARRED', {
-        'keys': {'f'},
+        'keys': ['f'],
         'help_text': 'Narrow to all starred messages',
         'key_category': 'navigation',
     }),
     ('ALL_MENTIONS', {
-        'keys': {'#'},
+        'keys': ['#'],
         'help_text': "Narrow to messages in which you're mentioned",
         'key_category': 'navigation',
     }),
     ('NEXT_UNREAD_TOPIC', {
-        'keys': {'n'},
+        'keys': ['n'],
         'help_text': 'Next unread topic',
         'key_category': 'navigation',
     }),
     ('NEXT_UNREAD_PM', {
-        'keys': {'p'},
+        'keys': ['p'],
         'help_text': 'Next unread private message',
         'key_category': 'navigation',
     }),
     ('SEARCH_PEOPLE', {
-        'keys': {'w'},
+        'keys': ['w'],
         'help_text': 'Search users',
         'key_category': 'searching',
     }),
     ('SEARCH_MESSAGES', {
-        'keys': {'/'},
+        'keys': ['/'],
         'help_text': 'Search Messages',
         'key_category': 'searching',
     }),
     ('SEARCH_STREAMS', {
-        'keys': {'q'},
+        'keys': ['q'],
         'help_text': 'Search Streams',
         'key_category': 'searching',
     }),
     ('SEARCH_TOPICS', {
-        'keys': {'q'},
+        'keys': ['q'],
         'help_text': 'Search topics in a stream',
         'key_category': 'searching',
     }),
     ('TOGGLE_MUTE_STREAM', {
-        'keys': {'m'},
+        'keys': ['m'],
         'help_text': 'Mute/unmute Streams',
         'key_category': 'stream_list',
     }),
     ('ENTER', {
-        'keys': {'enter'},
+        'keys': ['enter'],
         'help_text': 'Perform current action',
         'key_category': 'navigation',
     }),
     ('THUMBS_UP', {
-        'keys': {'+'},
+        'keys': ['+'],
         'help_text': 'Add/remove thumbs-up reaction to the current message',
         'key_category': 'msg_actions',
     }),
     ('TOGGLE_STAR_STATUS', {
-        'keys': {'ctrl s', '*'},
+        'keys': ['ctrl s', '*'],
         'help_text': 'Add/remove star status of the current message',
         'key_category': 'msg_actions',
     }),
     ('MSG_INFO', {
-        'keys': {'i'},
+        'keys': ['i'],
         'help_text': 'View message information',
         'key_category': 'msg_actions',
     }),
     ('EDIT_HISTORY', {
-        'keys': {'e'},
+        'keys': ['e'],
         'help_text': 'View edit history from message information box',
         'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
     }),
     ('STREAM_DESC', {
-        'keys': {'i'},
+        'keys': ['i'],
         'help_text': 'View stream information & modify settings',
         'key_category': 'stream_list',
     }),
     ('REDRAW', {
-        'keys': {'ctrl l'},
+        'keys': ['ctrl l'],
         'help_text': 'Redraw screen',
         'key_category': 'general',
     }),
     ('QUIT', {
-        'keys': {'ctrl c'},
+        'keys': ['ctrl c'],
         'help_text': 'Quit',
         'key_category': 'general',
     }),
     ('BEGINNING_OF_LINE', {
-        'keys': {'ctrl a'},
+        'keys': ['ctrl a'],
         'help_text': 'Jump to the beginning of the line',
         'key_category': 'msg_compose',
     }),
     ('END_OF_LINE', {
-        'keys': {'ctrl e'},
+        'keys': ['ctrl e'],
         'help_text': 'Jump to the end of the line',
         'key_category': 'msg_compose',
     }),
     ('ONE_WORD_BACKWARD', {
-        'keys': {'meta b'},
+        'keys': ['meta b'],
         'help_text': 'Jump backward one word',
         'key_category': 'msg_compose',
     }),
     ('ONE_WORD_FORWARD', {
-        'keys': {'meta f'},
+        'keys': ['meta f'],
         'help_text': 'Jump forward one word',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_END_OF_LINE', {
-        'keys': {'ctrl k'},
+        'keys': ['ctrl k'],
         'help_text': 'Cut forward to the end of the line',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_START_OF_LINE', {
-        'keys': {'ctrl u'},
+        'keys': ['ctrl u'],
         'help_text': 'Cut backward to the start of the line',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_END_OF_WORD', {
-        'keys': {'meta d'},
+        'keys': ['meta d'],
         'help_text': 'Cut forward to the end of the current word',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_START_OF_WORD', {
-        'keys': {'ctrl w'},
+        'keys': ['ctrl w'],
         'help_text': 'Cut backward to the start of the current word',
         'key_category': 'msg_compose',
     }),
     ('PREV_LINE', {
-        'keys': {'ctrl p', 'up'},
+        'keys': ['ctrl p', 'up'],
         'help_text': 'Jump to the previous line',
         'key_category': 'msg_compose',
     }),
     ('NEXT_LINE', {
-        'keys': {'ctrl n', 'down'},
+        'keys': ['ctrl n', 'down'],
         'help_text': 'Jump to the next line',
         'key_category': 'msg_compose',
     }),
     ('CLEAR_MESSAGE', {
-        'keys': {'ctrl l'},
+        'keys': ['ctrl l'],
         'help_text': 'Clear compose screen',
         'key_category': 'msg_compose',
     }),
@@ -334,7 +334,7 @@ def keys_for_command(command: str) -> List[str]:
     Returns the actual keys for a given mapped command
     """
     try:
-        return sorted(KEY_BINDINGS[command]['keys'])
+        return list(KEY_BINDINGS[command]['keys'])
     except KeyError as exception:
         raise InvalidCommand(command)
 
