@@ -66,7 +66,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         action="store_true",
                         help='list all the color themes.')
     parser.add_argument('--color-depth',
-                        choices=['1', '16', '256'], default=256,
+                        choices=['1', '16', '256'],
                         help="Force the color depth (default 256).")
     # debug mode
     parser.add_argument("-d",
@@ -214,6 +214,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         'autohide': ('no_autohide', NO_CONFIG),
         'notify': ('disabled', NO_CONFIG),
         'footlinks': ('enabled', NO_CONFIG),
+        'color-depth': ('256', NO_CONFIG)
     }
 
     if 'zterm' in zuliprc:
@@ -298,6 +299,11 @@ def main(options: Optional[List[str]]=None) -> None:
                 "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0])
             )
 
+        if args.color_depth:
+            zterm['color-depth'] = (args.color_depth, 'on command line')
+
+        color_depth = int(zterm['color-depth'][0])
+
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
@@ -311,12 +317,15 @@ def main(options: Optional[List[str]]=None) -> None:
               .format(*zterm['autohide']))
         print("   footlinks setting '{}' specified {}."
               .format(*zterm['footlinks']))
+        print("   color depth setting '{}' specified {}."
+              .format(*zterm['color-depth']))
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
             'footlinks': ['enabled', 'disabled'],
+            'color-depth': ['1', '16', '256']
         }
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():
@@ -328,9 +337,10 @@ def main(options: Optional[List[str]]=None) -> None:
                     print("  ", option)
                 print("Specify the {} option in zuliprc file.".format(setting))
                 sys.exit(1)
+            if setting == 'color-depth':
+                break
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
 
-        color_depth = int(args.color_depth)
         if color_depth == 1:
             theme_data = theme_with_monochrome_added(THEMES[theme_to_use[0]])
         else:
@@ -338,7 +348,7 @@ def main(options: Optional[List[str]]=None) -> None:
 
         Controller(zuliprc_path,
                    theme_data,
-                   int(args.color_depth),
+                   color_depth,
                    args.explore,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:

@@ -79,6 +79,8 @@ autohide=autohide
 footlinks=disabled
 # Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
+# Color depth defaults to 256, but can be set to 1 (for monochrome) or 16.
+color-depth=256
 ```
 
 ### Notifications
