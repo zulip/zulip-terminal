@@ -1079,7 +1079,7 @@ class TestModel:
             'edited_messages': {1},
             'topics': {10: ['old subject']},
         }, False),
-        ({  # message_id not present in index.
+        ({  # message_id not present in index, topic view closed.
             'message_id': 3,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
@@ -1100,8 +1100,31 @@ class TestModel:
                     'subject': 'old subject'
                 }},
             'edited_messages': set(),
-            'topics': {10: ['old subject']},
+            'topics': {10: []},  # This resets the cache
         }, False),
+        ({  # message_id not present in index, topic view is enabled.
+            'message_id': 3,
+            'rendered_content': '<p>new content</p>',
+            'subject': 'new subject',
+            'stream_id': 10,
+            'message_ids': [3],
+        }, 0, {
+            'messages': {
+                1: {
+                    'id': 1,
+                    'stream_id': 10,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                },
+                2: {
+                    'id': 2,
+                    'stream_id': 10,
+                    'content': 'old content',
+                    'subject': 'old subject'
+                }},
+            'edited_messages': set(),
+            'topics': {10: ['new subject', 'old subject']},
+        }, True),
         ({  # Message content is updated and topic view is enabled.
             'message_id': 1,
             'rendered_content': '<p>new content</p>',
@@ -1131,7 +1154,8 @@ class TestModel:
         "Message content is updated",
         "Both message content and subject is updated",
         "Some new type of update which we don't handle yet",
-        "message_id not present in index",
+        "message_id not present in index, topic view closed",
+        "message_id not present in index, topic view is enabled",
         "Message content is updated and topic view is enabled",
     ])
     def test__handle_update_message_event(self, mocker, model,

@@ -1006,32 +1006,39 @@ class Model:
         if indexed_message:
             self.index['edited_messages'].add(message_id)
 
-        if indexed_message:
-            if 'rendered_content' in event:
-                indexed_message['content'] = event['rendered_content']
-                self.index['messages'][message_id] = indexed_message
-                self._update_rendered_view(message_id)
+        # Update the rendered content, if the message is indexed
+        if 'rendered_content' in event and indexed_message:
+            indexed_message['content'] = event['rendered_content']
+            self.index['messages'][message_id] = indexed_message
+            self._update_rendered_view(message_id)
 
-            # 'subject' is not present in update event if
-            # the event didn't have a 'subject' update.
-            if 'subject' in event:
-                new_subject = event['subject']
-                stream_id = event['stream_id']
-                for msg_id in event['message_ids']:
-                    self.index['messages'][msg_id]['subject'] = new_subject
+        # NOTE: This is independent of messages being indexed
+        # Previous assertion:
+        # * 'subject' is not present in update event if
+        #   the event didn't have a 'subject' update.
+        if 'subject' in event:
+            new_subject = event['subject']
+            stream_id = event['stream_id']
+
+            # Update any indexed messages & re-render them
+            for msg_id in event['message_ids']:
+                indexed_msg = self.index['messages'].get(msg_id)
+                if indexed_msg:
+                    indexed_msg['subject'] = new_subject
                     self._update_rendered_view(msg_id)
-                if stream_id in self.index['topics']:
-                    # If topic view is open, reload list else reset cache.
-                    if hasattr(self.controller, 'view'):
-                        view = self.controller.view
-                        if (view.left_panel.is_in_topic_view_with_stream_id(
-                                indexed_message['stream_id'])):
-                            self._fetch_topics_in_streams([stream_id])
-                            view.left_panel.show_topic_view(
-                                view.topic_w.stream_button)
-                            self.controller.update_screen()
-                        else:
-                            self.index['topics'][stream_id] = []
+
+            # If topic view is open, reload list else reset cache.
+            if stream_id in self.index['topics']:
+                if hasattr(self.controller, 'view'):
+                    view = self.controller.view
+                    if (view.left_panel.is_in_topic_view_with_stream_id(
+                            stream_id)):
+                        self._fetch_topics_in_streams([stream_id])
+                        view.left_panel.show_topic_view(
+                            view.topic_w.stream_button)
+                        self.controller.update_screen()
+                    else:
+                        self.index['topics'][stream_id] = []
 
     def _handle_reaction_event(self, event: Event) -> None:
         """
