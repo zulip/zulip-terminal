@@ -17,12 +17,11 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    AboutView, EditModeView, HelpView, LeftColumnView, MessageView,
-    MiddleColumnView, ModListWalker, MsgInfoView, PopUpConfirmationView,
-    PopUpView, RightColumnView, StreamInfoView, StreamsView,
-    StreamsViewDivider, TopicsView, UsersView,
+    EditModeView, HelpView, LeftColumnView, MessageView, MiddleColumnView,
+    ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
+    RightColumnView, StreamInfoView, StreamsView, StreamsViewDivider,
+    TopicsView, UsersView,
 )
-from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
 
 VIEWS = "zulipterminal.ui_tools.views"
@@ -1340,56 +1339,6 @@ class TestHelpMenu:
         super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.help_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
-
-
-class TestAboutView:
-    @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
-        self.controller = mocker.Mock()
-        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
-                            return_value=(64, 64))
-        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
-        server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
-        self.about_view = AboutView(self.controller, 'About',
-                                    zt_version=ZT_VERSION,
-                                    server_version=server_version,
-                                    server_feature_level=server_feature_level)
-
-    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
-                                     *keys_for_command('ABOUT')})
-    def test_keypress_exit_popup(self, key, widget_size):
-        size = widget_size(self.about_view)
-        self.about_view.keypress(size, key)
-        assert self.controller.exit_popup.called
-
-    def test_keypress_exit_popup_invalid_key(self, widget_size):
-        key = 'a'
-        size = widget_size(self.about_view)
-        self.about_view.keypress(size, key)
-        assert not self.controller.exit_popup.called
-
-    def test_keypress_navigation(self, mocker, widget_size,
-                                 navigation_key_expected_key_pair):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.about_view)
-        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
-        self.about_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
-
-    def test_feature_level_content(self, mocker, zulip_version):
-        self.controller = mocker.Mock()
-        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
-                            return_value=(64, 64))
-        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
-        server_version, server_feature_level = zulip_version
-
-        about_view = AboutView(self.controller, 'About', zt_version=ZT_VERSION,
-                               server_version=server_version,
-                               server_feature_level=server_feature_level)
-
-        assert len(about_view.feature_level_content) == (
-            1 if server_feature_level else 0
-        )
 
 
 class TestPopUpConfirmationView:
