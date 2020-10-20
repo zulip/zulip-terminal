@@ -5,7 +5,8 @@ from urwid import Columns, Text
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.views import (
-    AboutView, EditHistoryView, HelpView, MsgInfoView, StreamInfoView,
+    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
+    StreamInfoView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
@@ -246,6 +247,32 @@ class TestEditHistoryView:
         return_value = EditHistoryView._get_author_prefix(snapshot, tag)
 
         assert return_value == expected_author_prefix
+
+
+class TestEditModeView:
+    @pytest.fixture()
+    def edit_mode_view(self, mocker):
+        controller = mocker.Mock()
+        controller.maximum_popup_dimensions.return_value = (64, 64)
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        button = mocker.Mock()
+        return EditModeView(controller, button)
+
+    @pytest.mark.parametrize(['index_in_widgets', 'mode'], [
+        (0, 'change_one'),
+        (1, 'change_later'),
+        (2, 'change_all'),
+    ])
+    @pytest.mark.parametrize('key', keys_for_command('ENTER'))
+    def test_select_edit_mode(self, mocker, edit_mode_view, widget_size,
+                              index_in_widgets, mode, key):
+        radio_button = edit_mode_view.widgets[index_in_widgets]
+        size = widget_size(radio_button)
+
+        radio_button.keypress(size, key)
+
+        mode_button = edit_mode_view.edit_mode_button
+        mode_button.set_selected_mode.assert_called_once_with(mode)
 
 
 class TestHelpView:
