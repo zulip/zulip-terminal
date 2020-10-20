@@ -5,13 +5,60 @@ from urwid import Columns, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.ui_tools.views import (
-    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView, PopUpView,
-    StreamInfoView,
+    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
+    PopUpConfirmationView, PopUpView, StreamInfoView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
 
 VIEWS = "zulipterminal.ui_tools.views"
+
+# Test classes are grouped/ordered below as:
+#  * an independent popup class
+#  * the base general popup class
+#  * classes derived from the base popup class, sorted alphabetically
+
+
+class TestPopUpConfirmationView:
+    @pytest.fixture
+    def popup_view(self, mocker, stream_button):
+        self.controller = mocker.Mock()
+        self.controller.view.LEFT_WIDTH = 27
+        self.callback = mocker.Mock()
+        self.list_walker = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                        return_value=[])
+        self.divider = mocker.patch(VIEWS + '.urwid.Divider')
+        self.text = mocker.patch(VIEWS + '.urwid.Text')
+        self.wrapper_w = mocker.patch(VIEWS + '.urwid.WidgetWrap')
+        return PopUpConfirmationView(
+            self.controller,
+            self.text,
+            self.callback,
+        )
+
+    def test_init(self, popup_view):
+        assert popup_view.controller == self.controller
+        assert popup_view.success_callback == self.callback
+        self.divider.assert_called_once_with()
+        self.list_walker.assert_called_once_with(
+            [self.text, self.divider(), self.wrapper_w()])
+
+    def test_exit_popup_yes(self, mocker, popup_view):
+        popup_view.exit_popup_yes(mocker.Mock())
+        self.callback.assert_called_once_with()
+        assert self.controller.exit_popup.called
+
+    def test_exit_popup_no(self, mocker, popup_view):
+        popup_view.exit_popup_no(mocker.Mock())
+        self.callback.assert_not_called()
+        assert self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
+    def test_exit_popup_GO_BACK(self, mocker, popup_view, key, widget_size):
+        size = widget_size(popup_view)
+        popup_view.keypress(size, key)
+        self.callback.assert_not_called()
+        assert self.controller.exit_popup.called
 
 
 class TestPopUpView:
