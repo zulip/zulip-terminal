@@ -283,6 +283,8 @@ class StreamsView(urwid.Frame):
                                                 'SEARCH_STREAMS',
                                                 self.update_streams)
 
+        self._show_unread_only = False
+
         title = urwid.Text("Streams", align="center")
         self._header = urwid.Pile([
             urwid.Columns([
@@ -296,6 +298,12 @@ class StreamsView(urwid.Frame):
         self.search_lock = threading.Lock()
 
         super().__init__(list_box, header=self._header)
+
+    def _set_title(self, text: str) -> None:
+        self._header[0].contents[1] = (
+            urwid.Text(text, align="center"),
+            urwid.Columns.options(width_type="pack")
+        )
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -332,6 +340,14 @@ class StreamsView(urwid.Frame):
             self.log.clear()
             self.log.extend(streams_display)
             self.view.controller.update_screen()
+
+    def _toggle_unread_only(self) -> None:
+        self._show_unread_only = not self._show_unread_only
+
+        if self._show_unread_only:
+            self._set_title("Streams [Unread]")
+        else:
+            self._set_title("Streams")
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
