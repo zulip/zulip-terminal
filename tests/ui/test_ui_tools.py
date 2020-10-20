@@ -18,8 +18,8 @@ from zulipterminal.ui_tools.buttons import (
 )
 from zulipterminal.ui_tools.views import (
     EditModeView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
-    MsgInfoView, PopUpConfirmationView, PopUpView, RightColumnView,
-    StreamInfoView, StreamsView, StreamsViewDivider, TopicsView, UsersView,
+    PopUpConfirmationView, PopUpView, RightColumnView, StreamInfoView,
+    StreamsView, StreamsViewDivider, TopicsView, UsersView,
 )
 
 
@@ -1427,137 +1427,6 @@ class TestStreamInfoView:
         pin_checkbox.keypress(size, key)
 
         toggle_pin_status.assert_called_once_with(stream_id)
-
-
-class TestMsgInfoView:
-    @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch, message_fixture):
-        self.controller = mocker.Mock()
-        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
-                            return_value=(64, 64))
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        # The subsequent patches (index and initial_data) set
-        # show_edit_history_label to False for this autoused fixture.
-        self.controller.model.index = {'edited_messages': set()}
-        self.controller.model.initial_data = {
-            'realm_allow_edit_history': False,
-        }
-        self.msg_info_view = MsgInfoView(self.controller, message_fixture,
-                                         'Message Information', OrderedDict(),
-                                         list())
-
-    def test_keypress_any_key(self, widget_size):
-        key = "a"
-        size = widget_size(self.msg_info_view)
-        self.msg_info_view.keypress(size, key)
-        assert not self.controller.exit_popup.called
-
-    @pytest.mark.parametrize('key', keys_for_command('EDIT_HISTORY'))
-    @pytest.mark.parametrize('realm_allow_edit_history', [True, False])
-    @pytest.mark.parametrize('edited_message_id', [
-            537286,
-            537287,
-            537288,
-        ],
-        ids=[
-            'stream_message_id',
-            'pm_message_id',
-            'group_pm_message_id',
-        ]
-    )
-    def test_keypress_edit_history(self, message_fixture, key, widget_size,
-                                   realm_allow_edit_history,
-                                   edited_message_id):
-        self.controller.model.index = {
-            'edited_messages': set([edited_message_id]),
-        }
-        self.controller.model.initial_data = {
-            'realm_allow_edit_history': realm_allow_edit_history,
-        }
-        msg_info_view = MsgInfoView(self.controller, message_fixture,
-                                    title='Message Information',
-                                    message_links=OrderedDict(),
-                                    time_mentions=list())
-        size = widget_size(msg_info_view)
-
-        msg_info_view.keypress(size, key)
-
-        if msg_info_view.show_edit_history_label:
-            self.controller.show_edit_history.assert_called_once_with(
-                message=message_fixture,
-                message_links=OrderedDict(),
-                time_mentions=list(),
-            )
-        else:
-            self.controller.show_edit_history.assert_not_called()
-
-    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
-                                     *keys_for_command('MSG_INFO')})
-    def test_keypress_exit_popup(self, key, widget_size):
-        size = widget_size(self.msg_info_view)
-        self.msg_info_view.keypress(size, key)
-        assert self.controller.exit_popup.called
-
-    def test_height_noreactions(self):
-        expected_height = 3
-        assert self.msg_info_view.height == expected_height
-
-    # FIXME This is the same parametrize as MessageBox:test_reactions_view
-    @pytest.mark.parametrize('to_vary_in_each_message', [
-        {'reactions': [{
-                'emoji_name': 'thumbs_up',
-                'emoji_code': '1f44d',
-                'user': {
-                    'email': 'iago@zulip.com',
-                    'full_name': 'Iago',
-                    'id': 5,
-                },
-                'reaction_type': 'unicode_emoji'
-            }, {
-                'emoji_name': 'zulip',
-                'emoji_code': 'zulip',
-                'user': {
-                    'email': 'iago@zulip.com',
-                    'full_name': 'Iago',
-                    'id': 5,
-                },
-                'reaction_type': 'zulip_extra_emoji'
-            }, {
-                'emoji_name': 'zulip',
-                'emoji_code': 'zulip',
-                'user': {
-                    'email': 'AARON@zulip.com',
-                    'full_name': 'aaron',
-                    'id': 1,
-                },
-                'reaction_type': 'zulip_extra_emoji'
-            }, {
-                'emoji_name': 'heart',
-                'emoji_code': '2764',
-                'user': {
-                    'email': 'iago@zulip.com',
-                    'full_name': 'Iago',
-                    'id': 5,
-                },
-                'reaction_type': 'unicode_emoji'
-            }]}
-        ])
-    def test_height_reactions(self, message_fixture, to_vary_in_each_message):
-        varied_message = dict(message_fixture, **to_vary_in_each_message)
-        self.msg_info_view = MsgInfoView(self.controller, varied_message,
-                                         'Message Information', OrderedDict(),
-                                         list())
-        # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
-        expected_height = 9
-        assert self.msg_info_view.height == expected_height
-
-    def test_keypress_navigation(self, mocker, widget_size,
-                                 navigation_key_expected_key_pair):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.msg_info_view)
-        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
-        self.msg_info_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestMessageBox:
