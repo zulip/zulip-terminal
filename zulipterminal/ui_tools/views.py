@@ -282,12 +282,20 @@ class StreamsView(urwid.Frame):
         self.stream_search_box = PanelSearchBox(self,
                                                 'SEARCH_STREAMS',
                                                 self.update_streams)
-        super().__init__(list_box, header=urwid.LineBox(
-            self.stream_search_box, tlcorner='─', tline='', lline='',
-            trcorner='─', blcorner='─', rline='',
-            bline='─', brcorner='─'
-        ))
+
+        title = urwid.Text("Streams", align="center")
+        self._header = urwid.Pile([
+            urwid.Columns([
+                urwid.Divider(LIST_TITLE_BAR_LINE),
+                ("pack", title),
+                urwid.Divider(LIST_TITLE_BAR_LINE),
+            ], dividechars=1),
+            self.stream_search_box,
+            urwid.Divider("─"),
+        ])
         self.search_lock = threading.Lock()
+
+        super().__init__(list_box, header=self._header)
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -775,15 +783,7 @@ class LeftColumnView(urwid.Pile):
                                          if hasattr(stream, 'stream_id')}
 
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
-        w = urwid.LineBox(
-            self.view.stream_w, title="Streams",
-            tlcorner=LIST_TITLE_BAR_LINE,
-            tline=LIST_TITLE_BAR_LINE,
-            trcorner=LIST_TITLE_BAR_LINE,
-            blcorner='', rline='', lline='',
-            bline='', brcorner='─'
-            )
-        return w
+        return self.view.stream_w
 
     def topics_view(self, stream_button: Any) -> Any:
         stream_id = stream_button.stream_id
