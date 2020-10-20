@@ -278,6 +278,7 @@ class StreamsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         self.focus_index_before_search = 0
+        self.focus_index_before_search__unread = 0
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(self,
                                                 'SEARCH_STREAMS',
@@ -341,18 +342,39 @@ class StreamsView(urwid.Frame):
             self.log.extend(streams_display)
             self.view.controller.update_screen()
 
+    def _save_focus_index(self) -> None:
+        if self._show_unread_only:
+            _, self.focus_index_before_search__unread = self.log.get_focus()
+        else:
+            _, self.focus_index_before_search = self.log.get_focus()
+
     def _reset_stream_list(self) -> None:
         self.log.clear()
-        self.log.extend(self.streams_btn_list)
-        self.log.set_focus(self.focus_index_before_search)
+
+        if self._show_unread_only:
+            unread_stream_buttons = [
+                button
+                for button in self.streams_btn_list
+                if (isinstance(button, StreamsViewDivider)
+                    or (not button.is_muted and int(button.count) > 0))
+            ]
+            self.log.extend(unread_stream_buttons)
+            self.log.set_focus(self.focus_index_before_search__unread)
+        else:
+            self.log.extend(self.streams_btn_list)
+            self.log.set_focus(self.focus_index_before_search)
 
     def _toggle_unread_only(self) -> None:
+        self._save_focus_index()  # before toggling
+
         self._show_unread_only = not self._show_unread_only
 
         if self._show_unread_only:
             self._set_title("Streams [Unread]")
         else:
             self._set_title("Streams")
+
+        self._reset_stream_list()
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
@@ -371,13 +393,14 @@ class StreamsView(urwid.Frame):
             return key
         elif is_command_key('TOGGLE_UNREAD_ONLY', key):
             self._toggle_unread_only()
+            return key
         elif is_command_key('GO_BACK', key):
             self.stream_search_box.reset_search_text()
             self._reset_stream_list()
             self.set_focus('body')
             return key
         return_value = super().keypress(size, key)
-        _, self.focus_index_before_search = self.log.get_focus()
+        self._save_focus_index()
         return return_value
 
 
