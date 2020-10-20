@@ -17,10 +17,9 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    EditModeView, HelpView, LeftColumnView, MessageView, MiddleColumnView,
-    ModListWalker, MsgInfoView, PopUpConfirmationView, PopUpView,
-    RightColumnView, StreamInfoView, StreamsView, StreamsViewDivider,
-    TopicsView, UsersView,
+    EditModeView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
+    MsgInfoView, PopUpConfirmationView, PopUpView, RightColumnView,
+    StreamInfoView, StreamsView, StreamsViewDivider, TopicsView, UsersView,
 )
 
 
@@ -1308,37 +1307,6 @@ class TestPopUpView:
         ))
         self.pop_up_view.keypress(size, key)
         self.super_keypress.assert_called_once_with(size, expected_key)
-
-
-class TestHelpMenu:
-    @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch):
-        self.controller = mocker.Mock()
-        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
-                            return_value=(64, 64))
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.help_view = HelpView(self.controller, 'Help Menu')
-
-    def test_keypress_any_key(self, widget_size):
-        key = "a"
-        size = widget_size(self.help_view)
-        self.help_view.keypress(size, key)
-        assert not self.controller.exit_popup.called
-
-    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
-                                     *keys_for_command('HELP')})
-    def test_keypress_exit_popup(self, key, widget_size):
-        size = widget_size(self.help_view)
-        self.help_view.keypress(size, key)
-        assert self.controller.exit_popup.called
-
-    def test_keypress_navigation(self, mocker, widget_size,
-                                 navigation_key_expected_key_pair):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.help_view)
-        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
-        self.help_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestPopUpConfirmationView:
