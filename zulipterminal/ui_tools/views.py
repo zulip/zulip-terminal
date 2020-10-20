@@ -364,6 +364,8 @@ class StreamsView(urwid.Frame):
         if is_command_key('SEARCH_STREAMS', key):
             self.set_focus('header')
             return key
+        elif is_command_key('TOGGLE_UNREAD_ONLY', key):
+            self._toggle_unread_only()
         elif is_command_key('GO_BACK', key):
             self.stream_search_box.reset_search_text()
             self.log.clear()
