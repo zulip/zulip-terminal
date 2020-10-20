@@ -341,6 +341,11 @@ class StreamsView(urwid.Frame):
             self.log.extend(streams_display)
             self.view.controller.update_screen()
 
+    def _reset_stream_list(self) -> None:
+        self.log.clear()
+        self.log.extend(self.streams_btn_list)
+        self.log.set_focus(self.focus_index_before_search)
+
     def _toggle_unread_only(self) -> None:
         self._show_unread_only = not self._show_unread_only
 
@@ -368,11 +373,8 @@ class StreamsView(urwid.Frame):
             self._toggle_unread_only()
         elif is_command_key('GO_BACK', key):
             self.stream_search_box.reset_search_text()
-            self.log.clear()
-            self.log.extend(self.streams_btn_list)
+            self._reset_stream_list()
             self.set_focus('body')
-            self.log.set_focus(self.focus_index_before_search)
-            self.view.controller.update_screen()
             return key
         return_value = super().keypress(size, key)
         _, self.focus_index_before_search = self.log.get_focus()
