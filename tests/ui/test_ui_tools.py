@@ -17,7 +17,7 @@ from zulipterminal.ui_tools.buttons import (
     StreamButton, TopButton, TopicButton, UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    EditModeView, LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
+    LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
     PopUpConfirmationView, PopUpView, RightColumnView, StreamsView,
     StreamsViewDivider, TopicsView, UsersView,
 )
@@ -1349,32 +1349,6 @@ class TestPopUpConfirmationView:
         popup_view.keypress(size, key)
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
-
-
-class TestEditModeView:
-    @pytest.fixture()
-    def edit_mode_view(self, mocker):
-        controller = mocker.Mock()
-        controller.maximum_popup_dimensions.return_value = (64, 64)
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        button = mocker.Mock()
-        return EditModeView(controller, button)
-
-    @pytest.mark.parametrize(['index_in_widgets', 'mode'], [
-        (0, 'change_one'),
-        (1, 'change_later'),
-        (2, 'change_all'),
-    ])
-    @pytest.mark.parametrize('key', keys_for_command('ENTER'))
-    def test_select_edit_mode(self, mocker, edit_mode_view, widget_size,
-                              index_in_widgets, mode, key):
-        radio_button = edit_mode_view.widgets[index_in_widgets]
-        size = widget_size(radio_button)
-
-        radio_button.keypress(size, key)
-
-        mode_button = edit_mode_view.edit_mode_button
-        mode_button.set_selected_mode.assert_called_once_with(mode)
 
 
 class TestMessageBox:
