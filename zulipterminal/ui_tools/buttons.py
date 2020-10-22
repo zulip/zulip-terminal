@@ -54,19 +54,19 @@ class TopButton(urwid.Button):
             count_text = ''
         else:
             count_text = str(count)
-        self.update_widget(count_text)
+        self.update_widget(('unread_count', count_text))
 
-    def update_widget(self, count_text: str) -> Any:
+    def update_widget(self, count_text: Tuple[str, str]) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count
-                              - len(count_text))
+                              - len(count_text[1]))
         if len(self._caption) > max_caption_length:
             caption = (self._caption[:max_caption_length - 1]
                        + '\N{HORIZONTAL ELLIPSIS}')
         else:
             caption = self._caption
         num_extra_spaces = (
-            self.width_for_text_and_count - len(count_text) - len(caption)
+            self.width_for_text_and_count - len(count_text[1]) - len(caption)
         )
 
         # NOTE: Generated text does not include space at end
@@ -174,10 +174,10 @@ class StreamButton(TopButton):
 
         # Mark muted streams 'M' during button creation.
         if self.model.is_muted_stream(self.stream_id):
-            self.update_widget('M')
+            self.update_widget(('unread_count', 'M'))
 
     def mark_muted(self) -> None:
-        self.update_widget('M')
+        self.update_widget(('unread_count', 'M'))
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
@@ -244,7 +244,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget('M')
+        self.update_widget(('unread_count', 'M'))
     # TODO: Handle event-based approach for topic-muting.
 
 
