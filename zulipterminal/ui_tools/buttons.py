@@ -6,6 +6,7 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.symbols import MUTE_MARKER
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -174,10 +175,10 @@ class StreamButton(TopButton):
 
         # Mark muted streams 'M' during button creation.
         if self.model.is_muted_stream(self.stream_id):
-            self.update_widget(('unread_count', 'M'))
+            self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count', 'M'))
+        self.update_widget(('unread_count', MUTE_MARKER))
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
@@ -247,7 +248,7 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('unread_count', 'M'))
+        self.update_widget(('unread_count',  MUTE_MARKER))
     # TODO: Handle event-based approach for topic-muting.
 
 

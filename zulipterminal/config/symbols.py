@@ -10,3 +10,4 @@ LIST_TITLE_BAR_LINE = '━'
 # NOTE: The '⏱' emoji needs an extra space while rendering. Otherwise, it
 # appears to overlap its subsequent text.
 TIME_MENTION_MARKER = '⏱ '  # Other tested options are: '⧗' and '⧖'.
+MUTE_MARKER = 'M'
