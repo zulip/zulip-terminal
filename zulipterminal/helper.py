@@ -177,7 +177,7 @@ def _set_count_in_view(controller: Any, new_count: int,
         additionally set the current count in the model and make use of the
         same in the UI.
     """
-    stream_buttons_log = controller.view.stream_w.log
+    stream_buttons_log = controller.view.stream_w.streams_btn_list
     is_open_topic_view = controller.view.left_panel.is_in_topic_view
     if is_open_topic_view:
         topic_buttons_log = controller.view.topic_w.log
