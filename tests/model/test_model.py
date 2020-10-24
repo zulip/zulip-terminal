@@ -1633,41 +1633,127 @@ class TestModel:
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
 
-    @pytest.mark.parametrize('event, expected_subscribers', [
-        ({'op': 'peer_add', 'stream_id': 99, 'user_id': 12}, [1001, 11, 12]),
-        ({'op': 'peer_remove', 'stream_id': 2, 'user_id': 12}, [1001, 11]),
+    @pytest.mark.parametrize(['event', 'feature_level',
+                              'stream_id', 'expected_subscribers'], [
+        ({'op': 'peer_add', 'stream_id': 99, 'user_id': 12}, None,
+         99, [1001, 11, 12]),
+        ({'op': 'peer_add', 'stream_id': 99, 'user_id': 12}, 34,
+         99, [1001, 11, 12]),
+        ({'op': 'peer_add', 'stream_ids': [99], 'user_ids': [12]}, 34,
+         99, [1001, 11, 12]),
+        ({'op': 'peer_add', 'stream_ids': [99], 'user_ids': [12]}, 35,
+         99, [1001, 11, 12]),
+        ({'op': 'peer_remove', 'stream_id': 2, 'user_id': 12}, None,
+         2, [1001, 11]),
+        ({'op': 'peer_remove', 'stream_id': 2, 'user_id': 12}, 34,
+         2, [1001, 11]),
+        ({'op': 'peer_remove', 'stream_ids': [2], 'user_ids': [12]}, 34,
+         2, [1001, 11]),
+        ({'op': 'peer_remove', 'stream_ids': [2], 'user_ids': [12]}, 35,
+         2, [1001, 11]),
     ], ids=[
-        'user_subscribed_to_stream',
-        'user_unsubscribed_from_stream',
+        'user_subscribed_to_stream:ZFLNone',
+        'user_subscribed_to_stream:ZFL34',
+        'user_subscribed_to_stream:ZFL34shouldbe35',
+        'user_subscribed_to_stream:ZFL35',
+        'user_unsubscribed_from_stream:ZFLNone',
+        'user_unsubscribed_from_stream:ZFL34',
+        'user_unsubscribed_from_stream:ZFL34shouldbe35',
+        'user_unsubscribed_from_stream:ZFL35',
     ])
     def test__handle_subscription_event_subscribers(self, model, mocker,
-                                                    stream_dict, event,
+                                                    stream_dict,
+                                                    event, feature_level,
+                                                    stream_id,
                                                     expected_subscribers):
         event['type'] = 'subscription'
 
         model.stream_dict = stream_dict
+        model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        new_subscribers = model.stream_dict[event['stream_id']]['subscribers']
+        new_subscribers = model.stream_dict[stream_id]['subscribers']
         assert new_subscribers == expected_subscribers
 
-    @pytest.mark.parametrize('event', [
-        ({'op': 'peer_add', 'stream_id': 462, 'user_id': 12}),
-        ({'op': 'peer_remove', 'stream_id': 462, 'user_id': 12}),
+    @pytest.mark.parametrize('event, feature_level', [
+        ({'op': 'peer_add', 'stream_id': 462, 'user_id': 12}, 34),
+        ({'op': 'peer_add', 'stream_ids': [462], 'user_ids': [12]}, 35),
+        ({'op': 'peer_remove', 'stream_id': 462, 'user_id': 12}, 34),
+        ({'op': 'peer_remove', 'stream_ids': [462], 'user_ids': [12]}, 35),
     ], ids=[
         'peer_subscribed_to_stream_that_user_is_unsubscribed_to',
+        'peer_subscribed_to_stream_that_user_is_unsubscribed_to:ZFL35+',
         'peer_unsubscribed_from_stream_that_user_is_unsubscribed_to',
+        'peer_unsubscribed_from_stream_that_user_is_unsubscribed_to:ZFL35+',
     ])
     def test__handle_subscription_event_subscribers_to_unsubscribed_streams(
-                            self, model, mocker, stream_dict, event):
+                    self, model, mocker, stream_dict, event, feature_level):
         event['type'] = 'subscription'
 
         model.stream_dict = deepcopy(stream_dict)
+        model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
         assert model.stream_dict == stream_dict
+
+    # NOTE: This only applies to feature level 34/35+
+    @pytest.mark.parametrize(['event', 'feature_level',
+                              'expected_subscribers'], [
+        ({'op': 'peer_add', 'user_ids': [13, 14]}, 34, [1001, 11, 12, 13, 14]),
+        ({'op': 'peer_add', 'user_ids': [13, 14]}, 35, [1001, 11, 12, 13, 14]),
+        ({'op': 'peer_remove', 'user_ids': [12, 11]}, 34, [1001]),
+        ({'op': 'peer_remove', 'user_ids': [12, 11]}, 35, [1001]),
+    ], ids=[
+        'users_subscribed_to_stream:ZFL34shouldbe35',
+        'users_subscribed_to_stream:ZFL35',
+        'users_unsubscribed_from_stream:ZFL34shouldbe35',
+        'users_unsubscribed_from_stream:ZFL35',
+    ])
+    def test__handle_subscription_event_subscribers_multiple_users_one_stream(
+        self, model, mocker, stream_dict, event, feature_level,
+        expected_subscribers
+    ):
+        event['type'] = 'subscription'
+        event['stream_ids'] = stream_ids = [2]
+
+        model.stream_dict = stream_dict
+        model.server_feature_level = feature_level
+
+        model._handle_subscription_event(event)
+
+        new_subscribers = model.stream_dict[stream_ids[0]]['subscribers']
+        assert new_subscribers == expected_subscribers
+
+    # NOTE: This only applies to feature level 34/35+
+    @pytest.mark.parametrize(['event', 'feature_level',
+                              'expected_subscribers'], [
+        ({'op': 'peer_add', 'user_ids': [13]}, 34, [1001, 11, 12, 13]),
+        ({'op': 'peer_add', 'user_ids': [13]}, 35, [1001, 11, 12, 13]),
+        ({'op': 'peer_remove', 'user_ids': [12]}, 34, [1001, 11]),
+        ({'op': 'peer_remove', 'user_ids': [12]}, 35, [1001, 11]),
+    ], ids=[
+        'user_subscribed_to_streams:ZFL34shouldbe35',
+        'user_subscribed_to_streams:ZFL35',
+        'user_unsubscribed_from_streams:ZFL34shouldbe35',
+        'user_unsubscribed_from_streams:ZFL35',
+    ])
+    def test__handle_subscription_event_subscribers_one_user_multiple_streams(
+        self, model, mocker, stream_dict, event, feature_level,
+        expected_subscribers
+    ):
+        event['type'] = 'subscription'
+        event['stream_ids'] = stream_ids = [1, 2]
+
+        model.stream_dict = stream_dict
+        model.server_feature_level = feature_level
+
+        model._handle_subscription_event(event)
+
+        for stream_id in stream_ids:
+            new_subscribers = model.stream_dict[stream_id]['subscribers']
+            assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [
         ({1},   1, True),
