@@ -783,14 +783,17 @@ class Model:
                     sort_streams(self.pinned_streams)
                     self.controller.view.left_panel.update_stream_view()
                     self.controller.update_screen()
-        elif (event['op'] in ('peer_add', 'peer_remove')
-              and self.is_user_subscribed_to_stream(event['stream_id'])):
-            subscribers = self.stream_dict[event['stream_id']]['subscribers']
-            user_id = event['user_id']
-            if event['op'] == 'peer_add':
-                subscribers.append(user_id)
-            else:
-                subscribers.remove(user_id)
+        elif event['op'] in ('peer_add', 'peer_remove'):
+            stream_ids = [event['stream_id']]
+            user_ids = [event['user_id']]
+            for stream_id in stream_ids:
+                if self.is_user_subscribed_to_stream(stream_id):
+                    subscribers = self.stream_dict[stream_id]['subscribers']
+                    if event['op'] == 'peer_add':
+                        subscribers.extend(user_ids)
+                    else:
+                        for user_id in user_ids:
+                            subscribers.remove(user_id)
 
     def _handle_typing_event(self, event: Event) -> None:
         """
