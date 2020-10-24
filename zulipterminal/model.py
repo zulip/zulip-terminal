@@ -49,7 +49,9 @@ Event = TypedDict('Event', {
     # subscription:
     'property': str,
     'user_id': int,  # Present when a streams subscribers are updated.
+    'user_ids': List[int],  # NOTE: replaces 'user_id' in ZFL 35
     'stream_id': int,
+    'stream_ids': List[int],  # NOTE: replaces 'stream_id' in ZFL 35 for peer*
     'value': bool,
     'message_ids': List[int]  # Present when subject of msg(s) is updated
 }, total=False)  # Each Event will only have a subset of these
@@ -784,8 +786,15 @@ class Model:
                     self.controller.view.left_panel.update_stream_view()
                     self.controller.update_screen()
         elif event['op'] in ('peer_add', 'peer_remove'):
-            stream_ids = [event['stream_id']]
-            user_ids = [event['user_id']]
+            # NOTE: ZFL 35 commit was not atomic with API change
+            #       (ZFL >=35 can use new plural style)
+            if 'stream_ids' not in event or 'user_ids' not in event:
+                stream_ids = [event['stream_id']]
+                user_ids = [event['user_id']]
+            else:
+                stream_ids = event['stream_ids']
+                user_ids = event['user_ids']
+
             for stream_id in stream_ids:
                 if self.is_user_subscribed_to_stream(stream_id):
                     subscribers = self.stream_dict[stream_id]['subscribers']
