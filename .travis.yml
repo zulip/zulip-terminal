@@ -28,6 +28,8 @@ jobs:
       name: "Install & pytest - CPython 3.7 (default linux)"
     - python: 3.8
       name: "Install & pytest - CPython 3.8 (default linux)"
+    - python: 3.9
+      name: "Install & pytest - CPython 3.9 (default linux)"
     - python: pypy3.6-7.3.1
       # Bumped from xenial for openssl
       dist: bionic
