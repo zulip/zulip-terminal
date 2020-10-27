@@ -78,6 +78,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
@@ -89,7 +90,7 @@ setup(
         'Issues':
             'https://github.com/zulip/zulip-terminal/issues',
     },
-    python_requires='>=3.5, <3.9',
+    python_requires='>=3.5, <3.10',
     keywords='',
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
