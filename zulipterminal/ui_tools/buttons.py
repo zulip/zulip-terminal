@@ -150,6 +150,8 @@ class StreamButton(TopButton):
         is_private = properties['invite_only']
         self.description = properties['description']
 
+        self._is_muted = False
+
         self.model = controller.model
         self.count = count
         self.view = view
@@ -174,14 +176,22 @@ class StreamButton(TopButton):
 
         # Mark muted streams 'M' during button creation.
         if self.model.is_muted_stream(self.stream_id):
+            # Use mark_muted here?
+            self._is_muted = True
             self.update_widget(('unread_count', 'M'))
 
+    @property
+    def is_muted(self) -> bool:
+        return self._is_muted
+
     def mark_muted(self) -> None:
+        self._is_muted = True
         self.update_widget(('unread_count', 'M'))
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])
 
     def mark_unmuted(self, unread_count: int) -> None:
+        self._is_muted = False
         self.update_count(unread_count)
         self.view.home_button.update_count(
             self.model.unread_counts['all_msg'])

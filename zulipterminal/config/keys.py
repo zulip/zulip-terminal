@@ -154,6 +154,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Toggle topics in a stream',
         'key_category': 'stream_list',
     }),
+    ('TOGGLE_UNREAD_ONLY', {
+        'keys': ['U'],
+        'help_text': 'Toggle showing only unread streams or topics',
+        'key_category': 'stream_list',
+    }),
     ('ALL_MESSAGES', {
         'keys': ['a', 'esc'],
         'help_text': 'Narrow to all messages',
