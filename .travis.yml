@@ -29,6 +29,8 @@ jobs:
     - python: 3.8
       name: "Install & pytest - CPython 3.8 (default linux)"
     - python: pypy3.6-7.3.1
+      # Bumped from xenial for openssl
+      dist: bionic
       # Use PyPy3 7.3.1, which fixes a typing_extensions.TypedDict bug
       name: "Install & pytest - PyPy 3.6 v7.3.1 (default linux)"
     - os: osx
