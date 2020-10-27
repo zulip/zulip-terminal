@@ -1,9 +1,11 @@
 language: python
+os: linux
+dist: xenial
 git:
   depth: 20
 cache:
   pip: true
-matrix:
+jobs:
   include:
     - python: 3.7
       name: "Linting - type consistency (mypy)"
@@ -34,7 +36,6 @@ matrix:
       cache:
       - $HOME/Library/Caches/pip
       osx_image: xcode10
-      sudo: required
       language: generic
 install:
   - pip3 install . && pip3 install .[testing]
