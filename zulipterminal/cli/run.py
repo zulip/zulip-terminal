@@ -225,6 +225,18 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     return settings
 
 
+def list_themes() -> None:
+    available_themes = all_themes()
+    print("The following themes are available:")
+    for theme in available_themes:
+        suffix = ""
+        if theme == "zt_dark":
+            suffix += "[default theme]"
+        print("  ", theme, suffix)
+    print("Specify theme in zuliprc file or override "
+          "using -t/--theme options on command line.")
+
+
 def main(options: Optional[List[str]]=None) -> None:
     """
     Launch Zulip Terminal.
@@ -253,10 +265,7 @@ def main(options: Optional[List[str]]=None) -> None:
         sys.exit(0)
 
     if args.list_themes:
-        available_themes = all_themes()
-        print('Themes available:')
-        for theme in available_themes:
-            print('    {}'.format(theme))
+        list_themes()
         sys.exit(0)
 
     if args.config_file:
@@ -284,11 +293,7 @@ def main(options: Optional[List[str]]=None) -> None:
         if not is_valid_theme:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
-            print("The following themes are available:")
-            for theme in available_themes:
-                print("  ", theme)
-            print("Specify theme in zuliprc file or override "
-                  "using -t/--theme options on command line.")
+            list_themes()
             sys.exit(1)
         if theme_to_use[0] not in available_themes:
             # theme must be an alias, as it is valid
