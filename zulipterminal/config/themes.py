@@ -169,6 +169,8 @@ THEMES = {
          None,             DEF['light_blue'],         DEF['black']),
         ('current_user',   'white',                   'black',
          None,             DEF['white'],              DEF['black']),
+        ('muted',          'light blue',              'black',
+         None,             DEF['light_blue'],         DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -247,6 +249,8 @@ THEMES = {
          None,             LIGHTBLUE,         BLACK),
         ('current_user',   'white',           'black',
          None,             WHITE,             BLACK),
+        ('muted',          'light blue',      'black',
+         None,             LIGHTBLUE,         BLACK),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -286,6 +290,7 @@ THEMES = {
         ('edit_author',    'dark green',      'white'),
         ('edit_time',      'dark blue',       'white'),
         ('current_user',   'dark gray',       'white'),
+        ('muted',          'dark gray',       'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -325,6 +330,7 @@ THEMES = {
         ('edit_author',    'dark gray',       'light blue'),
         ('edit_time',      'dark blue',       'light blue'),
         ('current_user',   'light gray',      'light blue'),
+        ('muted',          'light gray',      'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
