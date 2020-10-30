@@ -52,7 +52,7 @@ If it doesn't find this file, you have two options:
 
 1. `zulip-term` will prompt you for your server, email and password, and create a `zuliprc` file for you in that location
 
-   **NOTE:** If you use Google/Github Auth to login into your zulip organization then you don't have a password and you need to create one. Please go to your `<Your Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your associated account.
+   **NOTE:** If you use Google, Github or another external authentication to access your Zulip organization then you likely won't have a password set and currently need to create one to use zulip-terminal. If your organization is on Zulip cloud, you can visit https://zulip.com/accounts/go?next=/accounts/password/reset to create a new password for your account. For self-hosted servers please go to your `<Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your account.
 
 2. Each time you run `zulip-term`, you can specify the path to an alternative `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c /path/to/zuliprc`
 
