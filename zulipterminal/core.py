@@ -64,15 +64,17 @@ class Controller:
 
         # data and urwid pipe for inter-thread exception handling
         self._exception_info = None  # type: Optional[ExceptionInfo]
+        self._critical_exception = False
         self._exception_pipe = self.loop.watch_pipe(self._raise_exception)
 
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)
 
     def raise_exception_in_main_thread(self,
-                                       exc_info: ExceptionInfo) -> None:
+                                       exc_info: ExceptionInfo,
+                                       *, critical: bool) -> None:
         """
-        Sets an exception from another thread, which is cleanly raised
+        Sets an exception from another thread, which is cleanly handled
         from within the Controller thread via _raise_exception
         """
         # Exceptions shouldn't occur before the pipe is set
@@ -80,12 +82,14 @@ class Controller:
 
         if isinstance(exc_info, tuple):
             self._exception_info = exc_info
+            self._critical_exception = critical
         else:
             self._exception_info = (
                 RuntimeError,
                 "Invalid cross-thread exception info '{}'".format(exc_info),
                 None
             )
+            self._critical_exception = True
         os.write(self._exception_pipe, b'1')
 
     def is_in_editor_mode(self) -> bool:
@@ -360,7 +364,36 @@ class Controller:
     def _raise_exception(self, *args: Any, **kwargs: Any) -> Literal[True]:
         if self._exception_info is not None:
             exc = self._exception_info
-            raise exc[0].with_traceback(exc[1], exc[2])
+            if self._critical_exception:
+                raise exc[0].with_traceback(exc[1], exc[2])
+            else:
+                import traceback
+                exception_logfile = "zulip-terminal-thread-exceptions.log"
+                with open(exception_logfile, "a") as logfile:
+                    traceback.print_exception(*exc, file=logfile)
+                message = (
+                    "An exception occurred:"
+                    + "\n\n"
+                    + "".join(traceback.format_exception_only(exc[0], exc[1]))
+                    + "\n"
+                    + "The application should continue functioning, but you "
+                    + "may notice inconsistent behavior in this session."
+                    + "\n\n"
+                    + "Please report this to us either in"
+                    + "\n"
+                    + "* the #zulip-terminal stream"
+                    + "\n"
+                    + "  (https://chat.zulip.org/#narrow/stream/"
+                    + "206-zulip-terminal in the webapp)"
+                    + "\n"
+                    + "* an issue at "
+                    + "https://github.com/zulip/zulip-terminal/issues"
+                    + "\n\n"
+                    + "Details of the exception can be found in "
+                    + exception_logfile
+                )
+                self.popup_with_message(message, width=80)
+                self._exception_info = None
         return True  # If don't raise, retain pipe
 
     def main(self) -> None:
