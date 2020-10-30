@@ -9,7 +9,8 @@ from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
-    QUOTED_TEXT_MARKER, STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
+    QUOTED_TEXT_MARKER, STATUS_ACTIVE, STREAM_TOPIC_SEPARATOR,
+    TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -1128,6 +1129,7 @@ class TestRightColumnView:
                 view=self.view,
                 width=width,
                 color='user_' + self.view.users[0]['status'],
+                state_marker=STATUS_ACTIVE,
                 count=1,
                 is_current_user=False
             )
@@ -2313,11 +2315,12 @@ class TestUserButton:
                                  view=mocker.Mock(),
                                  width=width,
                                  color=None,  # FIXME test elsewhere?
+                                 state_marker="*",
                                  count=count)
 
         text = user_button._w._original_widget.get_text()
         count_str = '' if count == 0 else str(count)
-        expected_text = ' \N{BULLET} {}{}{}'.format(
+        expected_text = ' * {}{}{}'.format(
                 short_text,
                 (width - 4 - len(short_text) - len(count_str)) * ' ',
                 count_str)
@@ -2342,6 +2345,7 @@ class TestUserButton:
                                  view=mocker.Mock(),
                                  width=width,
                                  color=mocker.Mock(),
+                                 state_marker="*",
                                  count=mocker.Mock())
         size = widget_size(user_button)
 
