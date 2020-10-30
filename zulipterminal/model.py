@@ -1208,4 +1208,5 @@ class Model:
                     except Exception:
                         import sys
                         (self.controller.
-                         raise_exception_in_main_thread(sys.exc_info()))
+                         raise_exception_in_main_thread(sys.exc_info(),
+                                                        critical=False))
