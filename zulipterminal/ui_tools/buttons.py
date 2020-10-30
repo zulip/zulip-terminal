@@ -203,6 +203,7 @@ class StreamButton(TopButton):
 class UserButton(TopButton):
     def __init__(self, user: Dict[str, Any], controller: Any,
                  view: Any, width: int,
+                 state_marker: str,
                  color: Optional[str]=None, count: int=0,
                  is_current_user: bool=False) -> None:
         # Properties accessed externally
@@ -217,7 +218,7 @@ class UserButton(TopButton):
         super().__init__(controller,
                          caption=user['full_name'],
                          show_function=self._narrow_with_compose,
-                         prefix_character=(color, '\N{BULLET}'),
+                         prefix_character=(color, state_marker),
                          text_color=color,
                          width=width,
                          count=count)

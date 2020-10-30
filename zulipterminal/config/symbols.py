@@ -11,3 +11,7 @@ LIST_TITLE_BAR_LINE = '━'
 # appears to overlap its subsequent text.
 TIME_MENTION_MARKER = '⏱ '  # Other tested options are: '⧗' and '⧖'.
 MUTE_MARKER = 'M'
+STATUS_ACTIVE = '●'
+STATUS_IDLE = '◒'
+STATUS_OFFLINE = '○'
+STATUS_INACTIVE = '•'

@@ -63,7 +63,8 @@ def user_button(mocker, width=38):
         },
         width=width,
         controller=mocker.patch('zulipterminal.core.Controller'),
-        view=mocker.patch('zulipterminal.ui.View')
+        view=mocker.patch('zulipterminal.ui.View'),
+        state_marker="*",
     )
 
 

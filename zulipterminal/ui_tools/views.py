@@ -10,7 +10,8 @@ from zulipterminal.config.keys import (
     HELP_CATEGORIES, KEY_BINDINGS, is_command_key, keys_for_command,
 )
 from zulipterminal.config.symbols import (
-    CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER,
+    CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER, STATUS_ACTIVE,
+    STATUS_IDLE, STATUS_INACTIVE, STATUS_OFFLINE,
 )
 from zulipterminal.helper import (
     Message, asynch, edit_mode_captions, match_stream, match_user,
@@ -651,10 +652,19 @@ class RightColumnView(urwid.Frame):
         if users is None:
             users = self.view.users.copy()
             reset_default_view_users = True
+
+        state_icon = {
+            'active': STATUS_ACTIVE,
+            'idle': STATUS_IDLE,
+            'offline': STATUS_OFFLINE,
+            'inactive': STATUS_INACTIVE,
+        }
+
         users_btn_list = list()
         for user in users:
+            status = user['status']
             # Only include `inactive` users in search result.
-            if (user['status'] == 'inactive'
+            if (status == 'inactive'
                     and not self.view.controller.is_in_editor_mode()):
                 continue
             unread_count = (self.view.model.unread_counts['unread_pms'].
@@ -666,7 +676,8 @@ class RightColumnView(urwid.Frame):
                     controller=self.view.controller,
                     view=self.view,
                     width=self.width,
-                    color='user_' + user['status'],
+                    state_marker=state_icon[status],
+                    color='user_' + status,
                     count=unread_count,
                     is_current_user=is_current_user
                 )
