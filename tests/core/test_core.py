@@ -54,7 +54,7 @@ class TestController:
 
         assert self.main_loop.call_count == 1
         controller.loop.watch_pipe.assert_has_calls([
-            mocker.call(controller.draw_screen),
+            mocker.call(controller._draw_screen),
             mocker.call(controller._raise_exception)
         ])
 

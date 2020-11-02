@@ -60,7 +60,9 @@ class Controller:
         self.loop = urwid.MainLoop(self.view,
                                    self.theme,
                                    screen=screen)
-        self.update_pipe = self.loop.watch_pipe(self.draw_screen)
+
+        # urwid pipe for concurrent screen update handling
+        self._update_pipe = self.loop.watch_pipe(self._draw_screen)
 
         # data and urwid pipe for inter-thread exception handling
         self._exception_info = None  # type: Optional[ExceptionInfo]
@@ -142,12 +144,14 @@ class Controller:
         del self._stdout
 
     def update_screen(self) -> None:
+        # Update should not happen until pipe is set
+        assert hasattr(self, '_update_pipe')
         # Write something to update pipe to trigger draw_screen
-        if hasattr(self, 'update_pipe'):
-            os.write(self.update_pipe, b'1')
+        os.write(self._update_pipe, b'1')
 
-    def draw_screen(self, *args: Any, **kwargs: Any) -> None:
+    def _draw_screen(self, *args: Any, **kwargs: Any) -> Literal[True]:
         self.loop.draw_screen()
+        return True  # Always retain pipe
 
     def maximum_popup_dimensions(self) -> Tuple[int, int]:
         """
