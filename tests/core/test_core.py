@@ -26,6 +26,8 @@ class TestController:
         # Patch these unconditionally to avoid calling in __init__
         self.poll_for_events = mocker.patch(CORE + '.Model.poll_for_events')
         mocker.patch(CORE + '.Controller.show_loading')
+        self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
+                                      return_value=mocker.Mock())
 
         self.config_file = 'path/to/zuliprc'
         self.theme_name = 'zt_dark'
@@ -49,6 +51,10 @@ class TestController:
         self.view.assert_called_once_with(controller)
         self.poll_for_events.assert_called_once_with()
         assert controller.theme == self.theme
+
+        assert self.main_loop.call_count == 1
+        controller.loop.watch_pipe.assert_called_once_with(
+            controller.draw_screen)
 
     def test_initial_editor_mode(self, controller):
         assert not controller.is_in_editor_mode()
@@ -245,14 +251,15 @@ class TestController:
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        ret_mock = mocker.Mock()
-        mock_loop = mocker.patch('urwid.MainLoop', return_value=ret_mock)
         controller.view.palette = {
             'default': 'theme_properties'
         }
         mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
+        controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
+
         controller.main()
-        assert mock_loop.call_count == 1
+
+        assert controller.loop.run.call_count == 1
 
     @pytest.mark.parametrize('muted_streams, action', [
         ({205, 89}, 'unmuting'),
