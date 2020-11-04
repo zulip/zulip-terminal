@@ -991,7 +991,9 @@ class NoticeView(PopUpView):
 class AboutView(PopUpView):
     def __init__(self, controller: Any, title: str, *, zt_version: str,
                  server_version: str,
-                 server_feature_level: Optional[int]) -> None:
+                 server_feature_level: Optional[int],
+                 theme_name: str, color_depth: int,
+                 autohide_enabled: bool, footlink_enabled: bool) -> None:
         self.feature_level_content = (
             [('Feature level', str(server_feature_level))]
             if server_feature_level else []
@@ -1000,6 +1002,11 @@ class AboutView(PopUpView):
             ('Application', [('Zulip Terminal', zt_version)]),
             ('Server', [('Version', server_version)]
              + self.feature_level_content),
+            ('Application Configuration', [
+                ('Theme', theme_name),
+                ('Autohide', 'enabled' if autohide_enabled else 'disabled'),
+                ('Footlink', 'enabled' if footlink_enabled else 'disabled'),
+                ('Color depth', str(color_depth))])
         ]
 
         popup_width, column_widths = self.calculate_table_widths(contents,
