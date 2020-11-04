@@ -352,6 +352,7 @@ def main(options: Optional[List[str]]=None) -> None:
             theme_data = THEMES[theme_to_use[0]]
 
         Controller(zuliprc_path,
+                   theme_to_use[0],
                    theme_data,
                    color_depth,
                    args.explore,
