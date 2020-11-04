@@ -126,10 +126,15 @@ class TestAboutView:
                             return_value=(64, 64))
         mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
+
         self.about_view = AboutView(self.controller, 'About',
                                     zt_version=ZT_VERSION,
                                     server_version=server_version,
-                                    server_feature_level=server_feature_level)
+                                    server_feature_level=server_feature_level,
+                                    theme_name='zt_dark',
+                                    color_depth=256,
+                                    autohide_enabled=False,
+                                    footlink_enabled=True)
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('ABOUT')})
@@ -161,7 +166,11 @@ class TestAboutView:
 
         about_view = AboutView(self.controller, 'About', zt_version=ZT_VERSION,
                                server_version=server_version,
-                               server_feature_level=server_feature_level)
+                               server_feature_level=server_feature_level,
+                               theme_name='zt_dark',
+                               color_depth=256,
+                               autohide_enabled=False,
+                               footlink_enabled=True)
 
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
