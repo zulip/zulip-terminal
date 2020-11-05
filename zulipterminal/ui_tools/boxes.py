@@ -853,17 +853,20 @@ class MessageBox(urwid.Pile):
 
     # Use quotes as a workaround for OrderedDict typing issue.
     # See https://github.com/python/mypy/issues/6904.
+    @staticmethod
     def footlinks_view(
-        self, message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+        message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+        *,
+        maximum_footlinks: int,
     ) -> Any:
         # Return if footlinks are disabled by the user.
-        if self.model.controller.maximum_footlinks == 0:
+        if maximum_footlinks == 0:
             return None
 
         footlinks = []
         counter = 0
         for link, (text, index, show_footlink) in message_links.items():
-            if counter == self.model.controller.maximum_footlinks:
+            if counter == maximum_footlinks:
                 break
             if not show_footlink:
                 continue
@@ -1226,7 +1229,10 @@ class MessageBox(urwid.Pile):
         reactions = self.reactions_view(self.message['reactions'])
 
         # Footlinks.
-        footlinks = self.footlinks_view(self.message_links)
+        footlinks = self.footlinks_view(
+            self.message_links,
+            maximum_footlinks=self.model.controller.maximum_footlinks,
+        )
 
         # Build parts together and return
         parts = [

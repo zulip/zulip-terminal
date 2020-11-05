@@ -2072,12 +2072,12 @@ class TestMessageBox:
             'http_default_scheme',
         ]
     )
-    def test_footlinks_view(self, message_fixture, message_links,
-                            expected_text, expected_attrib):
-        self.model.controller.maximum_footlinks = 3
-        msg_box = MessageBox(message_fixture, self.model, None)
-
-        footlinks = msg_box.footlinks_view(message_links)
+    def test_footlinks_view(self, message_links, expected_text,
+                            expected_attrib):
+        footlinks = MessageBox.footlinks_view(
+            message_links,
+            maximum_footlinks=3,
+        )
 
         if expected_text:
             assert footlinks.original_widget.text == expected_text
@@ -2091,15 +2091,15 @@ class TestMessageBox:
         (1, Padding),
         (3, Padding),
     ])
-    def test_footlinks_limit(self, message_fixture, maximum_footlinks,
-                             expected_instance):
+    def test_footlinks_limit(self, maximum_footlinks, expected_instance):
         message_links = OrderedDict([
             ('https://github.com/zulip/zulip-terminal', ('ZT', 1, True)),
         ])
-        self.model.controller.maximum_footlinks = maximum_footlinks
-        msg_box = MessageBox(message_fixture, self.model, None)
 
-        footlinks = msg_box.footlinks_view(message_links)
+        footlinks = MessageBox.footlinks_view(
+            message_links,
+            maximum_footlinks=maximum_footlinks,
+        )
 
         assert isinstance(footlinks, expected_instance)
 
