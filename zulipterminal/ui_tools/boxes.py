@@ -858,13 +858,20 @@ class MessageBox(urwid.Pile):
         message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
         *,
         maximum_footlinks: int,
-    ) -> Any:
+        padded: bool,
+        wrap: str
+    ) -> Tuple[Any, int]:
+        """
+        Returns a Tuple that consists footlinks view (widget) and its required
+        width.
+        """
         # Return if footlinks are disabled by the user.
         if maximum_footlinks == 0:
-            return None
+            return None, 0
 
         footlinks = []
         counter = 0
+        footlinks_width = 0
         for link, (text, index, show_footlink) in message_links.items():
             if counter == maximum_footlinks:
                 break
@@ -872,20 +879,29 @@ class MessageBox(urwid.Pile):
                 continue
 
             counter += 1
-            footlinks.extend([
+            styled_footlink = [
                 ('msg_link_index', f"{index}:"),
-                ' ',
+                (None, " "),
                 ('msg_link', link),
-                '\n',
-            ])
+            ]
+            footlinks_width = max(
+                footlinks_width,
+                sum([len(text) for style, text in styled_footlink])
+            )
+            footlinks.extend([*styled_footlink, '\n'])
 
         if not footlinks:
-            return None
+            return None, 0
 
         footlinks[-1] = footlinks[-1][:-1]  # Remove the last newline.
-        return urwid.Padding(urwid.Text(footlinks, wrap='ellipsis'),
-                             align='left', left=8, width=('relative', 100),
-                             min_width=10, right=2)
+
+        text_widget = urwid.Text(footlinks, wrap=wrap)
+        if padded:
+            return urwid.Padding(text_widget, align='left', left=8,
+                                 width=('relative', 100), min_width=10,
+                                 right=2), footlinks_width
+        else:
+            return text_widget, footlinks_width
 
     @classmethod
     def soup2markup(cls, soup: Any, metadata: Dict[str, Any],
@@ -1229,9 +1245,11 @@ class MessageBox(urwid.Pile):
         reactions = self.reactions_view(self.message['reactions'])
 
         # Footlinks.
-        footlinks = self.footlinks_view(
+        footlinks, _ = self.footlinks_view(
             self.message_links,
             maximum_footlinks=self.model.controller.maximum_footlinks,
+            padded=True,
+            wrap='ellipsis',
         )
 
         # Build parts together and return

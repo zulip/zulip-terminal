@@ -2028,33 +2028,37 @@ class TestMessageBox:
         ]
 
     @pytest.mark.parametrize(['message_links', 'expected_text',
-                              'expected_attrib'], [
+                              'expected_attrib', 'expected_footlinks_width'], [
             (OrderedDict([
                 ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1,
                                                                     True)),
              ]),
              '1: https://github.com/zulip/zulip-terminal/pull/1',
-             [('msg_link_index', 2), (None, 1), ('msg_link', 46)]),
+             [('msg_link_index', 2), (None, 1), ('msg_link', 46)],
+             49),
             (OrderedDict([
                 ('https://foo.com', ('Foo!', 1, True)),
                 ('https://bar.com', ('Bar!', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
-              ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
+              ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
+             18),
             (OrderedDict([
                 ('https://example.com', ('https://example.com', 1, False)),
                 ('http://example.com', ('http://example.com', 2, False)),
              ]),
              None,
-             None),
+             None,
+             0),
             (OrderedDict([
                 ('https://foo.com', ('https://foo.com, Text', 1, True)),
                 ('https://bar.com', ('Text, https://bar.com', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
-              ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
+              ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
+             18),
             (OrderedDict([
                 ('https://foo.com', ('Foo!', 1, True)),
                 ('http://example.com', ('example.com', 2, False)),
@@ -2062,7 +2066,8 @@ class TestMessageBox:
              ]),
              '1: https://foo.com\n3: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
-              ('msg_link_index', 2), (None, 1), ('msg_link', 15)]),
+              ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
+             18),
         ],
         ids=[
             'one_footlink',
@@ -2073,15 +2078,18 @@ class TestMessageBox:
         ]
     )
     def test_footlinks_view(self, message_links, expected_text,
-                            expected_attrib):
-        footlinks = MessageBox.footlinks_view(
+                            expected_attrib, expected_footlinks_width):
+        footlinks, footlinks_width = MessageBox.footlinks_view(
             message_links,
             maximum_footlinks=3,
+            padded=True,
+            wrap='ellipsis',
         )
 
         if expected_text:
             assert footlinks.original_widget.text == expected_text
             assert footlinks.original_widget.attrib == expected_attrib
+            assert footlinks_width == expected_footlinks_width
         else:
             assert footlinks is None
             assert not hasattr(footlinks, 'original_widget')
@@ -2096,9 +2104,11 @@ class TestMessageBox:
             ('https://github.com/zulip/zulip-terminal', ('ZT', 1, True)),
         ])
 
-        footlinks = MessageBox.footlinks_view(
+        footlinks, _ = MessageBox.footlinks_view(
             message_links,
             maximum_footlinks=maximum_footlinks,
+            padded=True,
+            wrap='ellipsis',
         )
 
         assert isinstance(footlinks, expected_instance)

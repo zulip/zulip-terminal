@@ -1107,7 +1107,7 @@ class StreamInfoView(PopUpView):
                          else STREAM_MARKER_PUBLIC)
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream['rendered_description']
-        self.markup_desc, *_ = MessageBox.transform_content(
+        self.markup_desc, message_links, _ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,
         )
@@ -1137,16 +1137,28 @@ class StreamInfoView(PopUpView):
         urwid.connect_signal(pinned_setting, 'change',
                              self.toggle_pinned_status)
 
+        footlinks, footlinks_width = MessageBox.footlinks_view(
+            message_links=message_links,
+            maximum_footlinks=10,  # Show 'all', as no other way to add them
+            padded=False,
+            wrap='space',
+        )
+
         # Manual because calculate_table_widths does not support checkboxes.
         # Add 4 to checkbox label to accommodate the checkbox itself.
         popup_width = max(popup_width, len(muted_setting.label) + 4,
-                          len(pinned_setting.label) + 4, desc.pack()[0])
+                          len(pinned_setting.label) + 4, desc.pack()[0],
+                          footlinks_width)
         self.widgets = self.make_table_with_categories(stream_info_content,
                                                        column_widths)
 
         # Stream description.
         self.widgets.insert(0, desc)
-        self.widgets.insert(1, urwid.Text(''))  # Add a newline.
+        desc_newline = 1
+        if footlinks:
+            self.widgets.insert(1, footlinks)
+            desc_newline = 2
+        self.widgets.insert(desc_newline, urwid.Text(''))  # Add a newline.
 
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)

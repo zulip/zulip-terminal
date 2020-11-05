@@ -4,6 +4,7 @@ import pytest
 from urwid import Columns, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
@@ -625,6 +626,31 @@ class TestStreamInfoView:
         stream_info_view = StreamInfoView(self.controller, stream_id)
 
         assert stream_info_view.markup_desc == expected_markup
+
+    @pytest.mark.parametrize(['message_links', 'expected_text',
+                              'expected_attrib', 'expected_footlinks_width'], [
+            (OrderedDict([
+                ('https://example.com', ('Example', 1, True)),
+                ('https://generic.com', ('Generic', 2, True)),
+             ]),
+             '1: https://example.com\n2: https://generic.com',
+             [('msg_link_index', 2), (None, 1), ('msg_link', 19), (None, 1),
+              ('msg_link_index', 2), (None, 1), ('msg_link', 19)],
+             22),
+        ],
+    )
+    def test_footlinks(self, message_links, expected_text, expected_attrib,
+                       expected_footlinks_width):
+        footlinks, footlinks_width = MessageBox.footlinks_view(
+            message_links,
+            maximum_footlinks=10,
+            padded=False,
+            wrap='space',
+        )
+
+        assert footlinks.text == expected_text
+        assert footlinks.attrib == expected_attrib
+        assert footlinks_width == expected_footlinks_width
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})
