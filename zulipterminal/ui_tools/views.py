@@ -329,6 +329,10 @@ class StreamsView(urwid.Frame):
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
+            if button == 1:
+                self.view.search_box.text_box.set_edit_text('')
+                self.view.controller.message_search = None
+                return super().mouse_event(size, event, button, col, row, focus)
             if button == 4:
                 self.keypress(size, 'up')
                 return True
