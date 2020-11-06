@@ -316,6 +316,18 @@ Other gitlint options are available; for example it is possible to apply it to a
 
 Generally it is best to refer to the git log to get an idea of the general style to follow, and in particular look for similar types of commits to the ones you are writing.
 
+### Tips for working with tests (pytest)
+
+We currently have thousands of tests which get checked upon running `pytest`. While it is dependent on your system capability, this should typically take less than one minute to run. However, during debugging you may still wish to limit the scope of your tests, to improve the turnaround time:
+* If lots of tests are failing in a very verbose way, you might try the `-x` option (eg. `pytest -x`) to stop tests after the first failure; due to parametrization of tests and test fixtures, many apparent errors/failures can be resolved with just one fix! (try eg. `pytest --maxfail 3` for a less-strict version of this)
+* To avoid running all the successful tests each time, along with the failures, you can run with `--lf` (eg. `pytest --lf`), short for `--last-failed` (similar useful options may be `--failed-first` and `--new-first`, which may work well with `-x`)
+* Since pytest 3.10 there is `--sw` (`--stepwise`), which works through known failures in the same way as `--lf` and `-x` can be used, which can be combined with `--stepwise-skip` to control which test is the current focus
+* If you know the names of tests which are failing and/or in a specific location, you might limit tests to a particular location (eg. `pytest tests/model`) or use a selected keyword (eg. `pytest -k __handle`)
+
+When only a subset of tests are running it becomes more practical and useful to use the `-v` option (`--verbose`); instead of showing a `.` (or `F`, `E`, `x`, etc) for each test result, it gives the name (with parameters) of each test being run (eg. `pytest -v -k __handle`). This option also shows more detail in tests and can be given multiple times (eg. `pytest -vv`).
+
+For additional help with pytest options see `pytest -h`, or check out the [full pytest documentation](https://docs.pytest.org/en/latest/).
+
 ### Debugging Tips
 
 #### Output using `print`
