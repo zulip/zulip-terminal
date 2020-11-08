@@ -97,6 +97,8 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
+        self.stream_write_box.set_completer_delims("")
+
         self.title_write_box = ReadlineEdit(caption="Topic:  ",
                                             edit_text=title)
         self.title_write_box.enable_autocomplete(
@@ -104,6 +106,7 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
+        self.title_write_box.set_completer_delims("")
 
         self.header_write_box = urwid.Columns([
             urwid.LineBox(
