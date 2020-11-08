@@ -313,9 +313,7 @@ class TestWriteBox:
 
     @pytest.mark.parametrize('text, expected_text', [
         ('Som', 'Some general stream'),
-        pytest.param('Some gen', 'Some general stream',
-                     marks=pytest.mark.xfail(
-                         reason="Lacking urwid-readline support")),
+        ('Some gen', 'Some general stream'),
     ])
     def test__stream_box_autocomplete_with_spaces(self, mocker, write_box,
                                                   widget_size,
@@ -351,8 +349,7 @@ class TestWriteBox:
 
     @pytest.mark.parametrize('text, expected_text', [
         ('Th', 'This is a topic'),
-        pytest.param('This i', 'This is a topic', marks=pytest.mark.xfail(
-                             reason="Lacking urwid-readline support")),
+        ('This i', 'This is a topic'),
     ])
     def test__topic_box_autocomplete_with_spaces(self, mocker, write_box,
                                                  widget_size,
