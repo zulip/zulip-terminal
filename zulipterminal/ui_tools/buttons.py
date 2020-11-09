@@ -91,7 +91,7 @@ class TopButton(urwid.Button):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
             self.activate(key)
-            if self.controller.message_search is not None:
+            if self.controller.sticky_search and self.controller.message_search is not None:
                 self.controller.exit_editor_mode()
                 self.controller.search_messages(self.controller.message_search)
                 self.controller.view.middle_column.set_focus('body')

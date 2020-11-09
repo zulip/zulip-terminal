@@ -39,6 +39,7 @@ class Controller:
         self.footlinks_enabled = footlinks
         self.message_search = None
         self.stream_button = None
+        self.sticky_search = False
 
         self._editor = None  # type: Optional[Any]
 
@@ -241,10 +242,12 @@ class Controller:
         else:
             self.view.message_view.log.extend(w_list)
 
-        if self.message_search is not None:
-            self.view.search_box.text_box.set_edit_text(self.message_search)
-        else:
-            self.view.search_box.text_box.set_edit_text('')
+        if self.sticky_search:
+            if self.message_search is not None:
+                self.view.search_box.text_box.set_edit_text(
+                    self.message_search)
+            else:
+                self.view.search_box.text_box.set_edit_text('')
 
         self.exit_editor_mode()
 

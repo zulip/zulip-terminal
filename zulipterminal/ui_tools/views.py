@@ -530,6 +530,7 @@ class MiddleColumnView(urwid.Frame):
             return super().keypress(size, key)
 
         elif is_command_key('SEARCH_MESSAGES', key):
+            self.controller.sticky_search = True if key == 'meta /' else False
             self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus('header')
             return key
