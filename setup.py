@@ -110,7 +110,7 @@ setup(
     install_requires=[
         'urwid~=2.1.2',
         'zulip>=0.7.0',
-        'urwid_readline>=0.11',
+        'urwid_readline>=0.12',
         'beautifulsoup4>=4.9.0',
         'lxml>=4.5.2',
         'typing_extensions>=3.7',
