@@ -58,6 +58,8 @@ If it doesn't find this file, you have two options:
 
    Your personal zuliprc file can be obtained from Zulip servers in your account settings in the web application, which gives you all the permissions you have there. Bot zuliprc files can be downloaded from a similar area for each bot, and will have more limited permissions.
 
+**NOTE:** If your server uses self-signed certificates or an insecure connection, you will need to add extra options to the `zuliprc` file manually - see the documentation for the [Zulip python module](https://pypi.org/project/zulip/).
+
 We suggest running `zulip-term` using the `-e` or `--explore` option (in explore mode) when you are trying Zulip Terminal for the first time, where we intentionally do not mark messages as read.
 
 ## Configuration
