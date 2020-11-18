@@ -498,8 +498,7 @@ class TestStreamsView:
         ]
         stream_names.sort(key=lambda stream_name: stream_name.lower())
         self.view.pinned_streams = [{'name': name} for name in to_pin]
-        stream_names.sort(key=lambda stream_name: stream_name in [
-            stream for stream in to_pin], reverse=True)
+        stream_names.sort(key=lambda stream_name: stream_name in list(to_pin), reverse=True)
         self.view.controller.is_in_editor_mode = lambda: True
         search_box = "SEARCH_BOX"
         stream_view.streams_btn_list = [
