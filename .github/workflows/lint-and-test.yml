@@ -44,21 +44,33 @@ jobs:
         run: ./tools/run-isort-check
 
   pytest:
-    runs-on: ubuntu-latest
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
       fail-fast: false
       matrix:
-        test-python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
-    name: Install & pytest - CPython ${{ matrix.test-python-version }}
+        env:
+          - {PYTHON: 3.5, OS: ubuntu-latest, NAME: "CPython 3.5 (ubuntu)"}
+          - {PYTHON: 3.6, OS: ubuntu-latest, NAME: "CPython 3.6 (ubuntu)"}
+          - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)"}
+          - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
+          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)"}
+          - {PYTHON: 'pypy3', OS: ubuntu-latest, NAME: "PyPy 3 (ubuntu)"}
+          - {PYTHON: 3.9, OS: macos-latest, NAME: "CPython 3.9 (macos)"}
+    runs-on: ${{ matrix.env.OS }}
+    name: Install & test - ${{ matrix.env.NAME}}
     steps:
       - uses: actions/checkout@v2
-      - name: Install Python 3
+      - name: Install Python version ${{ matrix.env.PYTHON }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.test-python-version }}
+          python-version: ${{ matrix.env.PYTHON }}
+      - name: Output Python version
+        run: python --version
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
+      - name: Ensure libxml-related libraries are installed (pypy3 only)
+        if: matrix.env.PYTHON == 'pypy3'
+        run: sudo apt install libxml2-dev libxslt1-dev
       - name: Ensure regular package installs from checkout
         run: pip install .
       - name: Install test dependencies
