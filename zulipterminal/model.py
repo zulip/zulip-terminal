@@ -997,15 +997,19 @@ class Model:
         """
         Handle updated (edited) messages (changed content/subject)
         """
+        # Update edited message status from single message id
+        # NOTE: If all messages in topic have topic edited,
+        #       they are not all marked as edited, as per server optimization
         message_id = event['message_id']
-        # If the message is indexed
-        if self.index['messages'].get(message_id):
-            message = self.index['messages'][message_id]
+        indexed_message = self.index['messages'].get(message_id, None)
+
+        if indexed_message:
             self.index['edited_messages'].add(message_id)
 
+        if indexed_message:
             if 'rendered_content' in event:
-                message['content'] = event['rendered_content']
-                self.index['messages'][message_id] = message
+                indexed_message['content'] = event['rendered_content']
+                self.index['messages'][message_id] = indexed_message
                 self._update_rendered_view(message_id)
 
             # 'subject' is not present in update event if
@@ -1021,7 +1025,7 @@ class Model:
                     if hasattr(self.controller, 'view'):
                         view = self.controller.view
                         if (view.left_panel.is_in_topic_view_with_stream_id(
-                                message['stream_id'])):
+                                indexed_message['stream_id'])):
                             self._fetch_topics_in_streams([stream_id])
                             view.left_panel.show_topic_view(
                                 view.topic_w.stream_button)
