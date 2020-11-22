@@ -87,21 +87,14 @@ color-depth=256
 
 ### Notifications
 
+Note that notifications are not currently supported on WSL; see [#767](https://github.com/zulip/zulip-terminal/issues/767).
+
 #### Linux
 
 The following command installs `notify-send` on Debian based systems, similar
 commands can be found for other linux systems as well.
 ```
 sudo apt-get install libnotify-bin
-```
-
-#### WSL
-
-Run powershell as **admin** and run these commands to install dependencies for showing notifications:
-
-```
-set-executionpolicy remotesigned
-Install-Module -Name BurntToast
 ```
 
 #### OSX
