@@ -37,7 +37,6 @@ testing_deps = [
     'pytest==5.3.5',
     'pytest-cov==2.5.1',
     'pytest-mock==1.7.1',
-    'zipp==1.0.0',  # To support Python 3.5
 ]
 
 linting_deps = [
@@ -74,7 +73,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
 
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -90,7 +88,7 @@ setup(
         'Issues':
             'https://github.com/zulip/zulip-terminal/issues',
     },
-    python_requires='>=3.5, <3.10',
+    python_requires='>=3.6, <3.10',
     keywords='',
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=True,
