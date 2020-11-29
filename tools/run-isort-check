@@ -5,15 +5,14 @@ import sys
 
 
 cmds = ["isort"]
-files = ["zulipterminal", "tests", "setup.py"]
+files = ["zulipterminal", "tests", "tools", "setup.py"]
 
-result = subprocess.call(cmds + ["--check-only", "--diff", "--recursive"] + files)
+result = subprocess.call(cmds + ["--check-only", "--diff"] + files)
 
 if result == 0:
     print("All files have imports sorted according to rules.")
 else:
     print("Some files are not sorted according to rules.")
-    print("You might try '{}' to automatically fix all files.".format(" ".join(cmds)))
-    print("Alternatively try 'isort <somefiles>' to just fix specific files.")
+    print("Try 'isort <path>' to fix a path recursively.")
 
 sys.exit(result)
