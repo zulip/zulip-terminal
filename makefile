@@ -34,7 +34,7 @@ fix: check-clean-tree
 
 force-fix: venv
 	@echo "=== Auto-fixing files ==="
-	isort --recursive $(SOURCES)
+	isort $(SOURCES) tools
 	autopep8 --recursive --in-place $(SOURCES)
 	autoflake --recursive --in-place $(SOURCES)
 

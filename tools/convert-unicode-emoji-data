@@ -4,9 +4,9 @@
 # into what is required by ZT.
 
 import os
+from collections import OrderedDict
 
 from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
-from collections import OrderedDict
 
 
 INPUT_FILE = "zulipterminal/unicode_emoji_dict.py"

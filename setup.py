@@ -17,6 +17,7 @@ class PyTest(TestCommand):
 
     def run_tests(self):
         import shlex
+
         import pytest
         errno = pytest.main(shlex.split(self.pytest_args))
         sys.exit(errno)
@@ -40,7 +41,7 @@ testing_deps = [
 ]
 
 linting_deps = [
-    'isort==4.3.21',
+    'isort~=5.6.0',
     'mypy==0.782',
     'flake8~=3.8.3',
     'flake8-quotes~=3.2.0',
