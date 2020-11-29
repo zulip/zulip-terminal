@@ -59,7 +59,7 @@ def in_color(color: str, text: str) -> str:
         'cyan': '6',
     }
     # We can use 3 instead of 9 if high-contrast is eg. less compatible?
-    return "\033[9{}m{}\033[0m".format(color_for_str[color], text)
+    return f"\033[9{color_for_str[color]}m{text}\033[0m"
 
 
 def exit_with_error(error_message: str, *,
@@ -83,15 +83,15 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         help='config file downloaded from your zulip '
                              'organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
-                        help='choose color theme (default {}).'
-                             .format(DEFAULT_SETTINGS['theme']))
+                        help="choose color theme "
+                             f"(default {DEFAULT_SETTINGS['theme']}).")
     parser.add_argument('--list-themes',
                         action="store_true",
                         help='list all the color themes.')
     parser.add_argument('--color-depth',
                         choices=['1', '16', '256'],
-                        help="Force the color depth (default {})."
-                             .format(DEFAULT_SETTINGS['color-depth']))
+                        help="Force the color depth "
+                             f"(default {DEFAULT_SETTINGS['color-depth']}).")
     # debug mode
     parser.add_argument("-d",
                         "--debug",
@@ -129,7 +129,7 @@ def styled_input(label: str) -> str:
 
 
 def get_login_id(realm_url: str) -> str:
-    res_json = requests.get(url=realm_url + '/api/v1/server_settings').json()
+    res_json = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
     require_email_format_usernames = res_json['require_email_format_usernames']
     email_auth_enabled = res_json['email_auth_enabled']
 
@@ -150,7 +150,7 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
     login_id = get_login_id(realm_url)
     password = getpass(in_color('blue', "Password: "))
     response = requests.post(
-        url=realm_url + '/api/v1/fetch_api_key',
+        url=f"{realm_url}/api/v1/fetch_api_key",
         data={
             'username': login_id,
             'password': password,
@@ -160,7 +160,7 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
-    print(in_color('red', "zuliprc file was not found at " + zuliprc_path)
+    print(in_color('red', f"zuliprc file was not found at {zuliprc_path}")
           + "\nPlease enter your credentials to login into your"
             " Zulip organization."
             "\n"
@@ -175,9 +175,9 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
           + " (the Zulip community server)")
     realm_url = styled_input('Zulip URL: ')
     if realm_url.startswith("localhost"):
-        realm_url = "http://" + realm_url
+        realm_url = f"http://{realm_url}"
     elif not realm_url.startswith("http"):
-        realm_url = "https://" + realm_url
+        realm_url = f"https://{realm_url}"
     # Remove trailing "/"s from realm_url to simplify the below logic
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
@@ -194,7 +194,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         server_url=realm_url,
     )
     if not save_zuliprc_failure:
-        print('Generated API key saved at ' + zuliprc_path)
+        print(f"Generated API key saved at {zuliprc_path}")
     else:
         exit_with_error(save_zuliprc_failure)
 
@@ -210,14 +210,15 @@ def _write_zuliprc(to_path: str, *,
                           os.O_CREAT | os.O_WRONLY | os.O_EXCL,
                           0o600),
                   'w') as f:
-            f.write('[api]\nemail={}\nkey={}\nsite={}'
-                    .format(login_id, api_key, server_url))
+            f.write(
+                f"[api]\nemail={login_id}\nkey={api_key}\nsite={server_url}"
+            )
         return ""
     except FileExistsError as ex:
-        return "zuliprc already exists at {}".format(to_path)
+        return f"zuliprc already exists at {to_path}"
     except OSError as ex:
-        return ("{}: zuliprc could not be created at {}"
-                .format(ex.__class__.__name__, to_path))
+        return (f"{ex.__class__.__name__}: "
+                f"zuliprc could not be created at {to_path}")
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
@@ -257,9 +258,9 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     try:
         res = zuliprc.read(zuliprc_path)
         if len(res) == 0:
-            exit_with_error("Could not access zuliprc file at " + zuliprc_path)
+            exit_with_error(f"Could not access zuliprc file at {zuliprc_path}")
     except configparser.MissingSectionHeaderError:
-        exit_with_error("Failed to parse zuliprc file at " + zuliprc_path)
+        exit_with_error(f"Failed to parse zuliprc file at {zuliprc_path}")
 
     # Initialize with default settings
     NO_CONFIG = 'with no config'
@@ -284,7 +285,7 @@ def list_themes() -> str:
         suffix = ""
         if theme == DEFAULT_SETTINGS['theme']:
             suffix += "[default theme]"
-        text += "  {} {}\n".format(theme, suffix)
+        text += f"  {theme} {suffix}\n"
     return text + (
         "Specify theme in zuliprc file or override "
         "using -t/--theme options on command line."
@@ -315,7 +316,7 @@ def main(options: Optional[List[str]]=None) -> None:
         prof.enable()
 
     if args.version:
-        print('Zulip Terminal ' + ZT_VERSION)
+        print(f"Zulip Terminal {ZT_VERSION}")
         sys.exit(0)
 
     if args.list_themes:
@@ -389,8 +390,8 @@ def main(options: Optional[List[str]]=None) -> None:
         for setting, valid_values in valid_settings.items():
             if zterm[setting][0] not in valid_values:
                 helper_text = ["Valid values are:"] + [
-                    "  {}".format(option) for option in valid_values
-                ] + ["Specify the {} option in zuliprc file.".format(setting)]
+                    f"  {option}" for option in valid_values
+                ] + [f"Specify the {setting} option in zuliprc file."]
                 exit_with_error(
                     ("Invalid {} setting '{}' was specified {}."
                      .format(setting, *zterm[setting])),
@@ -413,19 +414,19 @@ def main(options: Optional[List[str]]=None) -> None:
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs
-        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.info(f"\n\n{e}\n\n")
         zt_logger.exception(e)
-        exit_with_error("\nError connecting to Zulip server: {}.".format(e))
+        exit_with_error(f"\nError connecting to Zulip server: {e}.")
     except (display_common.AttrSpecError, display_common.ScreenError) as e:
         # NOTE: Strictly this is not necessarily just a theme error
         # FIXME: Add test for this - once loading takes place after UI setup
 
         # Acts as separator between logs
-        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.info(f"\n\n{e}\n\n")
         zt_logger.exception(e)
-        exit_with_error("\nPossible theme error: {}.".format(e))
+        exit_with_error(f"\nPossible theme error: {e}.")
     except Exception as e:
-        zt_logger.info("\n\n" + str(e) + "\n\n")
+        zt_logger.info("\n\n{e}\n\n")
         zt_logger.exception(e)
         if args.debug:
             sys.stdout.flush()
@@ -437,14 +438,15 @@ def main(options: Optional[List[str]]=None) -> None:
                 pudb.post_mortem()
 
         if hasattr(e, 'extra_info'):
-            print("\n" + in_color("red", e.extra_info),    # type: ignore
+            print(in_color("red", f"\n{e.extra_info}"),    # type: ignore
                   file=sys.stderr)
 
         print(in_color("red", "\nZulip Terminal has crashed!"
-                       "\nPlease refer to " + TRACEBACK_LOG_FILENAME
-                       + " for full log of the error."), file=sys.stderr)
-        print("You can ask for help at:", file=sys.stderr)
-        print("https://chat.zulip.org/#narrow/stream/206-zulip-terminal",
+                              f"\nPlease refer to {TRACEBACK_LOG_FILENAME}"
+                              " for full log of the error."),
+              file=sys.stderr)
+        print("You can ask for help at:"
+              "\nhttps://chat.zulip.org/#narrow/stream/206-zulip-terminal",
               file=sys.stderr)
         print("\nThanks for using the Zulip-Terminal interface.\n")
         sys.stderr.flush()

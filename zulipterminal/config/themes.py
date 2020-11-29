@@ -70,7 +70,7 @@ DEF_base = dict(
 )
 
 DEF = dict(DEF_base,
-           **{color + ':bold': code + ', bold'
+           **{f"{color}:bold": f"{code}, bold"
               for color, code in DEF_base.items()})
 
 # Colors used in gruvbox-256
