@@ -885,27 +885,25 @@ class Model:
 
         recipient = ''
         if message['type'] == 'private':
-            target = 'you'
+            recipient = 'you'
             if len(message['display_recipient']) > 2:
-                extra_targets = [target] + [
+                extra_targets = [recipient] + [
                     recip['full_name']
                     for recip in message['display_recipient']
                     if recip['id'] not in (self.user_id, message['sender_id'])
                 ]
-                target = ', '.join(extra_targets)
-            recipient = ' (to {})'.format(target)
+                recipient = ', '.join(extra_targets)
         elif message['type'] == 'stream' and (
             {'mentioned', 'wildcard_mentioned'}.intersection(
                 set(message['flags'])
             )
             or self.stream_dict[message['stream_id']]['desktop_notifications']
         ):
-            recipient = ' (to {} -> {})'.format(message['display_recipient'],
-                                                message['subject'])
+            recipient = '{display_recipient} -> {subject}'.format(**message)
 
         if recipient:
-            return notify((self.server_name + ":\n"
-                           + message['sender_full_name'] + recipient),
+            return notify(f"{self.server_name}:\n"
+                          f"{message['sender_full_name']} (to {recipient})",
                           message['content'])
         return ""
 
