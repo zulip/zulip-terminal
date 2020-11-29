@@ -676,11 +676,10 @@ class MessageBox(urwid.Pile):
 
     def stream_header(self) -> Any:
         color = self.model.stream_dict[self.stream_id]['color']
-        bar_color = 's' + color
+        bar_color = f"s{color}"
         stream_title_markup = ('bar', [
-            (bar_color, '{} {} '.format(self.stream_name,
-                                        STREAM_TOPIC_SEPARATOR)),
-            ('title', ' {}'.format(self.topic_name))
+            (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
+            ('title', f" {self.topic_name}")
         ])
         stream_title = urwid.Text(stream_title_markup)
         header = urwid.Columns([
@@ -731,15 +730,15 @@ class MessageBox(urwid.Pile):
             text_to_fill = 'Mentions'
         elif self.message['type'] == 'stream':
             bar_color = self.model.stream_dict[self.stream_id]['color']
-            bar_color = 's' + bar_color
+            bar_color = f"s{bar_color}"
             if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
                 text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, '{}'.format(self.stream_name)),
-                    (bar_color, ': topic narrow')
+                    (bar_color, self.stream_name),
+                    (bar_color, ": topic narrow"),
                 ])
             else:
                 text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, '{}'.format(self.stream_name))
+                    (bar_color, self.stream_name)
                 ])
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = 'Group private conversation'
@@ -781,7 +780,7 @@ class MessageBox(urwid.Pile):
             my_user_id = self.model.user_id
             reaction_texts = [
                 ('reaction_mine' if my_user_id in ids else 'reaction',
-                 ':{}: {}'.format(reaction, len(ids)))
+                 f":{reaction}: {len(ids)}")
                 for reaction, ids in sorted_stats
             ]
 
@@ -812,7 +811,7 @@ class MessageBox(urwid.Pile):
                 continue
 
             footlinks.extend([
-                ('msg_link_index', '{}:'.format(index)),
+                ('msg_link_index', f"{index}:"),
                 ' ',
                 ('msg_link', link),
                 '\n',
@@ -867,7 +866,7 @@ class MessageBox(urwid.Pile):
                   and element.attrs.get('class', []) == ['emoji']):
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
                 emoji_name = element.attrs.get('title', [])
-                markup.append(('msg_emoji', ":" + emoji_name + ":"))
+                markup.append(('msg_emoji', f":{emoji_name}:"))
             elif element.name in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
                 text = unrendered_tags[element.name]
@@ -948,7 +947,7 @@ class MessageBox(urwid.Pile):
                     )
                     if saved_text != text:
                         self.message_links[link] = (
-                            '{}, {}'.format(saved_text, text),
+                            f"{saved_text}, {text}",
                             saved_link_index,
                             show_footlink or saved_footlink_status,
                         )
@@ -956,8 +955,7 @@ class MessageBox(urwid.Pile):
                 markup.extend([
                     ('msg_link', text),
                     ' ',
-                    ('msg_link_index',
-                     '[{}]'.format(self.message_links[link][1])),
+                    ('msg_link_index', f"[{self.message_links[link][1]}]"),
                 ])
             elif element.name == 'blockquote':
                 # BLOCKQUOTE TEXT
@@ -1010,8 +1008,7 @@ class MessageBox(urwid.Pile):
 
                 indent = state.get('indent_level', 1)
                 if 'list_index' in state:
-                    markup.append('{}{}. '.format('  ' * indent,
-                                                  state['list_index']))
+                    markup.append(f"{'  ' * indent}{state['list_index']}. ")
                     state['list_index'] += 1
                 else:
                     chars = [
@@ -1019,8 +1016,7 @@ class MessageBox(urwid.Pile):
                             '\N{RING OPERATOR}',    # small hollow
                             '\N{HYPHEN}',
                     ]
-                    markup.append('{}{} '.format('  ' * indent,
-                                                 chars[(indent - 1) % 3]))
+                    markup.append(f"{'  ' * indent}{chars[(indent - 1) % 3]} ")
                 state['list_start'] = False
                 markup.extend(self.soup2markup(element, **state))
             elif element.name == 'table':
@@ -1040,12 +1036,11 @@ class MessageBox(urwid.Pile):
                 # support for different formats.
                 time_string = local_time.strftime('%a, %b %-d %Y, %-H:%M (%Z)')
                 markup.append((
-                    'msg_time',
-                    ' {} {} '.format(TIME_MENTION_MARKER, time_string)
+                    'msg_time', f" {TIME_MENTION_MARKER} {time_string} "
                 ))
 
                 source_text = (
-                    'Original text was {}'.format(element.text.strip())
+                    f"Original text was {element.text.strip()}"
                 )
                 self.time_mentions.append((time_string, source_text))
             else:
@@ -1110,7 +1105,7 @@ class MessageBox(urwid.Pile):
                 if this_year != msg_year:
                     text['time'] = (
                         'time',
-                        '{} - {}'.format(msg_year, message['this']['time'])
+                        f"{msg_year} - {message['this']['time']}"
                     )
                 else:
                     text['time'] = ('time', message['this']['time'])
@@ -1128,7 +1123,9 @@ class MessageBox(urwid.Pile):
         if self.message['is_me_message']:
             self.message['content'] = self.message['content'].replace(
                 '/me',
-                '<strong>' + self.message['sender_full_name'] + '</strong>', 1)
+                f"<strong>{self.message['sender_full_name']}</strong>",
+                1
+            )
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content = self.transform_content()
@@ -1198,7 +1195,7 @@ class MessageBox(urwid.Pile):
         self.bq_len = len(blockquote_list)
         for tag in blockquote_list:
             child_list = tag.findChildren(recursive=False)
-            actual_padding = (padding_char + ' ') * pad_count
+            actual_padding = f"{padding_char} " * pad_count
             if len(child_list) == 1:
                 pad_count = 0
                 child_iterator = child_list
@@ -1215,7 +1212,7 @@ class MessageBox(urwid.Pile):
                         text = str(next_s).strip()
                         if text:
                             insert_tag = soup.new_tag('p')
-                            insert_tag.string = '\n' + actual_padding + text
+                            insert_tag.string = f"\n{actual_padding}{text}"
                             next_s.replace_with(insert_tag)
                 child.insert_before(new_tag)
             pad_count += 1
@@ -1237,7 +1234,7 @@ class MessageBox(urwid.Pile):
             selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
             self.model.controller.view.set_footer_text([
                 'Try pressing ',
-                ('code', ' ' + selection_key + ' '),
+                ('code', f" {selection_key} "),
                 ' and dragging to select text.'
             ])
             self.displaying_selection_hint = True
@@ -1306,7 +1303,7 @@ class MessageBox(urwid.Pile):
             )
         elif is_command_key('MENTION_REPLY', key):
             self.keypress(size, 'enter')
-            mention = '@**' + self.message['sender_full_name'] + '** '
+            mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(
                 mention)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
@@ -1406,10 +1403,10 @@ class SearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = ("Search ["
-                       + ", ".join(keys_for_command("SEARCH_MESSAGES"))
-                       + "]: ")
-        self.text_box = ReadlineEdit(search_text + " ")
+        search_text = (
+            f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
+        )
+        self.text_box = ReadlineEdit(f"{search_text} ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.conversation_focus = urwid.Text(" ")
@@ -1452,9 +1449,9 @@ class PanelSearchBox(urwid.Edit):
                  update_function: Callable[..., None]) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = ("Search ["
-                            + ", ".join(keys_for_command(search_command))
-                            + "]: ")
+        self.search_text = (
+            f"Search [{', '.join(keys_for_command(search_command))}]: "
+        )
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(caption='', edit_text=self.search_text)
 

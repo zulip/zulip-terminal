@@ -80,10 +80,12 @@ class TopButton(urwid.Button):
         )
 
         # NOTE: Generated text does not include space at end
+        # NOTE: Some are styles, so are not included in f-string
         self._w = urwid.AttrMap(urwid.SelectableIcon(
-            [' ', self.prefix_character, self.post_prefix_spacing,
-             '{}{}'.format(caption, num_extra_spaces * ' '),
-             ' ', count_text],
+            [" ",
+             self.prefix_character,
+             f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
+             count_text],
             self.width_for_text_and_count + 5),  # cursor location
             text_color,
             'selected')
@@ -104,9 +106,9 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("All messages     ["
-                       + primary_key_for_command("ALL_MESSAGES")
-                       + "]")
+        button_text = (
+            f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
+        )
         super().__init__(controller, button_text,
                          controller.show_all_messages, count=count,
                          prefix_character='',
@@ -115,9 +117,9 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("Private messages ["
-                       + primary_key_for_command("ALL_PM")
-                       + "]")
+        button_text = (
+            f"Private messages [{primary_key_for_command('ALL_PM')}]"
+        )
         super().__init__(controller, button_text,
                          controller.show_all_pm, count=count,
                          prefix_character='',
@@ -126,9 +128,9 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = ("Mentions         ["
-                       + primary_key_for_command("ALL_MENTIONS")
-                       + "]")
+        button_text = (
+            f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
+        )
         super().__init__(controller, button_text,
                          controller.show_all_mentions,
                          width=width,
@@ -138,9 +140,9 @@ class MentionedButton(TopButton):
 
 class StarredButton(TopButton):
     def __init__(self, controller: Any, width: int) -> None:
-        button_text = ("Starred messages ["
-                       + primary_key_for_command("ALL_STARRED")
-                       + "]")
+        button_text = (
+            f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
+        )
         super().__init__(controller, button_text,
                          controller.show_all_starred,
                          width=width,
@@ -170,7 +172,7 @@ class StreamButton(TopButton):
                 inverse_text = background if background else 'black'
                 break
         view.palette.append((
-            self.color, '', '', 'bold', self.color + ', bold', background))
+            self.color, '', '', 'bold', f"{self.color}, bold", background))
         view.palette.append((
             's' + self.color, '', '', 'standout', inverse_text, self.color))
 
@@ -485,7 +487,7 @@ class MessageLinkButton(urwid.Button):
         error = self._validate_narrow_link(parsed_link)
 
         if error:
-            self.view.set_footer_text(' {}'.format(error), duration=3)
+            self.view.set_footer_text(f" {error}", duration=3)
         else:
             self._switch_narrow_to(parsed_link)
 

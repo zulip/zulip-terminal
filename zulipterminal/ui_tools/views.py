@@ -698,7 +698,7 @@ class RightColumnView(urwid.Frame):
                     view=self.view,
                     width=self.width,
                     state_marker=state_icon[status],
-                    color='user_' + status,
+                    color=f"user_{status}",
                     count=unread_count,
                     is_current_user=is_current_user
                 )
@@ -1106,19 +1106,19 @@ class StreamInfoView(PopUpView):
 
         stream_marker = (STREAM_MARKER_PRIVATE if stream['invite_only']
                          else STREAM_MARKER_PUBLIC)
-        title = '{} {}'.format(stream_marker, stream['name'])
+        title = f"{stream_marker} {stream['name']}"
 
         desc = stream['description']
 
-        stream_info_content = [('', [desc]),
-                               ('Stream Details', [
-                                   ('Weekly Message Count',
-                                    str(weekly_msg_count)),
-                                   ('Stream Members',
-                                    '{} (Press {} to view list)'.format(
-                                        total_members, member_keys))
-                               ]),
-                               ('Stream settings', [])]
+        stream_info_content = [
+            ('', [desc]),
+            ('Stream Details', [
+                ('Weekly Message Count', str(weekly_msg_count)),
+                ('Stream Members',
+                 f"{total_members} (Press {member_keys} to view list)"),
+            ]),
+            ('Stream settings', []),
+        ]
         popup_width, column_widths = self.calculate_table_widths(
             stream_info_content, len(title))
 
@@ -1215,7 +1215,7 @@ class MsgInfoView(PopUpView):
 
             keys = ', '.join(map(repr, keys_for_command('EDIT_HISTORY')))
             msg_info[0][1].append(
-                ('Edit History', 'Press {} to view'.format(keys))
+                ('Edit History', f"Press {keys} to view")
             )
         # Render the category using the existing table methods if links exist.
         if message_links:
@@ -1230,7 +1230,7 @@ class MsgInfoView(PopUpView):
             grouped_reactions = dict()  # type: Dict[str, str]
             for reaction, user in reactions:
                 if reaction in grouped_reactions:
-                    grouped_reactions[reaction] += '\n{}'.format(user)
+                    grouped_reactions[reaction] += f"\n{user}"
                 else:
                     grouped_reactions[reaction] = user
             msg_info.append(('Reactions', list(grouped_reactions.items())))
@@ -1244,7 +1244,7 @@ class MsgInfoView(PopUpView):
             message_link_width = 0
             for index, link in enumerate(message_links):
                 text, link_index, _ = message_links[link]
-                caption = '{}: {}\n{}'.format(link_index, text, link)
+                caption = f"{link_index}: {text}\n{link}"
                 message_link_width = max(
                     message_link_width,
                     len(max(caption.split('\n'), key=len))
@@ -1361,7 +1361,7 @@ class EditHistoryView(PopUpView):
         else:
             author_name = 'Author N/A'
         author_prefix = self._get_author_prefix(snapshot, tag)
-        author = '{} by {}'.format(author_prefix, author_name)
+        author = f"{author_prefix} by {author_name}"
 
         header = [
             urwid.Text(('edit_topic', topic)),

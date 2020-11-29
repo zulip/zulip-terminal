@@ -54,9 +54,9 @@ class Controller:
         self._editor = None  # type: Optional[Any]
 
         self.show_loading()
+        client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
         self.client = zulip.Client(config_file=config_file,
-                                   client='ZulipTerminal/{} {}'.
-                                          format(ZT_VERSION, platform()))
+                                   client=client_identifier)
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -95,7 +95,7 @@ class Controller:
         else:
             self._exception_info = (
                 RuntimeError,
-                "Invalid cross-thread exception info '{}'".format(exc_info),
+                f"Invalid cross-thread exception info '{exc_info}'",
                 None
             )
             self._critical_exception = True
@@ -270,9 +270,11 @@ class Controller:
     def stream_muting_confirmation_popup(self, button: Any) -> None:
         currently_muted = self.model.is_muted_stream(button.stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"
-        question = urwid.Text(("bold", "Confirm " + type_of_action
-                               + " of stream '" + button.stream_name + "' ?"),
-                              "center")
+        question = urwid.Text(
+            ("bold",
+             f"Confirm {type_of_action} of stream '{button.stream_name}' ?"),
+            "center"
+        )
         mute_this_stream = partial(self.model.toggle_stream_muted_status,
                                    button.stream_id)
         self.loop.widget = PopUpConfirmationView(self, question,

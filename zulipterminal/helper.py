@@ -620,7 +620,7 @@ def canonicalize_color(color: str) -> str:
         # Potentially later versions too
         return color.lower()
     else:
-        raise ValueError('Unknown format for color "{}"'.format(color))
+        raise ValueError(f'Unknown format for color "{color}"')
 
 
 def notify(title: str, html_text: str) -> str:
