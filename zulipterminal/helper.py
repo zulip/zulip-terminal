@@ -30,65 +30,66 @@ MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
 WSL = 'microsoft' in platform.release().lower()
 
-StreamData = TypedDict('StreamData', {
-    'name': str,
-    'id': int,
-    'color': str,
-    'invite_only': bool,
-    'description': str,
-})
 
-EmojiData = TypedDict('EmojiData', {
-    'code': str,
-    'type': Literal['realm_emoji', 'unicode_emoji',
-                    'zulip_extra_emoji'],
-})
+class StreamData(TypedDict):
+    name: str
+    id: int
+    color: str
+    invite_only: bool
+    description: str
+
+
+class EmojiData(TypedDict):
+    code: str
+    type: Literal['realm_emoji', 'unicode_emoji', 'zulip_extra_emoji']
+
 
 NamedEmojiData = Dict[str, EmojiData]
 
-Message = TypedDict('Message', {
-    'id': int,
-    'sender_id': int,
-    'content': str,
-    'recipient_id': int,
-    'timestamp': int,
-    'client': str,
-    'subject': str,  # Only for stream msgs.
-    'topic_links': List[str],
-    'is_me_message': bool,
-    'reactions': List[Dict[str, Any]],
-    'submessages': List[Dict[str, Any]],
-    'flags': List[str],
-    'sender_full_name': str,
-    'sender_short_name': str,
-    'sender_email': str,
-    'sender_realm_str': str,
-    'display_recipient': Any,
-    'type': str,
-    'stream_id': int,  # Only for stream msgs.
-    'avatar_url': str,
-    'content_type': str,
-    'match_content': str,  # If keyword search specified in narrow params.
-    'match_subject': str,  # If keyword search specified in narrow params.
-  }, total=False)
 
-Index = TypedDict('Index', {
-    'pointer': Dict[str, Union[int, Set[None]]],  # narrow_str, message_id
+class Message(TypedDict, total=False):
+    id: int
+    sender_id: int
+    content: str
+    recipient_id: int
+    timestamp: int
+    client: str
+    subject: str  # Only for stream msgs.
+    topic_links: List[str]
+    is_me_message: bool
+    reactions: List[Dict[str, Any]]
+    submessages: List[Dict[str, Any]]
+    flags: List[str]
+    sender_full_name: str
+    sender_short_name: str
+    sender_email: str
+    sender_realm_str: str
+    display_recipient: Any
+    type: str
+    stream_id: int  # Only for stream msgs.
+    avatar_url: str
+    content_type: str
+    match_content: str  # If keyword search specified in narrow params.
+    match_subject: str  # If keyword search specified in narrow params.
+
+
+class Index(TypedDict):
+    pointer: Dict[str, Union[int, Set[None]]]  # narrow_str, message_id
     # Various sets of downloaded message ids (all, starred, ...)
-    'all_msg_ids': Set[int],
-    'starred_msg_ids': Set[int],
-    'mentioned_msg_ids': Set[int],
-    'private_msg_ids': Set[int],
-    'private_msg_ids_by_user_ids': Dict[FrozenSet[int], Set[int]],
-    'stream_msg_ids_by_stream_id': Dict[int, Set[int]],
-    'topic_msg_ids': Dict[int, Dict[str, Set[int]]],
+    all_msg_ids: Set[int]
+    starred_msg_ids: Set[int]
+    mentioned_msg_ids: Set[int]
+    private_msg_ids: Set[int]
+    private_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
+    stream_msg_ids_by_stream_id: Dict[int, Set[int]]
+    topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
-    'edited_messages': Set[int],  # {message_ids, ...}
-    'topics': Dict[int, List[str]],  # {topic names, ...}
-    'search': Set[int],  # {message_id, ...}
-    # Downloaded message data
-    'messages': Dict[int, Message],  # message_id: Message
-})
+    edited_messages: Set[int]  # {message_id, ...}
+    topics: Dict[int, List[str]]  # {topic names, ...}
+    search: Set[int]  # {message_id, ...}
+    # Downloaded message data by message id
+    messages: Dict[int, Message]
+
 
 initial_index = Index(
     pointer=defaultdict(set),
@@ -107,15 +108,14 @@ initial_index = Index(
 )
 
 
-UnreadCounts = TypedDict('UnreadCounts', {
-    'all_msg': int,
-    'all_pms': int,
-    'all_mentions': int,
-    'unread_topics': Dict[Tuple[int, str], int],  # stream_id, topic
-    'unread_pms': Dict[int, int],  # sender_id
-    'unread_huddles': Dict[FrozenSet[int], int],  # Group pms
-    'streams': Dict[int, int],  # stream_id
-})
+class UnreadCounts(TypedDict):
+    all_msg: int
+    all_pms: int
+    all_mentions: int
+    unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
+    unread_pms: Dict[int, int]  # sender_id
+    unread_huddles: Dict[FrozenSet[int], int]  # Group pms
+    streams: Dict[int, int]  # stream_id
 
 
 edit_mode_captions = {

@@ -40,39 +40,39 @@ from zulipterminal.helper import (
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
-Event = TypedDict('Event', {
-    'type': str,
+class Event(TypedDict, total=False):  # Each Event will only have a subset
+    type: str
     # typing:
-    'sender': Dict[str, Any],  # 'email', ...
+    sender: Dict[str, Any]  # 'email', ...
     # typing & reaction:
-    'op': str,
+    op: str
     # reaction:
-    'user': Dict[str, Any],  # 'email', 'user_id', 'full_name'
-    'reaction_type': str,
-    'emoji_code': str,
-    'emoji_name': str,
+    user: Dict[str, Any]  # 'email', 'user_id', 'full_name'
+    reaction_type: str
+    emoji_code: str
+    emoji_name: str
     # reaction & update_message:
-    'message_id': int,
+    message_id: int
     # update_message:
-    'rendered_content': str,
+    rendered_content: str
     # update_message_flags:
-    'messages': List[int],
-    'operation': str,  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
-    'flag': str,
-    'all': bool,
+    messages: List[int]
+    operation: str  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
+    flag: str
+    all: bool
     # message:
-    'message': Message,
-    'flags': List[str],
-    'subject': str,
+    message: Message
+    flags: List[str]
+    subject: str
     # subscription:
-    'property': str,
-    'user_id': int,  # Present when a streams subscribers are updated.
-    'user_ids': List[int],  # NOTE: replaces 'user_id' in ZFL 35
-    'stream_id': int,
-    'stream_ids': List[int],  # NOTE: replaces 'stream_id' in ZFL 35 for peer*
-    'value': bool,
-    'message_ids': List[int]  # Present when subject of msg(s) is updated
-}, total=False)  # Each Event will only have a subset of these
+    property: str
+    user_id: int  # Present when a streams subscribers are updated.
+    user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
+    stream_id: int
+    stream_ids: List[int]  # NOTE: replaces 'stream_id' in ZFL 35 for peer*
+    value: bool
+    message_ids: List[int]  # Present when subject of msg(s) is updated
+
 
 EditPropagateMode = Literal['change_one', 'change_all', 'change_later']
 

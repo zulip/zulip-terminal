@@ -4,12 +4,12 @@ from typing import List
 from typing_extensions import TypedDict
 
 
-KeyBinding = TypedDict('KeyBinding', {
-    'keys': List[str],
-    'help_text': str,
-    'excluded_from_random_tips': bool,
-    'key_category': str,
-}, total=False)
+class KeyBinding(TypedDict, total=False):
+    keys: List[str]
+    help_text: str
+    excluded_from_random_tips: bool
+    key_category: str
+
 
 KEY_BINDINGS = OrderedDict([
     # Key that is displayed in the UI is determined by the method
