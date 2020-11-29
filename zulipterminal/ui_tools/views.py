@@ -62,9 +62,9 @@ class ModListWalker(urwid.SimpleFocusListWalker):
             self._focus = 0
             return
         if index < 0 or index >= len(self):
-            raise IndexError('focus index is out of range: %s' % (index,))
+            raise IndexError(f"focus index is out of range: {index}")
         if index != int(index):
-            raise IndexError('invalid focus index: %s' % (index,))
+            raise IndexError(f"invalid focus index: {index}")
         index = int(index)
         if index != self._focus:
             self._focus_changed(index)

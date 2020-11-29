@@ -77,19 +77,19 @@ DEF = dict(DEF_base,
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = 'h234'  # dark0_hard
 WHITE = 'h246'  # light4_256
-WHITEBOLD = '%s, bold' % WHITE
+WHITEBOLD = f"{WHITE}, bold"
 DARKBLUE = 'h24'  # faded_blue
 DARKRED = 'h88'  # faded_red
 LIGHTBLUE = 'h109'  # bright_blue
-LIGHTBLUEBOLD = '%s, bold' % LIGHTBLUE
+LIGHTBLUEBOLD = f"{LIGHTBLUE}, bold"
 YELLOW = 'h172'  # neutral_yellow
-YELLOWBOLD = '%s, bold' % YELLOW
+YELLOWBOLD = f"{YELLOW}, bold"
 LIGHTGREEN = 'h142'  # bright_green
 LIGHTRED = 'h167'  # bright_red
-LIGHTREDBOLD = '%s, bold' % LIGHTRED
+LIGHTREDBOLD = f"{LIGHTRED}, bold"
 GRAY = 'h244'  # gray_244
 LIGHTMAGENTA = 'h132'  # neutral_purple
-LIGHTMAGENTABOLD = '%s, bold' % LIGHTMAGENTA
+LIGHTMAGENTABOLD = f"{LIGHTMAGENTA}, bold"
 
 THEME_ALIASES = {
     'default': 'zt_dark',
