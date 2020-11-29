@@ -274,17 +274,16 @@ class UnreadPMButton(urwid.Button):
         self.email = email
 
 
-DecodedStream = TypedDict('DecodedStream', {
-    'stream_id': Optional[int],
-    'stream_name': Optional[str],
-})
+class DecodedStream(TypedDict):
+    stream_id: Optional[int]
+    stream_name: Optional[str]
 
-ParsedNarrowLink = TypedDict('ParsedNarrowLink', {
-    'narrow': str,
-    'stream': DecodedStream,
-    'topic_name': str,
-    'message_id': Optional[int],
-}, total=False)
+
+class ParsedNarrowLink(TypedDict, total=False):
+    narrow: str
+    stream: DecodedStream
+    topic_name: str
+    message_id: Optional[int]
 
 
 class MessageLinkButton(urwid.Button):
