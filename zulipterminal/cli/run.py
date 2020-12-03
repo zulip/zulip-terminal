@@ -239,24 +239,24 @@ def list_themes() -> None:
           "using -t/--theme options on command line.")
 
 def check_packages_version() -> None:
-    req_file = open("requirements.txt", "r")
-    current_working_set = WorkingSet()
+    req_file = open("requirements.txt", "r") 
+    current_working_set = WorkingSet() # Getting current active distributions
     unmet_req_list = list()
 
     for line in req_file.read().splitlines():
         line = line.strip()
-        if line == '':
+        if line == '': # Empty line
             continue
-        elif not line or line.startswith('#'):
+        elif not line or line.startswith('#'): # Comment line
             continue
         else:
             try:
-                package_found = current_working_set.find(Requirement.parse(line))
+                package_found = current_working_set.find(Requirement.parse(line)) # Parse and find if the requirement is met
             except VersionConflict:
-                unmet_req_list.append(str(Requirement.parse(line)))
+                unmet_req_list.append(str(Requirement.parse(line))) # The versions do not match
             
             if not package_found:
-                unmet_req_list.append(str(Requirement.parse(line)))
+                unmet_req_list.append(str(Requirement.parse(line))) # Package not installed
     
     if len(unmet_req_list) != 0:
         print("WARNING: The following package versions are not consistent with those specified in requirements:", ', '.join(unmet_req_list))
