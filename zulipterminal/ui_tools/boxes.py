@@ -1,9 +1,9 @@
 import re
 import unicodedata
 from collections import OrderedDict, defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from sys import platform
-from time import ctime, time
+from time import ctime, sleep, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
@@ -23,7 +23,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, get_unused_fence, match_emoji, match_group,
+    Message, asynch, format_string, get_unused_fence, match_emoji, match_group,
     match_stream, match_topics, match_user,
 )
 from zulipterminal.server_url import near_message_url
@@ -42,6 +42,9 @@ class WriteBox(urwid.Pile):
         self.stream_id = None  # type: Optional[int]
         self.recipient_user_ids = []  # type: List[int]
         self.msg_body_edit_enabled = True
+        self.send_next_typing_update = datetime.now()
+        self.last_key_update = datetime.now()
+        self.idle_status_tracking = False
         self.FOCUS_CONTAINER_HEADER = 0
         self.FOCUS_HEADER_BOX_RECIPIENT = 0
         self.FOCUS_HEADER_BOX_STREAM = 1
@@ -63,6 +66,16 @@ class WriteBox(urwid.Pile):
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
+    def send_stop_typing_status(self) -> None:
+        # Send 'stop' updates only for PM narrows.
+        if self.to_write_box:
+            self.model.send_typing_status_by_user_ids(
+                self.recipient_user_ids,
+                status='stop'
+            )
+            self.send_next_typing_update = datetime.now()
+            self.idle_status_tracking = False
+
     def private_box_view(self, button: Any=None, email: str='',
                          recipient_user_ids: Optional[List[int]]=None) -> None:
         self.set_editor_mode()
@@ -70,6 +83,7 @@ class WriteBox(urwid.Pile):
             self.recipient_user_ids = recipient_user_ids
         if email == '' and button is not None:
             email = button.email
+        self.send_next_typing_update = datetime.now()
         self.to_write_box = ReadlineEdit("To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
@@ -88,6 +102,40 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
+
+        # Typing status is sent in regular intervals to limit the number of
+        # notifications sent. Idleness should also prompt a notification.
+        # Refer to https://zulip.com/api/set-typing-status for the protocol
+        # on typing notifications sent by clients.
+        TYPING_STARTED_WAIT_PERIOD = 10
+        TYPING_STOPPED_WAIT_PERIOD = 5
+
+        start_period_delta = timedelta(seconds=TYPING_STARTED_WAIT_PERIOD)
+        stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
+
+        def on_type_send_status(edit: object, new_edit_text: str) -> None:
+            if new_edit_text:
+                self.last_key_update = datetime.now()
+                if self.last_key_update > self.send_next_typing_update:
+                    self.model.send_typing_status_by_user_ids(
+                                self.recipient_user_ids, status='start')
+                    self.send_next_typing_update += start_period_delta
+                    # Initiate tracker function only if it isn't already
+                    # initiated.
+                    if not self.idle_status_tracking:
+                        self.idle_status_tracking = True
+                        track_idleness_and_update_status()
+
+        @asynch
+        def track_idleness_and_update_status() -> None:
+            while datetime.now() < self.last_key_update + stop_period_delta:
+                idle_check_time = (self.last_key_update
+                                   + stop_period_delta
+                                   - datetime.now())
+                sleep(idle_check_time.total_seconds())
+            self.send_stop_typing_status()
+
+        urwid.connect_signal(self.msg_write_box, 'change', on_type_send_status)
 
     def stream_box_view(self, stream_id: int, caption: str='', title: str='',
                         ) -> None:
@@ -352,6 +400,7 @@ class WriteBox(urwid.Pile):
                 self.view.set_footer_text()
 
         if is_command_key('SEND_MESSAGE', key):
+            self.send_stop_typing_status()
             if not self.to_write_box:
                 if re.fullmatch(r'\s*', self.title_write_box.edit_text):
                     topic = '(no topic)'
@@ -393,6 +442,7 @@ class WriteBox(urwid.Pile):
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
             self.msg_body_edit_enabled = True
+            self.send_stop_typing_status()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus('body')
