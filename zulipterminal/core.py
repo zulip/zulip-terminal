@@ -162,13 +162,16 @@ class Controller:
         return max_cols, max_rows
 
     def show_pop_up(self, to_show: Any) -> None:
-        double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
-                            rline='║', lline='║',
-                            blcorner='╚', bline='═', brcorner='╝')
+        # double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
+        #                     rline='║', lline='║',
+        #                     blcorner='╚', bline='═', brcorner='╝')
+        double_lines = dict(tlcorner='▛', tline='▀', trcorner='▜',
+                            rline='▐', lline='▌',
+                            blcorner='▙', bline='▄', brcorner='▟')
+        linebox = urwid.LineBox(to_show, to_show.title, **double_lines)
+        # linebox = urwid.AttrMap(linebox, )
         self.loop.widget = urwid.Overlay(
-            urwid.LineBox(to_show,
-                          to_show.title,
-                          **double_lines),
+            urwid.AttrMap(linebox, 'msg_code'),
             self.view,
             align='center',
             valign='middle',
