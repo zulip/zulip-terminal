@@ -32,6 +32,8 @@ class TestWriteBox:
             {'name': stream['name']} for stream in
             streams_fixture], key=lambda stream: stream['name'].lower())
 
+        write_box.to_write_box = None
+
         return write_box
 
     def test_init(self, write_box):
