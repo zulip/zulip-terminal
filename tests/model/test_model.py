@@ -434,6 +434,32 @@ class TestModel:
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), 'x')
 
+    @pytest.mark.parametrize('recipient_user_ids', [[5140], [5140, 5179]])
+    @pytest.mark.parametrize('status', ['start', 'stop'])
+    def test_send_typing_status_by_user_ids(self, mocker, model, status,
+                                            recipient_user_ids):
+        response = mocker.Mock()
+        mock_api_query = mocker.patch('zulipterminal.core.Controller'
+                                      '.client.set_typing_status',
+                                      return_value=response)
+
+        model.send_typing_status_by_user_ids(recipient_user_ids,
+                                             status=status)
+
+        mock_api_query.assert_called_once_with(
+            {'to': recipient_user_ids, 'op': status},
+        )
+
+        self.display_error_if_present.assert_called_once_with(response,
+                                                              self.controller)
+
+    @pytest.mark.parametrize('status', ['start', 'stop'])
+    def test_send_typing_status_with_no_recipients(self, model, status,
+                                                   recipient_user_ids=[]):
+        with pytest.raises(RuntimeError):
+            model.send_typing_status_by_user_ids(recipient_user_ids,
+                                                 status=status)
+
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
         ({'result': 'some_failure'}, False),

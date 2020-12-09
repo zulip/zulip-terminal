@@ -333,6 +333,20 @@ class Model:
         })
         display_error_if_present(response, self.controller)
 
+    @asynch
+    def send_typing_status_by_user_ids(self, recipient_user_ids: List[int],
+                                       *, status: Literal['start', 'stop']
+                                       ) -> None:
+        if recipient_user_ids:
+            request = {
+                'to': recipient_user_ids,
+                'op': status
+            }
+            response = self.client.set_typing_status(request)
+            display_error_if_present(response, self.controller)
+        else:
+            raise RuntimeError('Empty recipient list.')
+
     def send_private_message(self, recipients: List[str],
                              content: str) -> bool:
         if recipients:
