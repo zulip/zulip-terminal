@@ -10,6 +10,7 @@ from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
+    FullRenderedMsgView,
     HelpView,
     MsgInfoView,
     PopUpConfirmationView,
@@ -342,6 +343,84 @@ class TestUserInfoView:
         size = widget_size(self.user_info_view)
         super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.user_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
+class TestFullRenderedMsgView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, msg_box, initial_index):
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(MODULE + ".MessageBox", return_value=msg_box)
+        # NOTE: Given that the FullRenderedMsgView just uses the message ID from
+        # the message data currently, message_fixture is not used to avoid
+        # adding extra test runs unnecessarily.
+        self.message = {"id": 1}
+        self.full_rendered_message = FullRenderedMsgView(
+            controller=self.controller,
+            message=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+            title="Full Rendered Message",
+        )
+
+    def test_init(self, mocker, msg_box):
+        assert self.full_rendered_message.title == "Full Rendered Message"
+        assert self.full_rendered_message.controller == self.controller
+        assert self.full_rendered_message.message == self.message
+        assert self.full_rendered_message.topic_links == OrderedDict()
+        assert self.full_rendered_message.message_links == OrderedDict()
+        assert self.full_rendered_message.time_mentions == list()
+        assert self.full_rendered_message.header.widget_list == msg_box.header
+        assert self.full_rendered_message.footer.widget_list == msg_box.footer
+
+    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.full_rendered_message)
+
+        self.full_rendered_message.keypress(size, key)
+
+        assert self.controller.exit_popup.called
+
+    def test_keypress_exit_popup_invalid_key(self, widget_size):
+        size = widget_size(self.full_rendered_message)
+        key = "a"
+
+        self.full_rendered_message.keypress(size, key)
+
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize(
+        "key",
+        {
+            *keys_for_command("FULL_RENDERED_MESSAGE"),
+            *keys_for_command("GO_BACK"),
+        },
+    )
+    def test_keypress_show_msg_info(self, key, widget_size):
+        size = widget_size(self.full_rendered_message)
+
+        self.full_rendered_message.keypress(size, key)
+
+        self.controller.show_msg_info.assert_called_once_with(
+            msg=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )
+
+    def test_keypress_navigation(
+        self, mocker, widget_size, navigation_key_expected_key_pair
+    ):
+        size = widget_size(self.full_rendered_message)
+        key, expected_key = navigation_key_expected_key_pair
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
+
+        self.full_rendered_message.keypress(size, key)
+
         super_keypress.assert_called_once_with(size, expected_key)
 
 
