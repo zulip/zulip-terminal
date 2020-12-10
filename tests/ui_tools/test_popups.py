@@ -15,6 +15,7 @@ from zulipterminal.ui_tools.views import (
     PopUpView,
     StreamInfoView,
     StreamMembersView,
+    UserInfoView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
@@ -203,6 +204,130 @@ class TestAboutView:
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
         )
+
+
+class TestUserInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, tidied_user_info_response):
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(MODULE + ".urwid.SimpleFocusListWalker", return_value=[])
+
+        self.user_data = tidied_user_info_response
+
+        mocker.patch.object(
+            self.controller.model, "get_user_info", return_value=self.user_data
+        )
+        mocker.patch.object(
+            self.controller.model,
+            "formatted_local_time",
+            return_value="Tue Mar 13 10:55 AM",
+        )
+
+        self.user_info_view = UserInfoView(
+            self.controller, 10000, "User Info (up/down scrolls)"
+        )
+
+    @pytest.mark.parametrize(
+        [
+            "to_vary_in_each_user",
+            "expected_key",
+            "expected_value",
+        ],
+        [
+            ({}, "Email", "person2@example.com"),
+            ({"email": ""}, "Email", None),
+            ({"date_joined": "2021-03-18 16:52:48"}, "Date joined", "2021-03-18"),
+            ({}, "Date joined", None),
+            ({"timezone": "America/Los_Angeles"}, "Timezone", "America/Los Angeles"),
+            ({}, "Timezone", None),
+            (
+                {"is_bot": True, "bot_type": 1, "bot_owner_name": "Test Owner"},
+                "Owner",
+                "Test Owner",
+            ),
+            ({}, "Owner", None),
+            (
+                {"last_active": "Tue Mar 13 10:55:22"},
+                "Last active",
+                "Tue Mar 13 10:55:22",
+            ),
+            ({}, "Last active", None),
+            ({"is_bot": True, "bot_type": 1}, "Role", "Generic Bot"),
+            ({"is_bot": True, "bot_type": 2}, "Role", "Incoming Webhook Bot"),
+            ({"is_bot": True, "bot_type": 3}, "Role", "Outgoing Webhook Bot"),
+            ({"is_bot": True, "bot_type": 4}, "Role", "Embedded Bot"),
+            ({"role": 100}, "Role", "Owner"),
+            ({"role": 200}, "Role", "Administrator"),
+            ({"role": 300}, "Role", "Moderator"),
+            ({"role": 600}, "Role", "Guest"),
+            ({"role": 400}, "Role", "Member"),
+        ],
+        ids=[
+            "user_email",
+            "user_empty_email",
+            "user_date_joined",
+            "user_empty_date_joined",
+            "user_timezone",
+            "user_empty_timezone",
+            "user_bot_owner",
+            "user_empty_bot_owner",
+            "user_last_active",
+            "user_empty_last_active",
+            "user_is_generic_bot",
+            "user_is_incoming_webhook_bot",
+            "user_is_outgoing_webhook_bot",
+            "user_is_embedded_bot",
+            "user_is_owner",
+            "user_is_admin",
+            "user_is_moderator",
+            "user_is_guest",
+            "user_is_member",
+        ],
+    )
+    def test__fetch_user_data(
+        self, mocker, to_vary_in_each_user, expected_key, expected_value
+    ):
+        data = dict(self.user_data, **to_vary_in_each_user)
+
+        mocker.patch.object(self.controller.model, "get_user_info", return_value=data)
+
+        display_data = self.user_info_view._fetch_user_data(self.controller, 1)
+
+        assert display_data.get(expected_key, None) == expected_value
+
+    def test__fetch_user_data_USER_NOT_FOUND(self, mocker):
+        mocker.patch.object(self.controller.model, "get_user_info", return_value=dict())
+
+        display_data = self.user_info_view._fetch_user_data(self.controller, 1)
+
+        assert display_data["Name"] == "(Unavailable)"
+        assert display_data["Error"] == "User data not found"
+
+    @pytest.mark.parametrize(
+        "key", {*keys_for_command("GO_BACK"), *keys_for_command("USER_INFO")}
+    )
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.user_info_view)
+        self.user_info_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_exit_popup_invalid_key(self, widget_size):
+        key = "a"
+        size = widget_size(self.user_info_view)
+        self.user_info_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    def test_keypress_navigation(
+        self, mocker, widget_size, navigation_key_expected_key_pair
+    ):
+        key, expected_key = navigation_key_expected_key_pair
+        size = widget_size(self.user_info_view)
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        self.user_info_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestEditHistoryView:
