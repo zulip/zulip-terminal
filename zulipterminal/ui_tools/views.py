@@ -1,7 +1,9 @@
+import datetime
 import threading
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
+import pytz
 import urwid
 from typing_extensions import Literal
 
@@ -19,8 +21,19 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STATE_ICON
-from zulipterminal.helper import Message, asynch, match_stream, match_user
+from zulipterminal.config.ui_mappings import (
+    BOT_TYPE_BY_ID,
+    EDIT_MODE_CAPTIONS,
+    ROLE_BY_ID,
+    STATE_ICON,
+)
+from zulipterminal.helper import (
+    Message,
+    TidiedUserInfo,
+    asynch,
+    match_stream,
+    match_user,
+)
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1092,6 +1105,71 @@ class AboutView(PopUpView):
         widgets = self.make_table_with_categories(contents, column_widths)
 
         super().__init__(controller, widgets, "ABOUT", popup_width, title)
+
+
+class UserInfoView(PopUpView):
+    def __init__(self, controller: Any, user_id: int, title: str) -> None:
+
+        display_data = self._fetch_user_data(controller, user_id)
+
+        user_details = [
+            (key, value) for key, value in display_data.items() if key != "Name"
+        ]
+        user_view_content = [(display_data["Name"], user_details)]
+
+        popup_width, column_widths = self.calculate_table_widths(
+            user_view_content, len(title)
+        )
+        widgets = self.make_table_with_categories(user_view_content, column_widths)
+
+        super().__init__(controller, widgets, "USER_INFO", popup_width, title)
+
+    @staticmethod
+    def _fetch_user_data(controller: Any, user_id: int) -> Dict[str, Any]:
+        # Get user data from model
+        data: TidiedUserInfo = controller.model.get_user_info(user_id)
+
+        if not data:
+            display_data = {
+                "Name": "(Unavailable)",
+                "Error": "User data not found",
+            }
+            return display_data
+
+        # Style the data obtained to make it displayable
+        display_data = {"Name": data["full_name"]}
+
+        if data["email"]:
+            display_data["Email"] = data["email"]
+        if data["date_joined"]:
+            display_data["Date joined"] = data["date_joined"][:10]
+        if data["timezone"]:
+            display_data["Timezone"] = data["timezone"].replace("_", " ")
+
+            # Converting all timestamps to UTC
+            utc_time = datetime.datetime.now()
+            tz = pytz.timezone(data["timezone"])
+            time = utc_time.astimezone(tz).replace(tzinfo=None).timestamp()
+
+            # Take 24h vs AM/PM format into consideration
+            local_time = controller.model.formatted_local_time(
+                round(time), show_seconds=False
+            )
+            display_data["Local time"] = local_time[11:]
+
+        if data["is_bot"]:
+            display_data["Role"] = BOT_TYPE_BY_ID.get(
+                data["bot_type"], "Unknown Bot Type"
+            )
+            if data["bot_owner_name"]:
+                display_data["Owner"] = data["bot_owner_name"]
+        else:
+            display_data["Role"] = ROLE_BY_ID[data["role"]]["name"]
+
+            if data["last_active"]:
+                display_data["Last active"] = data["last_active"]
+
+        return display_data
 
 
 class HelpView(PopUpView):
