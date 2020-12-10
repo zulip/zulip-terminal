@@ -1,7 +1,9 @@
 import os
+import pytz
 import signal
 import sys
 import time
+from datetime import datetime
 from collections import OrderedDict
 from functools import partial
 from platform import platform
@@ -19,7 +21,7 @@ from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    NoticeView, PopUpConfirmationView, StreamInfoView,
+    NoticeView, PopUpConfirmationView, StreamInfoView, UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -212,6 +214,38 @@ class Controller:
                       autohide_enabled=self.autohide,
                       footlink_enabled=self.footlinks_enabled)
         )
+
+    def show_user_info(self, user_id:int) -> None:
+        response = self.client.get_user_by_id(user_id)
+        # TODO: add custom fields later as an enhancement
+
+        display_data = {}
+        res_data = response['user']
+        display_data['Name'] = res_data['full_name']
+        display_data['Email'] = res_data['email']
+        display_data['Date joined'] = res_data['date_joined'][:10]
+        display_data['Timezone'] = res_data['timezone']
+
+        try:
+            display_data['Local time'] = datetime.now(pytz.timezone(str(res_data['timezone']))).strftime("%H:%M")
+        except:
+            display_data['Local time'] = "Unknown timezone"
+
+        presence = self.client.get_user_presence(str(res_data['email']))
+        if presence['presence']['aggregated']['status'] == 'active':
+            display_data['Last active'] = "Active now"
+        else:
+            display_data['Last active'] = str(datetime.fromtimestamp(presence['presence']['aggregated']['timestamp']))
+
+        if res_data['is_admin']:
+            display_data['Role'] = "Admin"
+        elif res_data['is_guest']:
+            display_data['Role'] = "Guest"
+        else:
+            display_data['Role'] = "Member"
+
+        show_userinfo_view = UserInfoView(self, display_data, 'User Info (up/down scrolls)')
+        self.show_pop_up(show_userinfo_view)
 
     def show_edit_history(
         self, message: Message,

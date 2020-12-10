@@ -1247,6 +1247,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.show_msg_info(self.message,
                                                 self.message_links,
                                                 self.time_mentions)
+        elif is_command_key('USER_INFO', key):
+            self.model.controller.show_user_info(self.message['sender_id'])
         return key
 
 

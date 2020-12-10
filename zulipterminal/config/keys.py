@@ -305,6 +305,11 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'Clear compose screen',
         'key_category': 'msg_compose',
     }),
+    ('USER_INFO', {
+        'keys': ['u'],
+        'help_text': 'View user description',
+        'key_category': 'msg_actions',
+    }),
 ])  # type: OrderedDict[str, KeyBinding]
 
 HELP_CATEGORIES = OrderedDict([

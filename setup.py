@@ -116,5 +116,6 @@ setup(
         'typing_extensions>=3.7',
         'python-dateutil>=2.8.1',
         'tzlocal>=2.1',
+        'pytz>=2019.3',
     ],
 )
