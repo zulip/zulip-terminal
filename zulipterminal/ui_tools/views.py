@@ -1015,36 +1015,6 @@ class AboutView(PopUpView):
 
         super().__init__(controller, widgets, 'ABOUT', popup_width, title)
 
-
-# class UserInfoView(urwid.ListBox):
-#     def __init__(self, controller: Any, display_data:dict) -> None:
-#         self.controller = controller
-#         self.data = display_data
-
-#         if 'Zulip expertise' in self.data:
-#             self.height = len(self.data) + math.floor(len(self.data['Zulip expertise'])/45)
-#             #Zulip expertise is the only column that can be of multiple lines
-#         else: self.height = len(self.data)
-#         # self.height = len(self.data)
-#         self.width = 70
-
-#         self.log = urwid.SimpleListWalker(
-#             [urwid.AttrWrap(
-#                 urwid.Columns([
-#                     urwid.Text(field),
-#                     (45, urwid.Text(data))
-#                 ], dividechars=2),
-#                 None if index % 2 else 'bar')
-#             for index, (field, data) in enumerate(self.data.items())])
-
-#         super().__init__(self.log)
-
-#     def keypress(self, size: Tuple[int, int], key: str) -> str:
-#         if (is_command_key('GO_BACK', key) or
-#                 is_command_key('USER_INFO', key)):
-#                 self.controller.exit_popup()
-#         return super().keypress(size, key)
-
 class UserInfoView(PopUpView):
     def __init__(self,
                 controller: Any,

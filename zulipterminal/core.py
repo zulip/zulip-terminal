@@ -218,7 +218,6 @@ class Controller:
     def show_user_info(self, user_id:int) -> None:
         response = self.client.get_user_by_id(user_id)
         # TODO: add custom fields later as an enhancement
-
         display_data = {}
         res_data = response['user']
         display_data['Name'] = res_data['full_name']
