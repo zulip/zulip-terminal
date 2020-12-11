@@ -63,6 +63,7 @@ REQUIRED_STYLES = {
     'area:msg'        : 'standout',
     'area:stream'     : 'standout',
     'area:error'      : 'standout',
+    'area:user'       : 'standout',
     'search_error'    : 'standout',
     'task:success'    : 'standout',
     'task:error'      : 'standout',

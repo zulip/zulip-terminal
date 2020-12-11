@@ -29,6 +29,7 @@ from zulipterminal.ui_tools.views import (
     PopUpConfirmationView,
     StreamInfoView,
     StreamMembersView,
+    UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -284,6 +285,12 @@ class Controller:
                 maximum_footlinks=self.maximum_footlinks,
             ),
             "area:help",
+        )
+
+    def show_user_info(self, user_id: int) -> None:
+        self.show_pop_up(
+            UserInfoView(self, user_id, "User Information (up/down scrolls)"),
+            "area:user",
         )
 
     def show_edit_history(
