@@ -12,7 +12,7 @@ import urwid
 import zulip
 from typing_extensions import Literal
 
-from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.themes import ThemeSpec, popup_borders
 from zulipterminal.helper import Message, asynch
 from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
@@ -161,14 +161,13 @@ class Controller:
                                  self.loop.screen.get_cols_rows())
         return max_cols, max_rows
 
-    def show_pop_up(self, to_show: Any) -> None:
-        double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
-                            rline='║', lline='║',
-                            blcorner='╚', bline='═', brcorner='╝')
+    def show_pop_up(self, to_show: Any, popup_type: str) -> None:
         self.loop.widget = urwid.Overlay(
-            urwid.LineBox(to_show,
-                          to_show.title,
-                          **double_lines),
+            urwid.AttrMap(urwid.LineBox(to_show,
+                                        to_show.title,
+                                        title_attr='popup_title',
+                                        **popup_borders[popup_type]),
+                          'popup_border'),
             self.view,
             align='center',
             valign='middle',
@@ -182,10 +181,10 @@ class Controller:
 
     def show_help(self) -> None:
         help_view = HelpView(self, "Help Menu (up/down scrolls)")
-        self.show_pop_up(help_view)
+        self.show_pop_up(help_view, 'help')
 
     def show_topic_edit_mode(self, button: Any) -> None:
-        self.show_pop_up(EditModeView(self, button))
+        self.show_pop_up(EditModeView(self, button), 'help')
 
     def show_msg_info(self, msg: Message,
                       message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
@@ -194,14 +193,14 @@ class Controller:
         msg_info_view = MsgInfoView(self, msg,
                                     "Message Information (up/down scrolls)",
                                     message_links, time_mentions)
-        self.show_pop_up(msg_info_view)
+        self.show_pop_up(msg_info_view, 'info')
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
-        self.show_pop_up(show_stream_view)
+        self.show_pop_up(show_stream_view, 'stream_info')
 
     def popup_with_message(self, text: str, width: int) -> None:
-        self.show_pop_up(NoticeView(self, text, width, "NOTICE"))
+        self.show_pop_up(NoticeView(self, text, width, "NOTICE"), 'info')
 
     def show_about(self) -> None:
         self.show_pop_up(
@@ -210,7 +209,8 @@ class Controller:
                       server_feature_level=self.model.server_feature_level,
                       theme_name=self.theme_name, color_depth=self.color_depth,
                       autohide_enabled=self.autohide,
-                      footlink_enabled=self.footlinks_enabled)
+                      footlink_enabled=self.footlinks_enabled),
+            'about'
         )
 
     def show_edit_history(
@@ -220,7 +220,8 @@ class Controller:
     ) -> None:
         self.show_pop_up(
             EditHistoryView(self, message, message_links, time_mentions,
-                            'Edit History (up/down scrolls)')
+                            'Edit History (up/down scrolls)'),
+            'info'
         )
 
     def search_messages(self, text: str) -> None:
