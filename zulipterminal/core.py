@@ -162,19 +162,28 @@ class Controller:
         return max_cols, max_rows
 
     def show_pop_up(self, to_show: Any) -> None:
-        double_lines = dict(tlcorner='╔', tline='═', trcorner='╗',
-                            rline='║', lline='║',
-                            blcorner='╚', bline='═', brcorner='╝')
+        border_lines = dict(tlcorner='▛', tline='▀', trcorner='▜',
+                            rline='▐', lline='▌',
+                            blcorner='▙', bline='▄', brcorner='▟')
+        text = urwid.Text(to_show.title, align='center')
+        title_map = urwid.AttrMap(urwid.Filler(text), 'popup_title')
+        title_box_adapter = urwid.BoxAdapter(title_map, height=1)
+        title_box = urwid.LineBox(
+            title_box_adapter, tlcorner='▄', tline='▄', trcorner='▄',
+            rline='', lline='', blcorner='', bline='', brcorner=''
+        )
+        title = urwid.AttrMap(title_box, 'popup_border')
+        content = urwid.LineBox(to_show, **border_lines)
         self.loop.widget = urwid.Overlay(
-            urwid.LineBox(to_show,
-                          to_show.title,
-                          **double_lines),
+            urwid.AttrMap(urwid.Frame(header=title, body=content),
+                          'popup_border'),
             self.view,
             align='center',
             valign='middle',
             # +2 to both of the following, due to LineBox
+            # +2 to height, due to title enhancement
             width=to_show.width + 2,
-            height=to_show.height + 2,
+            height=to_show.height + 4,
         )
 
     def exit_popup(self) -> None:
