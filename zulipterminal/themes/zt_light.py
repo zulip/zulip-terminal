@@ -57,6 +57,7 @@ STYLES = {
     'area:stream'     : (Color.BLACK,               Color.LIGHT_BLUE),
     'area:msg'        : (Color.BLACK,               Color.YELLOW),
     'area:error'      : (Color.BLACK,               Color.LIGHT_RED),
+    'area:user'       : (Color.WHITE,               Color.DARK_BLUE),
     'search_error'    : (Color.LIGHT_RED,           Color.WHITE),
     'task:success'    : (Color.BLACK,               Color.DARK_GREEN),
     'task:error'      : (Color.WHITE,               Color.DARK_RED),

@@ -83,6 +83,7 @@ STYLES = {
     'area:msg'         : (Color.DARK0_HARD,            Color.BRIGHT_RED),
     'area:stream'      : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
     'area:error'       : (Color.LIGHT2,                Color.FADED_RED),
+    'area:user'        : (Color.LIGHT2,                Color.FADED_BLUE),
     'search_error'     : (Color.BRIGHT_RED,            Color.DARK0_HARD),
     'task:success'     : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
     'task:error'       : (Color.LIGHT2,                Color.FADED_RED),
