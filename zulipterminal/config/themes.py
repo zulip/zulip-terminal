@@ -43,6 +43,8 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'edit_tag': 'standout',
     'edit_author': 'bold',
     'edit_time': 'bold',
+    'popup_border': 'bold',
+    'popup_title': 'bold',
 }
 
 
@@ -171,6 +173,10 @@ THEMES = {
          None,             DEF['white'],              DEF['black']),
         ('muted',          'light blue',              'black',
          None,             DEF['light_blue'],         DEF['black']),
+        ('popup_title',    'black',                   'white',
+         None,             DEF['black'],              DEF['white']),
+        ('popup_border',   'white',                   'black',
+         None,             DEF['white'],              DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -251,6 +257,10 @@ THEMES = {
          None,             WHITE,             BLACK),
         ('muted',          'light blue',      'black',
          None,             LIGHTBLUE,         BLACK),
+        ('popup_title',    'black',           'white',
+         None,             BLACK,             WHITE),
+        ('popup_border',   'white',           'black',
+         None,             WHITE,             BLACK),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -291,6 +301,8 @@ THEMES = {
         ('edit_time',      'dark blue',       'white'),
         ('current_user',   'dark gray',       'white'),
         ('muted',          'dark gray',       'white'),
+        ('popup_title',    'white',           'black'),
+        ('popup_border',   'black',           'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -331,6 +343,8 @@ THEMES = {
         ('edit_time',      'dark blue',       'light blue'),
         ('current_user',   'light gray',      'light blue'),
         ('muted',          'light gray',      'light blue'),
+        ('popup_title',    'light blue',      'white'),
+        ('popup_border',   'white',           'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
