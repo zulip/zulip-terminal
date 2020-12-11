@@ -43,8 +43,22 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'edit_tag': 'standout',
     'edit_author': 'bold',
     'edit_time': 'bold',
+    'popup_border': 'standout',
+    'popup_title': 'bold',
 }
 
+# Pop-up border styles for different popup views
+popup_borders = {
+    'help': dict(tlcorner='▛', tline='▀', trcorner='▜', rline='▐',
+                 lline='▌', blcorner='▙', bline='▄', brcorner='▟'),
+    'info': dict(tlcorner='╔', tline='═', trcorner='╗', rline='║',
+                 lline='║', blcorner='╚', bline='═', brcorner='╝'),
+    'stream_info': dict(tlcorner='▘', tline='▀', trcorner='▝', rline='▐',
+                        lline='▌', blcorner='▖', bline='▄', brcorner='▗'),
+    # TODO: A different border styling may be specified
+    'about': dict(tlcorner='▘', tline='▀', trcorner='▝', rline='▐',
+                  lline='▌', blcorner='▖', bline='▄', brcorner='▗'),
+}
 
 # 256-color base names for default theme (bold values added below)
 DEF_base = dict(
@@ -171,6 +185,10 @@ THEMES = {
          None,             DEF['white'],              DEF['black']),
         ('muted',          'light blue',              'black',
          None,             DEF['light_blue'],         DEF['black']),
+        ('popup_border',   'black',                   'white',
+         None,             DEF['black'],              DEF['white']),
+        ('popup_title',    'white',                   'black',
+         None,             DEF['white'],              DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -251,6 +269,10 @@ THEMES = {
          None,             WHITE,             BLACK),
         ('muted',          'light blue',      'black',
          None,             LIGHTBLUE,         BLACK),
+        ('popup_border',   'black',           'white',
+         None,             DEF['black'],      DEF['white']),
+        ('popup_title',    'white',           'black',
+         None,             DEF['white'],      DEF['black']),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -291,6 +313,8 @@ THEMES = {
         ('edit_time',      'dark blue',       'white'),
         ('current_user',   'dark gray',       'white'),
         ('muted',          'dark gray',       'white'),
+        ('popup_border',   'white',           'black'),
+        ('popup_title',    'black',           'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -331,6 +355,8 @@ THEMES = {
         ('edit_time',      'dark blue',       'light blue'),
         ('current_user',   'light gray',      'light blue'),
         ('muted',          'light gray',      'light blue'),
+        ('popup_border',   'light blue',      'white'),
+        ('popup_title',    'white',           'light blue'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
