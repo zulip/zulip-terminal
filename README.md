@@ -38,8 +38,8 @@ We also provide some sample Dockerfiles to build docker images in [docker/](http
 ### Installing into an isolated Python virtual environment
 
 With the python 3.5+ required for running, the following should work on most systems:
-1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
-2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+1. `python3 -m venv zt_venv` (creates a virtual environment named `zt_venv` in the current directory)
+2. `source zt_venv/bin/activate` (activates the virtual environment; this assumes a bash-like shell)
 3. Run one of the install commands above, 
 
 If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the above list again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
@@ -259,8 +259,8 @@ $ pipenv run pip3 install -r requirements.txt
 
 1. Manually create & activate a virtual environment; any method should work, such as that used in the above simple installation
 
-    1. `python3 -m venv zulip-terminal-venv` (creates a venv named `zulip-terminal-venv` in the current directory)
-    2. `source zulip-terminal-venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+    1. `python3 -m venv zt_venv` (creates a venv named `zt_venv` in the current directory)
+    2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
 
 2. Install zulip-term, with the development requirements
 ```
