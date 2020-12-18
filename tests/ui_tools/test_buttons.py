@@ -328,6 +328,15 @@ class TestUserButton:
 
         assert activate.call_count == 1
 
+    @pytest.mark.parametrize("key", keys_for_command("USER_INFO"))
+    def test_keypress_USER_INFO(self, mocker, user_button, key, widget_size):
+        size = widget_size(user_button)
+        pop_up = mocker.patch("zulipterminal.core.Controller.show_user_info")
+
+        user_button.keypress(size, key)
+
+        pop_up.assert_called_once_with(user_button.user_id)
+
 
 class TestTopicButton:
     @pytest.mark.parametrize(
