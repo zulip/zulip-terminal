@@ -319,15 +319,17 @@ class TestWriteBox:
                                                   widget_size,
                                                   text, expected_text):
         write_box.stream_box_view(1000)
-        write_box.contents[0][0][0].set_edit_text(text)
-        write_box.contents[0][0][0].set_edit_pos(len(text))
-        write_box.focus_position = 0
-        write_box.contents[0][0].focus_col = 0
+        stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
+        write_box.header_write_box[stream_focus].set_edit_text(text)
+        write_box.header_write_box[stream_focus].set_edit_pos(len(text))
+        write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+        write_box.header_write_box.focus_col = stream_focus
         size = widget_size(write_box)
 
         write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
 
-        assert write_box.contents[0][0][0].edit_text == expected_text
+        assert (write_box.header_write_box[stream_focus].edit_text
+                == expected_text)
 
     @pytest.mark.parametrize(['text', 'matching_topics'], [
         ('', ['Topic 1', 'This is a topic', 'Hello there!']),
@@ -357,15 +359,17 @@ class TestWriteBox:
                                                  topics):
         write_box.stream_box_view(1000)
         write_box.model.topics_in_stream.return_value = topics
-        write_box.contents[0][0][1].set_edit_text(text)
-        write_box.contents[0][0][1].set_edit_pos(len(text))
-        write_box.focus_position = 0
-        write_box.contents[0][0].focus_col = 1
+        topic_focus = write_box.FOCUS_HEADER_BOX_TOPIC
+        write_box.header_write_box[topic_focus].set_edit_text(text)
+        write_box.header_write_box[topic_focus].set_edit_pos(len(text))
+        write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+        write_box.header_write_box.focus_col = topic_focus
         size = widget_size(write_box)
 
         write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
 
-        assert write_box.contents[0][0][1].edit_text == expected_text
+        assert (write_box.header_write_box[topic_focus].edit_text
+                == expected_text)
 
     @pytest.mark.parametrize(['suggestions', 'state', 'expected_state',
                               'expected_typeahead', 'is_truncated'], [
@@ -472,24 +476,35 @@ class TestWriteBox:
         else:
             self.view.set_footer_text.assert_not_called()
 
-    @pytest.mark.parametrize(["initial_focus_position",
-                              "initial_focus_col",
-                              "expected_focus_position",
-                              "expected_focus_col",
+    @pytest.mark.parametrize(["initial_focus_name",
+                              "initial_focus_col_name",
                               "box_type",
                               "msg_body_edit_enabled",
-                              "message_being_edited"], [
-        (0, 0, 0, 1, "stream", True, False),
-        (0, 1, 1, 0, "stream", True, False),
-        (0, 1, 0, 2, "stream", False, True),
-        (0, 2, 0, 1, "stream", False, True),
-        (1, 0, 0, 0, "stream", True, False),
-        (0, 0, 0, 1, "stream", True, True),
-        (0, 1, 0, 2, "stream", True, True),
-        (0, 2, 1, 0, "stream", True, True),
-        (1, 0, 0, 0, "stream", True, True),
-        (0, 0, 1, 0, "private", True, False),
-        (1, 0, 0, 0, "private", True, False),
+                              "message_being_edited",
+                              "expected_focus_name",
+                              "expected_focus_col_name"], [
+        ('CONTAINER_HEADER', 'HEADER_BOX_STREAM', "stream", True, False,
+         'CONTAINER_HEADER', 'HEADER_BOX_TOPIC'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_TOPIC', "stream", True, False,
+         'CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_TOPIC', "stream", False, True,
+         'CONTAINER_HEADER', 'HEADER_BOX_EDIT'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_EDIT', "stream", False, True,
+         'CONTAINER_HEADER', 'HEADER_BOX_TOPIC'),
+        ('CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY', "stream", True, False,
+         'CONTAINER_HEADER', 'HEADER_BOX_STREAM'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_STREAM', "stream", True, True,
+         'CONTAINER_HEADER', 'HEADER_BOX_TOPIC'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_TOPIC', "stream", True, True,
+         'CONTAINER_HEADER', 'HEADER_BOX_EDIT'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_EDIT', "stream", True, True,
+         'CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY'),
+        ('CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY', "stream", True, True,
+         'CONTAINER_HEADER', 'HEADER_BOX_STREAM'),
+        ('CONTAINER_HEADER', 'HEADER_BOX_RECIPIENT', "private", True, False,
+         'CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY'),
+        ('CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY', "private", True, False,
+         'CONTAINER_HEADER', 'HEADER_BOX_RECIPIENT'),
     ], ids=[
         'stream_name_to_topic_box',
         'topic_to_message_box',
@@ -506,10 +521,10 @@ class TestWriteBox:
     @pytest.mark.parametrize("tab_key",
                              keys_for_command("CYCLE_COMPOSE_FOCUS"))
     def test_keypress_CYCLE_COMPOSE_FOCUS(self, write_box, tab_key,
-                                          initial_focus_position,
-                                          expected_focus_position,
-                                          initial_focus_col,
-                                          expected_focus_col, box_type,
+                                          initial_focus_name,
+                                          expected_focus_name,
+                                          initial_focus_col_name,
+                                          expected_focus_col_name, box_type,
                                           msg_body_edit_enabled,
                                           message_being_edited,
                                           widget_size,
@@ -524,16 +539,27 @@ class TestWriteBox:
         else:
             write_box.private_box_view()
         size = widget_size(write_box)
-        write_box.focus_position = initial_focus_position
+
+        def focus_val(x: str) -> int:
+            return getattr(write_box, 'FOCUS_' + x)
+        write_box.focus_position = focus_val(initial_focus_name)
         write_box.msg_body_edit_enabled = msg_body_edit_enabled
-        write_box.contents[0][0].focus_col = initial_focus_col
+        if write_box.focus_position == write_box.FOCUS_CONTAINER_HEADER:
+            write_box.header_write_box.focus_col = (focus_val(
+                                                    initial_focus_col_name))
         write_box.model.get_invalid_recipient_emails.return_value = []
         write_box.model.user_dict = mocker.MagicMock()
 
         write_box.keypress(size, tab_key)
 
-        assert write_box.focus_position == expected_focus_position
-        assert write_box.contents[0][0].focus_col == expected_focus_col
+        assert write_box.focus_position == focus_val(expected_focus_name)
+        # FIXME: Needs refactoring?
+        if write_box.focus_position == write_box.FOCUS_CONTAINER_HEADER:
+            assert (write_box.header_write_box.focus_col
+                    == focus_val(expected_focus_col_name))
+        else:
+            assert (write_box.FOCUS_MESSAGE_BOX_BODY
+                    == focus_val(expected_focus_col_name))
 
 
 class TestPanelSearchBox:

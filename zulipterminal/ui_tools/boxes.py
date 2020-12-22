@@ -40,6 +40,13 @@ class WriteBox(urwid.Pile):
         self.stream_id = None  # type: Optional[int]
         self.recipient_user_ids = []  # type: List[int]
         self.msg_body_edit_enabled = True
+        self.FOCUS_CONTAINER_HEADER = 0
+        self.FOCUS_HEADER_BOX_RECIPIENT = 0
+        self.FOCUS_HEADER_BOX_STREAM = 0
+        self.FOCUS_HEADER_BOX_TOPIC = 1
+        self.FOCUS_HEADER_BOX_EDIT = 2
+        self.FOCUS_CONTAINER_MESSAGE = 1
+        self.FOCUS_MESSAGE_BOX_BODY = 0
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -73,7 +80,7 @@ class WriteBox(urwid.Pile):
             (self.header_write_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
-        self.focus_position = 1
+        self.focus_position = self.FOCUS_CONTAINER_MESSAGE
 
     def stream_box_view(self, stream_id: int, caption: str='', title: str='',
                         ) -> None:
@@ -388,12 +395,13 @@ class WriteBox(urwid.Pile):
         elif is_command_key('CYCLE_COMPOSE_FOCUS', key):
             if len(self.contents) == 0:
                 return key
-            header = self.contents[0][0]
+            header = self.header_write_box
             # toggle focus position
-            if self.focus_position == 0:
+            if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 if self.to_write_box is None:
-                    if header.focus_col == 0:
-                        stream_name = header[0].edit_text
+                    if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
+                        stream_name = (header[self.FOCUS_HEADER_BOX_STREAM]
+                                       .edit_text)
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 'Invalid stream name.'
@@ -414,20 +422,21 @@ class WriteBox(urwid.Pile):
                         self.stream_id = self.model.stream_id_from_name(
                                                                 stream_name)
 
-                        header.focus_col = 1
+                        header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
                         return key
-                    elif header.focus_col == 1 and self.msg_edit_id:
-                        header.focus_col = 2
+                    elif (header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
+                          and self.msg_edit_id):
+                        header.focus_col = self.FOCUS_HEADER_BOX_EDIT
                         return key
-                    elif header.focus_col == 2:
+                    elif header.focus_col == self.FOCUS_HEADER_BOX_EDIT:
                         if self.msg_body_edit_enabled:
-                            header.focus_col = 0
-                            self.focus_position = 1
+                            header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                            self.focus_position = self.FOCUS_CONTAINER_MESSAGE
                         else:
-                            header.focus_col = 1
+                            header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
                         return key
                     else:
-                        header.focus_col = 0
+                        header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
                     recipient_box = header.original_widget
                     recipient_emails = [email.strip() for email in
@@ -445,8 +454,14 @@ class WriteBox(urwid.Pile):
 
             if not self.msg_body_edit_enabled:
                 return key
-            self.focus_position = self.focus_position == 0
-            header.focus_col = 0
+            if self.focus_position == self.FOCUS_CONTAINER_HEADER:
+                self.focus_position = self.FOCUS_CONTAINER_MESSAGE
+            else:
+                self.focus_position = self.FOCUS_CONTAINER_HEADER
+            if self.to_write_box is None:
+                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+            else:
+                header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
 
         key = super().keypress(size, key)
         return key
@@ -1239,8 +1254,9 @@ class MessageBox(urwid.Pile):
             write_box.msg_body_edit_enabled = msg_body_edit_enabled
             # Set focus to topic box if message body editing is disabled.
             if not msg_body_edit_enabled:
-                write_box.focus_position = 0
-                write_box.contents[0][0].focus_col = 1
+                write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+                (write_box.header_write_box.
+                 focus_col) = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
