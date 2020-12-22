@@ -125,6 +125,8 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
+        self._set_stream_write_box_style(self.header_write_box[self
+                                         .FOCUS_HEADER_BOX_STREAM].edit_text)
 
     def stream_box_edit_view(self, stream_id: int, caption: str='',
                              title: str='') -> None:
@@ -132,6 +134,20 @@ class WriteBox(urwid.Pile):
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
+
+    def _set_stream_write_box_style(self, stream_name: Optional[str]) -> None:
+        # FIXME: Needs refactoring?
+        color = urwid.AttrSpec('white', 'black')
+        stream_marker = MESSAGE_CONTENT_MARKER
+        if stream_name and self.model.stream_dict:
+            if stream_name == self.model.stream_dict[self.stream_id]['name']:
+                stream_marker = '█'
+                color = self.model.stream_dict[self.stream_id]['color']
+            elif self.model.is_valid_stream(stream_name):
+                stream_marker = '█'
+                color = self.model.stream_dict[
+                        self.model.stream_id_from_name(stream_name)]['color']
+        self.header_write_box[0].set_text((color, stream_marker))
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:
@@ -157,8 +173,10 @@ class WriteBox(urwid.Pile):
                                        self.view.pinned_streams)
 
         # matched_streams[0] and matched_streams[1] contains the same data.
-        return self._process_typeaheads(matched_streams[0], state,
-                                        matched_streams[1])
+        typeahead = self._process_typeaheads(matched_streams[0], state,
+                                             matched_streams[1])
+        self._set_stream_write_box_style(typeahead)
+        return typeahead
 
     def generic_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
@@ -390,6 +408,7 @@ class WriteBox(urwid.Pile):
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
                         stream_name = (header[self.FOCUS_HEADER_BOX_STREAM]
                                        .edit_text)
+                        self._set_stream_write_box_style(stream_name)
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 'Invalid stream name.'

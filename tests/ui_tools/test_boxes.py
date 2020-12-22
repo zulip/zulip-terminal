@@ -300,6 +300,8 @@ class TestWriteBox:
     def test__stream_box_autocomplete(self, mocker, write_box, text, state,
                                       to_pin, matching_streams):
         streams_to_pin = [{'name': stream_name} for stream_name in to_pin]
+        write_box.model.stream_dict = None
+        write_box.stream_box_view(1000)
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
@@ -311,6 +313,47 @@ class TestWriteBox:
         _process_typeaheads.assert_called_once_with(matching_streams, state,
                                                     matching_streams)
 
+    @pytest.mark.parametrize(['stream_name', 'stream_id', 'expected_color'], [
+      (None, 9, 'AttrSpec(\'white\', \'black\')'),
+      ('stream_1', 9, 'AttrSpec(\'white\', \'black\')'),
+      ('issues', 9, '#c76'),
+      ('issues', 16, '#c76'),
+     ], ids=[
+        'no_stream_name',
+        'invalid_stream_name',
+        'valid_stream_name_with_same_id',
+        'valid_stream_name_with_different_id',
+    ])
+    def test__set_stream_write_box_style(self, write_box, stream_name,
+                                         stream_id, expected_color, mocker):
+        # FIXME: Needs refactoring?
+        stream_dict = {
+            9: {'color': '#c76', 'name': 'issues'},
+            16: {'color': '#98e', 'name': 'desktop'},
+        }
+        write_box.model.stream_dict = stream_dict
+        write_box.stream_id = stream_id
+        write_box.stream_box_view(stream_id)
+
+        def is_valid_stream(stream_name: str) -> bool:
+            for stream in stream_dict.values():
+                if stream['name'] == stream_name:
+                    return True
+            return False
+
+        def stream_id_from_name(stream_name: str) -> int:
+            for stream_id, stream in stream_dict.items():
+                if stream['name'] == stream_name:
+                    return stream_id
+            raise RuntimeError("Invalid stream name.")
+
+        write_box.model.is_valid_stream = is_valid_stream
+        write_box.model.stream_id_from_name = stream_id_from_name
+        write_box._set_stream_write_box_style(stream_name)
+        stream_marker = write_box.header_write_box[0].get_text()[1][0][0]
+
+        assert str(stream_marker) == expected_color
+
     @pytest.mark.parametrize('text, expected_text', [
         ('Som', 'Some general stream'),
         ('Some gen', 'Some general stream'),
@@ -319,6 +362,7 @@ class TestWriteBox:
                                                   widget_size,
                                                   text, expected_text):
         write_box.stream_box_view(1000)
+        write_box.model.stream_dict = None
         stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
         write_box.header_write_box[stream_focus].set_edit_text(text)
         write_box.header_write_box[stream_focus].set_edit_pos(len(text))
