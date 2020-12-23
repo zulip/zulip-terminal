@@ -42,9 +42,9 @@ class WriteBox(urwid.Pile):
         self.msg_body_edit_enabled = True
         self.FOCUS_CONTAINER_HEADER = 0
         self.FOCUS_HEADER_BOX_RECIPIENT = 0
-        self.FOCUS_HEADER_BOX_STREAM = 0
-        self.FOCUS_HEADER_BOX_TOPIC = 1
-        self.FOCUS_HEADER_BOX_EDIT = 2
+        self.FOCUS_HEADER_BOX_STREAM = 1
+        self.FOCUS_HEADER_BOX_TOPIC = 3
+        self.FOCUS_HEADER_BOX_EDIT = 4
         self.FOCUS_CONTAINER_MESSAGE = 1
         self.FOCUS_MESSAGE_BOX_BODY = 0
 
@@ -96,10 +96,7 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
-        self.stream_write_box = ReadlineEdit(
-            caption="Stream:  ",
-            edit_text=caption
-        )
+        self.stream_write_box = ReadlineEdit(edit_text=caption)
         self.stream_write_box.enable_autocomplete(
             func=self._stream_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
@@ -107,8 +104,7 @@ class WriteBox(urwid.Pile):
         )
         self.stream_write_box.set_completer_delims("")
 
-        self.title_write_box = ReadlineEdit(caption="Topic:  ",
-                                            edit_text=title)
+        self.title_write_box = ReadlineEdit(edit_text=title)
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
@@ -116,8 +112,10 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.set_completer_delims("")
 
-        self.header_write_box = (urwid.Columns([self.stream_write_box,
-                                 self.title_write_box], dividechars=1))
+        self.header_write_box = urwid.Columns([
+            ('pack', urwid.Text('█')), self.stream_write_box,
+            ('pack', urwid.Text(STREAM_TOPIC_SEPARATOR)),
+            self.title_write_box], dividechars=1)
         header_line_box = urwid.LineBox(
                 self.header_write_box, tlcorner='━', tline='━', lline='',
                 trcorner='━', blcorner='─', rline='', bline='─', brcorner='─'
