@@ -44,7 +44,10 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'edit_author': 'bold',
     'edit_time': 'bold',
     'popup_border': 'bold',
-    'popup_title': 'bold',
+    'area:help': 'standout',
+    'area:msg': 'standout',
+    'area:stream': 'standout',
+    'area:error': 'standout',
 }
 
 
@@ -173,10 +176,16 @@ THEMES = {
          None,             DEF['white'],              DEF['black']),
         ('muted',          'light blue',              'black',
          None,             DEF['light_blue'],         DEF['black']),
-        ('popup_title',    'black',                   'white',
-         None,             DEF['black'],              DEF['white']),
         ('popup_border',   'white',                   'black',
          None,             DEF['white'],              DEF['black']),
+        ('area:help',      'white',                   'dark green',
+         None,             DEF['white'],              DEF['dark_green']),
+        ('area:msg',       'white',                   'brown',
+         None,             DEF['white'],              DEF['brown']),
+        ('area:stream',    'white',                   'dark cyan',
+         None,             DEF['white'],              DEF['dark_cyan']),
+        ('area:error',     'white',                   'dark red',
+         None,             DEF['white'],               DEF['dark_red']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -257,10 +266,16 @@ THEMES = {
          None,             WHITE,             BLACK),
         ('muted',          'light blue',      'black',
          None,             LIGHTBLUE,         BLACK),
-        ('popup_title',    'black',           'white',
-         None,             BLACK,             WHITE),
         ('popup_border',   'white',           'black',
          None,             WHITE,             BLACK),
+        ('area:help',      'black',           'light green',
+         None,             BLACK,             LIGHTGREEN),
+        ('area:msg',       'black',           'light red',
+         None,             BLACK,             LIGHTRED),
+        ('area:stream',    'black',           'light blue',
+         None,             BLACK,             LIGHTBLUE),
+        ('area:error',     'white',           'dark red',
+         None,             WHITE,             DARKRED),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -301,8 +316,11 @@ THEMES = {
         ('edit_time',      'dark blue',       'white'),
         ('current_user',   'dark gray',       'white'),
         ('muted',          'dark gray',       'white'),
-        ('popup_title',    'white',           'black'),
         ('popup_border',   'black',           'white'),
+        ('area:help',      'black',           'light green'),
+        ('area:stream',    'black',           'light blue'),
+        ('area:msg',       'black',           'yellow'),
+        ('area:error',     'black',           'light red'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -343,8 +361,11 @@ THEMES = {
         ('edit_time',      'dark blue',       'light blue'),
         ('current_user',   'light gray',      'light blue'),
         ('muted',          'light gray',      'light blue'),
-        ('popup_title',    'light blue',      'white'),
         ('popup_border',   'white',           'light blue'),
+        ('area:help',      'white',           'dark green'),
+        ('area:stream',    'white',           'dark cyan'),
+        ('area:msg',       'white',           'brown'),
+        ('area:error',     'white',           'dark red'),
     ]
 }  # type: Dict[str, ThemeSpec]
 
