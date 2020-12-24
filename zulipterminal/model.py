@@ -1019,7 +1019,7 @@ class Model:
         if 'subject' in event:
             new_subject = event['subject']
             stream_id = event['stream_id']
-
+            event['message_ids'].sort()
             # Update any indexed messages & re-render them
             for msg_id in event['message_ids']:
                 indexed_msg = self.index['messages'].get(msg_id)
@@ -1123,7 +1123,10 @@ class Model:
                 # narrow.
                 if (len(self.narrow) == 2
                         and msg_box.message['subject'] != self.narrow[1][1]):
+                    msg_pos = view.message_view.log.index(msg_w)
                     view.message_view.log.remove(msg_w)
+                    prev_msg_sender = msg_box.last_message['sender_email']
+                    edited_msg_sender = msg_box.message['sender_email']
                     # Change narrow if there are no messages left in the
                     # current narrow.
                     if not view.message_view.log:
@@ -1133,6 +1136,21 @@ class Model:
                         if msg_w_list:
                             self.controller.narrow_to_topic(
                                 msg_w_list[0].original_widget)
+                    # Creates message box of the message following the
+                    # edited message to display elided sender/datefields
+                    # of lower messages
+                    elif prev_msg_sender != edited_msg_sender:
+                        if len(view.message_view.log) >= (msg_pos + 1):
+                            next_msg_w = view.message_view.log[msg_pos]
+                            next_msg = next_msg_w.original_widget.message
+                            next_msg_sender = next_msg['sender_email']
+                            prev_msg = msg_box.last_message
+                            if next_msg_sender != prev_msg_sender:
+                                msg_w_list = create_msg_box_list(
+                                                self,
+                                                [next_msg['id']],
+                                                last_message=prev_msg)
+                                view.message_view.log[msg_pos] = msg_w_list[0]
                     self.controller.update_screen()
                     return
 
