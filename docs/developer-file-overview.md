@@ -7,6 +7,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 | zulipterminal/         | core.py             | Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application           |
 |                        | helper.py           | Helper functions used in multiple places                                                               |
 |                        | model.py            | Defines the `Model`, fetching and storing data retrieved from the Zulip server                         |
+|                        | server_url.py       | Constructs and encodes server_url of messages.                                                         |
 |                        | ui.py               | Defines the `View`, and controls where each component is displayed                                     |
 |                        | unicode_emojis.py   | Stores valid unicode emoji data                                                                        |
 |                        | urwid_types.py      | Preliminary urwid types to improve type analysis                                                       |

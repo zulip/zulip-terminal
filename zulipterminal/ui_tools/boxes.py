@@ -26,6 +26,7 @@ from zulipterminal.helper import (
     Message, format_string, get_unused_fence, match_emoji, match_group,
     match_stream, match_topics, match_user,
 )
+from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
@@ -1233,7 +1234,20 @@ class MessageBox(urwid.Pile):
                 self.message['id'])['raw_content']
             fence = get_unused_fence(message_raw_content)
 
-            quote = '{0}quote\n{1}\n{0}\n'.format(fence, message_raw_content)
+            absolute_url = near_message_url(
+                self.model.server_url[:-1], self.message)
+
+            # Compose box should look something like this:
+            #   @_**Zeeshan|514** [said](link to message):
+            #   ```quote
+            #   message_content
+            #   ```
+            quote = '@_**{0}|{1}** [said]({2}):\n{3}quote\n{4}\n{3}\n'.format(
+                        self.message['sender_full_name'],
+                        self.message['sender_id'],
+                        absolute_url,
+                        fence,
+                        message_raw_content)
 
             self.model.controller.view.write_box.msg_write_box.set_edit_text(
                 quote)
