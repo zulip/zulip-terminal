@@ -5,7 +5,7 @@ import time
 from collections import OrderedDict, defaultdict
 from functools import wraps
 from itertools import chain, combinations
-from re import ASCII, match
+from re import ASCII, MULTILINE, findall, match
 from threading import Thread
 from typing import (
     Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Set, Tuple,
@@ -655,3 +655,21 @@ def hash_util_decode(string: str) -> str:
     # Acknowledge custom string replacements in zulip/zulip's
     # zerver/lib/url_encoding.py before unquote.
     return unquote(string.replace('.', '%'))
+
+
+def get_unused_fence(content: str) -> str:
+    """
+    Generates fence for quoted-message based on regex pattern
+    of continuous back-ticks. Referred and translated from
+    zulip/static/shared/js/fenced_code.js.
+    """
+    fence_length_regex = '^ {0,3}(`{3,})'
+    max_length_fence = 3
+
+    matches = findall(fence_length_regex, content,
+                      flags=MULTILINE)
+    if len(matches) != 0:
+        max_length_fence = max(max_length_fence,
+                               len(max(matches, key=len)) + 1)
+
+    return '`' * max_length_fence
