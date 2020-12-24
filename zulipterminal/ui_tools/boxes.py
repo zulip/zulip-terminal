@@ -71,13 +71,14 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
-        self.header_write_box = urwid.LineBox(
-            self.to_write_box, tlcorner='─', tline='─', lline='',
-            trcorner='─', blcorner='─', rline='',
-            bline='─', brcorner='─'
+        self.header_write_box = urwid.Columns([self.to_write_box])
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
         )
         self.contents = [
-            (self.header_write_box, self.options()),
+            (header_line_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
@@ -115,20 +116,17 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.set_completer_delims("")
 
-        self.header_write_box = urwid.Columns([
-            urwid.LineBox(
-                self.stream_write_box, tlcorner='─', tline='─', lline='',
-                trcorner='┬', blcorner='─', rline='│',
-                bline='─', brcorner='┴'
-            ),
-            urwid.LineBox(
-                self.title_write_box, tlcorner='─', tline='─', lline='',
-                trcorner='─', blcorner='─', rline='',
-                bline='─', brcorner='─'
-            ),
-        ])
+        self.header_write_box = urwid.Columns(
+            [self.stream_write_box, self.title_write_box],
+            dividechars=1
+        )
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
+        )
         write_box = [
-            (self.header_write_box, self.options()),
+            (header_line_box, self.options()),
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
@@ -138,12 +136,7 @@ class WriteBox(urwid.Pile):
         self.stream_box_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
-        self.header_write_box.widget_list.append(
-            urwid.LineBox(
-                self.edit_mode_button, tlcorner='┬', tline='─', lline='│',
-                trcorner='─', blcorner='┴', rline='',
-                bline='─', brcorner='─'
-            ))
+        self.header_write_box.widget_list.append(self.edit_mode_button)
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:
@@ -438,7 +431,7 @@ class WriteBox(urwid.Pile):
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
-                    recipient_box = header.original_widget
+                    recipient_box = header[self.FOCUS_HEADER_BOX_RECIPIENT]
                     recipient_emails = [email.strip() for email in
                                         recipient_box.edit_text.split(',')]
                     invalid_emails = self.model.get_invalid_recipient_emails(
