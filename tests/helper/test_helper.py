@@ -3,7 +3,7 @@ import pytest
 import zulipterminal.helper
 from zulipterminal.helper import (
     canonicalize_color, classify_unread_counts, display_error_if_present,
-    hash_util_decode, index_messages, notify, powerset,
+    get_unused_fence, hash_util_decode, index_messages, notify, powerset,
 )
 
 
@@ -314,3 +314,16 @@ def test_hash_util_decode(quoted_string, expected_unquoted_string):
     return_value = hash_util_decode(quoted_string)
 
     assert return_value == expected_unquoted_string
+
+
+@pytest.mark.parametrize('message_content, expected_fence', [
+    ('Hi `test_here`', '```'),
+    ('```quote\nZ(dot)T(dot)\n```\nempty body', '````'),
+    ('```python\ndef zulip():\n  pass\n```\ncode-block', '````'),
+    ('````\ndont_know_what_this_does\n````', '`````'),
+    ('````quote\n```\ndef zulip():\n  pass\n```code````quote', '`````'),
+])
+def test_get_unused_fence(message_content, expected_fence):
+    generated_fence = get_unused_fence(message_content)
+
+    assert generated_fence == expected_fence

@@ -23,8 +23,8 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, match_emoji, match_group, match_stream,
-    match_topics, match_user,
+    Message, format_string, get_unused_fence, match_emoji, match_group,
+    match_stream, match_topics, match_user,
 )
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
@@ -1223,8 +1223,16 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('QUOTE_REPLY', key):
             self.keypress(size, 'enter')
-            quote = '```quote\n' + self.model.client.get_raw_message(
-                self.message['id'])['raw_content'] + '\n```\n'
+
+            # To correctly quote a message that contains quote/code-blocks,
+            # we need to fence quoted message containing ``` with ````,
+            # ```` with ````` and so on.
+            message_raw_content = self.model.client.get_raw_message(
+                self.message['id'])['raw_content']
+            fence = get_unused_fence(message_raw_content)
+
+            quote = '{0}quote\n{1}\n{0}\n'.format(fence, message_raw_content)
+
             self.model.controller.view.write_box.msg_write_box.set_edit_text(
                 quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
