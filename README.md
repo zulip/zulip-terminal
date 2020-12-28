@@ -243,6 +243,10 @@ A simple tutorial for implementing the `typing` indicator is available
 in the [wiki](https://github.com/zulip/zulip-terminal/wiki/Developer-Documentation). Follow
 it to understand the how to implement a new feature for zulip-terminal.
 
+### Urwid
+
+Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
+
 ### Setting up a development environment
 
 Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
@@ -337,6 +341,8 @@ Other gitlint options are available; for example it is possible to apply it to a
 Generally it is best to refer to the git log to get an idea of the general style to follow, and in particular look for similar types of commits to the ones you are writing.
 
 ### Tips for working with tests (pytest)
+
+Tests for zulip-terminal are written using [pytest](https://pytest.org/). You can read the tests in the `/tests` folder to learn about writing tests for a new class/function. If you are new to pytest, reading its documentation is definitely recommended.
 
 We currently have thousands of tests which get checked upon running `pytest`. While it is dependent on your system capability, this should typically take less than one minute to run. However, during debugging you may still wish to limit the scope of your tests, to improve the turnaround time:
 * If lots of tests are failing in a very verbose way, you might try the `-x` option (eg. `pytest -x`) to stop tests after the first failure; due to parametrization of tests and test fixtures, many apparent errors/failures can be resolved with just one fix! (try eg. `pytest --maxfail 3` for a less-strict version of this)
