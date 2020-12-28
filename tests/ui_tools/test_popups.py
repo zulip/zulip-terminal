@@ -560,10 +560,12 @@ class TestStreamInfoView:
         self.controller.model.is_pinned_stream.return_value = False
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         stream_id = 10
-        self.controller.model.stream_dict = {stream_id: {'name': 'books',
-                                                         'invite_only': False,
-                                                         'description': 'hey',
-                                                         'subscribers': []}}
+        self.controller.model.stream_dict = {stream_id:
+                                             {'name': 'books',
+                                              'subscribers': [],
+                                              'description': 'hey',
+                                              'invite_only': False,
+                                              'stream_weekly_traffic': 123}}
         self.stream_info_view = StreamInfoView(self.controller, stream_id)
 
     def test_keypress_any_key(self, widget_size):
@@ -581,9 +583,12 @@ class TestStreamInfoView:
         self.controller.model.is_pinned_stream.return_value = False
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         stream_id = self.stream_info_view.stream_id
-        self.controller.model.stream_dict = {stream_id: {'name': 'books',
-                                                         'description': 'hey',
-                                                         'subscribers': []}}
+        self.controller.model.stream_dict = {stream_id:
+                                             {'name': 'books',
+                                              'subscribers': [],
+                                              'description': 'hey',
+                                              'invite_only': False,
+                                              'stream_weekly_traffic': 123}}
 
         stream_info_view = StreamInfoView(self.controller, stream_id)
         size = widget_size(stream_info_view)
@@ -611,7 +616,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
-        mute_checkbox = self.stream_info_view.widgets[6]
+        mute_checkbox = self.stream_info_view.widgets[7]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(mute_checkbox)
@@ -622,7 +627,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
-        pin_checkbox = self.stream_info_view.widgets[7]
+        pin_checkbox = self.stream_info_view.widgets[8]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(pin_checkbox)

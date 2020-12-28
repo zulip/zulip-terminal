@@ -1082,10 +1082,13 @@ class StreamInfoView(PopUpView):
                          else STREAM_MARKER_PUBLIC)
         title = '{} {}'.format(stream_marker, stream['name'])
         total_members = len(stream['subscribers'])
+        weekly_msg_count = stream['stream_weekly_traffic']
         keys = ', '.join(map(repr, keys_for_command('STREAM_MEMBERS')))
         desc = stream['description']
         stream_info_content = [('', [desc]),
                                ('Stream Details', [
+                                   ('Weekly Message Count',
+                                    str(weekly_msg_count)),
                                    ('Stream Members',
                                     '[{}] Press {} to view'.format(
                                         total_members, keys))
