@@ -1081,8 +1081,16 @@ class StreamInfoView(PopUpView):
         stream_marker = (STREAM_MARKER_PRIVATE if stream['invite_only']
                          else STREAM_MARKER_PUBLIC)
         title = '{} {}'.format(stream_marker, stream['name'])
+        total_members = len(stream['subscribers'])
+        keys = ', '.join(map(repr, keys_for_command('STREAM_MEMBERS')))
         desc = stream['description']
-        stream_info_content = [('', [desc]), ('Stream settings', [])]
+        stream_info_content = [('', [desc]),
+                               ('Stream Details', [
+                                   ('Stream Members',
+                                    '[{}] Press {} to view'.format(
+                                        total_members, keys))
+                               ]),
+                               ('Stream settings', [])]
         popup_width, column_widths = self.calculate_table_widths(
             stream_info_content, len(title))
 
@@ -1114,6 +1122,43 @@ class StreamInfoView(PopUpView):
 
     def toggle_pinned_status(self, button: Any, new_state: bool) -> None:
         self.controller.model.toggle_stream_pinned_status(self.stream_id)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key('STREAM_MEMBERS', key):
+            self.controller.show_stream_members(stream_id=self.stream_id)
+        return super().keypress(size, key)
+
+
+class StreamMembersView(PopUpView):
+    def __init__(self, controller: Any, stream_id: int) -> None:
+        self.stream_id = stream_id
+        self.controller = controller
+        model = controller.model
+
+        user_ids = model.get_other_subscribers_in_stream(stream_id=stream_id)
+        user_names = [model.user_name_from_id(id) for id in user_ids]
+        sorted_user_names = sorted(user_names)
+        sorted_user_names.insert(0, model.user_full_name)
+        title = 'Stream Members (up/down scrolls)'
+
+        stream_users_content = [('', [
+            (name, '') for name in sorted_user_names]
+        )]
+        popup_width, column_width = self.calculate_table_widths(
+            stream_users_content, len(title)
+        )
+        widgets = self.make_table_with_categories(stream_users_content,
+                                                  column_width)
+
+        super().__init__(controller, widgets, 'STREAM_MEMBERS', popup_width,
+                         title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if(is_command_key('GO_BACK', key)
+                or is_command_key('STREAM_MEMBERS', key)):
+            self.controller.show_stream_info(stream_id=self.stream_id)
+            return key
+        return super().keypress(size, key)
 
 
 class MsgInfoView(PopUpView):

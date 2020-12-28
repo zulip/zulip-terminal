@@ -6,7 +6,7 @@ from urwid import Columns, Text
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.ui_tools.views import (
     AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    PopUpConfirmationView, PopUpView, StreamInfoView,
+    PopUpConfirmationView, PopUpView, StreamInfoView, StreamMembersView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
@@ -562,8 +562,37 @@ class TestStreamInfoView:
         stream_id = 10
         self.controller.model.stream_dict = {stream_id: {'name': 'books',
                                                          'invite_only': False,
-                                                         'description': 'hey'}}
+                                                         'description': 'hey',
+                                                         'subscribers': []}}
         self.stream_info_view = StreamInfoView(self.controller, stream_id)
+
+    def test_keypress_any_key(self, widget_size):
+        key = "a"
+        size = widget_size(self.stream_info_view)
+        self.stream_info_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize('key', keys_for_command('STREAM_MEMBERS'))
+    def test_keypress_stream_members(self, mocker, key, widget_size):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        self.controller.model.is_muted_stream.return_value = False
+        self.controller.model.is_pinned_stream.return_value = False
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        stream_id = self.stream_info_view.stream_id
+        self.controller.model.stream_dict = {stream_id: {'name': 'books',
+                                                         'description': 'hey',
+                                                         'subscribers': []}}
+
+        stream_info_view = StreamInfoView(self.controller, stream_id)
+        size = widget_size(stream_info_view)
+
+        stream_info_view.keypress(size, key)
+
+        self.controller.show_stream_members.assert_called_once_with(
+            stream_id=stream_id,
+        )
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('STREAM_DESC')})
@@ -582,7 +611,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
-        mute_checkbox = self.stream_info_view.widgets[3]
+        mute_checkbox = self.stream_info_view.widgets[6]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(mute_checkbox)
@@ -593,7 +622,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
-        pin_checkbox = self.stream_info_view.widgets[4]
+        pin_checkbox = self.stream_info_view.widgets[7]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(pin_checkbox)
@@ -601,3 +630,35 @@ class TestStreamInfoView:
         pin_checkbox.keypress(size, key)
 
         toggle_pin_status.assert_called_once_with(stream_id)
+
+
+class TestStreamMembersView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        self.controller.model.get_other_subscribers_in_stream.return_value = []
+        self.controller.model.user_full_name = ''
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        stream_id = 10
+        self.stream_members_view = StreamMembersView(
+            self.controller, stream_id)
+
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('STREAM_MEMBERS')})
+    def test_keypress_exit_popup(self, key, widget_size):
+        stream_id = self.stream_members_view.stream_id
+        size = widget_size(self.stream_members_view)
+        self.stream_members_view.keypress(size, key)
+        self.controller.show_stream_info.assert_called_once_with(
+            stream_id=stream_id,
+        )
+
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
+        key, expected_key = navigation_key_expected_key_pair
+        size = widget_size(self.stream_members_view)
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.stream_members_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)

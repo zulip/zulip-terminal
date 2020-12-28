@@ -240,6 +240,12 @@ KEY_BINDINGS = OrderedDict([
         'help_text': 'View stream information & modify settings',
         'key_category': 'stream_list',
     }),
+    ('STREAM_MEMBERS', {
+        'keys': ['m'],
+        'help_text': 'View subscribed stream members from stream info',
+        'excluded_from_random_tips': True,
+        'key_category': 'stream_list',
+    }),
     ('REDRAW', {
         'keys': ['ctrl l'],
         'help_text': 'Redraw screen',

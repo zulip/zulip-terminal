@@ -19,7 +19,7 @@ from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    NoticeView, PopUpConfirmationView, StreamInfoView,
+    NoticeView, PopUpConfirmationView, StreamInfoView, StreamMembersView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -208,6 +208,10 @@ class Controller:
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
         self.show_pop_up(show_stream_view, 'area:stream')
+
+    def show_stream_members(self, stream_id: int) -> None:
+        stream_members_view = StreamMembersView(self, stream_id)
+        self.show_pop_up(stream_members_view, 'area:stream')
 
     def popup_with_message(self, text: str, width: int) -> None:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"),
