@@ -243,6 +243,10 @@ A simple tutorial for implementing the `typing` indicator is available
 in the [wiki](https://github.com/zulip/zulip-terminal/wiki/Developer-Documentation). Follow
 it to understand the how to implement a new feature for zulip-terminal.
 
+### Urwid
+
+Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
+
 ### Setting up a development environment
 
 Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
