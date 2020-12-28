@@ -566,6 +566,7 @@ class TestStreamInfoView:
                 'invite_only': False,
                 'description': 'hey',
                 'subscribers': [],
+                'stream_weekly_traffic': 123,
             }
         }
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
@@ -601,7 +602,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
-        mute_checkbox = self.stream_info_view.widgets[6]
+        mute_checkbox = self.stream_info_view.widgets[7]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(mute_checkbox)
@@ -612,7 +613,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
-        pin_checkbox = self.stream_info_view.widgets[7]
+        pin_checkbox = self.stream_info_view.widgets[8]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(pin_checkbox)

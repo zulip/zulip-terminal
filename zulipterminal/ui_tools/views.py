@@ -1082,6 +1082,8 @@ class StreamInfoView(PopUpView):
         total_members = len(stream['subscribers'])
         member_keys = ', '.join(map(repr, keys_for_command('STREAM_MEMBERS')))
 
+        weekly_msg_count = stream['stream_weekly_traffic']
+
         stream_marker = (STREAM_MARKER_PRIVATE if stream['invite_only']
                          else STREAM_MARKER_PUBLIC)
         title = '{} {}'.format(stream_marker, stream['name'])
@@ -1090,6 +1092,8 @@ class StreamInfoView(PopUpView):
 
         stream_info_content = [('', [desc]),
                                ('Stream Details', [
+                                   ('Weekly Message Count',
+                                    str(weekly_msg_count)),
                                    ('Stream Members',
                                     '{} (Press {} to view list)'.format(
                                         total_members, member_keys))
