@@ -22,6 +22,21 @@ Specific aims include:
 * Exploring alternative user interface designs suited to the display and input constraints
 * Supporting a wide range of platforms and terminal emulators
 
+### Feature status
+
+We consider the client to already provide a fairly stable moderately-featureful everyday-user experience.
+
+The current development focus is on improving aspects of everyday usage which are more commonly used - to reduce the need for users to temporarily switch to another client for a particular feature.
+
+Current limitations which we expect to only resolve over the long term include support for:
+* All operations performed by users with extra privileges (owners/admins)
+* Accessing and updating all settings
+* Using a mouse/pointer to achieve all actions
+* An internationalized UI
+
+For queries on missing feature support please take a look at the [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md),
+our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up on https://chat.zulip.org and chat with users and developers in the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream!
+
 ### Supported platforms
 - Linux
 - OSX
