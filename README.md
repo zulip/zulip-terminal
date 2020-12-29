@@ -12,13 +12,22 @@
 
 ![Screenshot 2020-05-19 at 9 56 49 AM](https://user-images.githubusercontent.com/56690786/82285402-0760b800-99b9-11ea-9a86-9d3765ea9177.png)
 
+## About
 
-## Supported platforms
+Zulip Terminal is the official terminal client for Zulip, providing a [text-based user interface (TUI)](https://en.wikipedia.org/wiki/Text-based_user_interface).
+
+Specific aims include:
+* Providing a broadly similar user experience to the Zulip web client, ultimately supporting all of its features
+* Enabling all actions to be achieved through the keyboard (see [Hot keys](#hot-keys))
+* Exploring alternative user interface designs suited to the display and input constraints
+* Supporting a wide range of platforms and terminal emulators
+
+### Supported platforms
 - Linux
 - OSX
 - WSL (On Windows)
 
-## Supported Server Versions
+### Supported Server Versions
 
 The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#id7). It may still work with earlier versions.
 
