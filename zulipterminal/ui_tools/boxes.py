@@ -177,6 +177,41 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+    def private_box_edit_view(self, message_timestamp: float,
+                              msg_content_edit_limit: int, button: Any=None,
+                              email: str='',
+                              recipient_user_ids: Optional[List[int]]=None,
+                              ) -> None:
+        self.private_box_view(email=email, button=button,
+                              recipient_user_ids=recipient_user_ids)
+
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
+        )
+
+        self.edit_countdown_timer_box = urwid.Text(u"")
+        self.edit_countdown_timer(self.edit_countdown_timer_box,
+                                  message_timestamp,
+                                  msg_content_edit_limit,
+                                  narrow_type="private")
+
+        self.edit_message_write_box = urwid.Columns([
+            self.msg_write_box,
+            (20, urwid.LineBox(
+                self.edit_countdown_timer_box, tlcorner='┌', tline='',
+                lline='│', trcorner='', blcorner='└', rline='',
+                bline='─', brcorner='─'
+            ))
+        ])
+
+        write_box = [
+            (header_line_box, self.options()),
+            (self.edit_message_write_box, self.options()),
+        ]
+        self.contents = write_box
+
     def stream_box_edit_view(self,  message_timestamp: float,
                              msg_content_edit_limit: int, stream_id: int,
                              caption: str='', title: str='', ) -> None:
@@ -1305,7 +1340,12 @@ class MessageBox(urwid.Pile):
                     msg_body_edit_enabled = False
 
             if self.message['type'] == 'private':
-                self.keypress(size, 'enter')
+                self.model.controller.view.write_box.private_box_edit_view(
+                    email=self.recipients_emails,
+                    recipient_user_ids=self.recipient_ids,
+                    message_timestamp=self.message['timestamp'],
+                    msg_content_edit_limit=edit_time_limit
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
