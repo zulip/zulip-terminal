@@ -1,9 +1,10 @@
+import math
 import re
 import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime
 from sys import platform
-from time import ctime, time
+from time import ctime, sleep, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
@@ -11,6 +12,7 @@ import dateutil.parser
 import urwid
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+from typing_extensions import Literal
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
@@ -22,7 +24,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, match_emoji, match_group, match_stream,
+    Message, asynch, format_string, match_emoji, match_group, match_stream,
     match_topics, match_user,
 )
 from zulipterminal.ui_tools.buttons import EditModeButton
@@ -56,6 +58,50 @@ class WriteBox(urwid.Pile):
 
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
+
+    def set_text_and_refresh(self, text_box: urwid.Text, text: str) -> None:
+        # Timer displays on the screen would need
+        # immediate screen refreshes to display changes accurately.
+        text_box.set_text(text)
+        self.view.controller.update_screen()
+
+    @asynch
+    def edit_countdown_timer(self, timer_box: urwid.Text,
+                             message_timestamp: float,
+                             msg_content_edit_limit: int,
+                             *, narrow_type: Literal['stream', 'private']
+                             ) -> None:
+        edit_deadline = msg_content_edit_limit + message_timestamp
+
+        while edit_deadline > time():
+            seconds_left = edit_deadline - time()
+            minutes = int(seconds_left // 60)
+            seconds = seconds_left % 60
+            if minutes >= 1:
+                self.set_text_and_refresh(
+                    timer_box,
+                    "{} min to edit".format(minutes)
+                    )
+                if seconds > 0:
+                    # Sleep for the variable time between the initiation of
+                    # the timer to the next minute.
+                    sleep(seconds)
+                else:
+                    # Sleep for a complete minute before updating timer.
+                    sleep(60)
+            elif seconds >= 1:
+                self.set_text_and_refresh(
+                    timer_box,
+                    "{} sec to edit".format(math.floor(seconds))
+                    )
+                # Update the timer every second when the time remaining
+                # is less than 1 minute.
+                sleep(1)
+
+        if narrow_type == "stream":
+            self.set_text_and_refresh(timer_box, "Topic-editing only")
+        else:
+            self.set_text_and_refresh(timer_box, "Time's up!")
 
     def private_box_view(self, button: Any=None, email: str='',
                          recipient_user_ids: Optional[List[int]]=None) -> None:
