@@ -177,12 +177,40 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
-    def stream_box_edit_view(self, stream_id: int, caption: str='',
-                             title: str='') -> None:
+    def stream_box_edit_view(self,  message_timestamp: float,
+                             msg_content_edit_limit: int, stream_id: int,
+                             caption: str='', title: str='', ) -> None:
         self.stream_box_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
+
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
+        )
+
+        self.edit_countdown_timer_box = urwid.Text(u"")
+        self.edit_countdown_timer(self.edit_countdown_timer_box,
+                                  message_timestamp,
+                                  msg_content_edit_limit,
+                                  narrow_type="stream")
+
+        self.edit_message_write_box = urwid.Columns([
+            self.msg_write_box,
+            (20, urwid.LineBox(
+                self.edit_countdown_timer_box, tlcorner='', tline='',
+                lline='│', trcorner='', blcorner='└', rline='',
+                bline='─', brcorner='─'
+            ))
+        ])
+
+        write_box = [
+            (header_line_box, self.options()),
+            (self.edit_message_write_box, self.options()),
+        ]
+        self.contents = write_box
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:
@@ -1282,7 +1310,9 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
                     caption=self.message['display_recipient'],
-                    title=self.message['subject']
+                    title=self.message['subject'],
+                    message_timestamp=self.message['timestamp'],
+                    msg_content_edit_limit=edit_time_limit
                 )
             msg_id = self.message['id']
             msg = self.model.client.get_raw_message(msg_id)['raw_content']

@@ -528,11 +528,14 @@ class TestWriteBox:
                                           msg_body_edit_enabled,
                                           message_being_edited,
                                           widget_size,
-                                          mocker, stream_id=10):
+                                          mocker, stream_id=10,
+                                          message_timestamp=10000,
+                                          msg_content_edit_limit=3600):
         if box_type == "stream":
             if message_being_edited:
                 mocker.patch(BOXES + ".EditModeButton")
-                write_box.stream_box_edit_view(stream_id)
+                write_box.stream_box_edit_view(stream_id, message_timestamp,
+                                               msg_content_edit_limit)
                 write_box.msg_edit_id = 10
             else:
                 write_box.stream_box_view(stream_id)
