@@ -1221,6 +1221,18 @@ class MessageBox(urwid.Pile):
                             " Time Limit for editing the message body has"
                             " been exceeded.", 3)
                     msg_body_edit_enabled = False
+            else:
+                seconds_left = edit_time_limit - time_since_msg_sent
+                edit_countdown_min = seconds_left // 60
+                edit_countdown_sec = seconds_left % 60
+                if edit_countdown_min > 0:
+                    self.model.controller.view.set_footer_text(
+                        "{} minutes to edit".format(int(edit_countdown_min)), 5
+                    )
+                else:
+                    self.model.controller.view.set_footer_text(
+                        "{} seconds to edit".format(int(edit_countdown_sec)), 5
+                    )
 
             if self.message['type'] == 'private':
                 self.keypress(size, 'enter')
