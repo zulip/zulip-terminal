@@ -572,6 +572,21 @@ class WriteBox(urwid.Pile):
         ]
         self.view.controller.report_error(footer_message)
 
+    def losing_focus_from_stream_box(self, key: str) -> bool:
+        stream_header = self.header_write_box[self.FOCUS_HEADER_BOX_STREAM]
+        stream_name_len = len(stream_header.edit_text)
+        cursor_pos = stream_header.edit_pos
+        if (
+            is_command_key("CYCLE_COMPOSE_FOCUS", key)
+            or key == primary_key_for_command("GO_DOWN")
+            or (
+                key == primary_key_for_command("GO_RIGHT")
+                and stream_name_len == cursor_pos
+            )
+        ):
+            return True
+        return False
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode:
             if not (
@@ -676,7 +691,11 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
-        elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
+        elif (
+            is_command_key("CYCLE_COMPOSE_FOCUS", key)
+            or is_command_key("GO_DOWN", key)
+            or is_command_key("GO_RIGHT", key)
+        ):
             if len(self.contents) == 0:
                 return key
             header = self.header_write_box
@@ -685,33 +704,39 @@ class WriteBox(urwid.Pile):
                 if self.to_write_box is None:
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
                         stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
-                        if not self.model.is_valid_stream(stream_name):
+                        if not self.model.is_valid_stream(
+                            stream_name
+                        ) and self.losing_focus_from_stream_box(key):
                             self.footer_notify_invalid_recipient("Invalid stream name")
                             return key
-                        user_ids = self.model.get_other_subscribers_in_stream(
-                            stream_name=stream_name
-                        )
-                        self.recipient_user_ids = user_ids
-                        self.stream_id = self.model.stream_id_from_name(stream_name)
+                        if is_command_key("CYCLE_COMPOSE_FOCUS", key):
+                            user_ids = self.model.get_other_subscribers_in_stream(
+                                stream_name=stream_name
+                            )
+                            self.recipient_user_ids = user_ids
+                            self.stream_id = self.model.stream_id_from_name(stream_name)
 
-                        header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
-                        return key
-                    elif (
-                        header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
-                        and self.msg_edit_state is not None
-                    ):
-                        header.focus_col = self.FOCUS_HEADER_BOX_EDIT
-                        return key
-                    elif header.focus_col == self.FOCUS_HEADER_BOX_EDIT:
-                        if self.msg_body_edit_enabled:
-                            header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-                            self.focus_position = self.FOCUS_CONTAINER_MESSAGE
-                        else:
                             header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
-                        return key
-                    else:
-                        header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-                else:
+                            return key
+                    elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
+                        if (
+                            header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
+                            and self.msg_edit_state is not None
+                        ):
+                            header.focus_col = self.FOCUS_HEADER_BOX_EDIT
+                            return key
+                        elif header.focus_col == self.FOCUS_HEADER_BOX_EDIT:
+                            if self.msg_body_edit_enabled:
+                                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                                self.focus_position = self.FOCUS_CONTAINER_MESSAGE
+                            else:
+                                header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
+                            return key
+                        else:
+                            header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                elif is_command_key("CYCLE_COMPOSE_FOCUS", key) or is_command_key(
+                    "GO_DOWN", key
+                ):
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )
@@ -726,16 +751,20 @@ class WriteBox(urwid.Pile):
                         users[email]["user_id"] for email in self.recipient_emails
                     ]
 
-            if not self.msg_body_edit_enabled:
+            if not self.msg_body_edit_enabled and (
+                is_command_key("CYCLE_COMPOSE_FOCUS", key)
+                or is_command_key("GO_DOWN", key)
+            ):
                 return key
-            if self.focus_position == self.FOCUS_CONTAINER_HEADER:
-                self.focus_position = self.FOCUS_CONTAINER_MESSAGE
-            else:
-                self.focus_position = self.FOCUS_CONTAINER_HEADER
-            if self.to_write_box is None:
-                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-            else:
-                header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+            if is_command_key("CYCLE_COMPOSE_FOCUS", key):
+                if self.focus_position == self.FOCUS_CONTAINER_HEADER:
+                    self.focus_position = self.FOCUS_CONTAINER_MESSAGE
+                else:
+                    self.focus_position = self.FOCUS_CONTAINER_HEADER
+                if self.to_write_box is None:
+                    header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                else:
+                    header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
 
         key = super().keypress(size, key)
         return key
