@@ -19,7 +19,8 @@ from zulipterminal.config.keys import (
 )
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
-    STREAM_MARKER_PUBLIC, STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
+    STREAM_MARKER_INVALID, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
+    STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream,
@@ -47,6 +48,10 @@ class WriteBox(urwid.Pile):
         self.FOCUS_HEADER_BOX_EDIT = 4
         self.FOCUS_CONTAINER_MESSAGE = 1
         self.FOCUS_MESSAGE_BOX_BODY = 0
+        # These are included to allow improved clarity
+        # FIXME: These elements don't acquire focus; replace prefix & in above?
+        self.FOCUS_HEADER_PREFIX_STREAM = 0
+        self.FOCUS_HEADER_PREFIX_TOPIC = 2
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -128,12 +133,31 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+        # Use and set a callback to set the stream marker
+        self._set_stream_write_box_style(None, caption)
+        urwid.connect_signal(self.stream_write_box, 'change',
+                             self._set_stream_write_box_style)
+
     def stream_box_edit_view(self, stream_id: int, caption: str='',
                              title: str='') -> None:
         self.stream_box_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
+
+    def _set_stream_write_box_style(self, widget: ReadlineEdit,
+                                    new_text: str) -> None:
+        # FIXME: Refactor when we have ~ Model.is_private_stream
+        stream_marker = STREAM_MARKER_INVALID
+        if self.model.is_valid_stream(new_text):
+            stream = self.model.stream_dict[
+                     self.model.stream_id_from_name(new_text)]
+            if stream['invite_only']:
+                stream_marker = STREAM_MARKER_PRIVATE
+            else:
+                stream_marker = STREAM_MARKER_PUBLIC
+        (self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM]
+         .set_text(stream_marker))
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:

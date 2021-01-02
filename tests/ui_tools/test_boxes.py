@@ -2,6 +2,9 @@ import pytest
 from pytest import param
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.symbols import (
+    STREAM_MARKER_INVALID, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
+)
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 
 
@@ -311,6 +314,32 @@ class TestWriteBox:
         _process_typeaheads.assert_called_once_with(matching_streams, state,
                                                     matching_streams)
 
+    @pytest.mark.parametrize([
+        'stream_name', 'stream_id', 'is_valid_stream', 'expected_marker'], [
+      ('Secret stream', 99, True,  STREAM_MARKER_PRIVATE),
+      ('Stream 1',       1, True,  STREAM_MARKER_PUBLIC),
+      ('Stream 0',       0, False, STREAM_MARKER_INVALID),
+    ], ids=[
+        'private_stream',
+        'public_stream',
+        'invalid_stream_name',
+    ])
+    def test__set_stream_write_box_style_markers(self, write_box, stream_id,
+                                                 stream_name, is_valid_stream,
+                                                 expected_marker, stream_dict,
+                                                 mocker):
+        # FIXME: Refactor when we have ~ Model.is_private_stream
+        write_box.model.stream_dict = stream_dict
+        write_box.model.is_valid_stream.return_value = is_valid_stream
+        write_box.model.stream_id_from_name.return_value = stream_id
+
+        write_box.stream_box_view(stream_id)
+
+        write_box._set_stream_write_box_style(write_box, stream_name)
+
+        assert (write_box.header_write_box
+                [write_box.FOCUS_HEADER_PREFIX_STREAM].text) == expected_marker
+
     @pytest.mark.parametrize('text, expected_text', [
         ('Som', 'Some general stream'),
         ('Some gen', 'Some general stream'),
@@ -318,6 +347,7 @@ class TestWriteBox:
     def test__stream_box_autocomplete_with_spaces(self, mocker, write_box,
                                                   widget_size,
                                                   text, expected_text):
+        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
         write_box.stream_box_view(1000)
         stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
         write_box.header_write_box[stream_focus].set_edit_text(text)
@@ -357,6 +387,7 @@ class TestWriteBox:
                                                  widget_size,
                                                  text, expected_text,
                                                  topics):
+        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
         write_box.stream_box_view(1000)
         write_box.model.topics_in_stream.return_value = topics
         topic_focus = write_box.FOCUS_HEADER_BOX_TOPIC
@@ -529,6 +560,8 @@ class TestWriteBox:
                                           message_being_edited,
                                           widget_size,
                                           mocker, stream_id=10):
+        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
+
         if box_type == "stream":
             if message_being_edited:
                 mocker.patch(BOXES + ".EditModeButton")
@@ -572,6 +605,7 @@ class TestWriteBox:
     ])
     def test_write_box_header_contents(self, write_box, expected_box_size,
                                        mocker, msg_type):
+        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
         mocker.patch(BOXES + '.WriteBox.set_editor_mode')
         if msg_type == 'stream':
             write_box.stream_box_view(1000)
