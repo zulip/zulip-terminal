@@ -315,10 +315,15 @@ class TestWriteBox:
                                                     matching_streams)
 
     @pytest.mark.parametrize([
-        'stream_name', 'stream_id', 'is_valid_stream', 'expected_marker'], [
-      ('Secret stream', 99, True,  STREAM_MARKER_PRIVATE),
-      ('Stream 1',       1, True,  STREAM_MARKER_PUBLIC),
-      ('Stream 0',       0, False, STREAM_MARKER_INVALID),
+        'stream_name',
+        'stream_id',
+        'is_valid_stream',
+        'expected_marker',
+        'expected_color'
+    ], [
+      ('Secret stream', 99, True,  STREAM_MARKER_PRIVATE, '#ccc'),
+      ('Stream 1',       1, True,  STREAM_MARKER_PUBLIC,  '#b0a5fd'),
+      ('Stream 0',       0, False, STREAM_MARKER_INVALID, 'general_bar'),
     ], ids=[
         'private_stream',
         'public_stream',
@@ -327,7 +332,7 @@ class TestWriteBox:
     def test__set_stream_write_box_style_markers(self, write_box, stream_id,
                                                  stream_name, is_valid_stream,
                                                  expected_marker, stream_dict,
-                                                 mocker):
+                                                 mocker, expected_color):
         # FIXME: Refactor when we have ~ Model.is_private_stream
         write_box.model.stream_dict = stream_dict
         write_box.model.is_valid_stream.return_value = is_valid_stream
@@ -337,8 +342,11 @@ class TestWriteBox:
 
         write_box._set_stream_write_box_style(write_box, stream_name)
 
-        assert (write_box.header_write_box
-                [write_box.FOCUS_HEADER_PREFIX_STREAM].text) == expected_marker
+        stream_marker = (write_box.header_write_box
+                         [write_box.FOCUS_HEADER_PREFIX_STREAM])
+
+        assert stream_marker.text == expected_marker
+        assert stream_marker.attrib[0][0] == expected_color
 
     @pytest.mark.parametrize('text, expected_text', [
         ('Som', 'Some general stream'),
