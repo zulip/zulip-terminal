@@ -561,6 +561,27 @@ class TestWriteBox:
             assert (write_box.FOCUS_MESSAGE_BOX_BODY
                     == focus_val(expected_focus_col_name))
 
+    @pytest.mark.parametrize(["msg_type", "expected_box_size"], [
+        ('private',     1),
+        ('stream',      4),
+        ('stream_edit', 5),
+    ], ids=[
+        'private_message',
+        'stream_message',
+        'stream_edit_message',
+    ])
+    def test_write_box_header_contents(self, write_box, expected_box_size,
+                                       mocker, msg_type):
+        mocker.patch(BOXES + '.WriteBox.set_editor_mode')
+        if msg_type == 'stream':
+            write_box.stream_box_view(1000)
+        elif msg_type == 'stream_edit':
+            write_box.stream_box_edit_view(1000)
+        else:
+            write_box.private_box_view(None, 'foo@gmail.com')
+
+        assert len(write_box.header_write_box.widget_list) == expected_box_size
+
 
 class TestPanelSearchBox:
     search_caption = "Search Results "
