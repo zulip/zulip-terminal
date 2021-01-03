@@ -115,8 +115,14 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.set_completer_delims("")
 
+        stream_marker = STREAM_MARKER_PUBLIC
+        color = None
+        if caption:
+            color = self.model.stream_dict[self.stream_id]['color']
+            if self.model.stream_dict[self.stream_id]['invite_only']:
+                stream_marker = STREAM_MARKER_PRIVATE
         self.header_write_box = urwid.Columns([
-            ('pack', urwid.Text(STREAM_MARKER_PUBLIC)),
+            ('pack', urwid.Text((color, STREAM_MARKER_PUBLIC))),
             self.stream_write_box,
             ('pack', urwid.Text(STREAM_TOPIC_SEPARATOR)),
             self.title_write_box], dividechars=1)
@@ -144,6 +150,7 @@ class WriteBox(urwid.Pile):
                                     new_text: str) -> None:
         # FIXME: Needs refactoring?
         stream_marker = STREAM_MARKER_INVALID
+        color = 'general_bar'
         if self.model.is_valid_stream(new_text):
             stream = self.model.stream_dict[
                      self.model.stream_id_from_name(new_text)]
@@ -151,8 +158,9 @@ class WriteBox(urwid.Pile):
                 stream_marker = STREAM_MARKER_PRIVATE
             else:
                 stream_marker = STREAM_MARKER_PUBLIC
+            color = stream['color']
         (self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM]
-         .set_text(stream_marker))
+         .set_text((color, stream_marker)))
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:
