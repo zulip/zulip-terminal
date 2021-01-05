@@ -2018,8 +2018,13 @@ class TestModel:
         assert self.client.get_events.called
         assert not sleep.called
 
-    def test_poll_for_events__reconnect_ok(self, mocker, model, raising_event):
-        register_return_value = lambda: ""
+    @pytest.mark.parametrize("register_return_value", [
+        pytest.param([""], id="reconnect_on_1st_attempt"),
+        pytest.param(["error", ""], id="reconnect_on_2nd_attempt"),
+        pytest.param(["error", "error", ""], id="reconnect_on_3rd_attempt"),
+    ])
+    def test_poll_for_events__reconnect_ok(self, mocker, model, raising_event,
+                                           register_return_value):
         mocker.patch("zulipterminal.model.Model._register_desired_events",
                      side_effect=register_return_value)
         sleep = mocker.patch("zulipterminal.model.time.sleep")
@@ -2036,6 +2041,7 @@ class TestModel:
         with pytest.raises(self.LoopEnder):
             model.poll_for_events()
 
-        model._register_desired_events.assert_called_once()
+        registers = [mocker.call() for _ in range(len(register_return_value))]
+        model._register_desired_events.assert_has_calls(registers)
         assert self.client.get_events.called
-        assert not sleep.called
+        assert sleep.call_count == len(registers) - 1
