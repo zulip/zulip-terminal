@@ -580,7 +580,16 @@ class TestMsgInfoView:
             {None: 'popup_contrast'},
             {None: 'selected'},
             15,
-        )],
+        ), (
+            OrderedDict([('https://foo.com', ('', 1, True))]),
+            '1: https://foo.com',
+            {None: 'popup_contrast'},
+            {None: 'selected'},
+            18,
+        )], ids=[
+            'link_with_link_text',
+            'link_without_link_text',
+        ]
     )
     def test_create_link_buttons(self, initial_link, expected_text,
                                  expected_attr_map, expected_focus_map,
