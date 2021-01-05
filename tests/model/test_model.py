@@ -2017,3 +2017,25 @@ class TestModel:
         assert not model._register_desired_events.called
         assert self.client.get_events.called
         assert not sleep.called
+
+    def test_poll_for_events__reconnect_ok(self, mocker, model, raising_event):
+        register_return_value = lambda: ""
+        mocker.patch("zulipterminal.model.Model._register_desired_events",
+                     side_effect=register_return_value)
+        sleep = mocker.patch("zulipterminal.model.time.sleep")
+
+        self.client.get_events.side_effect = [
+            {
+                "events": [raising_event],
+                "result": "success",
+            }
+        ]
+
+        model.queue_id = None  # Initial trigger for reconnecting
+
+        with pytest.raises(self.LoopEnder):
+            model.poll_for_events()
+
+        model._register_desired_events.assert_called_once()
+        assert self.client.get_events.called
+        assert not sleep.called
