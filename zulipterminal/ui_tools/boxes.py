@@ -661,6 +661,9 @@ class MessageBox(urwid.Pile):
         self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
             OrderedDict()
         )
+        self.topic_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
+            OrderedDict()
+        )
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
@@ -668,6 +671,13 @@ class MessageBox(urwid.Pile):
             self.last_message = defaultdict(dict)
 
         if self.message['type'] == 'stream':
+            # Set `topic_links` if present
+            for link in self.message.get('topic_links', []):
+                # Modernized response
+                self.topic_links[link['url']] = (
+                    link['text'], len(self.topic_links) + 1, True
+                )
+
             self.stream_name = self.message['display_recipient']
             self.stream_id = self.message['stream_id']
             self.topic_name = self.message['subject']
@@ -1549,6 +1559,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
             self.model.controller.show_msg_info(self.message,
+                                                self.topic_links,
                                                 self.message_links,
                                                 self.time_mentions)
         return key

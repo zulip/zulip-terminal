@@ -205,12 +205,13 @@ class Controller:
         self.show_pop_up(EditModeView(self, button), 'area:msg')
 
     def show_msg_info(self, msg: Message,
+                      topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                       message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                       time_mentions: List[Tuple[str, str]],
                       ) -> None:
         msg_info_view = MsgInfoView(self, msg,
                                     "Message Information (up/down scrolls)",
-                                    message_links, time_mentions)
+                                    topic_links, message_links, time_mentions)
         self.show_pop_up(msg_info_view, 'area:msg')
 
     def show_stream_info(self, stream_id: int) -> None:
@@ -241,11 +242,13 @@ class Controller:
 
     def show_edit_history(
         self, message: Message,
+        topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
         message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
-            EditHistoryView(self, message, message_links, time_mentions,
+            EditHistoryView(self, message, topic_links,
+                            message_links, time_mentions,
                             'Edit History (up/down scrolls)'),
             'area:msg'
         )

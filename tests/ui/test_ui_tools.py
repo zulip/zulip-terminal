@@ -1292,6 +1292,8 @@ class TestMessageBox:
         assert msg_box.last_message == defaultdict(dict)
         for field, invalid_default in set_fields:
             assert getattr(msg_box, field) != invalid_default
+        if message_type == 'stream':
+            assert msg_box.topic_links == OrderedDict()
         assert msg_box.message_links == OrderedDict()
         assert msg_box.time_mentions == list()
 
