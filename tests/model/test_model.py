@@ -1988,18 +1988,21 @@ class TestModel:
 
         assert fetched_custom_emojis == custom_emojis
 
-    def test_poll_for_events__no_disconnect(self, mocker, model):
+    # Use LoopEnder with raising_event to cause the event loop to end without
+    # processing the event
+    class LoopEnder(Exception):
+        pass
+
+    @pytest.fixture
+    def raising_event(self, mocker):
+        def raiser(*args):
+            raise TestModel.LoopEnder()
+        return mocker.MagicMock(__getitem__=raiser)
+
+    def test_poll_for_events__no_disconnect(self, mocker, model,
+                                            raising_event):
         mocker.patch("zulipterminal.model.Model._register_desired_events")
         sleep = mocker.patch("zulipterminal.model.time.sleep")
-
-        # This combination causes the event loop to end
-        # without processing the event
-        class LoopEnder(Exception):
-            pass
-
-        def raiser(*args):
-            raise LoopEnder()
-        raising_event = mocker.MagicMock(__getitem__=raiser)
 
         self.client.get_events.side_effect = [
             {
@@ -2008,7 +2011,7 @@ class TestModel:
             }
         ]
 
-        with pytest.raises(LoopEnder):
+        with pytest.raises(self.LoopEnder):
             model.poll_for_events()
 
         assert not model._register_desired_events.called
