@@ -1198,7 +1198,7 @@ class Model:
         while True:
             if queue_id is None:
                 while True:
-                    if self._register_desired_events():
+                    if not self._register_desired_events():
                         queue_id = self.queue_id
                         last_event_id = self.last_event_id
                         break
