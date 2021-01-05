@@ -1251,6 +1251,8 @@ class MsgInfoView(PopUpView):
                 ('Edit History', f"Press {keys} to view")
             )
         # Render the category using the existing table methods if links exist.
+        if topic_links:
+            msg_info.append(('Topic Links', []))
         if message_links:
             msg_info.append(('Message Links', []))
         if time_mentions:
@@ -1275,6 +1277,21 @@ class MsgInfoView(PopUpView):
         # To keep track of buttons (e.g., button links) and to facilitate
         # computing their slice indexes
         button_widgets = []  # type: List[Any]
+
+        if topic_links:
+            topic_link_widgets, topic_link_width = (
+                self.create_link_buttons(controller, topic_links)
+            )
+
+            # slice_index = Number of labels before topic links + 1 newline
+            #               + 1 'Topic Links' category label.
+            slice_index = len(msg_info[0][1]) + 2
+            slice_index += sum([len(w) + 2 for w in button_widgets])
+            button_widgets.append(topic_links)
+
+            widgets = (widgets[:slice_index] + topic_link_widgets
+                       + widgets[slice_index:])
+            popup_width = max(popup_width, topic_link_width)
 
         if message_links:
             message_link_widgets, message_link_width = (
@@ -1303,7 +1320,10 @@ class MsgInfoView(PopUpView):
 
         for index, link in enumerate(links):
             text, link_index, _ = links[link]
-            caption = f"{link_index}: {text}\n{link}"
+            if text:
+                caption = f"{link_index}: {text}\n{link}"
+            else:
+                caption = f"{link_index}: {link}"
             link_width = max(
                 link_width,
                 len(max(caption.split('\n'), key=len))
