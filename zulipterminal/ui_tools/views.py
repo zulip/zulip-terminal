@@ -1219,10 +1219,12 @@ class StreamMembersView(PopUpView):
 
 class MsgInfoView(PopUpView):
     def __init__(self, controller: Any, msg: Message, title: str,
+                 topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                  message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                  time_mentions: List[Tuple[str, str]],
                  ) -> None:
         self.msg = msg
+        self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
         date_and_time = controller.model.formatted_local_time(
@@ -1300,6 +1302,7 @@ class MsgInfoView(PopUpView):
                 and self.show_edit_history_label):
             self.controller.show_edit_history(
                 message=self.msg,
+                topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
@@ -1345,11 +1348,13 @@ EditHistoryTag = Literal['(Current Version)', '(Original Version)', '']
 
 class EditHistoryView(PopUpView):
     def __init__(self, controller: Any, message: Message,
+                 topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                  message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
                  time_mentions: List[Tuple[str, str]],
                  title: str) -> None:
         self.controller = controller
         self.message = message
+        self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
         width = 64
@@ -1446,6 +1451,7 @@ class EditHistoryView(PopUpView):
                 or is_command_key('EDIT_HISTORY', key)):
             self.controller.show_msg_info(
                 msg=self.message,
+                topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )

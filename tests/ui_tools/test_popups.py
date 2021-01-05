@@ -207,6 +207,7 @@ class TestEditHistoryView:
         self.edit_history_view = EditHistoryView(
             controller=self.controller,
             message=self.message,
+            topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
             title='Edit History',
@@ -215,6 +216,7 @@ class TestEditHistoryView:
     def test_init(self):
         assert self.edit_history_view.controller == self.controller
         assert self.edit_history_view.message == self.message
+        assert self.edit_history_view.topic_links == OrderedDict()
         assert self.edit_history_view.message_links == OrderedDict()
         assert self.edit_history_view.time_mentions == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
@@ -246,6 +248,7 @@ class TestEditHistoryView:
 
         self.controller.show_msg_info.assert_called_once_with(
             msg=self.message,
+            topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
         )
@@ -450,7 +453,13 @@ class TestMsgInfoView:
         ]
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
                                          'Message Information', OrderedDict(),
-                                         list())
+                                         OrderedDict(), list())
+
+    def test_init(self, message_fixture):
+        assert self.msg_info_view.msg == message_fixture
+        assert self.msg_info_view.topic_links == OrderedDict()
+        assert self.msg_info_view.message_links == OrderedDict()
+        assert self.msg_info_view.time_mentions == list()
 
     def test_keypress_any_key(self, widget_size):
         key = "a"
@@ -482,6 +491,7 @@ class TestMsgInfoView:
         }
         msg_info_view = MsgInfoView(self.controller, message_fixture,
                                     title='Message Information',
+                                    topic_links=OrderedDict(),
                                     message_links=OrderedDict(),
                                     time_mentions=list())
         size = widget_size(msg_info_view)
@@ -491,6 +501,7 @@ class TestMsgInfoView:
         if msg_info_view.show_edit_history_label:
             self.controller.show_edit_history.assert_called_once_with(
                 message=message_fixture,
+                topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
             )
@@ -552,7 +563,7 @@ class TestMsgInfoView:
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         self.msg_info_view = MsgInfoView(self.controller, varied_message,
                                          'Message Information', OrderedDict(),
-                                         list())
+                                         OrderedDict(), list())
         # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
         expected_height = 9
         assert self.msg_info_view.height == expected_height
