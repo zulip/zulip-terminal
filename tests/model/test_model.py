@@ -600,6 +600,34 @@ class TestModel:
             assert model.index['pointer'][repr(model.narrow)] == anchor
         assert model._have_last_message[repr(model.narrow)] is True
 
+    @pytest.mark.parametrize('messages, expected_messages_response', [(
+        {'topic_links':   [{'url': 'www.foo.com', 'text': 'Bar'}]},
+        {'topic_links':   [{'url': 'www.foo.com', 'text': 'Bar'}]},
+    ), (
+        {'topic_links':   ['www.foo1.com']},
+        {'topic_links':   [{'url': 'www.foo1.com', 'text': ''}]},
+    ), (
+        {'topic_links': []},
+        {'topic_links': []},
+    ), (
+        {'subject_links':   ['www.foo2.com']},
+        {'topic_links':     [{'url': 'www.foo2.com', 'text': ''}]},
+    ), (
+        {'subject_links': []},
+        {'topic_links':   []},
+    )], ids=[
+        'Zulip_4.0+_ZFL46_response_with_topic_links',
+        'Zulip_3.0+_ZFL1_response_with_topic_links',
+        'Zulip_3.0+_ZFL1_response_empty_topic_links',
+        'Zulip_2.1+_response_with_subject_links',
+        'Zulip_2.1+_response_empty_subject_links',
+    ])
+    def test_modernize_message_response(self, model, messages,
+                                        expected_messages_response):
+
+        assert (model.modernize_message_response(messages)
+                == expected_messages_response)
+
     def test_get_message_false_first_anchor(
             self, mocker, messages_successful_response, index_all_messages,
             initial_data, num_before=30, num_after=10
