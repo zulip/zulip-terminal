@@ -509,6 +509,11 @@ class Model:
         }
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
+            response['messages'] = [
+                self.modernize_message_response(msg)
+                for msg in response['messages']
+            ]
+
             self.index = index_messages(response['messages'], self, self.index)
             narrow_str = repr(self.narrow)
             if first_anchor and response['anchor'] != 10000000000000000:
@@ -529,6 +534,35 @@ class Model:
             return ""
         display_error_if_present(response, self.controller)
         return response['msg']
+
+    @staticmethod
+    def modernize_message_response(message: Message
+                                   ) -> Message:
+        """
+        Converts received message into the modern message response format.
+
+        This provides a good single place to handle support for older server
+        releases params, and making them compatible with recent releases.
+
+        TODO: This could be extended for other message params potentially
+        in future.
+        """
+        # (1) `subject_links` param is changed to `topic_links` from
+        # feature level 1, server version 3.0
+        if 'subject_links' in message.keys():
+            message['topic_links'] = message.pop('subject_links')
+
+        # (2) Modernize `topic_links` old response (List[str]) to new response
+        # (List[Dict[str, str]])
+        if 'topic_links' in message.keys():
+            topic_links = [
+                {'url': link, 'text': ''} for link in message['topic_links']
+                if type(link) == str
+            ]
+            if topic_links:
+                message['topic_links'] = topic_links
+
+        return message
 
     def fetch_message_history(self, message_id: int,
                               ) -> List[Dict[str, Union[int, str]]]:
@@ -986,7 +1020,7 @@ class Model:
         Handle new messages (eg. add message to the end of the view)
         """
         assert event['type'] == "message"
-        message = event['message']
+        message = self.modernize_message_response(event['message'])
         # sometimes `flags` are missing in `event` so initialize
         # an empty list of flags in that case.
         message['flags'] = event.get('flags', [])
