@@ -1125,8 +1125,6 @@ class Model:
                         and msg_box.message['subject'] != self.narrow[1][1]):
                     msg_pos = view.message_view.log.index(msg_w)
                     view.message_view.log.remove(msg_w)
-                    prev_msg_sender = msg_box.last_message['sender_email']
-                    edited_msg_sender = msg_box.message['sender_email']
                     # Change narrow if there are no messages left in the
                     # current narrow.
                     if not view.message_view.log:
@@ -1139,18 +1137,31 @@ class Model:
                     # Creates message box of the message following the
                     # edited message to display elided sender/datefields
                     # of lower messages
-                    elif prev_msg_sender != edited_msg_sender:
-                        if len(view.message_view.log) >= (msg_pos + 1):
-                            next_msg_w = view.message_view.log[msg_pos]
-                            next_msg = next_msg_w.original_widget.message
-                            next_msg_sender = next_msg['sender_email']
-                            prev_msg = msg_box.last_message
-                            if next_msg_sender != prev_msg_sender:
-                                msg_w_list = create_msg_box_list(
-                                                self,
-                                                [next_msg['id']],
-                                                last_message=prev_msg)
-                                view.message_view.log[msg_pos] = msg_w_list[0]
+                    elif len(view.message_view.log) >= (msg_pos + 1):
+                        edited_msg_sender = msg_box.message['sender_email']
+                        edited_msg_time = msg_box.message['timestamp']
+                        next_msg_w = view.message_view.log[msg_pos]
+                        next_msg = next_msg_w.original_widget.message
+                        next_msg_sender = next_msg['sender_email']
+                        next_msg_time = next_msg['timestamp']
+                        prev_msg = msg_box.last_message
+                        prev_msg_time = prev_msg.get('timestamp', 0)
+                        prev_msg_sender = prev_msg.get('sender_email', "")
+                        if prev_msg_sender == "":
+                            msg_w_list = create_msg_box_list(
+                                            self,
+                                            [next_msg['id']])
+                            new_msg_w = msg_w_list[0]
+                            view.message_view.log[msg_pos] = next_msg_w
+
+                        elif (next_msg_sender != prev_msg_sender
+                                or next_msg_time != prev_msg_time):
+                            msg_w_list = create_msg_box_list(
+                                            self,
+                                            [next_msg['id']],
+                                            last_message=prev_msg)
+                            new_msg_w = msg_w_list[0]
+                            view.message_view.log[msg_pos] = new_msg_w
                     self.controller.update_screen()
                     return
 

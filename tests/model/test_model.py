@@ -1209,12 +1209,16 @@ class TestModel:
         'msgbox_updated_in_all_messages_narrow',
     ])
     def test__update_rendered_view(self, mocker, model, subject, narrow,
-                                   new_log_len, msg_id=1):
+                                   new_log_len, msg_id=1,
+                                   sender_email='foo@gmail.com'):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
-        msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
+        msg_w.original_widget.message = {'id': msg_id, 'subject': subject,
+                                         'timestamp': 12,
+                                         'sender_email': sender_email}
         model.narrow = narrow
-        other_msg_w.original_widget.message = {'id': 2}
+        other_msg_w.original_widget.message = {'id': 2, 'timestamp': 13,
+                                               'sender_email': 'boo@gmail.com'}
         self.controller.view.message_view = (
             mocker.Mock(log=[msg_w, other_msg_w])
         )
@@ -1228,8 +1232,9 @@ class TestModel:
         # If there are 2 msgs and first one is updated, next one is updated too
         if new_log_len == 2:
             other_msg_w = new_msg_w
+
         assert (self.controller.view.message_view.log
-                == [new_msg_w, other_msg_w][-new_log_len:])
+                == [new_msg_w, other_msg_w][:new_log_len])
         assert model.controller.update_screen.called
 
     @pytest.mark.parametrize('subject, narrow, narrow_changed', [
@@ -1247,6 +1252,7 @@ class TestModel:
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {'id': msg_id, 'subject': subject}
+        msg_w.original_widget.last_message = {}
         model.narrow = narrow
         self.controller.view.message_view = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.
