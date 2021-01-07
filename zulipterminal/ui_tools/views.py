@@ -11,7 +11,8 @@ from zulipterminal.config.keys import (
 )
 from zulipterminal.config.symbols import (
     CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER, STATUS_ACTIVE,
-    STATUS_IDLE, STATUS_INACTIVE, STATUS_OFFLINE,
+    STATUS_IDLE, STATUS_INACTIVE, STATUS_OFFLINE, STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.helper import (
     Message, asynch, edit_mode_captions, match_stream, match_user,
@@ -1077,7 +1078,9 @@ class StreamInfoView(PopUpView):
         self.stream_id = stream_id
         self.controller = controller
         stream = controller.model.stream_dict[stream_id]
-        title = '# {}'.format(stream['name'])
+        stream_marker = (STREAM_MARKER_PRIVATE if stream['invite_only']
+                         else STREAM_MARKER_PUBLIC)
+        title = '{} {}'.format(stream_marker, stream['name'])
         desc = stream['description']
         stream_info_content = [('', [desc]), ('Stream settings', [])]
         popup_width, column_widths = self.calculate_table_widths(
