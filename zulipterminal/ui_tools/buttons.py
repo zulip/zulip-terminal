@@ -6,7 +6,9 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
-from zulipterminal.config.symbols import MUTE_MARKER
+from zulipterminal.config.symbols import (
+    MUTE_MARKER, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
+)
 from zulipterminal.helper import (
     StreamData, edit_mode_captions, hash_util_decode,
 )
@@ -168,11 +170,13 @@ class StreamButton(TopButton):
         view.palette.append((
             's' + self.color, '', '', 'standout', inverse_text, self.color))
 
+        stream_marker = (STREAM_MARKER_PRIVATE if is_private
+                         else STREAM_MARKER_PUBLIC)
         super().__init__(controller,
                          caption=self.stream_name,
                          show_function=controller.narrow_to_stream,
                          prefix_character=(
-                            self.color, 'P' if is_private else '#'),
+                            self.color, stream_marker),
                          width=width,
                          count=count)
 
