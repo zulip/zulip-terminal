@@ -7,7 +7,7 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Travis Build Status](https://travis-ci.com/zulip/zulip-terminal.svg?branch=master)](https://travis-ci.com/github/zulip/zulip-terminal)
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=master)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amaster)
-[![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://codecov.io/gh/zulip/zulip-terminal)
+[![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/master)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 ![Screenshot 2020-05-19 at 9 56 49 AM](https://user-images.githubusercontent.com/56690786/82285402-0760b800-99b9-11ea-9a86-9d3765ea9177.png)
