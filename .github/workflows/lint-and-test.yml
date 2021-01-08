@@ -65,5 +65,7 @@ jobs:
         run: pip install .[testing]
       - name: Run tests with pytest
         run: pytest 
-      - name: Run codecov
-        run: pip3 install codecov && codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        # We avoid extra work by just running codecov on one python version
+        if: matrix.test-python-version == 3.9
