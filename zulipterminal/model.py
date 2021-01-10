@@ -86,6 +86,7 @@ class Model:
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
+        self.add_to_counts = True
 
         self.user_id = -1
         self.user_email = ""
@@ -754,11 +755,13 @@ class Model:
                     unread_count = self.unread_counts['streams'][stream_id]
                     if event['value']:  # Unmuting streams
                         self.muted_streams.remove(stream_id)
-                        self.unread_counts['all_msg'] += unread_count
+                        if self.add_to_counts:
+                            self.unread_counts['all_msg'] += unread_count
                         stream_button.mark_unmuted(unread_count)
                     else:  # Muting streams
                         self.muted_streams.add(stream_id)
-                        self.unread_counts['all_msg'] -= unread_count
+                        if self.add_to_counts:
+                            self.unread_counts['all_msg'] -= unread_count
                         stream_button.mark_muted()
                     self.controller.update_screen()
                 elif event.get('property', None) == 'pin_to_top':
