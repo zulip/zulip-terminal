@@ -568,6 +568,36 @@ class TestMsgInfoView:
         expected_height = 9
         assert self.msg_info_view.height == expected_height
 
+    @pytest.mark.parametrize([
+            'initial_link',
+            'expected_text',
+            'expected_attr_map',
+            'expected_focus_map',
+            'expected_link_width'
+        ], [(
+            OrderedDict([('https://bar.com', ('Foo', 1, True))]),
+            '1: Foo\nhttps://bar.com',
+            {None: 'popup_contrast'},
+            {None: 'selected'},
+            15,
+        )],
+    )
+    def test_create_link_buttons(self, initial_link, expected_text,
+                                 expected_attr_map, expected_focus_map,
+                                 expected_link_width):
+        [link_w], link_width = self.msg_info_view.create_link_buttons(
+            self.controller, initial_link,
+        )
+
+        assert [link_w.link] == list(initial_link)
+        assert (link_w._wrapped_widget.original_widget.text
+                == expected_text)
+        assert (link_w._wrapped_widget.focus_map
+                == expected_focus_map)
+        assert (link_w._wrapped_widget.attr_map
+                == expected_attr_map)
+        assert link_width == expected_link_width
+
     def test_keypress_navigation(self, mocker, widget_size,
                                  navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair

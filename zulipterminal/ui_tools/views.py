@@ -1272,30 +1272,49 @@ class MsgInfoView(PopUpView):
                                                                  len(title))
         widgets = self.make_table_with_categories(msg_info, column_widths)
 
-        if message_links:
-            message_link_widgets = []
-            message_link_width = 0
-            for index, link in enumerate(message_links):
-                text, link_index, _ = message_links[link]
-                caption = f"{link_index}: {text}\n{link}"
-                message_link_width = max(
-                    message_link_width,
-                    len(max(caption.split('\n'), key=len))
-                )
+        # To keep track of buttons (e.g., button links) and to facilitate
+        # computing their slice indexes
+        button_widgets = []  # type: List[Any]
 
-                display_attr = None if index % 2 else 'popup_contrast'
-                message_link_widgets.append(
-                    MessageLinkButton(controller, caption, link, display_attr)
-                )
+        if message_links:
+            message_link_widgets, message_link_width = (
+                self.create_link_buttons(controller, message_links)
+            )
 
             # slice_index = Number of labels before message links + 1 newline
             #               + 1 'Message Links' category label.
             slice_index = len(msg_info[0][1]) + 2
+            slice_index += sum([len(w) + 2 for w in button_widgets])
+            button_widgets.append(message_links)
+
             widgets = (widgets[:slice_index] + message_link_widgets
                        + widgets[slice_index:])
             popup_width = max(popup_width, message_link_width)
 
         super().__init__(controller, widgets, 'MSG_INFO', popup_width, title)
+
+    @staticmethod
+    def create_link_buttons(
+            controller: Any,
+            links: 'OrderedDict[str, Tuple[str, int, bool]]'
+            ) -> Tuple[List[MessageLinkButton], int]:
+        link_widgets = []
+        link_width = 0
+
+        for index, link in enumerate(links):
+            text, link_index, _ = links[link]
+            caption = f"{link_index}: {text}\n{link}"
+            link_width = max(
+                link_width,
+                len(max(caption.split('\n'), key=len))
+            )
+
+            display_attr = None if index % 2 else 'popup_contrast'
+            link_widgets.append(
+                MessageLinkButton(controller, caption, link, display_attr)
+            )
+
+        return link_widgets, link_width
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (is_command_key('EDIT_HISTORY', key)
