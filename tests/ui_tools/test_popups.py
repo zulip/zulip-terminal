@@ -561,6 +561,7 @@ class TestStreamInfoView:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         stream_id = 10
         self.controller.model.stream_dict = {stream_id: {'name': 'books',
+                                                         'invite_only': False,
                                                          'description': 'hey'}}
         self.stream_info_view = StreamInfoView(self.controller, stream_id)
 
