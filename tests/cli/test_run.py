@@ -1,5 +1,6 @@
 import builtins
 import os
+import stat
 
 import pytest
 
@@ -88,6 +89,7 @@ def minimal_zuliprc(tmpdir):
     zuliprc_path = str(tmpdir) + "/zuliprc"
     with open(zuliprc_path, "w") as f:
         f.write("[api]")  # minimal to avoid Exception
+    os.chmod(zuliprc_path, 0o600)
     return zuliprc_path
 
 
@@ -295,6 +297,8 @@ def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
     expected_contents = "[api]\nemail={}\nkey={}\nsite={}".format(id, key, url)
     with open(path) as f:
         assert f.read() == expected_contents
+
+    assert stat.filemode(os.stat(path).st_mode)[-6:] == 6 * "-"
 
 
 def test__write_zuliprc__fail_file_exists(

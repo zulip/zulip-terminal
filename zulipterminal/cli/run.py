@@ -202,11 +202,12 @@ def _write_zuliprc(to_path: str, *,
                    login_id: str, api_key: str, server_url: str) -> str:
     """
     Writes a zuliprc file, returning a non-empty error string on failure
-    Only creates new files; errors if file already exists
+    Only creates new private files; errors if file already exists
     """
     try:
         with open(os.open(to_path,
-                          os.O_CREAT | os.O_WRONLY | os.O_EXCL),
+                          os.O_CREAT | os.O_WRONLY | os.O_EXCL,
+                          0o600),
                   'w') as f:
             f.write('[api]\nemail={}\nkey={}\nsite={}'
                     .format(login_id, api_key, server_url))
