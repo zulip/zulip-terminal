@@ -5,6 +5,7 @@ import pytest
 
 from zulipterminal.cli.run import (
     THEMES,
+    _write_zuliprc,
     exit_with_error,
     get_login_id,
     in_color,
@@ -237,8 +238,9 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, 'input', lambda _: 'text\n')
+    response = mocker.Mock(json=lambda: dict(api_key=""), status_code=200)
     mocker.patch("zulipterminal.cli.run.get_api_key",
-                 return_value=(mocker.Mock(status_code=200), None))
+                 return_value=(response, None))
 
     with pytest.raises(SystemExit):
         main([])
@@ -279,3 +281,17 @@ def test_exit_with_error(error_code, helper_text,
 
     if helper_text:
         assert lines[1] == helper_text
+
+
+def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
+    path = os.path.join(str(tmpdir), "zuliprc")
+
+    error_message = _write_zuliprc(
+        path, api_key=key, server_url=url, login_id=id,
+    )
+
+    assert error_message == ""
+
+    expected_contents = "[api]\nemail={}\nkey={}\nsite={}".format(id, key, url)
+    with open(path) as f:
+        assert f.read() == expected_contents
