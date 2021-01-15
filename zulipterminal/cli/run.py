@@ -2,6 +2,7 @@ import argparse
 import configparser
 import logging
 import os
+import stat
 import sys
 import traceback
 from os import path, remove
@@ -234,6 +235,22 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         except EOFError:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
+
+    mode = os.stat(zuliprc_path).st_mode
+    is_readable_by_group_or_others = mode & (stat.S_IRWXG | stat.S_IRWXO)
+
+    if is_readable_by_group_or_others:
+        print(in_color(
+            'red',
+            "ERROR: Please ensure your zuliprc is NOT publicly accessible:\n"
+            "  {0}\n"
+            "(it currently has permissions '{1}')\n"
+            "This can often be achieved with a command such as:\n"
+            "  chmod og-rwx {0}\n"
+            "Consider regenerating the [api] part of your zuliprc to ensure "
+            "your account is secure.".format(zuliprc_path, stat.filemode(mode))
+        ))
+        sys.exit(1)
 
     zuliprc = configparser.ConfigParser()
 

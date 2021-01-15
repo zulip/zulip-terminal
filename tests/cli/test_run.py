@@ -311,3 +311,40 @@ def test__write_zuliprc__fail_file_exists(
     )
 
     assert error_message == "zuliprc already exists at " + path
+
+
+@pytest.mark.parametrize('mode', [
+    0o77, 0o70, 0o07,
+    0o66, 0o60, 0o06,
+    0o55, 0o50, 0o05,
+    0o44, 0o40, 0o04,
+    0o33, 0o30, 0o03,
+    0o22, 0o20, 0o02,
+    0o11, 0o10, 0o01,
+])
+def test_show_error_if_loading_zuliprc_with_open_permissions(
+    capsys, minimal_zuliprc, mode,
+):
+    mode += 0o600
+    os.chmod(minimal_zuliprc, mode)
+    current_mode = stat.filemode(os.stat(minimal_zuliprc).st_mode)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", minimal_zuliprc, ])
+
+    assert str(e.value) == '1'
+
+    captured = capsys.readouterr()
+
+    lines = captured.out.split('\n')[:-1]
+    expected_last_lines = [
+        "(it currently has permissions '{}')".format(current_mode),
+        "This can often be achieved with a command such as:",
+        "  chmod og-rwx {}".format(minimal_zuliprc),
+        "Consider regenerating the [api] part of your zuliprc to ensure "
+        "your account is secure."
+        "\x1b[0m"
+    ]
+    assert lines[-4:] == expected_last_lines
+
+    assert captured.err == ""
