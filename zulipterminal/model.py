@@ -333,16 +333,19 @@ class Model:
         })
         display_error_if_present(response, self.controller)
 
-    def send_private_message(self, recipients: str,
+    def send_private_message(self, recipients: List[str],
                              content: str) -> bool:
-        request = {
-            'type': 'private',
-            'to': recipients,
-            'content': content,
-        }
-        response = self.client.send_message(request)
-        display_error_if_present(response, self.controller)
-        return response['result'] == 'success'
+        if recipients:
+            request = {
+                'type': 'private',
+                'to': recipients,
+                'content': content,
+            }
+            response = self.client.send_message(request)
+            display_error_if_present(response, self.controller)
+            return response['result'] == 'success'
+        else:
+            raise RuntimeError('Empty recipients list.')
 
     def send_stream_message(self, stream: str, topic: str,
                             content: str) -> bool:

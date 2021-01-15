@@ -378,8 +378,10 @@ class WriteBox(urwid.Pile):
                         msg_id=self.msg_edit_id,
                     )
                 else:
+                    recipient_emails = [email.strip() for email in
+                                        self.to_write_box.edit_text.split(',')]
                     success = self.model.send_private_message(
-                        recipients=self.to_write_box.edit_text,
+                        recipients=recipient_emails,
                         content=self.msg_write_box.edit_text
                     )
             if success:

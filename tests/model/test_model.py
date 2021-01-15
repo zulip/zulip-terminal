@@ -438,10 +438,13 @@ class TestModel:
         ({'result': 'success'}, True),
         ({'result': 'some_failure'}, False),
     ])
+    @pytest.mark.parametrize('recipients', [
+        ['iago@zulip.com'],
+        ['iago@zulip.com', 'hamlet@zulip.com']
+    ])
     def test_send_private_message(self, mocker, model,
-                                  response, return_value,
-                                  content="hi!",
-                                  recipients="notification-bot@zulip.com"):
+                                  recipients, response, return_value,
+                                  content="hi!"):
         self.client.send_message = mocker.Mock(return_value=response)
 
         result = model.send_private_message(recipients, content)
@@ -452,6 +455,12 @@ class TestModel:
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
+
+    def test_send_private_message_with_no_recipients(self, model,
+                                                     content="hi!",
+                                                     recipients=[]):
+        with pytest.raises(RuntimeError):
+            model.send_private_message(recipients, content)
 
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
