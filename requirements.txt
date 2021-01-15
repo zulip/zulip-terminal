@@ -10,7 +10,7 @@ tzlocal>=2.1
 pytest==5.3.5
 pytest-cov==2.5.1
 pytest-mock==1.7.1
-flake8==3.7.9
+flake8==3.8.3
 flake8-quotes==3.0.0
 flake8-continuation==1.0.5
 pudb==2017.1.4
