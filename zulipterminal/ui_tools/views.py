@@ -1158,7 +1158,7 @@ class StreamMembersView(PopUpView):
         widgets = self.make_table_with_categories(stream_users_content,
                                                   column_width)
 
-        super().__init__(controller, widgets, 'STREAM_MEMBERS', popup_width,
+        super().__init__(controller, widgets, 'STREAM_DESC', popup_width,
                          title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
