@@ -9,6 +9,7 @@ from zulipterminal.helper import (
     hash_util_decode,
     index_messages,
     notify,
+    notify_if_message_sent_outside_narrow,
     powerset,
 )
 
@@ -305,6 +306,41 @@ def test_display_error_if_present(mocker, response, footer_updated):
 
     if footer_updated:
         set_footer_text.assert_called_once_with(response['msg'], 3)
+    else:
+        set_footer_text.assert_not_called()
+
+
+@pytest.mark.parametrize(['req', 'narrow', 'footer_updated'], [
+    ({'type': 'private', 'to': 'foo@gmail.com', 'content': 'bar'},
+     [['is', 'private']], False),
+    ({'type': 'private', 'to': 'user@abc.com, user@chat.com', 'content': 'Hi'},
+     [['pm_with', 'user@0abc.com']], True),
+    ({'type': 'private', 'to': 'bar-bar@foo.com', 'content': ':party_parrot:'},
+     [['pm_with', 'user@abc.com, user@chat.com, bar-bar@foo.com']], True),
+    ({'type': 'stream', 'to': 'ZT', 'subject': '1', 'content': 'foo'},
+     [['stream', 'ZT'], ['topic', '1']], False),
+    ({'type': 'stream', 'to': 'here', 'subject': 'pytest', 'content': 'py'},
+     [['stream', 'test here']], True),
+    ({'type': 'stream', 'to': '|new_stream|', 'subject': '(no topic)',
+      'content': 'Hi `|new_stream|`'}, [], False),
+    ({'type': 'stream', 'to': 'zulip-terminal', 'subject': 'issue#T781',
+      'content': 'Added tests'}, [['is', 'starred']], True),
+    ({'type': 'private', 'to': '2@aBd%8@random.com', 'content': 'fist_bump'},
+     [['is', 'mentioned']], True),
+    ({'type': 'stream', 'to': 'PTEST', 'subject': 'TEST', 'content': 'Test'},
+     [['stream', 'PTEST'], ['search', 'FOO']], True)
+])
+def test_notify_if_message_sent_outside_narrow(mocker, req, narrow,
+                                               footer_updated):
+    controller = mocker.Mock()
+    set_footer_text = controller.view.set_footer_text
+    controller.model.narrow = narrow
+
+    notify_if_message_sent_outside_narrow(req, controller)
+
+    if footer_updated:
+        set_footer_text.assert_called_once_with(
+            'Message is sent outside of current narrow.', 3)
     else:
         set_footer_text.assert_not_called()
 

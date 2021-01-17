@@ -651,6 +651,31 @@ def display_error_if_present(response: Dict[str, Any], controller: Any
         controller.view.set_footer_text(response['msg'], 3)
 
 
+def check_narrow_and_notify(outer_narrow: List[Any],
+                            inner_narrow: List[Any],
+                            controller: Any) -> None:
+    current_narrow = controller.model.narrow
+
+    if (current_narrow != [] and current_narrow != outer_narrow
+            and current_narrow != inner_narrow):
+        controller.view.set_footer_text(
+            'Message is sent outside of current narrow.', 3)
+
+
+def notify_if_message_sent_outside_narrow(message: Dict[str, Any],
+                                          controller: Any) -> None:
+    current_narrow = controller.model.narrow
+
+    if message['type'] == 'stream':
+        stream_narrow = [['stream', message['to']]]
+        topic_narrow = stream_narrow + [['topic', message['subject']]]
+        check_narrow_and_notify(stream_narrow, topic_narrow, controller)
+    elif message['type'] == 'private':
+        pm_narrow = [['is', 'private']]
+        pm_with_narrow = [['pm_with', ",".join(message['to'])]]
+        check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
+
+
 def hash_util_decode(string: str) -> str:
     """
     Returns a decoded string given a hash_util_encode() [present in
