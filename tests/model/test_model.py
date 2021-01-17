@@ -23,6 +23,8 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._start_presence_updates')
         self.display_error_if_present = mocker.patch(
                             'zulipterminal.model.display_error_if_present')
+        self.notify_if_message_sent_outside_narrow = mocker.patch(
+            'zulipterminal.model.notify_if_message_sent_outside_narrow')
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile,
@@ -481,6 +483,9 @@ class TestModel:
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
+        if result == 'success':
+            self.notify_if_message_sent_outside_narrow.assert_called_once_with(
+                req, self.controller)
 
     def test_send_private_message_with_no_recipients(self, model,
                                                      content="hi!",
@@ -507,6 +512,10 @@ class TestModel:
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
 
+        if result == 'success':
+            self.notify_if_message_sent_outside_narrow.assert_called_once_with(
+                req, self.controller)
+
     @pytest.mark.parametrize('response, return_value', [
         ({'result': 'success'}, True),
         ({'result': 'some_failure'}, False),
@@ -530,16 +539,25 @@ class TestModel:
         ({'result': 'success'}, True),
         ({'result': 'some_failure'}, False),
     ])
-    @pytest.mark.parametrize('req', [
+    @pytest.mark.parametrize('req, old_topic, footer_updated', [
         ({'message_id': 1, 'propagate_mode': 'change_one',
-          'content': 'hi!', 'topic': 'Some topic'}),
+          'content': 'hi!', 'topic': 'Some topic'}, 'Some topic', False),
         ({'message_id': 1, 'propagate_mode': 'change_one',
-          'topic': 'Topic change'}),
+          'topic': 'Topic change'}, 'Old topic', True),
+        ({'message_id': 1, 'propagate_mode': 'change_all',
+          'topic': 'Old topic'}, 'Old topic', False),
+        ({'message_id': 1, 'propagate_mode': 'change_later',
+          'content': ':smile:', 'topic': 'terminal'}, 'terminal', False),
+        ({'message_id': 1, 'propagate_mode': 'change_one',
+          'content': 'Hey!', 'topic': 'grett'}, 'greet', True),
+        ({'message_id': 1, 'propagate_mode': 'change_all',
+          'content': 'Lets party!', 'topic': 'party'}, 'lets_party', True),
     ])
     def test_update_stream_message(self, mocker, model,
                                    response, return_value,
-                                   req):
+                                   req, old_topic, footer_updated):
         self.client.update_message = mocker.Mock(return_value=response)
+        model.index['messages'][req['message_id']]['subject'] = old_topic
 
         result = model.update_stream_message(**req)
 
@@ -547,6 +565,12 @@ class TestModel:
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response,
                                                               self.controller)
+        set_footer_text = model.controller.view.set_footer_text
+        if result and footer_updated:
+            set_footer_text.assert_called_once_with(
+                "You changed a message's topic.", 3)
+        else:
+            set_footer_text.assert_not_called()
 
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(self, mocker, messages_successful_response,

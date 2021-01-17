@@ -43,6 +43,7 @@ from zulipterminal.helper import (
     index_messages,
     initial_index,
     notify,
+    notify_if_message_sent_outside_narrow,
     set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -391,7 +392,12 @@ class Model:
             )
             response = self.client.send_message(composition)
             display_error_if_present(response, self.controller)
-            return response['result'] == 'success'
+            message_was_sent = response['result'] == 'success'
+            if message_was_sent:
+                notify_if_message_sent_outside_narrow(
+                    composition, self.controller,
+                )
+            return message_was_sent
         else:
             raise RuntimeError('Empty recipients list.')
 
@@ -405,7 +411,10 @@ class Model:
         )
         response = self.client.send_message(composition)
         display_error_if_present(response, self.controller)
-        return response['result'] == 'success'
+        message_was_sent = response['result'] == 'success'
+        if message_was_sent:
+            notify_if_message_sent_outside_narrow(composition, self.controller)
+        return message_was_sent
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
         request = {
@@ -429,6 +438,13 @@ class Model:
 
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
+        if response['result'] == 'success':
+            old_topic = self.index['messages'][message_id].get('subject', None)
+            new_topic = request['topic']
+            view = self.controller.view
+            if old_topic != new_topic:
+                view.set_footer_text("You changed a message's topic.", 3)
+
         return response['result'] == 'success'
 
     def fetch_custom_emojis(self) -> NamedEmojiData:
