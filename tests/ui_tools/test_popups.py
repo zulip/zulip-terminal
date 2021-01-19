@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 import pytest
+from pytest import param as case
 from urwid import Columns, Pile, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
@@ -1121,9 +1122,11 @@ class TestStreamInfoView:
         )
         self.controller.model.is_muted_stream.return_value = False
         self.controller.model.is_pinned_stream.return_value = False
+        self.controller.model.formatted_local_time.return_value = ""
         self.controller.model.is_visual_notifications_enabled.return_value = False
         mocker.patch(LISTWALKER, return_value=[])
         self.stream_id = general_stream["stream_id"]
+        self.controller.model.server_feature_level = 40
         self.controller.model.stream_dict = {self.stream_id: general_stream}
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
@@ -1140,6 +1143,53 @@ class TestStreamInfoView:
         self.controller.show_stream_members.assert_called_once_with(
             stream_id=self.stream_id,
         )
+
+    @pytest.mark.parametrize(
+        ["to_vary_in_stream_data", "server_feature_level", "expected_height"],
+        [
+            case(
+                {"date_created": None},
+                None,
+                10,
+                id="ZFL=None__no_date_created",
+            ),
+            case(
+                {"date_created": None},
+                29,
+                10,
+                id="ZFL<30__no_date_created",
+            ),
+            case(
+                {"date_created": 1472091253},
+                30,
+                11,
+                id="ZFL=30__with_date_created",
+            ),
+            case(
+                {"date_created": 1472047124},
+                40,
+                11,
+                id="ZFL>30__with_date_created",
+            ),
+        ],
+    )
+    def test_popup_height(
+        self,
+        general_stream,
+        to_vary_in_stream_data,
+        server_feature_level,
+        expected_height,
+    ):
+        stream_id = general_stream["stream_id"]
+        self.controller.model.stream_dict = {stream_id: general_stream}
+        self.controller.model.stream_dict[stream_id].update(to_vary_in_stream_data)
+        self.controller.model.server_feature_level = server_feature_level
+
+        stream_info_view = StreamInfoView(self.controller, stream_id)
+
+        # height = 1(description) + 2(blank lines) + 2(category)
+        # + 3(checkboxes) + [2-3](fields, depending upon server_feature_level)
+        assert stream_info_view.height == expected_height
 
     @pytest.mark.parametrize(
         "rendered_description, expected_markup",

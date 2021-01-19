@@ -1314,6 +1314,21 @@ class StreamInfoView(PopUpView):
         self.controller = controller
         stream = controller.model.stream_dict[stream_id]
 
+        # New in feature level 30, server version 4.0
+        stream_creation_date = stream["date_created"]
+        date_created = (
+            [
+                (
+                    "Created on",
+                    controller.model.formatted_local_time(
+                        stream_creation_date, show_seconds=False, show_year=True
+                    ),
+                )
+            ]
+            if stream_creation_date is not None
+            else []
+        )
+
         total_members = len(stream["subscribers"])
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
 
@@ -1333,7 +1348,8 @@ class StreamInfoView(PopUpView):
         stream_info_content = [
             (
                 "Stream Details",
-                [
+                date_created
+                + [
                     ("Weekly Message Count", str(weekly_msg_count)),
                     (
                         "Stream Members",

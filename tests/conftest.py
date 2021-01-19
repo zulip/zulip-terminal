@@ -203,6 +203,7 @@ def logged_on_user() -> Dict[str, Any]:
 def general_stream() -> Dict[str, Any]:
     return {
         "name": "Some general stream",
+        "date_created": 1472091253,
         "invite_only": False,
         "color": "#b0a5fd",  # Color in '#xxxxxx' format
         "pin_to_top": False,
@@ -230,6 +231,7 @@ def secret_stream() -> Dict[str, Any]:
         "pin_to_top": False,
         "invite_only": True,
         "name": "Secret stream",
+        "date_created": 1472047124,
         "email_address": "secret@example.com",
         "rendered_description": "Some private stream",
         "color": "#ccc",  # Color in '#xxx' format
@@ -252,6 +254,7 @@ def streams_fixture(
         streams.append(
             {
                 "name": f"Stream {i}",
+                "date_created": 1472047124 + i,
                 "invite_only": False,
                 "color": "#b0a5fd",
                 "pin_to_top": False,
