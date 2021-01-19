@@ -5,7 +5,6 @@
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
-[![Travis Build Status](https://travis-ci.com/zulip/zulip-terminal.svg?branch=master)](https://travis-ci.com/github/zulip/zulip-terminal)
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=master)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amaster)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/master)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
@@ -319,7 +318,7 @@ Once you have a development environment set up, you might find the following use
 
 If using make with pip, running `make` will ensure the development environment is up to date with the specified dependencies, useful after fetching from git and rebasing.
 
-NOTE: The linters and pytest are run in CI (travis) when you submit a pull request (PR), and we expect them to pass before code is merged. Running them locally can speed your development time, but if you have troubles understanding why the linters or pytest are failing, please do push your code to a branch/PR and we can discuss the problems in the PR or on chat.zulip.org.
+NOTE: The linters and pytest are run in CI (GitHub Actions) when you submit a pull request (PR), and we expect them to pass before code is merged. Running them locally can speed your development time, but if you have troubles understanding why the linters or pytest are failing, please do push your code to a branch/PR and we can discuss the problems in the PR or on chat.zulip.org.
 
 If using make with pip, there are corresponding make targets for running linting and testing if you wish to use them (`make lint` & `make test`), and before pushing a pull-request (PR) ready for merging you may find it useful to ensure that `make check` runs successfully (which runs both).
 
