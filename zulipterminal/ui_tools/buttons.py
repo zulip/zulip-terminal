@@ -401,7 +401,7 @@ class MessageLinkButton(urwid.Button):
         # Validate stream ID and name.
         if ((stream_id and not model.is_user_subscribed_to_stream(stream_id))
                 or (stream_name and not model.is_valid_stream(stream_name))):
-            # TODO: Narrow to the concerened stream in a 'preview' mode or
+            # TODO: Narrow to the concerned stream in a 'preview' mode or
             # report whether the stream id is invalid instead.
             return 'The stream seems to be either unknown or unsubscribed'
 

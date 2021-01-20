@@ -915,12 +915,12 @@ class PopUpView(urwid.ListBox):
             category_width = max(category_width, len(category))
             for row in content:
                 if isinstance(row, str):
-                    # Measure the longest line if the text is seperated by
+                    # Measure the longest line if the text is separated by
                     # newline(s).
                     text_width = max(text_width, len(max(row.split('\n'),
                                                          key=len)))
                 elif isinstance(row, tuple):
-                    # Measure the longest line if the text is seperated by
+                    # Measure the longest line if the text is separated by
                     # newline(s).
                     max_row_lengths = [
                         len(max(text.split('\n'), key=len))
@@ -1115,7 +1115,7 @@ class StreamInfoView(PopUpView):
                              self.toggle_pinned_status)
 
         # Manual because calculate_table_widths does not support checkboxes.
-        # Add 4 to checkbox label to accomodate the checkbox itself.
+        # Add 4 to checkbox label to accommodate the checkbox itself.
         popup_width = max(popup_width, len(muted_setting.label) + 4,
                           len(pinned_setting.label) + 4)
         self.widgets = self.make_table_with_categories(stream_info_content,
