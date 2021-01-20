@@ -60,6 +60,14 @@ def in_color(color: str, text: str) -> str:
     return "\033[9{}m{}\033[0m".format(color_for_str[color], text)
 
 
+def exit_with_error(error_message: str, *,
+                    helper_text: str="", error_code: int=1) -> None:
+    print(in_color("red", error_message))
+    if helper_text:
+        print(helper_text)
+    sys.exit(error_code)
+
+
 def parse_args(argv: List[str]) -> argparse.Namespace:
     description = """
         Starts Zulip-Terminal.
@@ -185,9 +193,10 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
                     + '\nsite=' + realm_url)
         print('Generated API key saved at ' + zuliprc_path)
     except OSError as ex:
-        print(in_color('red', ex.__class__.__name__
-              + ": zuliprc could not be created at " + zuliprc_path))
-        sys.exit(1)
+        exit_with_error(
+            ex.__class__.__name__ + ": zuliprc could not be created at "
+            + zuliprc_path
+        )
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
@@ -211,15 +220,9 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     try:
         res = zuliprc.read(zuliprc_path)
         if len(res) == 0:
-            print(in_color('red',
-                           "\nZuliprc file could not be accessed at "
-                           + zuliprc_path + "\n"))
-            sys.exit(1)
+            exit_with_error("Could not access zuliprc file at " + zuliprc_path)
     except configparser.MissingSectionHeaderError:
-        print(in_color('red',
-                       "\nFailed to parse zuliprc file at "
-                       + zuliprc_path + "\n"))
-        sys.exit(1)
+        exit_with_error("Failed to parse zuliprc file at " + zuliprc_path)
 
     # Initialize with default settings
     NO_CONFIG = 'with no config'
@@ -305,10 +308,10 @@ def main(options: Optional[List[str]]=None) -> None:
             or theme_to_use[0] in theme_aliases
         )
         if not is_valid_theme:
-            print("Invalid theme '{}' was specified {}."
-                  .format(*theme_to_use))
-            print(list_themes())
-            sys.exit(1)
+            exit_with_error(
+                "Invalid theme '{}' was specified {}.".format(*theme_to_use),
+                helper_text=list_themes(),
+            )
         if theme_to_use[0] not in available_themes:
             # theme must be an alias, as it is valid
             real_theme_name = theme_aliases[theme_to_use[0]]
@@ -348,13 +351,14 @@ def main(options: Optional[List[str]]=None) -> None:
         boolean_settings = dict()  # type: Dict[str, bool]
         for setting, valid_values in valid_settings.items():
             if zterm[setting][0] not in valid_values:
-                print("Invalid {} setting '{}' was specified {}."
-                      .format(setting, *zterm[setting]))
-                print("The following options are available:")
-                for option in valid_values:
-                    print("  ", option)
-                print("Specify the {} option in zuliprc file.".format(setting))
-                sys.exit(1)
+                helper_text = ["Valid values are:"] + [
+                    "  {}".format(option) for option in valid_values
+                ] + ["Specify the {} option in zuliprc file.".format(setting)]
+                exit_with_error(
+                    ("Invalid {} setting '{}' was specified {}."
+                     .format(setting, *zterm[setting])),
+                    helper_text="\n".join(helper_text),
+                )
             if setting == 'color-depth':
                 break
             boolean_settings[setting] = (zterm[setting][0] == valid_values[0])
@@ -371,20 +375,18 @@ def main(options: Optional[List[str]]=None) -> None:
                    args.explore,
                    **boolean_settings).main()
     except ServerConnectionFailure as e:
-        print(in_color('red',
-                       "\nError connecting to Zulip server: {}.".format(e)))
         # Acts as separator between logs
         zt_logger.info("\n\n" + str(e) + "\n\n")
         zt_logger.exception(e)
-        sys.exit(1)
+        exit_with_error("\nError connecting to Zulip server: {}.".format(e))
     except (display_common.AttrSpecError, display_common.ScreenError) as e:
         # NOTE: Strictly this is not necessarily just a theme error
         # FIXME: Add test for this - once loading takes place after UI setup
-        print(in_color('red', "\nPossible theme error: {}.".format(e)))
+
         # Acts as separator between logs
         zt_logger.info("\n\n" + str(e) + "\n\n")
         zt_logger.exception(e)
-        sys.exit(1)
+        exit_with_error("\nPossible theme error: {}.".format(e))
     except Exception as e:
         zt_logger.info("\n\n" + str(e) + "\n\n")
         zt_logger.exception(e)
