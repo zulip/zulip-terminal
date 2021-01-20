@@ -1,9 +1,10 @@
+import math
 import re
 import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime
 from sys import platform
-from time import ctime, time
+from time import ctime, sleep, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
@@ -11,6 +12,7 @@ import dateutil.parser
 import urwid
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+from typing_extensions import Literal
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
@@ -23,7 +25,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, format_string, match_emoji, match_group, match_stream,
+    Message, asynch, format_string, match_emoji, match_group, match_stream,
     match_topics, match_user,
 )
 from zulipterminal.ui_tools.buttons import EditModeButton
@@ -61,6 +63,50 @@ class WriteBox(urwid.Pile):
 
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
+
+    def set_text_and_refresh(self, text_box: urwid.Text, text: str) -> None:
+        # Timer displays on the screen would need
+        # immediate screen refreshes to display changes accurately.
+        text_box.set_text(text)
+        self.view.controller.update_screen()
+
+    @asynch
+    def edit_countdown_timer(self, timer_box: urwid.Text,
+                             message_timestamp: float,
+                             msg_content_edit_limit: int,
+                             *, narrow_type: Literal['stream', 'private']
+                             ) -> None:
+        edit_deadline = msg_content_edit_limit + message_timestamp
+
+        while edit_deadline > time():
+            seconds_left = edit_deadline - time()
+            minutes = int(seconds_left // 60)
+            seconds = seconds_left % 60
+            if minutes >= 1:
+                self.set_text_and_refresh(
+                    timer_box,
+                    "{} min to edit".format(minutes)
+                    )
+                if seconds > 0:
+                    # Sleep for the variable time between the initiation of
+                    # the timer to the next minute.
+                    sleep(seconds)
+                else:
+                    # Sleep for a complete minute before updating timer.
+                    sleep(60)
+            elif seconds >= 1:
+                self.set_text_and_refresh(
+                    timer_box,
+                    "{} sec to edit".format(math.floor(seconds))
+                    )
+                # Update the timer every second when the time remaining
+                # is less than 1 minute.
+                sleep(1)
+
+        if narrow_type == "stream":
+            self.set_text_and_refresh(timer_box, "Topic-editing only")
+        else:
+            self.set_text_and_refresh(timer_box, "Time's up!")
 
     def private_box_view(self, button: Any=None, email: str='',
                          recipient_user_ids: Optional[List[int]]=None) -> None:
@@ -138,18 +184,80 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.contents = write_box
-
+        
         # Use and set a callback to set the stream marker
         self._set_stream_write_box_style(None, caption)
         urwid.connect_signal(self.stream_write_box, 'change',
                              self._set_stream_write_box_style)
 
-    def stream_box_edit_view(self, stream_id: int, caption: str='',
-                             title: str='') -> None:
+    def private_box_edit_view(self, message_timestamp: float,
+                              msg_content_edit_limit: int, button: Any=None,
+                              email: str='',
+                              recipient_user_ids: Optional[List[int]]=None,
+                              ) -> None:
+        self.private_box_view(email=email, button=button,
+                              recipient_user_ids=recipient_user_ids)
+
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
+        )
+
+        self.edit_countdown_timer_box = urwid.Text(u"")
+        self.edit_countdown_timer(self.edit_countdown_timer_box,
+                                  message_timestamp,
+                                  msg_content_edit_limit,
+                                  narrow_type="private")
+
+        self.edit_message_write_box = urwid.Columns([
+            self.msg_write_box,
+            (20, urwid.LineBox(
+                self.edit_countdown_timer_box, tlcorner='┌', tline='',
+                lline='│', trcorner='', blcorner='└', rline='',
+                bline='─', brcorner='─'
+            ))
+        ])
+
+        write_box = [
+            (header_line_box, self.options()),
+            (self.edit_message_write_box, self.options()),
+        ]
+        self.contents = write_box
+
+    def stream_box_edit_view(self,  message_timestamp: float,
+                             msg_content_edit_limit: int, stream_id: int,
+                             caption: str='', title: str='', ) -> None:
         self.stream_box_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
+        header_line_box = urwid.LineBox(
+            self.header_write_box,
+            tlcorner='━', tline='━', trcorner='━', lline='',
+            blcorner='─', bline='─', brcorner='─', rline=''
+        )
+
+        self.edit_countdown_timer_box = urwid.Text(u"")
+        self.edit_countdown_timer(self.edit_countdown_timer_box,
+                                  message_timestamp,
+                                  msg_content_edit_limit,
+                                  narrow_type="stream")
+
+        self.edit_message_write_box = urwid.Columns([
+            self.msg_write_box,
+            (20, urwid.LineBox(
+                self.edit_countdown_timer_box, tlcorner='', tline='',
+                lline='│', trcorner='', blcorner='└', rline='',
+                bline='─', brcorner='─'
+            ))
+        ])
+
+        write_box = [
+            (header_line_box, self.options()),
+            (self.edit_message_write_box, self.options()),
+        ]
+        self.contents = write_box
 
     def _set_stream_write_box_style(self, widget: ReadlineEdit,
                                     new_text: str) -> None:
@@ -1262,12 +1370,19 @@ class MessageBox(urwid.Pile):
                     msg_body_edit_enabled = False
 
             if self.message['type'] == 'private':
-                self.keypress(size, 'enter')
+                self.model.controller.view.write_box.private_box_edit_view(
+                    email=self.recipients_emails,
+                    recipient_user_ids=self.recipient_ids,
+                    message_timestamp=self.message['timestamp'],
+                    msg_content_edit_limit=edit_time_limit
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
                     caption=self.message['display_recipient'],
-                    title=self.message['subject']
+                    title=self.message['subject'],
+                    message_timestamp=self.message['timestamp'],
+                    msg_content_edit_limit=edit_time_limit
                 )
             msg_id = self.message['id']
             msg = self.model.client.get_raw_message(msg_id)['raw_content']
