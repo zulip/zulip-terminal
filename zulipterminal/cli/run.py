@@ -380,7 +380,7 @@ def main(options: Optional[List[str]]=None) -> None:
             traceback.print_exc(file=sys.stderr)
             run_debugger = input("Run Debugger? (y/n): ")
             if run_debugger in ["y", "Y", "yes"]:
-                # Open PUDB Debuuger
+                # Open PUDB Debugger
                 import pudb
                 pudb.post_mortem()
 
