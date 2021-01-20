@@ -5,6 +5,7 @@ import pytest
 
 from zulipterminal.cli.run import (
     THEMES,
+    exit_with_error,
     get_login_id,
     in_color,
     main,
@@ -250,3 +251,26 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
         )
     )
     assert lines[-1] == expected_line
+
+
+@pytest.mark.parametrize('error_code, helper_text', [
+    (1, ""),
+    (2, "helper"),
+])
+def test_exit_with_error(error_code, helper_text,
+                         capsys, error_message="some text"):
+    with pytest.raises(SystemExit) as e:
+        exit_with_error(error_message=error_message,
+                        helper_text=helper_text,
+                        error_code=error_code)
+
+    assert str(e.value) == str(error_code)
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+
+    expected_line = "\033[91m{}\033[0m".format(error_message)
+    assert lines[0] == expected_line
+
+    if helper_text:
+        assert lines[1] == helper_text
