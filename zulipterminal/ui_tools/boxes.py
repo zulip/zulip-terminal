@@ -24,7 +24,7 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.helper import (
     Message, format_string, match_emoji, match_group, match_stream,
-    match_topics, match_user,
+    match_topics, match_user, unauthorised_warning,
 )
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
@@ -439,6 +439,8 @@ class WriteBox(urwid.Pile):
                                         ))
                             )
                             self.view.set_footer_text(invalid_stream_error, 3)
+                            return key
+                        elif unauthorised_warning(self.model, stream_name):
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                                                     stream_name=stream_name)
@@ -1166,11 +1168,13 @@ class MessageBox(urwid.Pile):
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message['type'] == 'stream':
-                self.model.controller.view.write_box.stream_box_view(
-                    caption=self.message['display_recipient'],
-                    title=self.message['subject'],
-                    stream_id=self.stream_id,
-                )
+                if not unauthorised_warning(self.model,
+                                            self.message.get('stream_id')):
+                    self.model.controller.view.write_box.stream_box_view(
+                        caption=self.message['display_recipient'],
+                        title=self.message['subject'],
+                        stream_id=self.stream_id,
+                    )
         elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
