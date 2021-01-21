@@ -40,7 +40,12 @@ class WriteBox(urwid.Pile):
         self.msg_edit_id = None  # type: Optional[int]
         self.is_in_typeahead_mode = False
         self.stream_id = None  # type: Optional[int]
+
+        # Used in PM and stream boxes
+        # (empty list implies PM box empty, or not initialized)
+        # eg. prioritizes autocomplete in message body
         self.recipient_user_ids = []  # type: List[int]
+
         self.msg_body_edit_enabled = True
         self.FOCUS_CONTAINER_HEADER = 0
         self.FOCUS_HEADER_BOX_RECIPIENT = 0
@@ -63,13 +68,18 @@ class WriteBox(urwid.Pile):
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
-    def private_box_view(self, button: Any=None, email: str='',
+    def private_box_view(self, *, email: str='',
                          recipient_user_ids: Optional[List[int]]=None) -> None:
+        # Neither or both arguments should be set
+        assert ((email != '' and recipient_user_ids is not None)
+                or (email == '' and recipient_user_ids is None))
+
         self.set_editor_mode()
         if recipient_user_ids:
             self.recipient_user_ids = recipient_user_ids
-        if email == '' and button is not None:
-            email = button.email
+        else:
+            self.recipient_user_ids = []
+
         self.to_write_box = ReadlineEdit("To: ", edit_text=email)
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
