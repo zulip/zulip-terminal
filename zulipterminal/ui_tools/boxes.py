@@ -37,8 +37,15 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
+
+        # If editing a message, its id - otherwise None
         self.msg_edit_id = None  # type: Optional[int]
+        # Determines if the message body (content) can be edited
+        self.msg_body_edit_enabled = True
+
         self.is_in_typeahead_mode = False
+
+        # Set to int for stream box only
         self.stream_id = None  # type: Optional[int]
 
         # Used in PM and stream boxes
@@ -46,7 +53,11 @@ class WriteBox(urwid.Pile):
         # eg. prioritizes autocomplete in message body
         self.recipient_user_ids = []  # type: List[int]
 
-        self.msg_body_edit_enabled = True
+        # Private message recipient text entry
+        self.to_write_box = None  # None if stream-box or not initialized
+
+        # Constant indices into self.contents
+        # (CONTAINER=vertical, HEADER/MESSAGE=horizontal)
         self.FOCUS_CONTAINER_HEADER = 0
         self.FOCUS_HEADER_BOX_RECIPIENT = 0
         self.FOCUS_HEADER_BOX_STREAM = 1
