@@ -1331,6 +1331,8 @@ class StreamInfoView(PopUpView):
 
         total_members = len(stream["subscribers"])
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
+        self.stream_email = stream["email_address"]
+        email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
 
         weekly_msg_count = stream["stream_weekly_traffic"]
 
@@ -1354,6 +1356,10 @@ class StreamInfoView(PopUpView):
                     (
                         "Stream Members",
                         f"{total_members} (Press {member_keys} to view list)",
+                    ),
+                    (
+                        "Stream email",
+                        f"Press {email_keys} to copy Stream email address",
                     ),
                 ],
             ),
@@ -1442,6 +1448,8 @@ class StreamInfoView(PopUpView):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
+        elif is_command_key("COPY_STREAM_EMAIL", key):
+            self.controller.copy_to_clipboard(self.stream_email, "Stream email")
         return super().keypress(size, key)
 
 

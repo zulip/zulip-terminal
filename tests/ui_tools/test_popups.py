@@ -1150,25 +1150,25 @@ class TestStreamInfoView:
             case(
                 {"date_created": None},
                 None,
-                10,
+                11,
                 id="ZFL=None__no_date_created",
             ),
             case(
                 {"date_created": None},
                 29,
-                10,
+                11,
                 id="ZFL<30__no_date_created",
             ),
             case(
                 {"date_created": 1472091253},
                 30,
-                11,
+                12,
                 id="ZFL=30__with_date_created",
             ),
             case(
                 {"date_created": 1472047124},
                 40,
-                11,
+                12,
                 id="ZFL>30__with_date_created",
             ),
         ],
@@ -1188,8 +1188,18 @@ class TestStreamInfoView:
         stream_info_view = StreamInfoView(self.controller, stream_id)
 
         # height = 1(description) + 2(blank lines) + 2(category)
-        # + 3(checkboxes) + [2-3](fields, depending upon server_feature_level)
+        # + 3(checkboxes) + [2-4](fields, depending upon server_feature_level)
         assert stream_info_view.height == expected_height
+
+    @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
+    def test_keypress_copy_stream_email(self, key, widget_size):
+        size = widget_size(self.stream_info_view)
+
+        self.stream_info_view.keypress(size, key)
+
+        self.controller.copy_to_clipboard.assert_called_once_with(
+            self.stream_info_view.stream_email, "Stream email"
+        )
 
     @pytest.mark.parametrize(
         "rendered_description, expected_markup",
