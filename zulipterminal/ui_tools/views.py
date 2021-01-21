@@ -1334,7 +1334,10 @@ class StreamInfoView(PopUpView):
         self.stream_email = stream["email_address"]
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
 
-        weekly_msg_count = stream["stream_weekly_traffic"]
+        weekly_traffic = stream["stream_weekly_traffic"]
+        weekly_msg_count = (
+            "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
+        )
 
         stream_marker = (
             STREAM_MARKER_PRIVATE if stream["invite_only"] else STREAM_MARKER_PUBLIC

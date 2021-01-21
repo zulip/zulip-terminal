@@ -1171,6 +1171,12 @@ class TestStreamInfoView:
                 12,
                 id="ZFL>30__with_date_created",
             ),
+            case(
+                {"date_created": 1472046489, "stream_weekly_traffic": None},
+                50,
+                12,
+                id="ZFL>30__new_stream_with_date_created",
+            ),
         ],
     )
     def test_popup_height(
