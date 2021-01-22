@@ -1127,6 +1127,7 @@ class TestStreamInfoView:
         mocker.patch(LISTWALKER, return_value=[])
         self.stream_id = general_stream["stream_id"]
         self.controller.model.server_feature_level = 40
+        self.controller.model.cached_retention_text = {self.stream_id: "10"}
         self.controller.model.stream_dict = {self.stream_id: general_stream}
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
@@ -1145,37 +1146,65 @@ class TestStreamInfoView:
         )
 
     @pytest.mark.parametrize(
-        ["to_vary_in_stream_data", "server_feature_level", "expected_height"],
+        [
+            "to_vary_in_stream_data",
+            "cached_message_retention_text",
+            "server_feature_level",
+            "expected_height",
+        ],
         [
             case(
                 {"date_created": None},
+                "74 [Organization default]",
                 None,
-                11,
-                id="ZFL=None__no_date_created",
+                12,
+                id="ZFL=None_no_date_created__no_retention_days",
             ),
             case(
                 {"date_created": None},
+                "74 [Organization default]",
+                16,
+                12,
+                id="ZFL<30_no_date_created__ZFL<17_no_retention_days",
+            ),
+            case(
+                {"date_created": None, "message_retention_days": 200},
+                "200",
+                17,
+                12,
+                id="ZFL<30_no_date_created__ZFL=17_custom_finite_retention_days",
+            ),
+            case(
+                {"date_created": None, "message_retention_days": None},
+                "Indefinite [Organization default]",
                 29,
-                11,
-                id="ZFL<30__no_date_created",
+                12,
+                id="ZFL<30_no_date_created__ZFL>17_default_indefinite_retention_days",
             ),
             case(
-                {"date_created": 1472091253},
+                {"date_created": 1472091253, "message_retention_days": 31},
+                "31",
                 30,
-                12,
-                id="ZFL=30__with_date_created",
+                13,
+                id="ZFL=30_with_date_created__ZFL>17_custom_finite_retention_days",
             ),
             case(
-                {"date_created": 1472047124},
+                {"date_created": 1472047124, "message_retention_days": None},
+                "72 [Organization default]",
                 40,
-                12,
-                id="ZFL>30__with_date_created",
+                13,
+                id="ZFL>30_with_date_created__ZFL>17_default_finite_retention_days",
             ),
             case(
-                {"date_created": 1472046489, "stream_weekly_traffic": None},
+                {
+                    "date_created": 1472046489,
+                    "stream_weekly_traffic": None,
+                    "message_retention_days": 60,
+                },
+                "60",
                 50,
-                12,
-                id="ZFL>30__new_stream_with_date_created",
+                13,
+                id="ZFL>30_new_stream_with_date_created__ZFL>17_finite_retention_days",
             ),
         ],
     )
@@ -1183,18 +1212,21 @@ class TestStreamInfoView:
         self,
         general_stream,
         to_vary_in_stream_data,
+        cached_message_retention_text,
         server_feature_level,
         expected_height,
     ):
+        model = self.controller.model
         stream_id = general_stream["stream_id"]
-        self.controller.model.stream_dict = {stream_id: general_stream}
-        self.controller.model.stream_dict[stream_id].update(to_vary_in_stream_data)
-        self.controller.model.server_feature_level = server_feature_level
+        model.stream_dict = {stream_id: general_stream}
+        model.stream_dict[stream_id].update(to_vary_in_stream_data)
+        model.cached_retention_text = {stream_id: cached_message_retention_text}
+        model.server_feature_level = server_feature_level
 
         stream_info_view = StreamInfoView(self.controller, stream_id)
 
         # height = 1(description) + 2(blank lines) + 2(category)
-        # + 3(checkboxes) + [2-4](fields, depending upon server_feature_level)
+        # + 3(checkboxes) + [2-5](fields, depending upon server_feature_level)
         assert stream_info_view.height == expected_height
 
     @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
