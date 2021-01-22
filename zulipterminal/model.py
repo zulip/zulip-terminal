@@ -162,6 +162,8 @@ class Model:
             for stream in self.stream_dict.values():
                 stream["date_created"] = None
 
+        self.normalize_and_cache_message_retention_text()
+
         # NOTE: The expected response has been upgraded from
         # [stream_name, topic] to [stream_name, topic, date_muted] in
         # feature level 1, server version 3.0.
@@ -191,6 +193,38 @@ class Model:
         self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
         self.new_user_input = True
         self._start_presence_updates()
+
+    def message_retention_days_response(self, days: int, org_default: bool) -> str:
+        suffix = " [Organization default]" if org_default else ""
+        return ("Indefinite" if (days == -1 or days is None) else str(days)) + suffix
+
+    def normalize_and_cache_message_retention_text(self) -> None:
+        # NOTE: The "message_retention_days" field was added in server v3.0, ZFL 17.
+        # For consistency, we add this field on server iterations even before this
+        # assigning it the value of "realm_message_retention_days" from /register.
+        # The server defines two special values for this field:
+        # • None: Inherits organization-level setting i.e. realm_message_retention_days
+        # • -1: Messages in this stream are stored indefinitely
+        # We store the abstracted message retention text for each stream mapped to its
+        # sream_id in model.cached_retention_text. This will be displayed in the UI.
+        self.cached_retention_text: Dict[int, str] = {}
+        realm_message_retention_days = self.initial_data["realm_message_retention_days"]
+        if self.server_feature_level is None or self.server_feature_level < 17:
+            for stream in self.stream_dict.values():
+                stream["message_retention_days"] = None
+
+        for stream in self.stream_dict.values():
+            message_retention_days = stream["message_retention_days"]
+            is_organization_default = message_retention_days is None
+            final_msg_retention_days = (
+                realm_message_retention_days
+                if is_organization_default
+                else message_retention_days
+            )
+            message_retention_response = self.message_retention_days_response(
+                final_msg_retention_days, is_organization_default
+            )
+            self.cached_retention_text[stream["stream_id"]] = message_retention_response
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """

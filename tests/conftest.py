@@ -217,6 +217,7 @@ def general_stream() -> Dict[str, Any]:
         "stream_weekly_traffic": 0,
         "push_notifications": False,
         "email_address": "general@example.comm",
+        "message_retention_days": 10,
         "subscribers": [1001, 11, 12],
     }
 
@@ -240,6 +241,7 @@ def secret_stream() -> Dict[str, Any]:
         "is_old_stream": True,
         "desktop_notifications": False,
         "stream_weekly_traffic": 0,
+        "message_retention_days": -1,
         "push_notifications": False,
         "subscribers": [1001, 11],
     }
@@ -267,6 +269,7 @@ def streams_fixture(
                 "desktop_notifications": False,
                 "stream_weekly_traffic": 0,
                 "push_notifications": False,
+                "message_retention_days": i + 30,
                 "email_address": f"stream{i}@example.com",
                 "subscribers": [1001, 11, 12],
             }
@@ -742,6 +745,7 @@ def initial_data(
         },
         "twenty_four_hour_time": True,
         "realm_emoji": realm_emojis,
+        "realm_message_retention_days": 74,
         "last_event_id": -1,
         "muted_topics": [],
         "realm_user_groups": [],
