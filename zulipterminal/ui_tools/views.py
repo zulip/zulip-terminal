@@ -1329,6 +1329,13 @@ class StreamInfoView(PopUpView):
             else []
         )
 
+        message_retention_days = [
+            (
+                "Message retention days",
+                self.controller.model.cached_retention_text[self.stream_id],
+            )
+        ]
+
         total_members = len(stream["subscribers"])
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
         self.stream_email = stream["email_address"]
@@ -1354,6 +1361,7 @@ class StreamInfoView(PopUpView):
             (
                 "Stream Details",
                 date_created
+                + message_retention_days
                 + [
                     ("Weekly Message Count", str(weekly_msg_count)),
                     (
