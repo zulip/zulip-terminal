@@ -220,6 +220,73 @@ class TestModel:
             include_subscribers=True,
         )
 
+    @pytest.mark.parametrize(
+        [
+            "to_vary_in_stream_dict",
+            "realm_msg_retention_days",
+            "feature_level",
+            "expect_msg_retention_text",
+        ],
+        [
+            case(
+                {1: {}},
+                None,
+                10,
+                {1: "Indefinite [Organization default]"},
+                id="ZFL=None_no_stream_retention_realm_retention=None",
+            ),
+            case(
+                {1: {}, 2: {}},
+                -1,
+                16,
+                {
+                    1: "Indefinite [Organization default]",
+                    2: "Indefinite [Organization default]",
+                },
+                id="ZFL=16_no_stream_retention_realm_retention=-1",
+            ),
+            case(
+                {2: {"message_retention_days": 30}},
+                60,
+                17,
+                {2: "30"},
+                id="ZFL=17_stream_retention_days=30",
+            ),
+            case(
+                {
+                    1: {"message_retention_days": None},
+                    2: {"message_retention_days": -1},
+                },
+                72,
+                18,
+                {1: "72 [Organization default]", 2: "Indefinite"},
+                id="ZFL=18_stream_retention_days=[None, -1]",
+            ),
+        ],
+    )
+    def test_normalize_and_cache_message_retention_text(
+        self,
+        model,
+        stream_dict,
+        to_vary_in_stream_dict,
+        realm_msg_retention_days,
+        feature_level,
+        expect_msg_retention_text,
+    ):
+        model.stream_dict = stream_dict
+        model.server_feature_level = feature_level
+        model.initial_data["realm_message_retention_days"] = realm_msg_retention_days
+        for stream_id in to_vary_in_stream_dict:
+            model.stream_dict[stream_id].update(to_vary_in_stream_dict[stream_id])
+
+        model.normalize_and_cache_message_retention_text()
+
+        for stream_id in to_vary_in_stream_dict:
+            assert (
+                model.cached_retention_text[stream_id]
+                == expect_msg_retention_text[stream_id]
+            )
+
     @pytest.mark.parametrize("msg_id", [1, 5, set()])
     @pytest.mark.parametrize(
         "narrow",
