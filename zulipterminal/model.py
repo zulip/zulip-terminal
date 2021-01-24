@@ -165,21 +165,10 @@ class Model:
         self.unread_counts = classify_unread_counts(self)
 
         self._draft: Optional[Composition] = None
-        unicode_emoji_data = unicode_emojis.EMOJI_DATA
-        for name, data in unicode_emoji_data.items():
-            data['type'] = 'unicode_emoji'
-        typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
-        custom_emoji_data = self.fetch_custom_emojis()
-        zulip_extra_emoji: NamedEmojiData = {
-                'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
-        }
-        all_emoji_data = {**typed_unicode_emoji_data,
-                          **custom_emoji_data,
-                          **zulip_extra_emoji}.items()
-        self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
-                                                    key=lambda e: e[0]))
 
         self._store_content_length_restrictions()
+
+        self.active_emoji_data = self.generate_all_emoji_data()
         self.twenty_four_hr_format = self.initial_data['twenty_four_hour_time']
         self.new_user_input = True
         self._start_presence_updates()
@@ -499,6 +488,22 @@ class Model:
         }
         display_error_if_present(response, self.controller)
         return custom_emojis
+
+    def generate_all_emoji_data(self) -> NamedEmojiData:
+        unicode_emoji_data = unicode_emojis.EMOJI_DATA
+        for name, data in unicode_emoji_data.items():
+            data['type'] = 'unicode_emoji'
+        typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
+        custom_emoji_data: NamedEmojiData = self.fetch_custom_emojis()
+        zulip_extra_emoji: NamedEmojiData = {
+                'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
+        }
+        all_emoji_data = {**typed_unicode_emoji_data,
+                          **custom_emoji_data,
+                          **zulip_extra_emoji}.items()
+        active_emoji_data = OrderedDict(sorted(all_emoji_data,
+                                               key=lambda e: e[0]))
+        return active_emoji_data
 
     def get_messages(self, *,
                      num_after: int, num_before: int,
