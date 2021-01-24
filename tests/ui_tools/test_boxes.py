@@ -3,7 +3,9 @@ from pytest import param
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
-    STREAM_MARKER_INVALID, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_INVALID,
+    STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 

@@ -9,7 +9,8 @@ from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, UserButton
 from zulipterminal.version import (
-    MINIMUM_SUPPORTED_SERVER_VERSION, SUPPORTED_SERVER_VERSIONS,
+    MINIMUM_SUPPORTED_SERVER_VERSION,
+    SUPPORTED_SERVER_VERSIONS,
 )
 
 

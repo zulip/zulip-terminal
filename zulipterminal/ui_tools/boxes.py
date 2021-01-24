@@ -15,16 +15,30 @@ from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import (
-    is_command_key, keys_for_command, primary_key_for_command,
+    is_command_key,
+    keys_for_command,
+    primary_key_for_command,
 )
 from zulipterminal.config.symbols import (
-    MESSAGE_CONTENT_MARKER, MESSAGE_HEADER_DIVIDER, QUOTED_TEXT_MARKER,
-    STREAM_MARKER_INVALID, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
-    STREAM_TOPIC_SEPARATOR, TIME_MENTION_MARKER,
+    MESSAGE_CONTENT_MARKER,
+    MESSAGE_HEADER_DIVIDER,
+    QUOTED_TEXT_MARKER,
+    STREAM_MARKER_INVALID,
+    STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
+    STREAM_TOPIC_SEPARATOR,
+    TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import (
-    Message, asynch, format_string, get_unused_fence, match_emoji, match_group,
-    match_stream, match_topics, match_user,
+    Message,
+    asynch,
+    format_string,
+    get_unused_fence,
+    match_emoji,
+    match_group,
+    match_stream,
+    match_topics,
+    match_user,
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton

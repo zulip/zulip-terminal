@@ -7,20 +7,40 @@ import urwid
 from typing_extensions import Literal
 
 from zulipterminal.config.keys import (
-    HELP_CATEGORIES, KEY_BINDINGS, is_command_key, keys_for_command,
+    HELP_CATEGORIES,
+    KEY_BINDINGS,
+    is_command_key,
+    keys_for_command,
 )
 from zulipterminal.config.symbols import (
-    CHECK_MARK, LIST_TITLE_BAR_LINE, PINNED_STREAMS_DIVIDER, STATUS_ACTIVE,
-    STATUS_IDLE, STATUS_INACTIVE, STATUS_OFFLINE, STREAM_MARKER_PRIVATE,
+    CHECK_MARK,
+    LIST_TITLE_BAR_LINE,
+    PINNED_STREAMS_DIVIDER,
+    STATUS_ACTIVE,
+    STATUS_IDLE,
+    STATUS_INACTIVE,
+    STATUS_OFFLINE,
+    STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.helper import (
-    Message, asynch, edit_mode_captions, match_stream, match_user,
+    Message,
+    asynch,
+    edit_mode_captions,
+    match_stream,
+    match_user,
 )
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
-    HomeButton, MentionedButton, MessageLinkButton, PMButton, StarredButton,
-    StreamButton, TopicButton, UnreadPMButton, UserButton,
+    HomeButton,
+    MentionedButton,
+    MessageLinkButton,
+    PMButton,
+    StarredButton,
+    StreamButton,
+    TopicButton,
+    UnreadPMButton,
+    UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
