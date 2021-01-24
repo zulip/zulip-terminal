@@ -208,6 +208,13 @@ def unicode_emojis():
     ])
 
 
+@pytest.fixture
+def zulip_emoji():
+    return OrderedDict([
+        ('zulip', {'code': 'zulip', 'type': 'zulip_extra_emoji'})
+    ])
+
+
 stream_msg_template = {
     'id': 537286,
     'sender_full_name': 'Foo Foo',
