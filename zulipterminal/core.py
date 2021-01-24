@@ -18,8 +18,15 @@ from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
-    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    NoticeView, PopUpConfirmationView, StreamInfoView, StreamMembersView,
+    AboutView,
+    EditHistoryView,
+    EditModeView,
+    HelpView,
+    MsgInfoView,
+    NoticeView,
+    PopUpConfirmationView,
+    StreamInfoView,
+    StreamMembersView,
 )
 from zulipterminal.version import ZT_VERSION
 

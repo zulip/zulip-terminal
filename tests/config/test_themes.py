@@ -1,7 +1,10 @@
 import pytest
 
 from zulipterminal.config.themes import (
-    THEMES, all_themes, complete_and_incomplete_themes, required_styles,
+    THEMES,
+    all_themes,
+    complete_and_incomplete_themes,
+    required_styles,
     theme_with_monochrome_added,
 )
 

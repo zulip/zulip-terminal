@@ -4,8 +4,18 @@ from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from typing import (
-    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Optional, Set,
-    Tuple, Union, cast,
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
 )
 from urllib.parse import urlparse
 
@@ -15,9 +25,17 @@ from typing_extensions import Literal, TypedDict
 from zulipterminal import unicode_emojis
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
-    Message, NamedEmojiData, StreamData, asynch, canonicalize_color,
-    classify_unread_counts, display_error_if_present, index_messages,
-    initial_index, notify, set_count,
+    Message,
+    NamedEmojiData,
+    StreamData,
+    asynch,
+    canonicalize_color,
+    classify_unread_counts,
+    display_error_if_present,
+    index_messages,
+    initial_index,
+    notify,
+    set_count,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
 

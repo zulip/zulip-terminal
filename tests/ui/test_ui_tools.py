@@ -9,17 +9,29 @@ from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
-    QUOTED_TEXT_MARKER, STATUS_ACTIVE, STREAM_TOPIC_SEPARATOR,
+    QUOTED_TEXT_MARKER,
+    STATUS_ACTIVE,
+    STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import (
-    StreamButton, TopButton, TopicButton, UserButton,
+    StreamButton,
+    TopButton,
+    TopicButton,
+    UserButton,
 )
 from zulipterminal.ui_tools.views import (
-    LeftColumnView, MessageView, MiddleColumnView, ModListWalker,
-    RightColumnView, StreamsView, StreamsViewDivider, TopicsView, UsersView,
+    LeftColumnView,
+    MessageView,
+    MiddleColumnView,
+    ModListWalker,
+    RightColumnView,
+    StreamsView,
+    StreamsViewDivider,
+    TopicsView,
+    UsersView,
 )
 
 

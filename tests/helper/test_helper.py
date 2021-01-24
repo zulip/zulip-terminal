@@ -2,8 +2,14 @@ import pytest
 
 import zulipterminal.helper
 from zulipterminal.helper import (
-    canonicalize_color, classify_unread_counts, display_error_if_present,
-    get_unused_fence, hash_util_decode, index_messages, notify, powerset,
+    canonicalize_color,
+    classify_unread_counts,
+    display_error_if_present,
+    get_unused_fence,
+    hash_util_decode,
+    index_messages,
+    notify,
+    powerset,
 )
 
 

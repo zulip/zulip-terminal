@@ -7,12 +7,15 @@ import urwid
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.symbols import (
-    APPLICATION_TITLE_BAR_LINE, LIST_TITLE_BAR_LINE,
+    APPLICATION_TITLE_BAR_LINE,
+    LIST_TITLE_BAR_LINE,
 )
 from zulipterminal.helper import WSL, asynch
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
-    LeftColumnView, MiddleColumnView, RightColumnView,
+    LeftColumnView,
+    MiddleColumnView,
+    RightColumnView,
 )
 
 

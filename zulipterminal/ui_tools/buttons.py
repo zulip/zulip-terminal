@@ -7,10 +7,14 @@ from typing_extensions import TypedDict
 
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.symbols import (
-    MUTE_MARKER, STREAM_MARKER_PRIVATE, STREAM_MARKER_PUBLIC,
+    MUTE_MARKER,
+    STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.helper import (
-    StreamData, edit_mode_captions, hash_util_decode,
+    StreamData,
+    edit_mode_captions,
+    hash_util_decode,
 )
 from zulipterminal.urwid_types import urwid_Size
 

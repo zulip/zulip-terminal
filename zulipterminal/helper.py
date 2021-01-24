@@ -8,8 +8,17 @@ from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
 from threading import Thread
 from typing import (
-    Any, Callable, DefaultDict, Dict, FrozenSet, Iterable, List, Set, Tuple,
-    TypeVar, Union,
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
 )
 from urllib.parse import unquote
 

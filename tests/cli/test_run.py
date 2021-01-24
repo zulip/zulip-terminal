@@ -4,7 +4,11 @@ import os
 import pytest
 
 from zulipterminal.cli.run import (
-    THEMES, get_login_id, in_color, main, parse_args,
+    THEMES,
+    get_login_id,
+    in_color,
+    main,
+    parse_args,
 )
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION

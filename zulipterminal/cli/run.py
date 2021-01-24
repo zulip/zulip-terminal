@@ -10,7 +10,10 @@ import requests
 from urwid import display_common, set_encoding
 
 from zulipterminal.config.themes import (
-    THEMES, aliased_themes, all_themes, complete_and_incomplete_themes,
+    THEMES,
+    aliased_themes,
+    all_themes,
+    complete_and_incomplete_themes,
     theme_with_monochrome_added,
 )
 from zulipterminal.core import Controller

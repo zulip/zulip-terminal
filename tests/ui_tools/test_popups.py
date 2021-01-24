@@ -5,8 +5,15 @@ from urwid import Columns, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.ui_tools.views import (
-    AboutView, EditHistoryView, EditModeView, HelpView, MsgInfoView,
-    PopUpConfirmationView, PopUpView, StreamInfoView, StreamMembersView,
+    AboutView,
+    EditHistoryView,
+    EditModeView,
+    HelpView,
+    MsgInfoView,
+    PopUpConfirmationView,
+    PopUpView,
+    StreamInfoView,
+    StreamMembersView,
 )
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
