@@ -901,23 +901,23 @@ class Model:
         message['flags'] = event.get('flags', [])
         # We need to update the topic order in index, unconditionally.
         if message['type'] == 'stream':
+            stream_id = message['stream_id']
+            topic = message['subject']
             # NOTE: The subsequent helper only updates the topic index based
             # on the message event not the UI (the UI is updated in a
             # consecutive block independently). However, it is critical to keep
             # the topics index synchronized as it used whenever the topics list
             # view is reconstructed later.
-            self._update_topic_index(message['stream_id'],
-                                     message['subject'])
+            self._update_topic_index(stream_id, topic)
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
             if hasattr(self.controller, 'view'):
                 view = self.controller.view
-                if (view.left_panel.is_in_topic_view_with_stream_id(
-                        message['stream_id'])):
+                if view.left_panel.is_in_topic_view_with_stream_id(stream_id):
                     view.topic_w.update_topics_list(
-                        message['stream_id'], message['subject'],
-                        message['sender_id'])
+                        stream_id, topic, message['sender_id']
+                    )
                     self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not,
