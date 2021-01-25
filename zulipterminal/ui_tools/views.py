@@ -377,6 +377,8 @@ class TopicsView(urwid.Frame):
         ))
         self.search_lock = threading.Lock()
 
+        self.filter_text = ""
+
     @asynch
     def filter_topics(self, search_box: Any, new_text: str) -> None:
         if not self.view.controller.is_in_editor_mode():
@@ -384,17 +386,19 @@ class TopicsView(urwid.Frame):
         # wait for any previously started search to finish to avoid
         # displaying wrong topics list.
         with self.search_lock:
-            new_text = new_text.lower()
+            self.filter_text = new_text.lower()
             topics_to_display = [
                 topic
                 for topic in self.topics_btn_list.copy()
-                if new_text in topic.topic_name.lower()
+                if self.filter_text in topic.topic_name.lower()
             ]
             self.log.clear()
             self.log.extend(topics_to_display)
             self.view.controller.update_screen()
 
     def _insert_topic_at_top(self, button: Any, is_current_user: bool) -> None:
+        if self.filter_text and self.filter_text not in button.topic_name.lower():
+            return
         self.log.insert(0, button)
         self.list_box.set_focus_valign('bottom')
         if is_current_user:
@@ -402,11 +406,16 @@ class TopicsView(urwid.Frame):
 
     def try_to_move_topic_to_top(self, topic_name: str,
                                  is_current_user: bool) -> None:
+        for topic_iterator, topic_button in enumerate(self.topics_btn_list):
+            if topic_button.topic_name == topic_name:
+                button_to_move = self.topics_btn_list.pop(topic_iterator)
+                self.topics_btn_list.insert(0, button_to_move)
+                break
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
                 button_to_move = self.log.pop(topic_iterator)
                 self._insert_topic_at_top(button_to_move, is_current_user)
-                return
+                break
         # Reaching here is not necesarily an error, as we may be searching
 
     def add_new_top_topic(self, stream_id: int, topic_name: str,
@@ -416,6 +425,7 @@ class TopicsView(urwid.Frame):
                                        self.view.controller,
                                        self.view.LEFT_WIDTH,
                                        0)
+        self.topics_btn_list.insert(0, new_topic_button)
         self._insert_topic_at_top(new_topic_button, is_current_user)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
