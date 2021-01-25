@@ -11,7 +11,6 @@ from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 
 
 BOXES = "zulipterminal.ui_tools.boxes"
-BUTTONS = "zulipterminal.ui_tools.buttons"
 
 
 class TestWriteBox:
