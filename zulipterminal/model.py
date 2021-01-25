@@ -125,6 +125,7 @@ class Model:
                  self._handle_update_message_flags_event),
                 ('update_display_settings',
                  self._handle_update_display_settings_event),
+                ('realm_emoji', self._handle_update_emoji_event),
             ])
         )
 
@@ -1271,6 +1272,17 @@ class Model:
             f"{'' if self.twenty_four_hr_format else ' %p'}"
         )
         return local_time.strftime(format_codes)
+
+    def _handle_update_emoji_event(self, event: Event) -> None:
+        """
+        Handle update of emoji
+        """
+        # Here, the event contains information of all realm emojis added
+        # by the users in the organisation along with a boolean value
+        # representing the active state of each emoji.
+        assert event['type'] == "realm_emoji"
+        self.active_emoji_data = self.generate_all_emoji_data(
+                                                    event['realm_emoji'])
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """

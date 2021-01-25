@@ -174,6 +174,7 @@ class TestModel:
             'typing',
             'update_message_flags',
             'update_display_settings',
+            'realm_emoji',
         ]
         fetch_event_types = [
             'realm',
@@ -2129,6 +2130,65 @@ class TestModel:
         assert all_emoji_data['joker']['type'] == 'realm_emoji'
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert all_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
+
+    @pytest.mark.parametrize(['to_vary_in_realm_emoji',
+                              'emoji_should_be_active'], [
+            ({
+                "deactivated": False,
+                "id": "20",
+                "name": "joy_cat",
+            }, True),
+            ({
+                "deactivated": True,
+                "id": "202020",
+                "name": "joker",
+            }, True),
+            ({
+                "deactivated": False,
+                "id": "22",
+                "name": "zulip",
+            }, True),
+            ({
+                "deactivated": True,
+                "id": "4",
+                "name": "zulip",
+            }, True),
+            ({
+                "deactivated": False,
+                "id": "23",
+                "name": "new_emoji",
+            }, True),
+            ({
+                "deactivated": True,
+                "id": "3",
+                "name": "singing",
+            }, False),
+        ],
+        ids=[
+            'realm_emoji_with_same_name_as_unicode_emoji_added',
+            'realm_emoji_with_same_name_as_unicode_emoji_removed',
+            'realm_emoji_with_name_as_zulip_added',
+            'realm_emoji_with_name_as_zulip_removed',
+            'realm_emoji_added',
+            'realm_emoji_removed',
+        ]
+    )
+    def test__handle_update_emoji_event(self, mocker, model, realm_emojis,
+                                        emoji_should_be_active,
+                                        to_vary_in_realm_emoji):
+        emoji_name = to_vary_in_realm_emoji['name']
+        realm_emojis[to_vary_in_realm_emoji['id']] = to_vary_in_realm_emoji
+        event = {
+            'type': 'realm_emoji',
+            'realm_emoji': realm_emojis
+        }
+
+        model._handle_update_emoji_event(event)
+
+        if emoji_should_be_active:
+            assert emoji_name in model.active_emoji_data
+        else:
+            assert emoji_name not in model.active_emoji_data
 
     # Use LoopEnder with raising_event to cause the event loop to end without
     # processing the event

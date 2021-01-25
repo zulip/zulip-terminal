@@ -148,6 +148,11 @@ class UpdateDisplaySettings(TypedDict):
     setting: bool
 
 
+class UpdateRealmEmojiEvent(TypedDict):
+    type: Literal['realm_emoji']
+    realm_emoji: Dict[str, Any]
+
+
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
@@ -156,4 +161,5 @@ Event = Union[
     TypingEvent,
     UpdateMessageFlagsEvent,
     UpdateDisplaySettings,
+    UpdateRealmEmojiEvent,
 ]
