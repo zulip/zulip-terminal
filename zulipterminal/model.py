@@ -915,12 +915,13 @@ class Model:
             if hasattr(self.controller, 'view'):
                 view = self.controller.view
                 if view.left_panel.is_in_topic_view_with_stream_id(stream_id):
-                    sender_id = message['sender_id']
+                    sent_by_me = message['sender_id'] == self.user_id
                     if is_new_topic:
                         view.topic_w.add_new_top_topic(stream_id, topic,
-                                                       sender_id)
+                                                       sent_by_me)
                     else:
-                        view.topic_w.try_to_move_topic_to_top(topic, sender_id)
+                        view.topic_w.try_to_move_topic_to_top(topic,
+                                                              sent_by_me)
                     self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not,

@@ -395,18 +395,18 @@ class TopicsView(urwid.Frame):
             self.view.controller.update_screen()
 
     def try_to_move_topic_to_top(self, topic_name: str,
-                                 sender_id: int) -> None:
+                                 is_current_user: bool) -> None:
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
                 self.log.insert(0, self.log.pop(topic_iterator))
                 self.list_box.set_focus_valign('bottom')
-                if sender_id == self.view.model.user_id:
+                if is_current_user:
                     self.list_box.set_focus(0)
                 return
         # Reaching here is not necesarily an error, as we may be searching
 
     def add_new_top_topic(self, stream_id: int, topic_name: str,
-                          sender_id: int) -> None:
+                          is_current_user: bool) -> None:
         new_topic_button = TopicButton(stream_id,
                                        topic_name,
                                        self.view.controller,
@@ -414,7 +414,7 @@ class TopicsView(urwid.Frame):
                                        0)
         self.log.insert(0, new_topic_button)
         self.list_box.set_focus_valign('bottom')
-        if sender_id == self.view.model.user_id:
+        if is_current_user:
             self.list_box.set_focus(0)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
