@@ -908,16 +908,19 @@ class Model:
             # consecutive block independently). However, it is critical to keep
             # the topics index synchronized as it used whenever the topics list
             # view is reconstructed later.
-            self._update_topic_index(stream_id, topic)
+            is_new_topic = self._update_topic_index(stream_id, topic)
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
             if hasattr(self.controller, 'view'):
                 view = self.controller.view
                 if view.left_panel.is_in_topic_view_with_stream_id(stream_id):
-                    view.topic_w.update_topics_list(
-                        stream_id, topic, message['sender_id']
-                    )
+                    sender_id = message['sender_id']
+                    if is_new_topic:
+                        view.topic_w.add_new_top_topic(stream_id, topic,
+                                                       sender_id)
+                    else:
+                        view.topic_w.try_to_move_topic_to_top(topic, sender_id)
                     self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not,
@@ -992,15 +995,19 @@ class Model:
                     msg_log.append(msg_w)
             self.controller.update_screen()
 
-    def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
+    def _update_topic_index(self, stream_id: int, topic_name: str) -> bool:
         """
         Update topic order in index based on incoming message.
         Helper method called by _handle_message_event
+
+        Returns True if a new topic, False if not
         """
         topic_list = self.topics_in_stream(stream_id)
+        is_new_topic = True
         for topic_iterator, topic in enumerate(topic_list):
             if topic == topic_name:
                 topic_list.insert(0, topic_list.pop(topic_iterator))
+                is_new_topic = False
                 break
         else:
             # No previous topics with same topic names are found
@@ -1009,6 +1016,7 @@ class Model:
 
         # Update the index.
         self.index['topics'][stream_id] = topic_list
+        return is_new_topic
 
     def _handle_update_message_event(self, event: Event) -> None:
         """

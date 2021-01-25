@@ -394,10 +394,8 @@ class TopicsView(urwid.Frame):
             self.log.extend(topics_to_display)
             self.view.controller.update_screen()
 
-    def update_topics_list(self, stream_id: int, topic_name: str,
-                           sender_id: int) -> None:
-        # More recent topics are found towards the beginning
-        # of the list.
+    def try_to_move_topic_to_top(self, topic_name: str,
+                                 sender_id: int) -> None:
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
                 self.log.insert(0, self.log.pop(topic_iterator))
@@ -405,8 +403,10 @@ class TopicsView(urwid.Frame):
                 if sender_id == self.view.model.user_id:
                     self.list_box.set_focus(0)
                 return
-        # No previous topics with same topic names are found
-        # hence we create a new topic button for it.
+        # Reaching here is not necesarily an error, as we may be searching
+
+    def add_new_top_topic(self, stream_id: int, topic_name: str,
+                          sender_id: int) -> None:
         new_topic_button = TopicButton(stream_id,
                                        topic_name,
                                        self.view.controller,
