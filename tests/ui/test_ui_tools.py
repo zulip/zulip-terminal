@@ -602,7 +602,7 @@ class TestTopicsView:
         assert topic_view.view == self.view
         assert topic_view.topic_search_box
         self.topic_search_box.assert_called_once_with(
-            topic_view, 'SEARCH_TOPICS', topic_view.update_topics)
+            topic_view, 'SEARCH_TOPICS', topic_view.filter_topics)
         self.header_list.assert_called_once_with([topic_view.stream_button,
                                                   self.divider('─'),
                                                   topic_view.topic_search_box])
@@ -628,7 +628,7 @@ class TestTopicsView:
             mocker.Mock(topic_name=topic_name)
             for topic_name in topic_names
         ]
-        topic_view.update_topics(search_box, new_text)
+        topic_view.filter_topics(search_box, new_text)
         assert [topic.topic_name for topic in topic_view.log
                 ] == expected_log
         self.view.controller.update_screen.assert_called_once_with()

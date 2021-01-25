@@ -366,7 +366,7 @@ class TopicsView(urwid.Frame):
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(self,
                                                'SEARCH_TOPICS',
-                                               self.update_topics)
+                                               self.filter_topics)
         self.header_list = urwid.Pile([self.stream_button,
                                        urwid.Divider('─'),
                                        self.topic_search_box])
@@ -378,7 +378,7 @@ class TopicsView(urwid.Frame):
         self.search_lock = threading.Lock()
 
     @asynch
-    def update_topics(self, search_box: Any, new_text: str) -> None:
+    def filter_topics(self, search_box: Any, new_text: str) -> None:
         if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
