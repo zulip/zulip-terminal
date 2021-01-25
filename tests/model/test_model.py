@@ -1009,6 +1009,7 @@ class TestModel:
         ({  # Only subject of 1 message is updated.
             'message_id': 1,
             'subject': 'new subject',
+            'orig_subject': 'old subject',
             'stream_id': 10,
             'message_ids': [1],
         }, 1, {
@@ -1031,6 +1032,7 @@ class TestModel:
         ({  # Subject of 2 messages is updated
             'message_id': 1,
             'subject': 'new subject',
+            'orig_subject': 'old topic',
             'stream_id': 10,
             'message_ids': [1, 2],
         }, 2, {
@@ -1052,6 +1054,8 @@ class TestModel:
         }, False),
         ({  # Message content is updated
             'message_id': 1,
+            'subject': 'same topic',
+            'orig_subject': 'same topic',
             'stream_id': 10,
             'rendered_content': '<p>new content</p>',
         }, 1, {
@@ -1075,6 +1079,7 @@ class TestModel:
             'message_id': 1,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'orig_subject': 'old subject',
             'stream_id': 10,
             'message_ids': [1],
         }, 2, {  # 2=update of subject & content
@@ -1097,6 +1102,8 @@ class TestModel:
         ({  # Some new type of update which we don't handle yet.
             'message_id': 1,
             'foo': 'boo',
+            'subject': 'old subject',
+            'orig_subject': 'old subject',
         }, 0, {
             'messages': {
                 1: {
@@ -1118,6 +1125,7 @@ class TestModel:
             'message_id': 3,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'orig_subject': 'old subject',
             'stream_id': 10,
             'message_ids': [3],
         }, 0, {
@@ -1141,6 +1149,7 @@ class TestModel:
             'message_id': 3,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'orig_subject': 'old subject',
             'stream_id': 10,
             'message_ids': [3],
         }, 0, {
@@ -1164,6 +1173,7 @@ class TestModel:
             'message_id': 1,
             'rendered_content': '<p>new content</p>',
             'subject': 'new subject',
+            'orig_subject': 'still old subject',
             'stream_id': 10,
             'message_ids': [1],
         }, 2, {

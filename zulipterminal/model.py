@@ -64,6 +64,7 @@ class Event(TypedDict, total=False):  # Each Event will only have a subset
     message: Message
     flags: List[str]
     subject: str
+    orig_subject: str
     # subscription:
     property: str
     user_id: int  # Present when a streams subscribers are updated.
@@ -1046,10 +1047,11 @@ class Model:
             self._update_rendered_view(message_id)
 
         # NOTE: This is independent of messages being indexed
-        # Previous assertion:
-        # * 'subject' is not present in update event if
-        #   the event didn't have a 'subject' update.
-        if 'subject' in event:
+        # 'subject' will be present in event even if the message
+        #  was not edited. In this case 'orig_subject' and 'subject'
+        #  will have the same value. We can exploit this fact to check
+        # if a message's subject/topic was edited.
+        if event['subject'] != event['orig_subject']:
             new_subject = event['subject']
             stream_id = event['stream_id']
 
