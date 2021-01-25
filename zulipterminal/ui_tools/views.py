@@ -394,14 +394,18 @@ class TopicsView(urwid.Frame):
             self.log.extend(topics_to_display)
             self.view.controller.update_screen()
 
+    def _insert_topic_at_top(self, button: Any, is_current_user: bool) -> None:
+        self.log.insert(0, button)
+        self.list_box.set_focus_valign('bottom')
+        if is_current_user:
+            self.list_box.set_focus(0)
+
     def try_to_move_topic_to_top(self, topic_name: str,
                                  is_current_user: bool) -> None:
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
-                self.log.insert(0, self.log.pop(topic_iterator))
-                self.list_box.set_focus_valign('bottom')
-                if is_current_user:
-                    self.list_box.set_focus(0)
+                button_to_move = self.log.pop(topic_iterator)
+                self._insert_topic_at_top(button_to_move, is_current_user)
                 return
         # Reaching here is not necesarily an error, as we may be searching
 
@@ -412,10 +416,7 @@ class TopicsView(urwid.Frame):
                                        self.view.controller,
                                        self.view.LEFT_WIDTH,
                                        0)
-        self.log.insert(0, new_topic_button)
-        self.list_box.set_focus_valign('bottom')
-        if is_current_user:
-            self.list_box.set_focus(0)
+        self._insert_topic_at_top(new_topic_button, is_current_user)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
