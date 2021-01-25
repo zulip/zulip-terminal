@@ -295,3 +295,15 @@ def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
     expected_contents = "[api]\nemail={}\nkey={}\nsite={}".format(id, key, url)
     with open(path) as f:
         assert f.read() == expected_contents
+
+
+def test__write_zuliprc__fail_file_exists(
+    minimal_zuliprc, tmpdir, id="id", key="key", url="url"
+):
+    path = os.path.join(str(tmpdir), "zuliprc")
+
+    error_message = _write_zuliprc(
+        path, api_key=key, server_url=url, login_id=id,
+    )
+
+    assert error_message == "zuliprc already exists at " + path

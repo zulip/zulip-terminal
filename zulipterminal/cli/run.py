@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import logging
+import os
 import sys
 import traceback
 from os import path, remove
@@ -201,12 +202,17 @@ def _write_zuliprc(to_path: str, *,
                    login_id: str, api_key: str, server_url: str) -> str:
     """
     Writes a zuliprc file, returning a non-empty error string on failure
+    Only creates new files; errors if file already exists
     """
     try:
-        with open(to_path, 'w') as f:
+        with open(os.open(to_path,
+                          os.O_CREAT | os.O_WRONLY | os.O_EXCL),
+                  'w') as f:
             f.write('[api]\nemail={}\nkey={}\nsite={}'
                     .format(login_id, api_key, server_url))
         return ""
+    except FileExistsError as ex:
+        return "zuliprc already exists at {}".format(to_path)
     except OSError as ex:
         return ("{}: zuliprc could not be created at {}"
                 .format(ex.__class__.__name__, to_path))
