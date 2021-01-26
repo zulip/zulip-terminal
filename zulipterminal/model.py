@@ -1,3 +1,4 @@
+import datetime
 import json
 import time
 from collections import OrderedDict, defaultdict
@@ -1126,6 +1127,14 @@ class Model:
         if operation == 'add' and flag_to_change == 'read':
             set_count(list(message_ids_to_mark & indexed_message_ids),
                       self.controller, -1)
+
+    def formatted_local_time(self, timestamp: int,
+                             *, show_seconds: bool) -> str:
+        local_time = datetime.datetime.fromtimestamp(timestamp)
+        if show_seconds:
+            return local_time.strftime('%a %b %d %H:%M:%S')
+        else:
+            return local_time.strftime('%a %b %d %H:%M')
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """

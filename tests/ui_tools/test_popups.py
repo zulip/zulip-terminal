@@ -432,6 +432,8 @@ class TestMsgInfoView:
         self.controller.model.initial_data = {
             'realm_allow_edit_history': False,
         }
+        self.controller.model.formatted_local_time.side_effect = [
+           "Tue Mar 13 10:55:22", "Tue Mar 13 10:55:37", "Tue Mar 13 10:55:36"]
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
                                          'Message Information', OrderedDict(),
                                          list())

@@ -3,7 +3,7 @@ import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from sys import platform
-from time import ctime, sleep, time
+from time import sleep, time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
@@ -622,9 +622,6 @@ class MessageBox(urwid.Pile):
 
         super().__init__(self.main_view())
 
-    def _time_for_message(self, message: Message) -> str:
-        return ctime(message['timestamp'])[:-8]
-
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
         if (len(self.model.narrow) == 1
@@ -1055,7 +1052,8 @@ class MessageBox(urwid.Pile):
                 'is_starred': 'starred' in msg['flags'],
                 'author': (msg['sender_full_name']
                            if 'sender_full_name' in msg else None),
-                'time': (self._time_for_message(msg)
+                'time': (str(self.model.formatted_local_time(
+                                        msg['timestamp'], show_seconds=False))
                          if 'timestamp' in msg else None),
                 'datetime': (datetime.fromtimestamp(msg['timestamp'])
                              if 'timestamp' in msg else None),

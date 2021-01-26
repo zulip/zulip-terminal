@@ -1,4 +1,5 @@
 import datetime
+import itertools
 from collections import OrderedDict, defaultdict
 from typing import Any, Dict
 
@@ -1778,10 +1779,6 @@ class TestMessageBox:
             'timestamp': 1532103879,
         }
     ])
-    @pytest.mark.parametrize('current_year', [2018, 2019, 2050],
-                             ids=['now_2018', 'now_2019', 'now_2050'])
-    @pytest.mark.parametrize('starred_msg', ['this', 'last', 'neither'],
-                             ids=['this_starred', 'last_starred', 'no_stars'])
     @pytest.mark.parametrize('expected_header, to_vary_in_last_message', [
         (['alice', ' ', 'DAYDATETIME'], {'sender_full_name': 'bob'}),
         ([' ', ' ', 'DAYDATETIME'], {'timestamp': 1532103779}),
@@ -1789,6 +1786,10 @@ class TestMessageBox:
     ], ids=['show_author_as_authors_different',
             'merge_messages_as_only_slightly_earlier_message',
             'dont_merge_messages_as_much_earlier_message'])
+    @pytest.mark.parametrize('current_year', [2018, 2019, 2050],
+                             ids=['now_2018', 'now_2019', 'now_2050'])
+    @pytest.mark.parametrize('starred_msg', ['this', 'last', 'neither'],
+                             ids=['this_starred', 'last_starred', 'no_stars'])
     def test_main_view_content_header_without_header(self, mocker, message,
                                                      expected_header,
                                                      current_year,
@@ -1804,7 +1805,9 @@ class TestMessageBox:
         all_to_vary = dict(to_vary_in_last_message, **stars['last'])
         last_msg = dict(message, **all_to_vary)
         msg_box = MessageBox(this_msg, self.model, last_msg)
-        expected_header[1] = msg_box._time_for_message(message)
+        self.model.formatted_local_time.side_effect = itertools.cycle(
+                                ["Fri Jul 20 21:54", " ", "Thu Jan 01 05:30"])
+        expected_header[1] = "Fri Jul 20 21:54"
         if current_year > 2018:
             expected_header[1] = '2018 - ' + expected_header[1]
         expected_header[2] = '*' if starred_msg == 'this' else ' '
