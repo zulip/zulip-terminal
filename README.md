@@ -187,15 +187,16 @@ source ~/.zshenv
 | Narrow to a topic/private-chat, or stream/all-private-messages| <kbd>z</kbd>                          |
 | Add/remove thumbs-up reaction to the current message  | <kbd>+</kbd>                                  |
 | Add/remove star status of the current message         | <kbd>*</kbd>                                  |
-| Show message information                              | <kbd>i</kbd>                                  |
-| View edit history from message information box        | <kbd>e</kbd>                                  |
+| Show/hide message information                         | <kbd>i</kbd>                                  |
+| Show/hide edit history (from message information)     | <kbd>e</kbd>                                  |
 
 ### Stream list actions
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
 | Toggle topics in a stream                             | <kbd>t</kbd>                                  |
 | Mute/unmute Streams                                   | <kbd>m</kbd>                                  |
-| Show stream information & modify settings             | <kbd>i</kbd>                                  |
+| Show/hide stream information & modify settings        | <kbd>i</kbd>                                  |
+| Show/hide stream members (from stream information)    | <kbd>m</kbd>                                  |
 
 ### Composing a message
 | Command                                                   | Key Combination                               |

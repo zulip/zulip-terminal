@@ -226,23 +226,24 @@ KEY_BINDINGS = OrderedDict([
     }),
     ('MSG_INFO', {
         'keys': ['i'],
-        'help_text': 'View message information',
+        'help_text': 'Show/hide message information',
         'key_category': 'msg_actions',
     }),
     ('EDIT_HISTORY', {
         'keys': ['e'],
-        'help_text': 'View edit history from message information box',
+        'help_text': 'Show/hide edit history (from message information)',
         'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
     }),
     ('STREAM_DESC', {
         'keys': ['i'],
-        'help_text': 'View stream information & modify settings',
+        'help_text': 'Show/hide stream information & modify settings',
         'key_category': 'stream_list',
     }),
     ('STREAM_MEMBERS', {
         'keys': ['m'],
-        'help_text': 'View subscribed stream members from stream info',
+        'help_text':
+            'Show/hide subscribed stream members (from stream information)',
         'excluded_from_random_tips': True,
         'key_category': 'stream_list',
     }),
