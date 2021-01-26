@@ -1804,13 +1804,21 @@ class TestMessageBox:
         date.today.return_value = datetime.date(current_year, 1, 1)
         date.side_effect = lambda *args, **kw: datetime.date(*args, **kw)
 
+        output_date_time = "Fri Jul 20 21:54"  # corresponding to timestamp
+
+        self.model.formatted_local_time.side_effect = [
+            output_date_time, " ",  # for this- and last-message
+        ] * 2  # called once in __init__ and then in main_view explicitly
+
         stars = {msg: ({'flags': ['starred']} if msg == starred_msg else {})
                  for msg in ('this', 'last')}
         this_msg = dict(message, **stars['this'])
         all_to_vary = dict(to_vary_in_last_message, **stars['last'])
         last_msg = dict(message, **all_to_vary)
+
         msg_box = MessageBox(this_msg, self.model, last_msg)
-        expected_header[1] = msg_box._time_for_message(message)
+
+        expected_header[1] = output_date_time
         if current_year > 2018:
             expected_header[1] = '2018 - ' + expected_header[1]
         expected_header[2] = '*' if starred_msg == 'this' else ' '

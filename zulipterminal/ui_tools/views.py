@@ -1,5 +1,4 @@
 import threading
-import time
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -1197,9 +1196,11 @@ class MsgInfoView(PopUpView):
         self.msg = msg
         self.message_links = message_links
         self.time_mentions = time_mentions
+        date_and_time = controller.model.formatted_local_time(
+                                        msg['timestamp'], show_seconds=True)
 
         msg_info = [
-            ('', [('Date & Time', time.ctime(msg['timestamp'])[:-5]),
+            ('', [('Date & Time', date_and_time),
                   ('Sender', msg['sender_full_name']),
                   ('Sender\'s Email ID', msg['sender_email'])]),
         ]
@@ -1210,7 +1211,7 @@ class MsgInfoView(PopUpView):
         )
         if self.show_edit_history_label:
             msg_info[0][1][0] = (
-                'Date & Time (Original)', time.ctime(msg['timestamp'])[:-5]
+                'Date & Time (Original)', date_and_time
             )
 
             keys = ', '.join(map(repr, keys_for_command('EDIT_HISTORY')))
@@ -1353,7 +1354,8 @@ class EditHistoryView(PopUpView):
                          tag: EditHistoryTag) -> Any:
         content = snapshot['content']
         topic = snapshot['topic']
-        timestamp = time.ctime(snapshot['timestamp'])[:-5]
+        date_and_time = self.controller.model.formatted_local_time(
+                                    snapshot['timestamp'], show_seconds=True)
 
         user_id = snapshot.get('user_id')
         if user_id:
@@ -1371,7 +1373,7 @@ class EditHistoryView(PopUpView):
         subheader = [
             urwid.Text(('edit_author', author)),
             # 19 = len(timestamp).
-            (19, urwid.Text(('edit_time', timestamp), align='right')),
+            (19, urwid.Text(('edit_time', date_and_time), align='right')),
         ]
 
         edit_block = [

@@ -193,6 +193,9 @@ class TestEditHistoryView:
         self.controller.model.fetch_message_history = (
             mocker.Mock(return_value=[])
         )
+        self.controller.model.formatted_local_time.return_value = (
+           "Tue Mar 13 10:55:22"
+        )
         mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
         # NOTE: Given that the EditHistoryView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
@@ -439,6 +442,9 @@ class TestMsgInfoView:
         self.controller.model.initial_data = {
             'realm_allow_edit_history': False,
         }
+        self.controller.model.formatted_local_time.side_effect = [
+           "Tue Mar 13 10:55:22", "Tue Mar 13 10:55:37",
+        ]
         self.msg_info_view = MsgInfoView(self.controller, message_fixture,
                                          'Message Information', OrderedDict(),
                                          list())
