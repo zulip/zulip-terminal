@@ -97,7 +97,8 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc])
-        assert str(e.value) == '1'
+
+    assert str(e.value) == '1'
 
     captured = capsys.readouterr()
 
@@ -132,7 +133,8 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc, "-t", bad_theme])
-        assert str(e.value) == '1'
+
+    assert str(e.value) == '1'
 
     captured = capsys.readouterr()
 
@@ -160,7 +162,8 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
 def test_zt_version(capsys, options):
     with pytest.raises(SystemExit) as e:
         main([options])
-        assert str(e.value) == "0"
+
+    assert str(e.value) == "0"
 
     captured = capsys.readouterr()
 
@@ -188,7 +191,9 @@ def test_parse_args_valid_autohide_option(option, autohide):
 def test_main_multiple_autohide_options(capsys, options):
     with pytest.raises(SystemExit) as e:
         main(options)
-        assert str(e.value) == "2"
+
+    assert str(e.value) == "2"
+
     captured = capsys.readouterr()
     lines = captured.err.strip('\n')
     lines = lines.split("pytest: ", 1)[1]
