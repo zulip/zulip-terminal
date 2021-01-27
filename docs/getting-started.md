@@ -8,7 +8,7 @@ If you encountered any issues above or have any queries, feel free to ask for he
 I would like you to try out a few of our keyboard shortcuts and send a couple message to help you get familiar with zulip terminal.
 
 #### What do you see?
-![Screenshot 2020-05-19 at 9 56 49 AM](https://user-images.githubusercontent.com/56690786/82285402-0760b800-99b9-11ea-9a86-9d3765ea9177.png)
+![Screenshot](https://user-images.githubusercontent.com/9568999/106061037-b659a580-60a9-11eb-8ff8-ea1c54ac9084.png)
 
 Zulip Terminal is divided into three columns/divisions.
 **The left column** shows list of all the streams you are subscribed to and some buttons for viewing different types of messages.
