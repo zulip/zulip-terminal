@@ -240,7 +240,7 @@ class UserButton(TopButton):
         self.controller.narrow_to_user(self)
         self._view.body.focus.original_widget.set_focus('footer')
         self._view.write_box.private_box_view(
-            email=self.email,
+            emails=[self.email],
             recipient_user_ids=[self.user_id]
         )
 
