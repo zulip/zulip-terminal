@@ -237,16 +237,18 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     return settings
 
 
-def list_themes() -> None:
+def list_themes() -> str:
     available_themes = all_themes()
-    print("The following themes are available:")
+    text = "The following themes are available:\n"
     for theme in available_themes:
         suffix = ""
         if theme == DEFAULT_SETTINGS['theme']:
             suffix += "[default theme]"
-        print("  ", theme, suffix)
-    print("Specify theme in zuliprc file or override "
-          "using -t/--theme options on command line.")
+        text += "  {} {}\n".format(theme, suffix)
+    return text + (
+        "Specify theme in zuliprc file or override "
+        "using -t/--theme options on command line."
+    )
 
 
 def main(options: Optional[List[str]]=None) -> None:
@@ -277,7 +279,7 @@ def main(options: Optional[List[str]]=None) -> None:
         sys.exit(0)
 
     if args.list_themes:
-        list_themes()
+        print(list_themes())
         sys.exit(0)
 
     if args.config_file:
@@ -305,7 +307,7 @@ def main(options: Optional[List[str]]=None) -> None:
         if not is_valid_theme:
             print("Invalid theme '{}' was specified {}."
                   .format(*theme_to_use))
-            list_themes()
+            print(list_themes())
             sys.exit(1)
         if theme_to_use[0] not in available_themes:
             # theme must be an alias, as it is valid
