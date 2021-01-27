@@ -1318,7 +1318,7 @@ class TestMessageBox:
         mocker.patch.object(MessageBox, 'main_view')
         msg_box = MessageBox(message, self.model, None)
 
-        assert msg_box.recipients_emails == 'foo@zulip.com'
+        assert msg_box.recipients_emails == ['foo@zulip.com']
         msg_box._is_private_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize('content, markup', [

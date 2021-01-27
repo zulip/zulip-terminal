@@ -114,20 +114,22 @@ class WriteBox(urwid.Pile):
             self.send_next_typing_update = datetime.now()
             self.idle_status_tracking = False
 
-    def private_box_view(self, *, email: str='',
+    def private_box_view(self, *, emails: Optional[List[str]]=None,
                          recipient_user_ids: Optional[List[int]]=None) -> None:
         # Neither or both arguments should be set
-        assert ((email != '' and recipient_user_ids is not None)
-                or (email == '' and recipient_user_ids is None))
+        assert ((emails is not None and recipient_user_ids is not None)
+                or (emails is None and recipient_user_ids is None))
 
         self.set_editor_mode()
-        if recipient_user_ids:
+        if recipient_user_ids and emails:
             self.recipient_user_ids = recipient_user_ids
+            email_text = ", ".join(emails)
         else:
             self.recipient_user_ids = []
+            email_text = ""
 
         self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit("To: ", edit_text=email)
+        self.to_write_box = ReadlineEdit("To: ", edit_text=email_text)
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
@@ -492,8 +494,12 @@ class WriteBox(urwid.Pile):
         elif is_command_key('SAVE_AS_DRAFT', key):
             if not self.msg_edit_id:
                 if self.to_write_box:
+                    recipient_emails = [
+                        email.strip()
+                        for email in self.to_write_box.edit_text.split(',')
+                    ]
                     message = Message(
-                            display_recipient=self.to_write_box.edit_text,
+                            display_recipient=recipient_emails,
                             content=self.msg_write_box.edit_text,
                             type='private',
                     )
@@ -619,7 +625,7 @@ class MessageBox(urwid.Pile):
             if self._is_private_message_to_self():
                 recipient = self.message['display_recipient'][0]
                 self.recipients_names = recipient['full_name']
-                self.recipients_emails = self.model.user_email
+                self.recipients_emails = [self.model.user_email]
                 self.recipient_ids = [self.model.user_id]
             else:
                 self.recipients_names = ', '.join(list(
@@ -627,11 +633,11 @@ class MessageBox(urwid.Pile):
                             for recipient in self.message['display_recipient']
                             if recipient['email'] != self.model.user_email
                         ))
-                self.recipients_emails = ', '.join(list(
-                            recipient['email']
-                            for recipient in self.message['display_recipient']
-                            if recipient['email'] != self.model.user_email
-                        ))
+                self.recipients_emails = [
+                    recipient['email']
+                    for recipient in self.message['display_recipient']
+                    if recipient['email'] != self.model.user_email
+                ]
                 self.recipient_ids = [recipient['id'] for recipient
                                       in self.message['display_recipient']
                                       if recipient['id'] != self.model.user_id]
@@ -1259,7 +1265,7 @@ class MessageBox(urwid.Pile):
         if is_command_key('ENTER', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.recipients_emails,
+                    emails=self.recipients_emails,
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message['type'] == 'stream':
@@ -1271,7 +1277,7 @@ class MessageBox(urwid.Pile):
         elif is_command_key('STREAM_MESSAGE', key):
             if self.message['type'] == 'private':
                 self.model.controller.view.write_box.private_box_view(
-                    email=self.recipients_emails,
+                    emails=self.recipients_emails,
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message['type'] == 'stream':
@@ -1309,7 +1315,7 @@ class MessageBox(urwid.Pile):
         elif is_command_key('REPLY_AUTHOR', key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
-                email=self.message['sender_email'],
+                emails=[self.message['sender_email']],
                 recipient_user_ids=[self.message['sender_id']],
             )
         elif is_command_key('MENTION_REPLY', key):

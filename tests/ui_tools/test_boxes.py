@@ -621,7 +621,7 @@ class TestWriteBox:
         elif msg_type == 'stream_edit':
             write_box.stream_box_edit_view(1000)
         else:
-            write_box.private_box_view(email='foo@gmail.com',
+            write_box.private_box_view(emails=['feedback@zulip.com'],
                                        recipient_user_ids=[1])
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
