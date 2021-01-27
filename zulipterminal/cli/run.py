@@ -37,6 +37,15 @@ zt_logger.addHandler(zt_logfile_handler)
 requests_logger = logging.getLogger("urllib3")
 requests_logger.setLevel(logging.DEBUG)
 
+# These should be the defaults without config file or command-line overrides
+DEFAULT_SETTINGS = {
+    'theme': 'zt_dark',
+    'autohide': 'no_autohide',
+    'notify': 'disabled',
+    'footlinks': 'enabled',
+    'color-depth': '256',
+}
+
 
 def in_color(color: str, text: str) -> str:
     color_for_str = {
@@ -64,13 +73,15 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         help='config file downloaded from your zulip '
                              'organization.(e.g. ~/zuliprc)')
     parser.add_argument('--theme', '-t',
-                        help='choose color theme. (e.g. blue, light)')
+                        help='choose color theme (default {}).'
+                             .format(DEFAULT_SETTINGS['theme']))
     parser.add_argument('--list-themes',
                         action="store_true",
                         help='list all the color themes.')
     parser.add_argument('--color-depth',
                         choices=['1', '16', '256'],
-                        help="Force the color depth (default 256).")
+                        help="Force the color depth (default {})."
+                             .format(DEFAULT_SETTINGS['color-depth']))
     # debug mode
     parser.add_argument("-d",
                         "--debug",
@@ -210,14 +221,11 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
                        + zuliprc_path + "\n"))
         sys.exit(1)
 
-    # default settings
+    # Initialize with default settings
     NO_CONFIG = 'with no config'
     settings = {
-        'theme': ('zt_dark', NO_CONFIG),
-        'autohide': ('no_autohide', NO_CONFIG),
-        'notify': ('disabled', NO_CONFIG),
-        'footlinks': ('enabled', NO_CONFIG),
-        'color-depth': ('256', NO_CONFIG)
+        setting: (default, NO_CONFIG)
+        for setting, default in DEFAULT_SETTINGS.items()
     }
 
     if 'zterm' in zuliprc:
@@ -234,7 +242,7 @@ def list_themes() -> None:
     print("The following themes are available:")
     for theme in available_themes:
         suffix = ""
-        if theme == "zt_dark":
+        if theme == DEFAULT_SETTINGS['theme']:
             suffix += "[default theme]"
         print("  ", theme, suffix)
     print("Specify theme in zuliprc file or override "
