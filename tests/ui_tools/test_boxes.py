@@ -21,10 +21,11 @@ class TestWriteBox:
 
     @pytest.fixture()
     def write_box(self, mocker, users_fixture, user_groups_fixture,
-                  streams_fixture, unicode_emojis):
+                  streams_fixture, unicode_emojis, user_dict):
         self.view.model.active_emoji_data = unicode_emojis
         write_box = WriteBox(self.view)
         write_box.view.users = users_fixture
+        write_box.model.user_dict = user_dict
         write_box.model.user_group_names = [
             groups['name'] for groups in user_groups_fixture]
 
