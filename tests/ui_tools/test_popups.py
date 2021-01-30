@@ -847,6 +847,7 @@ class TestStreamInfoView:
         )
         self.controller.model.is_muted_stream.return_value = False
         self.controller.model.is_pinned_stream.return_value = False
+        self.controller.model.is_visual_notifications_enabled.return_value = False
         mocker.patch(LISTWALKER, return_value=[])
         self.stream_id = 10
         self.controller.model.stream_dict = {
@@ -973,7 +974,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
-        mute_checkbox = self.stream_info_view.widgets[7]
+        mute_checkbox = self.stream_info_view.widgets[-3]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(mute_checkbox)
@@ -984,7 +985,7 @@ class TestStreamInfoView:
 
     @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
     def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
-        pin_checkbox = self.stream_info_view.widgets[8]
+        pin_checkbox = self.stream_info_view.widgets[-2]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
         size = widget_size(pin_checkbox)
@@ -992,6 +993,19 @@ class TestStreamInfoView:
         pin_checkbox.keypress(size, key)
 
         toggle_pin_status.assert_called_once_with(stream_id)
+
+    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    def test_checkbox_toggle_visual_notification(self, key, widget_size):
+        visual_notify_checkbox = self.stream_info_view.widgets[-1]
+        toggle_visual_notify_status = (
+            self.controller.model.toggle_stream_visual_notifications
+        )
+        stream_id = self.stream_info_view.stream_id
+        size = widget_size(visual_notify_checkbox)
+
+        visual_notify_checkbox.keypress(size, key)
+
+        toggle_visual_notify_status.assert_called_once_with(stream_id)
 
 
 class TestStreamMembersView:
