@@ -1427,12 +1427,15 @@ class SearchBox(urwid.Pile):
                 or is_command_key('GO_BACK', key)):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
+            self.controller.message_search = None
             self.controller.view.middle_column.set_focus('body')
+            self.controller._activate()
             return key
 
         elif is_command_key('ENTER', key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
+            self.controller.message_search = self.text_box.edit_text
             self.controller.view.middle_column.set_focus('body')
             return key
 

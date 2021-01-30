@@ -190,7 +190,7 @@ KEY_BINDINGS = OrderedDict([
         'key_category': 'searching',
     }),
     ('SEARCH_MESSAGES', {
-        'keys': ['/'],
+        'keys': ['/', 'meta /'],
         'help_text': 'Search Messages',
         'key_category': 'searching',
     }),

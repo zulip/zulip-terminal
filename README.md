@@ -168,7 +168,7 @@ source ~/.zshenv
 | Command                                               | Key Combination                               |
 | ----------------------------------------------------- | --------------------------------------------- |
 | Search users                                          | <kbd>w</kbd>                                  |
-| Search messages                                       | <kbd>/</kbd>                                  |
+| Search messages                                       | <kbd>/</kbd> / <kbd>alt /</kbd>               |
 | Search streams                                        | <kbd>q</kbd>                                  |
 | Search topics in a stream                             | <kbd>q</kbd>                                  |
 

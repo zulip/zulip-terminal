@@ -350,6 +350,10 @@ class StreamsView(urwid.Frame):
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
         if event == 'mouse press':
+            if button == 1:
+                self.view.search_box.text_box.set_edit_text('')
+                self.view.controller.message_search = None
+                return super().mouse_event(size, event, button, col, row, focus)
             if button == 4:
                 self.keypress(size, 'up')
                 return True
@@ -547,6 +551,7 @@ class MiddleColumnView(urwid.Frame):
             return super().keypress(size, key)
 
         elif is_command_key('SEARCH_MESSAGES', key):
+            self.controller.sticky_search = True if key == 'meta /' else False
             self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus('header')
             return key

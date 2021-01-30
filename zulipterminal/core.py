@@ -50,6 +50,9 @@ class Controller:
         self.autohide = autohide
         self.notify_enabled = notify
         self.footlinks_enabled = footlinks
+        self.message_search = None
+        self.stream_button = None
+        self.sticky_search = False
 
         self._editor = None  # type: Optional[Any]
 
@@ -314,6 +317,13 @@ class Controller:
         else:
             self.view.message_view.log.extend(w_list)
 
+        if self.sticky_search:
+            if self.message_search is not None:
+                self.view.search_box.text_box.set_edit_text(
+                    self.message_search)
+            else:
+                self.view.search_box.text_box.set_edit_text('')
+
         self.exit_editor_mode()
 
     def narrow_to_stream(self, button: Any) -> None:
@@ -322,6 +332,7 @@ class Controller:
         else:
             anchor = None
 
+        self.stream_button = button
         self._narrow_to(button,
                         anchor=anchor,
                         stream=button.stream_name)
@@ -331,7 +342,6 @@ class Controller:
             anchor = button.message['id']
         else:
             anchor = None
-
         self._narrow_to(button,
                         anchor=anchor,
                         stream=button.stream_name,
@@ -374,6 +384,13 @@ class Controller:
         self._narrow_to(button,
                         anchor=None,
                         starred=True)
+
+    def _activate(self) -> None:
+        self.view.show_left_panel(visible=False)
+        self.view.show_right_panel(visible=False)
+        self.view.body.focus_col = 1
+        if self.stream_button is not None:
+            self.narrow_to_stream(self.stream_button)
 
     def show_all_mentions(self, button: Any) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
