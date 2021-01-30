@@ -270,6 +270,47 @@ class Model:
             ids = index['mentioned_msg_ids']
         return ids.copy()
 
+    def current_narrow_contains_message(self, message: Message) -> bool:
+        """
+        Determine if a message conceptually belongs to a narrow
+        FIXME?: stars are not handled right now
+        """
+        return (
+            # all messages contains all messages
+            not self.narrow
+            # mentions
+            or (
+                self.narrow[0][1] == 'mentioned'
+                and 'mentioned' in message['flags']
+            )
+            # All-PMs
+            # FIXME Buggy condition?
+            or (
+                self.narrow[0][1] == message['type']
+                and len(self.narrow) == 1
+            )
+            # stream or stream+topic
+            or (
+                self.narrow[0][0] == 'stream'
+                and message['type'] == 'stream'
+                and message['display_recipient'] == self.narrow[0][1]
+                and (
+                    len(self.narrow) == 1  # stream
+                    or (len(self.narrow) == 2  # stream+topic
+                        and self.narrow[1][1] == message['subject'])
+                )
+            )
+            # PM-with
+            or (
+                self.narrow[0][0] == 'pm_with'
+                and message['type'] == 'private'
+                and len(self.narrow) == 1
+                and self.recipients == frozenset([
+                    user['id'] for user in message['display_recipient']
+                    ])
+            )
+        )
+
     def _notify_server_of_presence(self) -> Dict[str, Any]:
         response = self.client.update_presence(
                 request={
@@ -976,36 +1017,9 @@ class Model:
             else:
                 msg_w = msg_w_list[0]
 
-            if not self.narrow:
+            if self.current_narrow_contains_message(message):
                 msg_log.append(msg_w)
 
-            elif (self.narrow[0][1] == 'mentioned'
-                    and 'mentioned' in message['flags']):
-                msg_log.append(msg_w)
-
-            elif (self.narrow[0][1] == message['type']
-                    and len(self.narrow) == 1):
-                msg_log.append(msg_w)
-
-            elif (message['type'] == 'stream'
-                    and self.narrow[0][0] == "stream"):
-                recipient_stream = message['display_recipient']
-                narrow_stream = self.narrow[0][1]
-                append_to_stream = recipient_stream == narrow_stream
-
-                if (append_to_stream
-                    and (len(self.narrow) == 1
-                         or (len(self.narrow) == 2
-                             and self.narrow[1][1] == message['subject']))):
-                    msg_log.append(msg_w)
-
-            elif (message['type'] == 'private' and len(self.narrow) == 1
-                    and self.narrow[0][0] == "pm_with"):
-                narrow_recipients = self.recipients
-                message_recipients = frozenset(
-                    [user['id'] for user in message['display_recipient']])
-                if narrow_recipients == message_recipients:
-                    msg_log.append(msg_w)
             self.controller.update_screen()
 
     def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
