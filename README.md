@@ -1,12 +1,12 @@
 # Zulip Terminal - [Zulip](https://zulip.com)'s official terminal client
 
-[Recent changes](https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](#hot-keys) | [FAQs](https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md) | [Development](#contributor-guidelines)
+[Recent changes](https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](#hot-keys) | [FAQs](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) | [Development](#contributor-guidelines)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
-[![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=master)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amaster)
-[![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/master.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/master)
+[![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=main)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amain)
+[![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/main.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/main)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 ![Screenshot](https://user-images.githubusercontent.com/9568999/106061037-b659a580-60a9-11eb-8ff8-ea1c54ac9084.png)
@@ -33,7 +33,7 @@ Current limitations which we expect to only resolve over the long term include s
 * Using a mouse/pointer to achieve all actions
 * An internationalized UI
 
-For queries on missing feature support please take a look at the [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md),
+For queries on missing feature support please take a look at the [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md),
 our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up on https://chat.zulip.org and chat with users and developers in the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream!
 
 ### Supported platforms
@@ -55,9 +55,9 @@ We recommend installing in a dedicated python virtual environment (see below) or
 
 * **Latest** - The latest development version can be installed from the main git repository
 
-  To install, run a command like: `pip3 install git+https://github.com/zulip/zulip-terminal.git@master`
+  To install, run a command like: `pip3 install git+https://github.com/zulip/zulip-terminal.git@main`
 
-We also provide some sample Dockerfiles to build docker images in [docker/](https://github.com/zulip/zulip-terminal/tree/master/docker).
+We also provide some sample Dockerfiles to build docker images in [docker/](https://github.com/zulip/zulip-terminal/tree/main/docker).
 
 ### Installing into an isolated Python virtual environment
 

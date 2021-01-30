@@ -83,9 +83,9 @@ setup(
     ],
     project_urls={
         'Changelog':
-            'https://github.com/zulip/zulip-terminal/blob/master/CHANGELOG.md',
+            'https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md',
         'FAQs':
-            'https://github.com/zulip/zulip-terminal/blob/master/docs/FAQ.md',
+            'https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md',
         'Issues':
             'https://github.com/zulip/zulip-terminal/issues',
     },

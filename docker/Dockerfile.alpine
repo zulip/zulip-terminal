@@ -9,7 +9,7 @@ USER zulip
 WORKDIR /home/zulip
 
 ARG SOURCE=pypi
-ARG GIT_URL=https://github.com/zulip/zulip-terminal.git@master
+ARG GIT_URL=https://github.com/zulip/zulip-terminal.git@main
 
 RUN set -ex; python3 -m venv zt_venv \
     && source zt_venv/bin/activate \

@@ -28,14 +28,14 @@ docker run -it -v $HOME/.zulip:/.zulip zulip-terminal:latest
 
 ## Advanced Setup
 
-Images built using the `docker build` command above, implicitly use `SOURCE=pypi` to run the [latest pypi release of Zulip-Terminal](https://pypi.org/project/zulip-term/). If you wish to use the latest code available in development (master) branch of the zulip-terminal repository then `SOURCE=git` can be passed as a build argument.
+Images built using the `docker build` command above, implicitly use `SOURCE=pypi` to run the [latest pypi release of Zulip-Terminal](https://pypi.org/project/zulip-term/). If you wish to use the latest code available in development (main) branch of the zulip-terminal repository then `SOURCE=git` can be passed as a build argument.
 
 ```sh
-# To build docker image with the latest code in the master branch
+# To build docker image with the latest code in the main branch
 docker build -t zulip-terminal:latest -f Dockerfile.alpine . --build-arg SOURCE=git
 
 # In case you want to build the image with code from another branch, use GIT_URL to pass the appropriate remote and branch names
-docker build -t zulip-terminal:latest -f Dockerfile.alpine . --build-arg SOURCE=git --build-arg GIT_URL=https://github.com/zulip/zulip-terminal.git@master
+docker build -t zulip-terminal:latest -f Dockerfile.alpine . --build-arg SOURCE=git --build-arg GIT_URL=https://github.com/zulip/zulip-terminal.git@main
 ```
 
 You can swap `Dockerfile.alpine` for `Dockerfile.buster` if you prefer running inside image based on Debian instead of Alpine. The main advantage of Alpine is a better use of resources. The final Alpine docker image has a size of 150MB while the Debian image takes 221MB of disk space.
