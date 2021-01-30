@@ -1285,6 +1285,14 @@ class StreamInfoView(PopUpView):
             label="Pinned to top", state=pinned_state, checked_symbol=CHECK_MARK
         )
         urwid.connect_signal(pinned_setting, "change", self.toggle_pinned_status)
+        visual_notification = urwid.CheckBox(
+            label="Visual desktop notification",
+            state=controller.model.is_visual_notifications_enabled(stream_id),
+            checked_symbol=CHECK_MARK,
+        )
+        urwid.connect_signal(
+            visual_notification, "change", self.toggle_visual_notification
+        )
 
         footlinks, footlinks_width = MessageBox.footlinks_view(
             message_links=message_links,
@@ -1301,6 +1309,7 @@ class StreamInfoView(PopUpView):
             len(pinned_setting.label) + 4,
             desc.pack()[0],
             footlinks_width,
+            len(visual_notification.label) + 4,
         )
         self.widgets = self.make_table_with_categories(
             stream_info_content, column_widths
@@ -1316,6 +1325,7 @@ class StreamInfoView(PopUpView):
 
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
+        self.widgets.append(visual_notification)
         super().__init__(controller, self.widgets, "STREAM_DESC", popup_width, title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
@@ -1323,6 +1333,9 @@ class StreamInfoView(PopUpView):
 
     def toggle_pinned_status(self, button: Any, new_state: bool) -> None:
         self.controller.model.toggle_stream_pinned_status(self.stream_id)
+
+    def toggle_visual_notification(self, button: Any, new_state: bool) -> None:
+        self.controller.model.toggle_stream_visual_notifications(self.stream_id)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("STREAM_MEMBERS", key):
