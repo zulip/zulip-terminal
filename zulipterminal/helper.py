@@ -512,6 +512,23 @@ def match_user(user: Any, text: str) -> bool:
     return False
 
 
+def match_user_name_and_email(user: Any, text: str) -> bool:
+    """
+    Matches if the user's full name, last name, email or a combination
+    in the form of "name <email>" matches with `text`.
+    """
+    full_name = user['full_name'].lower()
+    email = user['email'].lower()
+    keywords = full_name.split()
+    keywords.append(full_name)
+    keywords.append(email)
+    keywords.append(f"{full_name} <{email}>")
+    for keyword in keywords:
+        if keyword.startswith(text.lower()):
+            return True
+    return False
+
+
 def match_emoji(emoji: str, text: str) -> bool:
     """
     True if the emoji matches with `text` (case insensitive),
