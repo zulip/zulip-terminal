@@ -176,6 +176,9 @@ class Model:
         self.new_user_input = True
         self._start_presence_updates()
 
+    def have_last_message_in_current_narrow(self) -> bool:
+        return self._have_last_message.get(repr(self.narrow), False)
+
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
         Returns the focus in the current narrow.

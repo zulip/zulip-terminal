@@ -177,9 +177,10 @@ class MessageView(urwid.ListBox):
 
                 return key
             except Exception:
-                if self.focus:
-                    id = self.focus.original_widget.message['id']
-                    self.load_new_messages(id)
+                if not self.model.have_last_message_in_current_narrow():
+                    if self.focus:
+                        id = self.focus.original_widget.message['id']
+                        self.load_new_messages(id)
                 return key
 
         elif is_command_key('GO_UP', key) and not self.old_loading:
