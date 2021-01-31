@@ -642,7 +642,7 @@ class TestWriteBox:
         ('CONTAINER_HEADER', 'HEADER_BOX_EDIT', "stream", True, True,
          'CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY'),
         ('CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY', "stream", True, True,
-         'CONTAINER_HEADER', 'HEADER_BOX_STREAM'),
+         'CONTAINER_HEADER', 'HEADER_BOX_TOPIC'),
         ('CONTAINER_HEADER', 'HEADER_BOX_RECIPIENT', "private", True, False,
          'CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY'),
         ('CONTAINER_MESSAGE', 'MESSAGE_BOX_BODY', "private", True, False,

@@ -82,6 +82,8 @@ class WriteBox(urwid.Pile):
         # Private message recipient text entry, None if stream-box
         # or not initialized
         self.to_write_box: Optional[ReadlineEdit] = None
+        self.in_edit_message_box = False
+        self.edit_caption: Optional[str] = None
 
         # For tracking sending typing status updates
         self.send_next_typing_update = datetime.now()
@@ -208,8 +210,8 @@ class WriteBox(urwid.Pile):
             write_box.edit_text
         )
 
-    def stream_box_view(self, stream_id: int, caption: str='', title: str='',
-                        ) -> None:
+    def _stream_view(self, stream_id: int, caption: str='', title: str='',
+                     ) -> None:
         self.set_editor_mode()
         self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
@@ -221,13 +223,6 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
-        self.stream_write_box = ReadlineEdit(edit_text=caption)
-        self.stream_write_box.enable_autocomplete(
-            func=self._stream_box_autocomplete,
-            key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
-        )
-        self.stream_write_box.set_completer_delims("")
 
         self.title_write_box = ReadlineEdit(edit_text=title)
         self.title_write_box.enable_autocomplete(
@@ -259,6 +254,18 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+    def stream_box_view(self, stream_id: int, caption: str='', title: str='',
+                        ) -> None:
+        self.stream_write_box = ReadlineEdit(
+            edit_text=caption
+        )
+        self.stream_write_box.enable_autocomplete(
+            func=self._stream_box_autocomplete,
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+        )
+        self.stream_write_box.set_completer_delims("")
+        self._stream_view(stream_id, caption, title)
         # Use and set a callback to set the stream marker
         self._set_stream_write_box_style(None, caption)
         urwid.connect_signal(self.stream_write_box, 'change',
@@ -266,7 +273,10 @@ class WriteBox(urwid.Pile):
 
     def stream_box_edit_view(self, stream_id: int, caption: str='',
                              title: str='') -> None:
-        self.stream_box_view(stream_id, caption, title)
+        self.in_edit_message_box = True
+        self.edit_caption = caption
+        self.stream_write_box = urwid.Text(caption)
+        self._stream_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
@@ -539,6 +549,8 @@ class WriteBox(urwid.Pile):
                     self.keypress(size, 'esc')
         elif is_command_key('GO_BACK', key):
             self.msg_edit_id = None
+            self.in_edit_message_box = False
+            self.edit_caption = None
             self.msg_body_edit_enabled = True
             self.send_stop_typing_status()
             self.view.controller.exit_editor_mode()
@@ -576,8 +588,11 @@ class WriteBox(urwid.Pile):
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 if self.to_write_box is None:
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
-                        stream_name = (header[self.FOCUS_HEADER_BOX_STREAM]
-                                       .edit_text)
+                        if not self.in_edit_message_box:
+                            stream_name = (header[self.FOCUS_HEADER_BOX_STREAM]
+                                           .edit_text)
+                        else:
+                            stream_name = self.edit_caption
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 'Invalid stream name.'
@@ -635,7 +650,10 @@ class WriteBox(urwid.Pile):
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
             if self.to_write_box is None:
-                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                if self.in_edit_message_box:
+                    header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
+                else:
+                    header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
 
@@ -1593,6 +1611,8 @@ class PanelSearchBox(urwid.Edit):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if ((is_command_key('ENTER', key) and self.get_edit_text() == '')
                 or is_command_key('GO_BACK', key)):
+            self.in_edit_message_box = False
+            self.edit_caption = None
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
