@@ -40,6 +40,7 @@ from zulipterminal.helper import (
     match_stream,
     match_topics,
     match_user,
+    match_user_name_and_email,
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
@@ -73,8 +74,9 @@ class WriteBox(urwid.Pile):
         # * updates server on PM typing events
         self.recipient_user_ids = []  # type: List[int]
 
-        # Private message recipient text entry
-        self.to_write_box = None  # None if stream-box or not initialized
+        # Private message recipient text entry, None if stream-box
+        # or not initialized
+        self.to_write_box = None  # type: Optional[ReadlineEdit]
 
         # For tracking sending typing status updates
         self.send_next_typing_update = datetime.now()
@@ -136,6 +138,13 @@ class WriteBox(urwid.Pile):
 
         self.send_next_typing_update = datetime.now()
         self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
+        self.to_write_box.enable_autocomplete(
+            func=self._to_box_autocomplete,
+            key=primary_key_for_command('AUTOCOMPLETE'),
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+        )
+        self.to_write_box.set_completer_delims("")
+
         self.msg_write_box = ReadlineEdit(multiline=True)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
@@ -272,6 +281,34 @@ class WriteBox(urwid.Pile):
             color = stream['color']
         (self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM]
          .set_text((color, stream_marker)))
+
+    def _to_box_autocomplete(self, text: str, state: Optional[int]
+                             ) -> Optional[str]:
+        users_list = self.view.users
+        recipients = text.rsplit(', ', 1)
+
+        # Use the most recent recipient for autocomplete.
+        previous_recipients = (
+            f"{recipients[0]}, " if len(recipients) > 1 else ""
+        )
+        latest_text = recipients[-1]
+
+        matching_users = [
+            user
+            for user in users_list
+            if match_user_name_and_email(user, latest_text)
+        ]
+
+        # Append the potential autocompleted recipients to the string
+        # containing the previous recipients.
+        updated_recipients = [
+            f"{previous_recipients}{user['full_name']} <{user['email']}>"
+            for user in matching_users
+        ]
+
+        user_names = [user['full_name'] for user in matching_users]
+
+        return self._process_typeaheads(updated_recipients, state, user_names)
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]
                                 ) -> Optional[str]:

@@ -287,6 +287,88 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    @pytest.mark.parametrize(['text', 'matching_users',
+                              'matching_users_info'], [
+        ('', [
+            'Human Myself',
+            'Human 1',
+            'Human 2'
+        ], [
+            'Human Myself <FOOBOO@gmail.com>',
+            'Human 1 <person1@example.com>',
+            'Human 2 <person2@example.com>'
+        ]),
+        ('My', ['Human Myself'],
+         ['Human Myself <FOOBOO@gmail.com>']),
+    ], ids=[
+        'no_search_text',
+        'single_word_search_text',
+    ])
+    def test__to_box_autocomplete(self, mocker, write_box, text,
+                                  matching_users, matching_users_info,
+                                  state=1):
+        _process_typeaheads = mocker.patch(BOXES
+                                           + '.WriteBox._process_typeaheads')
+
+        write_box._to_box_autocomplete(text, state)
+
+        _process_typeaheads.assert_called_once_with(matching_users_info, state,
+                                                    matching_users)
+
+    @pytest.mark.parametrize('text, expected_text', [
+        ('Hu', 'Human Myself <FOOBOO@gmail.com>'),
+        ('Human M', 'Human Myself <FOOBOO@gmail.com>'),
+        ('Human Myself <FOOBOO', 'Human Myself <FOOBOO@gmail.com>')
+    ])
+    def test__to_box_autocomplete_with_spaces(self, write_box, text,
+                                              expected_text, widget_size):
+        write_box.private_box_view(emails=['feedback@zulip.com'],
+                                   recipient_user_ids=[1])
+        write_box.to_write_box.set_edit_text(text)
+        write_box.to_write_box.set_edit_pos(len(text))
+        write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+        size = widget_size(write_box)
+
+        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
+
+        assert write_box.to_write_box.edit_text == expected_text
+
+    @pytest.mark.parametrize(['text', 'matching_users',
+                              'matching_users_info'], [
+        ('Welcome Bot <welcome-bot@zulip.com>, Human', [
+            'Human Myself',
+            'Human 1',
+            'Human 2'
+        ], [
+            'Welcome Bot <welcome-bot@zulip.com>, '
+            'Human Myself <FOOBOO@gmail.com>',
+            'Welcome Bot <welcome-bot@zulip.com>, '
+            'Human 1 <person1@example.com>',
+            'Welcome Bot <welcome-bot@zulip.com>, '
+            'Human 2 <person2@example.com>'
+        ]),
+        ('Welcome Bot <welcome-bot@zulip.com>, Notification Bot '
+         '<notification-bot@zulip.com>, person2',
+         ['Human 2'],
+         ['Welcome Bot <welcome-bot@zulip.com>, Notification Bot '
+          '<notification-bot@zulip.com>, Human 2 <person2@example.com>'])
+    ], ids=[
+        'name_search_text',
+        'email_search_text',
+    ])
+    def test__to_box_autocomplete_with_multiple_recipients(self, mocker,
+                                                           write_box, text,
+                                                           matching_users,
+                                                           matching_users_info,
+                                                           state=1):
+        _process_typeaheads = mocker.patch(BOXES
+                                           + '.WriteBox._process_typeaheads')
+
+        write_box._to_box_autocomplete(text, state)
+
+        _process_typeaheads.assert_called_once_with(matching_users_info, state,
+                                                    matching_users)
+
     @pytest.mark.parametrize(['text', 'state', 'to_pin', 'matching_streams'], [
         ('', 1, [], ['Secret stream', 'Some general stream',
                      'Stream 1', 'Stream 2']),
