@@ -190,12 +190,13 @@ class MessageView(urwid.ListBox):
                 self.set_focus_valign('middle')
                 return key
             except Exception:
-                if self.focus:
-                    id = self.focus.original_widget.message['id']
-                    self.load_old_messages(id)
-                else:
-                    self.load_old_messages()
-                return key
+                if not self.model.have_first_message_in_current_narrow():
+                    if self.focus:
+                        id = self.focus.original_widget.message['id']
+                        self.load_old_messages(id)
+                    else:
+                        self.load_old_messages()
+                    return key
 
         elif is_command_key('SCROLL_UP', key) and not self.old_loading:
             if (self.focus is not None

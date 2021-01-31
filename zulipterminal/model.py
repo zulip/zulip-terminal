@@ -101,6 +101,7 @@ class Model:
 
         self.narrow = []  # type: List[Any]
         self._have_last_message = {}  # type: Dict[str, bool]
+        self._have_first_message = {}  # type: Dict[str, bool]
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
@@ -178,6 +179,9 @@ class Model:
 
     def have_last_message_in_current_narrow(self) -> bool:
         return self._have_last_message.get(repr(self.narrow), False)
+
+    def have_first_message_in_current_narrow(self) -> bool:
+        return self._have_first_message.get(repr(self.narrow), False)
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -460,6 +464,12 @@ class Model:
             had_last_msg = self._have_last_message.get(narrow_str, False)
             self._have_last_message[narrow_str] = (
                 had_last_msg or just_found_last_msg
+            )
+
+            just_found_first_msg = response.get('found_oldest', False)
+            had_first_msg = self._have_first_message.get(narrow_str, False)
+            self._have_first_message[narrow_str] = (
+                had_first_msg or just_found_first_msg
             )
 
             return ""
