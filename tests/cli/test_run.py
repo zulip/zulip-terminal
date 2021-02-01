@@ -110,7 +110,7 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
         "Loading with:",
         "   theme 'zt_dark' specified with no config.",
         "   autohide setting 'no_autohide' specified with no config.",
-        "   footlinks setting 'enabled' specified with no config.",
+        "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: {}.\x1b[0m".
@@ -150,7 +150,7 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
         "      (you could try: {}, {})"
         "\x1b[0m".format('a', 'b'),
         "   autohide setting 'no_autohide' specified with no config.",
-        "   footlinks setting 'enabled' specified with no config.",
+        "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: {}.\x1b[0m".
@@ -262,9 +262,103 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     assert lines[-1] == expected_line
 
 
-@pytest.mark.parametrize('error_code, helper_text', [
-    (1, ""),
-    (2, "helper"),
+@pytest.fixture
+def parameterized_zuliprc(tmpdir):
+    def func(config):
+        zuliprc_path = str(tmpdir) + "/zuliprc"
+        with open(zuliprc_path, "w") as f:
+            f.write("[api]\n\n")  # minimal to avoid Exception
+            f.write("[zterm]\n")
+            for key, value in config.items():
+                f.write(f"{key}={value}\n")
+        os.chmod(zuliprc_path, 0o600)
+        return zuliprc_path
+    return func
+
+
+@pytest.mark.parametrize("config_key,config_value,footlinks_output", [
+        ("footlinks", "disabled",
+            "   maximum footlinks value '0' "
+            "specified in zuliprc file from footlinks."),
+        ("footlinks", "enabled",
+            "   maximum footlinks value '3' "
+            "specified in zuliprc file from footlinks."),
+        ("maximum-footlinks", "3",
+            "   maximum footlinks value '3' specified in zuliprc file."),
+        ("maximum-footlinks", "0",
+            "   maximum footlinks value '0' specified in zuliprc file.")
+    ],
+    ids=[
+        "footlinks_disabled",
+        "footlinks_enabled",
+        "maximum-footlinks_3",
+        "maximum-footlinks_0"
+    ])
+def test_successful_main_function_with_config(
+        config_key, config_value,
+        capsys, mocker, parameterized_zuliprc,
+        footlinks_output
+                                             ):
+    config = {
+        "theme": "default",
+        "autohide": "autohide",
+        "notify": "enabled",
+        "color-depth": "256"
+    }
+    config[config_key] = config_value
+    zuliprc = parameterized_zuliprc(config)
+    mocker.patch("zulipterminal.core.Controller.__init__",
+                 return_value=None)
+    mocker.patch("zulipterminal.core.Controller.main",
+                 return_value=None)
+    with pytest.raises(SystemExit):
+        main(["-c", zuliprc])
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_lines = [
+        'Loading with:',
+        "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
+        "   autohide setting 'autohide' specified in zuliprc file.",
+        footlinks_output,
+        "   color depth setting '256' specified in zuliprc file."
+                     ]
+    assert lines == expected_lines
+
+
+@pytest.mark.parametrize("zulip_config,err_message", [
+    ({
+        "footlinks": "enabled",
+        "maximum-footlinks": "3"
+    },
+     "Footlinks property is not allowed alongside maximum-footlinks"
+    ),
+    ({"maximum-footlinks": "-3"},
+     "Minimum value allowed for maximum-footlinks is 0"
+     )
+    ])
+def test_main_error_with_invalid_zuliprc_options(
+        parameterized_zuliprc, zulip_config, capsys,
+        mocker, err_message
+                                                ):
+    zuliprc = parameterized_zuliprc(zulip_config)
+    mocker.patch("zulipterminal.core.Controller.__init__",
+                 return_value=None
+                 )
+    mocker.patch("zulipterminal.core.Controller.main",
+                 return_value=None)
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc])
+    assert str(e.value) == "1"
+    captured = capsys.readouterr()
+    lines = captured.out.strip()
+    expected_lines = f"\033[91m{err_message}\033[0m"
+    assert lines == expected_lines
+
+
+@pytest.mark.parametrize('error_code,helper_text', [
+    (0, ""),
+    (1, "helper")
 ])
 def test_exit_with_error(error_code, helper_text,
                          capsys, error_message="some text"):

@@ -802,14 +802,18 @@ class MessageBox(urwid.Pile):
         self, message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
     ) -> Any:
         # Return if footlinks are disabled by the user.
-        if not self.model.controller.footlinks_enabled:
+        if self.model.controller.maximum_footlinks == 0:
             return None
 
         footlinks = []
+        counter = 0
         for link, (text, index, show_footlink) in message_links.items():
+            if counter == self.model.controller.maximum_footlinks:
+                break
             if not show_footlink:
                 continue
 
+            counter += 1
             footlinks.extend([
                 ('msg_link_index', f"{index}:"),
                 ' ',

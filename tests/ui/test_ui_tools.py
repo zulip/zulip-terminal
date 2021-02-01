@@ -2073,7 +2073,7 @@ class TestMessageBox:
     )
     def test_footlinks_view(self, message_fixture, message_links,
                             expected_text, expected_attrib):
-        self.model.controller.footlinks_enabled = True
+        self.model.controller.maximum_footlinks = 3
         msg_box = MessageBox(message_fixture, self.model, None)
 
         footlinks = msg_box.footlinks_view(message_links)
@@ -2085,16 +2085,17 @@ class TestMessageBox:
             assert footlinks is None
             assert not hasattr(footlinks, 'original_widget')
 
-    @pytest.mark.parametrize('footlinks_enabled, expected_instance', [
-        (False, type(None)),
-        (True, Padding),
+    @pytest.mark.parametrize('maximum_footlinks, expected_instance', [
+        (0, type(None)),
+        (1, Padding),
+        (3, Padding),
     ])
-    def test_footlinks_enabled(self, message_fixture, footlinks_enabled,
-                               expected_instance):
+    def test_footlinks_limit(self, message_fixture, maximum_footlinks,
+                             expected_instance):
         message_links = OrderedDict([
             ('https://github.com/zulip/zulip-terminal', ('ZT', 1, True)),
         ])
-        self.model.controller.footlinks_enabled = footlinks_enabled
+        self.model.controller.maximum_footlinks = maximum_footlinks
         msg_box = MessageBox(message_fixture, self.model, None)
 
         footlinks = msg_box.footlinks_view(message_links)
