@@ -141,7 +141,7 @@ class TestAboutView:
                                     theme_name='zt_dark',
                                     color_depth=256,
                                     autohide_enabled=False,
-                                    footlink_enabled=True)
+                                    maximum_footlinks=3)
 
     @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
                                      *keys_for_command('ABOUT')})
@@ -177,7 +177,7 @@ class TestAboutView:
                                theme_name='zt_dark',
                                color_depth=256,
                                autohide_enabled=False,
-                               footlink_enabled=True)
+                               maximum_footlinks=3)
 
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0

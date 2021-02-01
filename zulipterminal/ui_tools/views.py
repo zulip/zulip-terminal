@@ -1014,7 +1014,7 @@ class AboutView(PopUpView):
                  server_version: str,
                  server_feature_level: Optional[int],
                  theme_name: str, color_depth: int,
-                 autohide_enabled: bool, footlink_enabled: bool) -> None:
+                 autohide_enabled: bool, maximum_footlinks: int) -> None:
         self.feature_level_content = (
             [('Feature level', str(server_feature_level))]
             if server_feature_level else []
@@ -1026,7 +1026,7 @@ class AboutView(PopUpView):
             ('Application Configuration', [
                 ('Theme', theme_name),
                 ('Autohide', 'enabled' if autohide_enabled else 'disabled'),
-                ('Footlink', 'enabled' if footlink_enabled else 'disabled'),
+                ('Maximum footlinks', str(maximum_footlinks)),
                 ('Color depth', str(color_depth))])
         ]
 

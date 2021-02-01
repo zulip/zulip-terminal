@@ -40,16 +40,16 @@ class Controller:
     the application.
     """
 
-    def __init__(self, config_file: str, theme_name: str, theme: ThemeSpec,
-                 color_depth: int, in_explore_mode: bool,
-                 autohide: bool, notify: bool, footlinks: bool) -> None:
+    def __init__(self, config_file: str, maximum_footlinks: int,
+                 theme_name: str, theme: ThemeSpec, color_depth: int,
+                 in_explore_mode: bool, autohide: bool, notify: bool) -> None:
         self.theme_name = theme_name
         self.theme = theme
         self.color_depth = color_depth
         self.in_explore_mode = in_explore_mode
         self.autohide = autohide
         self.notify_enabled = notify
-        self.footlinks_enabled = footlinks
+        self.maximum_footlinks = maximum_footlinks
 
         self._editor = None  # type: Optional[Any]
 
@@ -231,7 +231,7 @@ class Controller:
                       server_feature_level=self.model.server_feature_level,
                       theme_name=self.theme_name, color_depth=self.color_depth,
                       autohide_enabled=self.autohide,
-                      footlink_enabled=self.footlinks_enabled),
+                      maximum_footlinks=self.maximum_footlinks),
             'area:help'
         )
 

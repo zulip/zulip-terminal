@@ -35,10 +35,11 @@ class TestController:
         self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
-        self.footlinks_enabled = True
-        result = Controller(self.config_file, self.theme_name, self.theme, 256,
+        self.maximum_footlinks = 3
+        result = Controller(self.config_file, self.maximum_footlinks,
+                            self.theme_name, self.theme, 256,
                             self.in_explore_mode, self.autohide,
-                            self.notify_enabled, self.footlinks_enabled)
+                            self.notify_enabled)
         result.view.message_view = mocker.Mock()  # set in View.__init__
         return result
 
@@ -51,7 +52,7 @@ class TestController:
         self.view.assert_called_once_with(controller)
         self.poll_for_events.assert_called_once_with()
         assert controller.theme == self.theme
-
+        assert controller.maximum_footlinks == self.maximum_footlinks
         assert self.main_loop.call_count == 1
         controller.loop.watch_pipe.assert_has_calls([
             mocker.call(controller._draw_screen),

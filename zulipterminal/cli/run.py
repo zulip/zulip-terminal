@@ -25,6 +25,8 @@ from zulipterminal.version import ZT_VERSION
 
 TRACEBACK_LOG_FILENAME = 'zulip-terminal-tracebacks.log'
 API_CALL_LOG_FILENAME = 'zulip-terminal-API-requests.log'
+ZULIPRC_CONFIG = 'in zuliprc file'
+NO_CONFIG = 'with no config'
 
 # Create a logger for this application
 zt_logger = logging.getLogger(__name__)
@@ -46,6 +48,7 @@ DEFAULT_SETTINGS = {
     'notify': 'disabled',
     'footlinks': 'enabled',
     'color-depth': '256',
+    'maximum-footlinks': '3',
 }
 
 
@@ -271,7 +274,6 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
 
     if 'zterm' in zuliprc:
         config = zuliprc['zterm']
-        ZULIPRC_CONFIG = 'in zuliprc file'
         for conf in config:
             settings[conf] = (config[conf], ZULIPRC_CONFIG)
 
@@ -339,6 +341,24 @@ def main(options: Optional[List[str]]=None) -> None:
         else:
             theme_to_use = zterm['theme']
 
+        if (zterm['footlinks'][1] == ZULIPRC_CONFIG
+           and zterm['maximum-footlinks'][1] == ZULIPRC_CONFIG):
+            exit_with_error(
+                "Footlinks property is not allowed alongside maximum-footlinks"
+            )
+
+        if (zterm['maximum-footlinks'][1] == ZULIPRC_CONFIG
+           and int(zterm['maximum-footlinks'][0]) < 0):
+            exit_with_error("Minimum value allowed for maximum-footlinks is 0")
+
+        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+            if zterm['footlinks'][0] == DEFAULT_SETTINGS['footlinks']:
+                maximum_footlinks = 3
+            else:
+                maximum_footlinks = 0
+        else:
+            maximum_footlinks = int(zterm['maximum-footlinks'][0])
+
         available_themes = all_themes()
         theme_aliases = aliased_themes()
         is_valid_theme = (
@@ -374,8 +394,14 @@ def main(options: Optional[List[str]]=None) -> None:
                            format(", ".join(complete))))
         print("   autohide setting '{}' specified {}."
               .format(*zterm['autohide']))
-        print("   footlinks setting '{}' specified {}."
-              .format(*zterm['footlinks']))
+        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+            print(
+                "   maximum footlinks value '{}' specified {} from footlinks."
+                .format(maximum_footlinks, zterm['footlinks'][1]))
+        else:
+            print(
+                "   maximum footlinks value '{}' specified {}."
+                .format(*zterm['maximum-footlinks']))
         print("   color depth setting '{}' specified {}."
               .format(*zterm['color-depth']))
         # For binary settings
@@ -383,7 +409,6 @@ def main(options: Optional[List[str]]=None) -> None:
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
-            'footlinks': ['enabled', 'disabled'],
             'color-depth': ['1', '16', '256']
         }
         boolean_settings = dict()  # type: Dict[str, bool]
@@ -407,6 +432,7 @@ def main(options: Optional[List[str]]=None) -> None:
             theme_data = THEMES[theme_to_use[0]]
 
         Controller(zuliprc_path,
+                   maximum_footlinks,
                    theme_to_use[0],
                    theme_data,
                    color_depth,

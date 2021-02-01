@@ -102,7 +102,13 @@ theme=default
 # Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
 autohide=autohide
 # Footlinks default to 'enabled', but can be set to 'disabled' to hide footlinks.
+# disabled won't show any footlinks.
+# enabled will show the first 3 per message.
 footlinks=disabled
+# If you need more flexibility, use maximum-footlinks.
+# Maximum footlinks to be shown, defaults to 3, but can be set to any value 0 or greater.
+# This option cannot be used with the footlinks option; use one or the other.
+maximum-footlinks=3
 # Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
 # Color depth defaults to 256, but can be set to 1 (for monochrome) or 16.
