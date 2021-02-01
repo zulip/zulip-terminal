@@ -107,7 +107,7 @@ class MessageView(urwid.ListBox):
         return msg_btn_list
 
     @asynch
-    def load_old_messages(self, anchor: int=10000000000) -> None:
+    def load_old_messages(self, anchor: int) -> None:
         self.old_loading = True
 
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
@@ -191,8 +191,6 @@ class MessageView(urwid.ListBox):
                 if self.focus:
                     id = self.focus.original_widget.message['id']
                     self.load_old_messages(id)
-                else:
-                    self.load_old_messages()
                 return key
 
         elif is_command_key('SCROLL_UP', key) and not self.old_loading:

@@ -280,26 +280,28 @@ class TestMessageView:
         msg_view.set_focus.assert_called_with(1, 'above')
         msg_view.set_focus_valign.assert_called_once_with('middle')
 
+    @pytest.mark.parametrize('view_is_focused', [True, False])
     @pytest.mark.parametrize('key', keys_for_command('GO_DOWN'))
     def test_keypress_GO_DOWN_exception(self, mocker, msg_view, key,
-                                        widget_size):
+                                        widget_size, view_is_focused):
         size = widget_size(msg_view)
         msg_view.new_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
 
-        # Raise exception
         msg_view.log.next_position = Exception()
-        mocker.patch(VIEWS + ".MessageView.focus", return_value=True)
+        mocker.patch(VIEWS + ".MessageView.focus",
+                     mocker.MagicMock() if view_is_focused else None)
         mocker.patch.object(msg_view, "load_new_messages")
-        msg_view.keypress(size, key)
-        msg_view.load_new_messages.assert_called_once_with(
-            msg_view.focus.original_widget.message['id'],
-        )
 
-        # No message in focus
-        msg_view.focus = False
         return_value = msg_view.keypress(size, key)
+
+        if view_is_focused:
+            msg_view.load_new_messages.assert_called_once_with(
+                msg_view.focus.original_widget.message['id'],
+            )
+        else:
+            msg_view.load_new_messages.assert_not_called()
         assert return_value == key
 
     @pytest.mark.parametrize('key', keys_for_command('GO_UP'))
@@ -315,28 +317,28 @@ class TestMessageView:
         msg_view.set_focus.assert_called_with(1, 'below')
         msg_view.set_focus_valign.assert_called_once_with('middle')
 
+    @pytest.mark.parametrize('view_is_focused', [True, False])
     @pytest.mark.parametrize('key', keys_for_command('GO_UP'))
     def test_keypress_GO_UP_exception(self, mocker, msg_view, key,
-                                      widget_size):
+                                      widget_size, view_is_focused):
         size = widget_size(msg_view)
+        msg_view.old_loading = False
         mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
         mocker.patch(VIEWS + ".MessageView.set_focus_valign")
-        msg_view.old_loading = False
 
-        # Raise exception
         msg_view.log.prev_position = Exception()
-        mocker.patch(VIEWS + ".MessageView.focus", return_value=True)
+        mocker.patch(VIEWS + ".MessageView.focus",
+                     mocker.MagicMock() if view_is_focused else None)
         mocker.patch.object(msg_view, "load_old_messages")
 
-        msg_view.keypress(size, key)
-        msg_view.load_old_messages.assert_called_once_with(
-            msg_view.focus.original_widget.message['id'],
-        )
-
-        # No message in focus
-        msg_view.focus = False
         return_value = msg_view.keypress(size, key)
-        msg_view.load_old_messages.assert_called_with()
+
+        if view_is_focused:
+            msg_view.load_old_messages.assert_called_once_with(
+                msg_view.focus.original_widget.message['id'],
+            )
+        else:
+            msg_view.load_old_messages.assert_not_called()
         assert return_value == key
 
     def test_read_message(self, mocker, msg_box):
