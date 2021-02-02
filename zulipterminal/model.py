@@ -782,6 +782,7 @@ class Model:
         Handle changes in subscription (eg. muting/unmuting,
                                         pinning/unpinning streams)
         """
+        assert event['type'] == "subscription"
         def get_stream_by_id(streams: List[StreamData], stream_id: int
                              ) -> StreamData:
             for stream in streams:
@@ -856,6 +857,7 @@ class Model:
         """
         Handle typing notifications (in private messages)
         """
+        assert event['type'] == "typing"
         if hasattr(self.controller, 'view'):
             # If the user is in pm narrow with the person typing
             narrow = self.narrow
@@ -924,6 +926,7 @@ class Model:
         """
         Handle new messages (eg. add message to the end of the view)
         """
+        assert event['type'] == "message"
         message = event['message']
         # sometimes `flags` are missing in `event` so initialize
         # an empty list of flags in that case.
@@ -1016,6 +1019,7 @@ class Model:
         """
         Handle updated (edited) messages (changed content/subject)
         """
+        assert event['type'] == "update_message"
         # Update edited message status from single message id
         # NOTE: If all messages in topic have topic edited,
         #       they are not all marked as edited, as per server optimization
@@ -1063,6 +1067,7 @@ class Model:
         """
         Handle change to reactions on a message
         """
+        assert event['type'] == "reaction"
         message_id = event['message_id']
         # If the message is indexed
         if self.index['messages'][message_id] != {}:
@@ -1092,6 +1097,7 @@ class Model:
         """
         Handle change to message flags (eg. starred, read)
         """
+        assert event['type'] == "update_message_flags"
         if (self.server_feature_level is None
                 or self.server_feature_level < 32):
             operation = event['operation']

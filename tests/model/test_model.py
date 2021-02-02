@@ -782,7 +782,7 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
-        event = {'message': message_fixture}
+        event = {'type': 'message', 'message': message_fixture}
 
         model._handle_message_event(event)
 
@@ -803,7 +803,7 @@ class TestModel:
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
-        event = {'message': message_fixture}
+        event = {'type': 'message', 'message': message_fixture}
 
         model._handle_message_event(event)
 
@@ -830,16 +830,28 @@ class TestModel:
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         # Test event with flags
-        event = {'message': message_fixture, 'flags': ['read', 'mentioned']}
+        event = {
+            'type': 'message',
+            'message': message_fixture,
+            'flags': ['read', 'mentioned'],
+        }
+
         model._handle_message_event(event)
+
         # set count not called since 'read' flag present.
         set_count.assert_not_called()
 
         # Test event without flags
         model.notify_user.assert_called_once_with(event['message'])
         self.controller.view.message_view.log = [mocker.Mock()]
-        event = {'message': message_fixture, 'flags': []}
+        event = {
+            'type': 'message',
+            'message': message_fixture,
+            'flags': [],
+        }
+
         model._handle_message_event(event)
+
         # set count called since the message is unread.
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
@@ -897,8 +909,11 @@ class TestModel:
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile['user_id']
-        event = {'message': response, 'flags': response['flags']
-                 if 'flags' in response else []}
+        event = {
+            'type': 'message',
+            'message': response,
+            'flags': response['flags'] if 'flags' in response else []
+        }
 
         model._handle_message_event(event)
 
@@ -907,7 +922,9 @@ class TestModel:
 
         model._have_last_message[repr(narrow)] = False
         model.notify_user.assert_called_once_with(response)
+
         model._handle_message_event(event)
+
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert self.controller.view.message_view.log == log
 
@@ -1197,6 +1214,8 @@ class TestModel:
                                           event, expected_index,
                                           expected_times_messages_rerendered,
                                           topic_view_enabled):
+        event['type'] = 'update_message'
+
         model.index = {
             'messages': {
                 message_id: {
@@ -1423,10 +1442,11 @@ class TestModel:
 
         model.index = dict(messages={})  # Not indexed
         event = {
+            'type': 'update_message_flags',
             'messages': [1],
             'flag': 'starred',
             'all': False,
-            operation: 'add'
+            operation: 'add',
         }
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
@@ -1444,8 +1464,8 @@ class TestModel:
 
         model.index = dict(messages={1: {'flags': None}})  # Minimal
         event = {
-            'messages': [1],
             'type': 'update_message_flags',
+            'messages': [1],
             'flag': 'starred',
             operation: 'OTHER',  # not 'add' or 'remove'
             'all': False,
@@ -1485,8 +1505,8 @@ class TestModel:
         model.index = dict(messages={msg_id: {'flags': flags_before}
                                      for msg_id in indexed_ids})
         event = {
-            'messages': event_message_ids,
             'type': 'update_message_flags',
+            'messages': event_message_ids,
             'flag': 'starred',
             operation: event_op,
             'all': False,
@@ -1537,8 +1557,8 @@ class TestModel:
         model.index = dict(messages={msg_id: {'flags': flags_before}
                                      for msg_id in indexed_ids})
         event = {
-            'messages': event_message_ids,
             'type': 'update_message_flags',
+            'messages': event_message_ids,
             'flag': 'read',
             operation: event_op,
             'all': False,
@@ -1622,7 +1642,6 @@ class TestModel:
         (
             [['pm_with', 'hamlet@zulip.com']],
             {
-                'type': 'typing',
                 'op': 'start',
                 'sender': {
                     'user_id': 4,
@@ -1643,7 +1662,6 @@ class TestModel:
         (
             [['pm_with', 'hamlet@zulip.com']],
             {
-                'type': 'typing',
                 'op': 'stop',
                 'sender': {
                     'user_id': 4,
@@ -1664,6 +1682,8 @@ class TestModel:
             'start', 'stop'])
     def test__handle_typing_event(self, mocker, model,
                                   narrow, event, called):
+        event['type'] = 'typing'
+
         mocker.patch('zulipterminal.ui.View.set_footer_text')
         model.narrow = narrow
         model.user_dict = {'hamlet@zulip.com': {'full_name': 'hamlet'}}
@@ -1693,6 +1713,8 @@ class TestModel:
     def test__handle_subscription_event_mute_streams(self, model, mocker,
                                                      stream_button, event,
                                                      final_muted_streams):
+        event['type'] = 'subscription'
+
         model.muted_streams = {15, 19}
         model.unread_counts = {'all_msg': 300,
                                'streams': {event['stream_id']: 99}}
@@ -1753,6 +1775,8 @@ class TestModel:
     ):
         def set_from_list_of_dict(data):
             return set(tuple(sorted(d.items())) for d in data)
+
+        event['type'] = 'subscription'
 
         model.controller.view.stream_id_to_button = {
             event['stream_id']: stream_button
