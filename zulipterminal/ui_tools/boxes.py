@@ -1,4 +1,5 @@
 import re
+import typing
 import unicodedata
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
@@ -44,6 +45,10 @@ from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
+
+
+if typing.TYPE_CHECKING:
+    from zulipterminal.model import Model
 
 
 class WriteBox(urwid.Pile):
@@ -582,7 +587,7 @@ class WriteBox(urwid.Pile):
 
 class MessageBox(urwid.Pile):
     # type of last_message is Optional[Message], but needs refactoring
-    def __init__(self, message: Message, model: Any,
+    def __init__(self, message: Message, model: 'Model',
                  last_message: Any) -> None:
         self.model = model
         self.message = message
@@ -615,7 +620,7 @@ class MessageBox(urwid.Pile):
                 recipient = self.message['display_recipient'][0]
                 self.recipients_names = recipient['full_name']
                 self.recipients_emails = self.model.user_email
-                self.recipient_ids = self.model.user_id
+                self.recipient_ids = [self.model.user_id]
             else:
                 self.recipients_names = ', '.join(list(
                             recipient['full_name']
@@ -675,6 +680,7 @@ class MessageBox(urwid.Pile):
                 and recipient_list[0]['email'] == self.model.user_email)
 
     def stream_header(self) -> Any:
+        assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]['color']
         bar_color = f"s{color}"
         stream_title_markup = ('bar', [
@@ -729,6 +735,7 @@ class MessageBox(urwid.Pile):
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == 'mentioned':
             text_to_fill = 'Mentions'
         elif self.message['type'] == 'stream':
+            assert self.stream_id is not None
             bar_color = self.model.stream_dict[self.stream_id]['color']
             bar_color = f"s{bar_color}"
             if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
