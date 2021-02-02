@@ -300,6 +300,9 @@ class TopicButton(TopButton):
         self.update_widget(('muted',  MUTE_MARKER), 'muted')
     # TODO: Handle event-based approach for topic-muting.
 
+    def mark_unmuted(self) -> None:
+        pass
+
 
 class DecodedStream(TypedDict):
     stream_id: Optional[int]

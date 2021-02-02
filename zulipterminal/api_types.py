@@ -112,6 +112,11 @@ class ReactionEvent(TypedDict):
     message_id: int
 
 
+class TopicMutingEvent(TypedDict):
+    type: Literal['muted_topics']
+    muted_topics: List[List[str]]
+
+
 class SubscriptionEvent(TypedDict):
     type: Literal['subscription']
     op: str
@@ -152,6 +157,7 @@ Event = Union[
     MessageEvent,
     UpdateMessageEvent,
     ReactionEvent,
+    TopicMutingEvent,
     SubscriptionEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,

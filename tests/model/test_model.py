@@ -167,6 +167,7 @@ class TestModel:
             'message',
             'update_message',
             'reaction',
+            'muted_topics',
             'subscription',
             'typing',
             'update_message_flags',
@@ -992,6 +993,55 @@ class TestModel:
 
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert self.controller.view.message_view.log == log
+
+    @pytest.mark.parametrize(['event', 'initial_muted_topics',
+                              'toggled_topic_status'], [
+        ({
+            "type": 'muted_topics',
+            "muted_topics": [
+                ['Stream 1', 'delhi', 3],
+                ['Stream 1', 'kerala', 2],
+                ['Stream 2', 'bangalore', 1]
+            ]
+         },
+         {
+            ('Stream 1', 'kerala'): 2,
+            ('Stream 2', 'bangalore'): 1
+         }, ('delhi', True)),
+        ({
+            "type": 'muted_topics',
+            "muted_topics": [
+                ['Stream 1', 'delhi', 3],
+                ['Stream 2', 'bangalore', 1]
+            ]
+         },
+         {
+            ('Stream 1', 'delhi'): 3,
+            ('Stream 1', 'kerala'): 2,
+            ('Stream 2', 'bangalore'): 1
+         }, ('kerala', False))
+    ], ids=['muting_topic_delhi', 'unmuting_topic_kerala'])
+    def test__handle_topic_muting_event(self, mocker, model,
+                                        event, initial_muted_topics,
+                                        toggled_topic_status):
+        model._muted_topics = initial_muted_topics
+        model._get_muted_topic = (
+            mocker.Mock(return_value=toggled_topic_status)
+        )
+        mark_muted = mocker.patch(
+            'zulipterminal.ui_tools.buttons.TopicButton.mark_muted')
+        mark_unmuted = mocker.patch(
+            'zulipterminal.ui_tools.buttons.TopicButton.mark_unmuted')
+        model.handle_topic_muting_event(event)
+
+        if toggled_topic_status[1]:
+            assert ('Stream 1', 'delhi') in model._muted_topics
+            mark_muted.called
+        else:
+            assert ('Stream 1', 'kerala') not in model._muted_topics
+            mark_unmuted.called
+        model._get_muted_topic.assert_called
+        assert model.controller.update_screen.called
 
     @pytest.mark.parametrize(['topic_name', 'topic_order_initial',
                               'topic_order_final'], [
@@ -2039,6 +2089,32 @@ class TestModel:
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
 
         assert return_value == is_muted
+
+    @pytest.mark.parametrize('muted_topics', [
+        [
+            ['Stream 1', 'delhi', 4],
+            ['Stream 1', 'kerala', 2],
+            ['Stream 2', 'bangalore', 1]
+        ]
+    ])
+    @pytest.mark.parametrize(['initial_muted_topics', 'toggle_topic_status'], [
+        ({
+            ('Stream 1', 'kerala'): 2,
+            ('Stream 2', 'bangalore'): 1
+         }, (['Stream 1', 'delhi', 4], True)),
+        ({
+            ('Stream 1', 'delhi'): 4,
+            ('Stream 1', 'chennai'): 3,
+            ('Stream 1', 'kerala'): 2,
+            ('Stream 2', 'bangalore'): 1
+         }, (['Stream 1', 'chennai', 3], False)),
+    ], ids=['muting_delhi', 'unmuting_chennai'])
+    def test__get_muted_topic(self, model, initial_muted_topics,
+                              muted_topics, toggle_topic_status):
+        model._muted_topics = initial_muted_topics
+        return_value = model._get_muted_topic(muted_topics)
+
+        assert return_value == toggle_topic_status
 
     @pytest.mark.parametrize('stream_id, expected_response', [
             (1, True),

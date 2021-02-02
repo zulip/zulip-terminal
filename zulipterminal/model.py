@@ -110,6 +110,7 @@ class Model:
                 ('message', self._handle_message_event),
                 ('update_message', self._handle_update_message_event),
                 ('reaction', self._handle_reaction_event),
+                ('muted_topics', self.handle_topic_muting_event),
                 ('subscription', self._handle_subscription_event),
                 ('typing', self._handle_typing_event),
                 ('update_message_flags',
@@ -144,7 +145,7 @@ class Model:
         # feature level 1, server version 3.0.
         muted_topics = self.initial_data['muted_topics']
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
-        self._muted_topics: Dict[Tuple[str, str], Optional[int]] = {
+        self._muted_topics: Dict[Tuple[str, str], Any] = {
             (stream_name, topic): (None if self.server_feature_level is None
                                    else date_muted[0])
             for stream_name, topic, *date_muted in muted_topics
@@ -837,6 +838,52 @@ class Model:
         # Sort groups for typeahead to work alphabetically (case-insensitive)
         user_group_names.sort(key=str.lower)
         return user_group_names
+
+    def handle_topic_muting_event(self, event: Event) -> None:
+        """
+        Handle Topic muting events
+        """
+        assert event['type'] == "muted_topics"
+        if hasattr(self.controller, 'view'):
+            if 'muted_topics' in event:
+                new_muted_topics = event['muted_topics']
+                added_topic, is_mute_topic = self._get_muted_topic(
+                                                        new_muted_topics)
+                self._muted_topics = {
+                    (stream_name, topic): (None
+                                           if self.server_feature_level is None
+                                           else date_muted)
+                    for stream_name, topic, date_muted in new_muted_topics
+                }
+                if (self.controller.view.left_panel.is_in_topic_view
+                    and added_topic[0] == self.controller.view.
+                        topic_w.stream_button.stream_name):
+                    topic_button = self.controller.view.topic_name_to_button[
+                                                                added_topic[1]]
+                    if is_mute_topic:
+                        topic_button.mark_muted()
+                    else:
+                        topic_button.mark_unmuted()
+                self.controller.update_screen()
+
+    def _get_muted_topic(self,
+                         muted_topics: List[List[str]]) -> Tuple[List[str],
+                                                                 bool]:
+        """
+        We figure out which topic has been muted/unmuted and return the extra
+        topic and whether it is muting/unmuting.
+        """
+        for topic in muted_topics:
+            if (topic[0], topic[1]) not in self._muted_topics.keys():
+                return (topic, True)
+        # If it reaches here, then we must have unmuted a topic.
+        for unmuted_topic in self._muted_topics.keys():
+            muting_timestamp = self._muted_topics[unmuted_topic]
+            formatted_topic = list(unmuted_topic)
+            formatted_topic.append(muting_timestamp)
+            if formatted_topic not in muted_topics:
+                return (formatted_topic, False)
+        return ([], True)
 
     def toggle_stream_muted_status(self, stream_id: int) -> None:
         request = [{
