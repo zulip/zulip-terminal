@@ -1,6 +1,6 @@
 import urllib.parse
 
-from zulipterminal.helper import Message
+from zulipterminal.api_types import Message
 
 
 def hash_util_encode(string: str) -> str:

@@ -2,7 +2,7 @@ from typing import Any, Iterable, List, Optional, Union
 
 import urwid
 
-from zulipterminal.helper import Message
+from zulipterminal.api_types import Message
 from zulipterminal.ui_tools.boxes import MessageBox
 
 

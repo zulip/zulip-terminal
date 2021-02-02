@@ -12,8 +12,9 @@ import urwid
 import zulip
 from typing_extensions import Literal
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import Message, asynch
+from zulipterminal.helper import asynch
 from zulipterminal.model import Model
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list

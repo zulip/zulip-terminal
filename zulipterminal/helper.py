@@ -25,6 +25,8 @@ from urllib.parse import unquote
 import lxml.html
 from typing_extensions import Literal, TypedDict
 
+from zulipterminal.api_types import Message
+
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
@@ -45,32 +47,6 @@ class EmojiData(TypedDict):
 
 
 NamedEmojiData = Dict[str, EmojiData]
-
-
-class Message(TypedDict, total=False):
-    id: int
-    sender_id: int
-    content: str
-    recipient_id: int
-    timestamp: int
-    client: str
-    subject: str  # Only for stream msgs.
-    topic_links: List[str]
-    is_me_message: bool
-    reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
-    flags: List[str]
-    sender_full_name: str
-    sender_short_name: str
-    sender_email: str
-    sender_realm_str: str
-    display_recipient: Any
-    type: str
-    stream_id: int  # Only for stream msgs.
-    avatar_url: str
-    content_type: str
-    match_content: str  # If keyword search specified in narrow params.
-    match_subject: str  # If keyword search specified in narrow params.
 
 
 class Index(TypedDict):
