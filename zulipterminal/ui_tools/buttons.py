@@ -342,6 +342,11 @@ class TopicButton(TopButton):
             # All messages in this topic are read.
             self.set_button_counts(0)
 
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key('TOGGLE_MUTE_TOPIC', key):
+            self.controller.topic_muting_confirmation_popup(self)
+        return super().keypress(size, key)
+
 
 class DecodedStream(TypedDict):
     stream_id: Optional[int]

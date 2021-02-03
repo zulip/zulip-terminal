@@ -318,6 +318,15 @@ class TestTopicButton:
         else:
             mark_muted.assert_not_called()
 
+    @pytest.mark.parametrize('key', keys_for_command('TOGGLE_MUTE_TOPIC'))
+    def test_keypress_TOGGLE_MUTE_TOPIC(self, mocker, topic_button, key,
+                                        widget_size):
+        size = widget_size(topic_button)
+        pop_up = mocker.patch(
+            'zulipterminal.core.Controller.topic_muting_confirmation_popup')
+        topic_button.keypress(size, key)
+        pop_up.assert_called_once_with(topic_button)
+
 
 class TestMessageLinkButton:
     @pytest.fixture(autouse=True)
