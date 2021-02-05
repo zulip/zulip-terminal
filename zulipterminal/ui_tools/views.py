@@ -960,7 +960,7 @@ class PopUpView(urwid.ListBox):
         """
         Returns a list of widgets to render a table with different categories.
         """
-        widgets = []  # type: List[Any]
+        widgets: List[Any] = []
         for category, content in contents:
             if category:
                 if len(widgets) > 0:  # Separate categories with newline.
@@ -1227,7 +1227,7 @@ class MsgInfoView(PopUpView):
                 (reaction['emoji_name'], reaction['user']['full_name'])
                 for reaction in msg['reactions']
             )
-            grouped_reactions = dict()  # type: Dict[str, str]
+            grouped_reactions: Dict[str, str] = dict()
             for reaction, user in reactions:
                 if reaction in grouped_reactions:
                     grouped_reactions[reaction] += f"\n{user}"
@@ -1278,7 +1278,7 @@ class MsgInfoView(PopUpView):
 class EditModeView(PopUpView):
     def __init__(self, controller: Any, button: Any):
         self.edit_mode_button = button
-        self.widgets = []  # type: List[urwid.RadioButton]
+        self.widgets: List[urwid.RadioButton] = []
 
         for mode in ['change_one', 'change_later', 'change_all']:
             self.add_radio_button(mode)
@@ -1322,7 +1322,7 @@ class EditHistoryView(PopUpView):
         self.message_links = message_links
         self.time_mentions = time_mentions
         width = 64
-        widgets = []  # type: List[Any]
+        widgets: List[Any] = []
 
         message_history = self.controller.model.fetch_message_history(
             message_id=self.message['id'],
@@ -1331,7 +1331,7 @@ class EditHistoryView(PopUpView):
             if len(widgets) > 0:  # Separate edit blocks with newline.
                 widgets.append(urwid.Text(''))
 
-            tag = ''  # type: EditHistoryTag
+            tag: EditHistoryTag = ''
             if index == 0:
                 tag = '(Original Version)'
             elif index == len(message_history) - 1:

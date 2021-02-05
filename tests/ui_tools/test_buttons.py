@@ -205,11 +205,11 @@ class TestUserButton:
     def test_text_content(self, mocker,
                           width, count, short_text, caption='caption'):
         mocker.patch(STREAMBUTTON + ".mark_muted")
-        user = {
+        user: Dict[str, Any] = {
             'email': 'some_email',  # value unimportant
             'user_id': 5,           # value unimportant
             'full_name': caption,
-        }  # type: Dict[str, Any]
+        }
         user_button = UserButton(user,
                                  controller=mocker.Mock(),
                                  view=mocker.Mock(),
@@ -234,11 +234,11 @@ class TestUserButton:
         mocker, enter_key, widget_size,
         caption="some user", width=30, email='some_email', user_id=5,
     ):
-        user = {
+        user: Dict[str, Any] = {
             'email': email,
             'user_id': user_id,
             'full_name': caption,
-        }  # type: Dict[str, Any]
+        }
         activate = mocker.patch(BUTTONS + ".UserButton.activate")
         user_button = UserButton(user,
                                  controller=mocker.Mock(),

@@ -411,7 +411,7 @@ def main(options: Optional[List[str]]=None) -> None:
             'notify': ['enabled', 'disabled'],
             'color-depth': ['1', '16', '256']
         }
-        boolean_settings = dict()  # type: Dict[str, bool]
+        boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in valid_settings.items():
             if zterm[setting][0] not in valid_values:
                 helper_text = ["Valid values are:"] + [

@@ -69,7 +69,7 @@ def test_HELP_is_not_allowed_as_tip():
 
 
 def test_commands_for_random_tips(mocker):
-    new_key_bindings = {
+    new_key_bindings: Dict[str, keys.KeyBinding] = {
         'ALPHA': {
             'keys': {'a'},
             'help_text': 'alpha',
@@ -89,7 +89,7 @@ def test_commands_for_random_tips(mocker):
             'help_text': 'delta',
             'excluded_from_random_tips': True,
             },
-    }  # type: Dict[str, keys.KeyBinding]
+    }
     mocker.patch.dict(keys.KEY_BINDINGS, new_key_bindings, clear=True)
     result = keys.commands_for_random_tips()
     assert len(result) == 2

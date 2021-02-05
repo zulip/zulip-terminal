@@ -30,7 +30,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
             muted_msgs += 1
             if model.narrow == []:  # Don't show in 'All messages'.
                 continue
-        msg_flag = 'unread'  # type: Union[str, None]
+        msg_flag: Union[str, None] = 'unread'
         flags = msg.get('flags')
         # update_messages sends messages with no flags
         # but flags are set to [] when fetching old messages.

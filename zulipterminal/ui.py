@@ -37,7 +37,7 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
 
-        self.message_view = None  # type: Any
+        self.message_view: Any = None
 
         super().__init__(self.main_window())
 
@@ -94,8 +94,7 @@ class View(urwid.WidgetWrap):
                              is_truncated: bool) -> None:
         if suggestions:
             # Wrap by space.
-            footer_text = [' ' + s + ' '
-                           for s in suggestions]  # type: List[Any]
+            footer_text: List[Any] = [' ' + s + ' ' for s in suggestions]
             if state is not None:
                 footer_text[state] = ('code', footer_text[state])
             if is_truncated:

@@ -15,7 +15,7 @@ def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
     column_alignments = []
 
     # Add +1 to count the header row as well.
-    cells = [[] for _ in range(len(rows) + 1)]  # type: List[List[str]]
+    cells: List[List[str]] = [[] for _ in range(len(rows) + 1)]
 
     # Fill up `cells` with the header/0th row and extract alignments.
     for header in headers:
@@ -76,7 +76,7 @@ def row_with_styled_content(row: List[str], column_alignments: List[str],
     and row elements.
     """
     aligner = {'center': str.center, 'left': str.ljust, 'right': str.rjust}
-    row_strip = [vertical_bar, ]  # type: StyledTableData
+    row_strip: StyledTableData = [vertical_bar, ]
     for column_num, cell in enumerate(row):
         aligned_text = aligner[column_alignments[column_num]](
             cell, column_widths[column_num]
@@ -94,7 +94,7 @@ def row_with_only_border(lcorner: str, line: str, connector: str, rcorner: str,
     Given left corner, line, connecter and right corner unicode character,
     constructs a border row strip for markup table.
     """
-    border = [lcorner, ]  # type: StyledTableData
+    border: StyledTableData = [lcorner, ]
     for width in column_widths:
         border.extend([line * width, connector])
     border.pop()  # Remove the extra connector.
@@ -122,7 +122,7 @@ def render_table(table_element: Any) -> StyledTableData:
                                          newline=False)
 
     # Construct the table, row-by-row.
-    table = []  # type: StyledTableData
+    table: StyledTableData = []
 
     # Add the header/0th row and the borders that surround it to the table.
     table.extend(top_border)
