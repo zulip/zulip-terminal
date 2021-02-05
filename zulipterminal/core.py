@@ -51,7 +51,7 @@ class Controller:
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
 
-        self._editor = None  # type: Optional[Any]
+        self._editor: Optional[Any] = None
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
@@ -72,7 +72,7 @@ class Controller:
         self._update_pipe = self.loop.watch_pipe(self._draw_screen)
 
         # data and urwid pipe for inter-thread exception handling
-        self._exception_info = None  # type: Optional[ExceptionInfo]
+        self._exception_info: Optional[ExceptionInfo] = None
         self._critical_exception = False
         self._exception_pipe = self.loop.watch_pipe(self._raise_exception)
 

@@ -98,7 +98,7 @@ THEME_ALIASES = {
     'blue': 'zt_blue',
 }
 
-THEMES = {
+THEMES: Dict[str, ThemeSpec] = {
     'zt_dark': [
         (None,             'white',                   'black',
          None,             DEF['white'],              DEF['black']),
@@ -367,7 +367,7 @@ THEMES = {
         ('area:msg',       'white',           'brown'),
         ('area:error',     'white',           'dark red'),
     ]
-}  # type: Dict[str, ThemeSpec]
+}
 
 
 def all_themes() -> List[str]:

@@ -247,7 +247,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     # (we could ensure this in a different way by a different type)
     assert new_count == 1 or new_count == -1
     messages = controller.model.index['messages']
-    unread_counts = controller.model.unread_counts  # type: UnreadCounts
+    unread_counts: UnreadCounts = controller.model.unread_counts
     changed_messages = [messages[id] for id in id_list]
     _set_count_in_model(new_count, changed_messages, unread_counts)
 
@@ -572,10 +572,12 @@ def match_stream(data: List[Tuple[DataT, str]], search_text: str,
         for datum, stream_name in data
     ]
 
-    matches = OrderedDict([
-        ('pinned', defaultdict(list)),
-        ('unpinned', defaultdict(list)),
-    ])  # type: OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]
+    matches: 'OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]' = (
+        OrderedDict([
+            ('pinned', defaultdict(list)),
+            ('unpinned', defaultdict(list)),
+        ])
+    )
 
     for datum, splits in stream_splits:
         stream_name = splits[0]

@@ -59,24 +59,24 @@ class WriteBox(urwid.Pile):
         self.view = view
 
         # If editing a message, its id - otherwise None
-        self.msg_edit_id = None  # type: Optional[int]
+        self.msg_edit_id: Optional[int] = None
         # Determines if the message body (content) can be edited
         self.msg_body_edit_enabled = True
 
         self.is_in_typeahead_mode = False
 
         # Set to int for stream box only
-        self.stream_id = None  # type: Optional[int]
+        self.stream_id: Optional[int] = None
 
         # Used in PM and stream boxes
         # (empty list implies PM box empty, or not initialized)
         # * prioritizes autocomplete in message body
         # * updates server on PM typing events
-        self.recipient_user_ids = []  # type: List[int]
+        self.recipient_user_ids: List[int] = []
 
         # Private message recipient text entry, None if stream-box
         # or not initialized
-        self.to_write_box = None  # type: Optional[ReadlineEdit]
+        self.to_write_box: Optional[ReadlineEdit] = None
 
         # For tracking sending typing status updates
         self.send_next_typing_update = datetime.now()
@@ -398,7 +398,7 @@ class WriteBox(urwid.Pile):
 
         if (state is not None and state < len(fewer_typeaheads)
                 and state >= -len(fewer_typeaheads)):
-            typeahead = fewer_typeaheads[state]  # type: Optional[str]
+            typeahead: Optional[str] = fewer_typeaheads[state]
         else:
             typeahead = None
             state = None
@@ -643,14 +643,14 @@ class MessageBox(urwid.Pile):
         self.model = model
         self.message = message
         self.stream_name = ''
-        self.stream_id = None  # type: Union[int, None]
+        self.stream_id: Union[int, None] = None
         self.topic_name = ''
         self.email = ''
-        self.user_id = None  # type: Union[int, None]
-        self.message_links = (
+        self.user_id: Union[int, None] = None
+        self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
             OrderedDict()
-        )   # type: OrderedDict[str, Tuple[str, int, bool]]
-        self.time_mentions = list()  # type: List[Tuple[str, str]]
+        )
+        self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -890,7 +890,7 @@ class MessageBox(urwid.Pile):
     def soup2markup(self, soup: Any, **state: Any) -> List[Any]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
-        markup = ['']  # type: List[Union[str, Tuple[Optional[str], Any]]]
+        markup: List[Union[str, Tuple[Optional[str], Any]]] = ['']
         if soup is None:  # This is not iterable, so return promptly
             return markup
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
@@ -1154,7 +1154,7 @@ class MessageBox(urwid.Pile):
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
             text_keys = ('author', 'star', 'time')
-            text = {key: (None, ' ') for key in text_keys}  # type: TextType
+            text: TextType = {key: (None, ' ') for key in text_keys}
 
             if any(different[key] for key in ('recipients', 'author', '24h')):
                 text['author'] = ('name', message['this']['author'])

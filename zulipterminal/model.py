@@ -99,10 +99,10 @@ class Model:
         self.controller = controller
         self.client = controller.client
 
-        self.narrow = []  # type: List[Any]
-        self._have_last_message = {}  # type: Dict[str, bool]
+        self.narrow: List[Any] = []
+        self._have_last_message: Dict[str, bool] = {}
         self.stream_id = -1
-        self.recipients = frozenset()  # type: FrozenSet[Any]
+        self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
 
         self.user_id = -1
@@ -114,16 +114,19 @@ class Model:
 
         self._notified_user_of_notification_failure = False
 
-        self.event_actions = OrderedDict([
-            ('message', self._handle_message_event),
-            ('update_message', self._handle_update_message_event),
-            ('reaction', self._handle_reaction_event),
-            ('subscription', self._handle_subscription_event),
-            ('typing', self._handle_typing_event),
-            ('update_message_flags', self._handle_update_message_flags_event),
-        ])  # type: OrderedDict[str, Callable[[Event], None]]
+        self.event_actions: 'OrderedDict[str, Callable[[Event], None]]' = (
+            OrderedDict([
+                ('message', self._handle_message_event),
+                ('update_message', self._handle_update_message_event),
+                ('reaction', self._handle_reaction_event),
+                ('subscription', self._handle_subscription_event),
+                ('typing', self._handle_typing_event),
+                ('update_message_flags',
+                 self._handle_update_message_flags_event),
+            ])
+        )
 
-        self.initial_data = {}  # type: Dict[str, Any]
+        self.initial_data: Dict[str, Any] = {}
 
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
@@ -146,27 +149,27 @@ class Model:
         # feature level 1, server version 3.0.
         muted_topics = self.initial_data['muted_topics']
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
-        self._muted_topics = {
+        self._muted_topics: Dict[Tuple[str, str], Optional[int]] = {
             (stream_name, topic): (None if self.server_feature_level is None
                                    else date_muted[0])
             for stream_name, topic, *date_muted in muted_topics
-        }  # type: Dict[Tuple[str, str], Optional[int]]
+        }
 
         groups = self.initial_data['realm_user_groups']
-        self.user_group_by_id = {}  # type: Dict[int, Dict[str, Any]]
+        self.user_group_by_id: Dict[int, Dict[str, Any]] = {}
         self.user_group_names = self._group_info_from_realm_user_groups(groups)
 
         self.unread_counts = classify_unread_counts(self)
 
-        self._draft = None  # type: Optional[Message]
+        self._draft: Optional[Message] = None
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
         typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
         custom_emoji_data = self.fetch_custom_emojis()
-        zulip_extra_emoji = {
+        zulip_extra_emoji: NamedEmojiData = {
                 'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
-        }  # type: NamedEmojiData
+        }
         all_emoji_data = {**typed_unicode_emoji_data,
                           **custom_emoji_data,
                           **zulip_extra_emoji}.items()
@@ -201,7 +204,7 @@ class Model:
                    starred: bool=False,
                    mentioned: bool=False) -> bool:
         selected_params = {k for k, v in locals().items() if k != 'self' and v}
-        valid_narrows = {
+        valid_narrows: Dict[FrozenSet[str], List[Any]] = {
             frozenset(): [],
             frozenset(['stream']): [['stream', stream]],
             frozenset(['stream', 'topic']): [['stream', stream],
@@ -210,7 +213,7 @@ class Model:
             frozenset(['pm_with']): [['pm_with', pm_with]],
             frozenset(['starred']): [['is', 'starred']],
             frozenset(['mentioned']): [['is', 'mentioned']],
-        }  # type: Dict[FrozenSet[str], List[Any]]
+        }
         for narrow_param, narrow in valid_narrows.items():
             if narrow_param == selected_params:
                 new_narrow = narrow
@@ -458,10 +461,14 @@ class Model:
 
     def fetch_custom_emojis(self) -> NamedEmojiData:
         response = self.client.get_realm_emoji()
-        custom_emojis = {emoji['name']: {'code': emoji_code,
-                                         'type': 'realm_emoji'}
-                         for emoji_code, emoji in response['emoji'].items()
-                         if not emoji['deactivated']}  # type: NamedEmojiData
+        custom_emojis: NamedEmojiData = {
+            emoji['name']: {
+                'code': emoji_code,
+                'type': 'realm_emoji',
+            }
+            for emoji_code, emoji in response['emoji'].items()
+            if not emoji['deactivated']
+        }
         display_error_if_present(response, self.controller)
         return custom_emojis
 
@@ -557,29 +564,29 @@ class Model:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
         with ThreadPoolExecutor(max_workers=1) as executor:
-            futures = {
+            futures: Dict[str, Future[str]] = {
                 'get_messages': executor.submit(self.get_messages,
                                                 num_after=10,
                                                 num_before=30,
                                                 anchor=None),
                 'register': executor.submit(self._register_desired_events,
                                             fetch_data=True),
-            }  # type: Dict[str, Future[str]]
+            }
 
             # Wait for threads to complete
             wait(futures.values())
 
-        results = {
+        results: Dict[str, str] = {
             name: self.exception_safe_result(future)
             for name, future in futures.items()
-        }  # type: Dict[str, str]
+        }
         if not any(results.values()):
             self.user_id = self.initial_data['user_id']
             self.user_email = self.initial_data['email']
             self.user_full_name = self.initial_data['full_name']
             self.server_name = self.initial_data['realm_name']
         else:
-            failures = defaultdict(list)  # type: DefaultDict[str, List[str]]
+            failures: DefaultDict[str, List[str]] = defaultdict(list)
             for name, result in results.items():
                 if result:
                     failures[result].append(name)
@@ -613,8 +620,8 @@ class Model:
 
         # Construct a dict of each user in the realm to look up by email
         # and a user-id to email mapping
-        self.user_dict = dict()  # type: Dict[str, Dict[str, Any]]
-        self.user_id_email_dict = dict()  # type: Dict[int, str]
+        self.user_dict: Dict[str, Dict[str, Any]] = dict()
+        self.user_id_email_dict: Dict[int, str] = dict()
         for user in self.initial_data['realm_users']:
             if self.user_id == user['user_id']:
                 current_user = {
