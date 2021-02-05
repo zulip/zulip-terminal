@@ -52,7 +52,7 @@ jobs:
           - {PYTHON: 3.6, OS: ubuntu-latest, NAME: "CPython 3.6 (ubuntu)"}
           - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)"}
           - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
-          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)"}
+          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", CODECOV: true}
           - {PYTHON: 'pypy3', OS: ubuntu-latest, NAME: "PyPy 3 (ubuntu)"}
           - {PYTHON: 3.9, OS: macos-latest, NAME: "CPython 3.9 (macos)"}
     runs-on: ${{ matrix.env.OS }}
@@ -79,4 +79,4 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         # We avoid extra work by just running codecov on one python version
-        if: matrix.test-python-version == 3.9
+        if: matrix.env.CODECOV
