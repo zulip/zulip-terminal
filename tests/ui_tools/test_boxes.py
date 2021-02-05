@@ -351,10 +351,29 @@ class TestWriteBox:
          '<notification-bot@zulip.com>, person2',
          ['Human 2'],
          ['Welcome Bot <welcome-bot@zulip.com>, Notification Bot '
+          '<notification-bot@zulip.com>, Human 2 <person2@example.com>']),
+        ('Email Gateway <emailgateway@zulip.com>,Human', [
+            'Human Myself',
+            'Human 1',
+            'Human 2'
+        ], [
+            'Email Gateway <emailgateway@zulip.com>, '
+            'Human Myself <FOOBOO@gmail.com>',
+            'Email Gateway <emailgateway@zulip.com>, '
+            'Human 1 <person1@example.com>',
+            'Email Gateway <emailgateway@zulip.com>, '
+            'Human 2 <person2@example.com>'
+        ]),
+        ('Human 1 <person1@example.com>, Notification Bot '
+         '<notification-bot@zulip.com>,person2',
+         ['Human 2'],
+         ['Human 1 <person1@example.com>, Notification Bot '
           '<notification-bot@zulip.com>, Human 2 <person2@example.com>'])
     ], ids=[
-        'name_search_text',
-        'email_search_text',
+        'name_search_text_with_space_after_separator',
+        'email_search_text_with_space_after_separator',
+        'name_search_text_without_space_after_separator',
+        'email_search_text_without_space_after_separator'
     ])
     def test__to_box_autocomplete_with_multiple_recipients(self, mocker,
                                                            write_box, text,

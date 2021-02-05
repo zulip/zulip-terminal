@@ -285,13 +285,13 @@ class WriteBox(urwid.Pile):
     def _to_box_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
         users_list = self.view.users
-        recipients = text.rsplit(', ', 1)
+        recipients = text.rsplit(',', 1)
 
         # Use the most recent recipient for autocomplete.
         previous_recipients = (
             f"{recipients[0]}, " if len(recipients) > 1 else ""
         )
-        latest_text = recipients[-1]
+        latest_text = recipients[-1].strip()
 
         matching_users = [
             user
