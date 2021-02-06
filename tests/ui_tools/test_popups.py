@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 import pytest
-from urwid import Columns, Text
+from urwid import Columns, Pile, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -81,23 +81,37 @@ class TestPopUpView:
         self.command = "COMMAND"
         self.title = "Generic title"
         self.width = 16
-        self.widget = mocker.Mock()
-        mocker.patch.object(self.widget, "rows", return_value=1)
-        self.widgets = [self.widget]
+        self.body = mocker.Mock()
+        self.header = mocker.Mock()
+        self.footer = mocker.Mock()
+        mocker.patch.object(self.body, "rows", return_value=1)
+        mocker.patch.object(self.header, "rows", return_value=1)
+        mocker.patch.object(self.footer, "rows", return_value=1)
+        self.body = [self.body]
+        self.header = Pile([self.header])
+        self.footer = Pile([self.footer])
         self.list_walker = mocker.patch(LISTWALKER, return_value=[])
-        self.super_init = mocker.patch(MODULE + ".urwid.ListBox.__init__")
-        self.super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        self.super_init = mocker.patch(MODULE + ".urwid.Frame.__init__")
+        self.super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.pop_up_view = PopUpView(
-            self.controller, self.widgets, self.command, self.width, self.title
+            self.controller,
+            self.body,
+            self.command,
+            self.width,
+            self.title,
+            self.header,
+            self.footer,
         )
 
-    def test_init(self):
+    def test_init(self, mocker):
         assert self.pop_up_view.controller == self.controller
         assert self.pop_up_view.command == self.command
         assert self.pop_up_view.title == self.title
         assert self.pop_up_view.width == self.width
-        self.list_walker.assert_called_once_with(self.widgets)
-        self.super_init.assert_called_once_with(self.pop_up_view.log)
+        self.list_walker.assert_called_once_with(self.body)
+        self.super_init.assert_called_once_with(
+            self.pop_up_view.body, header=mocker.ANY, footer=mocker.ANY
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, key, widget_size):
@@ -176,7 +190,7 @@ class TestAboutView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.about_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.about_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -325,7 +339,7 @@ class TestUserInfoView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.user_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.user_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -399,7 +413,7 @@ class TestEditHistoryView:
     ):
         size = widget_size(self.edit_history_view)
         key, expected_key = navigation_key_expected_key_pair
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
 
         self.edit_history_view.keypress(size, key)
 
@@ -599,7 +613,7 @@ class TestHelpView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.help_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.help_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -833,7 +847,7 @@ class TestMsgInfoView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.msg_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.msg_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -968,7 +982,7 @@ class TestStreamInfoView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.stream_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -1037,6 +1051,6 @@ class TestStreamMembersView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_members_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.Frame.keypress")
         self.stream_members_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
