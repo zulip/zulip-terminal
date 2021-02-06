@@ -245,7 +245,7 @@ To be a part of it and to contribute to the code, feel free to work on any [issu
 Please read our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
 [git guide](http://zulip.readthedocs.io/en/latest/git/index.html). **NOTE** Due to the difference in project scale, git commit titles in the Zulip Terminal project read slightly differently - please review our recent git log for examples and see the [GitLint](#gitlint) section below for more guidelines.
 
-A simple [tutorial](https://github.com/zulip/zulip-terminal/docs/developer-feature-tutorial.md) is available for implementing the `typing` indicator.
+A simple [tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/developer-feature-tutorial.md) is available for implementing the `typing` indicator.
 Follow it to understand the how to implement a new feature for zulip-terminal.
 
 You can of course browse the source on GitHub & in the source tree you download, and check the [source file overview](https://github.com/zulip/zulip-terminal/docs/developer-file-overview.md) for ideas of whow files are currently arranged.
