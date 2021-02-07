@@ -101,6 +101,7 @@ class Model:
 
         self.narrow = []  # type: List[Any]
         self._have_last_message = {}  # type: Dict[str, bool]
+        self._have_first_message = {}  # type: Dict[str, bool]
         self.stream_id = -1
         self.recipients = frozenset()  # type: FrozenSet[Any]
         self.index = initial_index
@@ -175,6 +176,12 @@ class Model:
 
         self.new_user_input = True
         self._start_presence_updates()
+
+    def have_last_message_in_current_narrow(self) -> bool:
+        return self._have_last_message.get(repr(self.narrow), False)
+
+    def have_first_message_in_current_narrow(self) -> bool:
+        return self._have_first_message.get(repr(self.narrow), False)
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -488,13 +495,24 @@ class Model:
             if first_anchor and response['anchor'] != 10000000000000000:
                 self.index['pointer'][narrow_str] = response['anchor']
             if 'found_newest' in response:
-                self._have_last_message[narrow_str] = response['found_newest']
+                just_found_last_msg = response['found_newest']
             else:
                 # Older versions of the server does not contain the
                 # 'found_newest' flag. Instead, we use this logic:
                 query_range = num_after + num_before + 1
-                self._have_last_message[narrow_str] = (
-                    len(response['messages']) < query_range)
+                just_found_last_msg = len(response['messages']) < query_range
+
+            had_last_msg = self._have_last_message.get(narrow_str, False)
+            self._have_last_message[narrow_str] = (
+                had_last_msg or just_found_last_msg
+            )
+
+            just_found_first_msg = response.get('found_oldest', False)
+            had_first_msg = self._have_first_message.get(narrow_str, False)
+            self._have_first_message[narrow_str] = (
+                had_first_msg or just_found_first_msg
+            )
+
             return ""
         display_error_if_present(response, self.controller)
         return response['msg']
@@ -1004,7 +1022,7 @@ class Model:
             set_count([message['id']], self.controller, 1)
 
         if (hasattr(self.controller, 'view')
-                and self._have_last_message[repr(self.narrow)]):
+                and self._have_last_message.get(repr(self.narrow), False)):
             msg_log = self.controller.view.message_view.log
             if msg_log:
                 last_message = msg_log[-1].original_widget.message
