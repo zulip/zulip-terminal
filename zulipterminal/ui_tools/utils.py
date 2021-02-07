@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Optional, Union
+from typing import Any, Iterable, List, Optional
 
 import urwid
 
@@ -6,9 +6,9 @@ from zulipterminal.api_types import Message
 from zulipterminal.ui_tools.boxes import MessageBox
 
 
-def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
+def create_msg_box_list(model: Any, messages: Optional[Iterable[Any]]=None,
                         *,
-                        focus_msg_id: Union[None, int]=None,
+                        focus_msg_id: Optional[int]=None,
                         last_message: Optional[Message]=None) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
@@ -30,7 +30,7 @@ def create_msg_box_list(model: Any, messages: Union[None, Iterable[Any]]=None,
             muted_msgs += 1
             if model.narrow == []:  # Don't show in 'All messages'.
                 continue
-        msg_flag: Union[str, None] = 'unread'
+        msg_flag: Optional[str] = 'unread'
         flags = msg.get('flags')
         # update_messages sends messages with no flags
         # but flags are set to [] when fetching old messages.

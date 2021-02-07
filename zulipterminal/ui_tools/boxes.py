@@ -649,10 +649,10 @@ class MessageBox(urwid.Pile):
         self.model = model
         self.message = message
         self.stream_name = ''
-        self.stream_id: Union[int, None] = None
+        self.stream_id: Optional[int] = None
         self.topic_name = ''
         self.email = ''
-        self.user_id: Union[int, None] = None
+        self.user_id: Optional[int] = None
         self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
             OrderedDict()
         )
