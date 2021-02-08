@@ -1316,6 +1316,51 @@ class TestEmojiPickerView:
             self.view,
         )
 
+    @pytest.mark.parametrize(
+        "emoji_units",
+        [
+            (
+                ("action", "1f3ac", []),
+                ("alien", "1f47d", ["ufo"]),
+                ("angel", "1f47c", []),
+                ("anger", "1f4a2", ["bam", "pow"]),
+                ("angry", "1f620", []),
+                ("eight", "0038-20e3", []),
+                ("email", "2709", ["envelope", "mail"]),
+                ("eye", "1f441", []),
+                ("ball", "26f9", ["sports"]),
+                ("cat", "1f408", ["meow"]),
+                ("heart", "2764", ["love", "love_you"]),
+                ("lightning", "1f329", ["lightning_storm"]),
+                ("smile", "1f642", []),
+                ("smiley", "1f603", []),
+                ("smirk", "1f60f", ["smug"]),
+                ("smoking", "1f6ac", []),
+            )
+        ],
+    )
+    @pytest.mark.parametrize(
+        ["search_string", "assert_list"],
+        [
+            ("e", ["eight", "email", "eye"]),
+            ("sm", ["smile", "smiley", "smirk", "smoking"]),
+            ("ang", ["angel", "anger", "angry"]),
+            ("abc", []),
+            ("q", []),
+        ],
+    )
+    def test_update_emoji_list(self, emoji_units, search_string, assert_list):
+        self.emoji_picker_view.emoji_buttons = (
+            self.emoji_picker_view.generate_emoji_buttons(emoji_units)
+        )
+
+        self.emoji_picker_view.update_emoji_list("SEARCH_EMOJIS", search_string)
+        self.emojis_display = self.emoji_picker_view.emojis_display
+        emojis_display_name = [emoji.emoji_name for emoji in self.emojis_display]
+
+        assert emojis_display_name == assert_list
+        assert self.emoji_picker_view.get_focus() == "header"
+
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_EMOJIS"))
     def test_keypress_search_emoji(self, key, widget_size):
         size = widget_size(self.emoji_picker_view)

@@ -34,6 +34,7 @@ from zulipterminal.helper import (
     Message,
     TidiedUserInfo,
     asynch,
+    match_emoji,
     match_stream,
     match_user,
 )
@@ -1922,8 +1923,8 @@ class EmojiPickerView(PopUpView):
         self.message = message
         self.controller = controller
         self.selected_emojis: Dict[str, str] = {}
-        emoji_buttons = self.generate_emoji_buttons(emoji_units)
-        width = max(len(button.label) for button in emoji_buttons)
+        self.emoji_buttons = self.generate_emoji_buttons(emoji_units)
+        width = max(len(button.label) for button in self.emoji_buttons)
         max_cols, max_rows = controller.maximum_popup_dimensions()
         popup_width = min(max_cols, width)
         self.emoji_search = PanelSearchBox(
@@ -1941,9 +1942,10 @@ class EmojiPickerView(PopUpView):
             brcorner="─",
         )
         self.empty_search = False
+        self.search_lock = threading.Lock()
         super().__init__(
             controller,
-            emoji_buttons,
+            self.emoji_buttons,
             "ADD_REACTION",
             popup_width,
             title,
@@ -1959,7 +1961,43 @@ class EmojiPickerView(PopUpView):
         new_text: Optional[str] = None,
         emoji_list: Any = None,
     ) -> None:
-        pass
+        """
+        Updates emoji list via PanelSearchBox.
+        """
+        assert (emoji_list is None and search_box is not None) or (
+            emoji_list is not None and search_box is None and new_text is None
+        )
+
+        # Return if the method is called by PanelSearchBox without
+        # self.emoji_search being defined.
+        if not hasattr(self, "emoji_search"):
+            return
+
+        with self.search_lock:
+            self.emojis_display = list()
+            if new_text and new_text != self.emoji_search.search_text:
+                for button in self.emoji_buttons:
+                    if match_emoji(button.emoji_name, new_text):
+                        self.emojis_display.append(button)
+                    else:
+                        for alias in button.aliases:
+                            if match_emoji(alias, new_text):
+                                self.emojis_display.append(button)
+                                break
+            else:
+                self.emojis_display = self.emoji_buttons
+
+            self.empty_search = len(self.emojis_display) == 0
+
+            body_content = self.emojis_display
+            if self.empty_search:
+                body_content = [self.emoji_search.search_error]
+
+            self.contents["body"] = (
+                urwid.ListBox(urwid.SimpleFocusListWalker(body_content)),
+                None,
+            )
+            self.controller.update_screen()
 
     def is_selected_emoji(self, emoji_name: str) -> bool:
         return emoji_name in self.selected_emojis.values()
