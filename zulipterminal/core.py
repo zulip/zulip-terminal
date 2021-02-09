@@ -287,10 +287,6 @@ class Controller:
         if already_narrowed:
             return
 
-        # store the steam id in the model (required for get_message_ids...)
-        if hasattr(button, 'stream_id'):  # FIXME Include in set_narrow?
-            self.model.stream_id = button.stream_id
-
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         # if no messages are found get more messages
