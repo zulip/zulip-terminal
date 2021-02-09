@@ -1000,7 +1000,6 @@ class TestMiddleColumnView:
                                             widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
-        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
                      return_value=1)
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
@@ -1008,7 +1007,8 @@ class TestMiddleColumnView:
         mid_col_view.keypress(size, key)
 
         mid_col_view.controller.narrow_to_user.assert_called_once_with(
-            pm_btn(1, 'EMAIL')
+            recipient_emails=["EMAIL"],
+            message_id=1,
         )
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_PM'))
@@ -1016,7 +1016,6 @@ class TestMiddleColumnView:
                                            widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
-        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
                      return_value=None)
 
@@ -1028,7 +1027,6 @@ class TestMiddleColumnView:
                                       widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
-        pm_btn = mocker.patch(VIEWS + '.UnreadPMButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_pm',
                      return_value=None)
         mid_col_view.footer = mocker.Mock()

@@ -325,16 +325,10 @@ class Controller:
                         stream=stream_name,
                         topic=topic_name)
 
-    def narrow_to_user(self, button: Any) -> None:
-        if hasattr(button, 'message'):
-            user_emails = button.recipients_emails
-            anchor = button.message['id']
-        else:
-            user_emails = button.email
-            anchor = None
-
-        self._narrow_to(anchor=anchor,
-                        pm_with=user_emails)
+    def narrow_to_user(
+        self, *, recipient_emails: List[str], message_id: Optional[int] = None,
+    ) -> None:
+        self._narrow_to(anchor=message_id, pm_with=",".join(recipient_emails))
 
     def show_all_messages(self, button: Any) -> None:
         if hasattr(button, 'message'):

@@ -652,7 +652,7 @@ class MessageBox(urwid.Pile):
         self.stream_name = ''
         self.stream_id: Union[int, None] = None
         self.topic_name = ''
-        self.email = ''
+        self.email = ''  # FIXME: Can we remove this?
         self.user_id: Union[int, None] = None
         self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
             OrderedDict()
@@ -1387,7 +1387,10 @@ class MessageBox(urwid.Pile):
                 )
         elif is_command_key('STREAM_NARROW', key):
             if self.message['type'] == 'private':
-                self.model.controller.narrow_to_user(self)
+                self.model.controller.narrow_to_user(
+                    recipient_emails=self.recipient_emails,
+                    message_id=self.message["id"],
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_stream(
                     stream_name=self.stream_name,
@@ -1402,7 +1405,10 @@ class MessageBox(urwid.Pile):
                    ):
                     self.model.controller.show_all_pm(self)
                 else:
-                    self.model.controller.narrow_to_user(self)
+                    self.model.controller.narrow_to_user(
+                        recipient_emails=self.recipient_emails,
+                        message_id=self.message["id"],
+                    )
             elif self.message['type'] == 'stream':
                 if len(self.model.narrow) > 1:  # in a topic
                     self.model.controller.narrow_to_stream(
@@ -1417,7 +1423,10 @@ class MessageBox(urwid.Pile):
                     )
         elif is_command_key('TOPIC_NARROW', key):
             if self.message['type'] == 'private':
-                self.model.controller.narrow_to_user(self)
+                self.model.controller.narrow_to_user(
+                    recipient_emails=self.recipient_emails,
+                    message_id=self.message["id"],
+                )
             elif self.message['type'] == 'stream':
                 self.model.controller.narrow_to_topic(
                     stream_name=self.stream_name,

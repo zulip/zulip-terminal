@@ -276,7 +276,9 @@ class UserButton(TopButton):
     def _narrow_with_compose(self) -> None:
         # Switches directly to composing with user
         # FIXME should we just narrow?
-        self.controller.narrow_to_user(self)
+        self.controller.narrow_to_user(
+            recipient_emails=[self.email],
+        )
         self._view.body.focus.original_widget.set_focus('footer')
         self._view.write_box.private_box_view(
             emails=[self.email],
