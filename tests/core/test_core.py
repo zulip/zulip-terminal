@@ -215,7 +215,9 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_show_all_starred(self, mocker, controller, index_all_starred):
+    def test_narrow_to_all_starred(
+        self, mocker, controller, index_all_starred
+    ):
         controller.model.narrow = []
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -230,7 +232,7 @@ class TestController:
         }
         controller.view.message_view = mocker.patch('urwid.ListBox')
 
-        controller.show_all_starred('')
+        controller.narrow_to_all_starred()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == [['is', 'starred']]
         controller.view.message_view.log.clear.assert_called_once_with()

@@ -338,11 +338,12 @@ class Controller:
     def narrow_to_all_pm(self, *, message_id: Optional[int] = None) -> None:
         self._narrow_to(anchor=message_id, pms=True)
 
-    def show_all_starred(self, button: Any) -> None:
+    def narrow_to_all_starred(
+        self, *, message_id: Optional[int] = None,
+    ) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
         # (it seems to work fine without)
-        self._narrow_to(anchor=None,
-                        starred=True)
+        self._narrow_to(anchor=None, starred=True)
 
     def show_all_mentions(self, button: Any) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
