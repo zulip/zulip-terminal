@@ -38,7 +38,6 @@ from zulipterminal.ui_tools.buttons import (
     StarredButton,
     StreamButton,
     TopicButton,
-    UnreadPMButton,
     UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -591,7 +590,10 @@ class MiddleColumnView(urwid.Frame):
             if pm is None:
                 return key
             email = self.model.user_id_email_dict[pm]
-            self.controller.narrow_to_user(UnreadPMButton(pm, email))
+            self.controller.narrow_to_user(
+                recipient_emails=[email],
+                contextual_message_id=pm,
+            )
         elif is_command_key('PRIVATE_MESSAGE', key):
             # Create new PM message
             self.footer.private_box_view()
