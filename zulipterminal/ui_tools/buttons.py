@@ -20,15 +20,6 @@ from zulipterminal.helper import (
 from zulipterminal.urwid_types import urwid_Size
 
 
-class MenuButton(urwid.Button):
-    def __init__(self, caption: Any, email: str='') -> None:
-        self.caption = caption  # str
-        self.email = email
-        super().__init__("")
-        self._w = urwid.AttrMap(urwid.SelectableIcon(
-            [self.caption], 0), None, 'selected')
-
-
 class TopButton(urwid.Button):
     def __init__(
         self,
@@ -320,12 +311,6 @@ class TopicButton(TopButton):
     def mark_muted(self) -> None:
         self.update_widget(('muted',  MUTE_MARKER), 'muted')
     # TODO: Handle event-based approach for topic-muting.
-
-
-class UnreadPMButton(urwid.Button):
-    def __init__(self, user_id: int, email: str) -> None:
-        self.user_id = user_id
-        self.email = email
 
 
 class DecodedStream(TypedDict):
