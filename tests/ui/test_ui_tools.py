@@ -982,7 +982,7 @@ class TestMiddleColumnView:
 
         mid_col_view.get_next_unread_topic.assert_called_once_with()
         mid_col_view.controller.narrow_to_topic.assert_called_once_with(
-            topic_btn('stream', 'topic', mid_col_view.model)
+            stream_name="stream", topic_name="topic",
         )
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_TOPIC'))

@@ -1333,7 +1333,8 @@ class TestModel:
         model.narrow = narrow
         self.controller.view.message_view = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.
-        new_msg_w = mocker.Mock()
+        original_widget = mocker.Mock(message=dict(id=2))  # FIXME: id matters?
+        new_msg_w = mocker.Mock(original_widget=original_widget)
         cmbl = mocker.patch('zulipterminal.model.create_msg_box_list',
                             return_value=[new_msg_w])
 
