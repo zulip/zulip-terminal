@@ -281,8 +281,7 @@ class Controller:
         self.loop.widget = PopUpConfirmationView(self, question,
                                                  mute_this_stream)
 
-    def _narrow_to(self, button: Any, anchor: Optional[int],
-                   **narrow: Any) -> None:
+    def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
         if already_narrowed:
             return
@@ -319,8 +318,7 @@ class Controller:
         else:
             anchor = None
 
-        self._narrow_to(button,
-                        anchor=anchor,
+        self._narrow_to(anchor=anchor,
                         stream=button.stream_name)
 
     def narrow_to_topic(self, button: Any) -> None:
@@ -329,8 +327,7 @@ class Controller:
         else:
             anchor = None
 
-        self._narrow_to(button,
-                        anchor=anchor,
+        self._narrow_to(anchor=anchor,
                         stream=button.stream_name,
                         topic=button.topic_name)
 
@@ -342,8 +339,7 @@ class Controller:
             user_emails = button.email
             anchor = None
 
-        self._narrow_to(button,
-                        anchor=anchor,
+        self._narrow_to(anchor=anchor,
                         pm_with=user_emails)
 
     def show_all_messages(self, button: Any) -> None:
@@ -352,8 +348,7 @@ class Controller:
         else:
             anchor = None
 
-        self._narrow_to(button,
-                        anchor=anchor)
+        self._narrow_to(anchor=anchor)
 
     def show_all_pm(self, button: Any) -> None:
         if hasattr(button, 'message'):
@@ -361,22 +356,19 @@ class Controller:
         else:
             anchor = None
 
-        self._narrow_to(button,
-                        anchor=anchor,
+        self._narrow_to(anchor=anchor,
                         pms=True)
 
     def show_all_starred(self, button: Any) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
         # (it seems to work fine without)
-        self._narrow_to(button,
-                        anchor=None,
+        self._narrow_to(anchor=None,
                         starred=True)
 
     def show_all_mentions(self, button: Any) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
         # (As with starred, it seems to work fine without)
-        self._narrow_to(button,
-                        anchor=None,
+        self._narrow_to(anchor=None,
                         mentioned=True)
 
     def deregister_client(self) -> None:
