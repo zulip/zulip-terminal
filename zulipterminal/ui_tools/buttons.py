@@ -117,14 +117,11 @@ class PMButton(TopButton):
         button_text = (
             f"Private messages [{primary_key_for_command('ALL_PM')}]"
         )
-        narrow_function = partial(
-            controller.show_all_pm,
-            self,
-        )
+
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=narrow_function,
+            show_function=controller.narrow_to_all_pm,
             count=count,
             prefix_character='',
             width=width,

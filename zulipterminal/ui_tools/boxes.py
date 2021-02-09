@@ -1403,7 +1403,9 @@ class MessageBox(urwid.Pile):
                     len(self.model.narrow) == 1
                     and self.model.narrow[0][0] == 'pm_with'
                    ):
-                    self.model.controller.show_all_pm(self)
+                    self.model.controller.narrow_to_all_pm(
+                        message_id=self.message["id"],
+                    )
                 else:
                     self.model.controller.narrow_to_user(
                         recipient_emails=self.recipient_emails,

@@ -197,14 +197,14 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_show_all_pm(self, mocker, controller, index_user):
+    def test_narrow_to_all_pm(self, mocker, controller, index_user):
         controller.model.narrow = []
         controller.model.index = index_user
         controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.user_id = 1
         controller.model.user_email = "some@email"
 
-        controller.show_all_pm('')
+        controller.narrow_to_all_pm()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == [['is', 'private']]
         controller.view.message_view.log.clear.assert_called_once_with()
