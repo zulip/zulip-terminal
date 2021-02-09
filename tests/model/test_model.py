@@ -53,7 +53,7 @@ class TestModel:
         assert hasattr(model, 'client')
         assert model.narrow == []
         assert model._have_last_message == {}
-        assert model.stream_id == -1
+        assert model.stream_id is None
         assert model.stream_dict == {}
         assert model.recipients == frozenset()
         assert model.index == initial_index
@@ -273,9 +273,9 @@ class TestModel:
 
     @pytest.mark.parametrize('initial_narrow, narrow, good_args', [
         ([['stream', 'foo']], [], dict()),
-        ([], [['stream', 'some stream']], dict(stream='some stream')),
-        ([], [['stream', 'some stream'], ['topic', 'some topic']],
-         dict(stream='some stream', topic='some topic')),
+        ([], [['stream', 'Stream 1']], dict(stream='Stream 1')),
+        ([], [['stream', 'Stream 1'], ['topic', 'some topic']],
+         dict(stream='Stream 1', topic='some topic')),
         ([], [['is', 'starred']], dict(starred=True)),
         ([], [['is', 'mentioned']], dict(mentioned=True)),
         ([], [['is', 'private']], dict(pms=True)),
@@ -283,9 +283,11 @@ class TestModel:
          dict(pm_with='FOOBOO@gmail.com')),
     ])
     def test_set_narrow_not_already_set(self, model, initial_narrow, narrow,
-                                        good_args, user_dict):
+                                        good_args, user_dict, stream_dict):
         model.narrow = initial_narrow
         model.user_dict = user_dict
+        print(stream_dict, flush=True)
+        model.stream_dict = stream_dict
         assert not model.set_narrow(**good_args)
         assert model.narrow != initial_narrow
         assert model.narrow == narrow

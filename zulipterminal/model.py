@@ -67,7 +67,7 @@ class Model:
 
         self.narrow: List[Any] = []
         self._have_last_message: Dict[str, bool] = {}
-        self.stream_id = -1
+        self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
 
@@ -198,6 +198,13 @@ class Model:
                 )
             else:
                 self.recipients = frozenset()
+
+            if stream is not None:
+                # FIXME?: Set up a mapping for this if we plan to use it a lot
+                self.stream_id = self.stream_id_from_name(stream)
+            else:
+                self.stream_id = None
+
             return False
         else:
             return True
@@ -222,6 +229,7 @@ class Model:
         elif self.is_search_narrow():  # Check searches first
             ids = index['search']
         elif narrow[0][0] == 'stream':
+            assert self.stream_id is not None
             stream_id = self.stream_id
             if len(narrow) == 1:
                 ids = index['stream_msg_ids_by_stream_id'][stream_id]

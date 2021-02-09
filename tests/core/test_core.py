@@ -97,6 +97,7 @@ class TestController:
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
+                'name': 'PTEST',
             }
         }
         controller.model.muted_streams = []
@@ -125,6 +126,7 @@ class TestController:
         controller.model.stream_dict = {
             205: {
                 'color': '#ffffff',
+                'name': 'PTEST',
             }
         }
         controller.model.muted_streams = []
