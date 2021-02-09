@@ -346,14 +346,10 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
-    def show_all_pm(self, button: Any) -> None:
-        if hasattr(button, 'message'):
-            anchor = button.message['id']
-        else:
-            anchor = None
-
-        self._narrow_to(anchor=anchor,
-                        pms=True)
+    def narrow_to_all_pm(
+        self, *, contextual_message_id: Optional[int] = None,
+    ) -> None:
+        self._narrow_to(anchor=contextual_message_id, pms=True)
 
     def show_all_starred(self, button: Any) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?

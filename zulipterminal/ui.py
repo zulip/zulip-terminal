@@ -189,7 +189,7 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key('ALL_PM', key):
-            self.model.controller.show_all_pm(self)
+            self.model.controller.narrow_to_all_pm()
             self.body.focus_col = 1
         elif is_command_key('ALL_STARRED', key):
             self.model.controller.show_all_starred(self)
