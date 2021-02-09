@@ -101,14 +101,11 @@ class HomeButton(TopButton):
         button_text = (
             f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
         )
-        narrow_function = partial(
-            controller.show_all_messages,
-            self,
-        )
+
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=narrow_function,
+            show_function=controller.narrow_to_all_messages,
             count=count,
             prefix_character='',
             width=width,

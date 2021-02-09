@@ -330,13 +330,10 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=message_id, pm_with=",".join(recipient_emails))
 
-    def show_all_messages(self, button: Any) -> None:
-        if hasattr(button, 'message'):
-            anchor = button.message['id']
-        else:
-            anchor = None
-
-        self._narrow_to(anchor=anchor)
+    def narrow_to_all_messages(
+        self, *, message_id: Optional[int] = None,
+    ) -> None:
+        self._narrow_to(anchor=message_id)
 
     def show_all_pm(self, button: Any) -> None:
         if hasattr(button, 'message'):

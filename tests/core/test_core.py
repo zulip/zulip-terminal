@@ -170,7 +170,9 @@ class TestController:
         id_list = index_user['private_msg_ids_by_user_ids'][recipients]
         assert {widget.original_widget.message['id']} == id_list
 
-    def test_show_all_messages(self, mocker, controller, index_all_messages):
+    def test_narrow_to_all_messages(
+        self, mocker, controller, index_all_messages
+    ):
         controller.model.narrow = [['stream', 'PTEST']]
         controller.model.index = index_all_messages
         controller.view.message_view = mocker.patch('urwid.ListBox')
@@ -184,7 +186,7 @@ class TestController:
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
-        controller.show_all_messages('')
+        controller.narrow_to_all_messages()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == []
         controller.view.message_view.log.clear.assert_called_once_with()
