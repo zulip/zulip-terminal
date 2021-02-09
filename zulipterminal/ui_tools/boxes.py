@@ -1444,7 +1444,9 @@ class MessageBox(urwid.Pile):
                     contextual_message_id=self.message["id"],
                 )
         elif is_command_key('ALL_MESSAGES', key):
-            self.model.controller.show_all_messages(self)
+            self.model.controller.narrow_to_all_messages(
+                contextual_message_id=self.message["id"]
+            )
         elif is_command_key('REPLY_AUTHOR', key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
