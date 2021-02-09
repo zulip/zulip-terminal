@@ -139,14 +139,11 @@ class MentionedButton(TopButton):
         button_text = (
             f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
         )
-        narrow_function = partial(
-            controller.show_all_mentions,
-            self,
-        )
+
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=narrow_function,
+            show_function=controller.narrow_to_all_mentions,
             width=width,
             prefix_character='',
             count=count,

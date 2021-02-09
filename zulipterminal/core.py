@@ -356,11 +356,10 @@ class Controller:
         # (nothing currently requires narrowing around a message id)
         self._narrow_to(anchor=None, starred=True)
 
-    def show_all_mentions(self, button: Any) -> None:
-        # NOTE: Should we ensure we maintain anchor focus here?
-        # (As with starred, it seems to work fine without)
-        self._narrow_to(anchor=None,
-                        mentioned=True)
+    def narrow_to_all_mentions(self) -> None:
+        # NOTE: Should we allow maintaining anchor focus here?
+        # (nothing currently requires narrowing around a message id)
+        self._narrow_to(anchor=None, mentioned=True)
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
