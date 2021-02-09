@@ -158,14 +158,11 @@ class StarredButton(TopButton):
         button_text = (
             f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
         )
-        narrow_function = partial(
-            controller.show_all_starred,
-            self,
-        )
+
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=narrow_function,
+            show_function=controller.narrow_to_all_starred,
             width=width,
             prefix_character='',
             count=0,  # Starred messages are already marked read

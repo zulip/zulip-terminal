@@ -192,7 +192,7 @@ class View(urwid.WidgetWrap):
             self.model.controller.narrow_to_all_pm()
             self.body.focus_col = 1
         elif is_command_key('ALL_STARRED', key):
-            self.model.controller.show_all_starred(self)
+            self.model.controller.narrow_to_all_starred()
             self.body.focus_col = 1
         elif is_command_key('ALL_MENTIONS', key):
             self.model.controller.show_all_mentions(self)
