@@ -131,7 +131,10 @@ class TestController:
         }
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
-        controller.narrow_to_topic(msg_box)
+
+        controller.narrow_to_topic(stream_name="PTEST",
+                                   topic_name=msg_box.topic_name)
+
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.view.message_view.log.clear.assert_called_once_with()

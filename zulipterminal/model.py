@@ -1178,8 +1178,13 @@ class Model:
                                         self, [msg_id],
                                         last_message=msg_box.last_message)
                         if msg_w_list:
+                            # FIXME Still depends on widget
+                            widget = msg_w_list[0].original_widget
                             self.controller.narrow_to_topic(
-                                msg_w_list[0].original_widget)
+                                stream_name=widget.stream_name,
+                                topic_name=widget.topic_name,
+                                message_id=widget.message["id"],
+                            )
                     self.controller.update_screen()
                     return
 

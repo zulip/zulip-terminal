@@ -1410,12 +1410,20 @@ class MessageBox(urwid.Pile):
                         message_id=self.message["id"],
                     )
                 else:
-                    self.model.controller.narrow_to_topic(self)
+                    self.model.controller.narrow_to_topic(
+                        stream_name=self.stream_name,
+                        topic_name=self.topic_name,
+                        message_id=self.message["id"],
+                    )
         elif is_command_key('TOPIC_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
-                self.model.controller.narrow_to_topic(self)
+                self.model.controller.narrow_to_topic(
+                    stream_name=self.stream_name,
+                    topic_name=self.topic_name,
+                    message_id=self.message["id"],
+                )
         elif is_command_key('ALL_MESSAGES', key):
             self.model.controller.show_all_messages(self)
         elif is_command_key('REPLY_AUTHOR', key):

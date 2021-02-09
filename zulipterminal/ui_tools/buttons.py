@@ -294,7 +294,8 @@ class TopicButton(TopButton):
 
         narrow_function = partial(
             controller.narrow_to_topic,
-            self,
+            stream_name=self.stream_name,
+            topic_name=self.topic_name,
         )
         super().__init__(
             controller=controller,
@@ -511,16 +512,16 @@ class MessageLinkButton(urwid.Button):
                 message_id=parsed_link['message_id'],
             )
         elif 'stream:topic' == narrow:
-            self.stream_id = parsed_link['stream']['stream_id']
-            self.stream_name = parsed_link['stream']['stream_name']
-            self.topic_name = parsed_link['topic_name']
-            self.controller.narrow_to_topic(self)
+            self.controller.narrow_to_topic(
+                stream_name=parsed_link['stream']['stream_name'],
+                topic_name=parsed_link['topic_name'],
+            )
         elif 'stream:topic:near' == narrow:
-            self.stream_id = parsed_link['stream']['stream_id']
-            self.stream_name = parsed_link['stream']['stream_name']
-            self.topic_name = parsed_link['topic_name']
-            self.message = dict(id=parsed_link['message_id'])
-            self.controller.narrow_to_topic(self)
+            self.controller.narrow_to_topic(
+                stream_name=parsed_link['stream']['stream_name'],
+                topic_name=parsed_link['topic_name'],
+                message_id=parsed_link['message_id'],
+            )
 
     def handle_narrow_link(self) -> None:
         """

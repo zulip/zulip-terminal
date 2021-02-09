@@ -317,15 +317,13 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=message_id, stream=stream_name)
 
-    def narrow_to_topic(self, button: Any) -> None:
-        if hasattr(button, 'message'):
-            anchor = button.message['id']
-        else:
-            anchor = None
-
-        self._narrow_to(anchor=anchor,
-                        stream=button.stream_name,
-                        topic=button.topic_name)
+    def narrow_to_topic(
+        self, *, stream_name: str, topic_name: str,
+        message_id: Optional[int] = None,
+    ) -> None:
+        self._narrow_to(anchor=message_id,
+                        stream=stream_name,
+                        topic=topic_name)
 
     def narrow_to_user(self, button: Any) -> None:
         if hasattr(button, 'message'):
