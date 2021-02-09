@@ -29,7 +29,7 @@ class MenuButton(urwid.Button):
 
 
 class TopButton(urwid.Button):
-    def __init__(self, controller: Any, caption: str,
+    def __init__(self, *, controller: Any, caption: str,
                  show_function: Callable[..., Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
@@ -109,10 +109,14 @@ class HomeButton(TopButton):
         button_text = (
             f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
         )
-        super().__init__(controller, button_text,
-                         controller.show_all_messages, count=count,
-                         prefix_character='',
-                         width=width)
+        super().__init__(
+            controller=controller,
+            caption=button_text,
+            show_function=controller.show_all_messages,
+            count=count,
+            prefix_character='',
+            width=width,
+        )
 
 
 class PMButton(TopButton):
@@ -120,10 +124,14 @@ class PMButton(TopButton):
         button_text = (
             f"Private messages [{primary_key_for_command('ALL_PM')}]"
         )
-        super().__init__(controller, button_text,
-                         controller.show_all_pm, count=count,
-                         prefix_character='',
-                         width=width)
+        super().__init__(
+            controller=controller,
+            caption=button_text,
+            show_function=controller.show_all_pm,
+            count=count,
+            prefix_character='',
+            width=width,
+        )
 
 
 class MentionedButton(TopButton):
@@ -131,11 +139,14 @@ class MentionedButton(TopButton):
         button_text = (
             f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
         )
-        super().__init__(controller, button_text,
-                         controller.show_all_mentions,
-                         width=width,
-                         count=count,
-                         prefix_character='')
+        super().__init__(
+            controller=controller,
+            caption=button_text,
+            show_function=controller.show_all_mentions,
+            width=width,
+            count=count,
+            prefix_character='',
+        )
 
 
 class StarredButton(TopButton):
@@ -143,11 +154,14 @@ class StarredButton(TopButton):
         button_text = (
             f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
         )
-        super().__init__(controller, button_text,
-                         controller.show_all_starred,
-                         width=width,
-                         prefix_character='',
-                         count=0)  # Starred messages are already marked read
+        super().__init__(
+            controller=controller,
+            caption=button_text,
+            show_function=controller.show_all_starred,
+            width=width,
+            prefix_character='',
+            count=0,  # Starred messages are already marked read
+        )
 
 
 class StreamButton(TopButton):
@@ -178,12 +192,14 @@ class StreamButton(TopButton):
 
         stream_marker = (STREAM_MARKER_PRIVATE if is_private
                          else STREAM_MARKER_PUBLIC)
-        super().__init__(controller,
-                         caption=self.stream_name,
-                         show_function=controller.narrow_to_stream,
-                         prefix_character=(self.color, stream_marker),
-                         width=width,
-                         count=count)
+        super().__init__(
+            controller=controller,
+            caption=self.stream_name,
+            show_function=controller.narrow_to_stream,
+            prefix_character=(self.color, stream_marker),
+            width=width,
+            count=count,
+        )
 
         # Mark muted streams 'M' during button creation.
         if self.model.is_muted_stream(self.stream_id):
@@ -224,13 +240,15 @@ class UserButton(TopButton):
         # FIXME Is this still needed?
         self.recipients = frozenset({self.user_id, view.model.user_id})
 
-        super().__init__(controller,
-                         caption=user['full_name'],
-                         show_function=self._narrow_with_compose,
-                         prefix_character=(color, state_marker),
-                         text_color=color,
-                         width=width,
-                         count=count)
+        super().__init__(
+            controller=controller,
+            caption=user['full_name'],
+            show_function=self._narrow_with_compose,
+            prefix_character=(color, state_marker),
+            text_color=color,
+            width=width,
+            count=count,
+        )
         if is_current_user:
             self.update_widget(('current_user', '(you)'), color)
 
@@ -253,12 +271,14 @@ class TopicButton(TopButton):
         self.stream_id = stream_id
         self.model = controller.model
 
-        super().__init__(controller=controller,
-                         caption=self.topic_name,
-                         prefix_character='',
-                         show_function=controller.narrow_to_topic,
-                         width=width,
-                         count=count)
+        super().__init__(
+            controller=controller,
+            caption=self.topic_name,
+            prefix_character='',
+            show_function=controller.narrow_to_topic,
+            width=width,
+            count=count,
+        )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
             self.mark_muted()
