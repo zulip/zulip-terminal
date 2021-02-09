@@ -345,11 +345,12 @@ class Controller:
         # (it seems to work fine without)
         self._narrow_to(anchor=None, starred=True)
 
-    def show_all_mentions(self, button: Any) -> None:
+    def narrow_to_all_mentions(
+        self, *, message_id: Optional[int] = None,
+    ) -> None:
         # NOTE: Should we ensure we maintain anchor focus here?
         # (As with starred, it seems to work fine without)
-        self._narrow_to(anchor=None,
-                        mentioned=True)
+        self._narrow_to(anchor=None, mentioned=True)
 
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id

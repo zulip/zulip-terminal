@@ -236,11 +236,11 @@ class TestView:
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
-        view.model.controller.show_all_mentions = mocker.Mock()
+        view.model.controller.narrow_to_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
 
-        view.model.controller.show_all_mentions.assert_called_once_with(view)
+        view.model.controller.narrow_to_all_mentions.assert_called_once_with()
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))

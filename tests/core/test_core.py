@@ -243,7 +243,9 @@ class TestController:
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_show_all_mentions(self, mocker, controller, index_all_mentions):
+    def test_narrow_to_all_mentions(
+        self, mocker, controller, index_all_mentions
+    ):
         controller.model.narrow = []
         controller.model.index = index_all_mentions
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -258,7 +260,7 @@ class TestController:
         }
         controller.view.message_view = mocker.patch('urwid.ListBox')
 
-        controller.show_all_mentions('')
+        controller.narrow_to_all_mentions()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == [['is', 'mentioned']]
         controller.view.message_view.log.clear.assert_called_once_with()
