@@ -276,10 +276,11 @@ class TestTopicButton:
 
         topic_button = TopicButton(stream_id=stream_id,
                                    topic=title, **params)
+
         top_button.assert_called_once_with(
             caption=title,
             prefix_character='',
-            show_function=controller.narrow_to_topic,
+            show_function=mocker.ANY,  # partial
             **params)
         assert topic_button.stream_name == stream_name
         assert topic_button.stream_id == stream_id
