@@ -1389,7 +1389,10 @@ class MessageBox(urwid.Pile):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
-                self.model.controller.narrow_to_stream(self)
+                self.model.controller.narrow_to_stream(
+                    stream_name=self.stream_name,
+                    message_id=self.message["id"],
+                )
         elif is_command_key('TOGGLE_NARROW', key):
             self.model.unset_search_narrow()
             if self.message['type'] == 'private':
@@ -1402,7 +1405,10 @@ class MessageBox(urwid.Pile):
                     self.model.controller.narrow_to_user(self)
             elif self.message['type'] == 'stream':
                 if len(self.model.narrow) > 1:  # in a topic
-                    self.model.controller.narrow_to_stream(self)
+                    self.model.controller.narrow_to_stream(
+                        stream_name=self.stream_name,
+                        message_id=self.message["id"],
+                    )
                 else:
                     self.model.controller.narrow_to_topic(self)
         elif is_command_key('TOPIC_NARROW', key):

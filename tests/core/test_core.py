@@ -103,7 +103,7 @@ class TestController:
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
-        controller.narrow_to_stream(stream_button)
+        controller.narrow_to_stream(stream_name="PTEST")
 
         assert controller.model.stream_id == stream_button.stream_id
         assert controller.model.narrow == [['stream',
