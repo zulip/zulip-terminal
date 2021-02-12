@@ -96,6 +96,8 @@ class Model:
                 ('typing', self._handle_typing_event),
                 ('update_message_flags',
                  self._handle_update_message_flags_event),
+                ('update_display_settings',
+                 self._handle_update_display_settings),
             ])
         )
 
@@ -149,6 +151,7 @@ class Model:
         self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
                                                     key=lambda e: e[0]))
 
+        self.twenty_four_hr_format = self.initial_data['twenty_four_hour_time']
         self.new_user_input = True
         self._start_presence_updates()
 
@@ -1170,8 +1173,10 @@ class Model:
         format_codes = (
             "%a %b %d "
             f"{'%Y ' if show_year else ''}"
-            "%H:%M"
+            f"{'%H:' if self.twenty_four_hr_format else '%I:'}"
+            "%M"
             f"{':%S' if show_seconds else ''}"
+            f"{'' if self.twenty_four_hr_format else ' %p'}"
         )
         return local_time.strftime(format_codes)
 
@@ -1222,6 +1227,24 @@ class Model:
                     self.controller.update_screen()
                     return
 
+    def _handle_update_display_settings(self, event: Event) -> None:
+        """
+        Handle change to user display setting (Eg: Time format)
+        """
+        assert event['type'] == "update_display_settings"
+        view = self.controller.view
+        if event['setting_name'] == 'twenty_four_hour_time':
+            self.twenty_four_hr_format = event['setting']
+            for msg_w in view.message_view.log:
+                msg_box = msg_w.original_widget
+                msg_id = msg_box.message['id']
+                last_msg = msg_box.last_message
+                msg_pos = view.message_view.log.index(msg_w)
+                msg_w_list = create_msg_box_list(self, [msg_id],
+                                                 last_message=last_msg)
+                view.message_view.log[msg_pos] = msg_w_list[0]
+        self.controller.update_screen()
+
     def _register_desired_events(self, *, fetch_data: bool=False) -> str:
         fetch_types = None if not fetch_data else [
             'realm',
@@ -1232,6 +1255,7 @@ class Model:
             'muted_topics',
             'realm_user',  # Enables cross_realm_bots
             'realm_user_groups',
+            'update_display_settings',
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             'zulip_version',

@@ -106,6 +106,12 @@ class UpdateMessageFlagsEvent(TypedDict):
     all: bool
 
 
+class UpdateDisplaySettings(TypedDict):
+    type: Literal['update_display_settings']
+    setting_name: str
+    setting: bool
+
+
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
@@ -113,4 +119,5 @@ Event = Union[
     SubscriptionEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,
+    UpdateDisplaySettings,
 ]

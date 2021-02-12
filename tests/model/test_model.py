@@ -179,6 +179,7 @@ class TestModel:
             'subscription',
             'typing',
             'update_message_flags',
+            'update_display_settings',
         ]
         fetch_event_types = [
             'realm',
@@ -189,6 +190,7 @@ class TestModel:
             'muted_topics',
             'realm_user',
             'realm_user_groups',
+            'update_display_settings',
             'zulip_version',
         ]
         model.client.register.assert_called_once_with(
@@ -1939,6 +1941,34 @@ class TestModel:
         for stream_id in stream_ids:
             new_subscribers = model.stream_dict[stream_id]['subscribers']
             assert new_subscribers == expected_subscribers
+
+    @pytest.mark.parametrize(['setting', 'twenty_four_hr_format'], [
+        (True, False), (False, True)
+    ])
+    def test_update_twenty_four_hour_format(self, mocker, model, setting,
+                                            twenty_four_hr_format):
+        event = {
+            'type': 'update_display_settings',
+            'setting_name': 'twenty_four_hour_time',
+        }
+        event['setting'] = setting
+
+        first_msg_w = mocker.Mock()
+        second_msg_w = mocker.Mock()
+        first_msg_w.original_widget.message = {'id': 1}
+        second_msg_w.original_widget.message = {'id': 2}
+        self.controller.view.message_view = mocker.Mock(
+                                               log=[first_msg_w, second_msg_w])
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list')
+        # Test for change in time format
+        model.twenty_four_hr_format = twenty_four_hr_format
+        assert model.twenty_four_hr_format != event['setting']
+        model._handle_update_display_settings(event)
+        assert model.twenty_four_hr_format == event['setting']
+        assert create_msg_box_list.call_count == len(
+                                    self.controller.view.message_view.log)
+        assert model.controller.update_screen.called
 
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [
         ({1},   1, True),

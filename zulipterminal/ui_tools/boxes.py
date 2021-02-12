@@ -1204,7 +1204,7 @@ class MessageBox(urwid.Pile):
 
             content_header = urwid.Columns([
                 ('weight', 10, urwid.Text(text['author'])),
-                (23, urwid.Text(text['time'], align='right')),
+                (26, urwid.Text(text['time'], align='right')),
                 (1, urwid.Text(text['star'], align='right')),
                 ], dividechars=1)
         else:
