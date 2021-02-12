@@ -217,7 +217,7 @@ class StreamButton(TopButton):
                          else STREAM_MARKER_PUBLIC)
         narrow_function = partial(
             controller.narrow_to_stream,
-            self,
+            stream_name=self.stream_name,
         )
         super().__init__(
             controller=controller,
@@ -508,14 +508,14 @@ class MessageLinkButton(urwid.Button):
         """
         narrow = parsed_link['narrow']
         if 'stream' == narrow:
-            self.stream_id = parsed_link['stream']['stream_id']
-            self.stream_name = parsed_link['stream']['stream_name']
-            self.controller.narrow_to_stream(self)
+            self.controller.narrow_to_stream(
+                stream_name=parsed_link['stream']['stream_name'],
+            )
         elif 'stream:near' == narrow:
-            self.stream_id = parsed_link['stream']['stream_id']
-            self.stream_name = parsed_link['stream']['stream_name']
-            self.message = dict(id=parsed_link['message_id'])
-            self.controller.narrow_to_stream(self)
+            self.controller.narrow_to_stream(
+                stream_name=parsed_link['stream']['stream_name'],
+                contextual_message_id=parsed_link['message_id'],
+            )
         elif 'stream:topic' == narrow:
             self.stream_id = parsed_link['stream']['stream_id']
             self.stream_name = parsed_link['stream']['stream_name']

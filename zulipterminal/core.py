@@ -312,14 +312,10 @@ class Controller:
 
         self.exit_editor_mode()
 
-    def narrow_to_stream(self, button: Any) -> None:
-        if hasattr(button, 'message'):
-            anchor = button.message['id']
-        else:
-            anchor = None
-
-        self._narrow_to(anchor=anchor,
-                        stream=button.stream_name)
+    def narrow_to_stream(
+        self, *, stream_name: str, contextual_message_id: Optional[int] = None,
+    ) -> None:
+        self._narrow_to(anchor=contextual_message_id, stream=stream_name)
 
     def narrow_to_topic(self, button: Any) -> None:
         if hasattr(button, 'message'):
