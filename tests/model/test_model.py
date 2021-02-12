@@ -91,6 +91,8 @@ class TestModel:
         assert model.active_emoji_data['joker']['type'] == 'realm_emoji'
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert model.active_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
+        assert (model.twenty_four_hr_format
+                == initial_data['twenty_four_hour_time'])
 
     @pytest.mark.parametrize(['server_response', 'locally_processed_data',
                               'zulip_feature_level'], [
@@ -179,6 +181,7 @@ class TestModel:
             'subscription',
             'typing',
             'update_message_flags',
+            'update_display_settings',
         ]
         fetch_event_types = [
             'realm',
@@ -189,6 +192,7 @@ class TestModel:
             'muted_topics',
             'realm_user',
             'realm_user_groups',
+            'update_display_settings',
             'zulip_version',
         ]
         model.client.register.assert_called_once_with(
@@ -1939,6 +1943,30 @@ class TestModel:
         for stream_id in stream_ids:
             new_subscribers = model.stream_dict[stream_id]['subscribers']
             assert new_subscribers == expected_subscribers
+
+    @pytest.mark.parametrize('setting', [True, False])
+    def test_update_twenty_four_hour_format(self, mocker, model, setting):
+        event = {
+            'type': 'update_display_settings',
+            'setting_name': 'twenty_four_hour_time',
+            'setting': setting,
+        }
+        first_msg_w = mocker.Mock()
+        second_msg_w = mocker.Mock()
+        first_msg_w.original_widget.message = {'id': 1}
+        second_msg_w.original_widget.message = {'id': 2}
+        self.controller.view.message_view = mocker.Mock(
+                                               log=[first_msg_w, second_msg_w])
+        create_msg_box_list = mocker.patch('zulipterminal.model.'
+                                           'create_msg_box_list')
+        model.twenty_four_hr_format = None  # initial value is not True/False
+
+        model._handle_update_display_settings_event(event)
+
+        assert model.twenty_four_hr_format == event['setting']
+        assert create_msg_box_list.call_count == len(
+                                    self.controller.view.message_view.log)
+        assert model.controller.update_screen.called
 
     @pytest.mark.parametrize('muted_streams, stream_id, is_muted', [
         ({1},   1, True),

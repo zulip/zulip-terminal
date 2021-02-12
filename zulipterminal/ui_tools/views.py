@@ -1392,8 +1392,8 @@ class EditHistoryView(PopUpView):
         ]
         subheader = [
             urwid.Text(('edit_author', author)),
-            # 19 = len(timestamp).
-            (19, urwid.Text(('edit_time', date_and_time), align='right')),
+            # 22 = len(timestamp).
+            (22, urwid.Text(('edit_time', date_and_time), align='right')),
         ]
 
         edit_block = [

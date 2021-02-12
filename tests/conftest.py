@@ -539,6 +539,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
                 }
             }
         },
+        'twenty_four_hour_time': True,
         'last_event_id': -1,
         'muted_topics': [],
         'realm_user_groups': [],
