@@ -1,4 +1,5 @@
 import re
+from functools import partial
 from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 from urllib.parse import urljoin, urlparse
 
@@ -30,7 +31,7 @@ class MenuButton(urwid.Button):
 
 class TopButton(urwid.Button):
     def __init__(self, *, controller: Any, caption: str,
-                 show_function: Callable[..., Any], width: int,
+                 show_function: Callable[[], Any], width: int,
                  prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
                  text_color: Optional[str]=None,
                  count: int=0) -> None:
@@ -94,7 +95,7 @@ class TopButton(urwid.Button):
         self.controller.view.show_left_panel(visible=False)
         self.controller.view.show_right_panel(visible=False)
         self.controller.view.body.focus_col = 1
-        self.show_function(self)
+        self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('ENTER', key):
@@ -109,10 +110,14 @@ class HomeButton(TopButton):
         button_text = (
             f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
         )
+        narrow_function = partial(
+            controller.show_all_messages,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=controller.show_all_messages,
+            show_function=narrow_function,
             count=count,
             prefix_character='',
             width=width,
@@ -124,10 +129,14 @@ class PMButton(TopButton):
         button_text = (
             f"Private messages [{primary_key_for_command('ALL_PM')}]"
         )
+        narrow_function = partial(
+            controller.show_all_pm,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=controller.show_all_pm,
+            show_function=narrow_function,
             count=count,
             prefix_character='',
             width=width,
@@ -139,10 +148,14 @@ class MentionedButton(TopButton):
         button_text = (
             f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
         )
+        narrow_function = partial(
+            controller.show_all_mentions,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=controller.show_all_mentions,
+            show_function=narrow_function,
             width=width,
             count=count,
             prefix_character='',
@@ -154,10 +167,14 @@ class StarredButton(TopButton):
         button_text = (
             f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
         )
+        narrow_function = partial(
+            controller.show_all_starred,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=button_text,
-            show_function=controller.show_all_starred,
+            show_function=narrow_function,
             width=width,
             prefix_character='',
             count=0,  # Starred messages are already marked read
@@ -192,10 +209,14 @@ class StreamButton(TopButton):
 
         stream_marker = (STREAM_MARKER_PRIVATE if is_private
                          else STREAM_MARKER_PUBLIC)
+        narrow_function = partial(
+            controller.narrow_to_stream,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=self.stream_name,
-            show_function=controller.narrow_to_stream,
+            show_function=narrow_function,
             prefix_character=(self.color, stream_marker),
             width=width,
             count=count,
@@ -252,7 +273,7 @@ class UserButton(TopButton):
         if is_current_user:
             self.update_widget(('current_user', '(you)'), color)
 
-    def _narrow_with_compose(self, button: Any) -> None:
+    def _narrow_with_compose(self) -> None:
         # Switches directly to composing with user
         # FIXME should we just narrow?
         self.controller.narrow_to_user(self)
@@ -271,11 +292,15 @@ class TopicButton(TopButton):
         self.stream_id = stream_id
         self.model = controller.model
 
+        narrow_function = partial(
+            controller.narrow_to_topic,
+            self,
+        )
         super().__init__(
             controller=controller,
             caption=self.topic_name,
             prefix_character='',
-            show_function=controller.narrow_to_topic,
+            show_function=narrow_function,
             width=width,
             count=count,
         )
