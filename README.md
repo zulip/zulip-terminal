@@ -1,6 +1,6 @@
 # Zulip Terminal - [Zulip](https://zulip.com)'s official terminal client
 
-[Recent changes](https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md) | [FAQs](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) | [Development](#contributor-guidelines)
+[Recent changes](https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md) | [FAQs](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) | [Development](#contributor-guidelines) | [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md)
 
 [![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
@@ -20,6 +20,8 @@ Specific aims include:
 * Enabling all actions to be achieved through the keyboard (see [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md))
 * Exploring alternative user interface designs suited to the display and input constraints
 * Supporting a wide range of platforms and terminal emulators
+
+Learn how to use Zulip Terminal with our [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md).
 
 ### Feature status
 
@@ -84,7 +86,7 @@ If it doesn't find this file, you have two options:
 
 **NOTE:** If your server uses self-signed certificates or an insecure connection, you will need to add extra options to the `zuliprc` file manually - see the documentation for the [Zulip python module](https://pypi.org/project/zulip/).
 
-We suggest running `zulip-term` using the `-e` or `--explore` option (in explore mode) when you are trying Zulip Terminal for the first time, where we intentionally do not mark messages as read.
+We suggest running `zulip-term` using the `-e` or `--explore` option (in explore mode) when you are trying Zulip Terminal for the first time, where we intentionally do not mark messages as read. Try following along with our [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md) to get the hang of things.
 
 ## Configuration
 
