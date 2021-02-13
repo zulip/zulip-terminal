@@ -88,6 +88,9 @@ setup(
             'https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md',
         'Issues':
             'https://github.com/zulip/zulip-terminal/issues',
+        'Hot Keys':
+            'https://github.com/zulip/zulip-terminal/blob/main/'
+            'docs/hotkeys.md',
     },
     python_requires='>=3.6, <3.10',
     keywords='',
