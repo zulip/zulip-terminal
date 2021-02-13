@@ -1,3 +1,7 @@
+"""
+Helper functions which render tables in the UI
+"""
+
 from typing import Any, List, Optional, Tuple, Union, cast
 
 

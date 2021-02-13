@@ -1,3 +1,8 @@
+"""
+Defines the `Controller`, which sets up the
+`model`, `view`, and coordinates the application
+"""
+
 import os
 import signal
 import sys

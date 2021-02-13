@@ -1,3 +1,8 @@
+"""
+UI buttons for 'narrowing' and showing unread counts,
+such as Stream, PM, Topic, Home, Starred, etc
+"""
+
 import re
 from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 from urllib.parse import urljoin, urlparse

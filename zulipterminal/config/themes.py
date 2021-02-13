@@ -1,3 +1,8 @@
+"""
+Stores styles and their colour mappings in each theme,
+with helper functions
+"""
+
 from typing import Dict, List, Optional, Tuple
 
 

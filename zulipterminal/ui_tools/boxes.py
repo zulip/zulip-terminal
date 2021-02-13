@@ -1,3 +1,8 @@
+"""
+UI boxes for displaying messages and entering text,
+such as `MessageBox`, `SearchBox`, `WriteBox`, etc.
+"""
+
 import re
 import typing
 import unicodedata

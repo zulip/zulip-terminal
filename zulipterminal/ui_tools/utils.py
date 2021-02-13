@@ -1,3 +1,7 @@
+"""
+The `MessageBox` for every message displayed is created here
+"""
+
 from typing import Any, Iterable, List, Optional, Union
 
 import urwid

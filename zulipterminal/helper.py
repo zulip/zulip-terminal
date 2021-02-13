@@ -1,3 +1,7 @@
+"""
+Helper functions used in multiple places
+"""
+
 import os
 import platform
 import subprocess

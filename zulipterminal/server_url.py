@@ -1,3 +1,7 @@
+"""
+Constructs and encodes server_url of messages.
+"""
+
 import urllib.parse
 
 from zulipterminal.api_types import Message

@@ -1,3 +1,8 @@
+"""
+Defines the `Model`, fetching and storing data retrieved from the Zulip server
+"""
+
+
 import datetime
 import json
 import time
