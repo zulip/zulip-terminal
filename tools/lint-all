@@ -8,6 +8,7 @@ tools = {
     'Import order (isort)': './tools/run-isort-check',
     'Type consistency (mypy)': './tools/run-mypy',
     'PEP8 & more (flake8)': 'flake8 zulipterminal/ tests/ setup.py'.split(),
+    'Docstring lint (docstrings match with developer-file-overview)': './tools/lint-docstring'
 }
 
 for tool_name, command in tools.items():
