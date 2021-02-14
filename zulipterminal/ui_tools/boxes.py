@@ -15,6 +15,11 @@ from bs4.element import NavigableString
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
+from zulipterminal.api_types import (
+    Composition,
+    PrivateComposition,
+    StreamComposition,
+)
 from zulipterminal.config.keys import (
     is_command_key,
     keys_for_command,
@@ -543,24 +548,26 @@ class WriteBox(urwid.Pile):
             if not self.msg_edit_id:
                 if self.to_write_box:
                     self.update_recipient_emails(self.to_write_box)
-                    message = Message(
-                            display_recipient=self.recipient_emails,
-                            content=self.msg_write_box.edit_text,
-                            type='private',
+                    this_draft: Composition = PrivateComposition(
+                        type="private",
+                        to=self.recipient_emails,
+                        content=self.msg_write_box.edit_text,
                     )
                 elif self.stream_id:
-                    message = Message(
-                        display_recipient=self.stream_write_box.edit_text,
+                    this_draft = StreamComposition(
+                        type="stream",
+                        to=self.stream_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         subject=self.title_write_box.edit_text,
-                        stream_id=self.stream_id,
-                        type='stream',
+                        stream_id=self.stream_id,  # FIXME Migrate to ids
                     )
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:
-                    self.model.save_draft(message)
-                elif message != saved_draft:
-                    self.view.controller.save_draft_confirmation_popup(message)
+                    self.model.save_draft(this_draft)
+                elif this_draft != saved_draft:
+                    self.view.controller.save_draft_confirmation_popup(
+                        this_draft,
+                    )
         elif is_command_key('CYCLE_COMPOSE_FOCUS', key):
             if len(self.contents) == 0:
                 return key

@@ -12,7 +12,7 @@ import urwid
 import zulip
 from typing_extensions import Literal
 
-from zulipterminal.api_types import Message
+from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.helper import asynch
 from zulipterminal.model import Model
@@ -262,10 +262,10 @@ class Controller:
         if 0 <= focus_position < len(w_list):
             self.view.message_view.set_focus(focus_position)
 
-    def save_draft_confirmation_popup(self, message: Message) -> None:
+    def save_draft_confirmation_popup(self, draft: Composition) -> None:
         question = urwid.Text('Save this message as a draft?'
                               ' (This will overwrite the existing draft.)')
-        save_draft = partial(self.model.save_draft, message)
+        save_draft = partial(self.model.save_draft, draft)
         self.loop.widget = PopUpConfirmationView(self, question, save_draft)
 
     def stream_muting_confirmation_popup(self, button: Any) -> None:

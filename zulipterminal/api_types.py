@@ -6,6 +6,23 @@ from typing_extensions import Literal, TypedDict
 EditPropagateMode = Literal['change_one', 'change_all', 'change_later']
 
 
+class PrivateComposition(TypedDict):
+    type: Literal['private']
+    content: str
+    to: List[str]  # emails  # TODO: Migrate to using List[int] (user ids)
+
+
+class StreamComposition(TypedDict):
+    type: Literal['stream']
+    content: str
+    to: str  # stream name  # TODO: Migrate to using int (stream id)
+    subject: str  # TODO: Migrate to using topic
+    stream_id: int  # FIXME: Not type of API; use until migrate to stream id
+
+
+Composition = Union[PrivateComposition, StreamComposition]
+
+
 class Message(TypedDict, total=False):
     id: int
     sender_id: int

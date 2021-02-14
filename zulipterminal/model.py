@@ -24,7 +24,7 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal import unicode_emojis
-from zulipterminal.api_types import EditPropagateMode, Event
+from zulipterminal.api_types import Composition, EditPropagateMode, Event
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Message,
@@ -127,7 +127,7 @@ class Model:
 
         self.unread_counts = classify_unread_counts(self)
 
-        self._draft: Optional[Message] = None
+        self._draft: Optional[Composition] = None
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
@@ -333,11 +333,11 @@ class Model:
             response = self.client.add_reaction(reaction_to_toggle_spec)
         display_error_if_present(response, self.controller)
 
-    def session_draft_message(self) -> Optional[Message]:
+    def session_draft_message(self) -> Optional[Composition]:
         return deepcopy(self._draft)
 
-    def save_draft(self, message: Message) -> None:
-        self._draft = deepcopy(message)
+    def save_draft(self, draft: Composition) -> None:
+        self._draft = deepcopy(draft)
         self.controller.view.set_footer_text("Saved message as draft", 3)
 
     @asynch
