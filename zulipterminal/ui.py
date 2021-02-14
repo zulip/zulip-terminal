@@ -224,12 +224,12 @@ class View(urwid.WidgetWrap):
             if saved_draft:
                 if saved_draft['type'] == 'stream':
                     self.write_box.stream_box_view(
-                        caption=saved_draft['display_recipient'],
+                        caption=saved_draft['to'],
                         title=saved_draft['subject'],
                         stream_id=saved_draft['stream_id'],
                     )
                 elif saved_draft['type'] == 'private':
-                    email_list = saved_draft['display_recipient']
+                    email_list = saved_draft['to']
                     recipient_user_ids = [
                         self.model.user_dict[email.strip()]['user_id']
                         for email in email_list
