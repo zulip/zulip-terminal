@@ -34,7 +34,7 @@ class TestModel:
 
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile,
-              unicode_emojis, custom_emojis):
+              unicode_emojis):
         mocker.patch('zulipterminal.model.Model.get_messages',
                      return_value='')
         self.client.register.return_value = initial_data
@@ -47,13 +47,11 @@ class TestModel:
         self.client.get_profile.return_value = user_profile
         mocker.patch('zulipterminal.model.unicode_emojis',
                      EMOJI_DATA=unicode_emojis)
-        mocker.patch('zulipterminal.model.Model.fetch_custom_emojis',
-                     return_value=custom_emojis)
         model = Model(self.controller)
         return model
 
     def test_init(self, model, initial_data, user_profile,
-                  unicode_emojis, custom_emojis, zulip_emoji, stream_dict):
+                  unicode_emojis, realm_emojis_data, zulip_emoji, stream_dict):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.narrow == []
@@ -80,9 +78,11 @@ class TestModel:
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
         assert model.active_emoji_data == OrderedDict(sorted(
-            {**unicode_emojis, **custom_emojis, **zulip_emoji}.items(),
+            {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
             key=lambda e: e[0]
         ))
+        # Deactivated emoji is removed from active emojis set
+        assert 'green_tick' not in model.active_emoji_data
         # Custom emoji replaces unicode emoji with same name.
         assert model.active_emoji_data['joker']['type'] == 'realm_emoji'
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
@@ -185,6 +185,7 @@ class TestModel:
             'realm_user',
             'realm_user_groups',
             'update_display_settings',
+            'realm_emoji',
             'zulip_version',
         ]
         model.client.register.assert_called_once_with(
@@ -2110,57 +2111,24 @@ class TestModel:
             model.user_name_from_id(user_id)
 
     def test_generate_all_emoji_data(self, mocker, model, zulip_emoji,
-                                     unicode_emojis, custom_emojis):
-        all_emoji_data = model.generate_all_emoji_data()
+                                     unicode_emojis, realm_emojis_data,
+                                     realm_emojis):
+        all_emoji_data = model.generate_all_emoji_data(realm_emojis)
 
         assert all_emoji_data == OrderedDict(sorted(
-            {**unicode_emojis, **custom_emojis, **zulip_emoji}.items(),
+            {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
             key=lambda e: e[0]
         ))
-        assert all_emoji_data['urwid']['type'] == 'realm_emoji'
+        # custom emoji added to active_emoji_data
+        assert all_emoji_data['singing']['type'] == 'realm_emoji'
+        # Deactivated custom emoji is removed from active emojis set
+        assert 'green_tick' not in all_emoji_data
+        # deactivated custom emoji which replaced unicode emoji with same name
+        assert all_emoji_data['joy_cat']['type'] == 'unicode_emoji'
         # Custom emoji replaces unicode emoji with same name.
         assert all_emoji_data['joker']['type'] == 'realm_emoji'
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert all_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
-
-    @pytest.mark.parametrize('response', [
-        {
-            # Omitting source_url, author_id (server version 3.0),
-            # author (server version < 3.0) from response since they
-            # are not used.
-            'emoji': {
-                '100': {
-                    'deactivated': False,
-                    'id': '100',
-                    'name': 'urwid',
-                },
-                '20': {
-                    'deactivated': False,
-                    'id': '20',
-                    'name': 'snape',
-                },
-                '3': {
-                    'deactivated': False,
-                    'id': '3',
-                    'name': 'dancing',
-                },
-                '81': {  # Not included in custom_emojis because deactivated.
-                    'deactivated': True,
-                    'id': '81',
-                    'name': 'green_tick',
-                },
-            },
-            'msg': '',
-            'result': 'success'
-        }
-    ])
-    def test_fetch_custom_emojis(self, mocker, model, custom_emojis,
-                                 response):
-        self.client.get_realm_emoji.return_value = response
-
-        fetched_custom_emojis = model.fetch_custom_emojis()
-
-        assert fetched_custom_emojis == custom_emojis
 
     # Use LoopEnder with raising_event to cause the event loop to end without
     # processing the event
