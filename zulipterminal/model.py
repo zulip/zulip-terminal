@@ -107,6 +107,7 @@ class Model:
             'realm_user',  # Enables cross_realm_bots
             'realm_user_groups',
             'update_display_settings',
+            'realm_emoji',
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             'zulip_version',
@@ -168,7 +169,9 @@ class Model:
 
         self._store_content_length_restrictions()
 
-        self.active_emoji_data = self.generate_all_emoji_data()
+        self.active_emoji_data = self.generate_all_emoji_data(
+                                        self.initial_data['realm_emoji'])
+
         self.twenty_four_hr_format = self.initial_data['twenty_four_hour_time']
         self.new_user_input = True
         self._start_presence_updates()
@@ -476,25 +479,21 @@ class Model:
 
         return response['result'] == 'success'
 
-    def fetch_custom_emojis(self) -> NamedEmojiData:
-        response = self.client.get_realm_emoji()
-        custom_emojis: NamedEmojiData = {
-            emoji['name']: {
-                'code': emoji_code,
-                'type': 'realm_emoji',
-            }
-            for emoji_code, emoji in response['emoji'].items()
-            if not emoji['deactivated']
-        }
-        display_error_if_present(response, self.controller)
-        return custom_emojis
-
-    def generate_all_emoji_data(self) -> NamedEmojiData:
+    def generate_all_emoji_data(self,
+                                custom_emoji: Dict[str, Any]
+                                ) -> NamedEmojiData:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
         typed_unicode_emoji_data = cast(NamedEmojiData, unicode_emoji_data)
-        custom_emoji_data: NamedEmojiData = self.fetch_custom_emojis()
+        custom_emoji_data: NamedEmojiData = {
+            emoji['name']: {
+                'code': emoji_code,
+                'type': 'realm_emoji',
+            }
+            for emoji_code, emoji in custom_emoji.items()
+            if not emoji['deactivated']
+        }
         zulip_extra_emoji: NamedEmojiData = {
                 'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
         }

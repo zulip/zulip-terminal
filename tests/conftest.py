@@ -185,13 +185,44 @@ def streams_fixture():
 
 
 @pytest.fixture
-def custom_emojis():
+def realm_emojis():
+    # Omitting source_url, author_id (server version 3.0),
+    # author (server version < 3.0) since they are not used.
+    return {
+        "1": {
+            "deactivated": True,
+            "id": "1",
+            "name": "green_tick",
+        },
+        "202020": {
+            "deactivated": False,
+            "id": "202020",
+            "name": "joker",
+        },
+        "2": {
+            "deactivated": True,
+            "id": "2",
+            "name": "joy_cat",
+        },
+        "3": {
+            "deactivated": False,
+            "id": "3",
+            "name": "singing",
+        },
+        "4": {
+            "deactivated": False,
+            "id": "4",
+            "name": "zulip",
+        }
+    }
+
+
+@pytest.fixture
+def realm_emojis_data():
     return OrderedDict([
-        ('urwid', {'code': '100', 'type': 'realm_emoji'}),
-        ('dancing', {'code': '3', 'type': 'realm_emoji'}),
-        ('snape', {'code': '20', 'type': 'realm_emoji'}),
         ('joker', {'code': '202020', 'type': 'realm_emoji'}),
-        ('zulip', {'code': '12345', 'type': 'realm_emoji'}),
+        ('singing', {'code': '3', 'type': 'realm_emoji'}),
+        ('zulip', {'code': '4', 'type': 'realm_emoji'}),
     ])
 
 
@@ -395,7 +426,7 @@ def topics():
 
 
 @pytest.fixture
-def initial_data(logged_on_user, users_fixture, streams_fixture):
+def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
     """
     Response from /register API request.
     """
@@ -547,6 +578,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture):
             }
         },
         'twenty_four_hour_time': True,
+        'realm_emoji': realm_emojis,
         'last_event_id': -1,
         'muted_topics': [],
         'realm_user_groups': [],
