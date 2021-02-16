@@ -971,8 +971,12 @@ class TestModel:
             ({"role": 300}, "role", 300),
             ({"role": 600}, "role", 600),
             ({}, "role", 400),
+            ({"is_owner": True}, "role", 100),
+            ({"is_admin": True}, "role", 200),
+            ({"is_guest": True}, "role", 600),
             ({"is_bot": True}, "is_bot", True),
             ({"bot_owner_id": 12}, "bot_owner_name", "Human 2"),
+            ({"bot_owner": "person2@example.com"}, "bot_owner_name", "Human 2"),
             ({}, "bot_owner_name", ""),
         ],
         ids=[
@@ -991,8 +995,12 @@ class TestModel:
             "user_is_moderator:Zulip_4.0+_ZFL60",
             "user_is_guest:Zulip_4.0+_ZFL59",
             "user_is_member",
+            "user_is_owner:Zulip_3.0+",
+            "user_is_admin:preZulip_4.0",
+            "user_is_guest:preZulip_4.0",
             "user_is_bot",
             "user_bot_has_owner:Zulip_3.0+_ZFL1",
+            "user_bot_has_owner:preZulip_3.0",
             "user_bot_has_no_owner",
         ],
     )
@@ -1001,12 +1009,14 @@ class TestModel:
         model,
         mocker,
         _all_users_by_id,
+        user_dict,
         to_vary_in_each_user,
         key,
         expected_value,
     ):
         _all_users_by_id[11] = dict({"user_id": 11}, **to_vary_in_each_user)
         model._all_users_by_id = _all_users_by_id
+        model.user_dict = user_dict
 
         assert model.get_user_info(11)[key] == expected_value
 
