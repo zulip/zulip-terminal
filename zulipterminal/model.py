@@ -35,6 +35,7 @@ from zulipterminal.api_types import (
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.ui_mappings import ROLE_BY_ID
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
@@ -732,10 +733,19 @@ class Model:
             # Default role is member
             user_info["role"] = 400
 
-        bot_owner: Optional[RealmUser] = None
+            # Ensure backwards compatibility for role parameters (e.g., `is_admin`)
+            for role_id, role in ROLE_BY_ID.items():
+                if api_user_data.get(role["bool"], None):
+                    user_info["role"] = role_id
+                    break
+
+        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
 
         if api_user_data.get("bot_owner_id", None):
             bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
+        # Ensure backwards compatibility for `bot_owner` (which is email of owner)
+        elif api_user_data.get("bot_owner", None):
+            bot_owner = self.user_dict.get(api_user_data["bot_owner"], None)
 
         user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
 
