@@ -17,7 +17,6 @@ class StreamComposition(TypedDict):
     content: str
     to: str  # stream name  # TODO: Migrate to using int (stream id)
     subject: str  # TODO: Migrate to using topic
-    stream_id: int  # FIXME: Not type of API; use until migrate to stream id
 
 
 Composition = Union[PrivateComposition, StreamComposition]
