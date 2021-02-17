@@ -24,7 +24,13 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal import unicode_emojis
-from zulipterminal.api_types import Composition, EditPropagateMode, Event
+from zulipterminal.api_types import (
+    Composition,
+    EditPropagateMode,
+    Event,
+    PrivateComposition,
+    StreamComposition,
+)
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Message,
@@ -378,12 +384,12 @@ class Model:
     def send_private_message(self, recipients: List[str],
                              content: str) -> bool:
         if recipients:
-            request = {
-                'type': 'private',
-                'to': recipients,
-                'content': content,
-            }
-            response = self.client.send_message(request)
+            composition = PrivateComposition(
+                type='private',
+                to=recipients,
+                content=content,
+            )
+            response = self.client.send_message(composition)
             display_error_if_present(response, self.controller)
             return response['result'] == 'success'
         else:
@@ -391,13 +397,13 @@ class Model:
 
     def send_stream_message(self, stream: str, topic: str,
                             content: str) -> bool:
-        request = {
-            'type': 'stream',
-            'to': stream,
-            'subject': topic,
-            'content': content,
-        }
-        response = self.client.send_message(request)
+        composition = StreamComposition(
+            type='stream',
+            to=stream,
+            subject=topic,
+            content=content,
+        )
+        response = self.client.send_message(composition)
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
