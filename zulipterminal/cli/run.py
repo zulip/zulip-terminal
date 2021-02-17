@@ -443,6 +443,24 @@ def main(options: Optional[List[str]]=None) -> None:
             theme_data = theme_with_monochrome_added(THEMES[theme_to_use[0]])
         else:
             theme_data = THEMES[theme_to_use[0]]
+        zterm['theme'] = theme_to_use
+        welcome_text = {
+            'theme': "   theme '{}' specified {}.".format(*zterm['theme']),
+            'autohide': ("   autohide setting '{}' specified {}."
+                         .format(*zterm['autohide'])),
+            'color-depth': ("   color depth setting '{}' specified {}."
+                            .format(*zterm['color-depth']))
+        }
+        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+            welcome_text['maximum-footlinks'] = ("   maximum footlinks value "
+                                                 "'{}' specified {}."
+                                                 ).format(
+                                                 maximum_footlinks,
+                                                 zterm['footlinks'][1])
+        else:
+            welcome_text['footlinks'] = ("   maximum footlinks value "
+                                         "'{}' specified {} from footlinks."
+                                         ).format(*zterm['footlinks'])
 
         Controller(zuliprc_path,
                    maximum_footlinks,
