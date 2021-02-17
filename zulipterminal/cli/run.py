@@ -301,6 +301,31 @@ def list_themes() -> str:
     )
 
 
+def print_welcome_message(zterm: Dict[str, str],
+                          theme_to_use: Tuple[str, str],
+                          maximum_footlinks: int) -> None:
+    print("Loading with:")
+    print("   theme '{}' specified {}.".format(*theme_to_use))
+    complete, incomplete = complete_and_incomplete_themes()
+    if theme_to_use[0] in incomplete:
+        print(in_color('yellow',
+                       "   WARNING: Incomplete theme; "
+                       "results may vary!\n"
+                       "      (you could try: {})".
+                       format(", ".join(complete))))
+    print("   autohide setting '{}' specified {}."
+          .format(*zterm['autohide']))
+    if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+        print(
+            "   maximum footlinks value '{}' specified {} from footlinks."
+            .format(maximum_footlinks, zterm['footlinks'][1]))
+    else:
+        print("   maximum footlinks value '{}' specified {}."
+              .format(*zterm['maximum-footlinks']))
+    print("   color depth setting '{}' specified {}."
+          .format(*zterm['color-depth']))
+
+
 def main(options: Optional[List[str]]=None) -> None:
     """
     Launch Zulip Terminal.
@@ -389,33 +414,8 @@ def main(options: Optional[List[str]]=None) -> None:
             zterm['color-depth'] = (args.color_depth, 'on command line')
 
         color_depth = int(zterm['color-depth'][0])
-
         if args.notify:
             zterm['notify'] = (args.notify, 'on command line')
-
-        print("Loading with:")
-        print("   theme '{}' specified {}.".format(*theme_to_use))
-        complete, incomplete = complete_and_incomplete_themes()
-        if theme_to_use[0] in incomplete:
-            print(in_color('yellow',
-                           "   WARNING: Incomplete theme; "
-                           "results may vary!\n"
-                           "      (you could try: {})".
-                           format(", ".join(complete))))
-        print("   autohide setting '{}' specified {}."
-              .format(*zterm['autohide']))
-        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
-            print(
-                "   maximum footlinks value '{}' specified {} from footlinks."
-                .format(maximum_footlinks, zterm['footlinks'][1]))
-        else:
-            print(
-                "   maximum footlinks value '{}' specified {}."
-                .format(*zterm['maximum-footlinks']))
-        print("   color depth setting '{}' specified {}."
-              .format(*zterm['color-depth']))
-        print("   notify setting '{}' specified {}."
-              .format(*zterm['notify']))
 
         # For binary settings
         # Specify setting in order True, False
@@ -461,7 +461,7 @@ def main(options: Optional[List[str]]=None) -> None:
             welcome_text['footlinks'] = ("   maximum footlinks value "
                                          "'{}' specified {} from footlinks."
                                          ).format(*zterm['footlinks'])
-
+        print_welcome_message(zterm, theme_to_use, maximum_footlinks)
         Controller(zuliprc_path,
                    maximum_footlinks,
                    theme_to_use[0],
