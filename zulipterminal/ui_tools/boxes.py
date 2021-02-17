@@ -1,7 +1,7 @@
 import re
 import typing
 import unicodedata
-from collections import OrderedDict, defaultdict
+from collections import Counter, OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from sys import platform
 from time import sleep, time
@@ -457,12 +457,27 @@ class WriteBox(urwid.Pile):
         )
 
         user_names = [user["full_name"] for user in sorted_matching_users]
+
+        # Counter holds a count of each name in the list of users' names in a
+        # dict-like manner, which is a more efficient approach when compared to
+        # slicing the original list on each name.
+        # FIXME: Use a persistent counter rather than generate one on each autocomplete.
+        user_names_counter = Counter(user_names)
+
+        # Append user_id's to users with the same names.
+        user_names_with_distinct_duplicates = [
+            f"{user['full_name']}|{user['user_id']}"
+            if user_names_counter[user["full_name"]] > 1
+            else user["full_name"]
+            for user in sorted_matching_users
+        ]
+
         extra_prefix = "{}{}".format(
             "*" if prefix_string[-1] != "*" else "",
             "*" if prefix_string[-2:] != "**" else "",
         )
         user_typeahead = format_string(
-            user_names, prefix_string + extra_prefix + "{}**"
+            user_names_with_distinct_duplicates, prefix_string + extra_prefix + "{}**"
         )
 
         return user_typeahead, user_names

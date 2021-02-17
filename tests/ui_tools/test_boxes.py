@@ -221,10 +221,10 @@ class TestWriteBox:
             ("@Human", 0, "@**Human Myself**"),
             ("@Human", 1, "@**Human 1**"),
             ("@Human", 2, "@**Human 2**"),
-            ("@Human", 3, "@**Human Duplicate**"),
-            ("@Human", 4, "@**Human Duplicate**"),
-            ("@Human", -1, "@**Human Duplicate**"),
-            ("@Human", -2, "@**Human Duplicate**"),
+            ("@Human", 3, "@**Human Duplicate|13**"),
+            ("@Human", 4, "@**Human Duplicate|14**"),
+            ("@Human", -1, "@**Human Duplicate|14**"),
+            ("@Human", -2, "@**Human Duplicate|13**"),
             ("@Human", -3, "@**Human 2**"),
             ("@Human", -4, "@**Human 1**"),
             ("@Human", -5, "@**Human Myself**"),
@@ -232,8 +232,8 @@ class TestWriteBox:
             ("@_Human", 0, "@_**Human Myself**"),
             ("@_Human", 1, "@_**Human 1**"),
             ("@_Human", 2, "@_**Human 2**"),
-            ("@_Human", 3, "@_**Human Duplicate**"),
-            ("@_Human", 4, "@_**Human Duplicate**"),
+            ("@_Human", 3, "@_**Human Duplicate|13**"),
+            ("@_Human", 4, "@_**Human Duplicate|14**"),
             ("@H", 1, "@**Human 1**"),
             ("@Hu", 1, "@**Human 1**"),
             ("@Hum", 1, "@**Human 1**"),
@@ -260,8 +260,8 @@ class TestWriteBox:
             ("@", 0, "@**Human Myself**"),
             ("@", 1, "@**Human 1**"),
             ("@", 2, "@**Human 2**"),
-            ("@", 3, "@**Human Duplicate**"),
-            ("@", 4, "@**Human Duplicate**"),
+            ("@", 3, "@**Human Duplicate|13**"),
+            ("@", 4, "@**Human Duplicate|14**"),
             ("@", 5, "@*Group 1*"),
             ("@", 6, "@*Group 2*"),
             ("@", 7, "@*Group 3*"),
@@ -272,8 +272,8 @@ class TestWriteBox:
             ("@**", 0, "@**Human Myself**"),
             ("@**", 1, "@**Human 1**"),
             ("@**", 2, "@**Human 2**"),
-            ("@", 3, "@**Human Duplicate**"),
-            ("@", 4, "@**Human Duplicate**"),
+            ("@", 3, "@**Human Duplicate|13**"),
+            ("@", 4, "@**Human Duplicate|14**"),
             ("@**", 5, None),  # Reached last match
             ("@**", 6, None),  # Beyond end
             # Expected sequence of autocompletes from '@*' (only groups)
@@ -287,11 +287,11 @@ class TestWriteBox:
             ("@_", 0, "@_**Human Myself**"),  # NOTE: No silent group mention
             ("@_", 1, "@_**Human 1**"),
             ("@_", 2, "@_**Human 2**"),
-            ("@_", 3, "@_**Human Duplicate**"),
-            ("@_", 4, "@_**Human Duplicate**"),
+            ("@_", 3, "@_**Human Duplicate|13**"),
+            ("@_", 4, "@_**Human Duplicate|14**"),
             ("@_", 5, None),  # Reached last match
             ("@_", 6, None),  # Beyond end
-            ("@_", -1, "@_**Human Duplicate**"),
+            ("@_", -1, "@_**Human Duplicate|14**"),
             # Complex autocomplete prefixes.
             ("(@H", 0, "(@**Human Myself**"),
             ("(@H", 1, "(@**Human 1**"),
@@ -339,6 +339,41 @@ class TestWriteBox:
         write_box.recipient_user_ids = recipients
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
+
+    @pytest.mark.parametrize(
+        "text, expected_distinct_prefix",
+        # Add 3 different lists of tuples, with each tuple containing a combination
+        # of the text to be autocompleted and the corresponding typeahead prefix to
+        # be added to the typeahead suggestions. Only the "@" case has to be ignored
+        # while building the parameters, because it includes group suggestions too.
+        [("@" + "Human"[: index + 1], "@") for index in range(len("Human"))]
+        + [("@**" + "Human"[:index], "@") for index in range(len("Human") + 1)]
+        + [("@_" + "Human"[:index], "@_") for index in range(len("Human") + 1)],
+    )
+    def test_generic_autocomplete_user_mentions(
+        self, write_box, mocker, text, expected_distinct_prefix, state=1
+    ):
+        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+
+        write_box.generic_autocomplete(text, state)
+
+        matching_users = [
+            "Human Myself",
+            "Human 1",
+            "Human 2",
+            "Human Duplicate",
+            "Human Duplicate",
+        ]
+        distinct_matching_users = [
+            expected_distinct_prefix + "**Human Myself**",
+            expected_distinct_prefix + "**Human 1**",
+            expected_distinct_prefix + "**Human 2**",
+            expected_distinct_prefix + "**Human Duplicate|13**",
+            expected_distinct_prefix + "**Human Duplicate|14**",
+        ]
+        _process_typeaheads.assert_called_once_with(
+            distinct_matching_users, state, matching_users
+        )
 
     @pytest.mark.parametrize(
         "text, state, required_typeahead, to_pin",
