@@ -24,7 +24,13 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal import unicode_emojis
-from zulipterminal.api_types import Composition, EditPropagateMode, Event
+from zulipterminal.api_types import (
+    Composition,
+    EditPropagateMode,
+    Event,
+    PrivateComposition,
+    StreamComposition,
+)
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Message,
@@ -379,7 +385,7 @@ class Model:
     def send_private_message(self, recipients: List[str],
                              content: str) -> bool:
         if recipients:
-            request = {
+            request: PrivateComposition = {
                 'type': 'private',
                 'to': recipients,
                 'content': content,
@@ -395,7 +401,7 @@ class Model:
 
     def send_stream_message(self, stream: str, topic: str,
                             content: str) -> bool:
-        request = {
+        request: StreamComposition = {
             'type': 'stream',
             'to': stream,
             'subject': topic,

@@ -25,7 +25,7 @@ from urllib.parse import unquote
 import lxml.html
 from typing_extensions import Literal, TypedDict
 
-from zulipterminal.api_types import Message
+from zulipterminal.api_types import Composition, Message
 
 
 MACOS = platform.system() == "Darwin"
@@ -662,7 +662,7 @@ def check_narrow_and_notify(outer_narrow: List[Any],
             'Message is sent outside of current narrow.', 3)
 
 
-def notify_if_message_sent_outside_narrow(message: Dict[str, Any],
+def notify_if_message_sent_outside_narrow(message: Composition,
                                           controller: Any) -> None:
     current_narrow = controller.model.narrow
 

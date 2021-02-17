@@ -12,7 +12,7 @@ class PrivateComposition(TypedDict):
     to: List[str]  # emails  # TODO: Migrate to using List[int] (user ids)
 
 
-class StreamComposition(TypedDict):
+class StreamComposition(TypedDict, total=False):
     type: Literal['stream']
     content: str
     to: str  # stream name  # TODO: Migrate to using int (stream id)
