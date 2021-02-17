@@ -223,10 +223,13 @@ class View(urwid.WidgetWrap):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
                 if saved_draft['type'] == 'stream':
+                    stream_id = self.model.stream_id_from_name(
+                        saved_draft['to']
+                    )
                     self.write_box.stream_box_view(
                         caption=saved_draft['to'],
                         title=saved_draft['subject'],
-                        stream_id=saved_draft['stream_id'],
+                        stream_id=stream_id,
                     )
                 elif saved_draft['type'] == 'private':
                     email_list = saved_draft['to']

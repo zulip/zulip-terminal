@@ -559,7 +559,6 @@ class WriteBox(urwid.Pile):
                         to=self.stream_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         subject=self.title_write_box.edit_text,
-                        stream_id=self.stream_id,  # FIXME Migrate to ids
                     )
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:
