@@ -340,7 +340,7 @@ class Controller:
 
     def narrow_to_user(self, button: Any) -> None:
         if hasattr(button, 'message'):
-            user_emails = button.recipients_emails
+            user_emails = ", ".join(button.recipient_emails)
             anchor = button.message['id']
         else:
             user_emails = button.email
