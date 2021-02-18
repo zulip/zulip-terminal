@@ -1216,7 +1216,7 @@ class MsgInfoView(PopUpView):
         self.message_links = message_links
         self.time_mentions = time_mentions
         date_and_time = controller.model.formatted_local_time(
-                                        msg['timestamp'], show_seconds=True)
+                                        msg['timestamp'], show_year=True)
 
         msg_info = [
             ('', [('Date & Time', date_and_time),

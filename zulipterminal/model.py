@@ -1164,10 +1164,13 @@ class Model:
                       self.controller, -1)
 
     def formatted_local_time(self, timestamp: int,
-                             *, show_seconds: bool) -> str:
+                             *, show_seconds: bool = False,
+                             show_year: bool = False) -> str:
         local_time = datetime.datetime.fromtimestamp(timestamp)
         if show_seconds:
             return local_time.strftime('%a %b %d %H:%M:%S')
+        if show_year:
+            return local_time.strftime('%a %b %-d %Y %-H:%M:%S')
         else:
             return local_time.strftime('%a %b %d %H:%M')
 
