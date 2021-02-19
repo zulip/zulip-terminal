@@ -63,6 +63,8 @@ dev_helper_deps = [
     "gitlint>=0.10",
     "autopep8~=1.5.4",
     "autoflake~=1.3.1",
+    "pyscreenshot>=2.3",
+    "Pillow>=8.1.2",
 ]
 
 setup(
