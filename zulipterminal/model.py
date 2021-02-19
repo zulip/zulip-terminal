@@ -1164,15 +1164,16 @@ class Model:
                       self.controller, -1)
 
     def formatted_local_time(self, timestamp: int,
-                             *, show_seconds: bool = False,
+                             *, show_seconds: bool,
                              show_year: bool = False) -> str:
         local_time = datetime.datetime.fromtimestamp(timestamp)
-        if show_seconds:
-            return local_time.strftime('%a %b %d %H:%M:%S')
-        if show_year:
-            return local_time.strftime('%a %b %-d %Y %-H:%M:%S')
-        else:
-            return local_time.strftime('%a %b %d %H:%M')
+        format_codes = (
+            "%a %b %d"
+            f"{' %Y ' if show_year else ''}"
+            "%H:%M"
+            f"{':%S' if show_seconds else ''}"
+        )
+        return local_time.strftime(format_codes)
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
