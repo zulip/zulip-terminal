@@ -179,7 +179,7 @@ class WriteBox(urwid.Pile):
         stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
 
         def on_type_send_status(edit: object, new_edit_text: str) -> None:
-            if new_edit_text:
+            if new_edit_text and self.recipient_user_ids:
                 self.last_key_update = datetime.now()
                 if self.last_key_update > self.send_next_typing_update:
                     self.model.send_typing_status_by_user_ids(
