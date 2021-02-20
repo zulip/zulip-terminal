@@ -41,6 +41,19 @@ class TestWriteBox:
         assert write_box.view == self.view
         assert write_box.msg_edit_id is None
 
+    def test_not_calling_typing_method_without_recipients(self, mocker,
+                                                          write_box):
+        write_box.model.send_typing_status_by_user_ids = mocker.Mock()
+        write_box.private_box_view(emails=[], recipient_user_ids=[])
+        # Set idle_status_tracking to True to avoid setting off the
+        # idleness tracker function.
+        write_box.idle_status_tracking = True
+
+        # Changing the edit_text triggers on_type_send_status.
+        write_box.msg_write_box.edit_text = "random text"
+
+        assert not write_box.model.send_typing_status_by_user_ids.called
+
     @pytest.mark.parametrize('text, state', [
         ('Plain Text', 0),
         ('Plain Text', 1),
