@@ -154,6 +154,26 @@ echo 'export ZT_NOTIFICATION_SOUND=Ping' >> ~/.zshenv
 source ~/.zshenv
 ```
 
+### Copy to clipboard
+
+Zulip Terminal allows users to copy certain texts to the clipboard via a Python module, [`Pyperclip`](https://pypi.org/project/pyperclip/). This module makes use of various system packages which may or may not come with the OS.
+The "Copy to clipboard" feature is currently only available for copying Stream email, from the [Stream information popup](docs/hotkeys.md#stream-list-actions).
+
+#### Linux
+
+On Linux, this module makes use of `xclip` or `xsel` commands, which should already come with the OS. If none of these commands are installed on your system, then install any ONE using:
+```
+sudo apt-get install xclip [Recommended]
+```
+OR
+```
+sudo apt-get install xsel
+```
+
+#### OSX and WSL
+
+No additional package is required to enable copying to clipboard.
+
 ## Contributor Guidelines
 
 Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
