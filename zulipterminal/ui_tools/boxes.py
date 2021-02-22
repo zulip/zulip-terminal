@@ -252,18 +252,8 @@ class WriteBox(urwid.Pile):
         write_box.edit_pos = len(write_box.edit_text)
 
         if invalid_recipients:
-            invalid_recipients_error = [
-                "Invalid recipient(s) - " + ", ".join(invalid_recipients),
-                " - Use ",
-                ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
-                " or ",
-                (
-                    "footer_contrast",
-                    primary_key_for_command("AUTOCOMPLETE_REVERSE"),
-                ),
-                " to autocomplete.",
-            ]
-            self.view.controller.report_error(invalid_recipients_error)
+            error_message = "Invalid recipient(s) - " + ", ".join(invalid_recipients)
+            self.footer_notify_invalid_recipient(error_message)
             return False
 
         return True
@@ -572,6 +562,16 @@ class WriteBox(urwid.Pile):
 
         return emoji_typeahead, emojis
 
+    def footer_notify_invalid_recipient(self, error_message: str) -> None:
+        footer_message = [
+            error_message + ". Use ",
+            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+            " or ",
+            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE_REVERSE")),
+            " to autocomplete.",
+        ]
+        self.view.controller.report_error(footer_message)
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode:
             if not (
@@ -686,14 +686,7 @@ class WriteBox(urwid.Pile):
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
                         stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
                         if not self.model.is_valid_stream(stream_name):
-                            invalid_stream_error = (
-                                "Invalid stream name."
-                                " Use {} or {} to autocomplete.".format(
-                                    primary_key_for_command("AUTOCOMPLETE"),
-                                    primary_key_for_command("AUTOCOMPLETE_REVERSE"),
-                                )
-                            )
-                            self.view.controller.report_error(invalid_stream_error)
+                            self.footer_notify_invalid_recipient("Invalid stream name")
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                             stream_name=stream_name
