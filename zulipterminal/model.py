@@ -29,6 +29,7 @@ from zulipterminal.api_types import (
     EditPropagateMode,
     Event,
     PrivateComposition,
+    RealmEmojiData,
     StreamComposition,
     Subscription,
 )
@@ -481,7 +482,7 @@ class Model:
         return response['result'] == 'success'
 
     def generate_all_emoji_data(self,
-                                custom_emoji: Dict[str, Any]
+                                custom_emoji: Dict[str, RealmEmojiData]
                                 ) -> NamedEmojiData:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
