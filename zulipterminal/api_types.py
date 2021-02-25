@@ -148,9 +148,18 @@ class UpdateDisplaySettings(TypedDict):
     setting: bool
 
 
+class RealmEmojiData(TypedDict):
+    id: str
+    name: str
+    source_url: str
+    deactivated: bool
+    # Previous versions had an author object with an id field.
+    author_id: int  # NOTE: new in Zulip 3.0 / ZFL 7.
+
+
 class UpdateRealmEmojiEvent(TypedDict):
     type: Literal['realm_emoji']
-    realm_emoji: Dict[str, Any]
+    realm_emoji: Dict[str, RealmEmojiData]
 
 
 Event = Union[
