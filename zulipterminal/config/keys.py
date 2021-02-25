@@ -38,38 +38,38 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'key_category': 'general',
     }),
     ('GO_UP', {
-        'keys': ['k', 'up'],
-        'help_text': 'Go up/Previous message',
+        'keys': ['Up', 'k'],
+        'help_text': 'Go up / Previous message',
         'key_category': 'navigation',
     }),
     ('GO_DOWN', {
-        'keys': ['j', 'down'],
-        'help_text': 'Go down/Next message',
+        'keys': ['Down', 'j'],
+        'help_text': 'Go down / Next message',
         'key_category': 'navigation',
     }),
     ('GO_LEFT', {
-        'keys': ['h', 'left'],
+        'keys': ['Left', 'h'],
         'help_text': 'Go left',
         'key_category': 'navigation',
     }),
     ('GO_RIGHT', {
-        'keys': ['l', 'right'],
+        'keys': ['Right', 'l'],
         'help_text': 'Go right',
         'key_category': 'navigation',
     }),
     ('SCROLL_UP', {
-        'keys': ['K', 'page up'],
+        'keys': ['PgUp', 'K'],
         'help_text': 'Scroll up',
         'key_category': 'navigation',
     }),
     ('SCROLL_DOWN', {
-        'keys': ['J', 'page down'],
+        'keys': ['PgDn', 'J'],
         'help_text': 'Scroll down',
         'key_category': 'navigation',
     }),
     ('GO_TO_BOTTOM', {
-        'keys': ['G', 'end'],
-        'help_text': 'Go to bottom/last message in view',
+        'keys': ['End', 'G'],
+        'help_text': 'Go to bottom / Last message',
         'key_category': 'navigation',
     }),
     ('REPLY_MESSAGE', {
@@ -94,7 +94,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('EDIT_MESSAGE', {
         'keys': ['e'],
-        'help_text': "Edit current message's text or topic",
+        'help_text': "Edit message's content or topic",
         'key_category': 'msg_actions'
     }),
     ('STREAM_MESSAGE', {
@@ -113,7 +113,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'key_category': 'msg_compose',
     }),
     ('SEND_MESSAGE', {
-        'keys': ['meta enter', 'ctrl d'],
+        'keys': ['ctrl d', 'meta enter'],
         'help_text': 'Send a message',
         'key_category': 'msg_compose',
     }),
@@ -186,7 +186,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('SEARCH_PEOPLE', {
         'keys': ['w'],
-        'help_text': 'Search users',
+        'help_text': 'Search Users',
         'key_category': 'searching',
     }),
     ('SEARCH_MESSAGES', {
@@ -242,8 +242,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('STREAM_MEMBERS', {
         'keys': ['m'],
-        'help_text':
-            'Show/hide subscribed stream members (from stream information)',
+        'help_text': 'Show/hide stream members (from stream information)',
         'excluded_from_random_tips': True,
         'key_category': 'stream_list',
     }),
@@ -259,12 +258,12 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('BEGINNING_OF_LINE', {
         'keys': ['ctrl a'],
-        'help_text': 'Jump to the beginning of the line',
+        'help_text': 'Jump to the beginning of line',
         'key_category': 'msg_compose',
     }),
     ('END_OF_LINE', {
         'keys': ['ctrl e'],
-        'help_text': 'Jump to the end of the line',
+        'help_text': 'Jump to the end of line',
         'key_category': 'msg_compose',
     }),
     ('ONE_WORD_BACKWARD', {
@@ -277,39 +276,59 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Jump forward one word',
         'key_category': 'msg_compose',
     }),
+    ('DELETE_LAST_CHARACTER', {
+        'keys': ['ctrl h'],
+        'help_text': 'Delete previous character (to left)',
+        'key_category': 'msg_compose',
+    }),
+    ('TRANSPOSE_CHARACTERS', {
+        'keys': ['ctrl t'],
+        'help_text': 'Transpose characters',
+        'key_category': 'msg_compose',
+    }),
     ('CUT_TO_END_OF_LINE', {
         'keys': ['ctrl k'],
-        'help_text': 'Cut forward to the end of the line',
+        'help_text': 'Cut forwards to the end of the line',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_START_OF_LINE', {
         'keys': ['ctrl u'],
-        'help_text': 'Cut backward to the start of the line',
+        'help_text': 'Cut backwards to the start of the line',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_END_OF_WORD', {
         'keys': ['meta d'],
-        'help_text': 'Cut forward to the end of the current word',
+        'help_text': 'Cut forwards to the end of the current word',
         'key_category': 'msg_compose',
     }),
     ('CUT_TO_START_OF_WORD', {
         'keys': ['ctrl w'],
-        'help_text': 'Cut backward to the start of the current word',
+        'help_text': 'Cut backwards to the start of the current word',
+        'key_category': 'msg_compose',
+    }),
+    ('PASTE_LAST_CUT', {
+        'keys': ['ctrl y'],
+        'help_text': 'Paste last cut section',
+        'key_category': 'msg_compose',
+    }),
+    ('UNDO_LAST_ACTION', {
+        'keys': ['ctrl _'],
+        'help_text': 'Undo last action',
         'key_category': 'msg_compose',
     }),
     ('PREV_LINE', {
-        'keys': ['ctrl p', 'up'],
+        'keys': ['Up', 'ctrl p'],
         'help_text': 'Jump to the previous line',
         'key_category': 'msg_compose',
     }),
     ('NEXT_LINE', {
-        'keys': ['ctrl n', 'down'],
+        'keys': ['Down', 'ctrl n'],
         'help_text': 'Jump to the next line',
         'key_category': 'msg_compose',
     }),
     ('CLEAR_MESSAGE', {
         'keys': ['ctrl l'],
-        'help_text': 'Clear compose screen',
+        'help_text': 'Clear compose box',
         'key_category': 'msg_compose',
     }),
 ])
@@ -318,7 +337,7 @@ HELP_CATEGORIES = OrderedDict([
     ('general', 'General'),
     ('navigation', 'Navigation'),
     ('searching', 'Searching'),
-    ('msg_actions', 'Actions for the selected message'),
+    ('msg_actions', 'Message actions'),
     ('stream_list', 'Stream list actions'),
     ('msg_compose', 'Composing a Message'),
 ])
