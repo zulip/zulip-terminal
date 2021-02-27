@@ -54,6 +54,20 @@ class TestWriteBox:
 
         assert not write_box.model.send_typing_status_by_user_ids.called
 
+    @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
+    def test_not_calling_send_private_message_without_recipients(self, key,
+                                                                 mocker,
+                                                                 write_box,
+                                                                 widget_size):
+        write_box.model.send_private_message = mocker.Mock()
+        write_box.private_box_view(emails=[], recipient_user_ids=[])
+        write_box.msg_write_box.edit_text = "random text"
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        assert not write_box.model.send_private_message.called
+
     @pytest.mark.parametrize('text, state', [
         ('Plain Text', 0),
         ('Plain Text', 1),

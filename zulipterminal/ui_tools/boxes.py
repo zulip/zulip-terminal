@@ -528,10 +528,15 @@ class WriteBox(urwid.Pile):
                     )
                 else:
                     self.update_recipient_emails(self.to_write_box)
-                    success = self.model.send_private_message(
-                        recipients=self.recipient_emails,
-                        content=self.msg_write_box.edit_text
-                    )
+                    if self.recipient_emails:
+                        success = self.model.send_private_message(
+                            recipients=self.recipient_emails,
+                            content=self.msg_write_box.edit_text
+                        )
+                    else:
+                        self.view.set_footer_text("Cannot send message without"
+                                                  " specifying recipients.", 3)
+                        success = None
             if success:
                 self.msg_write_box.edit_text = ''
                 if self.msg_edit_id:
