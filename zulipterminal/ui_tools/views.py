@@ -2008,19 +2008,31 @@ class EmojiPickerView(PopUpView):
         else:
             self.selected_emojis.update({emoji_code: emoji_name})
 
+    def count_reactions(self, emoji_code: str) -> int:
+        num_reacts = 0
+        for reaction in self.message["reactions"]:
+            if reaction["emoji_code"] == emoji_code:
+                num_reacts += 1
+        return num_reacts
+
     def generate_emoji_buttons(
         self, emoji_units: List[Tuple[str, str, List[str]]]
     ) -> List[EmojiButton]:
-        return [
+        emoji_buttons = [
             EmojiButton(
                 controller=self.controller,
                 emoji_unit=emoji_unit,
                 message=self.message,
+                reaction_count=self.count_reactions(emoji_unit[1]),
                 is_selected=self.is_selected_emoji,
                 toggle_selection=self.add_or_remove_selected_emoji,
             )
             for emoji_unit in emoji_units
         ]
+        sorted_emoji_buttons = sorted(
+            emoji_buttons, key=lambda button: button.reaction_count, reverse=True
+        )
+        return sorted_emoji_buttons
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (

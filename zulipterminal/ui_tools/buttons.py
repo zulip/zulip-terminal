@@ -328,12 +328,14 @@ class EmojiButton(TopButton):
         controller: Any,
         emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
         message: Message,
+        reaction_count: int = 0,
         is_selected: Callable[[str], bool],
         toggle_selection: Callable[[str, str], None],
     ) -> None:
         self.controller = controller
         self.message = message
         self.is_selected = is_selected
+        self.reaction_count = reaction_count
         self.toggle_selection = toggle_selection
         self.emoji_name, self.emoji_code, self.aliases = emoji_unit
         full_button_caption = ", ".join([self.emoji_name, *self.aliases])
@@ -344,20 +346,31 @@ class EmojiButton(TopButton):
             prefix_character="",
             show_function=self.update_emoji_button,
         )
-        if self._has_user_reacted_to_msg() or is_selected(self.emoji_name):
-            self.update_widget((None, f" {CHECK_MARK} "), None)
+
+        has_check_mark = self._has_user_reacted_to_msg() or is_selected(self.emoji_name)
+        self.update_widget((None, self.get_update_widget_text(has_check_mark)), None)
 
     def _has_user_reacted_to_msg(self) -> bool:
         return self.controller.model.has_user_reacted_to_message(
             self.message, emoji_code=self.emoji_code
         )
 
+    def get_update_widget_text(self, user_reacted: bool) -> str:
+        count_text = str(self.reaction_count) if self.reaction_count > 0 else ""
+        reacted_check_mark = CHECK_MARK if user_reacted else ""
+        return f" {reacted_check_mark} {count_text} "
+
     def update_emoji_button(self) -> None:
         self.toggle_selection(self.emoji_code, self.emoji_name)
         is_reaction_added = self._has_user_reacted_to_msg() != self.is_selected(
             self.emoji_name
         )
-        self.update_widget((None, f" {CHECK_MARK} " if is_reaction_added else ""), None)
+        self.reaction_count = (
+            (self.reaction_count + 1)
+            if is_reaction_added
+            else (self.reaction_count - 1)
+        )
+        self.update_widget((None, self.get_update_widget_text(is_reaction_added)), None)
 
 
 class DecodedStream(TypedDict):
