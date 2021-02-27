@@ -111,7 +111,7 @@ setup(
         'zulip>=0.7.0',
         'urwid_readline>=0.12',
         'beautifulsoup4>=4.9.0',
-        'lxml>=4.5.2',
+        'lxml>=4.6.2',
         'typing_extensions>=3.7',
         'python-dateutil>=2.8.1',
         'tzlocal>=2.1',
