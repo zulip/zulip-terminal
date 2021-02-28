@@ -3,14 +3,24 @@
 # Convert emoji file downloaded using tools/fetch-unicode-emoji-data
 # into what is required by ZT.
 
-import os
 from collections import OrderedDict
+from pathlib import Path, PurePath
 
-from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
 
+try:
+    from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
+except ModuleNotFoundError:
+    print(
+        "ERROR: Could not find downloaded unicode emoji\n"
+        "Try fetching the unicode first using tools/fetch-unicode-emojis-data"
+    )
+    exit(1)
 
-INPUT_FILE = "zulipterminal/unicode_emoji_dict.py"
-OUTPUT_FILE = "zulipterminal/unicode_emojis.py"
+WORKING_FOLDER = Path(__file__).resolve().parent.parent / "zulipterminal"
+INPUT_FILE = WORKING_FOLDER / "unicode_emoji_dict.py"
+OUTPUT_FILE = WORKING_FOLDER / "unicode_emojis.py"
+
+SCRIPT_NAME = PurePath(__file__).name
 
 emoji_dict = EMOJI_NAME_MAPS
 
@@ -22,19 +32,22 @@ for emoji_code, emoji_names in emoji_dict.items():
 
 ordered_emojis = OrderedDict(sorted(emoji_map.items()))
 
-with open(OUTPUT_FILE, "w") as f:
-    f.write('from collections import OrderedDict\n\n\n')
-    f.write('# Generated automatically by '
-            'tools/convert-unicode-emoji-data\n')
-    f.write('# Do not modify.\n\n')
-    f.write('EMOJI_DATA = OrderedDict([\n')
+with OUTPUT_FILE.open("w") as f:
+    f.write(
+        "from collections import OrderedDict\n\n\n"
+        f"# Generated automatically by tools/{SCRIPT_NAME}\n"
+        "# Do not modify.\n\n"
+        "EMOJI_DATA = OrderedDict([\n"
+    )
     for emoji_code, emoji_name in ordered_emojis.items():
         # {'smile': {'code': '263a'}}
-        f.write("    ('%s', {'code': '%s'}),\n" % (emoji_code,
-                                                   emoji_name))
-    f.write('])\n')
+        f.write(f"    ('{emoji_code}', {{'code': '{emoji_name}'}}),\n")
+    f.write("])\n")
 
-print("Emoji list saved in {}".format(OUTPUT_FILE))
-if os.path.exists(INPUT_FILE):
-    os.remove(INPUT_FILE)
-    print("{} deleted.".format(INPUT_FILE))
+print(f"Emoji list saved in {OUTPUT_FILE}")
+
+try:
+    INPUT_FILE.unlink()
+    print(f"{INPUT_FILE} deleted.")
+except Exception as exc:
+    print("Warning: Could not delete file:\n{exc}")
