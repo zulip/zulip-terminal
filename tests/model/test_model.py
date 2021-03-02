@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any
+from typing import Any, List, Tuple
 
 import pytest
 from zulip import ZulipError
@@ -1411,41 +1411,48 @@ class TestModel:
         return _factory
 
     @pytest.fixture
-    def reaction_event_index(self):
+    def reaction_event_index_factory(self):
         """
-        Minimal index to test reaction events
+        Generate index for reaction tests based on minimal specification
+
+        Input is a list of pairs, of a message-id and a list of reaction tuples
         """
-        return {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'content': 'Boo is Foo',
-                    'reactions': [
-                        {
-                            'user': {
-                                'email': 'Foo@zulip.com',
-                                'user_id': 1,
-                                'full_name': 'Foo Boo'
-                            },
-                            'reaction_type': 'unicode_emoji',
-                            'emoji_code': '1232',
-                            'emoji_name': 'thumbs_up'
-                        }
-                    ],
-                },
-                2: {
-                    'id': 2,
-                    'content': "Boo is not Foo",
-                    'reactions': [],
+        def _factory(msgs: List[Tuple[int, List[Tuple[int, str, str, str]]]]):
+            return {
+                'messages': {
+                    message_id: {
+                        'id': message_id,
+                        'content': f"message content {message_id}",
+                        'reactions': [
+                            {
+                                'user': {
+                                    'email': f"User email #{user_id}",
+                                    'full_name': f"User #{user_id}",
+                                    'user_id': user_id,
+                                },
+                                'reaction_type': type,
+                                'emoji_code': code,
+                                'emoji_name': name,
+                            }
+                            for user_id, type, code, name in reactions
+                        ]
+                    }
+                    for message_id, reactions in msgs
                 }
             }
-        }
+        return _factory
 
     def test__handle_reaction_event(
-        self, mocker, model, reaction_event_factory, reaction_event_index,
+        self, mocker, model,
+        reaction_event_factory, reaction_event_index_factory,
     ):
         reaction_event = reaction_event_factory(op="add")
-        model.index = reaction_event_index
+        model.index = reaction_event_index_factory(
+            [
+                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
+                (2, []),
+            ]
+        )
         model._update_rendered_view = mocker.Mock()
 
         model._handle_reaction_event(reaction_event)
@@ -1464,10 +1471,16 @@ class TestModel:
         assert model.index['messages'][1] == {}
 
     def test__handle_reaction_event_remove_reaction(
-        self, mocker, model, reaction_event_factory, reaction_event_index,
+        self, mocker, model,
+        reaction_event_factory, reaction_event_index_factory,
     ):
         reaction_event = reaction_event_factory(op="remove")
-        model.index = reaction_event_index
+        model.index = reaction_event_index_factory(
+            [
+                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
+                (2, []),
+            ]
+        )
         model._update_rendered_view = mocker.Mock()
 
         model._handle_reaction_event(reaction_event)
