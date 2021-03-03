@@ -1431,22 +1431,19 @@ class TestModel:
         })])
     def test__handle_reaction_event(self, mocker, model, response, index):
         model.index = index
-        mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        self.controller.view.message_view = mocker.Mock()
-        self.controller.view.message_view.log = [mock_msg, another_msg]
-        mock_msg.original_widget.message = index['messages'][1]
-        another_msg.original_widget.message = index['messages'][2]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
+        model._update_rendered_view = mocker.Mock()
+
         model._handle_reaction_event(response)
+
         update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
         assert update_emoji == response['emoji_code']
-        self.controller.update_screen.assert_called_once_with()
+        model._update_rendered_view.assert_called_once_with(1)
 
         # TEST FOR FALSE CASES
         model.index['messages'][1] = {}
+
         model._handle_reaction_event(response)
+
         # If there was no message earlier then don't update
         assert model.index['messages'][1] == {}
 
@@ -1491,20 +1488,13 @@ class TestModel:
     def test__handle_reaction_event_remove_reaction(self, mocker, model,
                                                     response, index):
         model.index = index
-        mock_msg = mocker.Mock()
-        another_msg = mocker.Mock()
-        self.controller.view.message_view = (
-            mocker.Mock(log=[mock_msg, another_msg])
-        )
-        mock_msg.original_widget.message = index['messages'][1]
-        another_msg.original_widget.message = index['messages'][2]
-        mocker.patch('zulipterminal.model.create_msg_box_list',
-                     return_value=[mock_msg])
-
-        # Test removing of reaction.
+        model._update_rendered_view = mocker.Mock()
         response['op'] = 'remove'
+
         model._handle_reaction_event(response)
+
         assert len(model.index['messages'][1]['reactions']) == 1
+        model._update_rendered_view.assert_called_once_with(1)
 
     @pytest.fixture(params=[
         ('op', 32),  # At server feature level 32, event uses standard field
