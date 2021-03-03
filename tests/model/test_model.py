@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pytest
 from zulip import ZulipError
@@ -1416,11 +1416,15 @@ class TestModel:
         Generate index for reaction tests based on minimal specification
 
         Input is a list of pairs, of a message-id and a list of reaction tuples
+        NOTE: reactions as None indicate not indexed, [] indicates no reaction
         """
-        def _factory(msgs: List[Tuple[int, List[Tuple[int, str, str, str]]]]):
+        MsgsType = List[Tuple[int, Optional[List[Tuple[int, str, str, str]]]]]
+
+        def _factory(msgs: MsgsType):
             return {
                 'messages': {
-                    message_id: {
+                    message_id:
+                    {} if reactions is None else {
                         'id': message_id,
                         'content': f"message content {message_id}",
                         'reactions': [
@@ -1451,17 +1455,18 @@ class TestModel:
         reaction_event = reaction_event_factory(op=op)
         model.index = reaction_event_index_factory(
             [
-                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
-                (2, []),
+                (1, None),
+                (2, [(1, "unicode_emoji", "1232", "thumbs_up")]),
+                (3, []),
             ]
         )
         model._update_rendered_view = mocker.Mock()
-        model.index['messages'][1] = {}
+        previous_index = deepcopy(model.index)
 
         model._handle_reaction_event(reaction_event)
 
         # If there was no message earlier then don't update
-        assert model.index['messages'][1] == {}
+        assert model.index == previous_index
         assert not model._update_rendered_view.called
 
     def test__handle_reaction_event_add_reaction(
