@@ -1393,7 +1393,7 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_factory(self):
-        def _factory(*, op: str):
+        def _factory(*, op: str, message_id: int):
             return {
               'emoji_code': '1f44d',
               'id': 2,
@@ -1403,7 +1403,7 @@ class TestModel:
                   'full_name': 'Foo Boo'
               },
               'reaction_type': 'unicode_emoji',
-              'message_id': 1,
+              'message_id': message_id,
               'emoji_name': 'thumbs_up',
               'type': 'reaction',
               'op': op,
@@ -1451,11 +1451,14 @@ class TestModel:
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
         op,
+        unindexed_message_id=1,
     ):
-        reaction_event = reaction_event_factory(op=op)
+        reaction_event = reaction_event_factory(
+            op=op, message_id=unindexed_message_id,
+        )
         model.index = reaction_event_index_factory(
             [
-                (1, None),
+                (unindexed_message_id, None),
                 (2, [(1, "unicode_emoji", "1232", "thumbs_up")]),
                 (3, []),
             ]
@@ -1472,8 +1475,11 @@ class TestModel:
     def test__handle_reaction_event_add_reaction(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
+        event_message_id=1,
     ):
-        reaction_event = reaction_event_factory(op="add")
+        reaction_event = reaction_event_factory(
+            op="add", message_id=event_message_id,
+        )
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
@@ -1484,16 +1490,19 @@ class TestModel:
 
         model._handle_reaction_event(reaction_event)
 
-        update_emoji = model.index['messages'][1]['reactions'][1]['emoji_code']
-        assert update_emoji == reaction_event['emoji_code']
+        new_emoji = model.index['messages'][event_message_id]['reactions'][-1]
+        assert new_emoji["emoji_code"] == reaction_event["emoji_code"]
 
-        model._update_rendered_view.assert_called_once_with(1)
+        model._update_rendered_view.assert_called_once_with(event_message_id)
 
     def test__handle_reaction_event_remove_reaction(
         self, mocker, model,
         reaction_event_factory, reaction_event_index_factory,
+        event_message_id=1,
     ):
-        reaction_event = reaction_event_factory(op="remove")
+        reaction_event = reaction_event_factory(
+            op="remove", message_id=event_message_id,
+        )
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
@@ -1504,8 +1513,10 @@ class TestModel:
 
         model._handle_reaction_event(reaction_event)
 
-        assert len(model.index['messages'][1]['reactions']) == 1
-        model._update_rendered_view.assert_called_once_with(1)
+        # Removed emoji doesn't match, so length remains 1
+        assert len(model.index['messages'][event_message_id]['reactions']) == 1
+
+        model._update_rendered_view.assert_called_once_with(event_message_id)
 
     @pytest.fixture(params=[
         ('op', 32),  # At server feature level 32, event uses standard field
