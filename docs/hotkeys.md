@@ -15,13 +15,13 @@
 ## Navigation
 |Command|Key Combination|
 | :--- | :---: |
-|Go up / Previous message|<kbd>Up</kbd> / <kbd>k</kbd>|
-|Go down / Next message|<kbd>Down</kbd> / <kbd>j</kbd>|
-|Go left|<kbd>Left</kbd> / <kbd>h</kbd>|
-|Go right|<kbd>Right</kbd> / <kbd>l</kbd>|
-|Scroll up|<kbd>PgUp</kbd> / <kbd>K</kbd>|
-|Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
-|Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
+|Go up / Previous message|<kbd>up</kbd> / <kbd>k</kbd>|
+|Go down / Next message|<kbd>down</kbd> / <kbd>j</kbd>|
+|Go left|<kbd>left</kbd> / <kbd>h</kbd>|
+|Go right|<kbd>right</kbd> / <kbd>l</kbd>|
+|Scroll up|<kbd>page</kbd> + <kbd>up</kbd> / <kbd>K</kbd>|
+|Scroll down|<kbd>page</kbd> + <kbd>down</kbd> / <kbd>J</kbd>|
+|Go to bottom / Last message|<kbd>end</kbd> / <kbd>G</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>esc</kbd>|
 |Narrow to all private messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
@@ -84,7 +84,7 @@
 |Cut backwards to the start of the current word|<kbd>ctrl</kbd> + <kbd>w</kbd>|
 |Paste last cut section|<kbd>ctrl</kbd> + <kbd>y</kbd>|
 |Undo last action|<kbd>ctrl</kbd> + <kbd>_</kbd>|
-|Jump to the previous line|<kbd>Up</kbd> / <kbd>ctrl</kbd> + <kbd>p</kbd>|
-|Jump to the next line|<kbd>Down</kbd> / <kbd>ctrl</kbd> + <kbd>n</kbd>|
+|Jump to the previous line|<kbd>up</kbd> / <kbd>ctrl</kbd> + <kbd>p</kbd>|
+|Jump to the next line|<kbd>down</kbd> / <kbd>ctrl</kbd> + <kbd>n</kbd>|
 |Clear compose box|<kbd>ctrl</kbd> + <kbd>l</kbd>|
 
