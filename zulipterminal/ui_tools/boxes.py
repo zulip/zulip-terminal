@@ -1315,25 +1315,34 @@ class MessageBox(urwid.Pile):
         bq_len = len(blockquote_list)
         for tag in blockquote_list:
             child_list = tag.findChildren(recursive=False)
+            child_block = tag.find_all('blockquote')
             actual_padding = f"{padding_char} " * pad_count
             if len(child_list) == 1:
-                pad_count = 0
+                pad_count -= 1
                 child_iterator = child_list
             else:
-                child_iterator = child_list[1:]
+                if len(child_block) == 0:
+                    child_iterator = child_list
+                else:
+                    # If there is some text at the begining of a
+                    # quote, we pad it seperately.
+                    if child_list[0].name == 'p':
+                        new_tag = soup.new_tag('p')
+                        new_tag.string = f"\n{actual_padding}"
+                        child_list[0].insert_before(new_tag)
+                    child_iterator = child_list[1:]
             for child in child_iterator:
                 new_tag = soup.new_tag('p')
                 new_tag.string = actual_padding
                 # If the quoted message is multi-line message
                 # we deconstruct it and pad it at break-points (<br/>)
-                if child.findAll('br'):
-                    for br in child.findAll('br'):
-                        next_s = br.nextSibling
-                        text = str(next_s).strip()
-                        if text:
-                            insert_tag = soup.new_tag('p')
-                            insert_tag.string = f"\n{actual_padding}{text}"
-                            next_s.replace_with(insert_tag)
+                for br in child.findAll('br'):
+                    next_s = br.nextSibling
+                    text = str(next_s.string).strip()
+                    if text:
+                        insert_tag = soup.new_tag('p')
+                        insert_tag.string = f"\n{padding_char} {text}"
+                        next_s.replace_with(insert_tag)
                 child.insert_before(new_tag)
             pad_count += 1
         return bq_len

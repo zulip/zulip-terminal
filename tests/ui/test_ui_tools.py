@@ -1963,9 +1963,8 @@ class TestMessageBox:
                     </blockquote>
                 </blockquote>""",
              ("{} {} A\n"
-              "{} {} B"),
-             id="multi-line level 2",
-             marks=pytest.mark.xfail(reason="rendered_bug")),
+              "{} {} B\n\n"),
+             id="multi-line level 2"),
         case("""<blockquote>
                     <blockquote>
                         <p>A</p>
@@ -1977,8 +1976,86 @@ class TestMessageBox:
                 </blockquote>""",
              ("{} {} A\n"
               "{} B\n"
-              "{} {} C"),
-             id="quoted level 2-1-2",
+              "{} \n"
+              "{} {} C\n\n"),
+             id="quoted level 2-1-2"),
+        case("""<p><a href='https://chat.zulip.org/1'>czo</a></p>
+                <blockquote>
+                    <p><a href='https://chat.zulip.org/2'>czo</a></p>
+                    <blockquote>
+                        <p>A<br>
+                        B</p>
+                    </blockquote>
+                    <p>C</p>
+                </blockquote>
+                <p>D</p>""",
+             ("czo [1]\n"
+              "{} czo [2]\n"
+              "{} \n"
+              "{} {} A\n"
+              "{} {} B\n\n"
+              "{} C\n\n"
+              "D"),
+             id="quoted with links level 2"),
+        case("""<blockquote>
+                    <blockquote>
+                        <blockquote>
+                            <p>A</p>
+                        </blockquote>
+                        <p>B</p>
+                        <blockquote>
+                            <p>C</p>
+                        </blockquote>
+                        <p>D</p>
+                    </blockquote>
+                    <p>E</p>
+                </blockquote>
+                <p>F</p>""",
+             ("{} {} {} A\n"
+              "{} {} B\n"
+              "{} {} \n"
+              "{} {} {} C\n\n"
+              "{} {} D\n\n"
+              "{} E\n\n"
+              "F"),
+             id="quoted level 3-2-3"),
+        case("""<blockquote>
+                    <p>A</p>
+                    <blockquote>
+                        <blockquote>
+                            <blockquote>
+                                <p>B<br>
+                                C</p>
+                            </blockquote>
+                        </blockquote>
+                    </blockquote>
+                </blockquote>""",
+             ("{} A\n"
+              "{} {} {} B\n"
+              "{} {} {} C\n"),
+             id="quoted level 1-3",
+             marks=pytest.mark.xfail(reason="rendered_bug")),
+        case("""<blockquote>
+                    <p><a href="https://chat.zulip.org/1">czo</a></p>
+                    <blockquote>
+                        <p><a href="https://chat.zulip.org/2">czo</a></p>
+                        <blockquote>
+                            <p>A<br>
+                            B</p>
+                        </blockquote>
+                        <p>C</p>
+                    </blockquote>
+                    <p>D<br>
+                    E</p>
+                </blockquote>""",
+             ("{} czo [1]\n"
+              "{} {} czo [2]\n"
+              "{} {} {} A\n"
+              "{} {} {} B\n"
+              "{} {} C\n"
+              "{} D\n"
+              "{} E\n"),
+             id="quoted with links level 1-3-1",
              marks=pytest.mark.xfail(reason="rendered_bug")),
     ])
     def test_transform_content(self, mocker, raw_html, expected_content):
