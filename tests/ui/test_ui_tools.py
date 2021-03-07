@@ -4,6 +4,7 @@ from collections import OrderedDict, defaultdict
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+from pytest import param as case
 from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
@@ -1908,61 +1909,77 @@ class TestMessageBox:
             write_box.msg_write_box.set_edit_text.assert_not_called()
 
     @pytest.mark.parametrize('raw_html, expected_content', [
-        ("""<blockquote>
-                <p>A</p>
-            </blockquote>
-            <p>B</p>""", "{} A\n\nB"),
-        ("""<blockquote>
-                <blockquote>
+        case("""<blockquote>
                     <p>A</p>
                 </blockquote>
-                <p>B</p>
-            </blockquote>
-            <p>C</p>""", "{} {} A\n\n{} B\n\nC"),
-        ("""<blockquote>
-                <blockquote>
+                <p>B</p>""",
+             ("{} A\n\n"
+              "B"),
+             id="quoted level 1"),
+        case("""<blockquote>
                     <blockquote>
                         <p>A</p>
                     </blockquote>
                     <p>B</p>
                 </blockquote>
-                <p>C</p>
-            </blockquote>
-            <p>D</p>""", "{} {} {} A\n\n{} {} B\n\n{} C\n\nD"),
-        ("""<blockquote>
-                <p>A<br/>B</p>
-            </blockquote>
-            <p>C</p>""", "{} A\n{} B\n\nC"),
-        ("""<blockquote>
-                <p><a href='https://chat.zulip.org/'</a>czo</p>
-            </blockquote>""", "{} czo [1]\n"),
-        pytest.param("""<blockquote>
-                            <blockquote>
-                                <p>A<br>
-                                B</p>
-                            </blockquote>
+                <p>C</p>""",
+             ("{} {} A\n\n"
+              "{} B\n\n"
+              "C"),
+             id="quoted level 2"),
+        case("""<blockquote>
+                    <blockquote>
+                        <blockquote>
+                            <p>A</p>
                         </blockquote>
-            """, "{} {} A\n{} {} B",
-                     marks=pytest.mark.xfail(reason="rendered_bug")),
-        pytest.param("""<blockquote>
-                            <blockquote>
-                                <p>A</p>
-                            </blockquote>
-                            <p>B</p>
-                            <blockquote>
-                                <p>C</p>
-                            </blockquote>
-                        </blockquote>
-        """, "{} {} A\n{} B\n{} {} C",
-                     marks=pytest.mark.xfail(reason="rendered_bug")),
-    ], ids=[
-        "quoted level 1",
-        "quoted level 2",
-        "quoted level 3",
-        "multi-line quoting",
-        "quoting with links",
-        "multi-line level 2",
-        "quoted level 2-1-2",
+                        <p>B</p>
+                    </blockquote>
+                    <p>C</p>
+                </blockquote>
+                <p>D</p>""",
+             ("{} {} {} A\n\n"
+              "{} {} B\n\n"
+              "{} C\n\n"
+              "D"),
+             id="quoted level 3"),
+        case("""<blockquote>
+                    <p>A<br>
+                    B</p>
+                </blockquote>
+                <p>C</p>""",
+             ("{} A\n"
+              "{} B\n\n"
+              "C"),
+             id="multi-line quoting"),
+        case("""<blockquote>
+                    <p><a href='https://chat.zulip.org/'>czo</a></p>
+                </blockquote>""",
+             ("{} czo [1]\n"),
+             id="quoting with links"),
+        case("""<blockquote>
+                    <blockquote>
+                        <p>A<br>
+                        B</p>
+                    </blockquote>
+                </blockquote>""",
+             ("{} {} A\n"
+              "{} {} B"),
+             id="multi-line level 2",
+             marks=pytest.mark.xfail(reason="rendered_bug")),
+        case("""<blockquote>
+                    <blockquote>
+                        <p>A</p>
+                    </blockquote>
+                    <p>B</p>
+                    <blockquote>
+                        <p>C</p>
+                    </blockquote>
+                </blockquote>""",
+             ("{} {} A\n"
+              "{} B\n"
+              "{} {} C"),
+             id="quoted level 2-1-2",
+             marks=pytest.mark.xfail(reason="rendered_bug")),
     ])
     def test_transform_content(self, mocker, raw_html, expected_content):
         expected_content = expected_content.replace('{}', QUOTED_TEXT_MARKER)
