@@ -1913,7 +1913,7 @@ class TestMessageBox:
                     <p>A</p>
                 </blockquote>
                 <p>B</p>""",
-             ("{} A\n\n"
+             ("{} A\n"
               "B"),
              id="quoted level 1"),
         case("""<blockquote>
@@ -1923,8 +1923,8 @@ class TestMessageBox:
                     <p>B</p>
                 </blockquote>
                 <p>C</p>""",
-             ("{} {} A\n\n"
-              "{} B\n\n"
+             ("{} {} A\n"
+              "{} B\n"
               "C"),
              id="quoted level 2"),
         case("""<blockquote>
@@ -1937,9 +1937,9 @@ class TestMessageBox:
                     <p>C</p>
                 </blockquote>
                 <p>D</p>""",
-             ("{} {} {} A\n\n"
-              "{} {} B\n\n"
-              "{} C\n\n"
+             ("{} {} {} A\n"
+              "{} {} B\n"
+              "{} C\n"
               "D"),
              id="quoted level 3"),
         case("""<blockquote>
@@ -1948,7 +1948,7 @@ class TestMessageBox:
                 </blockquote>
                 <p>C</p>""",
              ("{} A\n"
-              "{} B\n\n"
+              "{} B\n"
               "C"),
              id="multi-line quoting"),
         case("""<blockquote>
@@ -1963,7 +1963,7 @@ class TestMessageBox:
                     </blockquote>
                 </blockquote>""",
              ("{} {} A\n"
-              "{} {} B\n\n"),
+              "{} {} B\n"),
              id="multi-line level 2"),
         case("""<blockquote>
                     <blockquote>
@@ -1977,7 +1977,7 @@ class TestMessageBox:
              ("{} {} A\n"
               "{} B\n"
               "{} \n"
-              "{} {} C\n\n"),
+              "{} {} C\n"),
              id="quoted level 2-1-2"),
         case("""<p><a href='https://chat.zulip.org/1'>czo</a></p>
                 <blockquote>
@@ -1993,8 +1993,8 @@ class TestMessageBox:
               "{} czo [2]\n"
               "{} \n"
               "{} {} A\n"
-              "{} {} B\n\n"
-              "{} C\n\n"
+              "{} {} B\n"
+              "{} C\n"
               "D"),
              id="quoted with links level 2"),
         case("""<blockquote>
@@ -2014,9 +2014,9 @@ class TestMessageBox:
              ("{} {} {} A\n"
               "{} {} B\n"
               "{} {} \n"
-              "{} {} {} C\n\n"
-              "{} {} D\n\n"
-              "{} E\n\n"
+              "{} {} {} C\n"
+              "{} {} D\n"
+              "{} E\n"
               "F"),
              id="quoted level 3-2-3"),
         case("""<blockquote>
