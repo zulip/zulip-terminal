@@ -11,6 +11,7 @@
 |Open draft message saved in this session|<kbd>d</kbd>|
 |Redraw screen|<kbd>ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>ctrl</kbd> + <kbd>c</kbd>|
+|View user information (From Users list)|<kbd>i</kbd>|
 
 ## Navigation
 |Command|Key Combination|
