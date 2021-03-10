@@ -1531,7 +1531,10 @@ class TestModel:
         operation, model.server_feature_level = update_message_flags_operation
 
         model.index = dict(messages={msg_id: {'flags': flags_before}
-                                     for msg_id in indexed_ids})
+                                     for msg_id in indexed_ids},
+                           starred_msg_ids=set([msg_id
+                                                for msg_id in indexed_ids
+                                                if 'starred' in flags_before]))
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
@@ -1544,6 +1547,11 @@ class TestModel:
 
         model._handle_update_message_flags_event(event)
 
+        assert (model.index['starred_msg_ids']
+                == set([
+                    message_id
+                    for message_id, details in model.index['messages'].items()
+                    if 'starred' in details['flags']]))
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
             assert model.index['messages'][changed_id]['flags'] == flags_after
