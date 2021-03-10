@@ -113,7 +113,8 @@ class MessageView(urwid.ListBox):
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
         if self.log:
             top_message_id = self.log[0].original_widget.message['id']
-            ids_to_keep.remove(top_message_id)  # update this id
+            if top_message_id in ids_to_keep:
+                ids_to_keep.remove(top_message_id)  # update this id
             no_update_baseline = {top_message_id}
         else:
             no_update_baseline = set()

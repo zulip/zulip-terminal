@@ -1153,9 +1153,14 @@ class Model:
             if operation == 'add':
                 if flag_to_change not in msg['flags']:
                     msg['flags'].append(flag_to_change)
+                if flag_to_change == 'starred':
+                    self.index['starred_msg_ids'].add(message_id)
             elif operation == 'remove':
                 if flag_to_change in msg['flags']:
                     msg['flags'].remove(flag_to_change)
+                if(message_id in self.index['starred_msg_ids']
+                   and flag_to_change == 'starred'):
+                    self.index['starred_msg_ids'].remove(message_id)
             else:
                 raise RuntimeError(event, msg['flags'])
 
