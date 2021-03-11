@@ -30,6 +30,7 @@ from zulipterminal.api_types import (
     Event,
     PrivateComposition,
     StreamComposition,
+    Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
@@ -114,10 +115,12 @@ class Model:
 
         self.users = self.get_all_users()
 
-        subscriptions = self.initial_data['subscriptions']
-        stream_data = Model._stream_info_from_subscriptions(subscriptions)
-        (self.stream_dict, self.muted_streams,
-         self.pinned_streams, self.unpinned_streams) = stream_data
+        self.stream_dict: Dict[int, Any] = {}
+        self.muted_streams: Set[int] = set()
+        self.pinned_streams: List[StreamData] = []
+        self.unpinned_streams: List[StreamData] = []
+
+        self._subscribe_to_streams(self.initial_data['subscriptions'])
 
         # NOTE: The expected response has been upgraded from
         # [stream_name, topic] to [stream_name, topic, date_muted] in
@@ -734,40 +737,40 @@ class Model:
 
         return self.user_dict[user_email]['full_name']
 
-    @staticmethod
-    def _stream_info_from_subscriptions(
-            subscriptions: List[Dict[str, Any]]
-    ) -> Tuple[Dict[int, Any], Set[int], List[StreamData], List[StreamData]]:
-
-        def make_reduced_stream_data(stream: Dict[str, Any]) -> StreamData:
+    def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
+        def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
             return StreamData({'name': stream['name'],
                                'id': stream['stream_id'],
                                'color': stream['color'],
                                'invite_only': stream['invite_only'],
                                'description': stream['description']})
-        # Canonicalize color formats, since zulip server versions may use
-        # different formats
+
+        new_pinned_streams = []
+        new_unpinned_streams = []
+        new_muted_streams = set()
         for subscription in subscriptions:
+            # Canonicalize color formats, since zulip server versions may use
+            # different formats
             subscription['color'] = canonicalize_color(subscription['color'])
 
-        pinned_streams = [make_reduced_stream_data(stream)
-                          for stream in subscriptions if stream['pin_to_top']]
-        unpinned_streams = [make_reduced_stream_data(stream)
-                            for stream in subscriptions
-                            if not stream['pin_to_top']]
-        sort_streams(pinned_streams)
-        sort_streams(unpinned_streams)
-        # Mapping of stream-id to all available stream info
-        # Stream IDs for muted streams
-        # Limited stream info sorted by name (used in display)
-        return (
-            {stream['stream_id']: stream for stream in subscriptions},
-            {stream['stream_id'] for stream in subscriptions
-             if stream['in_home_view'] is False},
-            pinned_streams,
-            unpinned_streams,
-        )
+            self.stream_dict[subscription['stream_id']] = subscription
+            streamData = make_reduced_stream_data(subscription)
+            if subscription['pin_to_top']:
+                new_pinned_streams.append(streamData)
+            else:
+                new_unpinned_streams.append(streamData)
+            if not subscription['in_home_view']:
+                new_muted_streams.add(subscription['stream_id'])
+
+        if new_pinned_streams:
+            self.pinned_streams.extend(new_pinned_streams)
+            sort_streams(self.pinned_streams)
+        if new_unpinned_streams:
+            self.unpinned_streams.extend(new_unpinned_streams)
+            sort_streams(self.unpinned_streams)
+
+        self.muted_streams = self.muted_streams.union(new_muted_streams)
 
     def _group_info_from_realm_user_groups(self,
                                            groups: List[Dict[str, Any]]

@@ -34,9 +34,6 @@ class TestModel:
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
@@ -50,13 +47,13 @@ class TestModel:
         return model
 
     def test_init(self, model, initial_data, user_profile,
-                  unicode_emojis, custom_emojis):
+                  unicode_emojis, custom_emojis, stream_dict):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.narrow == []
         assert model._have_last_message == {}
         assert model.stream_id is None
-        assert model.stream_dict == {}
+        assert model.stream_dict == stream_dict
         assert model.recipients == frozenset()
         assert model.index == initial_index
         model.get_messages.assert_called_once_with(num_before=30,
@@ -74,10 +71,6 @@ class TestModel:
         # FIXME Add test here for model.server_url
         model.get_all_users.assert_called_once_with()
         assert model.users == []
-        (model._stream_info_from_subscriptions.
-         assert_called_once_with(initial_data['subscriptions']))
-        assert model.pinned_streams == []
-        assert model.unpinned_streams == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
         zulip_emoji = {
@@ -132,9 +125,7 @@ class TestModel:
 
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -154,9 +145,7 @@ class TestModel:
 
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -584,9 +573,7 @@ class TestModel:
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -624,9 +611,7 @@ class TestModel:
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -658,9 +643,7 @@ class TestModel:
         self.client.register.return_value = initial_data
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -743,9 +726,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
         mocker.patch('zulipterminal.model.Model.get_all_users',
                      return_value=[])
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -777,9 +758,7 @@ class TestModel:
                            user_id):
         mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.'
-                     '_stream_info_from_subscriptions',
-                     return_value=({}, set(), [], []))
+        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -788,17 +767,18 @@ class TestModel:
         assert model.users == user_list
 
     @pytest.mark.parametrize('muted', powerset([1, 2, 99, 1000]))
-    def test__stream_info_from_subscriptions(self, initial_data, streams,
-                                             muted):
+    def test__subscribe_to_streams(self, initial_data, muted, model):
         subs = [dict(entry, in_home_view=entry['stream_id'] not in muted)
                 for entry in initial_data['subscriptions']]
-        by_id, muted_streams, pinned, unpinned = (
-                Model._stream_info_from_subscriptions(subs))
-        assert len(by_id)
-        assert all(msg_id == msg['stream_id'] for msg_id, msg in by_id.items())
-        assert muted_streams == muted
-        assert pinned == []  # FIXME generalize/parametrize
-        assert unpinned == streams  # FIXME generalize/parametrize
+
+        model._subscribe_to_streams(subs)
+
+        assert len(model.stream_dict)
+        assert all(msg_id == msg['stream_id']
+                   for msg_id, msg in model.stream_dict.items())
+        assert model.muted_streams == muted
+        assert model.pinned_streams == []  # FIXME generalize/parametrize
+        assert len(model.unpinned_streams)  # FIXME generalize/parametrize
 
     def test__handle_message_event_with_Falsey_log(self, mocker,
                                                    model, message_fixture):
