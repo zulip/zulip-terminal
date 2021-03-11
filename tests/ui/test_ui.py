@@ -243,6 +243,18 @@ class TestView:
         view.model.controller.show_all_mentions.assert_called_once_with(view)
         assert view.body.focus_col == 1
 
+    @pytest.mark.parametrize('key', keys_for_command('STREAM_MESSAGE'))
+    def test_keypress_STREAM_MESSAGE(self, view, mocker, key, widget_size):
+        view.middle_column = mocker.Mock()
+        view.body = mocker.Mock()
+        view.controller.is_in_editor_mode = lambda: False
+        size = widget_size(view)
+
+        returned_key = view.keypress(size, key)
+        view.middle_column.keypress.assert_called_once_with(size, key)
+        assert returned_key == key
+        assert view.body.focus_col == 1
+
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
         'autohide', 'no_autohide'])
