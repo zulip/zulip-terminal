@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import Literal, TypedDict
 
@@ -46,6 +46,38 @@ class Message(TypedDict, total=False):
     content_type: str
     match_content: str  # If keyword search specified in narrow params.
     match_subject: str  # If keyword search specified in narrow params.
+
+
+# Elements and types taken from https://zulip.com/api/get-events
+class Subscription(TypedDict):
+    stream_id: int
+    name: str
+    description: str
+    rendered_description: str
+    date_created: int  # NOTE: new in Zulip 4.0 / ZFL 30
+    invite_only: bool
+    subscribers: List[int]
+    desktop_notifications: Optional[bool]
+    email_notifications: Optional[bool]
+    wildcard_mentions_notify: Optional[bool]
+    push_notifications: Optional[bool]
+    audible_notifications: Optional[bool]
+    pin_to_top: bool
+    email_address: str
+
+    is_muted: bool  # NOTE: new in Zulip 2.1 (in_home_view still present)
+    in_home_view: bool  # TODO: Migrate to is_muted (note inversion)
+
+    is_announcement_only: bool  # Deprecated in Zulip 3.0 -> stream_post_policy
+    stream_post_policy: int  # NOTE: new in Zulip 3.0 / ZFL 1
+
+    is_web_public: bool
+    role: int  # NOTE: new in Zulip 4.0 / ZFL 31
+    color: str
+    message_retention_days: Optional[int]  # NOTE: new in Zulip 3.0 / ZFL 17
+    history_public_to_subscribers: bool
+    first_message_id: Optional[int]
+    stream_weekly_traffic: Optional[int]
 
 
 class MessageEvent(TypedDict):
