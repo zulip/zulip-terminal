@@ -183,6 +183,7 @@ class View(urwid.WidgetWrap):
         elif (is_command_key('SEARCH_MESSAGES', key)
                 or is_command_key('NEXT_UNREAD_TOPIC', key)
                 or is_command_key('NEXT_UNREAD_PM', key)
+                or is_command_key('STREAM_MESSAGE', key)
                 or is_command_key('PRIVATE_MESSAGE', key)):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)

@@ -1388,16 +1388,13 @@ class MessageBox(urwid.Pile):
                     stream_id=self.stream_id,
                 )
         elif is_command_key('STREAM_MESSAGE', key):
-            if self.message['type'] == 'private':
-                self.model.controller.view.write_box.private_box_view(
-                    emails=self.recipient_emails,
-                    recipient_user_ids=self.recipient_ids,
-                )
-            elif self.message['type'] == 'stream':
+            if len(self.model.narrow) == 2:
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     stream_id=self.stream_id,
                 )
+            else:
+                self.model.controller.view.write_box.stream_box_view(0)
         elif is_command_key('STREAM_NARROW', key):
             if self.message['type'] == 'private':
                 self.model.controller.narrow_to_user(self)

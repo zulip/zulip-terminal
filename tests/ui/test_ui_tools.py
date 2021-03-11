@@ -1858,6 +1858,40 @@ class TestMessageBox:
             assert label[0].text == 'EDITED'
             assert label[1][1] == 7
 
+    @pytest.mark.parametrize('key', keys_for_command('STREAM_MESSAGE'))
+    @pytest.mark.parametrize('narrow, expect_to_prefill', [
+        ([], False),
+        ([['stream', 'general']], False),
+        ([['stream', 'general'], ['topic', 'Test']], True),
+        ([['is', 'starred']], False),
+        ([['is', 'mentioned']], False),
+        ([['is', 'private']], False),
+        ([['pm_with', 'notification-bot@zulip.com']], False),
+    ], ids=[
+        'all_messages_narrow',
+        'stream_narrow',
+        'topic_narrow',
+        'private_conversation_narrow',
+        'starred_messages_narrow',
+        'mentions_narrow',
+        'private_messages_narrow',
+    ])
+    def test_keypress_STREAM_MESSAGE(self, mocker, msg_box, widget_size,
+                                     narrow, expect_to_prefill, key):
+        write_box = msg_box.model.controller.view.write_box
+        msg_box.model.narrow = narrow
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+
+        if expect_to_prefill:
+            write_box.stream_box_view.assert_called_once_with(
+                caption='PTEST',
+                stream_id=205,
+            )
+        else:
+            write_box.stream_box_view.assert_called_once_with(0)
+
     @pytest.mark.parametrize('key', keys_for_command('EDIT_MESSAGE'))
     @pytest.mark.parametrize(['to_vary_in_each_message',
                               'realm_editing_allowed',
