@@ -1794,10 +1794,22 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
-            if self.message["sender_id"] != self.model.user_id:
-                self.model.controller.report_error(
-                    " You can't edit messages sent by other users."
-                )
+            # User can't edit messages of others that already have a subject
+            # For private messages, subject = "" (empty string)
+            # This also handles the realm_message_content_edit_limit_seconds == 0 case
+            if (
+                self.message["sender_id"] != self.model.user_id
+                and self.message["subject"] != "(no topic)"
+            ):
+                if self.message["type"] == "stream":
+                    self.model.controller.report_error(
+                        " You can't edit messages sent by other users that"
+                        " already have a topic."
+                    )
+                else:
+                    self.model.controller.report_error(
+                        " You can't edit private messages sent by other users."
+                    )
                 return key
             # Check if editing is allowed in the realm
             elif not self.model.initial_data["realm_allow_message_editing"]:
@@ -1808,23 +1820,45 @@ class MessageBox(urwid.Pile):
             # on message body editing.
             msg_body_edit_enabled = True
             if self.model.initial_data["realm_message_content_edit_limit_seconds"] > 0:
-                time_since_msg_sent = time() - self.message["timestamp"]
-                edit_time_limit = self.model.initial_data[
-                    "realm_message_content_edit_limit_seconds"
-                ]
-                if time_since_msg_sent >= edit_time_limit:
-                    if self.message["type"] == "private":
-                        self.model.controller.report_error(
-                            " Time Limit for editing the message has been exceeded."
-                        )
-                        return key
-                    elif self.message["type"] == "stream":
+                if self.message["sender_id"] == self.model.user_id:
+                    time_since_msg_sent = time() - self.message["timestamp"]
+                    edit_time_limit = self.model.initial_data[
+                        "realm_message_content_edit_limit_seconds"
+                    ]
+                    # Don't allow editing message body if time-limit exceeded.
+                    if time_since_msg_sent >= edit_time_limit:
+                        if self.message["type"] == "private":
+                            self.model.controller.report_error(
+                                " Time Limit for editing the message has been exceeded."
+                            )
+                            return key
+                        elif self.message["type"] == "stream":
+                            self.model.controller.report_warning(
+                                " Only topic editing allowed."
+                                " Time Limit for editing the message body"
+                                " has been exceeded."
+                            )
+                            msg_body_edit_enabled = False
+                elif self.message["type"] == "stream":
+                    # Allow editing topic if the message has "(no topic)" subject
+                    if self.message["subject"] == "(no topic)":
                         self.model.controller.report_warning(
-                            " Only topic editing allowed."
-                            " Time Limit for editing the message body has"
-                            " been exceeded.",
+                            " Only topic editing is allowed."
+                            " This is someone else's message but with (no topic)."
                         )
                         msg_body_edit_enabled = False
+                    else:
+                        self.model.controller.report_error(
+                            " You can't edit messages sent by other users that"
+                            " already have a topic."
+                        )
+                        return key
+                else:
+                    # The remaining case is of a private message not belonging to user.
+                    # Which should be already handled by the topmost if block
+                    raise RuntimeError(
+                        "Reached unexpected block. This should be handled at the top."
+                    )
 
             if self.message["type"] == "private":
                 self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
