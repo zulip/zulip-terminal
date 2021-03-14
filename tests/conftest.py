@@ -105,6 +105,20 @@ def users_fixture(logged_on_user):
                 "is_admin": False,
             }
         )
+    # Also add two users with the same name.
+    for i in range(1, 3):
+        users.append(
+            {
+                "user_id": 12 + i,
+                "full_name": "Human Duplicate",
+                "email": f"personduplicate{i}@example.com",
+                "avatar_url": None,
+                "is_active": True,
+                "bot_type": None,
+                "is_bot": False,
+                "is_admin": False,
+            }
+        )
     return users
 
 
@@ -811,6 +825,18 @@ def user_dict(logged_on_user):
             "user_id": 12,
             "status": "inactive",
         },
+        "personduplicate1@example.com": {
+            "full_name": "Human Duplicate",
+            "email": "personduplicate1@example.com",
+            "user_id": 13,
+            "status": "inactive",
+        },
+        "personduplicate2@example.com": {
+            "full_name": "Human Duplicate",
+            "email": "personduplicate2@example.com",
+            "user_id": 14,
+            "status": "inactive",
+        },
         "emailgateway@zulip.com": {
             "email": "emailgateway@zulip.com",
             "full_name": "Email Gateway",
@@ -868,6 +894,18 @@ def user_list(logged_on_user):
             "full_name": "Human 2",
             "email": "person2@example.com",
             "user_id": 12,
+            "status": "inactive",
+        },
+        {
+            "full_name": "Human Duplicate",
+            "email": "personduplicate1@example.com",
+            "user_id": 13,
+            "status": "inactive",
+        },
+        {
+            "full_name": "Human Duplicate",
+            "email": "personduplicate2@example.com",
+            "user_id": 14,
             "status": "inactive",
         },
         {

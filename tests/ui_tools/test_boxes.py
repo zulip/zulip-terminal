@@ -101,6 +101,8 @@ class TestWriteBox:
                     "Human Myself",
                     "Human 1",
                     "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
                     "Group 1",
                     "Group 2",
                     "Group 3",
@@ -108,14 +110,74 @@ class TestWriteBox:
                 ],
             ),
             ("@*", 0, ["Group 1", "Group 2", "Group 3", "Group 4"]),
-            ("@**", 0, ["Human Myself", "Human 1", "Human 2"]),
+            (
+                "@**",
+                0,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
             # mentions
-            ("@Human", 0, ["Human Myself", "Human 1", "Human 2"]),
-            ("@**Human", 0, ["Human Myself", "Human 1", "Human 2"]),
-            ("@_Human", 0, ["Human Myself", "Human 1", "Human 2"]),
+            (
+                "@Human",
+                0,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
+            (
+                "@**Human",
+                0,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
+            (
+                "@_Human",
+                0,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
             ("@_*Human", None, []),  # NOTE: Optional single star fails
-            ("@_**Human", 0, ["Human Myself", "Human 1", "Human 2"]),
-            ("@Human", None, ["Human Myself", "Human 1", "Human 2"]),
+            (
+                "@_**Human",
+                0,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
+            (
+                "@Human",
+                None,
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
+            ),
             ("@NoMatch", None, []),
             # streams
             (
@@ -159,13 +221,19 @@ class TestWriteBox:
             ("@Human", 0, "@**Human Myself**"),
             ("@Human", 1, "@**Human 1**"),
             ("@Human", 2, "@**Human 2**"),
-            ("@Human", -1, "@**Human 2**"),
-            ("@Human", -2, "@**Human 1**"),
-            ("@Human", -3, "@**Human Myself**"),
-            ("@Human", -4, None),
+            ("@Human", 3, "@**Human Duplicate**"),
+            ("@Human", 4, "@**Human Duplicate**"),
+            ("@Human", -1, "@**Human Duplicate**"),
+            ("@Human", -2, "@**Human Duplicate**"),
+            ("@Human", -3, "@**Human 2**"),
+            ("@Human", -4, "@**Human 1**"),
+            ("@Human", -5, "@**Human Myself**"),
+            ("@Human", -6, None),
             ("@_Human", 0, "@_**Human Myself**"),
             ("@_Human", 1, "@_**Human 1**"),
             ("@_Human", 2, "@_**Human 2**"),
+            ("@_Human", 3, "@_**Human Duplicate**"),
+            ("@_Human", 4, "@_**Human Duplicate**"),
             ("@H", 1, "@**Human 1**"),
             ("@Hu", 1, "@**Human 1**"),
             ("@Hum", 1, "@**Human 1**"),
@@ -192,18 +260,22 @@ class TestWriteBox:
             ("@", 0, "@**Human Myself**"),
             ("@", 1, "@**Human 1**"),
             ("@", 2, "@**Human 2**"),
-            ("@", 3, "@*Group 1*"),
-            ("@", 4, "@*Group 2*"),
-            ("@", 5, "@*Group 3*"),
-            ("@", 6, "@*Group 4*"),
-            ("@", 7, None),  # Reached last match
-            ("@", 8, None),  # Beyond end
+            ("@", 3, "@**Human Duplicate**"),
+            ("@", 4, "@**Human Duplicate**"),
+            ("@", 5, "@*Group 1*"),
+            ("@", 6, "@*Group 2*"),
+            ("@", 7, "@*Group 3*"),
+            ("@", 8, "@*Group 4*"),
+            ("@", 9, None),  # Reached last match
+            ("@", 10, None),  # Beyond end
             # Expected sequence of autocompletes from '@**' (no groups)
             ("@**", 0, "@**Human Myself**"),
             ("@**", 1, "@**Human 1**"),
             ("@**", 2, "@**Human 2**"),
-            ("@**", 3, None),  # Reached last match
-            ("@**", 4, None),  # Beyond end
+            ("@", 3, "@**Human Duplicate**"),
+            ("@", 4, "@**Human Duplicate**"),
+            ("@**", 5, None),  # Reached last match
+            ("@**", 6, None),  # Beyond end
             # Expected sequence of autocompletes from '@*' (only groups)
             ("@*", 0, "@*Group 1*"),
             ("@*", 1, "@*Group 2*"),
@@ -215,9 +287,11 @@ class TestWriteBox:
             ("@_", 0, "@_**Human Myself**"),  # NOTE: No silent group mention
             ("@_", 1, "@_**Human 1**"),
             ("@_", 2, "@_**Human 2**"),
-            ("@_", 3, None),  # Reached last match
-            ("@_", 4, None),  # Beyond end
-            ("@_", -1, "@_**Human 2**"),
+            ("@_", 3, "@_**Human Duplicate**"),
+            ("@_", 4, "@_**Human Duplicate**"),
+            ("@_", 5, None),  # Reached last match
+            ("@_", 6, None),  # Beyond end
+            ("@_", -1, "@_**Human Duplicate**"),
             # Complex autocomplete prefixes.
             ("(@H", 0, "(@**Human Myself**"),
             ("(@H", 1, "(@**Human 1**"),
@@ -383,11 +457,19 @@ class TestWriteBox:
         [
             (
                 "",
-                ["Human Myself", "Human 1", "Human 2"],
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
                 [
                     "Human Myself <FOOBOO@gmail.com>",
                     "Human 1 <person1@example.com>",
                     "Human 2 <person2@example.com>",
+                    "Human Duplicate <personduplicate1@example.com>",
+                    "Human Duplicate <personduplicate2@example.com>",
                 ],
             ),
             ("My", ["Human Myself"], ["Human Myself <FOOBOO@gmail.com>"]),
@@ -436,7 +518,13 @@ class TestWriteBox:
         [
             (
                 "Welcome Bot <welcome-bot@zulip.com>, Human",
-                ["Human Myself", "Human 1", "Human 2"],
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
                 [
                     "Welcome Bot <welcome-bot@zulip.com>, "
                     "Human Myself <FOOBOO@gmail.com>",
@@ -444,6 +532,10 @@ class TestWriteBox:
                     "Human 1 <person1@example.com>",
                     "Welcome Bot <welcome-bot@zulip.com>, "
                     "Human 2 <person2@example.com>",
+                    "Welcome Bot <welcome-bot@zulip.com>, "
+                    "Human Duplicate <personduplicate1@example.com>",
+                    "Welcome Bot <welcome-bot@zulip.com>, "
+                    "Human Duplicate <personduplicate2@example.com>",
                 ],
             ),
             (
@@ -457,7 +549,13 @@ class TestWriteBox:
             ),
             (
                 "Email Gateway <emailgateway@zulip.com>,Human",
-                ["Human Myself", "Human 1", "Human 2"],
+                [
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Human Duplicate",
+                    "Human Duplicate",
+                ],
                 [
                     "Email Gateway <emailgateway@zulip.com>, "
                     "Human Myself <FOOBOO@gmail.com>",
@@ -465,6 +563,10 @@ class TestWriteBox:
                     "Human 1 <person1@example.com>",
                     "Email Gateway <emailgateway@zulip.com>, "
                     "Human 2 <person2@example.com>",
+                    "Email Gateway <emailgateway@zulip.com>, "
+                    "Human Duplicate <personduplicate1@example.com>",
+                    "Email Gateway <emailgateway@zulip.com>, "
+                    "Human Duplicate <personduplicate2@example.com>",
                 ],
             ),
             (
