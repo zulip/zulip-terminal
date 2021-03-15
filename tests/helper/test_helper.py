@@ -242,7 +242,7 @@ def test_color_formats(mocker, color):
 def test_invalid_color_format(mocker, color):
     with pytest.raises(ValueError) as e:
         canon = canonicalize_color(color)
-    assert str(e.value) == 'Unknown format for color "{}"'.format(color)
+    assert str(e.value) == f'Unknown format for color "{color}"'
 
 
 @pytest.mark.parametrize('OS, is_notification_sent', [

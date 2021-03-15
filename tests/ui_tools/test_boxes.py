@@ -561,7 +561,7 @@ class TestWriteBox:
                                 'zulipterminal.ui.View.set_typeahead_footer')
         # Use an example formatting to differentiate between
         # typeaheads and suggestions.
-        typeaheads = ['*{}*'.format(s) for s in suggestions]
+        typeaheads = [f"*{s}*" for s in suggestions]
 
         typeahead = write_box._process_typeaheads(typeaheads, state,
                                                   suggestions)

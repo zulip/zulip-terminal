@@ -1367,8 +1367,7 @@ class TestMessageBox:
          [('msg_link', 'blah.gif'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="/api"',
          [('msg_link', '/api'), ' ', ('msg_link_index', '[1]')]),
-        ('<a href="some/relative_url">{}/some/relative_url</a>'
-         .format(SERVER_URL),
+        (f'<a href="some/relative_url">{SERVER_URL}/some/relative_url</a>',
          [('msg_link', '/some/relative_url'), ' ', ('msg_link_index', '[1]')]),
         ('<a href="http://foo.com/bar">foo.com/bar</a>',
          [('msg_link', 'foo.com'), ' ', ('msg_link_index', '[1]')]),
@@ -1459,11 +1458,11 @@ class TestMessageBox:
         ('<time datetime="2020-08-07T04:30:00Z"> Fri, Aug 7 2020, 10:00AM IST'
          '</time>', [(
             'msg_time',
-            ' {} Fri, Aug 7 2020, 10:00 (IST) '.format(TIME_MENTION_MARKER)
+            f" {TIME_MENTION_MARKER} Fri, Aug 7 2020, 10:00 (IST) "
          )]),
         ('<time datetime="2020-08-11T16:32:58Z"> 1597163578</time>', [(
             'msg_time',
-            ' {} Tue, Aug 11 2020, 22:02 (IST) '.format(TIME_MENTION_MARKER)
+            f" {TIME_MENTION_MARKER} Tue, Aug 11 2020, 22:02 (IST) "
          )]),
         ('<span class="katex-display">some-math</span>', ['some-math']),
         ('<span class="katex">some-math</span>', ['some-math']),
@@ -1714,15 +1713,15 @@ class TestMessageBox:
 
     @pytest.mark.parametrize(['msg_narrow', 'msg_type', 'assert_header_bar',
                               'assert_search_bar'], [
-        ([], 0, "PTEST {} ".format(STREAM_TOPIC_SEPARATOR),
+        ([], 0, f"PTEST {STREAM_TOPIC_SEPARATOR} ",
          'All messages'),
         ([], 1, 'You and ', 'All messages'),
         ([], 2, 'You and ', 'All messages'),
         ([['stream', 'PTEST']], 0,
-         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR),
+         f"PTEST {STREAM_TOPIC_SEPARATOR} ",
          ('bar', [('s#bd6', 'PTEST')])),
         ([['stream', 'PTEST'], ['topic', 'b']], 0,
-         'PTEST {}'.format(STREAM_TOPIC_SEPARATOR),
+         f"PTEST {STREAM_TOPIC_SEPARATOR}",
          ('bar', [('s#bd6', 'PTEST'), ('s#bd6', ': topic narrow')])),
         ([['is', 'private']], 1, 'You and ', 'All private messages'),
         ([['is', 'private']], 2, 'You and ', 'All private messages'),
@@ -1731,16 +1730,16 @@ class TestMessageBox:
         ([['pm_with', 'boo@zulip.com, bar@zulip.com']], 2, 'You and ',
          'Group private conversation'),
         ([['is', 'starred']], 0,
-         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR),
+         f"PTEST {STREAM_TOPIC_SEPARATOR} ",
          'Starred messages'),
         ([['is', 'starred']], 1, 'You and ', 'Starred messages'),
         ([['is', 'starred']], 2, 'You and ', 'Starred messages'),
         ([['is', 'starred'], ['search', 'FOO']], 1, 'You and ',
          'Starred messages'),
         ([['search', 'FOO']], 0,
-         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR), 'All messages'),
+         f"PTEST {STREAM_TOPIC_SEPARATOR} ", 'All messages'),
         ([['is', 'mentioned']], 0,
-         'PTEST {} '.format(STREAM_TOPIC_SEPARATOR), 'Mentions'),
+         f"PTEST {STREAM_TOPIC_SEPARATOR} ", 'Mentions'),
         ([['is', 'mentioned']], 1, 'You and ', 'Mentions'),
         ([['is', 'mentioned']], 2, 'You and ', 'Mentions'),
         ([['is', 'mentioned'], ['search', 'FOO']], 1, 'You and ',
@@ -2245,7 +2244,7 @@ class TestMessageBox:
 
     @pytest.mark.parametrize(
         'key', keys_for_command('ENTER'),
-        ids=lambda param: 'left_click-key:{}'.format(param)
+        ids=lambda param: f"left_click-key:{param}"
     )
     def test_mouse_event_left_click(self, mocker, msg_box, key, widget_size,
                                     compose_box_is_open):
