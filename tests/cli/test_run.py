@@ -113,8 +113,8 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
         "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
         "\x1b[91m",
-        ("Error connecting to Zulip server: {}.\x1b[0m".
-            format(server_connection_error)),
+        ("Error connecting to Zulip server: "
+         f"{server_connection_error}.\x1b[0m"),
     ]
     assert lines == expected_lines
 
@@ -144,17 +144,17 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
     lines = captured.out.strip().split("\n")
     expected_lines = [
         "Loading with:",
-        "   theme '{}' specified on command line.".format(bad_theme),
+        f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m"
         "   WARNING: Incomplete theme; results may vary!",
-        "      (you could try: {}, {})"
-        "\x1b[0m".format('a', 'b'),
+        f"      (you could try: {'a'}, {'b'})"
+        "\x1b[0m",
         "   autohide setting 'no_autohide' specified with no config.",
         "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
         "\x1b[91m",
-        ("Error connecting to Zulip server: {}.\x1b[0m".
-            format(server_connection_error)),
+        ("Error connecting to Zulip server: "
+         f"{server_connection_error}.\x1b[0m"),
     ]
     assert lines == expected_lines
 
@@ -200,8 +200,8 @@ def test_main_multiple_autohide_options(capsys, options):
     captured = capsys.readouterr()
     lines = captured.err.strip('\n')
     lines = lines.split("pytest: ", 1)[1]
-    expected = ("error: argument {}: not allowed "
-                "with argument {}".format(options[1], options[0]))
+    expected = (f"error: argument {options[1]}: not allowed "
+                f"with argument {options[0]}")
     assert lines == expected
 
 
@@ -364,7 +364,7 @@ def test_exit_with_error(error_code, helper_text,
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
 
-    expected_line = "\033[91m{}\033[0m".format(error_message)
+    expected_line = f"\033[91m{error_message}\033[0m"
     assert lines[0] == expected_line
 
     if helper_text:
@@ -380,7 +380,7 @@ def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
 
     assert error_message == ""
 
-    expected_contents = "[api]\nemail={}\nkey={}\nsite={}".format(id, key, url)
+    expected_contents = f"[api]\nemail={id}\nkey={key}\nsite={url}"
     with open(path) as f:
         assert f.read() == expected_contents
 
@@ -424,9 +424,9 @@ def test_show_error_if_loading_zuliprc_with_open_permissions(
 
     lines = captured.out.split('\n')[:-1]
     expected_last_lines = [
-        "(it currently has permissions '{}')".format(current_mode),
+        f"(it currently has permissions '{current_mode}')",
         "This can often be achieved with a command such as:",
-        "  chmod og-rwx {}".format(minimal_zuliprc),
+        f"  chmod og-rwx {minimal_zuliprc}",
         "Consider regenerating the [api] part of your zuliprc to ensure "
         "your account is secure."
         "\x1b[0m"

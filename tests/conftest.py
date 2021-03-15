@@ -89,8 +89,8 @@ def users_fixture(logged_on_user):
     for i in range(1, 3):
         users.append({
             'user_id': 10 + i,
-            'full_name': 'Human {}'.format(i),
-            'email': 'person{}@example.com'.format(i),
+            'full_name': f"Human {i}",
+            'email': f"person{i}@example.com",
             'avatar_url': None,
             'is_active': True,
             'bot_type': None,
@@ -107,8 +107,8 @@ def user_groups_fixture():
     for i in range(1, 5):
         user_groups.append({
             'id': 10 + i,
-            'name': 'Group {}'.format(i),
-            'description': 'Core developers of Group {}'.format(i),
+            'name': f"Group {i}",
+            'description': f"Core developers of Group {i}",
             'members': members[i - 1],
         })
     return user_groups
@@ -166,19 +166,19 @@ def streams_fixture():
     streams = [general_stream, secret_stream]
     for i in range(1, 3):
         streams.append({
-            'name': 'Stream {}'.format(i),
+            'name': f"Stream {i}",
             'invite_only': False,
             'color': '#b0a5fd',
             'pin_to_top': False,
             'stream_id': i,
             'in_home_view': True,
             'audible_notifications': False,
-            'description': 'A description of stream {}'.format(i),
+            'description': f"A description of stream {i}",
             'is_old_stream': True,
             'desktop_notifications': False,
             'stream_weekly_traffic': 0,
             'push_notifications': False,
-            'email_address': 'stream{}@example.com'.format(i),
+            'email_address': f"stream{i}@example.com",
             'subscribers': [1001, 11, 12]
         })
     return deepcopy(streams)

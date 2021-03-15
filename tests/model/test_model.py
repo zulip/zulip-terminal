@@ -1028,7 +1028,7 @@ class TestModel:
                 target = 'you'
                 if len(message_fixture['display_recipient']) > 2:
                     target += ', Bar Bar'
-            title = 'Test Organization Name:\nFoo Foo (to {})'.format(target)
+            title = f"Test Organization Name:\nFoo Foo (to {target})"
             # TODO: Test message content too?
             notify.assert_called_once_with(title, mocker.ANY)
         else:
