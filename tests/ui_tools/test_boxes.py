@@ -78,6 +78,73 @@ class TestWriteBox:
 
         assert not write_box.model.send_private_message.called
 
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    @pytest.mark.parametrize(
+        "draft_composition",
+        [
+            {
+                "type": "stream",
+                "to": "Current Stream",
+                "content": "Random message",
+                "subject": "Topic",
+            },
+            {
+                "type": "private",
+                "to": ["emailgateway@zulip.com"],
+                "content": "Random message",
+            },
+        ],
+    )
+    @pytest.mark.parametrize(
+        "is_draft_saved_in_current_session",
+        [
+            True,
+            False,
+        ],
+        ids=[
+            "saved_draft_in_current_session",
+            "no_saved_draft_in_current_session",
+        ],
+    )
+    def test_keypress_SAVE_DRAFT_MESSAGE(
+        self,
+        key,
+        mocker,
+        draft_composition,
+        is_draft_saved_in_current_session,
+        write_box,
+        widget_size,
+    ):
+        mocker.patch(BOXES + ".WriteBox.update_recipient_emails")
+        (
+            write_box.model.session_draft_message.return_value
+        ) = is_draft_saved_in_current_session
+        write_box.msg_write_box = mocker.Mock(edit_text=draft_composition["content"])
+
+        if draft_composition["type"] == "stream":
+            write_box.stream_write_box = mocker.Mock(edit_text=draft_composition["to"])
+            write_box.title_write_box = mocker.Mock(
+                edit_text=draft_composition["subject"]
+            )
+            write_box.stream_id = 1
+        else:
+            write_box.recipient_emails = draft_composition["to"]
+            write_box.to_write_box = mocker.Mock()
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        if is_draft_saved_in_current_session:
+            controller = write_box.view.controller
+            (
+                controller.save_draft_confirmation_popup.assert_called_once_with(
+                    draft_composition
+                )
+            )
+        else:
+            (write_box.model.save_draft.assert_called_once_with(draft_composition))
+        assert write_box.model.session_draft_message.called
+
     @pytest.mark.parametrize(
         "text, state",
         [
