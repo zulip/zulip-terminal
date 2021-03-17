@@ -809,7 +809,8 @@ class LeftColumnView(urwid.Pile):
 
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
-            self.view.stream_w, title="Streams",
+            self.view.stream_w,
+            title="Streams", title_attr='column_title',
             tlcorner=COLUMN_TITLE_BAR_LINE,
             tline=COLUMN_TITLE_BAR_LINE,
             trcorner=COLUMN_TITLE_BAR_LINE,
@@ -836,7 +837,8 @@ class LeftColumnView(urwid.Pile):
         self.view.topic_w = TopicsView(topics_btn_list, self.view,
                                        stream_button)
         w = urwid.LineBox(
-            self.view.topic_w, title="Topics",
+            self.view.topic_w,
+            title="Topics", title_attr='column_title',
             tlcorner=COLUMN_TITLE_BAR_LINE,
             tline=COLUMN_TITLE_BAR_LINE,
             trcorner=COLUMN_TITLE_BAR_LINE,
