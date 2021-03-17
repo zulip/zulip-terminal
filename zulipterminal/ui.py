@@ -222,7 +222,7 @@ class View(urwid.WidgetWrap):
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
-            self.users_view.keypress(size, "w")
+            self.users_view.keypress(size, key)
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
@@ -233,7 +233,7 @@ class View(urwid.WidgetWrap):
         ):
             # jump stream search
             self.body.focus_position = 0
-            self.left_panel.keypress(size, "q")
+            self.left_panel.keypress(size, key)
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
             if self.left_panel.is_in_topic_view:

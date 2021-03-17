@@ -201,15 +201,15 @@ class MessageView(urwid.ListBox):
 
         elif is_command_key("SCROLL_UP", key) and not self.old_loading:
             if self.focus is not None and self.focus_position == 0:
-                return self.keypress(size, "up")
+                return self.keypress(size, primary_key_for_command("GO_UP"))
             else:
-                return super().keypress(size, "page up")
+                return super().keypress(size, primary_key_for_command("SCROLL_UP"))
 
         elif is_command_key("SCROLL_DOWN", key) and not self.old_loading:
             if self.focus is not None and self.focus_position == len(self.log) - 1:
-                return self.keypress(size, "down")
+                return self.keypress(size, primary_key_for_command("GO_DOWN"))
             else:
-                return super().keypress(size, "page down")
+                return super().keypress(size, primary_key_for_command("SCROLL_DOWN"))
 
         elif is_command_key("THUMBS_UP", key):
             if self.focus is not None:
@@ -575,8 +575,8 @@ class MiddleColumnView(urwid.Frame):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("GO_BACK", key):
-            self.header.keypress(size, "esc")
-            self.footer.keypress(size, "esc")
+            self.header.keypress(size, key)
+            self.footer.keypress(size, key)
             self.set_focus("body")
 
         elif self.focus_position in ["footer", "header"]:
@@ -595,7 +595,7 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key("STREAM_MESSAGE", key):
-            self.body.keypress(size, "c")
+            self.body.keypress(size, key)
             # For new streams with no previous conversation.
             if self.footer.focus is None:
                 stream_id = self.model.stream_id
@@ -606,7 +606,7 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key("REPLY_AUTHOR", key):
-            self.body.keypress(size, "R")
+            self.body.keypress(size, key)
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1

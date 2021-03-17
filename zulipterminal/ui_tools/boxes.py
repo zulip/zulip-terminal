@@ -649,7 +649,7 @@ class WriteBox(urwid.Pile):
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
                     self.msg_edit_state = None
-                    self.keypress(size, "esc")
+                    self.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("GO_BACK", key):
             self.msg_edit_state = None
             self.msg_body_edit_enabled = True
@@ -1846,7 +1846,7 @@ class PanelSearchBox(urwid.Edit):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, "esc")
+            self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", "Search Results"), " "])
