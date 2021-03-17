@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from pytest import param as case
 from urwid import Columns, Divider, Padding, Text
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
     QUOTED_TEXT_MARKER,
     STATUS_ACTIVE,
@@ -579,7 +579,7 @@ class TestStreamsView:
         stream_view.log.clear()
         stream_view.log.extend(stream_view.streams_btn_list[3])
         stream_view.log.set_focus(0)
-        stream_view.keypress(size, "down")
+        stream_view.keypress(size, primary_key_for_command("GO_DOWN"))
         assert stream_view.log.get_focus()[1] != stream_view.focus_index_before_search
 
         # Exit search
@@ -708,7 +708,7 @@ class TestTopicsView:
         topic_view.log.clear()
         topic_view.log.extend(topic_view.topics_btn_list[3])
         topic_view.log.set_focus(0)
-        topic_view.keypress(size, "down")
+        topic_view.keypress(size, primary_key_for_command("GO_DOWN"))
         assert topic_view.log.get_focus()[1] != topic_view.focus_index_before_search
 
         # Exit search
