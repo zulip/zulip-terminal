@@ -886,10 +886,9 @@ class TestMiddleColumnView:
         )
         mid_col_view.set_focus.assert_called_once_with("header")
 
-    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
     @pytest.mark.parametrize("reply_message_key", keys_for_command("REPLY_MESSAGE"))
     def test_keypress_REPLY_MESSAGE(
-        self, mid_col_view, mocker, widget_size, reply_message_key, enter_key
+        self, mid_col_view, mocker, widget_size, reply_message_key
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
@@ -899,7 +898,7 @@ class TestMiddleColumnView:
 
         mid_col_view.keypress(size, reply_message_key)
 
-        mid_col_view.body.keypress.assert_called_once_with(size, enter_key)
+        mid_col_view.body.keypress.assert_called_once_with(size, reply_message_key)
         mid_col_view.set_focus.assert_called_once_with("footer")
         assert mid_col_view.footer.focus_position == 1
 

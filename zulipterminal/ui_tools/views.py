@@ -588,7 +588,7 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key("REPLY_MESSAGE", key):
-            self.body.keypress(size, "enter")
+            self.body.keypress(size, key)
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1

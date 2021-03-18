@@ -1575,7 +1575,7 @@ class MessageBox(urwid.Pile):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("ENTER", key):
+        if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
                     emails=self.recipient_emails,
@@ -1653,7 +1653,7 @@ class MessageBox(urwid.Pile):
                 recipient_user_ids=[self.message["sender_id"]],
             )
         elif is_command_key("MENTION_REPLY", key):
-            self.keypress(size, "enter")
+            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(mention)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
@@ -1661,7 +1661,7 @@ class MessageBox(urwid.Pile):
             )
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("QUOTE_REPLY", key):
-            self.keypress(size, "enter")
+            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
             # To correctly quote a message that contains quote/code-blocks,
             # we need to fence quoted message containing ``` with ````,
@@ -1723,7 +1723,7 @@ class MessageBox(urwid.Pile):
                         msg_body_edit_enabled = False
 
             if self.message["type"] == "private":
-                self.keypress(size, "enter")
+                self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             elif self.message["type"] == "stream":
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
