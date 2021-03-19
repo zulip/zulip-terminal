@@ -284,12 +284,18 @@ class Controller:
         self.loop.widget = PopUpConfirmationView(self, question,
                                                  mute_this_stream)
 
-    def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
+    def _narrow_to(self, anchor: Optional[int],
+                   force_clear: bool = False, **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
         if already_narrowed:
             return
 
         msg_id_list = self.model.get_message_ids_in_current_narrow()
+
+        if force_clear:
+            assert self.model.stream_id is not None
+            (self.model.index['stream_msg_ids_by_stream_id']
+             [self.model.stream_id].clear())
 
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
@@ -330,6 +336,7 @@ class Controller:
         self._narrow_to(
             anchor=contextual_message_id,
             stream=stream_name,
+            force_clear=True,
             topic=topic_name,
         )
 
