@@ -13,7 +13,7 @@ from zulipterminal.config.keys import (
 )
 from zulipterminal.config.symbols import (
     CHECK_MARK,
-    LIST_TITLE_BAR_LINE,
+    COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
     STATUS_ACTIVE,
     STATUS_IDLE,
@@ -806,9 +806,9 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w, title="Streams",
-            tlcorner=LIST_TITLE_BAR_LINE,
-            tline=LIST_TITLE_BAR_LINE,
-            trcorner=LIST_TITLE_BAR_LINE,
+            tlcorner=COLUMN_TITLE_BAR_LINE,
+            tline=COLUMN_TITLE_BAR_LINE,
+            trcorner=COLUMN_TITLE_BAR_LINE,
             blcorner='', rline='', lline='',
             bline='', brcorner='─'
             )
@@ -833,9 +833,9 @@ class LeftColumnView(urwid.Pile):
                                        stream_button)
         w = urwid.LineBox(
             self.view.topic_w, title="Topics",
-            tlcorner=LIST_TITLE_BAR_LINE,
-            tline=LIST_TITLE_BAR_LINE,
-            trcorner=LIST_TITLE_BAR_LINE,
+            tlcorner=COLUMN_TITLE_BAR_LINE,
+            tline=COLUMN_TITLE_BAR_LINE,
+            trcorner=COLUMN_TITLE_BAR_LINE,
             blcorner='', rline='', lline='',
             bline='', brcorner='─'
             )
