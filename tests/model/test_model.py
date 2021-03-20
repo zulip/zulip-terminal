@@ -853,6 +853,46 @@ class TestModel:
             model = Model(self.controller)
 
     @pytest.mark.parametrize(
+        "response, expected_raw_content, display_error_called",
+        [
+            (
+                {
+                    "result": "success",
+                    "msg": "",
+                    "raw_content": "Feels **great** to be back!",
+                },
+                "Feels **great** to be back!",
+                False,
+            ),
+            (
+                {
+                    "result": "error",
+                    "msg": "Invalid message(s)",
+                    "code": "BAD_REQUEST",
+                },
+                None,
+                True,
+            ),
+        ],
+    )
+    def test_fetch_raw_message_content(
+        self,
+        mocker,
+        model,
+        expected_raw_content,
+        response,
+        display_error_called,
+        message_id=1,
+    ):
+        self.client.get_raw_message.return_value = response
+
+        return_value = model.fetch_raw_message_content(message_id)
+
+        self.client.get_raw_message.assert_called_once_with(message_id)
+        assert self.display_error_if_present.called == display_error_called
+        assert return_value == expected_raw_content
+
+    @pytest.mark.parametrize(
         "initial_muted_streams, value",
         [
             ({315}, True),
