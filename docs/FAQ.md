@@ -20,12 +20,12 @@ We have reports of success on the following terminal emulators:
 * Termite (https://github.com/thestinger/termite)
 * Terminator (https://github.com/gnome-terminator/terminator)
 * iterm2 (https://iterm2.com/) **Mac only**
-* Microsoft/Windows Terminal (https://github.com/Microsoft/Terminal) **Windows only**
 * mosh (https://mosh.org/)
 
 Issues have been reported with the following:
 
-* terminal app **Mac only** - **Issues with some default keypresses, including for sending messages** [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
+* (**major**) terminal app **Mac only** - **Issues with some default keypresses, including for sending messages** [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
+* (**minor**) Microsoft/Windows Terminal (https://github.com/Microsoft/Terminal) **Windows only** - Bold text isn't actually bold, it either renders the same as normal text or renders in a different colour (https://github.com/microsoft/terminal/issues/109)
 
 Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
 
