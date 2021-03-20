@@ -609,6 +609,17 @@ class Model:
         display_error_if_present(response, self.controller)
         return list()
 
+    def fetch_raw_message_content(self, message_id: int) -> Optional[str]:
+        """
+        Fetches raw message content of a message using its ID.
+        """
+        response = self.client.get_raw_message(message_id)
+        if response["result"] == "success":
+            return response["raw_content"]
+        display_error_if_present(response, self.controller)
+
+        return None
+
     def _fetch_topics_in_streams(self, stream_list: Iterable[int]) -> str:
         """
         Fetch all topics with specified stream_id's and
