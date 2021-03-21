@@ -101,6 +101,8 @@ setup(
     entry_points={
         'console_scripts': [
             'zulip-term = zulipterminal.cli.run:main',
+            'zulip-term-check-symbols = '
+            'zulipterminal.scripts.render_symbols:main',
         ],
     },
     extras_require={
