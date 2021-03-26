@@ -15,11 +15,15 @@ from zulipterminal.helper import (
 )
 
 
+MODULE = "zulipterminal.helper"
+MODEL = "zulipterminal.model.Model"
+
+
 def test_index_messages_narrow_all_messages(
     mocker, messages_successful_response, index_all_messages, initial_index
 ) -> None:
     messages = messages_successful_response["messages"]
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
     assert index_messages(messages, model, model.index) == index_all_messages
@@ -29,7 +33,7 @@ def test_index_messages_narrow_stream(
     mocker, messages_successful_response, index_stream, initial_index
 ) -> None:
     messages = messages_successful_response["messages"]
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["stream", "PTEST"]]
     model.is_search_narrow.return_value = False
@@ -41,7 +45,7 @@ def test_index_messages_narrow_topic(
     mocker, messages_successful_response, index_topic, initial_index
 ) -> None:
     messages = messages_successful_response["messages"]
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["stream", "7"], ["topic", "Test"]]
     model.is_search_narrow.return_value = False
@@ -53,7 +57,7 @@ def test_index_messages_narrow_user(
     mocker, messages_successful_response, index_user, initial_index
 ) -> None:
     messages = messages_successful_response["messages"]
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["pm_with", "boo@zulip.com"]]
     model.is_search_narrow.return_value = False
@@ -70,7 +74,7 @@ def test_index_messages_narrow_user_multiple(
     mocker, messages_successful_response, index_user_multiple, initial_index
 ) -> None:
     messages = messages_successful_response["messages"]
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["pm_with", "boo@zulip.com, bar@zulip.com"]]
     model.is_search_narrow.return_value = False
@@ -103,7 +107,7 @@ def test_index_edited_message(
     for msg in messages:
         if msg["id"] in edited_msgs:
             msg["edit_history"] = []
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
 
@@ -137,7 +141,7 @@ def test_index_starred(
         if msg["id"] in msgs_with_stars and "starred" not in msg["flags"]:
             msg["flags"].append("starred")
 
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["is", "starred"]]
     model.is_search_narrow.return_value = False
@@ -169,7 +173,7 @@ def test_index_mentioned_messages(
         ):
             msg["flags"].append("wildcard_mentioned")
 
-    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
+    model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = [["is", "mentioned"]]
     model.is_search_narrow.return_value = False
@@ -293,10 +297,10 @@ def test_invalid_color_format(mocker, color):
 def test_notify(mocker, OS, is_notification_sent):
     title = "Author"
     text = "Hello!"
-    mocker.patch("zulipterminal.helper.WSL", OS[0])
-    mocker.patch("zulipterminal.helper.MACOS", OS[1])
-    mocker.patch("zulipterminal.helper.LINUX", OS[2])
-    subprocess = mocker.patch("zulipterminal.helper.subprocess")
+    mocker.patch(MODULE + ".WSL", OS[0])
+    mocker.patch(MODULE + ".MACOS", OS[1])
+    mocker.patch(MODULE + ".LINUX", OS[2])
+    subprocess = mocker.patch(MODULE + ".subprocess")
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
 
@@ -320,7 +324,7 @@ def test_notify(mocker, OS, is_notification_sent):
     ],
 )
 def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
-    subprocess = mocker.patch("zulipterminal.helper.subprocess")
+    subprocess = mocker.patch(MODULE + ".subprocess")
 
     for os in ("LINUX", "MACOS", "WSL"):
         if os != OS:
