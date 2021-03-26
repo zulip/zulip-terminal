@@ -578,9 +578,9 @@ class MiddleColumnView(urwid.Frame):
             stream_topic = self.get_next_unread_topic()
             if stream_topic is None:
                 return key
-            stream, topic = stream_topic
+            stream_id, topic = stream_topic
             self.controller.narrow_to_topic(
-                stream_name=stream,
+                stream_name=self.model.stream_dict[stream_id]['name'],
                 topic_name=topic,
             )
             return key
