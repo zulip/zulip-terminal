@@ -1388,7 +1388,10 @@ class MessageBox(urwid.Pile):
                     stream_id=self.stream_id,
                 )
         elif is_command_key('STREAM_MESSAGE', key):
-            if len(self.model.narrow) == 2:
+            if (
+                len(self.model.narrow) != 0
+                and self.model.narrow[0][0] == "stream"
+               ):
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     stream_id=self.stream_id,

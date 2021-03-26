@@ -1858,7 +1858,7 @@ class TestMessageBox:
     @pytest.mark.parametrize('key', keys_for_command('STREAM_MESSAGE'))
     @pytest.mark.parametrize('narrow, expect_to_prefill', [
         ([], False),
-        ([['stream', 'general']], False),
+        ([['stream', 'general']], True),
         ([['stream', 'general'], ['topic', 'Test']], True),
         ([['is', 'starred']], False),
         ([['is', 'mentioned']], False),
