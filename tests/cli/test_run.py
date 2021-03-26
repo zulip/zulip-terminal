@@ -16,6 +16,10 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
 
+MODULE = "zulipterminal.cli.run"
+CONTROLLER = MODULE + ".Controller"
+
+
 @pytest.mark.parametrize(
     "color, code",
     [
@@ -50,7 +54,7 @@ def test_get_login_id(mocker, json, label):
     response = mocker.Mock(json=lambda: json)
     mocked_get = mocker.patch("requests.get", return_value=response)
     mocked_styled_input = mocker.patch(
-        "zulipterminal.cli.run.styled_input", return_value="input return value"
+        MODULE + ".styled_input", return_value="input return value"
     )
 
     result = get_login_id("REALM_URL")
@@ -108,7 +112,7 @@ def test_valid_zuliprc_but_no_connection(
     capsys, mocker, minimal_zuliprc, server_connection_error="some_error"
 ):
     mocker.patch(
-        "zulipterminal.core.Controller.__init__",
+        CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
 
@@ -152,15 +156,15 @@ def test_warning_regarding_incomplete_theme(
     server_connection_error="sce",
 ):
     mocker.patch(
-        "zulipterminal.core.Controller.__init__",
+        CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
-    mocker.patch("zulipterminal.cli.run.all_themes", return_value=("a", "b", "c", "d"))
+    mocker.patch(MODULE + ".all_themes", return_value=("a", "b", "c", "d"))
     mocker.patch(
-        "zulipterminal.cli.run.complete_and_incomplete_themes",
+        MODULE + ".complete_and_incomplete_themes",
         return_value=expected_complete_incomplete_themes,
     )
-    mocker.patch("zulipterminal.cli.run.generate_theme")
+    mocker.patch(MODULE + ".generate_theme")
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc, "-t", bad_theme])
@@ -305,7 +309,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
     response = mocker.Mock(json=lambda: dict(api_key=""), status_code=200)
-    mocker.patch("zulipterminal.cli.run.get_api_key", return_value=(response, None))
+    mocker.patch(MODULE + ".get_api_key", return_value=(response, None))
 
     with pytest.raises(SystemExit):
         main([])
@@ -368,8 +372,8 @@ def test_successful_main_function_with_config(
     }
     config[config_key] = config_value
     zuliprc = parameterized_zuliprc(config)
-    mocker.patch("zulipterminal.core.Controller.__init__", return_value=None)
-    mocker.patch("zulipterminal.core.Controller.main", return_value=None)
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+    mocker.patch(CONTROLLER + ".main", return_value=None)
 
     with pytest.raises(SystemExit):
         main(["-c", zuliprc])
@@ -408,8 +412,8 @@ def test_main_error_with_invalid_zuliprc_options(
     error_message,
 ):
     zuliprc = parameterized_zuliprc(zulip_config)
-    mocker.patch("zulipterminal.core.Controller.__init__", return_value=None)
-    mocker.patch("zulipterminal.core.Controller.main", return_value=None)
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+    mocker.patch(CONTROLLER + ".main", return_value=None)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", zuliprc])
