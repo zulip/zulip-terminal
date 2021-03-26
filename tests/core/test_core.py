@@ -9,7 +9,8 @@ from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
 
 
-CORE = "zulipterminal.core"
+MODULE = "zulipterminal.core"
+MODEL = MODULE + ".Model"
 
 SERVER_URL = "https://chat.zulip.zulip"
 
@@ -20,18 +21,18 @@ class TestController:
         mocker.patch("zulipterminal.ui_tools.boxes.MessageBox.main_view")
         self.client = mocker.patch("zulip.Client")
         # Patch init only, in general, allowing specific patching elsewhere
-        self.model = mocker.patch(CORE + ".Model.__init__", return_value=None)
-        self.view = mocker.patch(CORE + ".View.__init__", return_value=None)
+        self.model = mocker.patch(MODEL + ".__init__", return_value=None)
+        self.view = mocker.patch(MODULE + ".View.__init__", return_value=None)
         self.model.view = self.view
         self.view.focus_col = 1
 
     @pytest.fixture
     def controller(self, mocker) -> None:
         # Patch these unconditionally to avoid calling in __init__
-        self.poll_for_events = mocker.patch(CORE + ".Model.poll_for_events")
-        mocker.patch(CORE + ".Controller.show_loading")
+        self.poll_for_events = mocker.patch(MODEL + ".poll_for_events")
+        mocker.patch(MODULE + ".Controller.show_loading")
         self.main_loop = mocker.patch(
-            CORE + ".urwid.MainLoop", return_value=mocker.Mock()
+            MODULE + ".urwid.MainLoop", return_value=mocker.Mock()
         )
 
         self.config_file = "path/to/zuliprc"
@@ -323,7 +324,7 @@ class TestController:
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
         controller.report_success = mocker.Mock()
-        mock_get = mocker.patch(CORE + ".webbrowser.get")
+        mock_get = mocker.patch(MODULE + ".webbrowser.get")
         mock_open = mock_get.return_value.open
 
         controller.open_in_browser(url)
@@ -337,7 +338,7 @@ class TestController:
         os.environ["DISPLAY"] = ":0"
         error = "No runnable browser found"
         controller.report_error = mocker.Mock()
-        mocker.patch(CORE + ".webbrowser.get").side_effect = webbrowser.Error(error)
+        mocker.patch(MODULE + ".webbrowser.get").side_effect = webbrowser.Error(error)
 
         controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
 
@@ -345,7 +346,7 @@ class TestController:
 
     def test_main(self, mocker, controller):
         controller.view.palette = {"default": "theme_properties"}
-        mock_tsk = mocker.patch("zulipterminal.ui.Screen.tty_signal_keys")
+        mock_tsk = mocker.patch(MODULE + ".Screen.tty_signal_keys")
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
 
         controller.main()
@@ -358,9 +359,9 @@ class TestController:
     def test_stream_muting_confirmation_popup(
         self, mocker, controller, stream_button, muted_streams, action
     ):
-        pop_up = mocker.patch(CORE + ".PopUpConfirmationView")
-        text = mocker.patch(CORE + ".urwid.Text")
-        partial = mocker.patch(CORE + ".partial")
+        pop_up = mocker.patch(MODULE + ".PopUpConfirmationView")
+        text = mocker.patch(MODULE + ".urwid.Text")
+        partial = mocker.patch(MODULE + ".partial")
         controller.model.muted_streams = muted_streams
         controller.loop = mocker.Mock()
 
@@ -398,12 +399,9 @@ class TestController:
     def test_search_message(
         self, initial_narrow, final_narrow, controller, mocker, msg_ids
     ):
-        get_message = mocker.patch("zulipterminal.model.Model.get_messages")
-        create_msg = mocker.patch("zulipterminal.core.create_msg_box_list")
-        mocker.patch(
-            "zulipterminal.model.Model.get_message_ids_in_current_narrow",
-            return_value=msg_ids,
-        )
+        get_message = mocker.patch(MODEL + ".get_messages")
+        create_msg = mocker.patch(MODULE + ".create_msg_box_list")
+        mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=msg_ids)
         controller.model.index = {"search": {500}}  # Any initial search index
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.narrow = initial_narrow
