@@ -974,10 +974,11 @@ class TestMiddleColumnView:
                                                key):
         size = widget_size(mid_col_view)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
-        topic_btn = mocker.patch(VIEWS + '.TopicButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
-                     return_value=('stream', 'topic'))
-
+                     return_value=('1', 'topic'))
+        mid_col_view.model.stream_dict = {
+            '1': {'name': 'stream'}
+        }
         mid_col_view.keypress(size, key)
 
         mid_col_view.get_next_unread_topic.assert_called_once_with()
@@ -991,7 +992,6 @@ class TestMiddleColumnView:
                                                   key):
         size = widget_size(mid_col_view)
         mocker.patch(VIEWS + '.MiddleColumnView.focus_position')
-        topic_btn = mocker.patch(VIEWS + '.TopicButton')
         mocker.patch(VIEWS + '.MiddleColumnView.get_next_unread_topic',
                      return_value=None)
 
