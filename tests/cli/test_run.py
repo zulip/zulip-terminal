@@ -74,7 +74,9 @@ def test_main_help(capsys, options):
         '--no-autohide',
         '-v, --version',
         '-e, --explore',
-        '--color-depth'
+        '--color-depth',
+        '--notify',
+        '--no-notify',
     }
     optional_argument_lines = {line[2:] for line in lines
                                if len(line) > 2 and line[2] == '-'}
@@ -191,6 +193,34 @@ def test_parse_args_valid_autohide_option(option, autohide):
         ['--no-autohide', '--autohide']
 ])
 def test_main_multiple_autohide_options(capsys, options):
+    with pytest.raises(SystemExit) as e:
+        main(options)
+
+    assert str(e.value) == "2"
+
+    captured = capsys.readouterr()
+    lines = captured.err.strip('\n')
+    lines = lines.split("pytest: ", 1)[1]
+    expected = (f"error: argument {options[1]}: not allowed "
+                f"with argument {options[0]}")
+    assert lines == expected
+
+
+@pytest.mark.parametrize('option, notify_option', [
+        ('--notify', 'enabled'),
+        ('--no-notify', 'disabled'),
+        ('--profile', None),  # disabled by default
+])
+def test__parse_args_valid_notify_option(option, notify_option):
+    args = parse_args([option])
+    assert args.notify == notify_option
+
+
+@pytest.mark.parametrize('options', [
+        ['--notify', '--no-notify'],
+        ['--no-notify', '--notify'],
+])
+def test_main_multiple_notify_options(capsys, options):
     with pytest.raises(SystemExit) as e:
         main(options)
 
