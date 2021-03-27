@@ -1017,7 +1017,8 @@ class AboutView(PopUpView):
                  server_version: str,
                  server_feature_level: Optional[int],
                  theme_name: str, color_depth: int,
-                 autohide_enabled: bool, maximum_footlinks: int) -> None:
+                 autohide_enabled: bool, maximum_footlinks: int,
+                 notify_enabled: bool) -> None:
         self.feature_level_content = (
             [('Feature level', str(server_feature_level))]
             if server_feature_level else []
@@ -1030,7 +1031,10 @@ class AboutView(PopUpView):
                 ('Theme', theme_name),
                 ('Autohide', 'enabled' if autohide_enabled else 'disabled'),
                 ('Maximum footlinks', str(maximum_footlinks)),
-                ('Color depth', str(color_depth))])
+                ('Color depth', str(color_depth)),
+                ('Notifications',
+                 'enabled' if notify_enabled else 'disabled'),
+            ])
         ]
 
         popup_width, column_widths = self.calculate_table_widths(contents,

@@ -227,10 +227,13 @@ class Controller:
 
     def show_about(self) -> None:
         self.show_pop_up(
-            AboutView(self, 'About', zt_version=ZT_VERSION,
+            AboutView(self, 'About',
+                      zt_version=ZT_VERSION,
                       server_version=self.model.server_version,
                       server_feature_level=self.model.server_feature_level,
-                      theme_name=self.theme_name, color_depth=self.color_depth,
+                      theme_name=self.theme_name,
+                      color_depth=self.color_depth,
+                      notify_enabled=self.notify_enabled,
                       autohide_enabled=self.autohide,
                       maximum_footlinks=self.maximum_footlinks),
             'area:help'
