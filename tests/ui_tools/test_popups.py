@@ -141,6 +141,7 @@ class TestAboutView:
                                     server_feature_level=server_feature_level,
                                     theme_name='zt_dark',
                                     color_depth=256,
+                                    notify_enabled=False,
                                     autohide_enabled=False,
                                     maximum_footlinks=3)
 
@@ -177,6 +178,7 @@ class TestAboutView:
                                server_feature_level=server_feature_level,
                                theme_name='zt_dark',
                                color_depth=256,
+                               notify_enabled=False,
                                autohide_enabled=False,
                                maximum_footlinks=3)
 
