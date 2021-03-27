@@ -95,6 +95,13 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         choices=['1', '16', '256'],
                         help="Force the color depth "
                              f"(default {DEFAULT_SETTINGS['color-depth']}).")
+    notify_group = parser.add_mutually_exclusive_group()
+    notify_group.add_argument('--notify', dest='notify', default=None,
+                              action='store_const', const='enabled',
+                              help='Enable desktop notifications.')
+    notify_group.add_argument('--no-notify', dest='notify', default=None,
+                              action='store_const', const='disabled',
+                              help='Disable desktop notifications.')
     # debug mode
     parser.add_argument("-d",
                         "--debug",
@@ -382,6 +389,9 @@ def main(options: Optional[List[str]]=None) -> None:
             zterm['color-depth'] = (args.color_depth, 'on command line')
 
         color_depth = int(zterm['color-depth'][0])
+
+        if args.notify:
+            zterm['notify'] = (args.notify, 'on command line')
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
