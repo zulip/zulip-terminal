@@ -414,6 +414,9 @@ def main(options: Optional[List[str]]=None) -> None:
                 .format(*zterm['maximum-footlinks']))
         print("   color depth setting '{}' specified {}."
               .format(*zterm['color-depth']))
+        print("   notify setting '{}' specified {}."
+              .format(*zterm['notify']))
+
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
