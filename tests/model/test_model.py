@@ -54,6 +54,7 @@ class TestModel:
         assert model._have_last_message == {}
         assert model.stream_id is None
         assert model.stream_dict == stream_dict
+        assert model.subscribed_streams == {1, 2, 99, 1000}
         assert model.recipients == frozenset()
         assert model.index == initial_index
         model.get_messages.assert_called_once_with(num_before=30,

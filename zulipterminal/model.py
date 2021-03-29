@@ -116,6 +116,7 @@ class Model:
         self.users = self.get_all_users()
 
         self.stream_dict: Dict[int, Any] = {}
+        self.subscribed_streams: Set[int] = set()
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
@@ -749,6 +750,7 @@ class Model:
         new_pinned_streams = []
         new_unpinned_streams = []
         new_muted_streams = set()
+        new_subscribed_streams = set()
         for subscription in subscriptions:
             # Canonicalize color formats, since zulip server versions may use
             # different formats
@@ -762,6 +764,7 @@ class Model:
                 new_unpinned_streams.append(streamData)
             if not subscription['in_home_view']:
                 new_muted_streams.add(subscription['stream_id'])
+            new_subscribed_streams.add(subscription['stream_id'])
 
         if new_pinned_streams:
             self.pinned_streams.extend(new_pinned_streams)
@@ -771,6 +774,8 @@ class Model:
             sort_streams(self.unpinned_streams)
 
         self.muted_streams = self.muted_streams.union(new_muted_streams)
+        self.subscribed_streams = (self.subscribed_streams
+                                   .union(new_subscribed_streams))
 
     def _group_info_from_realm_user_groups(self,
                                            groups: List[Dict[str, Any]]
