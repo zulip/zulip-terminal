@@ -127,12 +127,16 @@ class TestController:
         assert {widget.original_widget.message["id"]} == id_list
 
     @pytest.mark.parametrize(
-        ["initial_narrow", "anchor", "expected_final_focus"],
+        ["initial_narrow", "initial_stream_id", "anchor", "expected_final_focus"],
         [
-            ([], None, 537289),
+            ([], None, None, 537289),
+            ([["stream", "PTEST"], ["topic", "Test"]], 205, 537286, 537286),
+            ([["stream", "PTEST"], ["topic", "Test"]], 205, 537289, 537289),
         ],
         ids=[
             "all-messages_to_topic_narrow_no_anchor",
+            "topic_narrow_to_same_topic_narrow_with_anchor",
+            "topic_narrow_to_same_topic_narrow_with_other_anchor",
         ],
     )
     def test_narrow_to_topic(
@@ -142,6 +146,7 @@ class TestController:
         msg_box,
         index_multiple_topic_msg,
         initial_narrow,
+        initial_stream_id,
         anchor,
         expected_final_focus,
     ):
@@ -151,6 +156,7 @@ class TestController:
         ]
         controller.model.narrow = initial_narrow
         controller.model.index = index_multiple_topic_msg
+        controller.model.stream_id = initial_stream_id
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
             205: {

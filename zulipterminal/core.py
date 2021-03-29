@@ -386,7 +386,8 @@ class Controller:
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
-        if already_narrowed:
+
+        if already_narrowed and anchor is None:
             return
 
         msg_id_list = self.model.get_message_ids_in_current_narrow()
