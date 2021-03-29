@@ -88,6 +88,23 @@ class Model:
 
         self._notified_user_of_notification_failure = False
 
+        # Events fetched once at startup
+        self.initial_data_to_fetch: List[str] = [
+            'realm',
+            'presence',
+            'subscription',
+            'message',
+            'update_message_flags',
+            'muted_topics',
+            'realm_user',  # Enables cross_realm_bots
+            'realm_user_groups',
+            'update_display_settings',
+            # zulip_version and zulip_feature_level are always returned in
+            # POST /register from Feature level 3.
+            'zulip_version',
+        ]
+
+        # Events desired with their corresponding callback
         self.event_actions: 'OrderedDict[str, Callable[[Event], None]]' = (
             OrderedDict([
                 ('message', self._handle_message_event),
@@ -106,7 +123,7 @@ class Model:
 
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
-        self._update_initial_data()
+        self._fetch_initial_data()
 
         self.server_version = self.initial_data['zulip_version']
         self.server_feature_level = (
@@ -567,7 +584,7 @@ class Model:
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics.keys()
 
-    def _update_initial_data(self) -> None:
+    def _fetch_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
         with ThreadPoolExecutor(max_workers=1) as executor:
@@ -1267,20 +1284,7 @@ class Model:
         self.controller.update_screen()
 
     def _register_desired_events(self, *, fetch_data: bool=False) -> str:
-        fetch_types = None if not fetch_data else [
-            'realm',
-            'presence',
-            'subscription',
-            'message',
-            'update_message_flags',
-            'muted_topics',
-            'realm_user',  # Enables cross_realm_bots
-            'realm_user_groups',
-            'update_display_settings',
-            # zulip_version and zulip_feature_level are always returned in
-            # POST /register from Feature level 3.
-            'zulip_version',
-        ]
+        fetch_types = None if not fetch_data else self.initial_data_to_fetch
         event_types = list(self.event_actions)
         try:
             response = self.client.register(event_types=event_types,
