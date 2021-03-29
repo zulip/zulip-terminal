@@ -737,15 +737,15 @@ class Model:
 
         return self.user_dict[user_email]['full_name']
 
-    def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
-        def make_reduced_stream_data(stream: Subscription) -> StreamData:
-            # stream_id has been changed to id.
-            return StreamData({'name': stream['name'],
-                               'id': stream['stream_id'],
-                               'color': stream['color'],
-                               'invite_only': stream['invite_only'],
-                               'description': stream['description']})
+    def make_reduced_stream_data(self, stream: Subscription) -> StreamData:
+        # stream_id has been changed to id.
+        return StreamData({'name': stream['name'],
+                           'id': stream['stream_id'],
+                           'color': stream['color'],
+                           'invite_only': stream['invite_only'],
+                           'description': stream['description']})
 
+    def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         new_pinned_streams = []
         new_unpinned_streams = []
         new_muted_streams = set()
@@ -755,7 +755,7 @@ class Model:
             subscription['color'] = canonicalize_color(subscription['color'])
 
             self.stream_dict[subscription['stream_id']] = subscription
-            streamData = make_reduced_stream_data(subscription)
+            streamData = self.make_reduced_stream_data(subscription)
             if subscription['pin_to_top']:
                 new_pinned_streams.append(streamData)
             else:
@@ -819,18 +819,19 @@ class Model:
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
 
+    def _get_stream_by_id(self, streams: List[StreamData], stream_id: int
+                          ) -> StreamData:
+        for stream in streams:
+            if stream['id'] == stream_id:
+                return stream
+        raise RuntimeError("Invalid stream id.")
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting,
                                         pinning/unpinning streams)
         """
         assert event['type'] == "subscription"
-        def get_stream_by_id(streams: List[StreamData], stream_id: int
-                             ) -> StreamData:
-            for stream in streams:
-                if stream['id'] == stream_id:
-                    return stream
-            raise RuntimeError("Invalid stream id.")
 
         if event['op'] == 'update':
             if hasattr(self.controller, 'view'):
@@ -861,14 +862,14 @@ class Model:
                     )
 
                     if event['value']:
-                        stream = get_stream_by_id(self.unpinned_streams,
-                                                  stream_id)
+                        stream = self._get_stream_by_id(self.unpinned_streams,
+                                                        stream_id)
                         if stream:
                             self.unpinned_streams.remove(stream)
                             self.pinned_streams.append(stream)
                     else:
-                        stream = get_stream_by_id(self.pinned_streams,
-                                                  stream_id)
+                        stream = self._get_stream_by_id(self.pinned_streams,
+                                                        stream_id)
                         if stream:
                             self.pinned_streams.remove(stream)
                             self.unpinned_streams.append(stream)
