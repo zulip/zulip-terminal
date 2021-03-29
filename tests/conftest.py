@@ -128,7 +128,7 @@ general_stream = {
     'name': 'Some general stream',
     'invite_only': False,
     'color': '#b0a5fd',                   # Color in '#xxxxxx' format
-    'pin_to_top': False,
+    'pin_to_top': True,
     'stream_id': 1000,
     'in_home_view': True,
     'audible_notifications': False,

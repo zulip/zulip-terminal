@@ -121,6 +121,7 @@ class SubscriptionEvent(TypedDict):
 
     value: bool
     message_ids: List[int]  # Present when subject of msg(s) is updated
+    subscriptions: List[Subscription]  # Present when stream is added/removed
 
 
 class TypingEvent(TypedDict):

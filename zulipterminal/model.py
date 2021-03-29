@@ -831,12 +831,36 @@ class Model:
                 return stream
         raise RuntimeError("Invalid stream id.")
 
+    def _unsubscribe_to_streams(self,
+                                stream_info_list: List[Subscription]) -> None:
+        is_pinned_stream_removed = False
+        is_unpinned_stream_removed = False
+        for stream_info in stream_info_list:
+            stream_id = stream_info['stream_id']
+            if self.is_pinned_stream(stream_id):
+                stream = self._get_stream_by_id(self.pinned_streams,
+                                                stream_id)
+                self.pinned_streams.remove(stream)
+                is_pinned_stream_removed = True
+            else:
+                stream = self._get_stream_by_id(self.unpinned_streams,
+                                                stream_id)
+                self.unpinned_streams.remove(stream)
+                is_unpinned_stream_removed = True
+            if stream_id in self.muted_streams:
+                self.muted_streams.remove(stream_id)
+            self.subscribed_streams.remove(stream_id)
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting,
                                         pinning/unpinning streams)
         """
         assert event['type'] == "subscription"
+
+        def _update_sidebar() -> None:
+            self.controller.view.left_panel.update_stream_view()
+            self.controller.update_screen()
 
         if event['op'] == 'update':
             if hasattr(self.controller, 'view'):
@@ -880,8 +904,16 @@ class Model:
                             self.unpinned_streams.append(stream)
                     sort_streams(self.unpinned_streams)
                     sort_streams(self.pinned_streams)
-                    self.controller.view.left_panel.update_stream_view()
-                    self.controller.update_screen()
+                    _update_sidebar()
+
+        elif event['op'] == 'add':
+            self._subscribe_to_streams(event['subscriptions'])
+            _update_sidebar()
+
+        elif event['op'] == 'remove':
+            self._unsubscribe_to_streams(event['subscriptions'])
+            _update_sidebar()
+
         elif event['op'] in ('peer_add', 'peer_remove'):
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)
