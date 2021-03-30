@@ -824,6 +824,9 @@ class Model:
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
 
+    def is_user_in_unsubscribed_stream(self, stream_id: int) -> bool:
+        return not(stream_id in self.subscribed_streams)
+
     def _get_stream_by_id(self, streams: List[StreamData], stream_id: int
                           ) -> StreamData:
         for stream in streams:

@@ -555,10 +555,13 @@ class MiddleColumnView(urwid.Frame):
             return key
 
         elif is_command_key('STREAM_MESSAGE', key):
+            assert self.model.stream_id is not None
+            stream_id = self.model.stream_id
+            if self.model.controller.check_for_invalid_operation(stream_id):
+                return None
             self.body.keypress(size, 'c')
             # For new streams with no previous conversation.
             if self.footer.focus is None:
-                stream_id = self.model.stream_id
                 stream_dict = self.model.stream_dict
                 self.footer.stream_box_view(
                     caption=stream_dict[stream_id]['name'])

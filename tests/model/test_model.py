@@ -2021,6 +2021,30 @@ class TestModel:
 
         assert return_value == expected_response
 
+    @pytest.mark.parametrize('stream_id, expected_response,', [
+            (99, False),
+            (101, True),
+            (2, False),
+        ],
+        ids=[
+            'subscribed_pinned_stream',
+            'subscribed_unpinned_stream',
+            'unsubscribed_stream',
+        ]
+    )
+    def test_is_user_in_unsubscribed_stream(self, model,
+                                            stream_id, expected_response,
+                                            initial_pinned_streams,
+                                            initial_unpinned_streams):
+
+        model.pinned_streams = deepcopy(initial_pinned_streams)
+        model.unpinned_streams = deepcopy(initial_unpinned_streams)
+        return_value = model.is_user_in_unsubscribed_stream(stream_id)
+
+        assert model.pinned_streams == initial_pinned_streams
+        assert model.unpinned_streams == initial_unpinned_streams
+        assert return_value == expected_response
+
     @pytest.mark.parametrize('response', [{
         'result': 'success',
         'msg': '',
