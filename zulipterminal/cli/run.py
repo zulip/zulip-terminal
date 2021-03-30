@@ -301,29 +301,15 @@ def list_themes() -> str:
     )
 
 
-def print_welcome_message(zterm: Dict[str, str],
-                          theme_to_use: Tuple[str, str],
-                          maximum_footlinks: int) -> None:
+def print_welcome_message(welcome_text: Dict[str, Any],
+                          theme_helper_text: str) -> None:
     print("Loading with:")
-    print("   theme '{}' specified {}.".format(*theme_to_use))
-    complete, incomplete = complete_and_incomplete_themes()
-    if theme_to_use[0] in incomplete:
-        print(in_color('yellow',
-                       "   WARNING: Incomplete theme; "
-                       "results may vary!\n"
-                       "      (you could try: {})".
-                       format(", ".join(complete))))
-    print("   autohide setting '{}' specified {}."
-          .format(*zterm['autohide']))
-    if zterm['footlinks'][1] == ZULIPRC_CONFIG:
-        print(
-            "   maximum footlinks value '{}' specified {} from footlinks."
-            .format(maximum_footlinks, zterm['footlinks'][1]))
-    else:
-        print("   maximum footlinks value '{}' specified {}."
-              .format(*zterm['maximum-footlinks']))
-    print("   color depth setting '{}' specified {}."
-          .format(*zterm['color-depth']))
+    print(welcome_text['theme'])
+    if theme_helper_text:
+        print(in_color('yellow', theme_helper_text))
+    welcome_text.pop('theme')
+    for key in sorted(welcome_text):
+        print(welcome_text[key])
 
 
 def main(options: Optional[List[str]]=None) -> None:
@@ -388,8 +374,11 @@ def main(options: Optional[List[str]]=None) -> None:
                 maximum_footlinks = 3
             else:
                 maximum_footlinks = 0
+            zterm['footlinks'] = (maximum_footlinks, ZULIPRC_CONFIG)
+            zterm.pop('maximum-footlinks')
         else:
             maximum_footlinks = int(zterm['maximum-footlinks'][0])
+            zterm.pop('footlinks')
 
         available_themes = all_themes()
         theme_aliases = aliased_themes()
@@ -449,19 +438,28 @@ def main(options: Optional[List[str]]=None) -> None:
             'autohide': ("   autohide setting '{}' specified {}."
                          .format(*zterm['autohide'])),
             'color-depth': ("   color depth setting '{}' specified {}."
-                            .format(*zterm['color-depth']))
+                            .format(*zterm['color-depth'])),
+            'notify': ("   notify setting '{}' specified {}."
+                       .format(*zterm['notify']))
         }
-        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+        if 'maximum-footlinks' in zterm:
             welcome_text['maximum-footlinks'] = ("   maximum footlinks value "
                                                  "'{}' specified {}."
                                                  ).format(
-                                                 maximum_footlinks,
-                                                 zterm['footlinks'][1])
+                                                 *zterm['maximum-footlinks'])
         else:
             welcome_text['footlinks'] = ("   maximum footlinks value "
                                          "'{}' specified {} from footlinks."
                                          ).format(*zterm['footlinks'])
-        print_welcome_message(zterm, theme_to_use, maximum_footlinks)
+        complete, incomplete = complete_and_incomplete_themes()
+        theme_helper_text = ""
+        if zterm['theme'][0] in incomplete:
+            theme_helper_text = ("   WARNING: Incomplete theme; "
+                                 "results may vary!\n"
+                                 "      (you could try: {})".
+                                 format(", ".join(complete)))
+
+        print_welcome_message(welcome_text, theme_helper_text)
         Controller(zuliprc_path,
                    maximum_footlinks,
                    theme_to_use[0],
