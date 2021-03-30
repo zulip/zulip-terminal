@@ -292,7 +292,7 @@ class StreamsViewDivider(urwid.Divider):
 
 class StreamsView(urwid.Frame):
     def __init__(self, streams_btn_list: List[Any], view: Any) -> None:
-        self.view = view
+        # self.view = view
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         self.focus_index_before_search = 0
