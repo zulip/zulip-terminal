@@ -182,40 +182,51 @@ class View(urwid.WidgetWrap):
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif (is_command_key('SEARCH_MESSAGES', key)
-                or is_command_key('NEXT_UNREAD_TOPIC', key)
-                or is_command_key('NEXT_UNREAD_PM', key)
-                or is_command_key('STREAM_MESSAGE', key)
-                or is_command_key('PRIVATE_MESSAGE', key)):
-            self.body.focus_col = 1
+
+        def _message_view(key):
             self.middle_column.keypress(size, key)
-            return key
-        elif is_command_key('ALL_PM', key):
+            self.body.focus_col = 1
+
+        def search_messages(key):
+            _message_view(key)
+
+        def next_unread_topic(key):
+            _message_view(key)
+
+        def next_unread_pm(key):
+            _message_view(key)
+
+        def stream_message(key):
+            _message_view(key)
+
+        def private_message(key):
+            _message_view(key)
+
+        def all_pm(key):
             self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
-            return key
-        elif is_command_key('ALL_STARRED', key):
+
+        def all_starred(key):
             self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
-            return key
-        elif is_command_key('ALL_MENTIONS', key):
+
+        def all_mentions(key):
             self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
-            return key
-        elif is_command_key('SEARCH_PEOPLE', key):
+
+        def search_people(key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
-            self.users_view.keypress(size, 'w')
+            self.users_view.keypress(size, key)
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
-            return key
-        elif (is_command_key('SEARCH_STREAMS', key)
-              or is_command_key('SEARCH_TOPICS', key)):
+
+        def search_stream_or_topic(key):
             # jump stream search
             self.body.focus_position = 0
-            self.left_panel.keypress(size, 'q')
+            self.left_panel.keypress(size, key)
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
             if self.left_panel.is_in_topic_view:
@@ -224,8 +235,8 @@ class View(urwid.WidgetWrap):
                 search_box = self.stream_w.stream_search_box
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
-            return key
-        elif is_command_key('OPEN_DRAFT', key):
+
+        def open_draft(key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
                 if saved_draft['type'] == 'stream':
@@ -254,31 +265,47 @@ class View(urwid.WidgetWrap):
             else:
                 self.set_footer_text('No draft message was saved in'
                                      ' this session.', 3)
-            return key
-        elif is_command_key('ABOUT', key):
+
+        def show_about(key):
             self.controller.show_about()
-            return key
-        elif is_command_key('HELP', key):
-            # Show help menu
+
+        def show_help(key):
             self.controller.show_help()
+
+        key_actions = {
+            '/': search_messages,
+            'n': next_unread_topic,
+            'p': next_unread_pm,
+            'm': stream_message,
+            'x': private_message,
+            'P': all_pm,
+            'f': all_starred,
+            '#': all_mentions,
+            'w': search_people,
+            'q': search_stream_or_topic,
+            'd': open_draft,
+            'meta ?': show_about,
+            '?': show_help
+        }
+        action = key_actions.get(key, None)
+        if action:
+            action(key)
             return key
+
         # replace alternate keys with arrow/functional keys
         # This is needed for navigating in widgets
         # other than message_view.
-        elif is_command_key('GO_UP', key):
-            key = 'up'
-        elif is_command_key('GO_DOWN', key):
-            key = 'down'
-        elif is_command_key('GO_LEFT', key):
-            key = 'left'
-        elif is_command_key('GO_RIGHT', key):
-            key = 'right'
-        elif is_command_key('SCROLL_UP', key):
-            key = 'page up'
-        elif is_command_key('SCROLL_DOWN', key):
-            key = 'page down'
-        elif is_command_key('GO_TO_BOTTOM', key):
-            key = 'end'
+        alt_keys = {
+            'k': 'up',
+            'j': 'down',
+            'h': 'left',
+            'l': 'right',
+            'K': 'page up',
+            'J': 'page down',
+            'G': 'end'
+        }
+        key = alt_keys.get(key, key)
+
         return super().keypress(size, key)
 
 
