@@ -2,6 +2,7 @@ from collections import OrderedDict
 from typing import List
 
 from typing_extensions import TypedDict
+from urwid.command_map import command_map
 
 
 class KeyBinding(TypedDict, total=False):
@@ -353,6 +354,16 @@ HELP_CATEGORIES = OrderedDict(
     ]
 )
 
+STD_NAV_CMDS = [
+    "GO_UP",
+    "GO_DOWN",
+    "GO_LEFT",
+    "GO_RIGHT",
+    "SCROLL_UP",
+    "SCROLL_DOWN",
+    "GO_TO_BOTTOM",
+]
+
 
 class InvalidCommand(Exception):
     pass
@@ -395,3 +406,19 @@ def commands_for_random_tips() -> List[KeyBinding]:
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
     ]
+
+
+# Maps alternate nav keys to standard nav keys.
+# Refer urwid/command_map.py
+for cmd in STD_NAV_CMDS:
+    std_key, *alt_keys = keys_for_command(cmd)
+
+    for key in alt_keys:
+        if std_key == "end":
+            urwid_cmd = "cursor max right"
+        elif std_key == "home":
+            urwid_cmd = "cursor max left"
+        else:
+            urwid_cmd = "cursor " + std_key
+
+        command_map.__setitem__(key, urwid_cmd)
