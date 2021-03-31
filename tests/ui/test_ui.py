@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional
 
 import pytest
 from pytest_mock import MockerFixture
@@ -275,9 +275,8 @@ class TestView:
         mocker: MockerFixture,
         # TODO: Improve `widget_size`'s return type, likely via Protocols.
         widget_size: Callable[[Widget], urwid_Box],
-        navigation_key_expected_key_pair: Tuple[str, str],
+        navigation_key: str,
     ) -> None:
-        key, expected_key = navigation_key_expected_key_pair
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -287,9 +286,9 @@ class TestView:
 
         view.controller.is_in_editor_mode = lambda: False
 
-        view.keypress(size, key)
+        view.keypress(size, navigation_key)
 
-        super_keypress.assert_called_once_with(size, expected_key)
+        super_keypress.assert_called_once_with(size, navigation_key)
 
     @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
     def test_keypress_ALL_MENTIONS(

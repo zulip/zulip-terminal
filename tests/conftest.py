@@ -7,7 +7,11 @@ from pytest_mock import MockerFixture
 from urwid import Widget
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.keys import (
+    ZT_TO_URWID_CMD_MAPPING,
+    keys_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.helper import Index, TidiedUserInfo
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -1203,24 +1207,13 @@ def mouse_scroll_event(request: Any) -> Tuple[Any]:
 
 
 @pytest.fixture(
-    params=[
-        (key, expected_key)
-        for keys, expected_key in [
-            (keys_for_command("GO_UP"), "up"),
-            (keys_for_command("GO_DOWN"), "down"),
-            (keys_for_command("SCROLL_UP"), "page up"),
-            (keys_for_command("SCROLL_DOWN"), "page down"),
-            (keys_for_command("GO_TO_BOTTOM"), "end"),
-        ]
-        for key in keys
-    ],
-    ids=lambda param: "key:{}-expected_key:{}".format(*param),
+    params=[key for cmd in ZT_TO_URWID_CMD_MAPPING for key in keys_for_command(cmd)],
+    ids=lambda param: "nav-key:{}".format(*param),
 )
-def navigation_key_expected_key_pair(request: Any) -> Tuple[str, str]:
+def navigation_key(request: Any) -> str:
     """
-    Fixture to generate pairs of navigation keys with their respective
-    expected key.
-    The expected key is the one which is passed to the super `keypress` calls.
+    Fixture to generate navigation keys.
+    This key is passed to the super `keypress` calls as is.
     """
     return request.param
 

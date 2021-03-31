@@ -2,6 +2,16 @@ from collections import OrderedDict
 from typing import List
 
 from typing_extensions import TypedDict
+from urwid.command_map import (
+    CURSOR_DOWN,
+    CURSOR_LEFT,
+    CURSOR_MAX_RIGHT,
+    CURSOR_PAGE_DOWN,
+    CURSOR_PAGE_UP,
+    CURSOR_RIGHT,
+    CURSOR_UP,
+    command_map,
+)
 
 
 class KeyBinding(TypedDict, total=False):
@@ -380,6 +390,16 @@ HELP_CATEGORIES = OrderedDict(
     ]
 )
 
+ZT_TO_URWID_CMD_MAPPING = {
+    "GO_UP": CURSOR_UP,
+    "GO_DOWN": CURSOR_DOWN,
+    "GO_LEFT": CURSOR_LEFT,
+    "GO_RIGHT": CURSOR_RIGHT,
+    "SCROLL_UP": CURSOR_PAGE_UP,
+    "SCROLL_DOWN": CURSOR_PAGE_DOWN,
+    "GO_TO_BOTTOM": CURSOR_MAX_RIGHT,
+}
+
 
 class InvalidCommand(Exception):
     pass
@@ -422,3 +442,10 @@ def commands_for_random_tips() -> List[KeyBinding]:
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
     ]
+
+
+# Refer urwid/command_map.py
+# Adds alternate keys for standard urwid navigational commands.
+for zt_cmd, urwid_cmd in ZT_TO_URWID_CMD_MAPPING.items():
+    for key in keys_for_command(zt_cmd):
+        command_map[key] = urwid_cmd
