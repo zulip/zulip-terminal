@@ -97,3 +97,14 @@ def test_commands_for_random_tips(mocker: MockerFixture) -> None:
     assert len(result) == 2
     assert new_key_bindings["BETA"] in result
     assert new_key_bindings["GAMMA"] in result
+
+
+def test_updated_urwid_command_map() -> None:
+    urwid_to_zt_mapping = {v: k for k, v in keys.ZT_TO_URWID_CMD_MAPPING.items()}
+    # Check if keys in command map are actually the ones in KEY_BINDINGS
+    for key, urwid_cmd in keys.command_map._command.items():
+        try:
+            zt_cmd = urwid_to_zt_mapping[urwid_cmd]
+            assert key in keys.keys_for_command(zt_cmd)
+        except KeyError:
+            pass
