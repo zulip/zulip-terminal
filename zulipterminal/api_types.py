@@ -30,7 +30,11 @@ class Message(TypedDict, total=False):
     timestamp: int
     client: str
     subject: str  # Only for stream msgs.
-    topic_links: List[str]
+    # NOTE: new in Zulip 3.0 / ZFL 1, replacing `subject_links`
+    # NOTE: API response format of `topic_links` changed in Zulip 4.0 / ZFL 46
+    topic_links: List[Any]
+    # NOTE: `subject_links` in Zulip 2.1; deprecated from Zulip 3.0 / ZFL 1
+    subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
     submessages: List[Dict[str, Any]]
