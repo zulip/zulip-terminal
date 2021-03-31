@@ -1,6 +1,6 @@
 import pytest
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import STD_NAV_CMDS, keys_for_command
 from zulipterminal.ui import View
 
 
@@ -234,10 +234,10 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    def test_keypress_normal_mode_navigation(
-        self, view, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
+    @pytest.mark.parametrize(
+        "key", [key for cmd in STD_NAV_CMDS for key in keys_for_command(cmd)]
+    )
+    def test_keypress_normal_mode_navigation(self, view, mocker, key, widget_size):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -249,7 +249,7 @@ class TestView:
 
         view.keypress(size, key)
 
-        super_keypress.assert_called_once_with(size, expected_key)
+        super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
     def test_keypress_ALL_MENTIONS(self, view, mocker, key, widget_size):
