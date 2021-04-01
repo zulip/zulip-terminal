@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pytest
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
@@ -1108,8 +1108,8 @@ def classified_unread_counts():
 
 @pytest.fixture(
     params=[
-        ("mouse press", 4, "up"),
-        ("mouse press", 5, "down"),
+        ("mouse press", 4, primary_key_for_command("GO_UP")),
+        ("mouse press", 5, primary_key_for_command("GO_DOWN")),
     ],
     ids=[
         "mouse_scroll_up",
