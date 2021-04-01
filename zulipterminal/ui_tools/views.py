@@ -293,13 +293,17 @@ class StreamsViewDivider(urwid.Divider):
 class StreamsView(urwid.Frame):
     def __init__(self, streams_btn_list: List[Any], view: Any) -> None:
         self.view = view
-        self.log = urwid.SimpleFocusListWalker(streams_btn_list)
+        # Create Stream List Box
         self.streams_btn_list = streams_btn_list
-        self.focus_index_before_search = 0
+        self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         list_box = urwid.ListBox(self.log)
+        # Create Stream Search Box
         self.stream_search_box = PanelSearchBox(self,
                                                 'SEARCH_STREAMS',
                                                 self.update_streams)
+        self.focus_index_before_search = 0
+        self.in_search_mode = False
+        # Create Stream View Frame
         super().__init__(list_box, header=urwid.LineBox(
             self.stream_search_box, tlcorner='─', tline='', lline='',
             trcorner='─', blcorner='─', rline='',
@@ -356,6 +360,7 @@ class StreamsView(urwid.Frame):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('SEARCH_STREAMS', key):
+            self.in_search_mode = True
             self.set_focus('header')
             return key
         elif is_command_key('GO_BACK', key):
@@ -365,9 +370,11 @@ class StreamsView(urwid.Frame):
             self.set_focus('body')
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
+            self.in_search_mode = False
             return key
         return_value = super().keypress(size, key)
-        _, self.focus_index_before_search = self.log.get_focus()
+        if not self.in_search_mode:
+            _, self.focus_index_before_search = self.log.get_focus()
         return return_value
 
 
@@ -375,17 +382,21 @@ class TopicsView(urwid.Frame):
     def __init__(self, topics_btn_list: List[Any], view: Any,
                  stream_button: Any) -> None:
         self.view = view
-        self.log = urwid.SimpleFocusListWalker(topics_btn_list)
-        self.topics_btn_list = topics_btn_list
         self.stream_button = stream_button
-        self.focus_index_before_search = 0
+        # Create Topic List Box
+        self.topics_btn_list = topics_btn_list
+        self.log = urwid.SimpleFocusListWalker(topics_btn_list)
         self.list_box = urwid.ListBox(self.log)
+        # Create Topic Search Box
         self.topic_search_box = PanelSearchBox(self,
                                                'SEARCH_TOPICS',
                                                self.update_topics)
+        self.focus_index_before_search = 0
+        self.in_search_mode = False
         self.header_list = urwid.Pile([self.stream_button,
                                        urwid.Divider('─'),
                                        self.topic_search_box])
+        # Create Topic View Frame
         super().__init__(self.list_box, header=urwid.LineBox(
             self.header_list, tlcorner='─', tline='', lline='',
             trcorner='─', blcorner='─', rline='',
@@ -452,6 +463,7 @@ class TopicsView(urwid.Frame):
             self.view.show_left_panel(visible=False)
             self.view.body.focus_col = 1
         if is_command_key('SEARCH_TOPICS', key):
+            self.in_search_mode = True
             self.set_focus('header')
             self.header_list.set_focus(2)
             return key
@@ -462,9 +474,11 @@ class TopicsView(urwid.Frame):
             self.set_focus('body')
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
+            self.in_search_mode = False
             return key
         return_value = super().keypress(size, key)
-        _, self.focus_index_before_search = self.log.get_focus()
+        if not self.in_search_mode:
+            _, self.focus_index_before_search = self.log.get_focus()
         return return_value
 
 
