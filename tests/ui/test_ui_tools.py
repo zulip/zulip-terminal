@@ -568,64 +568,38 @@ class TestStreamsView:
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
+        stream_view.log.extend(["FOO", "foo", "fan", "boo", "BOO"])
+        stream_view.log.set_focus(3)
+
         stream_view.keypress(size, key)
+
+        assert stream_view.focus_index_before_search == 3
         stream_view.set_focus.assert_called_once_with("header")
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
+        mocker.patch(VIEWS + ".urwid.Frame.keypress")
         mocker.patch.object(stream_view.stream_search_box, "reset_search_text")
+        stream_view.streams_btn_list = ["FOO", "foo", "fan", "boo", "BOO"]
+        stream_view.focus_index_before_search = 3
+
+        # Simulate search
+        stream_view.log.clear()
+        stream_view.log.extend(stream_view.streams_btn_list[3])
+        stream_view.log.set_focus(0)
+        stream_view.keypress(size, "down")
+        assert stream_view.log.get_focus()[1] != stream_view.focus_index_before_search
+
+        # Exit search
         stream_view.keypress(size, key)
+
+        # Check state reset after search
         stream_view.set_focus.assert_called_once_with("body")
         assert stream_view.stream_search_box.reset_search_text.called
-        assert stream_view.log == self.streams_btn_list
-
-    @pytest.mark.parametrize("search_streams_key", keys_for_command("SEARCH_STREAMS"))
-    @pytest.mark.parametrize("go_back_key", keys_for_command("GO_BACK"))
-    @pytest.mark.parametrize(
-        "current_focus, stream",
-        [
-            (0, "FOO"),
-            (2, "fan"),
-            (4, "BOO"),
-        ],
-    )
-    def test_return_to_focus_after_search(
-        self,
-        mocker,
-        stream_view,
-        widget_size,
-        current_focus,
-        stream,
-        search_streams_key,
-        go_back_key,
-    ):
-        # Initialize log
-        stream_view.streams_btn_list = [
-            mocker.Mock(stream_name=stream_name)
-            for stream_name in ["FOO", "foo", "fan", "boo", "BOO"]
-        ]
-        stream_view.log.extend(stream_view.streams_btn_list)
-
-        # Set initial stream focus to 'current_focus' and name to 'stream'
-        stream_view.log.set_focus(current_focus)
-        stream_view.focus_index_before_search = current_focus
-        previous_focus = stream_view.log.get_focus()[1]
-        previous_focus_stream_name = stream
-
-        # Toggle Stream Search
-        size = widget_size(stream_view)
-        stream_view.keypress(size, search_streams_key)
-
-        # Exit Stream Search
-        stream_view.keypress(size, go_back_key)
-
-        # Obtain new stream focus
-        new_focus = stream_view.log.get_focus()[1]
-        new_focus_stream_name = stream_view.log[new_focus].stream_name
-        assert new_focus == previous_focus
-        assert previous_focus_stream_name == new_focus_stream_name
+        assert stream_view.log == stream_view.streams_btn_list
+        assert stream_view.log.get_focus()[1] == stream_view.focus_index_before_search
 
 
 class TestTopicsView:
@@ -741,65 +715,39 @@ class TestTopicsView:
     def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
+        topic_view.log.extend(["FOO", "foo", "fan", "boo", "BOO"])
+        topic_view.log.set_focus(3)
+
         topic_view.keypress(size, key)
+
         topic_view.set_focus.assert_called_once_with("header")
         topic_view.header_list.set_focus.assert_called_once_with(2)
+        assert topic_view.focus_index_before_search == 3
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
+        mocker.patch(VIEWS + ".urwid.Frame.keypress")
         mocker.patch.object(topic_view.topic_search_box, "reset_search_text")
+        topic_view.topics_btn_list = ["FOO", "foo", "fan", "boo", "BOO"]
+        topic_view.focus_index_before_search = 3
+
+        # Simulate search
+        topic_view.log.clear()
+        topic_view.log.extend(topic_view.topics_btn_list[3])
+        topic_view.log.set_focus(0)
+        topic_view.keypress(size, "down")
+        assert topic_view.log.get_focus()[1] != topic_view.focus_index_before_search
+
+        # Exit search
         topic_view.keypress(size, key)
+
+        # Check state reset after search
         topic_view.set_focus.assert_called_once_with("body")
         assert topic_view.topic_search_box.reset_search_text.called
-        assert topic_view.log == self.topics_btn_list
-
-    @pytest.mark.parametrize("search_topics_key", keys_for_command("SEARCH_TOPICS"))
-    @pytest.mark.parametrize("go_back_key", keys_for_command("GO_BACK"))
-    @pytest.mark.parametrize(
-        "current_focus, topic",
-        [
-            (0, "FOO"),
-            (2, "fan"),
-            (4, "BOO"),
-        ],
-    )
-    def test_return_to_focus_after_search(
-        self,
-        mocker,
-        topic_view,
-        widget_size,
-        current_focus,
-        topic,
-        search_topics_key,
-        go_back_key,
-    ):
-        # Initialize log
-        topic_view.topics_btn_list = [
-            mocker.Mock(topic_name=topic_name)
-            for topic_name in ["FOO", "foo", "fan", "boo", "BOO"]
-        ]
-        topic_view.log.extend(topic_view.topics_btn_list)
-
-        # Set initial focus to 'current_focus' and name to 'topic'
-        topic_view.log.set_focus(current_focus)
-        topic_view.focus_index_before_search = current_focus
-        previous_focus = topic_view.log.get_focus()[1]
-        previous_focus_topic_name = topic
-
-        # Toggle Search
-        size = widget_size(topic_view)
-        topic_view.keypress(size, search_topics_key)
-
-        # Exit Search
-        topic_view.keypress(size, go_back_key)
-
-        # Obtain new focus
-        new_focus = topic_view.log.get_focus()[1]
-        new_focus_topic_name = topic_view.log[new_focus].topic_name
-        assert new_focus == previous_focus
-        assert previous_focus_topic_name == new_focus_topic_name
+        assert topic_view.log == topic_view.topics_btn_list
+        assert topic_view.log.get_focus()[1] == topic_view.focus_index_before_search
 
 
 class TestUsersView:
