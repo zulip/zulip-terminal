@@ -817,6 +817,8 @@ class TestPanelSearchBox:
             lambda: True
         )
         panel_search_box.panel_view.log = log
+        empty_search = False if log else True
+        panel_search_box.panel_view.empty_search = empty_search
         panel_search_box.set_caption("")
         panel_search_box.edit_text = "key words"
 
@@ -825,19 +827,24 @@ class TestPanelSearchBox:
         # Update this display
         # FIXME We can't test for the styled version?
         # We'd compare to [('filter_results', 'Search Results'), ' ']
-        assert panel_search_box.caption == self.search_caption
+
         assert panel_search_box.edit_text == "key words"
 
-        # Leave editor mode
-        (panel_search_box.panel_view.view.controller.exit_editor_mode
-         .assert_called_once_with())
-
-        # Switch focus to body; if have results, move to them
-        panel_search_box.panel_view.set_focus.assert_called_once_with("body")
         if expect_body_focus_set:
+            assert panel_search_box.caption == self.search_caption
+            # Leave editor mode
+            (panel_search_box.panel_view.view.controller.exit_editor_mode
+             .assert_called_once_with())
+            # Switch focus to body; if have results, move to them
+            panel_search_box.panel_view.set_focus.assert_called_once_with(
+                "body")
             (panel_search_box.panel_view.body.set_focus
              .assert_called_once_with(0))
         else:
+            assert panel_search_box.caption == ''
+            (panel_search_box.panel_view.view.controller.exit_editor_mode
+             .assert_not_called())
+            panel_search_box.panel_view.set_focus.assert_not_called()
             (panel_search_box.panel_view.body.set_focus
              .assert_not_called())
 

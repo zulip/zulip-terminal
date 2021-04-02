@@ -302,6 +302,7 @@ class StreamsView(urwid.Frame):
             bline='─', brcorner='─'
         ))
         self.search_lock = threading.Lock()
+        self.empty_search = False
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -317,17 +318,20 @@ class StreamsView(urwid.Frame):
             streams_display = match_stream(stream_buttons, new_text,
                                            self.view.pinned_streams)[0]
 
+            streams_display_num = len(streams_display)
+            self.empty_search = (streams_display_num == 0)
+
             # Add a divider to separate pinned streams from the rest.
             pinned_stream_names = [
                 stream['name']
                 for stream in self.view.pinned_streams
             ]
-            first_unpinned_index = len(streams_display)
+            first_unpinned_index = streams_display_num
             for index, stream in enumerate(streams_display):
                 if stream.stream_name not in pinned_stream_names:
                     first_unpinned_index = index
                     break
-            if first_unpinned_index not in [0, len(streams_display)]:
+            if first_unpinned_index not in [0, streams_display_num]:
                 # Do not add a divider when it is already present. This can
                 # happen when new_text=''.
                 if not isinstance(streams_display[first_unpinned_index],
@@ -336,7 +340,10 @@ class StreamsView(urwid.Frame):
                                            StreamsViewDivider())
 
             self.log.clear()
-            self.log.extend(streams_display)
+            if not self.empty_search:
+                self.log.extend(streams_display)
+            else:
+                self.log.extend([self.stream_search_box.search_error])
             self.view.controller.update_screen()
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
@@ -388,6 +395,7 @@ class TopicsView(urwid.Frame):
             bline='─', brcorner='─'
         ))
         self.search_lock = threading.Lock()
+        self.empty_search = False
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
@@ -402,8 +410,13 @@ class TopicsView(urwid.Frame):
                 for topic in self.topics_btn_list.copy()
                 if new_text in topic.topic_name.lower()
             ]
+            self.empty_search = (len(topics_to_display) == 0)
+
             self.log.clear()
-            self.log.extend(topics_to_display)
+            if not self.empty_search:
+                self.log.extend(topics_to_display)
+            else:
+                self.log.extend([self.topic_search_box.search_error])
             self.view.controller.update_screen()
 
     def update_topics_list(self, stream_id: int, topic_name: str,
@@ -623,6 +636,7 @@ class RightColumnView(urwid.Frame):
             )
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
+        self.empty_search = False
         super().__init__(self.users_view(), header=search_box)
 
     @asynch
@@ -655,6 +669,7 @@ class RightColumnView(urwid.Frame):
         with self.search_lock:
             if user_list:
                 self.view.users = user_list
+
             users = self.view.users.copy()
             if new_text:
                 users_display = [
@@ -662,7 +677,17 @@ class RightColumnView(urwid.Frame):
                 ]
             else:
                 users_display = users
-            self.body = self.users_view(users_display)
+
+            self.empty_search = (len(users_display) == 0)
+
+            # FIXME Update log directly?
+            if not self.empty_search:
+                self.body = self.users_view(users_display)
+            else:
+                self.body = UsersView(
+                    self.view.controller,
+                    [self.user_search.search_error]
+                )
             self.set_body(self.body)
             self.view.controller.update_screen()
 

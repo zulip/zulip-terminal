@@ -1624,6 +1624,10 @@ class PanelSearchBox(urwid.Edit):
         self.search_text = (
             f"Search [{', '.join(keys_for_command(search_command))}]: "
         )
+        self.search_error = urwid.AttrMap(
+            urwid.Text([' ', INVALID_MARKER, ' No Results']),
+            'search_error'
+        )
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(caption='', edit_text=self.search_text)
 
@@ -1652,10 +1656,10 @@ class PanelSearchBox(urwid.Edit):
             self.reset_search_text()
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, 'esc')
-        elif is_command_key('ENTER', key):
+        elif is_command_key('ENTER', key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([('filter_results', 'Search Results'), ' '])
             self.panel_view.set_focus("body")
-            if hasattr(self.panel_view, 'log') and len(self.panel_view.log):
+            if hasattr(self.panel_view, 'log'):
                 self.panel_view.body.set_focus(0)
         return super().keypress(size, key)
