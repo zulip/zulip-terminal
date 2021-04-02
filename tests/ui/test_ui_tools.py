@@ -498,6 +498,7 @@ class TestStreamsView:
         ('FOO', ['foo', '', 'FOO', 'FOOBAR'], ['foo', ]),
         # With 'bar' pinned.
         ('bar', ['bar'], ['bar', ]),
+        ('baar', 'search error', []),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log,
                             to_pin):
@@ -510,14 +511,17 @@ class TestStreamsView:
         stream_names.sort(key=lambda stream_name: stream_name in [
             stream for stream in to_pin], reverse=True)
         self.view.controller.is_in_editor_mode = lambda: True
-        search_box = "SEARCH_BOX"
+        search_box = stream_view.stream_search_box
         stream_view.streams_btn_list = [
             mocker.Mock(stream_name=stream_name)
             for stream_name in stream_names
         ]
         stream_view.update_streams(search_box, new_text)
-        assert [stream.stream_name for stream in stream_view.log
-                ] == expected_log
+        if expected_log != 'search error':
+            assert [stream.stream_name for stream in stream_view.log
+                    ] == expected_log
+        else:
+            assert hasattr(stream_view.log[0].original_widget, 'text')
         self.view.controller.update_screen.assert_called_once_with()
 
     def test_mouse_event(self, mocker, stream_view, widget_size):
@@ -624,6 +628,7 @@ class TestTopicsView:
         ('FOO', ['FOO', 'FOOBAR', 'foo']),
         ('(no', ['(no topic)']),
         ('topic', ['(no topic)']),
+        ('c', 'search error'),
     ])
     def test_update_topics(self, mocker, topic_view, new_text, expected_log):
         topic_names = [
@@ -638,8 +643,11 @@ class TestTopicsView:
             for topic_name in topic_names
         ]
         topic_view.update_topics(search_box, new_text)
-        assert [topic.topic_name for topic in topic_view.log
-                ] == expected_log
+        if expected_log != 'search error':
+            assert [topic.topic_name for topic in topic_view.log
+                    ] == expected_log
+        else:
+            assert hasattr(topic_view.log[0].original_widget, 'text')
         self.view.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(['topic_name', 'topic_initial_log',
@@ -1097,8 +1105,8 @@ class TestRightColumnView:
         set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
 
         right_col_view.update_user_list("SEARCH_BOX", search_string)
-
-        right_col_view.users_view.assert_called_with(assert_list)
+        if assert_list:
+            right_col_view.users_view.assert_called_with(assert_list)
         set_body.assert_called_once_with(right_col_view.body)
 
     def test_update_user_presence(self, right_col_view, mocker,

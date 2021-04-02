@@ -49,6 +49,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'area:msg': 'standout',
     'area:stream': 'standout',
     'area:error': 'standout',
+    'search_error': 'standout'
 }
 
 
@@ -206,6 +207,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             DEF['white'],              DEF['dark_cyan']),
         ('area:error',     'white',                   'dark red',
          None,             DEF['white'],               DEF['dark_red']),
+        ('search_error',   'light red',               'black',
+         None,             DEF['light_red'],           DEF['black']),
     ],
     'gruvbox_dark': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -298,6 +301,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             BLACK,             LIGHTBLUE),
         ('area:error',     'white',           'dark red',
          None,             WHITE,             DARKRED),
+        ('search_error',   'light red',       'black',
+         None,             LIGHTRED,          BLACK),
     ],
     'gruvbox_dark24': [
         # default colorscheme on 16 colors, gruvbox colorscheme
@@ -390,6 +395,8 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             BLACK24,           LIGHTBLUE24),
         ('area:error',     'white',           'dark red',
          None,             WHITE24,           DARKRED24),
+        ('search_error',   'light red',       'black',
+         None,             LIGHTRED,          BLACK),
     ],
     'zt_light': [
         (None,             'black',           'white'),
@@ -436,6 +443,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('area:stream',    'black',           'light blue'),
         ('area:msg',       'black',           'yellow'),
         ('area:error',     'black',           'light red'),
+        ('search_error',   'light red',       'white'),
     ],
     'zt_blue': [
         (None,             'black',           'light blue'),
@@ -482,6 +490,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('area:stream',    'white',           'dark cyan'),
         ('area:msg',       'white',           'brown'),
         ('area:error',     'white',           'dark red'),
+        ('search_error',   'light red',       'light blue'),
     ]
 }
 
