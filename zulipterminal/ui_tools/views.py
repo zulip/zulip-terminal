@@ -16,14 +16,10 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
-    STATUS_ACTIVE,
-    STATUS_IDLE,
-    STATUS_INACTIVE,
-    STATUS_OFFLINE,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STATE_ICON
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
@@ -711,13 +707,6 @@ class RightColumnView(urwid.Frame):
             users = self.view.users.copy()
             reset_default_view_users = True
 
-        state_icon = {
-            "active": STATUS_ACTIVE,
-            "idle": STATUS_IDLE,
-            "offline": STATUS_OFFLINE,
-            "inactive": STATUS_INACTIVE,
-        }
-
         users_btn_list = list()
         for user in users:
             status = user["status"]
@@ -734,7 +723,7 @@ class RightColumnView(urwid.Frame):
                     controller=self.view.controller,
                     view=self.view,
                     width=self.width,
-                    state_marker=state_icon[status],
+                    state_marker=STATE_ICON[status],
                     color=f"user_{status}",
                     count=unread_count,
                     is_current_user=is_current_user,
