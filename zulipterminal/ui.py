@@ -1,7 +1,7 @@
 import random
 import re
 import time
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
 
 import urwid
 
@@ -17,6 +17,7 @@ from zulipterminal.ui_tools.views import (
     MiddleColumnView,
     RightColumnView,
 )
+from zulipterminal.urwid_types import urwid_Box
 
 
 class View(urwid.WidgetWrap):
@@ -190,8 +191,7 @@ class View(urwid.WidgetWrap):
         if visible:
             self.body.focus_position = 2
 
-    # FIXME: The type of size should be urwid_Size; this needs checking
-    def keypress(self, size: Tuple[int, int], key: str) -> Optional[str]:
+    def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
