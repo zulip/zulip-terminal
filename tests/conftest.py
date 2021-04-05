@@ -104,6 +104,11 @@ def msg_box(mocker, messages_successful_response):
     )
 
 
+@pytest.fixture(params=[True, False], ids=["ignore_mouse_click", "handle_mouse_click"])
+def compose_box_is_open(request):
+    return request.param
+
+
 # --------------- Model Fixtures ----------------------------------------------
 
 
