@@ -11,6 +11,7 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
     QUOTED_TEXT_MARKER,
     STATUS_ACTIVE,
+    STATUS_INACTIVE,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
@@ -2112,9 +2113,12 @@ class TestMessageBox:
     @pytest.mark.parametrize(
         "expected_header, to_vary_in_last_message",
         [
-            (["alice", " ", "DAYDATETIME"], {"sender_full_name": "bob"}),
-            ([" ", " ", "DAYDATETIME"], {"timestamp": 1532103779}),
-            (["alice", " ", "DAYDATETIME"], {"timestamp": 0}),
+            (
+                [STATUS_INACTIVE, "alice", " ", "DAYDATETIME"],
+                {"sender_full_name": "bob"},
+            ),
+            ([" ", " ", " ", "DAYDATETIME"], {"timestamp": 1532103779}),
+            ([STATUS_INACTIVE, "alice", " ", "DAYDATETIME"], {"timestamp": 0}),
         ],
         ids=[
             "show_author_as_authors_different",
@@ -2142,6 +2146,9 @@ class TestMessageBox:
             " ",
         ] * 2  # called once in __init__ and then in main_view explicitly
 
+        # The empty dict is responsible for INACTIVE status of test user.
+        self.model.user_dict = {}  # called once in main_view explicitly
+
         stars = {
             msg: ({"flags": ["starred"]} if msg == starred_msg else {})
             for msg in ("this", "last")
@@ -2152,10 +2159,10 @@ class TestMessageBox:
 
         msg_box = MessageBox(this_msg, self.model, last_msg)
 
-        expected_header[1] = output_date_time
+        expected_header[2] = output_date_time
         if current_year > 2018:
-            expected_header[1] = "2018 - " + expected_header[1]
-        expected_header[2] = "*" if starred_msg == "this" else " "
+            expected_header[2] = "2018 - " + expected_header[2]
+        expected_header[3] = "*" if starred_msg == "this" else " "
 
         view_components = msg_box.main_view()
 
