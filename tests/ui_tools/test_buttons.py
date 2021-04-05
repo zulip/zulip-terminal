@@ -348,10 +348,13 @@ class TestTopicButton:
             14: {"name": "GSoC"},
         }
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        view = mocker.Mock()
         top_button = mocker.patch(TOPBUTTON + ".__init__")
         params = dict(controller=controller, width=width, count=count)
 
-        topic_button = TopicButton(stream_id=stream_id, topic=title, **params)
+        topic_button = TopicButton(
+            stream_id=stream_id, topic=title, view=view, **params
+        )
 
         top_button.assert_called_once_with(
             caption=title,
@@ -389,13 +392,26 @@ class TestTopicButton:
             return_value=is_muted_topic_return_value
         )
         controller.model.stream_dict = {205: {"name": stream_name}}
+        view = mocker.Mock()
         topic_button = TopicButton(
-            stream_id=205, topic=title, controller=controller, width=40, count=0
+            stream_id=205,
+            topic=title,
+            controller=controller,
+            view=view,
+            width=40,
+            count=0,
         )
         if is_muted_called:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+    @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
+    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_button, key, widget_size):
+        size = widget_size(topic_button)
+        topic_button.view.left_panel = mocker.Mock()
+        topic_button.keypress(size, key)
+        topic_button.view.left_panel.show_stream_view.assert_called_once_with()
 
 
 class TestMessageLinkButton:

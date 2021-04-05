@@ -469,9 +469,6 @@ class TopicsView(urwid.Frame):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("TOGGLE_TOPIC", key):
-            # Exit topic view
-            self.view.left_panel.show_stream_view()
         if is_command_key("SEARCH_TOPICS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
@@ -865,6 +862,7 @@ class LeftColumnView(urwid.Pile):
                 stream_id=stream_id,
                 topic=topic,
                 controller=self.controller,
+                view=self.view,
                 width=self.width,
                 count=self.model.unread_counts["unread_topics"].get(
                     (stream_id, topic), 0

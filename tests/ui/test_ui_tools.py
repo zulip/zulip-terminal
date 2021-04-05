@@ -694,14 +694,6 @@ class TestTopicsView:
         assert [topic.topic_name for topic in topic_view.log] == topic_final_log
         set_focus_valign.assert_called_once_with("bottom")
 
-    @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
-    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_view, key, widget_size):
-        size = widget_size(topic_view)
-        mocker.patch(VIEWS + ".urwid.Frame.keypress")
-        topic_view.view.left_panel = mocker.Mock()
-        topic_view.keypress(size, key)
-        topic_view.view.left_panel.show_stream_view.assert_called_once_with()
-
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_TOPICS"))
     def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
@@ -1249,6 +1241,7 @@ class TestLeftColumnView:
                     stream_id=205,
                     topic=topic,
                     controller=self.view.controller,
+                    view=self.view,
                     width=40,
                     count=count,
                 )

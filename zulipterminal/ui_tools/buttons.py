@@ -290,6 +290,7 @@ class TopicButton(TopButton):
         stream_id: int,
         topic: str,
         controller: Any,
+        view: Any,
         width: int = 0,
         count: int = 0,
     ) -> None:
@@ -297,6 +298,7 @@ class TopicButton(TopButton):
         self.topic_name = topic
         self.stream_id = stream_id
         self.model = controller.model
+        self.view = view
 
         narrow_function = partial(
             controller.narrow_to_topic,
@@ -320,6 +322,12 @@ class TopicButton(TopButton):
         self.update_widget(("muted", MUTE_MARKER), "muted")
 
     # TODO: Handle event-based approach for topic-muting.
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key("TOGGLE_TOPIC", key):
+            # Exit topic view
+            self.view.left_panel.show_stream_view()
+        return super().keypress(size, key)
 
 
 class DecodedStream(TypedDict):
