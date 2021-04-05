@@ -1,6 +1,5 @@
 from typing import Any, List, Optional
 
-import gitlint
 from gitlint.options import ListOption
 from gitlint.rules import CommitRule, RuleViolation
 
@@ -48,8 +47,8 @@ class AreaFormatting(CommitRule):
             return False
 
         for area in title_components[:-1]:
-            if (any(deny_capital_text(word) for word in area.split('/')) or
-                    ' ' in area):
+            if(any(deny_capital_text(word) for word in area.split('/'))
+               or ' ' in area):
                 violations += [RuleViolation(self.id, error, line_nr=1)]
 
         error = "Summary of change, after area(s), should be capitalized"

@@ -18,7 +18,7 @@ def run() -> None:
                                   description="Import order checker (config: setup.cfg)")
     linter_config.external_linter('mypy', [sys.executable, 'tools/run-mypy'], pass_targets=False,
                                   description="Static type checker for Python (config: mypy.ini)")
-    linter_config.external_linter('flake8', 'flake8 zulipterminal/ tests/ setup.py'.split(),
+    linter_config.external_linter('flake8', 'flake8 zulipterminal/ tests/ tools/ setup.py'.split(),
                                   description="Standard Python linter (config: setup.cfg)")
 
 
