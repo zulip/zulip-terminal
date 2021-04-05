@@ -31,6 +31,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
+from zulipterminal.config.ui_mappings import STATE_ICON
 from zulipterminal.helper import (
     Message,
     asynch,
@@ -1324,11 +1325,23 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, Tuple[Optional[str], str]]
-            text_keys = ("author", "star", "time")
+            text_keys = ("author", "star", "time", "status")
             text: TextType = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("name", message["this"]["author"])
+
+                # TODO: Refactor to use user ids for look up instead of emails.
+                email = self.message.get("sender_email", "")
+                user = self.model.user_dict.get(email, None)
+                # TODO: Currently status of bots are shown as `inactive`.
+                # Render bot users' status with bot marker as a follow-up
+                status = user.get("status", "inactive") if user else "inactive"
+
+                # The default text['status'] value is (None, ' ')
+                if status in STATE_ICON:
+                    text["status"] = (f"user_{status}", STATE_ICON[status])
+
             if message["this"]["is_starred"]:
                 text["star"] = ("starred", "*")
             if any(different[key] for key in ("recipients", "author", "timestamp")):
@@ -1341,6 +1354,7 @@ class MessageBox(urwid.Pile):
 
             content_header = urwid.Columns(
                 [
+                    ("pack", urwid.Text(text["status"])),
                     ("weight", 10, urwid.Text(text["author"])),
                     (26, urwid.Text(text["time"], align="right")),
                     (1, urwid.Text(text["star"], align="right")),
