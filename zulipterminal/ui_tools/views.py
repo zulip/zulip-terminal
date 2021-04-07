@@ -552,6 +552,14 @@ class MiddleColumnView(urwid.Frame):
             return pm
         return None
 
+    def update_message_list_status_markers(self) -> None:
+        for message_w in self.body.log:
+            message_box = message_w.original_widget
+
+            message_box.update_message_author_status()
+
+        self.controller.update_screen()
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("GO_BACK", key):
             self.header.keypress(size, "esc")
