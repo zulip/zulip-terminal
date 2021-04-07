@@ -344,9 +344,9 @@ class Model:
                 self.initial_data["presences"] = response["presences"]
                 self.users = self.get_all_users()
                 if hasattr(self.controller, "view"):
-                    self.controller.view.users_view.update_user_list(
-                        user_list=self.users
-                    )
+                    view = self.controller.view
+                    view.users_view.update_user_list(user_list=self.users)
+                    view.middle_column.update_message_list_status_markers()
             time.sleep(60)
 
     @asynch
