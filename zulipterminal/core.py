@@ -434,6 +434,10 @@ class Controller:
             if time_elapsed > max_duration:
                 self.active_conversation_info = {}
 
+            # If user changes narrow
+            if self.model.narrow != active_conversation_info["narrow"]:
+                self.active_conversation_info = {}
+
             self.view.set_footer_text(
                 [
                     ("footer_contrast", " " + sender_name + " "),

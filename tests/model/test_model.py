@@ -2552,6 +2552,7 @@ class TestModel:
                 model.controller.active_conversation_info["typing_start_time"]
                 == "UNIXTIME"
             )
+            assert model.controller.active_conversation_info["narrow"] == narrow
         assert show_typing_notification.called == expected_show_typing_notification
 
     @pytest.mark.parametrize(

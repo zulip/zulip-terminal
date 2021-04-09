@@ -553,6 +553,7 @@ class TestController:
                 {
                     "sender_name": "hamlet",
                     "typing_start_time": datetime.now() + timedelta(1),
+                    "narrow": ["pm"],
                 },
                 id="in_pm_narrow_with_sender_typing:start",
             ),
@@ -567,6 +568,7 @@ class TestController:
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
         sleep = mocker.patch(MODULE + ".time.sleep")
+        controller.model.narrow = ["pm"]
         controller.active_conversation_info = active_conversation_info
 
         def mock_typing() -> None:
@@ -598,10 +600,29 @@ class TestController:
         controller: Controller,
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
-        controller.active_conversation_info = {"sender_name": "hamlet"}
+        controller.model.narrow = ["pm"]
+        controller.active_conversation_info = {
+            "sender_name": "hamlet",
+            "narrow": controller.model.narrow,
+        }
         controller.active_conversation_info[
             "typing_start_time"
         ] = datetime.now() - timedelta(seconds=14.5)
+
+        controller.show_typing_notification()
+
+        assert controller.active_conversation_info == {}
+
+    def test_end_typing_notification_on_narrow_change(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        controller.model.narrow = [["pm_with", "othello@zulip.com"]]
+        controller.active_conversation_info = {
+            "sender_name": "hamlet",
+            "narrow": [["pm_with", "hamlet@zulip.com"]],
+        }
+        controller.active_conversation_info["typing_start_time"] = datetime.now()
 
         controller.show_typing_notification()
 
