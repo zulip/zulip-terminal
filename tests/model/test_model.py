@@ -7,7 +7,13 @@ import pytest
 from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
-from zulipterminal.model import Model, ServerConnectionFailure
+from zulipterminal.model import (
+    MAX_MESSAGE_LENGTH,
+    MAX_STREAM_NAME_LENGTH,
+    MAX_TOPIC_NAME_LENGTH,
+    Model,
+    ServerConnectionFailure,
+)
 
 
 class TestModel:
@@ -627,6 +633,40 @@ class TestModel:
 
         assert (model.modernize_message_response(messages)
                 == expected_messages_response)
+
+    @pytest.mark.parametrize('feature_level, to_vary_in_initial_data', [
+        (None, {}),
+        (27, {}),
+        (52, {}),
+        (53, {
+            'max_stream_name_length': 30,
+            'max_topic_length': 20,
+            'max_message_length': 5000,
+        })], ids=[
+            'Zulip_2.1.x_ZFL_None_no_restrictions',
+            'Zulip_3.1.x_ZFL_27_no_restrictions',
+            'Zulip_4.0.x_ZFL_52_no_restrictions',
+            'Zulip_4.0.x_ZFL_53_with_restrictions',
+    ])
+    def test__store_content_length_restrictions(
+            self, model, initial_data, feature_level, to_vary_in_initial_data):
+        initial_data.update(to_vary_in_initial_data)
+        model.initial_data = initial_data
+        model.server_feature_level = feature_level
+
+        model._store_content_length_restrictions()
+
+        if to_vary_in_initial_data:
+            assert (model.max_stream_name_length
+                    == to_vary_in_initial_data['max_stream_name_length'])
+            assert (model.max_topic_length
+                    == to_vary_in_initial_data['max_topic_length'])
+            assert (model.max_message_length
+                    == to_vary_in_initial_data['max_message_length'])
+        else:
+            assert model.max_stream_name_length == MAX_STREAM_NAME_LENGTH
+            assert model.max_topic_length == MAX_TOPIC_NAME_LENGTH
+            assert model.max_message_length == MAX_MESSAGE_LENGTH
 
     def test_get_message_false_first_anchor(
             self, mocker, messages_successful_response, index_all_messages,

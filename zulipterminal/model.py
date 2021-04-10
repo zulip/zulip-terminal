@@ -52,6 +52,14 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 
 OFFLINE_THRESHOLD_SECS = 140
 
+# Adapted from zerver/models.py
+# These fields have migrated to the API inside the Realm object
+# in ZFL 53. To allow backporting to earlier server versions, we
+# define these hard-coded parameters.
+MAX_STREAM_NAME_LENGTH = 60
+MAX_TOPIC_NAME_LENGTH = 60
+MAX_MESSAGE_LENGTH = 10000
+
 
 class ServerConnectionFailure(Exception):
     pass
@@ -171,6 +179,7 @@ class Model:
         self.active_emoji_data = OrderedDict(sorted(all_emoji_data,
                                                     key=lambda e: e[0]))
 
+        self._store_content_length_restrictions()
         self.twenty_four_hr_format = self.initial_data['twenty_four_hour_time']
         self.new_user_input = True
         self._start_presence_updates()
@@ -534,6 +543,19 @@ class Model:
             return ""
         display_error_if_present(response, self.controller)
         return response['msg']
+
+    def _store_content_length_restrictions(self) -> None:
+        """
+        Stores content length restriction fields for compose box in
+        Model, if received from server, else use pre-defined values.
+        These fields were added in server version 4.0, ZFL 53.
+        """
+        self.max_stream_name_length = self.initial_data.get(
+            'max_stream_name_length', MAX_STREAM_NAME_LENGTH)
+        self.max_topic_length = self.initial_data.get(
+            'max_topic_length', MAX_TOPIC_NAME_LENGTH)
+        self.max_message_length = self.initial_data.get(
+            'max_message_length', MAX_MESSAGE_LENGTH)
 
     @staticmethod
     def modernize_message_response(message: Message
