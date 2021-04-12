@@ -1517,7 +1517,7 @@ class TestModel:
                                          update_message_flags_operation):
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={})  # Not indexed
+        model.index = dict(messages={}, unread_msgs={})  # Not indexed
         event = {
             'type': 'update_message_flags',
             'messages': [1],
@@ -1530,7 +1530,7 @@ class TestModel:
 
         model._handle_update_message_flags_event(event)
 
-        assert model.index == dict(messages={})
+        assert model.index == dict(messages={}, unread_msgs={})
         model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
@@ -1539,7 +1539,7 @@ class TestModel:
     ):
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={1: {'flags': None}})  # Minimal
+        model.index = dict(messages={1: {'flags': None}}, unread_msgs={})
         event = {
             'type': 'update_message_flags',
             'messages': [1],
@@ -1583,7 +1583,8 @@ class TestModel:
                                      for msg_id in indexed_ids},
                            starred_msg_ids=set([msg_id
                                                 for msg_id in indexed_ids
-                                                if 'starred' in flags_before]))
+                                                if 'starred' in flags_before]),
+                           unread_msgs={})
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
@@ -1640,7 +1641,12 @@ class TestModel:
         operation, model.server_feature_level = update_message_flags_operation
 
         model.index = dict(messages={msg_id: {'flags': flags_before}
-                                     for msg_id in indexed_ids})
+                                     for msg_id in indexed_ids},
+                           unread_msgs={msg_id: {'flags': []}
+                                        for msg_id in (set(event_message_ids)
+                                                       - set(indexed_ids))
+                                        if 'read' in flags_before})
+
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
@@ -1668,6 +1674,7 @@ class TestModel:
             assert (model.index['messages'][unchanged_id]['flags']
                     == flags_before)
 
+        changed_ids = set(event_message_ids) - set(indexed_ids)
         if event_op == 'add':
             set_count.assert_called_once_with(list(changed_ids),
                                               self.controller, -1)

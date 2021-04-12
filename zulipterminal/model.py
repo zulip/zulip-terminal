@@ -1227,6 +1227,7 @@ class Model:
             return
 
         indexed_message_ids = set(self.index['messages'])
+        indexed_unread_msg_ids = set(self.index['unread_msgs'].keys())
         message_ids_to_mark = set(event['messages'])
 
         for message_id in message_ids_to_mark & indexed_message_ids:
@@ -1249,8 +1250,10 @@ class Model:
             self._update_rendered_view(message_id)
 
         if operation == 'add' and flag_to_change == 'read':
-            set_count(list(message_ids_to_mark & indexed_message_ids),
-                      self.controller, -1)
+            msgs_to_mark_as_read = message_ids_to_mark & indexed_unread_msg_ids
+            set_count(list(msgs_to_mark_as_read), self.controller, -1)
+            for message_id in msgs_to_mark_as_read:
+                self.index['unread_msgs'].pop(message_id)
 
     def formatted_local_time(
         self, timestamp: int, *, show_seconds: bool, show_year: bool = False

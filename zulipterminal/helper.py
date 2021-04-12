@@ -146,12 +146,11 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
                            (stream_id, message['subject']))
             update_unreads(unread_counts['streams'], stream_id)
         # 1-1 pms have 2 display_recipient
-        elif len(message['display_recipient']) == 2:
+        elif 'sender_id' in message:
             update_unreads(unread_counts['unread_pms'], message['sender_id'])
         else:  # If it's a group pm
             update_unreads(unread_counts['unread_huddles'],
-                           frozenset(recipient['id'] for recipient
-                                     in message['display_recipient']))
+                           message['display_recipient'])
 
 
 def _set_count_in_view(controller: Any, new_count: int,
@@ -173,12 +172,6 @@ def _set_count_in_view(controller: Any, new_count: int,
     all_pm = controller.view.pm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
-        user_id = message['sender_id']
-
-        # If we sent this message, don't increase the count
-        if user_id == controller.model.user_id:
-            continue
-
         msg_type = message['type']
         add_to_counts = True
         if 'mentioned' in message['flags']:
@@ -207,10 +200,12 @@ def _set_count_in_view(controller: Any, new_count: int,
                         topic_button.update_count(topic_button.count
                                                   + new_count)
         else:
-            for user_button in user_buttons_log:
-                if user_button.user_id == user_id:
-                    user_button.update_count(user_button.count + new_count)
-                    break
+            if 'sender_id' in message:
+                user_id = message['sender_id']
+                for user_button in user_buttons_log:
+                    if user_button.user_id == user_id:
+                        user_button.update_count(user_button.count + new_count)
+                        break
             unread_counts['all_pms'] += new_count
             all_pm.update_count(unread_counts['all_pms'])
 
@@ -223,7 +218,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     # This method applies new_count for 'new message' (1) or 'read' (-1)
     # (we could ensure this in a different way by a different type)
     assert new_count == 1 or new_count == -1
-    messages = controller.model.index['messages']
+    messages = controller.model.index['unread_msgs']
     unread_counts: UnreadCounts = controller.model.unread_counts
     changed_messages = [messages[id] for id in id_list]
     _set_count_in_model(new_count, changed_messages, unread_counts)
