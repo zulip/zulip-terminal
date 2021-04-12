@@ -543,8 +543,10 @@ class TestStreamsView:
                                      widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, 'set_focus')
+        mocker.patch.object(stream_view.stream_search_box, 'set_caption')
         stream_view.keypress(size, key)
         stream_view.set_focus.assert_called_once_with("header")
+        stream_view.stream_search_box.set_caption.assert_called_once_with('')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
     def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
@@ -703,9 +705,11 @@ class TestTopicsView:
                                     widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + '.TopicsView.set_focus')
+        mocker.patch.object(topic_view.topic_search_box, 'set_caption')
         topic_view.keypress(size, key)
         topic_view.set_focus.assert_called_once_with('header')
         topic_view.header_list.set_focus.assert_called_once_with(2)
+        topic_view.topic_search_box.set_caption.assert_called_once_with('')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
     def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
@@ -1157,8 +1161,10 @@ class TestRightColumnView:
                                     widget_size):
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
+        mocker.patch.object(right_col_view.user_search, 'set_caption')
         right_col_view.keypress(size, key)
         right_col_view.set_focus.assert_called_once_with('header')
+        right_col_view.user_search.set_caption.assert_called_once_with('')
 
     @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
     def test_keypress_GO_BACK(self, right_col_view, mocker, key, widget_size):
