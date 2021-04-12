@@ -98,6 +98,8 @@ class Model:
 
         self._notified_user_of_notification_failure = False
 
+        self.callbacks: Dict[str, Any] = {}
+
         # Events fetched once at startup
         self.initial_data_to_fetch: List[str] = [
             "realm",
@@ -177,6 +179,28 @@ class Model:
         self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
         self.new_user_input = True
         self._start_presence_updates()
+
+    def register_callback(
+        self, obj: Any, event: str, callback: Callable[[Any], None]
+    ) -> None:
+        """
+        Registers a callback from UI elements that needs
+        to be triggered on events.
+        """
+        if event not in self.callbacks:
+            self.callbacks[event] = {}
+        self.callbacks[event] = (obj, callback)
+
+    def process_callback(self, event: str, stream_id: Optional[int]) -> None:
+        """
+        This function processes and calls the callback function that
+        was registered in self.callbacks and is recently triggered.
+        """
+        if event in self.callbacks and event == "stream_info_open":
+            caller = self.callbacks[event]
+            if caller[0].stream_id == stream_id:
+                callback = caller[1]
+                callback()
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -954,7 +978,6 @@ class Model:
                         self.muted_streams.add(stream_id)
                         self.unread_counts["all_msg"] -= unread_count
                         stream_button.mark_muted()
-                    self.controller.update_screen()
                 elif event.get("property", None) == "pin_to_top":
                     stream_id = event["stream_id"]
 
@@ -974,7 +997,8 @@ class Model:
                     sort_streams(self.unpinned_streams)
                     sort_streams(self.pinned_streams)
                     self.controller.view.left_panel.update_stream_view()
-                    self.controller.update_screen()
+                self.process_callback("stream_info_open", event.get("stream_id", None))
+                self.controller.update_screen()
         elif event["op"] in ("peer_add", "peer_remove"):
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)

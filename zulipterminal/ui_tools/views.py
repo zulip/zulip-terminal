@@ -1242,6 +1242,10 @@ class StreamInfoView(PopUpView):
 
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
+
+        self.controller.model.register_callback(
+            self, "stream_info_open", self.update_checkboxes_from_events
+        )
         super().__init__(controller, self.widgets, "STREAM_DESC", popup_width, title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
