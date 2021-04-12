@@ -298,7 +298,6 @@ class TestView:
 
         view.users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
-        view.user_search.set_edit_text.assert_called_once_with("")
         view.controller.enter_editor_mode_with.assert_called_once_with(view.user_search)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
@@ -324,7 +323,6 @@ class TestView:
 
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
-        view.stream_w.stream_search_box.set_edit_text.assert_called_once_with("")
         view.controller.enter_editor_mode_with.assert_called_once_with(
             view.stream_w.stream_search_box
         )

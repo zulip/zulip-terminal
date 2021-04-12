@@ -225,7 +225,6 @@ class View(urwid.WidgetWrap):
             self.users_view.keypress(size, "w")
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
-            self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
@@ -240,7 +239,6 @@ class View(urwid.WidgetWrap):
                 search_box = self.topic_w.topic_search_box
             else:
                 search_box = self.stream_w.stream_search_box
-            search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
             return key
         elif is_command_key("OPEN_DRAFT", key):
