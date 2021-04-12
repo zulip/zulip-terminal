@@ -26,10 +26,10 @@ from zulipterminal.config.keys import (
     primary_key_for_command,
 )
 from zulipterminal.config.symbols import (
+    INVALID_MARKER,
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
     QUOTED_TEXT_MARKER,
-    STREAM_MARKER_INVALID,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
     STREAM_TOPIC_SEPARATOR,
@@ -278,7 +278,7 @@ class WriteBox(urwid.Pile):
     def _set_stream_write_box_style(self, widget: ReadlineEdit,
                                     new_text: str) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
-        stream_marker = STREAM_MARKER_INVALID
+        stream_marker = INVALID_MARKER
         color = 'general_bar'
         if self.model.is_valid_stream(new_text):
             stream = self.model.stream_dict[

@@ -3,7 +3,7 @@ from pytest import param
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
-    STREAM_MARKER_INVALID,
+    INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
@@ -456,7 +456,7 @@ class TestWriteBox:
     ], [
       ('Secret stream', 99, True,  STREAM_MARKER_PRIVATE, '#ccc'),
       ('Stream 1',       1, True,  STREAM_MARKER_PUBLIC,  '#b0a5fd'),
-      ('Stream 0',       0, False, STREAM_MARKER_INVALID, 'general_bar'),
+      ('Stream 0',       0, False, INVALID_MARKER, 'general_bar'),
     ], ids=[
         'private_stream',
         'public_stream',
