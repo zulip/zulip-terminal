@@ -1819,11 +1819,11 @@ class PanelSearchBox(urwid.Edit):
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
         urwid.connect_signal(self, "change", update_function)
-        super().__init__(caption="", edit_text=self.search_text)
+        super().__init__(caption=self.search_text, edit_text="")
 
     def reset_search_text(self) -> None:
-        self.set_caption("")
-        self.set_edit_text(self.search_text)
+        self.set_caption(self.search_text)
+        self.set_edit_text("")
 
     def valid_char(self, ch: str) -> bool:
         # This method 'strips' leading space *before* entering it in the box

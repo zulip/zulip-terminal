@@ -1260,8 +1260,8 @@ class TestPanelSearchBox:
 
     def test_init(self, panel_search_box):
         assert panel_search_box.search_text == "Search [X]: "
-        assert panel_search_box.caption == ""
-        assert panel_search_box.edit_text == panel_search_box.search_text
+        assert panel_search_box.caption == panel_search_box.search_text
+        assert panel_search_box.edit_text == ""
 
     def test_reset_search_text(self, panel_search_box):
         panel_search_box.set_caption(self.search_caption)
@@ -1269,8 +1269,8 @@ class TestPanelSearchBox:
 
         panel_search_box.reset_search_text()
 
-        assert panel_search_box.caption == ""
-        assert panel_search_box.edit_text == panel_search_box.search_text
+        assert panel_search_box.caption == panel_search_box.search_text
+        assert panel_search_box.edit_text == ""
 
     @pytest.mark.parametrize(
         "search_text, entered_string, expected_result",
@@ -1346,8 +1346,8 @@ class TestPanelSearchBox:
         panel_search_box.keypress(size, back_key)
 
         # Reset display
-        assert panel_search_box.caption == ""
-        assert panel_search_box.edit_text == panel_search_box.search_text
+        assert panel_search_box.caption == panel_search_box.search_text
+        assert panel_search_box.edit_text == ""
 
         # Leave editor mode
         panel_view.view.controller.exit_editor_mode.assert_called_once_with()
