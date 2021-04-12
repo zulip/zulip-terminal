@@ -470,6 +470,7 @@ class TopicsView(urwid.Frame):
 
 class UsersView(urwid.ListBox):
     def __init__(self, controller: Any, users_btn_list: List[Any]) -> None:
+        self.users_btn_list = users_btn_list
         self.log = urwid.SimpleFocusListWalker(users_btn_list)
         self.controller = controller
         super().__init__(self.log)

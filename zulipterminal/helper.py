@@ -162,12 +162,12 @@ def _set_count_in_view(controller: Any, new_count: int,
         additionally set the current count in the model and make use of the
         same in the UI.
     """
-    stream_buttons_log = controller.view.stream_w.log
+    stream_buttons_list = controller.view.stream_w.streams_btn_list
     is_open_topic_view = controller.view.left_panel.is_in_topic_view
     if is_open_topic_view:
-        topic_buttons_log = controller.view.topic_w.log
+        topic_buttons_list = controller.view.topic_w.topics_btn_list
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
-    user_buttons_log = controller.view.user_w.log
+    user_buttons_list = controller.view.user_w.users_btn_list
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
     all_mentioned = controller.view.mentioned_button
@@ -190,7 +190,7 @@ def _set_count_in_view(controller: Any, new_count: int,
             if controller.model.is_muted_stream(stream_id):
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
-                for stream_button in stream_buttons_log:
+                for stream_button in stream_buttons_list:
                     if stream_button.stream_id == stream_id:
                         stream_button.update_count(stream_button.count
                                                    + new_count)
@@ -201,12 +201,12 @@ def _set_count_in_view(controller: Any, new_count: int,
             if is_open_topic_view and stream_id == toggled_stream_id:
                 # If topic_view is open for incoming messages's stream,
                 # We update the respective TopicButton count accordingly.
-                for topic_button in topic_buttons_log:
+                for topic_button in topic_buttons_list:
                     if topic_button.topic_name == msg_topic:
                         topic_button.update_count(topic_button.count
                                                   + new_count)
         else:
-            for user_button in user_buttons_log:
+            for user_button in user_buttons_list:
                 if user_button.user_id == user_id:
                     user_button.update_count(user_button.count + new_count)
                     break
