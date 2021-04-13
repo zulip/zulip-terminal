@@ -1,3 +1,6 @@
+import os
+
+
 STREAM_MARKER_INVALID = '✗'
 STREAM_MARKER_PRIVATE = 'P'
 STREAM_MARKER_PUBLIC = '#'
@@ -18,3 +21,11 @@ STATUS_ACTIVE = '●'
 STATUS_IDLE = '◒'
 STATUS_OFFLINE = '○'
 STATUS_INACTIVE = '•'
+
+
+def is_utf8_encoding_enabled() -> bool:
+    """
+    It checks whether UTF-8 encoding is enabled in locale.
+    """
+    lang = os.environ.get('LANG', '')
+    return '.utf-8' in lang.lower()
