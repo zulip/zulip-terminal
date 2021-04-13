@@ -66,17 +66,6 @@ One session of Zulip Terminal represents a connection of one user to one Zulip s
 
 Since we expect the above to be straightforward for most users and it allows the code to remain dramatically simpler, we are unlikely to support multiple Zulip servers within the same session in at least the short/medium term. However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
 
-## Unable to render non-ASCII characters
-
-**NOTE** Releases of 0.3.2 onwards should not have this issue, or require this solution.
-
-If you see `?` in place of emojis or Zulip Terminal gives a `UnicodeError` / `CanvasError`, you haven't enabled utf-8
-encoding in your terminal. To enable it by default, add this to the end of you `~/.bashrc`:
-
-```
-export LANG=en_US.utf-8
-```
-
 ## Unable to open links
 
 If you are unable to open links in messages, then try double right-click on the link.
