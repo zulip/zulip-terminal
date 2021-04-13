@@ -66,6 +66,18 @@ One session of Zulip Terminal represents a connection of one user to one Zulip s
 
 Since we expect the above to be straightforward for most users and it allows the code to remain dramatically simpler, we are unlikely to support multiple Zulip servers within the same session in at least the short/medium term. However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
 
+## Unable to render symbols
+
+If some symbols don't render properly on your terminal, it could likely be because of the symbols not being supported on your terminal emulator and/or font.
+
+We provide a tool that you can run with the command `zulip-term-check-symbols` to check whether or not the symbols render properly on your terminal emulator and font configuration.
+
+Ideally, you should see something similar to the following screenshot (taken on the GNOME Terminal) as a result of running the tool:
+
+![Render Symbols Screenshot](https://user-images.githubusercontent.com/60441372/115103315-9a5df580-9f6e-11eb-8c90-3b2585817d08.png)
+
+If you are unable to observe a similar result upon running the tool, please take a screenshot and let us know about it along with your terminal and font configuration by opening an issue or at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
 ## Unable to open links
 
 If you are unable to open links in messages, then try double right-click on the link.
