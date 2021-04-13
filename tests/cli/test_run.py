@@ -124,6 +124,48 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
     assert captured.err == ""
 
 
+def test_warning_utf_encoding_not_enabled(capsys, mocker, monkeypatch,
+                                          minimal_zuliprc,
+                                          server_connection_error="sce"):
+    mocker.patch('zulipterminal.core.Controller.__init__',
+                 side_effect=ServerConnectionFailure(server_connection_error))
+
+    mocker.patch('zulipterminal.cli.run.is_utf8_encoding_enabled',
+                 return_value=False)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", minimal_zuliprc])
+
+    assert str(e.value) == '1'
+
+    captured = capsys.readouterr()
+
+    lines = captured.out.strip().split("\n")
+    print(lines)
+    expected_lines = [
+        "Loading with:",
+        "   theme 'zt_dark' specified with no config.",
+        "   autohide setting 'no_autohide' specified with no config.",
+        "   maximum footlinks value '3' specified with no config.",
+        "   color depth setting '256' specified with no config.",
+        "   notify setting 'disabled' specified with no config.",
+        "\x1b[93m"
+        "   WARNING: Locale doesn't include UTF-8; "
+        "some icons may not get rendered properly!",
+        "            (there might be '?' markers instead)",
+        "   To enable it by default, add this line to "
+        "the end of your '~/.bashrc' (restart terminal to "
+        "see effect)",
+        "      export LANG=en_US.utf-8",
+        "\x1b[0m",
+        "\x1b[91m",
+        f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
+    ]
+    assert lines == expected_lines
+
+    assert captured.err == ""
+
+
 @pytest.mark.parametrize('bad_theme', ['c', 'd'])
 def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
                                             minimal_zuliprc, bad_theme,

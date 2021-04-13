@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests
 from urwid import display_common, set_encoding
 
+from zulipterminal.config.symbols import is_utf8_encoding_enabled
 from zulipterminal.config.themes import (
     THEMES,
     aliased_themes,
@@ -416,6 +417,16 @@ def main(options: Optional[List[str]]=None) -> None:
               .format(*zterm['color-depth']))
         print("   notify setting '{}' specified {}."
               .format(*zterm['notify']))
+
+        if not is_utf8_encoding_enabled():
+            print(in_color('yellow',
+                           "   WARNING: Locale doesn't include UTF-8; "
+                           "some icons may not get rendered properly!\n"
+                           "            (there might be '?' markers instead)\n"
+                           "   To enable it by default, add this line to "
+                           "the end of your '~/.bashrc' (restart terminal to "
+                           "see effect)\n"
+                           "      export LANG=en_US.utf-8\n"))
 
         # For binary settings
         # Specify setting in order True, False
