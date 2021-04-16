@@ -112,8 +112,8 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
         "Loading with:",
         "   theme 'zt_dark' specified with no config.",
         "   autohide setting 'no_autohide' specified with no config.",
-        "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
+        "   maximum footlinks value '3' specified with no config.",
         "   notify setting 'disabled' specified with no config.",
         "\x1b[91m",
         ("Error connecting to Zulip server: "
@@ -153,8 +153,8 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
         f"      (you could try: {'a'}, {'b'})"
         "\x1b[0m",
         "   autohide setting 'no_autohide' specified with no config.",
-        "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
+        "   maximum footlinks value '3' specified with no config.",
         "   notify setting 'disabled' specified with no config.",
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
@@ -341,8 +341,8 @@ def test_successful_main_function_with_config(
         'Loading with:',
         "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
         "   autohide setting 'autohide' specified in zuliprc file.",
-        f"   maximum footlinks value {footlinks_output}",
         "   color depth setting '256' specified in zuliprc file.",
+        f"   maximum footlinks value {footlinks_output}",
         "   notify setting 'enabled' specified in zuliprc file."
     ]
     assert lines == expected_lines
