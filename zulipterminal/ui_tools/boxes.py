@@ -150,7 +150,8 @@ class WriteBox(urwid.Pile):
         )
         self.to_write_box.set_completer_delims("")
 
-        self.msg_write_box = ReadlineEdit(multiline=True)
+        self.msg_write_box = ReadlineEdit(
+            multiline=True, max_char=self.model.max_message_length)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
@@ -215,13 +216,15 @@ class WriteBox(urwid.Pile):
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
                                             stream_id=stream_id)
         self.to_write_box = None
-        self.msg_write_box = ReadlineEdit(multiline=True)
+        self.msg_write_box = ReadlineEdit(
+            multiline=True, max_char=self.model.max_message_length)
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
             key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
         )
-        self.stream_write_box = ReadlineEdit(edit_text=caption)
+        self.stream_write_box = ReadlineEdit(
+            edit_text=caption, max_char=self.model.max_stream_name_length)
         self.stream_write_box.enable_autocomplete(
             func=self._stream_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
@@ -229,7 +232,8 @@ class WriteBox(urwid.Pile):
         )
         self.stream_write_box.set_completer_delims("")
 
-        self.title_write_box = ReadlineEdit(edit_text=title)
+        self.title_write_box = ReadlineEdit(
+            edit_text=title, max_char=self.model.max_topic_length)
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
