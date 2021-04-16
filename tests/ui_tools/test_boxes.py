@@ -26,6 +26,9 @@ class TestWriteBox:
         write_box = WriteBox(self.view)
         write_box.view.users = users_fixture
         write_box.model.user_dict = user_dict
+        write_box.model.max_stream_name_length = 60
+        write_box.model.max_topic_length = 60
+        write_box.model.max_message_length = 10000
         write_box.model.user_group_names = [
             groups['name'] for groups in user_groups_fixture]
 
