@@ -22,6 +22,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'excluded_from_random_tips': True,
         'key_category': 'general',
     }),
+    ('MARKDOWN_HELP', {
+        'keys': ['meta m'],
+        'help_text': 'Show/hide markdown help menu',
+        'key_category': 'general',
+    }),
     ('ABOUT', {
         'keys': ['meta ?'],
         'help_text': 'Show/hide about menu',
