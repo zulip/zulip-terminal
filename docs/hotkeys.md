@@ -6,6 +6,7 @@
 |Command|Key Combination|
 | :--- | :---: |
 |Show/hide help menu|<kbd>?</kbd>|
+|Show/hide markdown help menu|<kbd>meta</kbd> + <kbd>m</kbd>|
 |Show/hide about menu|<kbd>meta</kbd> + <kbd>?</kbd>|
 |Go Back|<kbd>esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
