@@ -409,16 +409,16 @@ class TopicsView(urwid.Frame):
         # displaying wrong topics list.
         with self.search_lock:
             new_text = new_text.lower()
-            topics_to_display = [
+            topics_display = [
                 topic
                 for topic in self.topics_btn_list.copy()
                 if new_text in topic.topic_name.lower()
             ]
-            self.empty_search = (len(topics_to_display) == 0)
+            self.empty_search = (len(topics_display) == 0)
 
             self.log.clear()
             if not self.empty_search:
-                self.log.extend(topics_to_display)
+                self.log.extend(topics_display)
             else:
                 self.log.extend([self.topic_search_box.search_error])
             self.view.controller.update_screen()
