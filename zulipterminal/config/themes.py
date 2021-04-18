@@ -92,6 +92,23 @@ GRAY = 'h244'  # gray_244
 LIGHTMAGENTA = 'h132'  # neutral_purple
 LIGHTMAGENTABOLD = f"{LIGHTMAGENTA}, bold"
 
+# Colors used in gruvbox_dark24
+BLACK24 = '#1d2021'  # dark0_hard
+WHITE24 = '#a89984'  # light4
+WHITEBOLD24 = f"{WHITE24}, bold"
+DARKBLUE24 = '#076678'  # faded_blue
+DARKRED24 = '#9d0006'  # faded_red
+LIGHTBLUE24 = '#83a598'  # bright_blue
+LIGHTBLUEBOLD24 = f"{LIGHTBLUE24}, bold"
+YELLOW24 = '#d79921'  # neutral_yellow
+YELLOWBOLD24 = f"{YELLOW24}, bold"
+LIGHTGREEN24 = '#b8bb26'  # bright_green
+LIGHTRED24 = '#fb4934'  # bright_red
+LIGHTREDBOLD24 = f"{LIGHTRED24}, bold"
+GRAY24 = '#928374'  # gray_244
+LIGHTMAGENTA24 = '#b16286'  # neutral_purple
+LIGHTMAGENTABOLD24 = f"{LIGHTMAGENTA24}, bold"
+
 THEME_ALIASES = {
     'default': 'zt_dark',
     'gruvbox': 'gruvbox_dark',
@@ -281,6 +298,98 @@ THEMES: Dict[str, ThemeSpec] = {
          None,             BLACK,             LIGHTBLUE),
         ('area:error',     'white',           'dark red',
          None,             WHITE,             DARKRED),
+    ],
+    'gruvbox_dark24': [
+        # default colorscheme on 16 colors, gruvbox colorscheme
+        # on 24 bit color (true color)
+        (None,             'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('selected',       'black',           'white',
+         None,             BLACK24,           WHITE24),
+        ('msg_selected',   'black',           'white',
+         None,             BLACK24,           WHITE24),
+        ('header',         'dark cyan',       'dark blue',
+         None,             'dark cyan',       DARKBLUE24),
+        ('general_narrow', 'white',           'dark blue',
+         None,             WHITE24,           DARKBLUE24),
+        ('general_bar',    'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('name',           'yellow, bold',    'black',
+         None,             YELLOWBOLD24,      BLACK24),
+        ('unread',         'light magenta',   'black',
+         None,             LIGHTMAGENTA24,    BLACK24),
+        ('user_active',    'light green',     'black',
+         None,             LIGHTGREEN24,      BLACK24),
+        ('user_idle',      'yellow',          'black',
+         None,             YELLOW24,          BLACK24),
+        ('user_offline',   'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('user_inactive',  'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('title',          'white, bold',     'black',
+         None,             WHITEBOLD24,       BLACK24),
+        ('column_title',   'white, bold',     'black',
+         None,             WHITEBOLD24,       BLACK24),
+        ('time',           'light blue',      'black',
+         None,             LIGHTBLUE24,       BLACK24),
+        ('bar',            'white',           'dark gray',
+         None,             WHITE24,           GRAY24),
+        ('popup_contrast', 'black',           'dark gray',
+         None,             BLACK24,           GRAY24),
+        ('msg_emoji',      'light magenta',   'black',
+         None,             LIGHTMAGENTA24,     BLACK24),
+        ('reaction',       'light magenta, bold', 'black',
+         None,             LIGHTMAGENTABOLD24,    BLACK24),
+        ('reaction_mine',  'black',           'light magenta',
+         None,             BLACK24,           LIGHTMAGENTA24),
+        ('msg_mention',    'light red, bold', 'black',
+         None,             LIGHTREDBOLD24,    BLACK24),
+        ('msg_link',       'light blue',      'black',
+         None,             LIGHTBLUE24,       BLACK24),
+        ('msg_link_index', 'light blue, bold', 'black',
+         None,             LIGHTBLUEBOLD24,   BLACK24),
+        ('msg_quote',      'brown',           'black',
+         None,             'brown',           BLACK24),
+        ('msg_code',       'black',           'white',
+         None,             BLACK24,           WHITE24),
+        ('msg_bold',       'white, bold',     'black',
+         None,             WHITEBOLD24,       BLACK24),
+        ('msg_time',       'black',           'white',
+         None,             BLACK24,           WHITE24),
+        ('footer',         'white',           'dark red',
+         None,             WHITE24,           DARKRED24),
+        ('starred',        'light red, bold', 'black',
+         None,             LIGHTREDBOLD24,    BLACK24),
+        ('popup_category', 'light blue, bold', 'black',
+         None,             LIGHTBLUE24,       BLACK24),
+        ('unread_count',   'yellow',          'black',
+         None,             YELLOW24,          BLACK24),
+        ('table_head',     'white, bold',     'black',
+         None,             WHITEBOLD24,       BLACK24),
+        ('filter_results', 'black',           'light green',
+         None,             BLACK24,           LIGHTGREEN24),
+        ('edit_topic',     'black',           'dark gray',
+         None,             BLACK24,           GRAY24),
+        ('edit_tag',       'black',           'dark gray',
+         None,             BLACK24,           GRAY24),
+        ('edit_author',    'yellow',          'black',
+         None,             YELLOW24,          BLACK24),
+        ('edit_time',      'light blue',      'black',
+         None,             LIGHTBLUE24,       BLACK24),
+        ('current_user',   'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('muted',          'light blue',      'black',
+         None,             LIGHTBLUE24,       BLACK24),
+        ('popup_border',   'white',           'black',
+         None,             WHITE24,           BLACK24),
+        ('area:help',      'black',           'light green',
+         None,             BLACK24,           LIGHTGREEN24),
+        ('area:msg',       'black',           'light red',
+         None,             BLACK24,           LIGHTRED24),
+        ('area:stream',    'black',           'light blue',
+         None,             BLACK24,           LIGHTBLUE24),
+        ('area:error',     'white',           'dark red',
+         None,             WHITE24,           DARKRED24),
     ],
     'zt_light': [
         (None,             'black',           'white'),
