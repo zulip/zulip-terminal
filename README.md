@@ -113,7 +113,7 @@ footlinks=disabled
 maximum-footlinks=3
 # Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
-# Color depth defaults to 256, but can be set to 1 (for monochrome) or 16.
+# Color depth defaults to 256, but can be set to 1 (for monochrome), or 16 or 24bit.
 color-depth=256
 ```
 

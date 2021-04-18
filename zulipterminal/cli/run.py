@@ -92,7 +92,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         action="store_true",
                         help='list all the color themes.')
     parser.add_argument('--color-depth',
-                        choices=['1', '16', '256'],
+                        choices=['1', '16', '256', '24bit'],
                         help="Force the color depth "
                              f"(default {DEFAULT_SETTINGS['color-depth']}).")
     notify_group = parser.add_mutually_exclusive_group()
@@ -388,7 +388,11 @@ def main(options: Optional[List[str]]=None) -> None:
         if args.color_depth:
             zterm['color-depth'] = (args.color_depth, 'on command line')
 
-        color_depth = int(zterm['color-depth'][0])
+        color_depth_str = zterm['color-depth'][0]
+        if color_depth_str == '24bit':
+            color_depth = 2 ** 24
+        else:
+            color_depth = int(color_depth_str)
 
         if args.notify:
             zterm['notify'] = (args.notify, 'on command line')
@@ -422,7 +426,7 @@ def main(options: Optional[List[str]]=None) -> None:
         valid_settings = {
             'autohide': ['autohide', 'no_autohide'],
             'notify': ['enabled', 'disabled'],
-            'color-depth': ['1', '16', '256']
+            'color-depth': ['1', '16', '256', '24bit']
         }
         boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in valid_settings.items():
