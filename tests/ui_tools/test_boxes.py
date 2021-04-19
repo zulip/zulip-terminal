@@ -339,6 +339,34 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
+        "header, expected_recipient_emails, expected_recipient_user_ids",
+        [
+            case(
+                "Human 1 <person1@example.com>",
+                ["person1@example.com"],
+                [11],
+                id="single_recipient",
+            ),
+            case(
+                "Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+                ["person1@example.com", "person2@example.com"],
+                [11, 12],
+                id="multiple_recipients",
+            ),
+        ],
+    )
+    def test_update_recipients(
+        self, write_box, header, expected_recipient_emails, expected_recipient_user_ids
+    ):
+        write_box.private_box_view()
+        write_box.to_write_box.edit_text = header
+
+        write_box.update_recipients(write_box.to_write_box)
+
+        assert write_box.recipient_emails == expected_recipient_emails
+        assert write_box.recipient_user_ids == expected_recipient_user_ids
+
+    @pytest.mark.parametrize(
         "text, state",
         [
             ("Plain Text", 0),

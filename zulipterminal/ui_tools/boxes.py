@@ -287,8 +287,11 @@ class WriteBox(urwid.Pile):
 
         urwid.connect_signal(self.msg_write_box, "change", on_type_send_status)
 
-    def update_recipient_emails(self, write_box: ReadlineEdit) -> None:
+    def update_recipients(self, write_box: ReadlineEdit) -> None:
         self.recipient_emails = re.findall(REGEX_RECIPIENT_EMAIL, write_box.edit_text)
+        self._set_regular_and_typing_recipient_user_ids(
+            [self.model.user_dict[email]["user_id"] for email in self.recipient_emails]
+        )
 
     def _tidy_valid_recipients_and_notify_invalid_ones(
         self, write_box: ReadlineEdit
@@ -756,7 +759,7 @@ class WriteBox(urwid.Pile):
                     )
                     if not all_valid:
                         return key
-                    self.update_recipient_emails(self.to_write_box)
+                    self.update_recipients(self.to_write_box)
                     if self.recipient_emails:
                         success = self.model.send_private_message(
                             recipients=self.recipient_emails,
@@ -789,7 +792,7 @@ class WriteBox(urwid.Pile):
                     )
                     if not all_valid:
                         return key
-                    self.update_recipient_emails(self.to_write_box)
+                    self.update_recipients(self.to_write_box)
                     this_draft: Composition = PrivateComposition(
                         type="private",
                         to=self.recipient_emails,
@@ -857,14 +860,10 @@ class WriteBox(urwid.Pile):
                     )
                     if not all_valid:
                         return key
-                    # We extract emails into self.recipient_emails only once we know
+                    # We extract recipients' user_ids and emails only once we know
                     # that all the recipients are valid, to avoid including any
                     # invalid ones.
-                    self.update_recipient_emails(self.to_write_box)
-                    users = self.model.user_dict
-                    self._set_regular_and_typing_recipient_user_ids(
-                        [users[email]["user_id"] for email in self.recipient_emails]
-                    )
+                    self.update_recipients(self.to_write_box)
 
             if not self.msg_body_edit_enabled:
                 return key
