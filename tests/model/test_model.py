@@ -181,6 +181,7 @@ class TestModel:
             'presence',
             'subscription',
             'message',
+            'starred_messages',
             'update_message_flags',
             'muted_topics',
             'realm_user',
