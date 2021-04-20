@@ -968,17 +968,16 @@ class MessageBox(urwid.Pile):
                     metadata['bq_len'] -= 1
                     continue
                 markup.append(element)
-            elif (tag == 'div'
-                  and (set(tag_classes)
-                       & set(unrendered_div_classes))):
+            elif tag == 'div' and (
+                 set(tag_classes) & set(unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
-                matching_class = (set(unrendered_div_classes)
-                                  & set(tag_classes))
-                text = unrendered_div_classes[matching_class.pop()]
+                # NOTE: Though `matches` is generalized for multiple
+                # matches it is very unlikely that there would be any.
+                matches = set(unrendered_div_classes) & set(tag_classes)
+                text = unrendered_div_classes[matches.pop()]
                 if text:
                     markup.append(unrendered_template.format(text))
-            elif (tag == 'img'
-                  and tag_classes == ['emoji']):
+            elif tag == 'img' and tag_classes == ['emoji']:
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
                 emoji_name = tag_attrs.get('title', [])
                 markup.append(('msg_emoji', f":{emoji_name}:"))
@@ -990,18 +989,15 @@ class MessageBox(urwid.Pile):
             elif tag in ('p', 'del'):
                 # PARAGRAPH, STRIKE-THROUGH
                 markup.extend(cls.soup2markup(element, metadata)[0])
-            elif (tag == 'span'
-                  and 'emoji' in tag_classes):
+            elif tag == 'span' and 'emoji' in tag_classes:
                 # EMOJI
                 markup.append(('msg_emoji', tag_text))
-            elif (tag == 'span'
-                  and ({'katex-display', 'katex'}
-                       & set(tag_classes))):
+            elif tag == 'span' and (
+                    {'katex-display', 'katex'} & set(tag_classes)):
                 # MATH TEXT
                 markup.append(tag_text)
-            elif (tag == 'span'
-                  and ({'user-group-mention', 'user-mention'}
-                       & set(tag_classes))):
+            elif tag == 'span' and (
+                    {'user-group-mention', 'user-mention'} & set(tag_classes)):
                 # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('msg_mention', tag_text))
             elif tag == 'a':
@@ -1080,15 +1076,10 @@ class MessageBox(urwid.Pile):
                 ))
             elif tag == 'code':
                 # CODE (INLINE?)
-                markup.append((
-                    'msg_code', tag_text
-                ))
-            elif (tag == 'div'
-                    and 'codehilite' in tag_classes):
+                markup.append(('msg_code', tag_text))
+            elif tag == 'div' and 'codehilite' in tag_classes:
                 # CODE (BLOCK?)
-                markup.append((
-                    'msg_code', tag_text
-                ))
+                markup.append(('msg_code', tag_text))
             elif tag in ('strong', 'em'):
                 # BOLD & ITALIC
                 markup.append(('msg_bold', tag_text))
@@ -1157,9 +1148,7 @@ class MessageBox(urwid.Pile):
                     'msg_time', f" {TIME_MENTION_MARKER} {time_string} "
                 ))
 
-                source_text = (
-                    f"Original text was {tag_text.strip()}"
-                )
+                source_text = f"Original text was {tag_text.strip()}"
                 metadata['time_mentions'].append((time_string, source_text))
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
