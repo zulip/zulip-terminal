@@ -925,6 +925,9 @@ class MessageBox(urwid.Pile):
         markup: List[Union[str, Tuple[Optional[str], Any]]] = ['']
         if soup is None:  # This is not iterable, so return promptly
             return markup, metadata['message_links'], metadata['time_mentions']
+
+        math_classes = ['katex', 'katex-display']
+        mention_classes = ['user-mention', 'user-group-mention']
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             'br': '',  # No indicator of absence
