@@ -11,7 +11,7 @@ from urllib.parse import urljoin, urlparse
 import dateutil.parser
 import urwid
 from bs4 import BeautifulSoup
-from bs4.element import NavigableString
+from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
@@ -954,54 +954,62 @@ class MessageBox(urwid.Pile):
         }
         unrendered_template = '[{} NOT RENDERED]'
         for element in soup:
+            if isinstance(element, Tag):
+                # Caching element variables for use in the
+                # if/elif/else chain below for improving legibility.
+                tag = element.name
+                tag_attrs = element.attrs
+                tag_classes = tag_attrs.get('class', [])
+                tag_text = element.text
+
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
                 if element == '\n' and metadata.get('bq_len', 0) > 0:
                     metadata['bq_len'] -= 1
                     continue
                 markup.append(element)
-            elif (element.name == 'div' and element.attrs
-                  and any(cls in element.attrs.get('class', [])
+            elif (tag == 'div' and tag_attrs
+                  and any(cls in tag_classes
                           for cls in unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
                 matching_class = (set(unrendered_div_classes)
-                                  & set(element.attrs.get('class')))
+                                  & set(tag_classes))
                 text = unrendered_div_classes[matching_class.pop()]
                 if text:
                     markup.append(unrendered_template.format(text))
-            elif (element.name == 'img'
-                  and element.attrs.get('class', []) == ['emoji']):
+            elif (tag == 'img'
+                  and tag_classes == ['emoji']):
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
-                emoji_name = element.attrs.get('title', [])
+                emoji_name = tag_attrs.get('title', [])
                 markup.append(('msg_emoji', f":{emoji_name}:"))
-            elif element.name in unrendered_tags:
+            elif tag in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
-                text = unrendered_tags[element.name]
+                text = unrendered_tags[tag]
                 if text:
                     markup.append(unrendered_template.format(text))
-            elif element.name in ('p', 'del'):
+            elif tag in ('p', 'del'):
                 # PARAGRAPH, STRIKE-THROUGH
                 markup.extend(cls.soup2markup(element, metadata)[0])
-            elif (element.name == 'span' and element.attrs
-                  and 'emoji' in element.attrs.get('class', [])):
+            elif (tag == 'span' and tag_attrs
+                  and 'emoji' in tag_classes):
                 # EMOJI
-                markup.append(('msg_emoji', element.text))
-            elif (element.name == 'span' and element.attrs
-                  and ('katex-display' in element.attrs.get('class', [])
-                       or 'katex' in element.attrs.get('class', []))):
+                markup.append(('msg_emoji', tag_text))
+            elif (tag == 'span' and tag_attrs
+                  and ('katex-display' in tag_classes
+                       or 'katex' in tag_classes)):
                 # MATH TEXT
-                markup.append(element.text)
-            elif (element.name == 'span' and element.attrs
-                  and ('user-group-mention' in element.attrs.get('class', [])
-                       or 'user-mention' in element.attrs.get('class', []))):
+                markup.append(tag_text)
+            elif (tag == 'span' and tag_attrs
+                  and ('user-group-mention' in tag_classes
+                       or 'user-mention' in tag_classes)):
                 # USER MENTIONS & USER-GROUP MENTIONS
-                markup.append(('msg_mention', element.text))
-            elif element.name == 'a':
+                markup.append(('msg_mention', tag_text))
+            elif tag == 'a':
                 # LINKS
                 # Use rstrip to avoid anomalies and edge cases like
                 # https://google.com vs https://google.com/.
-                link = element.attrs['href'].rstrip('/')
-                text = element.img['src'] if element.img else element.text
+                link = tag_attrs['href'].rstrip('/')
+                text = element.img['src'] if element.img else tag_text
                 text = text.rstrip('/')
 
                 parsed_link = urlparse(link)
@@ -1065,26 +1073,26 @@ class MessageBox(urwid.Pile):
                     ('msg_link_index',
                      f"[{metadata['message_links'][link][1]}]"),
                 ])
-            elif element.name == 'blockquote':
+            elif tag == 'blockquote':
                 # BLOCKQUOTE TEXT
                 markup.append((
                     'msg_quote', cls.soup2markup(element, metadata)[0]
                 ))
-            elif element.name == 'code':
+            elif tag == 'code':
                 # CODE (INLINE?)
                 markup.append((
-                    'msg_code', element.text
+                    'msg_code', tag_text
                 ))
-            elif (element.name == 'div' and element.attrs
-                    and 'codehilite' in element.attrs.get('class', [])):
+            elif (tag == 'div' and tag_attrs
+                    and 'codehilite' in tag_classes):
                 # CODE (BLOCK?)
                 markup.append((
-                    'msg_code', element.text
+                    'msg_code', tag_text
                 ))
-            elif element.name in ('strong', 'em'):
+            elif tag in ('strong', 'em'):
                 # BOLD & ITALIC
-                markup.append(('msg_bold', element.text))
-            elif element.name in ('ul', 'ol'):
+                markup.append(('msg_bold', tag_text))
+            elif tag in ('ul', 'ol'):
                 # LISTS (UL & OL)
                 for part in element.contents:
                     if part == '\n':
@@ -1096,8 +1104,8 @@ class MessageBox(urwid.Pile):
                 else:
                     state['indent_level'] += 1
                     state['list_start'] = False
-                if element.name == 'ol':
-                    start_number = int(element.attrs.get('start', 1))
+                if tag == 'ol':
+                    start_number = int(tag_attrs.get('start', 1))
                     state['list_index'] = start_number
                     markup.extend(cls.soup2markup(element, metadata,
                                                   **state)[0])
@@ -1108,7 +1116,7 @@ class MessageBox(urwid.Pile):
                     markup.extend(cls.soup2markup(element, metadata,
                                                   **state)[0])
                 del state['indent_level']  # reset indents after any list
-            elif element.name == 'li':
+            elif tag == 'li':
                 # LIST ITEMS (LI)
                 for part in element.contents:
                     if part == '\n':
@@ -1129,9 +1137,9 @@ class MessageBox(urwid.Pile):
                     markup.append(f"{'  ' * indent}{chars[(indent - 1) % 3]} ")
                 state['list_start'] = False
                 markup.extend(cls.soup2markup(element, metadata, **state)[0])
-            elif element.name == 'table':
+            elif tag == 'table':
                 markup.extend(render_table(element))
-            elif element.name == 'time':
+            elif tag == 'time':
                 # New in feature level 16, server version 3.0.
                 # Render time in current user's local time zone.
                 timestamp = element.get('datetime')
@@ -1150,7 +1158,7 @@ class MessageBox(urwid.Pile):
                 ))
 
                 source_text = (
-                    f"Original text was {element.text.strip()}"
+                    f"Original text was {tag_text.strip()}"
                 )
                 metadata['time_mentions'].append((time_string, source_text))
             else:
