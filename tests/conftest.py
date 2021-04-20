@@ -586,6 +586,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
         # adding extra tests unnecessarily.
         'zulip_version': MINIMUM_SUPPORTED_SERVER_VERSION[0],
         'zulip_feature_level': MINIMUM_SUPPORTED_SERVER_VERSION[1],
+        'starred_messages': [1117554, 1117558, 1117574],
     }
 
 
