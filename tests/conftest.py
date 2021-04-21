@@ -964,6 +964,22 @@ def user_dict(logged_on_user):
 
 
 @pytest.fixture
+def user_id_email_dict(logged_on_user):
+    """
+    User_id_email_dict created according to `initial_data` fixture.
+    """
+    return {
+        logged_on_user["user_id"]: logged_on_user["email"],
+        11: "person1@example.com",
+        12: "person2@example.com",
+        6: "emailgateway@zulip.com",
+        1: "feedback@zulip.com",
+        5: "notification-bot@zulip.com",
+        4: "welcome-bot@zulip.com",
+    }
+
+
+@pytest.fixture
 def user_list(logged_on_user):
     """
     List of users created corresponding to
