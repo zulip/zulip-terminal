@@ -524,9 +524,7 @@ class TestModel:
             ({"result": "some_failure"}, False),
         ],
     )
-    @pytest.mark.parametrize(
-        "recipients", [["iago@zulip.com"], ["iago@zulip.com", "hamlet@zulip.com"]]
-    )
+    @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
     def test_send_private_message(
         self, mocker, model, recipients, response, return_value, content="hi!"
     ):

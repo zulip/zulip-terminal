@@ -422,7 +422,7 @@ class Model:
         else:
             raise RuntimeError("Empty recipient list.")
 
-    def send_private_message(self, recipients: List[str], content: str) -> bool:
+    def send_private_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
             composition = PrivateComposition(
                 type="private",
