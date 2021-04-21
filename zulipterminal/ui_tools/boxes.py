@@ -58,6 +58,9 @@ class _MessageEditState(NamedTuple):
     old_topic: str
 
 
+DELIMS_MESSAGE_COMPOSE = "\t\n;"
+
+
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super().__init__(self.main_view(True))
@@ -190,6 +193,8 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
+        self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
+
         self.header_write_box = urwid.Columns([self.to_write_box])
         header_line_box = urwid.LineBox(
             self.header_write_box,
@@ -311,6 +316,8 @@ class WriteBox(urwid.Pile):
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
+        self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
+
         self.stream_write_box = ReadlineEdit(
             edit_text=caption, max_char=self.model.max_stream_name_length
         )

@@ -402,13 +402,13 @@ class TestWriteBox:
             ("@Hum", 1, "@**Human 1**"),
             ("@Huma", 1, "@**Human 1**"),
             ("@Human", 1, "@**Human 1**"),
-            ("@Human 1", 0, "@**Human 1**"),
+            ("@Human 1", 0, "@**Human 1**"),  # Space-containing text
             ("@_H", 1, "@_**Human 1**"),
             ("@_Hu", 1, "@_**Human 1**"),
             ("@_Hum", 1, "@_**Human 1**"),
             ("@_Huma", 1, "@_**Human 1**"),
             ("@_Human", 1, "@_**Human 1**"),
-            ("@_Human 1", 0, "@_**Human 1**"),
+            ("@_Human 1", 0, "@_**Human 1**"),  # Space-containing text
             ("@Group", 0, "@*Group 1*"),
             ("@Group", 1, "@*Group 2*"),
             ("@G", 0, "@*Group 1*"),
@@ -439,6 +439,7 @@ class TestWriteBox:
             ("@", 4, "@**Human Duplicate|14**"),
             ("@**", 5, None),  # Reached last match
             ("@**", 6, None),  # Beyond end
+            ("@**Human 1", 0, "@**Human 1**"),  # Space-containing text
             # Expected sequence of autocompletes from '@*' (only groups)
             ("@*", 0, "@*Group 1*"),
             ("@*", 1, "@*Group 2*"),
@@ -455,6 +456,8 @@ class TestWriteBox:
             ("@_", 5, None),  # Reached last match
             ("@_", 6, None),  # Beyond end
             ("@_", -1, "@_**Human Duplicate|14**"),
+            ("@_Human 1", 0, "@_**Human 1**"),  # Space-containing text
+            ("@_**Human 1", 0, "@_**Human 1**"),  # Space-containing text
             # Complex autocomplete prefixes.
             ("(@H", 0, "(@**Human Myself**"),
             ("(@H", 1, "(@**Human 1**"),
