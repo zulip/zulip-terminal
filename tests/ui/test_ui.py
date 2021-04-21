@@ -394,7 +394,7 @@ class TestView:
             },
             {
                 "type": "private",
-                "to": ["foo@zulip.com", "bar@gmail.com"],
+                "to": [1, 2],
                 "content": "this is a private message content",
             },
             None,
@@ -426,10 +426,7 @@ class TestView:
         view.controller.is_in_editor_mode = lambda: False
         view.model.stream_id_from_name.return_value = 10
         view.model.session_draft_message.return_value = draft
-        view.model.user_dict = {
-            "foo@zulip.com": {"user_id": 1},
-            "bar@gmail.com": {"user_id": 2},
-        }
+        view.model.user_id_email_dict = {1: "foo@zulip.com", 2: "bar@gmail.com"}
         mocked_stream_box_view = mocker.patch.object(view.write_box, "stream_box_view")
         mocked_private_box_view = mocker.patch.object(
             view.write_box, "private_box_view"
@@ -445,7 +442,8 @@ class TestView:
                 )
             else:
                 mocked_private_box_view.assert_called_once_with(
-                    emails=draft["to"], recipient_user_ids=[1, 2]
+                    emails=["foo@zulip.com", "bar@gmail.com"],
+                    recipient_user_ids=draft["to"],
                 )
 
             assert view.body.focus_col == 1

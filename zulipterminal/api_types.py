@@ -19,7 +19,7 @@ MessageFlag = Literal[
 class PrivateComposition(TypedDict):
     type: Literal["private"]
     content: str
-    to: List[str]  # emails  # TODO: Migrate to using List[int] (user ids)
+    to: List[int]  # User ids
 
 
 class StreamComposition(TypedDict):
