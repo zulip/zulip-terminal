@@ -20,6 +20,7 @@ Specific aims include:
 * Enabling all actions to be achieved through the keyboard (see [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md))
 * Exploring alternative user interface designs suited to the display and input constraints
 * Supporting a wide range of platforms and terminal emulators
+* Making best use of available rows/columns to scale from 80x24 upwards (see [Small terminal notes](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#how-small-a-size-of-terminal-is-supported))
 
 Learn how to use Zulip Terminal with our [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md).
 

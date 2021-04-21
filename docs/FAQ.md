@@ -94,6 +94,17 @@ Links that don't fit on one line are cropped with an ellipsis in the footlinks, 
 
 **NOTE** Footlinks, ie. footnotes in messages showing the targets of links, exist in release 0.5.2 onwards.
 
+## How small a size of terminal is supported?
+
+While most users likely do not use such sizes, we aim to support sizes from the standard 80 columns by 24 rows upwards.
+
+If you use a width from approximately 100 columns upwards, everything is expected to work as documented.
+
+However, since we currently use a fixed width for the left and right side panels, for widths from approximately 80-100 columns the message list can become too narrow.
+In these situations we recommend using the `autohide` option in your configuration file (see [configuration file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the command-line in a particular session via `--autohide`.
+
+If you experience problems related to small sizes that are not resolved using the above, please check [#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any unresolved such issues and report them there.
+
 ## Mouse does not support *performing some action/feature*
 
 We think of Zulip Terminal as a keyboard-centric client. Consequently, while functionality via the mouse does work in places, mouse support is not currently a priority for the project (see also [#248](https://www.github.com/zulip/zulip-terminal/issues/248)).
