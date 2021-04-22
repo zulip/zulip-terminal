@@ -23,6 +23,7 @@ from zulipterminal.config.keys import (
 from zulipterminal.config.regexes import (
     REGEX_CLEANED_RECIPIENT,
     REGEX_RECIPIENT_EMAIL,
+    REGEX_STREAM_AND_TOPIC_FENCED,
     REGEX_STREAM_AND_TOPIC_FENCED_HALF,
 )
 from zulipterminal.config.symbols import (
@@ -638,10 +639,19 @@ class WriteBox(urwid.Pile):
         and return the (updated) text.
         """
         match = re.search(REGEX_STREAM_AND_TOPIC_FENCED_HALF, text)
+        match_fenced = re.search(REGEX_STREAM_AND_TOPIC_FENCED, text)
         if match:
             prefix = f"#**{match.group(1)}>"
-            autocomplete_map.update({prefix: self.autocomplete_stream_and_topic})
             prefix_indices[prefix] = match.start()
+        elif match_fenced:
+            # Amending the prefix to remove stream fence `**`
+            prefix = f"#**{match_fenced.group(1)}>"
+            prefix_with_topic = prefix + match_fenced.group(2)
+            prefix_indices[prefix] = match_fenced.start()
+            # Amending the text to have new prefix (without `**` fence)
+            text = text[: match_fenced.start()] + prefix_with_topic
+        if match or match_fenced:
+            autocomplete_map.update({prefix: self.autocomplete_stream_and_topic})
 
         return text
 

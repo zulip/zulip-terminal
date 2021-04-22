@@ -84,9 +84,13 @@ class TestWriteBox:
             ("#**Stream 1>", 1, True, "#**Stream 1>This is a topic**"),
             ("#**Stream 1>", -1, True, "#**Stream 1>Hello there!**"),
             ("#**Stream 1>", -2, True, "#**Stream 1>This is a topic**"),
+            # Fenced prefix
+            ("#**Stream 1**>T", 0, True, "#**Stream 1>Topic 1**"),
             # Invalid stream
             ("#**invalid stream>", 0, False, None),
+            ("#**invalid stream**>", 0, False, None),
             # Invalid prefix format
+            ("#**Stream 1*>", 0, True, None),
             ("#*Stream 1>", 0, True, None),
             # Complex autocomplete prefixes.
             ("(#**Stream 1>", 0, True, "(#**Stream 1>Topic 1**"),
@@ -94,6 +98,7 @@ class TestWriteBox:
             ("@#**Stream 1>", 0, True, "@#**Stream 1>Topic 1**"),
             ("@_#**Stream 1>", 0, True, "@_#**Stream 1>Topic 1**"),
             (":#**Stream 1>", 0, True, ":#**Stream 1>Topic 1**"),
+            ("(#**Stream 1**>", 0, True, "(#**Stream 1>Topic 1**"),
         ],
     )
     def test_generic_autocomplete_stream_and_topic(
