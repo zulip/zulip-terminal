@@ -102,6 +102,14 @@ class Controller:
             self._critical_exception = True
         os.write(self._exception_pipe, b'1')
 
+    def check_for_invalid_operation(self, stream_id: int) -> bool:
+        if self.model.is_user_in_unsubscribed_stream(stream_id):
+            self.model.controller.view.set_footer_text(
+                " This is not allowed in unsubscribed streams.",
+                3)
+            return True
+        return False
+
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
 

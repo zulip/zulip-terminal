@@ -81,6 +81,7 @@ class TestMessageView:
         self.model = mocker.MagicMock()
         self.view = mocker.Mock()
         self.urwid = mocker.patch(VIEWS + ".urwid")
+        self.model.controller.check_for_invalid_operation.return_value = False
 
     @pytest.fixture
     def msg_view(self, mocker, msg_box):
@@ -820,6 +821,7 @@ class TestMiddleColumnView:
         self.super = mocker.patch(VIEWS + '.urwid.Frame.__init__')
         self.super_keypress = mocker.patch(VIEWS + '.urwid.Frame.keypress')
         self.model.controller == mocker.Mock()
+        self.model.controller.check_for_invalid_operation.return_value = False
 
     @pytest.fixture
     def mid_col_view(self):
@@ -1266,6 +1268,7 @@ class TestMessageBox:
     def mock_external_classes(self, mocker, initial_index):
         self.model = mocker.MagicMock()
         self.model.index = initial_index
+        self.model.controller.check_for_invalid_operation.return_value = False
 
     @pytest.mark.parametrize('message_type, set_fields', [
         ('stream',
@@ -1877,7 +1880,9 @@ class TestMessageBox:
     ])
     def test_keypress_STREAM_MESSAGE(self, mocker, msg_box, widget_size,
                                      narrow, expect_to_prefill, key):
-        write_box = msg_box.model.controller.view.write_box
+        controller = msg_box.model.controller
+        controller.check_for_invalid_operation.return_value = False
+        write_box = controller.view.write_box
         msg_box.model.narrow = narrow
         size = widget_size(msg_box)
 

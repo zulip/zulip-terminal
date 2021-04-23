@@ -133,6 +133,7 @@ class Model:
         self.users = self.get_all_users()
 
         self.stream_dict: Dict[int, Any] = {}
+        self.subscribed_streams: Set[int] = set()
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
@@ -787,31 +788,33 @@ class Model:
 
         return self.user_dict[user_email]['full_name']
 
-    def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
-        def make_reduced_stream_data(stream: Subscription) -> StreamData:
-            # stream_id has been changed to id.
-            return StreamData({'name': stream['name'],
-                               'id': stream['stream_id'],
-                               'color': stream['color'],
-                               'invite_only': stream['invite_only'],
-                               'description': stream['description']})
+    def make_reduced_stream_data(self, stream: Subscription) -> StreamData:
+        # stream_id has been changed to id.
+        return StreamData({'name': stream['name'],
+                           'id': stream['stream_id'],
+                           'color': stream['color'],
+                           'invite_only': stream['invite_only'],
+                           'description': stream['description']})
 
+    def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         new_pinned_streams = []
         new_unpinned_streams = []
         new_muted_streams = set()
+        new_subscribed_streams = set()
         for subscription in subscriptions:
             # Canonicalize color formats, since zulip server versions may use
             # different formats
             subscription['color'] = canonicalize_color(subscription['color'])
 
             self.stream_dict[subscription['stream_id']] = subscription
-            streamData = make_reduced_stream_data(subscription)
+            streamData = self.make_reduced_stream_data(subscription)
             if subscription['pin_to_top']:
                 new_pinned_streams.append(streamData)
             else:
                 new_unpinned_streams.append(streamData)
             if not subscription['in_home_view']:
                 new_muted_streams.add(subscription['stream_id'])
+            new_subscribed_streams.add(subscription['stream_id'])
 
         if new_pinned_streams:
             self.pinned_streams.extend(new_pinned_streams)
@@ -821,6 +824,8 @@ class Model:
             sort_streams(self.unpinned_streams)
 
         self.muted_streams = self.muted_streams.union(new_muted_streams)
+        self.subscribed_streams = (self.subscribed_streams
+                                   .union(new_subscribed_streams))
 
     def _group_info_from_realm_user_groups(self,
                                            groups: List[Dict[str, Any]]
@@ -869,18 +874,46 @@ class Model:
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
 
+    def is_user_in_unsubscribed_stream(self, stream_id: int) -> bool:
+        return not(stream_id in self.subscribed_streams)
+
+    def _get_stream_by_id(self, streams: List[StreamData], stream_id: int
+                          ) -> StreamData:
+        for stream in streams:
+            if stream['id'] == stream_id:
+                return stream
+        raise RuntimeError("Invalid stream id.")
+
+    def _unsubscribe_to_streams(self,
+                                stream_info_list: List[Subscription]) -> None:
+        is_pinned_stream_removed = False
+        is_unpinned_stream_removed = False
+        for stream_info in stream_info_list:
+            stream_id = stream_info['stream_id']
+            if self.is_pinned_stream(stream_id):
+                stream = self._get_stream_by_id(self.pinned_streams,
+                                                stream_id)
+                self.pinned_streams.remove(stream)
+                is_pinned_stream_removed = True
+            else:
+                stream = self._get_stream_by_id(self.unpinned_streams,
+                                                stream_id)
+                self.unpinned_streams.remove(stream)
+                is_unpinned_stream_removed = True
+            if stream_id in self.muted_streams:
+                self.muted_streams.remove(stream_id)
+            self.subscribed_streams.remove(stream_id)
+
     def _handle_subscription_event(self, event: Event) -> None:
         """
         Handle changes in subscription (eg. muting/unmuting,
                                         pinning/unpinning streams)
         """
         assert event['type'] == "subscription"
-        def get_stream_by_id(streams: List[StreamData], stream_id: int
-                             ) -> StreamData:
-            for stream in streams:
-                if stream['id'] == stream_id:
-                    return stream
-            raise RuntimeError("Invalid stream id.")
+
+        def _update_sidebar() -> None:
+            self.controller.view.left_panel.update_stream_view()
+            self.controller.update_screen()
 
         if event['op'] == 'update':
             if hasattr(self.controller, 'view'):
@@ -911,21 +944,29 @@ class Model:
                     )
 
                     if event['value']:
-                        stream = get_stream_by_id(self.unpinned_streams,
-                                                  stream_id)
+                        stream = self._get_stream_by_id(self.unpinned_streams,
+                                                        stream_id)
                         if stream:
                             self.unpinned_streams.remove(stream)
                             self.pinned_streams.append(stream)
                     else:
-                        stream = get_stream_by_id(self.pinned_streams,
-                                                  stream_id)
+                        stream = self._get_stream_by_id(self.pinned_streams,
+                                                        stream_id)
                         if stream:
                             self.pinned_streams.remove(stream)
                             self.unpinned_streams.append(stream)
                     sort_streams(self.unpinned_streams)
                     sort_streams(self.pinned_streams)
-                    self.controller.view.left_panel.update_stream_view()
-                    self.controller.update_screen()
+                    _update_sidebar()
+
+        elif event['op'] == 'add':
+            self._subscribe_to_streams(event['subscriptions'])
+            _update_sidebar()
+
+        elif event['op'] == 'remove':
+            self._unsubscribe_to_streams(event['subscriptions'])
+            _update_sidebar()
+
         elif event['op'] in ('peer_add', 'peer_remove'):
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)

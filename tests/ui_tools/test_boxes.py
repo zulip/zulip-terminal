@@ -18,6 +18,7 @@ class TestWriteBox:
     def mock_external_classes(self, mocker, initial_index):
         self.view = mocker.Mock()
         self.view.model = mocker.Mock()
+        self.view.model.is_user_in_unsubscribed_stream.return_value = False
 
     @pytest.fixture()
     def write_box(self, mocker, users_fixture, user_groups_fixture,

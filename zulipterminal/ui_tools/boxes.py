@@ -1398,13 +1398,17 @@ class MessageBox(urwid.Pile):
                     stream_id=self.stream_id,
                 )
         elif is_command_key('STREAM_MESSAGE', key):
+            assert self.stream_id is not None
+            stream_id = self.stream_id
+            if self.model.controller.check_for_invalid_operation(stream_id):
+                return None
             if (
                 len(self.model.narrow) != 0
                 and self.model.narrow[0][0] == "stream"
                ):
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
-                    stream_id=self.stream_id,
+                    stream_id=stream_id,
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
@@ -1469,6 +1473,11 @@ class MessageBox(urwid.Pile):
                 recipient_user_ids=[self.message['sender_id']],
             )
         elif is_command_key('MENTION_REPLY', key):
+            assert self.stream_id is not None
+            stream_id = self.stream_id
+            if self.model.controller.check_for_invalid_operation(stream_id):
+                return key
+
             self.keypress(size, 'enter')
             mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(

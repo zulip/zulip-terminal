@@ -7,7 +7,7 @@ import pytest
 from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
-from zulipterminal.model import Model, ServerConnectionFailure
+from zulipterminal.model import Model, ServerConnectionFailure, sort_streams
 
 
 class TestModel:
@@ -46,14 +46,34 @@ class TestModel:
         model = Model(self.controller)
         return model
 
+    @pytest.fixture
+    def initial_pinned_streams(self, model, stream_dict):
+        pinned_streams = []
+        for _, stream in stream_dict.items():
+            if stream['pin_to_top']:
+                pinned_streams.append(model.make_reduced_stream_data(stream))
+        return pinned_streams
+
+    @pytest.fixture
+    def initial_unpinned_streams(self, model, stream_dict):
+        pinned_streams = []
+        for _, stream in stream_dict.items():
+            if not stream['pin_to_top']:
+                pinned_streams.append(model.make_reduced_stream_data(stream))
+        return pinned_streams
+
     def test_init(self, model, initial_data, user_profile,
-                  unicode_emojis, custom_emojis, stream_dict):
+                  unicode_emojis, custom_emojis, stream_dict,
+                  initial_pinned_streams, initial_unpinned_streams):
         assert hasattr(model, 'controller')
         assert hasattr(model, 'client')
         assert model.narrow == []
         assert model._have_last_message == {}
         assert model.stream_id is None
         assert model.stream_dict == stream_dict
+        assert model.pinned_streams == initial_pinned_streams
+        assert model.unpinned_streams == initial_unpinned_streams
+        assert model.subscribed_streams == {1, 2, 99, 1000}
         assert model.recipients == frozenset()
         assert model.index == initial_index
         model.get_messages.assert_called_once_with(num_before=30,
@@ -805,7 +825,7 @@ class TestModel:
         assert all(msg_id == msg['stream_id']
                    for msg_id, msg in model.stream_dict.items())
         assert model.muted_streams == muted
-        assert model.pinned_streams == []  # FIXME generalize/parametrize
+        assert len(model.pinned_streams)  # FIXME generalize/parametrize
         assert len(model.unpinned_streams)  # FIXME generalize/parametrize
 
     def test__handle_message_event_with_Falsey_log(self, mocker,
@@ -2029,6 +2049,30 @@ class TestModel:
 
         assert return_value == expected_response
 
+    @pytest.mark.parametrize('stream_id, expected_response,', [
+            (99, False),
+            (101, True),
+            (2, False),
+        ],
+        ids=[
+            'subscribed_pinned_stream',
+            'subscribed_unpinned_stream',
+            'unsubscribed_stream',
+        ]
+    )
+    def test_is_user_in_unsubscribed_stream(self, model,
+                                            stream_id, expected_response,
+                                            initial_pinned_streams,
+                                            initial_unpinned_streams):
+
+        model.pinned_streams = deepcopy(initial_pinned_streams)
+        model.unpinned_streams = deepcopy(initial_unpinned_streams)
+        return_value = model.is_user_in_unsubscribed_stream(stream_id)
+
+        assert model.pinned_streams == initial_pinned_streams
+        assert model.unpinned_streams == initial_unpinned_streams
+        assert return_value == expected_response
+
     @pytest.mark.parametrize('response', [{
         'result': 'success',
         'msg': '',
@@ -2116,6 +2160,142 @@ class TestModel:
         fetched_custom_emojis = model.fetch_custom_emojis()
 
         assert fetched_custom_emojis == custom_emojis
+
+    @pytest.mark.parametrize('event', [
+        {
+            'op': 'add',
+            'type': 'subscription',
+            'subscriptions': [
+                {
+                    'name': 'all',
+                    'stream_id': 1,
+                    'description': '',
+                    'color': '#95a5fd',
+                    'pin_to_top': False,
+                    'invite_only': False,
+                    'in_home_view': True
+                }
+            ]
+        },
+        {
+            'op': 'add',
+            'type': 'subscription',
+            'subscriptions': [
+                {
+                    'name': 'design',
+                    'stream_id': 2,
+                    'description': '',
+                    'color': '#95a5fd',
+                    'pin_to_top': True,
+                    'invite_only': False,
+                    'in_home_view': True
+                }
+            ]
+        },
+        {
+            'op': 'add',
+            'type': 'subscription',
+            'subscriptions': [
+                {
+                    'name': 'all',
+                    'stream_id': 3,
+                    'description': '',
+                    'color': '#95a5fd',
+                    'pin_to_top': True,
+                    'invite_only': False,
+                    'in_home_view': False
+                }
+            ]
+        },
+    ], ids=[
+        'add_1',
+        'add_and_pin_2',
+        'add_and_mute_3'
+    ])
+    def test__handle_subscription_event_add_stream(
+                                    self, model, mocker,
+                                    event,
+                                    initial_pinned_streams,
+                                    initial_unpinned_streams
+    ):
+
+        model.pinned_streams = deepcopy(initial_pinned_streams)
+        model.unpinned_streams = deepcopy(initial_unpinned_streams)
+        model._handle_subscription_event(event)
+        is_stream_pinned = event['subscriptions'][0]['pin_to_top']
+        if is_stream_pinned:
+            new_pinned_stream = (model
+                                 .make_reduced_stream_data(
+                                  event['subscriptions'][0]))
+            expected_pinned_streams = (initial_pinned_streams
+                                       + [new_pinned_stream])
+            expected_unpinned_streams = initial_unpinned_streams
+            sort_streams(expected_pinned_streams)
+        else:
+            new_unpinned_stream = (model
+                                   .make_reduced_stream_data(
+                                    event['subscriptions'][0]))
+            expected_unpinned_streams = (initial_unpinned_streams
+                                         + [new_unpinned_stream])
+            expected_pinned_streams = initial_pinned_streams
+            sort_streams(expected_unpinned_streams)
+
+        assert model.pinned_streams == expected_pinned_streams
+        assert model.unpinned_streams == expected_unpinned_streams
+
+        (model.controller.view.left_panel.update_stream_view
+         .assert_called_once_with())
+        model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize('event', [
+        {
+            'op': 'remove',
+            'type': 'subscription',
+            'subscriptions': [{
+                'name': 'Secret stream',
+                'stream_id': 99
+            }]
+        },
+        {
+            'op': 'remove',
+            'type': 'subscription',
+            'subscriptions': [{
+                'name': 'Some general stream',
+                'stream_id': 1000
+            }]
+        },
+    ], ids=[
+        'remove_99',
+        'remove_1000'
+    ])
+    def test__handle_subscription_event_remove_stream(
+                                    self, model, mocker,
+                                    event,
+                                    initial_pinned_streams,
+                                    initial_unpinned_streams,
+                                    stream_dict
+    ):
+        model.pinned_streams = deepcopy(initial_pinned_streams)
+        model.unpinned_streams = deepcopy(initial_unpinned_streams)
+        model.stream_dict = stream_dict
+        stream_id = event['subscriptions'][0]['stream_id']
+        if model.is_pinned_stream(stream_id):
+            stream = model._get_stream_by_id(initial_pinned_streams, stream_id)
+            initial_pinned_streams.remove(stream)
+        else:
+            stream = (model
+                      ._get_stream_by_id(initial_unpinned_streams, stream_id))
+            initial_unpinned_streams.remove(stream)
+        model._handle_subscription_event(event)
+        expected_pinned_streams = initial_pinned_streams
+        expected_unpinned_streams = initial_unpinned_streams
+
+        assert model.pinned_streams == expected_pinned_streams
+        assert model.unpinned_streams == expected_unpinned_streams
+
+        update_left_panel = model.controller.view.left_panel.update_stream_view
+        update_left_panel.assert_called_once_with()
+        model.controller.update_screen.assert_called_once_with()
 
     # Use LoopEnder with raising_event to cause the event loop to end without
     # processing the event
