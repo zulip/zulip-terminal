@@ -1,8 +1,10 @@
 import re
+from copy import deepcopy
 from enum import Enum
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import pytest
+from pygments.styles.perldoc import PerldocStyle
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
@@ -10,6 +12,7 @@ from zulipterminal.config.themes import (
     REQUIRED_STYLES,
     THEMES,
     ThemeSpec,
+    add_pygments_style,
     all_themes,
     complete_and_incomplete_themes,
     parse_themefile,
@@ -61,6 +64,7 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     theme = THEMES[theme_name]
     theme_styles = theme.STYLES
     theme_colors = theme.Color
+    theme_meta = theme.META
 
     # Check if STYLE and REQUIRED_STYLES use the same styles.
     assert len(theme_styles) == len(REQUIRED_STYLES)
@@ -87,6 +91,11 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     for style_name, style_conf in theme_styles.items():
         fg, bg = style_conf
         assert fg in theme_colors and bg in theme_colors
+    # Check completeness of META
+    expected_META = {"pygments": ["styles", "background", "overrides"]}
+    for metadata, config in expected_META.items():
+        assert theme_meta[metadata]
+        assert all([theme_meta[metadata][c] for c in config])
 
 
 def test_complete_and_incomplete_themes() -> None:
@@ -147,3 +156,40 @@ def test_parse_themefile(
     req_styles = {"s1": "", "s2": "bold"}
     mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
     assert parse_themefile(STYLES, color_depth) == expected_urwid_theme
+
+
+@pytest.mark.parametrize(
+    "theme_meta, expected_styles",
+    [
+        (
+            {
+                "pygments": {
+                    "styles": PerldocStyle().styles,
+                    "background": "#def",
+                    "overrides": {
+                        "k": "#abc",
+                        "sd": "#123, bold",
+                    },
+                },
+            },
+            [
+                ("pygments:k", "white", "black", "bold", "#abc", "#def"),
+                ("pygments:kr", "white", "black", "bold", "#abc", "#def"),
+                ("pygments:sd", "white", "black", "bold", "#123, bold", "#def"),
+            ],
+        )
+    ],
+)
+def test_add_pygments_style(
+    mocker: MockerFixture, theme_meta: Dict[str, Any], expected_styles: ThemeSpec
+) -> None:
+    urwid_theme: ThemeSpec = [(None, "#xxx", "#yyy")]
+    original_urwid_theme = deepcopy(urwid_theme)
+
+    add_pygments_style(theme_meta, urwid_theme)
+
+    # Check if original exists
+    assert original_urwid_theme[0] in urwid_theme
+    # Check for overrides(k,sd) and inheriting styles (kr)
+    for style in expected_styles:
+        assert style in urwid_theme

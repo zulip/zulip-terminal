@@ -4,6 +4,8 @@ ZT LIGHT
 This theme uses the default color scheme.
 For further details on themefiles look at the theme contribution guide.
 """
+from pygments.styles.perldoc import PerldocStyle
+
 from zulipterminal.config.color import DefaultBoldColor as Color
 
 
@@ -64,5 +66,30 @@ STYLES = {
     'task:success'    : (Color.BLACK,               Color.DARK_GREEN),
     'task:error'      : (Color.WHITE,               Color.DARK_RED),
     'task:warning'    : (Color.BLACK,               Color.YELLOW),
+}
+
+META = {
+    'pygments': {
+        'styles'    : PerldocStyle().styles,
+        'background': PerldocStyle().background_color,
+        'overrides' : {
+            'cs'  : '#8B008B, bold',
+            'sh'  : '#1c7e71, italics',
+            'k'   : '#8B008B, bold',
+            'nc'  : '#008b45, bold',
+            'ne'  : '#008b45, bold',
+            'nn'  : '#008b45, underline',
+            'nt'  : '#8B008B, bold',
+            'gh'  : '#000080, bold',
+            'gu'  : '#800080, bold',
+            'ge'  : 'default, italics',
+            'gs'  : 'default, bold',
+            'err' : '#a61717',
+            'n'   : '#666666',
+            'p'   : '#666666',
+            'o'   : '#8B008B',
+            'w'   : '#666666',  # inline/plain-codeblock
+        }
+    }
 }
 # fmt: on

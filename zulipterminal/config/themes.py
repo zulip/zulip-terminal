@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from pygments.token import STANDARD_TYPES
+
 from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
 
 
@@ -71,6 +73,14 @@ REQUIRED_STYLES = {
     'task:error'      : 'standout',
     'task:warning'    : 'standout',
 }
+
+REQUIRED_META = {
+    'pygments': {
+        'styles'     : None,
+        'background' : None,
+        'overrides'  : None,
+    }
+}
 # fmt: on
 
 THEMES = {
@@ -101,6 +111,9 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
         name
         for name, theme in THEMES.items()
         if set(theme.STYLES) == set(REQUIRED_STYLES)
+        if set(theme.META) == set(REQUIRED_META)
+        for meta, conf in theme.META.items()
+        if set(conf) == set(REQUIRED_META.get(meta, {}))
     }
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
@@ -109,6 +122,13 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
 def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
     theme_styles = THEMES[theme_name].STYLES
     urwid_theme = parse_themefile(theme_styles, color_depth)
+
+    try:
+        theme_meta = THEMES[theme_name].META
+        add_pygments_style(theme_meta, urwid_theme)
+    except AttributeError:
+        pass
+
     return urwid_theme
 
 
@@ -141,3 +161,47 @@ def parse_themefile(
 
         urwid_theme.append(new_style)
     return urwid_theme
+
+
+def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> None:
+    """
+    This function adds pygments styles for use in syntax
+    highlighting of code blocks and inline code.
+    pygments["styles"]:
+        one of those available in pygments/styles.
+    pygments["background"]:
+        used to set a different background for codeblocks instead of the
+        one used in the syntax style, if it doesn't match with
+        the overall zt theme.
+        The default is available as Eg: MaterialStyle.background_color
+    pygments["overrides"]:
+        used to override certain pygments styles to match to urwid format.
+        It can also be used to customize the syntax style.
+    """
+    pygments = theme_meta["pygments"]
+    pygments_styles = pygments["styles"]
+    pygments_bg = pygments["background"]
+    pygments_overrides = pygments["overrides"]
+
+    for token, css_class in STANDARD_TYPES.items():
+        if css_class in pygments_overrides:
+            pygments_styles[token] = pygments_overrides[css_class]
+
+        # Inherit parent pygments style if not defined.
+        # Eg: Use `String` if `String.Double` is not present.
+        if pygments_styles[token] == "":
+            try:
+                t = [k for k, v in STANDARD_TYPES.items() if v == css_class[0]]
+                pygments_styles[token] = pygments_styles[t[0]]
+            except IndexError:
+                pass
+
+        new_style = (
+            f"pygments:{css_class}",
+            "white",
+            "black",
+            "bold",  # Mono style
+            pygments_styles[token],
+            pygments_bg,
+        )
+        urwid_theme.append(new_style)

@@ -5,9 +5,15 @@ This theme uses the official gruvbox color scheme.
 For color reference see:
     https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 
+For syntax highlighting, this theme uses the solarized dark styles
+from pygments. This could be updated to a gruvbox style when the style
+is released.
+
 For further details on themefiles look at the theme contribution guide
 """
 from enum import Enum
+
+from pygments.styles.solarized import SolarizedDarkStyle
 
 from zulipterminal.config.color import color_properties
 
@@ -90,5 +96,26 @@ STYLES = {
     'task:success'     : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
     'task:error'       : (Color.LIGHT2,                Color.FADED_RED),
     'task:warning'     : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+}
+
+META = {
+    'pygments': {
+        'styles'    : SolarizedDarkStyle().styles,
+        'background': 'h236',
+        'overrides' : {
+            'c'   : '#586e75, italics',    # base01
+            'cp'  : '#d33682',             # magenta
+            'cpf' : '#586e75',             # base01
+            'ge'  : '#839496, italics',    # base0
+            'gh'  : '#839496, bold',       # base0
+            'gu'  : '#839496, underline',  # base0
+            'gp'  : '#268bd2, bold',       # blue
+            'gs'  : '#839496, bold',       # base0
+            'err' : '#dc322f',             # red
+            'n'   : '#bdae93',             # gruvbox: light4
+            'p'   : '#bdae93',             # gruvbox: light4
+            'w'   : '#bdae93',             # gruvbox: light4
+        }
+    }
 }
 # fmt: on
