@@ -4,6 +4,8 @@ ZT DARK
 This theme uses the default color scheme.
 For further details on themefiles look at the theme contribution guide.
 """
+from pygments.styles.material import MaterialStyle
+
 from zulipterminal.config.color import DefaultBoldColor as Color
 
 
@@ -64,5 +66,22 @@ STYLES = {
     'task:success'    : (Color.WHITE,               Color.DARK_GREEN),
     'task:error'      : (Color.WHITE,               Color.DARK_RED),
     'task:warning'    : (Color.WHITE,               Color.BROWN),
+}
+
+META = {
+    'pygments': {
+        'styles'    : MaterialStyle().styles,
+        'background': 'h235',
+        'overrides' : {
+            'kn' : MaterialStyle().cyan  + ', italics',
+            'sd' : MaterialStyle().faded + ', italics',
+            'ow' : MaterialStyle().cyan  + ', italics',
+            'c'  : MaterialStyle().faded + ', italics',
+            'n'  : MaterialStyle().paleblue,
+            'no' : MaterialStyle().paleblue,
+            'nx' : MaterialStyle().paleblue,
+            'w'  : MaterialStyle().paleblue,  # inline/plain-codeblock
+        }
+    }
 }
 # fmt: on
