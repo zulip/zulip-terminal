@@ -1378,21 +1378,26 @@ class TestMessageBox:
                     ("pygments:w", " "),
                     ("pygments:w", "func"),
                     ("pygments:w", "():"),
-                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "    "),
                     ("pygments:pg", "print"),
                     ("pygments:w", "()"),
-                    ("pygments:w", "\n" "\n"),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "                 \n"),
+                    ("pygments:w", ""),
                     ("pygments:w", "class"),
                     ("pygments:w", " "),
                     ("pygments:w", "New"),
                     ("pygments:w", ":"),
-                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "       \n"),
+                    ("pygments:w", "    "),
                     ("pygments:w", "name"),
                     ("pygments:w", " "),
                     ("pygments:w", "="),
                     ("pygments:w", " "),
                     ("pygments:w", '"name"'),
                     ("pygments:w", "\n"),
+                    ("pygments:w", ""),
                 ],
                 id="codehilite-code",
             ),
@@ -1410,21 +1415,26 @@ class TestMessageBox:
                     ("pygments:w", " "),
                     ("pygments:w", "func"),
                     ("pygments:w", "():"),
-                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "    "),
                     ("pygments:pg", "print"),
                     ("pygments:w", "()"),
-                    ("pygments:w", "\n" "\n"),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "                 \n"),
+                    ("pygments:w", ""),
                     ("pygments:w", "class"),
                     ("pygments:w", " "),
                     ("pygments:w", "New"),
                     ("pygments:w", ":"),
-                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "       \n"),
+                    ("pygments:w", "    "),
                     ("pygments:w", "name"),
                     ("pygments:w", " "),
                     ("pygments:w", "="),
                     ("pygments:w", " "),
                     ("pygments:w", '"name"'),
                     ("pygments:w", "\n"),
+                    ("pygments:w", ""),
                 ],
                 id="codehilite-code-old",
             ),
@@ -1437,9 +1447,14 @@ class TestMessageBox:
                 "    Codeblock\n"
                 "</code></pre></div>",
                 [
-                    ("pygments:w", "This is a\n    Plain\n\n    Codeblock\n"),
+                    ("pygments:w", "This is a"),
+                    ("pygments:w", "    \n"),
+                    ("pygments:w", "    Plain    \n"),
+                    ("pygments:w", "             \n"),
+                    ("pygments:w", "    Codeblock\n"),
+                    ("pygments:w", ""),
                 ],
-                id="codehilite-plain-text-codeblock",
+                id="codehilite-no-language-codeblock",
             ),
             case(
                 '<div class="codehilite">'
@@ -1450,9 +1465,54 @@ class TestMessageBox:
                 "    Codeblock\n"
                 "</pre></div>",
                 [
-                    ("pygments:w", "This is a\n    Plain\n\n    Codeblock\n"),
+                    ("pygments:w", "This is a"),
+                    ("pygments:w", "    \n"),
+                    ("pygments:w", "    Plain    \n"),
+                    ("pygments:w", "             \n"),
+                    ("pygments:w", "    Codeblock\n"),
+                    ("pygments:w", ""),
                 ],
-                id="codehilite-plain-text-codeblock-old",
+                id="codehilite-no-language-codeblock-old",
+            ),
+            case(
+                '<div class="codehilite">'
+                "<pre><span></span>"
+                "This is a partially\n"
+                "  <span>pigmentized</span>\n"
+                "\n"
+                "codeblock\n"
+                "</pre></div>",
+                [
+                    ("pygments:w", "This is a partially"),
+                    ("pygments:w", "\n"),
+                    ("pygments:w", "  "),
+                    ("pygments:w", "pigmentized"),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "                   \n"),
+                    ("pygments:w", "codeblock          \n"),
+                    ("pygments:w", ""),
+                ],
+                id="codehilite-partial-codeblock",
+            ),
+            case(
+                '<div class="codehilite">'
+                "<pre><span></span>"
+                "<code>This is a partially\n"
+                "  <span>pigmentized</span>\n"
+                "\n"
+                "codeblock\n"
+                "</code></pre></div>",
+                [
+                    ("pygments:w", "This is a partially"),
+                    ("pygments:w", "\n"),
+                    ("pygments:w", "  "),
+                    ("pygments:w", "pigmentized"),
+                    ("pygments:w", "      \n"),
+                    ("pygments:w", "                   \n"),
+                    ("pygments:w", "codeblock          \n"),
+                    ("pygments:w", ""),
+                ],
+                id="codehilite-partial-codeblock-old",
             ),
             case("<strong>Something", [("msg_bold", "Something")], id="strong"),
             case("<em>Something", [("msg_bold", "Something")], id="em"),

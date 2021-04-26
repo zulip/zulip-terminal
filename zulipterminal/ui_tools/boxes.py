@@ -1359,20 +1359,7 @@ class MessageBox(urwid.Pile):
                 if code_soup is None:
                     code_soup = element.pre
 
-                for code_element in code_soup.contents:
-                    code_text = (
-                        code_element.text
-                        if isinstance(code_element, Tag)
-                        else code_element.string
-                    )
-
-                    if code_element.name == "span":
-                        if len(code_text) == 0:
-                            continue
-                        css_style = code_element.attrs.get("class", ["w"])
-                        markup.append((f"pygments:{css_style[0]}", code_text))
-                    else:
-                        markup.append(("pygments:w", code_text))
+                markup.extend(cls.parse_codeblock(code_soup))
             elif tag in ("strong", "em"):
                 # BOLD & ITALIC
                 markup.append(("msg_bold", tag_text))
@@ -1698,6 +1685,99 @@ class MessageBox(urwid.Pile):
                 child.insert_before(new_tag)
             pad_count += 1
         return bq_len
+
+    @staticmethod
+    def parse_codeblock(code_soup: Any) -> List[Any]:
+        """
+        Parses code block to add whitespace padding to create
+        a visual box.
+            A code soup is made up of <span> tags with NavigableStrings
+            in between.
+            Example:
+            Code:
+                ---
+                <code><s>def</s>·<s>func</s><s>():</s>\n
+                ····<s>print</s><s>()</s><s></s>\n
+                \n
+                <s>class</s>·<s>New</s><s>:</s>\n
+                ····<s>name</s>·<s>=</s>·<s>"name"</s>\n
+                </code>
+                ---
+            Partial Text Code:
+                ---
+                <code> sudo wget -q0 - link <s>|</s> sudo apt-key add -
+                sudo sh -c <s>'some string'</s>
+                sudo apt-get update
+                sudo apt-get install zulip
+                </code>
+                ---
+            Plain Text Codeblock:
+                ---
+                <code>This·is·a\n
+                ····Plain\n
+                \n
+                ····Codeblock\n
+                </code>
+                ---
+
+            * <s>xxxx</s> is short for <span class="pg">xxxx</span>
+                 where pg is the pygments css class.
+            * '·' is used for whitespace and '\n' for new line
+            NOTE: For old messages instead of <code>xxx</code>
+            it would have <pre><span></span>xxx</pre>
+        """
+        markup = []
+
+        # Find longest line
+        code_text = code_soup.text
+        max_line_len = len(max(code_text.split("\n"), key=lambda x: len(x)))
+
+        line_len = 0
+        for code_element in code_soup.contents:
+            code_text = (
+                code_element.text
+                if isinstance(code_element, Tag)
+                else code_element.string
+            )
+
+            if code_element.name == "span":
+                # Ignore empty spans, causes problems with urwid spacing.
+                if len(code_text) == 0:
+                    continue
+                css_style = code_element.attrs.get("class", ["w"])
+                markup.append((f"pygments:{css_style[0]}", code_text))
+                line_len += len(code_text)
+            elif "\n" not in code_text:
+                # NavigableStrings like spaces between words, etc
+                markup.append(("pygments:w", code_text))
+                line_len += len(code_text)
+            elif "\n" in code_text:
+                # Every line ends with a NavigableString which
+                # can contain multiple lines sometimes (See docstring)
+                lines = code_text.split("\n")
+
+                # Complete the line, which may be an empty string.
+                code_line_ending = lines[0]
+                if code_line_ending:
+                    markup.append(("pygments:w", code_line_ending))
+                    line_len += len(code_line_ending)
+
+                # Reset the `line_len`
+                right_padding = " " * (max_line_len - line_len) + "\n"
+                markup.append(("pygments:w", right_padding))
+                line_len = 0
+
+                # Pad remaining lines, which may all be empty lines.
+                for line in lines[1:-1]:
+                    padded_line = line + " " * (max_line_len - len(line)) + "\n"
+                    markup.append(("pygments:w", padded_line))
+
+                # Start new line with it's indent.
+                code_indent = lines[-1]
+                markup.append(("pygments:w", code_indent))
+                line_len += len(code_indent)
+
+        return markup
 
     def selectable(self) -> bool:
         # Returning True, indicates that this widget
