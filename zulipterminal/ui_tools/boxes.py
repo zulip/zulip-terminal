@@ -1429,6 +1429,31 @@ class MessageBox(urwid.Pile):
         ]
         return [part for part, condition in parts if condition]
 
+    def update_message_author_status(self) -> bool:
+        """
+        Update the author status by resetting the entire message box
+        if author field is present.
+        """
+        author_is_present = False
+        author_column = 1  # Index of author field in content header
+        author_field = None
+
+        # Get message author field (if present)
+        if self.need_recipient_header():
+            author_field = self[1][author_column]
+        elif isinstance(self[0][author_column], urwid.Text):
+            author_field = self[0][author_column]
+
+        if author_field is not None:
+            author_is_present = author_field.text != " "
+
+        if author_is_present:
+            # Re initialize the message if update is required.
+            # FIXME: Render specific element (here author field) instead?
+            super().__init__(self.main_view())
+
+        return author_is_present
+
     @classmethod
     def transform_content(
         cls, content: Any, server_url: str

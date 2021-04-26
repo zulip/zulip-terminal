@@ -2211,6 +2211,30 @@ class TestMessageBox:
             assert label[0].text == "EDITED"
             assert label[1][1] == 7
 
+    @pytest.mark.parametrize(
+        "to_vary_in_last_message, update_required",
+        [
+            ({"sender_full_name": "Unique name (won't be in next message)"}, True),
+            ({}, False),
+        ],
+        ids=[
+            "author_field_present",
+            "author_field_not_present",
+        ],
+    )
+    def test_update_message_author_status(
+        self,
+        message_fixture,
+        update_required,
+        to_vary_in_last_message,
+    ):
+        message = message_fixture
+        last_msg = dict(message, **to_vary_in_last_message)
+
+        msg_box = MessageBox(message, self.model, last_msg)
+
+        assert msg_box.update_message_author_status() == update_required
+
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize(
         "narrow, expect_to_prefill",
