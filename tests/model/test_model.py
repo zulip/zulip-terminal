@@ -2080,8 +2080,39 @@ class TestModel:
                 },
                 True,
             ),
+            # In narrow with oneself, OP - 'start'
+            (
+                [["pm_with", "iago@zulip.com"]],
+                {
+                    "type": "typing",
+                    "op": "start",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
+                    "id": 0,
+                },
+                False,
+            ),
+            # In narrow with oneself, OP - 'stop'
+            (
+                [["pm_with", "iago@zulip.com"]],
+                {
+                    "type": "typing",
+                    "op": "stop",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
+                    "id": 0,
+                },
+                False,
+            ),
         ],
-        ids=["not_in_pm_narrow", "not_in_pm_narrow_with_sender", "start", "stop"],
+        ids=[
+            "not_in_pm_narrow",
+            "not_in_pm_narrow_with_sender",
+            "start",
+            "stop",
+            "start_in_narrow_with_oneself",
+            "stop_in_narrow_with_oneself",
+        ],
     )
     def test__handle_typing_event(self, mocker, model, narrow, event, called):
         event["type"] = "typing"
@@ -2089,6 +2120,7 @@ class TestModel:
         mocker.patch("zulipterminal.ui.View.set_footer_text")
         model.narrow = narrow
         model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
+        model.user_id = 5  # Iago's user_id
 
         model._handle_typing_event(event)
 
