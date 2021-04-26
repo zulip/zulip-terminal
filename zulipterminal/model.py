@@ -1097,11 +1097,13 @@ class Model:
         assert event["type"] == "typing"
         if hasattr(self.controller, "view"):
             # If the user is in pm narrow with the person typing
+            # and the person typing isn't the user themselves
             narrow = self.narrow
             if (
                 len(narrow) == 1
                 and narrow[0][0] == "pm_with"
                 and event["sender"]["email"] in narrow[0][1].split(",")
+                and event["sender"]["user_id"] != self.user_id
             ):
                 if event["op"] == "start":
                     user = self.user_dict[event["sender"]["email"]]
