@@ -1727,10 +1727,12 @@ class MessageBox(urwid.Pile):
             it would have <pre><span></span>xxx</pre>
         """
         markup = []
+        MAX_NO_WRAP_WIDTH = 60
 
         # Find longest line
         code_text = code_soup.text
         max_line_len = len(max(code_text.split("\n"), key=lambda x: len(x)))
+        max_line_len = min(max_line_len, MAX_NO_WRAP_WIDTH)
 
         line_len = 0
         for code_element in code_soup.contents:
