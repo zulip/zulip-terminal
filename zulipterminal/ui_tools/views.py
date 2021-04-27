@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import urwid
 from typing_extensions import Literal
 
+from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
@@ -22,7 +23,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.config.ui_mappings import edit_mode_captions
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1348,7 +1349,7 @@ class EditModeView(PopUpView):
         self.edit_mode_button = button
         self.widgets: List[urwid.RadioButton] = []
 
-        for mode in ['change_one', 'change_later', 'change_all']:
+        for mode in EDIT_MODE_CAPTIONS.keys():
             self.add_radio_button(mode)
         super().__init__(controller, self.widgets, 'ENTER', 62,
                          'Topic edit propagation mode')
@@ -1362,10 +1363,10 @@ class EditModeView(PopUpView):
         if new_state:
             self.edit_mode_button.set_selected_mode(mode)
 
-    def add_radio_button(self, mode: str) -> None:
+    def add_radio_button(self, mode: EditPropagateMode) -> None:
         state = mode == self.edit_mode_button.mode
         radio_button = urwid.RadioButton(self.widgets,
-                                         edit_mode_captions[mode],
+                                         EDIT_MODE_CAPTIONS[mode],
                                          state=state)
         urwid.connect_signal(radio_button, 'change', self.set_selected_mode,
                              mode)

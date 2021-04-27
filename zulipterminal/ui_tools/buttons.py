@@ -6,13 +6,14 @@ from urllib.parse import urljoin, urlparse
 import urwid
 from typing_extensions import TypedDict
 
+from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.symbols import (
     MUTE_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.config.ui_mappings import edit_mode_captions
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
@@ -527,7 +528,7 @@ class EditModeButton(urwid.Button):
                          on_press=controller.show_topic_edit_mode)
         self.set_selected_mode('change_later')  # set default mode
 
-    def set_selected_mode(self, mode: str) -> None:
+    def set_selected_mode(self, mode: EditPropagateMode) -> None:
         self.mode = mode
         self._w = urwid.AttrMap(urwid.SelectableIcon(
-            edit_mode_captions[self.mode], self.width), None, 'selected')
+            EDIT_MODE_CAPTIONS[self.mode], self.width), None, 'selected')
