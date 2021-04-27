@@ -1336,8 +1336,40 @@ class MessageBox(urwid.Pile):
                 # CODE (INLINE?)
                 markup.append(("msg_code", tag_text))
             elif tag == "div" and "codehilite" in tag_classes:
-                # CODE (BLOCK?)
-                markup.append(("msg_code", tag_text))
+                """
+                CODE BLOCK
+                -------------
+                Structure:   # Language is optional
+                    <div class="codehilite" data-code-language="python">
+                      <pre>
+                        <span></span>
+                        <code>
+                          Code HTML
+                          Made of <span>'s and NavigableStrings
+                        </code>
+                      </pre>
+                    </div>
+                """
+                code_soup = element.pre.code
+                # NOTE: Old messages don't have the additional `code` tag.
+                # Ref: https://github.com/Python-Markdown/markdown/pull/862
+                if code_soup is None:
+                    code_soup = element.pre
+
+                for code_element in code_soup.contents:
+                    code_text = (
+                        code_element.text
+                        if isinstance(code_element, Tag)
+                        else code_element.string
+                    )
+
+                    if code_element.name == "span":
+                        if len(code_text) == 0:
+                            continue
+                        css_style = code_element.attrs.get("class", ["w"])
+                        markup.append((f"pygments:{css_style[0]}", code_text))
+                    else:
+                        markup.append(("pygments:w", code_text))
             elif tag in ("strong", "em"):
                 # BOLD & ITALIC
                 markup.append(("msg_bold", tag_text))
