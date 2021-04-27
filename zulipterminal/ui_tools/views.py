@@ -22,13 +22,8 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.helper import (
-    Message,
-    asynch,
-    edit_mode_captions,
-    match_stream,
-    match_user,
-)
+from zulipterminal.config.ui_mappings import edit_mode_captions
+from zulipterminal.helper import Message, asynch, match_stream, match_user
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton,

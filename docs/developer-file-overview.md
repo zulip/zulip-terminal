@@ -19,6 +19,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 | zulipterminal/config   | keys.py             | Stores keybindings and their helper functions                                                          |
 |                        | symbols.py          | Stores terminal characters used to mark particular elements of the user interface                      |
 |                        | themes.py           | Stores styles and their colour mappings in each theme, with helper functions                           |
+|                        | ui_mappings.py      | Stores relationships between state/API data and presentation in the UI                                 |
 |                        |                     |                                                                                                        |
 | zulipterminal/ui_tools | boxes.py            | UI boxes for displaying messages and entering text, such as `MessageBox`, `SearchBox`, `WriteBox`, etc.|
 |                        | buttons.py          | UI buttons for 'narrowing' and showing unread counts, such as Stream, PM, Topic, Home, Starred, etc    |
