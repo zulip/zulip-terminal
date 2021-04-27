@@ -141,6 +141,19 @@ def users_fixture(logged_on_user):
 
 
 @pytest.fixture
+def _all_users_by_id(initial_data):
+    return {
+        user["user_id"]: user
+        for user in (initial_data["realm_users"] + initial_data["cross_realm_bots"])
+    }
+
+
+@pytest.fixture
+def _cross_realm_bots_by_id(initial_data):
+    return {user["user_id"]: user for user in initial_data["cross_realm_bots"]}
+
+
+@pytest.fixture
 def user_groups_fixture():
     user_groups = []
     members = [[1001, 11], [11, 12], [12], []]

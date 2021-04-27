@@ -30,6 +30,7 @@ from zulipterminal.api_types import (
     Event,
     PrivateComposition,
     RealmEmojiData,
+    RealmUser,
     StreamComposition,
     Subscription,
 )
@@ -135,6 +136,9 @@ class Model:
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
         self._fetch_initial_data()
+
+        self._all_users_by_id: Dict[int, RealmUser] = {}
+        self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
 
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
@@ -713,6 +717,7 @@ class Model:
         self.user_id_email_dict: Dict[int, str] = dict()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
+                self._all_users_by_id[self.user_id] = user
                 current_user = {
                     "full_name": user["full_name"],
                     "email": user["email"],
@@ -775,6 +780,7 @@ class Model:
                 "user_id": user["user_id"],
                 "status": status,
             }
+            self._all_users_by_id[user["user_id"]] = user
             self.user_id_email_dict[user["user_id"]] = email
 
         # Add internal (cross-realm) bots to dicts
@@ -786,6 +792,8 @@ class Model:
                 "user_id": bot["user_id"],
                 "status": "inactive",
             }
+            self._cross_realm_bots_by_id[bot["user_id"]] = bot
+            self._all_users_by_id[bot["user_id"]] = bot
             self.user_id_email_dict[bot["user_id"]] = email
 
         # Generate filtered lists for active & idle users
@@ -1415,6 +1423,8 @@ class Model:
 
         if response["result"] == "success":
             if fetch_data:
+                # FIXME: Improve methods to avoid updating `realm_users` on
+                # every cycle. Add support for `realm_users` events too.
                 self.initial_data.update(response)
             self.max_message_id = response["max_message_id"]
             self.queue_id = response["queue_id"]
