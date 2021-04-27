@@ -968,7 +968,7 @@ class MessageBox(urwid.Pile):
                     metadata['bq_len'] -= 1
                     continue
                 markup.append(element)
-            elif (tag == 'div' and tag_attrs
+            elif (tag == 'div'
                   and any(cls in tag_classes
                           for cls in unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
@@ -990,16 +990,16 @@ class MessageBox(urwid.Pile):
             elif tag in ('p', 'del'):
                 # PARAGRAPH, STRIKE-THROUGH
                 markup.extend(cls.soup2markup(element, metadata)[0])
-            elif (tag == 'span' and tag_attrs
+            elif (tag == 'span'
                   and 'emoji' in tag_classes):
                 # EMOJI
                 markup.append(('msg_emoji', tag_text))
-            elif (tag == 'span' and tag_attrs
+            elif (tag == 'span'
                   and ('katex-display' in tag_classes
                        or 'katex' in tag_classes)):
                 # MATH TEXT
                 markup.append(tag_text)
-            elif (tag == 'span' and tag_attrs
+            elif (tag == 'span'
                   and ('user-group-mention' in tag_classes
                        or 'user-mention' in tag_classes)):
                 # USER MENTIONS & USER-GROUP MENTIONS
@@ -1083,7 +1083,7 @@ class MessageBox(urwid.Pile):
                 markup.append((
                     'msg_code', tag_text
                 ))
-            elif (tag == 'div' and tag_attrs
+            elif (tag == 'div'
                     and 'codehilite' in tag_classes):
                 # CODE (BLOCK?)
                 markup.append((
