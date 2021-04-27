@@ -955,8 +955,8 @@ class MessageBox(urwid.Pile):
                     continue
                 markup.append(element)
             elif (tag == 'div'
-                  and any(cls in tag_classes
-                          for cls in unrendered_div_classes)):
+                  and (set(tag_classes)
+                       & set(unrendered_div_classes))):
                 # UNRENDERED DIV CLASSES
                 matching_class = (set(unrendered_div_classes)
                                   & set(tag_classes))
@@ -981,13 +981,13 @@ class MessageBox(urwid.Pile):
                 # EMOJI
                 markup.append(('msg_emoji', tag_text))
             elif (tag == 'span'
-                  and ('katex-display' in tag_classes
-                       or 'katex' in tag_classes)):
+                  and ({'katex-display', 'katex'}
+                       & set(tag_classes))):
                 # MATH TEXT
                 markup.append(tag_text)
             elif (tag == 'span'
-                  and ('user-group-mention' in tag_classes
-                       or 'user-mention' in tag_classes)):
+                  and ({'user-group-mention', 'user-mention'}
+                       & set(tag_classes))):
                 # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('msg_mention', tag_text))
             elif tag == 'a':
