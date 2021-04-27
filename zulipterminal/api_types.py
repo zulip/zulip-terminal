@@ -98,6 +98,43 @@ class Subscription(TypedDict):
     stream_weekly_traffic: Optional[int]
 
 
+class RealmUser(TypedDict):
+    user_id: int
+    full_name: str
+    email: str
+
+    # Present in most cases, but these only in /users/me from Zulip 3.0 (ZFL 10):
+    timezone: str
+    date_joined: str
+
+    avatar_url: str  # Absent depending on server/capability-field (Zulip 3.0/ZFL 18+)
+    avatar_version: int  # NOTE: new in Zulip 3.0 [(ZFL 6) (ZFL 10)]
+
+    is_bot: bool
+    # These are only meaningfully (or literally) present for bots (ie. is_bot==True)
+    bot_type: int
+    bot_owner_id: int  # NOTE: new in Zulip 3.0 (ZFL 1) - None for old bots
+    bot_owner: str  # (before ZFL 1; containing email field of owner instead)
+
+    is_billing_admin: bool  # NOTE: new in Zulip 5.0 (ZFL 73)
+
+    # If role is present, prefer it to the other is_* fields below
+    role: int  # NOTE: new in Zulip 4.0 (ZFL 59)
+    is_owner: bool  # NOTE: new in Zulip 3.0 [/users/* (ZFL 8); /register (ZFL 11)]
+    is_admin: bool
+    is_guest: bool  # NOTE: added /users/me ZFL 10; other changes before that
+
+    # To support in future:
+    # profile_data: Dict  # NOTE: Only if requested
+    # is_active: bool  # NOTE: Dependent upon realm_users vs realm_non_active_users
+    # delivery_email: str  # NOTE: Only available if admin, and email visibility limited
+
+    # Occasionally present or deprecated fields
+    # is_moderator: bool  # NOTE: new in Zulip 4.0 (ZFL 60) - ONLY IN REGISTER RESPONSE
+    # is_cross_realm_bot: bool  # NOTE: Only for cross-realm bots
+    # max_message_id: int  # NOTE: DEPRECATED & only for /users/me
+
+
 class MessageEvent(TypedDict):
     type: Literal["message"]
     message: Message
