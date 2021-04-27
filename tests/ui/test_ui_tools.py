@@ -1365,9 +1365,94 @@ class TestMessageBox:
             ),
             case("<code>some code", [("msg_code", "some code")], id="code"),
             case(
-                '<div class="codehilite">some code',
-                [("msg_code", "some code")],
-                id="codehilite",
+                '<div class="codehilite" data-code-language="python">'
+                "<pre><span></span>"
+                "<code><span>def</span> <span>func</span><span>():</span>\n"
+                '    <span class="pg">print</span><span>()</span><span></span>\n'
+                "\n"
+                "<span>class</span> <span>New</span><span>:</span>\n"
+                '    <span>name</span> <span>=</span> <span>"name"</span>\n'
+                "</code></pre></div>",
+                [
+                    ("pygments:w", "def"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "func"),
+                    ("pygments:w", "():"),
+                    ("pygments:w", "\n" "    "),
+                    ("pygments:pg", "print"),
+                    ("pygments:w", "()"),
+                    ("pygments:w", "\n" "\n"),
+                    ("pygments:w", "class"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "New"),
+                    ("pygments:w", ":"),
+                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "name"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "="),
+                    ("pygments:w", " "),
+                    ("pygments:w", '"name"'),
+                    ("pygments:w", "\n"),
+                ],
+                id="codehilite-code",
+            ),
+            case(
+                '<div class="codehilite" data-code-language="python">'
+                "<pre><span></span>"
+                "<span>def</span> <span>func</span><span>():</span>\n"
+                '    <span class="pg">print</span><span>()</span>\n'
+                "\n"
+                "<span>class</span> <span>New</span><span>:</span>\n"
+                '    <span>name</span> <span>=</span> <span>"name"</span>\n'
+                "</pre></div>",
+                [
+                    ("pygments:w", "def"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "func"),
+                    ("pygments:w", "():"),
+                    ("pygments:w", "\n" "    "),
+                    ("pygments:pg", "print"),
+                    ("pygments:w", "()"),
+                    ("pygments:w", "\n" "\n"),
+                    ("pygments:w", "class"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "New"),
+                    ("pygments:w", ":"),
+                    ("pygments:w", "\n" "    "),
+                    ("pygments:w", "name"),
+                    ("pygments:w", " "),
+                    ("pygments:w", "="),
+                    ("pygments:w", " "),
+                    ("pygments:w", '"name"'),
+                    ("pygments:w", "\n"),
+                ],
+                id="codehilite-code-old",
+            ),
+            case(
+                '<div class="codehilite">'
+                "<pre><span></span>"
+                "<code>This is a\n"
+                "    Plain\n"
+                "\n"
+                "    Codeblock\n"
+                "</code></pre></div>",
+                [
+                    ("pygments:w", "This is a\n    Plain\n\n    Codeblock\n"),
+                ],
+                id="codehilite-plain-text-codeblock",
+            ),
+            case(
+                '<div class="codehilite">'
+                "<pre><span></span>"
+                "This is a\n"
+                "    Plain\n"
+                "\n"
+                "    Codeblock\n"
+                "</pre></div>",
+                [
+                    ("pygments:w", "This is a\n    Plain\n\n    Codeblock\n"),
+                ],
+                id="codehilite-plain-text-codeblock-old",
             ),
             case("<strong>Something", [("msg_bold", "Something")], id="strong"),
             case("<em>Something", [("msg_bold", "Something")], id="em"),
