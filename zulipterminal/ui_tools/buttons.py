@@ -12,11 +12,8 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.helper import (
-    StreamData,
-    edit_mode_captions,
-    hash_util_decode,
-)
+from zulipterminal.config.ui_mappings import edit_mode_captions
+from zulipterminal.helper import StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
 
