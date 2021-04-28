@@ -65,6 +65,46 @@ class TestWriteBox:
 
         assert not write_box.model.send_typing_status_by_user_ids.called
 
+    @pytest.mark.parametrize(
+        "emails, user_ids, expect_method_called, typing_recipient_user_ids",
+        [
+            (["FOOBOO@gmail.com"], [1001], False, []),
+            (["FOOBOO@gmail.com", "person1@example.com"], [1001, 11], True, [11]),
+        ],
+        ids=["pm_only_with_oneself", "group_pm"],
+    )
+    def test_not_calling_typing_method_to_oneself(
+        self,
+        mocker,
+        write_box,
+        expect_method_called,
+        emails,
+        logged_on_user,
+        user_ids,
+        typing_recipient_user_ids,
+    ):
+        write_box.model.send_typing_status_by_user_ids = mocker.Mock()
+        write_box.model.user_id = logged_on_user["user_id"]
+        write_box.private_box_view(emails=emails, recipient_user_ids=user_ids)
+        # Set idle_status_tracking to True to avoid setting off the
+        # idleness tracker function.
+        write_box.idle_status_tracking = True
+        write_box.msg_write_box.edit_text = "random text"
+
+        assert (
+            write_box.model.send_typing_status_by_user_ids.called
+            == expect_method_called
+        )
+
+        if expect_method_called:
+            write_box.model.send_typing_status_by_user_ids.assert_called_with(
+                typing_recipient_user_ids, status="start"
+            )
+            write_box.send_stop_typing_status()
+            write_box.model.send_typing_status_by_user_ids.assert_called_with(
+                typing_recipient_user_ids, status="stop"
+            )
+
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_not_calling_send_private_message_without_recipients(
         self, key, mocker, write_box, widget_size
