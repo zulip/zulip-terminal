@@ -77,9 +77,13 @@ class WriteBox(urwid.Pile):
 
         # Used in PM and stream boxes
         # (empty list implies PM box empty, or not initialized)
-        # * prioritizes autocomplete in message body
-        # * updates server on PM typing events
+        # Prioritizes autocomplete in message body
         self.recipient_user_ids: List[int] = []
+
+        # Updates server on PM typing events
+        # Is separate from recipient_user_ids because we
+        # don't include the user's own id in this list
+        self.typing_recipient_user_ids: List[int] = []
 
         # Private message recipient text entry, None if stream-box
         # or not initialized
@@ -119,11 +123,11 @@ class WriteBox(urwid.Pile):
         # to send to and a prior 'start' status has already been sent.
         if (
             self.to_write_box
-            and self.recipient_user_ids
+            and self.typing_recipient_user_ids
             and self.sent_start_typing_status
         ):
             self.model.send_typing_status_by_user_ids(
-                self.recipient_user_ids, status="stop"
+                self.typing_recipient_user_ids, status="stop"
             )
             self.send_next_typing_update = datetime.now()
             self.idle_status_tracking = False
@@ -151,8 +155,14 @@ class WriteBox(urwid.Pile):
                     for email in emails
                 ]
             )
+            self.typing_recipient_user_ids = [
+                user_id
+                for user_id in self.recipient_user_ids
+                if user_id != self.model.user_id
+            ]
         else:
             self.recipient_user_ids = []
+            self.typing_recipient_user_ids = []
             self.recipient_emails = []
             recipient_info = ""
 
@@ -202,11 +212,11 @@ class WriteBox(urwid.Pile):
         stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
 
         def on_type_send_status(edit: object, new_edit_text: str) -> None:
-            if new_edit_text and self.recipient_user_ids:
+            if new_edit_text and self.typing_recipient_user_ids:
                 self.last_key_update = datetime.now()
                 if self.last_key_update > self.send_next_typing_update:
                     self.model.send_typing_status_by_user_ids(
-                        self.recipient_user_ids, status="start"
+                        self.typing_recipient_user_ids, status="start"
                     )
                     self.send_next_typing_update += start_period_delta
                     self.sent_start_typing_status = True
@@ -740,6 +750,11 @@ class WriteBox(urwid.Pile):
                     users = self.model.user_dict
                     self.recipient_user_ids = [
                         users[email]["user_id"] for email in self.recipient_emails
+                    ]
+                    self.typing_recipient_user_ids = [
+                        user_id
+                        for user_id in self.recipient_user_ids
+                        if user_id is not self.model.user_id
                     ]
 
             if not self.msg_body_edit_enabled:
