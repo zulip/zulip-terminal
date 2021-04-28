@@ -126,13 +126,31 @@ class TestController:
         id_list = index_stream["stream_msg_ids_by_stream_id"][stream_id]
         assert {widget.original_widget.message["id"]} == id_list
 
-    def test_narrow_to_topic(self, mocker, controller, msg_box, index_topic):
+    @pytest.mark.parametrize(
+        ["initial_narrow", "anchor", "expected_final_focus"],
+        [
+            ([], None, 537289),
+        ],
+        ids=[
+            "all-messages_to_topic_narrow_no_anchor",
+        ],
+    )
+    def test_narrow_to_topic(
+        self,
+        mocker,
+        controller,
+        msg_box,
+        index_multiple_topic_msg,
+        initial_narrow,
+        anchor,
+        expected_final_focus,
+    ):
         expected_narrow = [
             ["stream", msg_box.stream_name],
             ["topic", msg_box.topic_name],
         ]
-        controller.model.narrow = []
-        controller.model.index = index_topic
+        controller.model.narrow = initial_narrow
+        controller.model.index = index_multiple_topic_msg
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
             205: {
@@ -143,16 +161,23 @@ class TestController:
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
-        controller.narrow_to_topic(stream_name="PTEST", topic_name=msg_box.topic_name)
+        controller.narrow_to_topic(
+            stream_name="PTEST",
+            topic_name=msg_box.topic_name,
+            contextual_message_id=anchor,
+        )
 
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
+        widgets, focus = controller.view.message_view.log.extend.call_args_list[0][0]
         stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
-        id_list = index_topic["topic_msg_ids"][stream_id][topic_name]
-        assert {widget.original_widget.message["id"]} == id_list
+        id_list = index_multiple_topic_msg["topic_msg_ids"][stream_id][topic_name]
+        msg_ids = {widget.original_widget.message["id"] for widget in widgets}
+        final_focus_msg_id = widgets[focus].original_widget.message["id"]
+        assert msg_ids == id_list
+        assert final_focus_msg_id == expected_final_focus
 
     def test_narrow_to_user(self, mocker, controller, user_button, index_user):
         controller.model.narrow = []
