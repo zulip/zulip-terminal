@@ -110,6 +110,7 @@ setup(
         "urwid_readline>=0.13",
         "beautifulsoup4>=4.9.0",
         "lxml>=4.6.2",
+        "pygments>=2.8.1",
         "typing_extensions>=3.7",
         "python-dateutil>=2.8.1",
         "tzlocal>=2.1",
