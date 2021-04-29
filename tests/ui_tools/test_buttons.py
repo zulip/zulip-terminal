@@ -6,6 +6,7 @@ from urwid import AttrMap, Overlay
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
+    StarredButton,
     StreamButton,
     TopButton,
     TopicButton,
@@ -91,6 +92,35 @@ class TestTopButton:
                 count_str)
         assert len(text[0]) == len(expected_text) == (width - 1)
         assert text[0] == expected_text
+
+    @pytest.mark.parametrize('old_count, new_count, new_count_str', [
+        (10, 11, '11'), (0, 1, '1'), (11, 10, '10'), (1, 0, '')
+    ])
+    def test_update_count(
+        self, mocker, old_count, new_count, new_count_str, width=12
+    ):
+        top_button = TopButton(controller=mocker.Mock(),
+                               caption='caption',
+                               show_function=mocker.Mock(),
+                               width=width,
+                               count=old_count,
+                               count_style='starred_count')
+        # Avoid testing use in initialization by patching afterwards
+        update_widget = mocker.patch(TOPBUTTON + ".update_widget")
+
+        top_button.update_count(new_count)
+
+        update_widget.assert_called_once_with(
+            (top_button.count_style, new_count_str), None,
+        )
+
+
+class TestStarredButton:
+    def test_count_style_init_argument_value(self, mocker, width=12, count=10):
+        starred_button = StarredButton(controller=mocker.Mock(),
+                                       width=width,
+                                       count=count)
+        assert starred_button.count_style == 'starred_count'
 
 
 class TestStreamButton:
@@ -281,6 +311,7 @@ class TestTopicButton:
             caption=title,
             prefix_character='',
             show_function=mocker.ANY,  # partial
+            count_style='unread_count',
             **params)
         assert topic_button.stream_name == stream_name
         assert topic_button.stream_id == stream_id

@@ -29,6 +29,7 @@ class TopButton(urwid.Button):
         prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
         text_color: Optional[str]=None,
         count: int=0,
+        count_style: Optional[str]=None,
     ) -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
@@ -39,6 +40,7 @@ class TopButton(urwid.Button):
         self.prefix_character = prefix_character
         self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
+        self.count_style = count_style
 
         prefix_length = 0 if prefix == '' else 2
         # Space either side, at least one space between
@@ -59,9 +61,10 @@ class TopButton(urwid.Button):
             count_text = ''
         else:
             count_text = str(count)
-        self.update_widget(('unread_count', count_text), new_color)
 
-    def update_widget(self, count_text: Tuple[str, str],
+        self.update_widget((self.count_style, count_text), new_color)
+
+    def update_widget(self, count_text: Tuple[Optional[str], str],
                       text_color: Optional[str]) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count
@@ -113,6 +116,7 @@ class HomeButton(TopButton):
             width=width,
             prefix_character='',
             count=count,
+            count_style='unread_count',
         )
 
 
@@ -129,6 +133,7 @@ class PMButton(TopButton):
             width=width,
             prefix_character='',
             count=count,
+            count_style='unread_count'
         )
 
 
@@ -145,6 +150,7 @@ class MentionedButton(TopButton):
             width=width,
             prefix_character='',
             count=count,
+            count_style='unread_count',
         )
 
 
@@ -161,6 +167,7 @@ class StarredButton(TopButton):
             width=width,
             prefix_character='',
             count=count,  # Number of starred messages, not unread count
+            count_style='starred_count',
         )
 
 
@@ -203,6 +210,7 @@ class StreamButton(TopButton):
             width=width,
             prefix_character=(self.color, stream_marker),
             count=count,
+            count_style='unread_count',
         )
 
         # Mark muted streams 'M' during button creation.
@@ -289,6 +297,7 @@ class TopicButton(TopButton):
             width=width,
             prefix_character='',
             count=count,
+            count_style='unread_count',
         )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
