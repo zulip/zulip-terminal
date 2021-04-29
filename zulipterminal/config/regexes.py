@@ -1,3 +1,18 @@
+# All regexes with (*) are inspired from webapp's
+# zulip/static/js/composebox_typeahead.js
+
+
+# (*) Stream and topic regexes
+REGEX_STREAM_NAME = r"([^*>]+)"
+REGEX_TOPIC_NAME = r"([^*]*)"
+
+
+# (*) Example: #**zulip-terminal
+REGEX_STREAM_FENCED_HALF = r"#\*\*{stream}".format(stream=REGEX_STREAM_NAME)
+# (*) Example text: #**stream name>Topic name
+REGEX_STREAM_AND_TOPIC_FENCED_HALF = f"{REGEX_STREAM_FENCED_HALF}>{REGEX_TOPIC_NAME}$"
+
+
 # Referred and translated from zulip/static/shared/js/fenced_code.js
 # Example: ```quote\nThis is a quote.\n```
 REGEX_QUOTED_FENCE_LENGTH = r"^ {0,3}(`{3,})"
