@@ -27,7 +27,7 @@ class TopButton(urwid.Button):
         show_function: Callable[[], Any],
         width: int,
         prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
-        text_color: Optional[str]=None,
+        text_style: Optional[str]=None,
         count: int=0,
     ) -> None:
         if isinstance(prefix_character, tuple):
@@ -44,15 +44,15 @@ class TopButton(urwid.Button):
         # Space either side, at least one space between
         self.width_for_text_and_count = width - 3 - prefix_length
 
-        self.original_color = text_color
+        self.original_color = text_style
         self.show_function = show_function
         super().__init__("")
-        self.update_count(count, text_color)
+        self.update_count(count, text_style)
         self.controller = controller
         urwid.connect_signal(self, 'click', self.activate)
 
-    def update_count(self, count: int, text_color: Optional[str]=None) -> None:
-        new_color = self.original_color if text_color is None else text_color
+    def update_count(self, count: int, text_style: Optional[str]=None) -> None:
+        new_color = self.original_color if text_style is None else text_style
 
         self.count = count
         if count == 0:
@@ -62,7 +62,7 @@ class TopButton(urwid.Button):
         self.update_widget(('unread_count', count_text), new_color)
 
     def update_widget(self, count_text: Tuple[str, str],
-                      text_color: Optional[str]) -> Any:
+                      text_style: Optional[str]) -> Any:
         # Note that we don't modify self._caption
         max_caption_length = (self.width_for_text_and_count
                               - len(count_text[1]))
@@ -83,7 +83,7 @@ class TopButton(urwid.Button):
              f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
              count_text],
             self.width_for_text_and_count + 5),  # cursor location
-            text_color,
+            text_style,
             'selected')
 
     def activate(self, key: Any) -> None:
@@ -250,7 +250,7 @@ class UserButton(TopButton):
             show_function=self._narrow_with_compose,
             width=width,
             prefix_character=(color, state_marker),
-            text_color=color,
+            text_style=color,
             count=count,
         )
         if is_current_user:
