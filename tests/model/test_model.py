@@ -551,6 +551,51 @@ class TestModel:
         with pytest.raises(AssertionError):
             model.react_to_message(dict(), "x")
 
+    @pytest.mark.parametrize(
+        "emoji_code, reactions, expected_has_user_reacted",
+        [
+            case(
+                "1f600",
+                [{"user": {"id": 2}, "emoji_code": "1f602"}],
+                False,
+                id="id_inside_user_field__user_not_reacted",
+            ),
+            case(
+                "1f44d",
+                [{"user": {"user_id": 1}, "emoji_code": "1f44d"}],
+                True,
+                id="user_id_inside_user_field__user_has_reacted",
+            ),
+            case(
+                "zulip",
+                [{"user_id": 1, "emoji_code": "zulip"}],
+                True,
+                id="no_user_field_with_user_id__user_has_reacted",
+            ),
+            case(
+                "1f639",
+                [{"user_id": 2, "emoji_code": "1f44d"}],
+                False,
+                id="no_user_field_with_user_id__user_not_reacted",
+            ),
+        ],
+    )
+    def test_has_user_reacted_to_message(
+        self,
+        model,
+        emoji_code,
+        reactions,
+        expected_has_user_reacted,
+        user_id=1,
+        message_id=5,
+    ):
+        model.user_id = user_id
+        message = dict(id=message_id, reactions=reactions)
+
+        has_reacted = model.has_user_reacted_to_message(message, emoji_code=emoji_code)
+
+        assert has_reacted == expected_has_user_reacted
+
     @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
     @pytest.mark.parametrize("status", ["start", "stop"])
     def test_send_typing_status_by_user_ids(

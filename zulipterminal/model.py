@@ -377,22 +377,30 @@ class Model:
             reaction_type=emoji_type,
             message_id=str(message["id"]),
         )
-        # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
-        # check both the reaction.user.{user_id/id} fields too for pre v3 support.
-        existing_reactions = [
-            reaction["emoji_code"]
-            for reaction in message["reactions"]
-            if (
-                reaction.get("user", {}).get("user_id", None) == self.user_id
-                or reaction.get("user", {}).get("id", None) == self.user_id
-                or reaction.get("user_id", None) == self.user_id
-            )
-        ]
-        if reaction_to_toggle_spec["emoji_code"] in existing_reactions:
+        has_user_reacted = self.has_user_reacted_to_message(
+            message, emoji_code=emoji_code
+        )
+        if has_user_reacted:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
             response = self.client.add_reaction(reaction_to_toggle_spec)
         display_error_if_present(response, self.controller)
+
+    def has_user_reacted_to_message(self, message: Message, *, emoji_code: str) -> bool:
+        for reaction in message["reactions"]:
+            if reaction["emoji_code"] != emoji_code:
+                continue
+            # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
+            # check both the reaction.user.{user_id/id} fields too for pre v3 support.
+            user = reaction.get("user", {})
+            has_user_reacted = (
+                user.get("user_id", None) == self.user_id
+                or user.get("id", None) == self.user_id
+                or reaction.get("user_id", None) == self.user_id
+            )
+            if has_user_reacted:
+                return True
+        return False
 
     def session_draft_message(self) -> Optional[Composition]:
         return deepcopy(self._draft)
