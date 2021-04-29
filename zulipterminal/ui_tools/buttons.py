@@ -149,7 +149,7 @@ class MentionedButton(TopButton):
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any, width: int) -> None:
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
         button_text = (
             f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
         )
@@ -160,7 +160,7 @@ class StarredButton(TopButton):
             show_function=controller.narrow_to_all_starred,
             width=width,
             prefix_character='',
-            count=0,  # Starred messages are already marked read
+            count=count,  # Number of starred messages, not unread count
         )
 
 

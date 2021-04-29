@@ -1190,6 +1190,9 @@ class TestLeftColumnView:
             },
             'all_mentions': 1,
         }
+        self.view.model.initial_data = {
+            "starred_messages": [1117554, 1117558, 1117574],
+        }
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
 
@@ -1198,6 +1201,7 @@ class TestLeftColumnView:
             VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
+        starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(STREAMBUTTON + ".mark_muted")
@@ -1206,6 +1210,8 @@ class TestLeftColumnView:
                                             count=2, width=width)
         pm_button.assert_called_once_with(left_col_view.controller,
                                           count=0, width=width)
+        starred_button.assert_called_once_with(left_col_view.controller,
+                                               count=3, width=width)
 
     @pytest.mark.parametrize('pinned', powerset([1, 2, 99, 1000]))
     def test_streams_view(self, mocker, streams, pinned, width=40):
