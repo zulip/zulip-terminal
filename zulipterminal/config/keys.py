@@ -149,6 +149,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Cycle through autocomplete suggestions in reverse',
         'key_category': 'msg_compose',
     }),
+    ('ADD_REACTION', {
+        'keys': [':'],
+        'help_text': 'Show/hide Emoji picker popup for current message',
+        'key_category': 'msg_actions',
+    }),
     ('STREAM_NARROW', {
         'keys': ['s'],
         'help_text': 'Narrow to the stream of the current message',
@@ -218,6 +223,12 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     ('SEARCH_TOPICS', {
         'keys': ['q'],
         'help_text': 'Search topics in a stream',
+        'key_category': 'searching',
+    }),
+    ('SEARCH_EMOJIS', {
+        'keys': ['p'],
+        'help_text': 'Search emojis from Emoji-picker popup',
+        'excluded_from_random_tips': True,
         'key_category': 'searching',
     }),
     ('TOGGLE_MUTE_STREAM', {
