@@ -26,6 +26,11 @@ from urllib.parse import unquote
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
+from zulipterminal.config.regexes import (
+    REGEX_COLOR_3_DIGIT,
+    REGEX_COLOR_6_DIGIT,
+    REGEX_QUOTED_FENCE_LENGTH,
+)
 
 
 class StreamData(TypedDict):
@@ -620,10 +625,10 @@ def canonicalize_color(color: str) -> str:
     Given a color of the format '#xxxxxx' or '#xxx', produces one of the
     format '#xxx'. Always produces lowercase hex digits.
     """
-    if match("^#[0-9A-Fa-f]{6}$", color, ASCII) is not None:
+    if match(REGEX_COLOR_6_DIGIT, color, ASCII) is not None:
         # '#xxxxxx' color, stored by current zulip server
         return (color[:2] + color[3] + color[5]).lower()
-    elif match("^#[0-9A-Fa-f]{3}$", color, ASCII) is not None:
+    elif match(REGEX_COLOR_3_DIGIT, color, ASCII) is not None:
         # '#xxx' color, which may be stored by the zulip server <= 2.0.0
         # Potentially later versions too
         return color.lower()
@@ -680,10 +685,9 @@ def get_unused_fence(content: str) -> str:
     of continuous back-ticks. Referred and translated from
     zulip/static/shared/js/fenced_code.js.
     """
-    fence_length_regex = "^ {0,3}(`{3,})"
     max_length_fence = 3
 
-    matches = findall(fence_length_regex, content, flags=MULTILINE)
+    matches = findall(REGEX_QUOTED_FENCE_LENGTH, content, flags=MULTILINE)
     if len(matches) != 0:
         max_length_fence = max(max_length_fence, len(max(matches, key=len)) + 1)
 
