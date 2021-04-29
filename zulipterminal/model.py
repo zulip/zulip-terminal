@@ -1261,6 +1261,14 @@ class Model:
             set_count(list(message_ids_to_mark & indexed_message_ids),
                       self.controller, -1)
 
+        if (flag_to_change == 'starred' and operation in ["add", "remove"]):
+            # update starred count in view
+            len_ids = len(message_ids_to_mark)
+            count = -len_ids if operation == "remove" else len_ids
+            self.controller.view.starred_button.update_count(
+                self.controller.view.starred_button.count + count)
+            self.controller.update_screen()
+
     def formatted_local_time(
         self, timestamp: int, *, show_seconds: bool, show_year: bool = False
     ) -> str:

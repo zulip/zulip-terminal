@@ -1528,6 +1528,7 @@ class TestModel:
         assert model.index == dict(messages={})
         model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
+        self.controller.view.starred_button.update_count.assert_called()
 
     def test_update_star_status_invalid_operation(
             self, mocker, model, update_message_flags_operation,
@@ -1548,6 +1549,7 @@ class TestModel:
             model._handle_update_message_flags_event(event)
         model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
+        self.controller.view.starred_button.update_count.assert_not_called()
 
     @pytest.mark.parametrize('event_message_ids, indexed_ids', [
         ([1], [1]),
@@ -1557,20 +1559,20 @@ class TestModel:
         ([], [1, 2]),
         ([1, 2], []),
     ])
-    @pytest.mark.parametrize('event_op, flags_before, flags_after', [
-        ('add', [], ['starred']),
-        ('add', ['read'], ['read', 'starred']),
-        ('add', ['starred'], ['starred']),
-        ('add', ['read', 'starred'], ['read', 'starred']),
-        ('remove', [], []),
-        ('remove', ['read'], ['read']),
-        ('remove', ['starred'], []),
-        ('remove', ['read', 'starred'], ['read']),
-        ('remove', ['starred', 'read'], ['read']),
+    @pytest.mark.parametrize('event_op, scaling, flags_before, flags_after', [
+        ('add', 1, [], ['starred']),
+        ('add', 1, ['read'], ['read', 'starred']),
+        ('add', 1, ['starred'], ['starred']),
+        ('add', 1, ['read', 'starred'], ['read', 'starred']),
+        ('remove', -1, [], []),
+        ('remove', -1, ['read'], ['read']),
+        ('remove', -1, ['starred'], []),
+        ('remove', -1, ['read', 'starred'], ['read']),
+        ('remove', -1, ['starred', 'read'], ['read']),
     ])
     def test_update_star_status(self, mocker, model, event_op,
                                 event_message_ids, indexed_ids,
-                                flags_before, flags_after,
+                                scaling, flags_before, flags_after,
                                 update_message_flags_operation):
         operation, model.server_feature_level = update_message_flags_operation
 
@@ -1586,8 +1588,10 @@ class TestModel:
             operation: event_op,
             'all': False,
         }
+        self.controller.view.starred_button.count = 0
         mocker.patch('zulipterminal.model.Model._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
+        update_star_count = self.controller.view.starred_button.update_count
 
         model._handle_update_message_flags_event(event)
 
@@ -1606,6 +1610,10 @@ class TestModel:
         for unchanged_id in (set(indexed_ids) - set(event_message_ids)):
             assert (model.index['messages'][unchanged_id]['flags']
                     == flags_before)
+
+        count = len(event_message_ids) * scaling
+        update_star_count.assert_called_with(
+            self.controller.view.starred_button.count + count)
 
         set_count.assert_not_called()
 
@@ -1635,7 +1643,10 @@ class TestModel:
         operation, model.server_feature_level = update_message_flags_operation
 
         model.index = dict(messages={msg_id: {'flags': flags_before}
-                                     for msg_id in indexed_ids})
+                                     for msg_id in indexed_ids},
+                           starred_msg_ids=set([msg_id
+                                                for msg_id in indexed_ids
+                                                if 'starred' in flags_before]))
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
