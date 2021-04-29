@@ -221,7 +221,7 @@ class MessageView(urwid.ListBox):
 
         elif is_command_key("THUMBS_UP", key):
             if self.focus is not None:
-                self.model.react_to_message(
+                self.model.toggle_message_reaction(
                     self.focus.original_widget.message, reaction_to_toggle="thumbs_up"
                 )
 

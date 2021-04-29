@@ -503,7 +503,7 @@ class TestModel:
             ),
         ],
     )
-    def test_react_to_message_with_valid_emoji(
+    def test_toggle_message_reaction_with_valid_emoji(
         self,
         mocker,
         model,
@@ -537,7 +537,7 @@ class TestModel:
         model.client.add_reaction.return_value = response
         model.client.remove_reaction.return_value = response
 
-        model.react_to_message(message, emoji_name)
+        model.toggle_message_reaction(message, emoji_name)
 
         if expected_method == "POST":
             model.client.add_reaction.assert_called_once_with(reaction_spec)
@@ -547,9 +547,9 @@ class TestModel:
             model.client.add_reaction.assert_not_called()
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-    def test_react_to_message_with_invalid_emoji(self, model):
+    def test_toggle_message_reaction_with_invalid_emoji(self, model):
         with pytest.raises(AssertionError):
-            model.react_to_message(dict(), "x")
+            model.toggle_message_reaction(dict(), "x")
 
     @pytest.mark.parametrize(
         "emoji_code, reactions, expected_has_user_reacted",

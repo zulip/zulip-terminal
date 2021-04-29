@@ -357,7 +357,9 @@ class Model:
             time.sleep(60)
 
     @asynch
-    def react_to_message(self, message: Message, reaction_to_toggle: str) -> None:
+    def toggle_message_reaction(
+        self, message: Message, reaction_to_toggle: str
+    ) -> None:
         # Check if reaction_to_toggle is a valid original/alias
         assert reaction_to_toggle in self.all_emoji_names
 
