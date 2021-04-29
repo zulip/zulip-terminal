@@ -357,6 +357,14 @@ def stream_msg_template():
 
 
 @pytest.fixture
+def extra_stream_msg_template():
+    msg_template = msg_template_factory(
+        537289, "stream", 1520918740, subject="Test", stream_id=205
+    )
+    return msg_template
+
+
+@pytest.fixture
 def pm_template():
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
     return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
@@ -728,6 +736,20 @@ def index_topic(empty_index):
     """
     diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286}}})}
     return dict(empty_index, **diff)
+
+
+@pytest.fixture
+def index_multiple_topic_msg(empty_index, extra_stream_msg_template):
+    """
+    Index of initial_data with multiple message when model.narrow = [['stream, '7'],
+                                                                     ['topic', 'Test']]
+    """
+    empty_index_with_multiple_topic_msg = empty_index
+    empty_index_with_multiple_topic_msg["messages"].update(
+        {extra_stream_msg_template["id"]: extra_stream_msg_template}
+    )
+    diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286, 537289}}})}
+    return dict(empty_index_with_multiple_topic_msg, **diff)
 
 
 @pytest.fixture
