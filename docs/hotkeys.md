@@ -39,6 +39,7 @@
 |Search Messages|<kbd>/</kbd>|
 |Search Streams|<kbd>q</kbd>|
 |Search topics in a stream|<kbd>q</kbd>|
+|Search emojis from Emoji-picker popup|<kbd>p</kbd>|
 
 ## Message actions
 |Command|Key Combination|
@@ -50,6 +51,7 @@
 |Edit message's content or topic|<kbd>e</kbd>|
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
+|Show/hide Emoji picker popup for current message|<kbd>:</kbd>|
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
 |Narrow to a topic/private-chat, or stream/all-private-messages|<kbd>z</kbd>|
