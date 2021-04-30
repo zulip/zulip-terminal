@@ -163,11 +163,30 @@ class Controller:
 
     def maximum_popup_dimensions(self) -> Tuple[int, int]:
         """
-        Returns 3/4th of the screen estate's columns and rows.
+        Returns 3/4th of the screen estate's columns if columns are greater
+        than 100 (MAX_LINEAR_SCALING_WIDTH) else scales accordingly untill
+        popup width becomes full width at 80 (MIN_SUPPORTED_POPUP_WIDTH) below
+        which popup width remains full width.
+        The screen estate's rows are always scaled by 3/4th to get the
+        popup rows.
         """
-        max_cols, max_rows = map(lambda num: 3 * num // 4,
-                                 self.loop.screen.get_cols_rows())
-        return max_cols, max_rows
+        MIN_SUPPORTED_POPUP_WIDTH = 80
+        MAX_LINEAR_SCALING_WIDTH = 100
+
+        def clamp(n: int, minn: int, maxn: int) -> int:
+            return max(min(maxn, n), minn)
+
+        max_cols, max_rows = self.loop.screen.get_cols_rows()
+        min_width = MIN_SUPPORTED_POPUP_WIDTH
+        max_width = MAX_LINEAR_SCALING_WIDTH
+        # Scale Width
+        width = clamp(max_cols, min_width, max_width)
+        scaling = 1 - ((width - min_width) / (4 * (max_width - min_width)))
+        max_popup_cols = int(scaling * max_cols)
+        # Scale Height
+        max_popup_rows = 3 * max_rows // 4
+
+        return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
         border_lines = dict(tlcorner='▛', tline='▀', trcorner='▜',

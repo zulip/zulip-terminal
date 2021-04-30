@@ -343,3 +343,19 @@ class TestController:
             num_after=0, num_before=30, anchor=10000000000)
         create_msg.assert_called_once_with(controller.model, msg_ids)
         assert controller.model.index == {'search': msg_ids}
+
+    @pytest.mark.parametrize('screen_size, expected_popup_size', [
+        ((150, 90), (3 * 150 // 4, 3 * 90 // 4)),
+        ((90, 75), (7 * 90 // 8, 3 * 75 // 4)),
+        ((70, 60), (70, 3 * 60 // 4)),
+    ], ids=[
+        'above_linear_range', 'in_linear_range', 'below_linear_range',
+    ])
+    def test_maximum_popup_dimensions(self, mocker, controller,
+                                      screen_size, expected_popup_size):
+        controller.loop.screen.get_cols_rows = mocker.Mock(
+            return_value=screen_size)
+
+        popup_size = controller.maximum_popup_dimensions()
+
+        assert popup_size == expected_popup_size
