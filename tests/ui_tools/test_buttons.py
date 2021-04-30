@@ -5,9 +5,12 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import AttrMap, Overlay, Widget
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.symbols import CHECK_MARK
 from zulipterminal.ui_tools.buttons import (
     DecodedStream,
+    EmojiButton,
     MessageLinkButton,
     ParsedNarrowLink,
     StarredButton,
@@ -221,6 +224,99 @@ class TestUserButton:
         user_button.keypress(size, key)
 
         pop_up.assert_called_once_with(user_button.user_id)
+
+
+class TestEmojiButton:
+    @pytest.mark.parametrize(
+        "emoji_unit, to_vary_in_message",
+        [
+            case(
+                ("working_on_it", "1f6e0", ["hammer_and_wrench", "tools"]),
+                {"reactions": [{"emoji_name": "thumbs_up", "user": [{"id": 232}]}]},
+                id="emoji_button_with_no_reaction",
+            ),
+            case(
+                ("+1", "1f44d", ["thumbs_up", "like"]),
+                {"reactions": [{"emoji_name": "+1", "user": [{"id": 10}]}]},
+                id="emoji_button_with_a_reaction",
+            ),
+        ],
+    )
+    def test_init_calls_top_button(
+        self,
+        mocker: MockerFixture,
+        emoji_unit: Tuple[str, str, List[str]],
+        to_vary_in_message: Dict[str, Any],
+        message_fixture: Message,
+    ) -> None:
+        controller = mocker.Mock()
+        controller.model.has_user_reacted_to_message = mocker.Mock(return_value=False)
+        top_button = mocker.patch(MODULE + ".TopButton.__init__")
+        caption = ", ".join([emoji_unit[0], *emoji_unit[2]])
+        message_fixture["reactions"] = to_vary_in_message["reactions"]
+
+        emoji_button = EmojiButton(
+            controller=controller,
+            emoji_unit=emoji_unit,
+            message=message_fixture,
+            is_selected=lambda *_: False,
+            toggle_selection=lambda *_: None,
+        )
+
+        top_button.assert_called_once_with(
+            controller=controller,
+            caption=caption,
+            prefix_character="",
+            show_function=emoji_button.update_emoji_button,
+        )
+        assert emoji_button.emoji_name == emoji_unit[0]
+
+    @pytest.mark.parametrize("key", keys_for_command("ENTER"))
+    @pytest.mark.parametrize(
+        "emoji, has_user_reacted, is_selected_final",
+        [
+            case(("smile", "1f642", []), True, False, id="reacted_unselected_emoji"),
+            case(("smile", "1f642", []), True, True, id="reacted_selected_emoji"),
+            case(("+1", "1f44d", []), False, False, id="unreacted_unselected_emoji"),
+            case(("+1", "1f44d", []), False, True, id="unreacted_selected_emoji"),
+        ],
+    )
+    def test_keypress_emoji_button(
+        self,
+        mocker: MockerFixture,
+        key: str,
+        emoji: Tuple[str, str, List[str]],
+        has_user_reacted: bool,
+        is_selected_final: bool,
+        widget_size: Callable[[Widget], urwid_Size],
+        message_fixture: Message,
+    ) -> None:
+        controller = mocker.Mock()
+        controller.model.has_user_reacted_to_message = mocker.Mock(
+            return_value=has_user_reacted
+        )
+        message_fixture.update(
+            {
+                "reactions": [
+                    {"emoji_name": "smile", "user": [{"id": 10}]},
+                    {"emoji_name": "+1", "user": [{"id": 52}]},
+                ],
+            }
+        )
+        emoji_button = EmojiButton(
+            controller=controller,
+            emoji_unit=emoji,
+            message=message_fixture,
+            is_selected=lambda *_: is_selected_final,
+            toggle_selection=lambda *_: None,
+        )
+        size = widget_size(emoji_button)
+
+        emoji_button.keypress(size, key)
+
+        suffix_text = f"{CHECK_MARK}" if has_user_reacted != is_selected_final else ""
+        assert emoji_button.emoji_name == emoji[0]
+        assert emoji_button.button_suffix.get_text()[0].strip() == suffix_text
 
 
 class TestTopicButton:

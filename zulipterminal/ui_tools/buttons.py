@@ -1,6 +1,6 @@
 import re
 from functools import partial
-from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
@@ -10,12 +10,13 @@ from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
+    CHECK_MARK,
     MUTE_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
-from zulipterminal.helper import StreamData, hash_util_decode
+from zulipterminal.helper import Message, StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -318,6 +319,45 @@ class TopicButton(TopButton):
             # Exit topic view
             self.view.left_panel.show_stream_view()
         return super().keypress(size, key)
+
+
+class EmojiButton(TopButton):
+    def __init__(
+        self,
+        *,
+        controller: Any,
+        emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
+        message: Message,
+        is_selected: Callable[[str], bool],
+        toggle_selection: Callable[[str, str], None],
+    ) -> None:
+        self.controller = controller
+        self.message = message
+        self.is_selected = is_selected
+        self.toggle_selection = toggle_selection
+        self.emoji_name, self.emoji_code, self.aliases = emoji_unit
+        full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+
+        super().__init__(
+            controller=controller,
+            caption=full_button_caption,
+            prefix_character="",
+            show_function=self.update_emoji_button,
+        )
+        if self._has_user_reacted_to_msg() or is_selected(self.emoji_name):
+            self.update_widget((None, f" {CHECK_MARK} "), None)
+
+    def _has_user_reacted_to_msg(self) -> bool:
+        return self.controller.model.has_user_reacted_to_message(
+            self.message, emoji_code=self.emoji_code
+        )
+
+    def update_emoji_button(self) -> None:
+        self.toggle_selection(self.emoji_code, self.emoji_name)
+        is_reaction_added = self._has_user_reacted_to_msg() != self.is_selected(
+            self.emoji_name
+        )
+        self.update_widget((None, f" {CHECK_MARK} " if is_reaction_added else ""), None)
 
 
 class DecodedStream(TypedDict):
