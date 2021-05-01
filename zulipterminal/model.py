@@ -430,7 +430,7 @@ class Model:
             message_was_sent = response['result'] == 'success'
             if message_was_sent:
                 notify_if_message_sent_outside_narrow(
-                    composition, self.controller,
+                    composition, self.controller
                 )
             return message_was_sent
         else:
@@ -592,7 +592,7 @@ class Model:
 
         return message
 
-    def fetch_message_history(self, message_id: int,
+    def fetch_message_history(self, message_id: int
                               ) -> List[Dict[str, Union[int, str]]]:
         """
         Fetches message edit history for a message using its ID.
@@ -683,7 +683,7 @@ class Model:
             raise ServerConnectionFailure(", ".join(failure_text))
 
     def get_other_subscribers_in_stream(self, stream_id: Optional[int]=None,
-                                        stream_name: Optional[str]=None,
+                                        stream_name: Optional[str]=None
                                         ) -> List[int]:
         assert stream_id is not None or stream_name is not None
 

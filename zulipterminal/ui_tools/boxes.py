@@ -205,7 +205,7 @@ class WriteBox(urwid.Pile):
             write_box.edit_text
         )
 
-    def stream_box_view(self, stream_id: int, caption: str='', title: str='',
+    def stream_box_view(self, stream_id: int, caption: str='', title: str=''
                         ) -> None:
         self.set_editor_mode()
         self.stream_id = stream_id
@@ -1281,7 +1281,7 @@ class MessageBox(urwid.Pile):
         return [part for part, condition in parts if condition]
 
     @classmethod
-    def transform_content(cls, content: Any, server_url: str,
+    def transform_content(cls, content: Any, server_url: str
                           ) -> Tuple[Tuple[None, Any],
                                      'OrderedDict[str, Tuple[str, int, bool]]',
                                      List[Tuple[str, str]]]:
