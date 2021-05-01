@@ -338,7 +338,7 @@ class Controller:
         self.exit_editor_mode()
 
     def narrow_to_stream(
-        self, *, stream_name: str, contextual_message_id: Optional[int] = None,
+        self, *, stream_name: str, contextual_message_id: Optional[int] = None
     ) -> None:
         self._narrow_to(anchor=contextual_message_id, stream=stream_name)
 
@@ -367,12 +367,12 @@ class Controller:
         )
 
     def narrow_to_all_messages(
-        self, *, contextual_message_id: Optional[int] = None,
+        self, *, contextual_message_id: Optional[int] = None
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
     def narrow_to_all_pm(
-        self, *, contextual_message_id: Optional[int] = None,
+        self, *, contextual_message_id: Optional[int] = None
     ) -> None:
         self._narrow_to(anchor=contextual_message_id, pms=True)
 

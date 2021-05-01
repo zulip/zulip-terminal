@@ -76,7 +76,7 @@ def row_with_styled_content(row: List[str], column_alignments: List[str],
     and row elements.
     """
     aligner = {'center': str.center, 'left': str.ljust, 'right': str.rjust}
-    row_strip: StyledTableData = [vertical_bar, ]
+    row_strip: StyledTableData = [vertical_bar]
     for column_num, cell in enumerate(row):
         aligned_text = aligner[column_alignments[column_num]](
             cell, column_widths[column_num]
@@ -94,7 +94,7 @@ def row_with_only_border(lcorner: str, line: str, connector: str, rcorner: str,
     Given left corner, line, connecter and right corner unicode character,
     constructs a border row strip for markup table.
     """
-    border: StyledTableData = [lcorner, ]
+    border: StyledTableData = [lcorner]
     for width in column_widths:
         border.extend([line * width, connector])
     border.pop()  # Remove the extra connector.
