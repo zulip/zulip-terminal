@@ -207,7 +207,18 @@ class TestController:
         id_list = index_user["private_msg_ids_by_user_ids"][recipients]
         assert {widget.original_widget.message["id"]} == id_list
 
-    def test_narrow_to_all_messages(self, mocker, controller, index_all_messages):
+    @pytest.mark.parametrize(
+        "anchor, expected_final_focus_msg_id",
+        [(None, 537288), (537286, 537286), (537288, 537288)],
+    )
+    def test_narrow_to_all_messages(
+        self,
+        mocker,
+        controller,
+        index_all_messages,
+        anchor,
+        expected_final_focus_msg_id,
+    ):
         controller.model.narrow = [["stream", "PTEST"]]
         controller.model.index = index_all_messages
         controller.view.message_view = mocker.patch("urwid.ListBox")
@@ -221,15 +232,17 @@ class TestController:
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
-        controller.narrow_to_all_messages()  # FIXME: Add id narrowing test
+        controller.narrow_to_all_messages(contextual_message_id=anchor)
 
         assert controller.model.narrow == []
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
+        widgets, focus = controller.view.message_view.log.extend.call_args_list[0][0]
         id_list = index_all_messages["all_msg_ids"]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
+        final_focus_msg_id = widgets[focus].original_widget.message["id"]
         assert msg_ids == id_list
+        assert final_focus_msg_id == expected_final_focus_msg_id
 
     def test_narrow_to_all_pm(self, mocker, controller, index_user):
         controller.model.narrow = []
