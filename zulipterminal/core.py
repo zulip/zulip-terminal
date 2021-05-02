@@ -392,8 +392,10 @@ class Controller:
 
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
-        # if no messages are found get more messages
-        if len(msg_id_list) == 0:
+        # If no messages are found in the current narrow
+        # OR, given anchor is not present in msg_id_list
+        # then, get more messages.
+        if len(msg_id_list) == 0 or (anchor is not None and anchor not in msg_id_list):
             self.model.get_messages(num_before=30, num_after=10, anchor=anchor)
             msg_id_list = self.model.get_message_ids_in_current_narrow()
 
