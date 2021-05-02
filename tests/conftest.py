@@ -1,6 +1,6 @@
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple
 
 import pytest
 
@@ -273,6 +273,21 @@ def zulip_emoji():
     return OrderedDict([("zulip", {"code": "zulip", "type": "zulip_extra_emoji"})])
 
 
+def display_recipient_factory(recipient_details_list: List[Tuple[int, str]]):
+    """
+    Generate display_recipient field for (PM/group) messages
+    """
+    return [
+        {
+            "id": _id,
+            "is_mirror_dummy": False,
+            "full_name": _name,
+            "email": f"{_name.split()[0]}@example.com",
+        }
+        for _id, _name in recipient_details_list
+    ]
+
+
 stream_msg_template = {
     "id": 537286,
     "sender_full_name": "Foo Foo",
@@ -311,20 +326,9 @@ pm_template = {
     "avatar_url": "dummy_avatar_url",
     "subject_links": [],
     "content": "Hey PM content here.",
-    "display_recipient": [
-        {
-            "id": 5179,
-            "is_mirror_dummy": False,
-            "full_name": "Boo Boo",
-            "email": "boo@zulip.com",
-        },
-        {
-            "id": 5140,
-            "is_mirror_dummy": False,
-            "full_name": "Foo Foo",
-            "email": "foo@zulip.com",
-        },
-    ],
+    "display_recipient": display_recipient_factory(
+        [(5179, "Boo Boo"), (5140, "Foo Foo")]
+    ),
 }
 
 group_pm_template = {
@@ -344,26 +348,9 @@ group_pm_template = {
     "avatar_url": "dummy_avatar_url",
     "subject_links": [],
     "content": "Hey PM content here again.",
-    "display_recipient": [
-        {
-            "id": 5179,
-            "is_mirror_dummy": False,
-            "full_name": "Boo Boo",
-            "email": "boo@zulip.com",
-        },
-        {
-            "id": 5140,
-            "is_mirror_dummy": False,
-            "full_name": "Foo Foo",
-            "email": "foo@zulip.com",
-        },
-        {
-            "id": 5180,
-            "is_mirror_dummy": False,
-            "full_name": "Bar Bar",
-            "email": "bar@zulip.com",
-        },
-    ],
+    "display_recipient": display_recipient_factory(
+        [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
+    ),
 }
 
 
