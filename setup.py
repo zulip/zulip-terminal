@@ -43,7 +43,7 @@ testing_deps = [
 linting_deps = [
     'isort~=5.7.0',
     'mypy==0.812',
-    'flake8~=3.8.3',
+    'flake8~=3.9.0',
     'flake8-quotes~=3.2.0',
     'flake8-continuation~=1.0.5',
 ]
