@@ -35,9 +35,9 @@ def long_description():
 
 
 testing_deps = [
-    'pytest==5.3.5',
-    'pytest-cov==2.5.1',
-    'pytest-mock==1.7.1',
+    'pytest~=6.2.3',
+    'pytest-cov~=2.11.1',
+    'pytest-mock~=3.6.0',
 ]
 
 linting_deps = [
