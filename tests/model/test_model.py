@@ -43,7 +43,7 @@ class TestModel:
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
         self.client.get_profile.return_value = user_profile
         mocker.patch('zulipterminal.model.unicode_emojis',
                      EMOJI_DATA=unicode_emojis)
@@ -131,7 +131,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         with pytest.raises(ServerConnectionFailure) as e:
             model = Model(self.controller)
@@ -151,7 +151,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         with pytest.raises(ServerConnectionFailure) as e:
             model = Model(self.controller)
@@ -581,7 +581,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         self.client.get_messages.return_value = messages_successful_response
@@ -681,7 +681,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         messages_successful_response['anchor'] = 0
@@ -713,7 +713,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mock before calling get_messages
         # FIXME This has no influence on the result
@@ -796,7 +796,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
 
         # Setup mocks before calling get_messages
         self.client.register.return_value = initial_data
@@ -828,7 +828,7 @@ class TestModel:
         mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
-            return_value=[])
+            return_value=([], {}))
         model = Model(self.controller)
         assert model.user_dict == user_dict
         assert model.users == user_list
@@ -852,7 +852,7 @@ class TestModel:
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -873,7 +873,7 @@ class TestModel:
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -892,12 +892,40 @@ class TestModel:
          assert_called_once_with(model, [message_fixture['id']],
                                  last_message=expected_last_msg))
 
-    def test__handle_message_event_with_flags(self, mocker,
-                                              model, message_fixture):
+    @pytest.mark.parametrize('indexed_unread_msg_ids', [
+        {
+            "stream": {
+                537286: {
+                    'type': 'stream',
+                    'display_recipient': 'PTEST',
+                    'stream_id': 205,
+                    'subject': 'Test',
+                    'flags': []
+                }
+            },
+            "pm": {
+                537287: {
+                    'type': 'private',
+                    'sender_id': 5140,
+                    'flags': []
+                }
+            },
+            "pm_huddles": {
+                537288: {
+                    'type': 'private',
+                    'display_recipient': frozenset({5179, 5140, 5180}),
+                    'flags': []
+                }
+            }
+        }
+    ])
+    def test__handle_message_event_with_flags(self, mocker, model,
+                                              indexed_unread_msg_ids,
+                                              message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
@@ -928,14 +956,24 @@ class TestModel:
 
         model._handle_message_event(event)
 
+        # Test update of index['unread_msgs'].
+        if message_fixture['id'] == 537286:
+            msg_type = "stream"
+        elif message_fixture['id'] == 537287:
+            msg_type = "pm"
+        else:
+            msg_type = "pm_huddles"
+        assert model.index['unread_msgs'] == indexed_unread_msg_ids[msg_type]
+
         # set count called since the message is unread.
         set_count.assert_called_once_with([event['message']['id']],
                                           self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
         ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
-          'id': 1}, [], frozenset(), ['msg_w']),
-        ({'type': 'private', 'id': 1},
+          'id': 1, 'display_recipient': 'a'}, [], frozenset(), ['msg_w']),
+        ({'type': 'private', 'id': 1, 'sender_id': 1,
+          'display_recipient': []},
          [['is', 'private']], frozenset(), ['msg_w']),
         ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'FOO',
           'display_recipient': 'a'},
@@ -948,14 +986,15 @@ class TestModel:
           'display_recipient': 'a'},
          [['stream', 'c'], ['topic', 'b']],
          frozenset(), []),
-        ({'type': 'private', 'id': 1,
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
           'display_recipient': [{'id': 5827}, {'id': 5}]},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), ['msg_w']),
-        ({'type': 'private', 'id': 1},
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
+          'display_recipient': []},
          [['is', 'search']],
          frozenset(), []),
-        ({'type': 'private', 'id': 1,
+        ({'type': 'private', 'id': 1, 'sender_id': 5827,
           'display_recipient': [{'id': 5827}, {'id': 3212}]},
          [['pm_with', 'notification-bot@zulip.com']],
          frozenset({5827, 5}), []),
@@ -973,7 +1012,7 @@ class TestModel:
         model._have_last_message[repr(narrow)] = True
         mocker.patch('zulipterminal.model.Model._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
-                                 return_value={})
+                                 return_value=initial_index)
         create_msg_box_list = mocker.patch('zulipterminal.model.'
                                            'create_msg_box_list',
                                            return_value=["msg_w"])
@@ -1511,7 +1550,7 @@ class TestModel:
                                          update_message_flags_operation):
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={})  # Not indexed
+        model.index = dict(messages={}, unread_msgs={})  # Not indexed
         event = {
             'type': 'update_message_flags',
             'messages': [1],
@@ -1524,7 +1563,7 @@ class TestModel:
 
         model._handle_update_message_flags_event(event)
 
-        assert model.index == dict(messages={})
+        assert model.index == dict(messages={}, unread_msgs={})
         model._update_rendered_view.assert_not_called()
         set_count.assert_not_called()
 
@@ -1533,7 +1572,7 @@ class TestModel:
     ):
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={1: {'flags': None}})  # Minimal
+        model.index = dict(messages={1: {'flags': None}}, unread_msgs={})
         event = {
             'type': 'update_message_flags',
             'messages': [1],
@@ -1577,7 +1616,8 @@ class TestModel:
                                      for msg_id in indexed_ids},
                            starred_msg_ids=set([msg_id
                                                 for msg_id in indexed_ids
-                                                if 'starred' in flags_before]))
+                                                if 'starred' in flags_before]),
+                           unread_msgs={})
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
@@ -1634,7 +1674,12 @@ class TestModel:
         operation, model.server_feature_level = update_message_flags_operation
 
         model.index = dict(messages={msg_id: {'flags': flags_before}
-                                     for msg_id in indexed_ids})
+                                     for msg_id in indexed_ids},
+                           unread_msgs={msg_id: {'flags': []}
+                                        for msg_id in (set(event_message_ids)
+                                                       - set(indexed_ids))
+                                        if 'read' in flags_before})
+
         event = {
             'type': 'update_message_flags',
             'messages': event_message_ids,
@@ -1662,6 +1707,7 @@ class TestModel:
             assert (model.index['messages'][unchanged_id]['flags']
                     == flags_before)
 
+        changed_ids = set(event_message_ids) - set(indexed_ids)
         if event_op == 'add':
             set_count.assert_called_once_with(list(changed_ids),
                                               self.controller, -1)
