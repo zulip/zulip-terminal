@@ -2144,37 +2144,38 @@ class TestModel:
         assert all_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
 
     @pytest.mark.parametrize(['to_vary_in_realm_emoji',
+                              'expected_emoji_type',
                               'emoji_should_be_active'], [
             ({
                 "deactivated": False,
                 "id": "20",
                 "name": "joy_cat",
-            }, True),
+            }, 'realm_emoji', True),
             ({
                 "deactivated": True,
                 "id": "202020",
                 "name": "joker",
-            }, True),
+            }, 'unicode_emoji', True),
             ({
                 "deactivated": False,
                 "id": "22",
                 "name": "zulip",
-            }, True),
+            }, 'zulip_extra_emoji', True),
             ({
                 "deactivated": True,
                 "id": "4",
                 "name": "zulip",
-            }, True),
+            }, 'zulip_extra_emoji', True),
             ({
                 "deactivated": False,
                 "id": "23",
                 "name": "new_emoji",
-            }, True),
+            }, 'realm_emoji', True),
             ({
                 "deactivated": True,
                 "id": "3",
                 "name": "singing",
-            }, False),
+            }, '', False),
         ],
         ids=[
             'realm_emoji_with_same_name_as_unicode_emoji_added',
@@ -2187,6 +2188,7 @@ class TestModel:
     )
     def test__handle_update_emoji_event(self, mocker, model, realm_emojis,
                                         emoji_should_be_active,
+                                        expected_emoji_type,
                                         to_vary_in_realm_emoji):
         emoji_name = to_vary_in_realm_emoji['name']
         realm_emojis[to_vary_in_realm_emoji['id']] = to_vary_in_realm_emoji
@@ -2199,6 +2201,8 @@ class TestModel:
 
         if emoji_should_be_active:
             assert emoji_name in model.active_emoji_data
+            assert (model.active_emoji_data[emoji_name]['type']
+                    == expected_emoji_type)
         else:
             assert emoji_name not in model.active_emoji_data
 
