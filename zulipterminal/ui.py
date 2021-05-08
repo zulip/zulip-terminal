@@ -275,6 +275,9 @@ class View(urwid.WidgetWrap):
             # Show help menu
             self.controller.show_help()
             return key
+        elif is_command_key("MARKDOWN_HELP", key):
+            self.controller.show_markdown_help()
+            return key
         # replace alternate keys with arrow/functional keys
         # This is needed for navigating in widgets
         # other than message_view.
