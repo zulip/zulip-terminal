@@ -962,7 +962,9 @@ class TabView(urwid.WidgetWrap):
         super().__init__(tab)
 
 
-PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, str]]]]]
+# FIXME: This type could be improved, as Any isn't too explicit and clear.
+# (this was previously str, but some types passed in can be more complex)
+PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
 
 
 class PopUpView(urwid.Frame):
