@@ -4,6 +4,7 @@ from typing_extensions import Literal, TypedDict
 
 
 EditPropagateMode = Literal['change_one', 'change_all', 'change_later']
+EmojiType = Literal['realm_emoji', 'unicode_emoji', 'zulip_extra_emoji']
 
 
 class PrivateComposition(TypedDict):
@@ -106,7 +107,7 @@ class ReactionEvent(TypedDict):
     type: Literal['reaction']
     op: str
     user: Dict[str, Any]  # 'email', 'user_id', 'full_name'
-    reaction_type: str
+    reaction_type: EmojiType
     emoji_code: str
     emoji_name: str
     message_id: int

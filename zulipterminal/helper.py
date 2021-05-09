@@ -23,9 +23,9 @@ from typing import (
 from urllib.parse import unquote
 
 import lxml.html
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
-from zulipterminal.api_types import Composition, Message
+from zulipterminal.api_types import Composition, EmojiType, Message
 
 
 MACOS = platform.system() == "Darwin"
@@ -43,7 +43,7 @@ class StreamData(TypedDict):
 
 class EmojiData(TypedDict):
     code: str
-    type: Literal['realm_emoji', 'unicode_emoji', 'zulip_extra_emoji']
+    type: EmojiType
 
 
 NamedEmojiData = Dict[str, EmojiData]
