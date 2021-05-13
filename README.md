@@ -71,6 +71,14 @@ With the python 3.6+ required for running, the following should work on most sys
 
 If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the above list again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
 
+### Keeping your install up to date
+
+Stable releases are made available on PyPI and GitHub; to ensure you keep up to date with them we suggest checking those sites for updates.
+Stable releases are also announced in the #**announce** stream on the Zulip Community server (https://chat.zulip.org), where you are welcome to make an account; future releases are expected to be announced in #**announce>terminal releases**.
+
+If running from the `main` git branch, note that this does not automatically update, and you must do so manually.
+This also applies to other source or development installs, including eg. https://aur.archlinux.org/packages/python-zulip-term-git/
+
 ## Running for the first time
 
 Upon first running `zulip-term` it looks for a `zuliprc` file, by default in your home directory, which contains the details to log into a Zulip server.
