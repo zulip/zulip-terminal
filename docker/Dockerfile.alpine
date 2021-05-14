@@ -4,7 +4,7 @@ RUN addgroup -S zulipgr \
     && adduser -S zulip -G zulipgr \
     && apk add --no-cache git ca-certificates gcc musl-dev \
                           libffi-dev openssl-dev libxml2-dev \
-                          libxslt-dev
+                          libxslt-dev cargo
 USER zulip
 WORKDIR /home/zulip
 
