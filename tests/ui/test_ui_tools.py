@@ -1901,12 +1901,17 @@ class TestMessageBox:
     @pytest.mark.parametrize(['to_vary_in_each_message',
                               'realm_editing_allowed',
                               'msg_body_edit_enabled',
-                              'expect_editing_to_succeed'], [
-        ({'sender_id': 2, 'timestamp': 45}, True, True, False),
-        ({'sender_id': 1, 'timestamp': 1}, True, False, True),
-        ({'sender_id': 1, 'timestamp': 45}, False, True, False),
-        ({'sender_id': 1, 'timestamp': 45}, True, True, True),
+                              'expect_editing_to_succeed',
+                              'community_editing_enabled'], [
+        ({'sender_id': 2, 'timestamp': 45}, True, True, False, False),
+        ({'sender_id': 2, 'timestamp': 1}, True, True, False, True),
+        ({'sender_id': 2, 'timestamp': 45}, True, True, False, False),
+        ({'sender_id': 1, 'timestamp': 1}, True, False, True, True),
+        ({'sender_id': 1, 'timestamp': 45}, False, True, False, False),
+        ({'sender_id': 1, 'timestamp': 45}, True, True, True, True),
     ], ids=['msg_sent_by_other_user',
+            'msg_sent_by_other_user_with_community_editing',
+            'msg_sent_by_other_user_with_community_editing_exceeds_time_limit',
             'topic_edit_only_after_time_limit',
             'editing_not_allowed',
             'all_conditions_met'])
@@ -1915,14 +1920,18 @@ class TestMessageBox:
                                    to_vary_in_each_message,
                                    realm_editing_allowed,
                                    msg_body_edit_enabled,
+                                   community_editing_enabled,
                                    key):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         size = widget_size(msg_box)
         msg_box.model.user_id = 1
+        msg_box.model.server_feature_level = 11
         msg_box.model.initial_data = {
             'realm_allow_message_editing': realm_editing_allowed,
+            'realm_allow_community_topic_editing': community_editing_enabled,
             'realm_message_content_edit_limit_seconds': 60,
+            'realm_community_topic_editing_limit_seconds': 60,
         }
         msg_box.model.client.get_raw_message.return_value = {
             'raw_content': "Edit this message"
