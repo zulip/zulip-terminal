@@ -284,6 +284,7 @@ class TopicButton(TopButton):
         self.topic_name = topic
         self.stream_id = stream_id
         self.model = controller.model
+        self.view = controller.view
 
         narrow_function = partial(
             controller.narrow_to_topic,
@@ -301,11 +302,57 @@ class TopicButton(TopButton):
         )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
-            self.mark_muted()
+            self.update_widget(('muted',  MUTE_MARKER), 'muted')
+            # TODO: Handle event-based approach for topic-muting.
+
+    def set_button_counts(self, unmuted_count: int) -> None:
+        self.update_count(unmuted_count)
+        self.model.unread_counts['streams'][self.stream_id] += unmuted_count
+        stream_button = self.view.stream_id_to_button[self.stream_id]
+        stream_button.update_count(
+            self.model.unread_counts['streams'][self.stream_id])
+        self.model.unread_counts['all_msg'] += unmuted_count
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
 
     def mark_muted(self) -> None:
+        """
+        We do not decrease the count of topic button (or
+        unread_counts['unread_topics']) but only mark it as M since
+        we would require the correct count while unmuting.
+        However, we decrease the all msg count and the topic's stream
+        count by the unread counts.
+        """
         self.update_widget(('muted',  MUTE_MARKER), 'muted')
-    # TODO: Handle event-based approach for topic-muting.
+        if self.stream_id in self.model.unread_counts['streams']:
+            self.model.unread_counts['streams'][self.stream_id] -= self.count
+            stream_button = self.view.stream_id_to_button[self.stream_id]
+            stream_button.update_count(
+                self.model.unread_counts['streams'][self.stream_id])
+        self.model.unread_counts['unread_muted_topics'][(
+                                self.stream_id, self.topic_name)] = self.count
+        self.model.unread_counts['unread_topics'].pop(
+                                    (self.stream_id, self.topic_name), None)
+        self.model.unread_counts['all_msg'] -= self.count
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
+
+    def mark_unmuted(self) -> None:
+        key = (self.stream_id, self.topic_name)
+        if key in self.model.unread_counts['unread_muted_topics']:
+            unmuted_count = self.model.unread_counts[
+                                                'unread_muted_topics'][key]
+            self.model.unread_counts['unread_muted_topics'].pop(key, None)
+            self.model.unread_counts['unread_topics'][key] = unmuted_count
+            self.set_button_counts(unmuted_count)
+        else:
+            # All messages in this topic are read.
+            self.set_button_counts(0)
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key('TOGGLE_MUTE_TOPIC', key):
+            self.controller.topic_muting_confirmation_popup(self)
+        return super().keypress(size, key)
 
 
 class DecodedStream(TypedDict):

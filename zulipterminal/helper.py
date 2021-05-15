@@ -89,6 +89,7 @@ class UnreadCounts(TypedDict):
     all_pms: int
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
+    unread_muted_topics: Dict[Tuple[int, str], int]
     unread_pms: Dict[int, int]  # sender_id
     unread_huddles: Dict[FrozenSet[int], int]  # Group pms
     streams: Dict[int, int]  # stream_id
@@ -111,7 +112,8 @@ def asynch(func: Callable[..., None]) -> Callable[..., None]:
     return wrapper
 
 
-def _set_count_in_model(new_count: int, changed_messages: List[Message],
+def _set_count_in_model(controller: Any, new_count: int,
+                        changed_messages: List[Message],
                         unread_counts: UnreadCounts) -> None:
     """
         This function doesn't explicitly set counts in model,
@@ -133,9 +135,16 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
     for message in changed_messages:
         if message['type'] == 'stream':
             stream_id = message['stream_id']
-            update_unreads(unread_counts['unread_topics'],
-                           (stream_id, message['subject']))
-            update_unreads(unread_counts['streams'], stream_id)
+            topic = message['subject']
+            # If topic is muted, update unread_counts['unread_muted_topics']
+            # Don't need to change stream unread count
+            if controller.model.is_muted_topic(stream_id, topic):
+                update_unreads(unread_counts['unread_muted_topics'],
+                               (stream_id, topic))
+            else:
+                update_unreads(unread_counts['unread_topics'],
+                               (stream_id, topic))
+                update_unreads(unread_counts['streams'], stream_id)
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(message['display_recipient']) <= 2:
@@ -180,24 +189,27 @@ def _set_count_in_view(controller: Any, new_count: int,
         if msg_type == 'stream':
             stream_id = message['stream_id']
             msg_topic = message['subject']
-            if controller.model.is_muted_stream(stream_id):
-                add_to_counts = False  # if muted, don't add to eg. all_msg
-            else:
-                for stream_button in stream_buttons_log:
-                    if stream_button.stream_id == stream_id:
-                        stream_button.update_count(stream_button.count
-                                                   + new_count)
-                        break
-            # FIXME: Update unread_counts['unread_topics']?
+            # If the topic has been muted, we don't need to change
+            # stream/topic button count.
             if controller.model.is_muted_topic(stream_id, msg_topic):
                 add_to_counts = False
-            if is_open_topic_view and stream_id == toggled_stream_id:
-                # If topic_view is open for incoming messages's stream,
-                # We update the respective TopicButton count accordingly.
-                for topic_button in topic_buttons_log:
-                    if topic_button.topic_name == msg_topic:
-                        topic_button.update_count(topic_button.count
-                                                  + new_count)
+            else:
+                if controller.model.is_muted_stream(stream_id):
+                    add_to_counts = False  # if muted, don't add to eg. all_msg
+                else:
+                    for stream_button in stream_buttons_log:
+                        if stream_button.stream_id == stream_id:
+                            stream_button.update_count(stream_button.count
+                                                       + new_count)
+                            break
+
+                if is_open_topic_view and stream_id == toggled_stream_id:
+                    # If topic_view is open for incoming messages's stream,
+                    # We update the respective TopicButton count accordingly.
+                    for topic_button in topic_buttons_log:
+                        if topic_button.topic_name == msg_topic:
+                            topic_button.update_count(topic_button.count
+                                                      + new_count)
         else:
             for user_button in user_buttons_log:
                 if user_button.user_id == user_id:
@@ -218,7 +230,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     messages = controller.model.index['messages']
     unread_counts: UnreadCounts = controller.model.unread_counts
     changed_messages = [messages[id] for id in id_list]
-    _set_count_in_model(new_count, changed_messages, unread_counts)
+    _set_count_in_model(controller, new_count, changed_messages, unread_counts)
 
     # if view is not yet loaded. Usually the case when first message is read.
     while not hasattr(controller, 'view'):
@@ -422,6 +434,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         all_pms=0,
         all_mentions=0,
         unread_topics=dict(),
+        unread_muted_topics=dict(),
         unread_pms=dict(),
         unread_huddles=dict(),
         streams=defaultdict(int),
@@ -439,12 +452,13 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     for stream in unread_msg_counts['streams']:
         count = len(stream['unread_message_ids'])
         stream_id = stream['stream_id']
+        stream_topic = (stream_id, stream['topic'])
         # unsubscribed streams may be in raw unreads, but are not tracked
         if not model.is_user_subscribed_to_stream(stream_id):
             continue
         if model.is_muted_topic(stream_id, stream['topic']):
+            unread_counts['unread_muted_topics'][stream_topic] = count
             continue
-        stream_topic = (stream_id, stream['topic'])
         unread_counts['unread_topics'][stream_topic] = count
         if not unread_counts['streams'].get(stream_id):
             unread_counts['streams'][stream_id] = count

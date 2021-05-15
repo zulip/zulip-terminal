@@ -7,7 +7,11 @@ import pytest
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
-from zulipterminal.ui_tools.buttons import StreamButton, UserButton
+from zulipterminal.ui_tools.buttons import (
+    StreamButton,
+    TopicButton,
+    UserButton,
+)
 from zulipterminal.version import (
     MINIMUM_SUPPORTED_SERVER_VERSION,
     SUPPORTED_SERVER_VERSIONS,
@@ -46,6 +50,21 @@ def stream_button(mocker):
         controller=mocker.patch('zulipterminal.core.Controller'),
         width=40,
         view=view_mock,
+        count=30
+    )
+    return button
+
+
+@pytest.fixture
+def topic_button(mocker):
+    """
+    Mocked topic button.
+    """
+    button = TopicButton(
+        stream_id=1,
+        topic='party',
+        controller=mocker.patch('zulipterminal.core.Controller'),
+        width=27,
         count=30
     )
     return button

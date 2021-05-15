@@ -64,6 +64,11 @@
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
 |Show/hide stream members (from stream information)|<kbd>m</kbd>|
 
+## Topic list actions
+|Command|Key Combination|
+| :--- | :---: |
+|Mute/unmute Topics|<kbd>M</kbd>|
+
 ## Composing a Message
 |Command|Key Combination|
 | :--- | :---: |

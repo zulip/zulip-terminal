@@ -302,6 +302,34 @@ class TestController:
                                  + "' ?"), "center")
         pop_up.assert_called_once_with(controller, text(), partial())
 
+    @pytest.mark.parametrize('muted_topics, action', [
+        ({
+            ('Stream 1', 'delhi'): 1
+         }, 'muting'),
+        ({
+            ('Stream 1', 'delhi'): 1,
+            ('Stream 1', 'party'): 2
+        }, 'unmuting'),
+    ])
+    def test_topic_muting_confirmation_popup(self, mocker, controller,
+                                             stream_dict, topic_button,
+                                             muted_topics, action):
+        pop_up = mocker.patch(CORE + '.PopUpConfirmationView')
+        text = mocker.patch(CORE + '.urwid.Text')
+        partial = mocker.patch(CORE + '.partial')
+        controller.model._muted_topics = muted_topics
+        controller.model.stream_dict = stream_dict
+        controller.loop = mocker.Mock()
+
+        controller.topic_muting_confirmation_popup(topic_button)
+        text.assert_called_with(
+            ("",
+             f"Confirm {action} of topic '{topic_button.topic_name}' "
+             f"under the '{topic_button.stream_name}' stream ?"),
+            "center"
+        )
+        pop_up.assert_called_once_with(controller, text(), partial())
+
     @pytest.mark.parametrize('initial_narrow, final_narrow', [
         ([], [['search', 'FOO']]),
         ([['search', 'BOO']], [['search', 'FOO']]),
