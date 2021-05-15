@@ -160,6 +160,10 @@ def _set_count_in_view(controller: Any, new_count: int,
     if is_open_topic_view:
         topic_buttons_log = controller.view.topic_w.log
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
+    users = controller.model.get_all_users()
+    if hasattr(controller, 'view'):
+        controller.view.users_view.update_user_list(
+            user_list=users)
     user_buttons_log = controller.view.user_w.log
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
