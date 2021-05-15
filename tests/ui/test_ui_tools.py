@@ -1901,20 +1901,24 @@ class TestMessageBox:
     @pytest.mark.parametrize(['to_vary_in_each_message',
                               'realm_editing_allowed',
                               'msg_body_edit_enabled',
+                              'msg_body_edit_limit',
                               'expect_editing_to_succeed'], [
-        ({'sender_id': 2, 'timestamp': 45}, True, True, False),
-        ({'sender_id': 1, 'timestamp': 1}, True, False, True),
-        ({'sender_id': 1, 'timestamp': 45}, False, True, False),
-        ({'sender_id': 1, 'timestamp': 45}, True, True, True),
+        ({'sender_id': 2, 'timestamp': 45}, True, True, 60, False),
+        ({'sender_id': 1, 'timestamp': 1}, True, False, 60, True),
+        ({'sender_id': 1, 'timestamp': 45}, False, True, 60, False),
+        ({'sender_id': 1, 'timestamp': 45}, True, True, 60, True),
+        ({'sender_id': 1, 'timestamp': 1}, True, True, 0, True),
     ], ids=['msg_sent_by_other_user',
             'topic_edit_only_after_time_limit',
             'editing_not_allowed',
-            'all_conditions_met'])
+            'all_conditions_met',
+            'no_msg_body_edit_limit'])
     def test_keypress_EDIT_MESSAGE(self, mocker, message_fixture, widget_size,
                                    expect_editing_to_succeed,
                                    to_vary_in_each_message,
                                    realm_editing_allowed,
                                    msg_body_edit_enabled,
+                                   msg_body_edit_limit,
                                    key):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, message_fixture)
@@ -1922,7 +1926,7 @@ class TestMessageBox:
         msg_box.model.user_id = 1
         msg_box.model.initial_data = {
             'realm_allow_message_editing': realm_editing_allowed,
-            'realm_message_content_edit_limit_seconds': 60,
+            'realm_message_content_edit_limit_seconds': msg_body_edit_limit,
         }
         msg_box.model.client.get_raw_message.return_value = {
             'raw_content': "Edit this message"
@@ -1931,9 +1935,10 @@ class TestMessageBox:
         write_box.msg_edit_id = None
         write_box.msg_body_edit_enabled = None
         mocker.patch("zulipterminal.ui_tools.boxes.time", return_value=100)
-        # private messages cannot be edited after time-limit.
+        # private messages cannot be edited after time-limit, if there is one.
         if (varied_message['type'] == 'private'
-                and varied_message['timestamp'] == 1):
+                and varied_message['timestamp'] == 1
+                and msg_body_edit_limit > 0):
             expect_editing_to_succeed = False
 
         msg_box.keypress(size, key)

@@ -1518,23 +1518,26 @@ class MessageBox(urwid.Pile):
                     " Editing sent message is disabled.", 3)
                 return key
             # Check if message is still editable, i.e. within
-            # the time limit.
-            time_since_msg_sent = time() - self.message['timestamp']
-            edit_time_limit = self.model.initial_data[
-                    'realm_message_content_edit_limit_seconds']
+            # the time limit. A limit of 0 signifies no limit
+            # on message body editing.
             msg_body_edit_enabled = True
-            if time_since_msg_sent >= edit_time_limit:
-                if self.message['type'] == 'private':
-                    self.model.controller.view.set_footer_text(
-                            " Time Limit for editing the message has"
-                            " been exceeded.", 3)
-                    return key
-                elif self.message['type'] == 'stream':
-                    self.model.controller.view.set_footer_text(
-                            " Only topic editing allowed."
-                            " Time Limit for editing the message body has"
-                            " been exceeded.", 3)
-                    msg_body_edit_enabled = False
+            if self.model.initial_data[
+                    'realm_message_content_edit_limit_seconds'] > 0:
+                time_since_msg_sent = time() - self.message['timestamp']
+                edit_time_limit = self.model.initial_data[
+                        'realm_message_content_edit_limit_seconds']
+                if time_since_msg_sent >= edit_time_limit:
+                    if self.message['type'] == 'private':
+                        self.model.controller.view.set_footer_text(
+                                " Time Limit for editing the message has"
+                                " been exceeded.", 3)
+                        return key
+                    elif self.message['type'] == 'stream':
+                        self.model.controller.view.set_footer_text(
+                                " Only topic editing allowed."
+                                " Time Limit for editing the message body has"
+                                " been exceeded.", 3)
+                        msg_body_edit_enabled = False
 
             if self.message['type'] == 'private':
                 self.keypress(size, 'enter')
