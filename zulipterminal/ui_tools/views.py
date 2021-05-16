@@ -378,7 +378,7 @@ class TopicsView(urwid.Frame):
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(self,
                                                'SEARCH_TOPICS',
-                                               self.update_topics)
+                                               self.filter_topics)
         self.header_list = urwid.Pile([self.stream_button,
                                        urwid.Divider('─'),
                                        self.topic_search_box])
@@ -389,45 +389,56 @@ class TopicsView(urwid.Frame):
         ))
         self.search_lock = threading.Lock()
 
+        self.filter_text = ""
+
     @asynch
-    def update_topics(self, search_box: Any, new_text: str) -> None:
+    def filter_topics(self, search_box: Any, new_text: str) -> None:
         if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong topics list.
         with self.search_lock:
-            new_text = new_text.lower()
+            self.filter_text = new_text.lower()
             topics_to_display = [
                 topic
                 for topic in self.topics_btn_list.copy()
-                if new_text in topic.topic_name.lower()
+                if self.filter_text in topic.topic_name.lower()
             ]
             self.log.clear()
             self.log.extend(topics_to_display)
             self.view.controller.update_screen()
 
-    def update_topics_list(self, stream_id: int, topic_name: str,
-                           sender_id: int) -> None:
-        # More recent topics are found towards the beginning
-        # of the list.
+    def _insert_topic_at_top(self, button: Any, is_current_user: bool) -> None:
+        if self.filter_text and self.filter_text not in button.topic_name.lower():
+            return
+        self.log.insert(0, button)
+        self.list_box.set_focus_valign('bottom')
+        if is_current_user:
+            self.list_box.set_focus(0)
+
+    def try_to_move_topic_to_top(self, topic_name: str,
+                                 is_current_user: bool) -> None:
+        for topic_iterator, topic_button in enumerate(self.topics_btn_list):
+            if topic_button.topic_name == topic_name:
+                button_to_move = self.topics_btn_list.pop(topic_iterator)
+                self.topics_btn_list.insert(0, button_to_move)
+                break
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
-                self.log.insert(0, self.log.pop(topic_iterator))
-                self.list_box.set_focus_valign('bottom')
-                if sender_id == self.view.model.user_id:
-                    self.list_box.set_focus(0)
-                return
-        # No previous topics with same topic names are found
-        # hence we create a new topic button for it.
+                button_to_move = self.log.pop(topic_iterator)
+                self._insert_topic_at_top(button_to_move, is_current_user)
+                break
+        # Reaching here is not necesarily an error, as we may be searching
+
+    def add_new_top_topic(self, stream_id: int, topic_name: str,
+                          is_current_user: bool) -> None:
         new_topic_button = TopicButton(stream_id,
                                        topic_name,
                                        self.view.controller,
                                        self.view.LEFT_WIDTH,
                                        0)
-        self.log.insert(0, new_topic_button)
-        self.list_box.set_focus_valign('bottom')
-        if sender_id == self.view.model.user_id:
-            self.list_box.set_focus(0)
+        self.topics_btn_list.insert(0, new_topic_button)
+        self._insert_topic_at_top(new_topic_button, is_current_user)
 
     def mouse_event(self, size: urwid_Size, event: str, button: int, col: int,
                     row: int, focus: bool) -> bool:
