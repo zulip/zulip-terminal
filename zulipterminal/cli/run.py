@@ -89,16 +89,16 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         action='store',
                         help='config file downloaded from your zulip '
                              'organization (default: ~/zuliprc)',)
-    parser.add_argument('--theme', '-t',
-                        help="choose color theme "
-                             f"(default: {DEFAULT_SETTINGS['theme']})",)
+    parser.add_argument(
+        '--theme', '-t',
+        help=f"choose color theme (default: {DEFAULT_SETTINGS['theme']})",)
     parser.add_argument('--list-themes',
                         action="store_true",
                         help='list all the color themes and exit',)
-    parser.add_argument('--color-depth',
-                        choices=['1', '16', '256', '24bit'],
-                        help="force the color depth "
-                             f"(default: {DEFAULT_SETTINGS['color-depth']})",)
+    parser.add_argument(
+        '--color-depth',
+        choices=['1', '16', '256', '24bit'],
+        help=f"force the color depth (default: {DEFAULT_SETTINGS['color-depth']})",)
     parser.add_argument('-e', '--explore', action='store_true',
                         help='do not mark messages as read in the session',)
 
@@ -116,8 +116,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                                 help='autohide list of users and streams',)
     autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
                                 action="store_const", const='no_autohide',
-                                help='don\'t autohide list of '
-                                     'users and streams',)
+                                help='don\'t autohide list of users and streams',)
 
     parser.add_argument("-d",
                         "--debug",
@@ -166,19 +165,15 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
-    print(in_color('red', f"zuliprc file was not found at {zuliprc_path}")
-          + "\nPlease enter your credentials to login into your"
-            " Zulip organization."
-            "\n"
-            "\nNOTE: The " + in_color('blue', "Zulip URL")
-          + " is where you would go in a web browser to log in to Zulip."
-            "\nIt often looks like one of the following:"
-            "\n   " + in_color('green', "your-org.zulipchat.com")
-          + " (Zulip cloud)"
-            "\n   " + in_color('green', "zulip.your-org.com")
-          + " (self-hosted servers)"
-            "\n   " + in_color('green', "chat.zulip.org")
-          + " (the Zulip community server)")
+    print(f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
+          f"\nPlease enter your credentials to login into your Zulip organization."
+          f"\n"
+          f"\nNOTE: The {in_color('blue', 'Zulip URL')}"
+          f" is where you would go in a web browser to log in to Zulip."
+          f"\nIt often looks like one of the following:"
+          f"\n   {in_color('green', 'your-org.zulipchat.com')} (Zulip cloud)"
+          f"\n   {in_color('green', 'zulip.your-org.com')} (self-hosted servers)"
+          f"\n   {in_color('green', 'chat.zulip.org')} (the Zulip community server)")
     realm_url = styled_input('Zulip URL: ')
     if realm_url.startswith("localhost"):
         realm_url = f"http://{realm_url}"
@@ -223,8 +218,7 @@ def _write_zuliprc(to_path: str, *,
     except FileExistsError as ex:
         return f"zuliprc already exists at {to_path}"
     except OSError as ex:
-        return (f"{ex.__class__.__name__}: "
-                f"zuliprc could not be created at {to_path}")
+        return (f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}")
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
@@ -397,11 +391,11 @@ def main(options: Optional[List[str]]=None) -> None:
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use[0] in incomplete:
-            print(in_color('yellow',
-                           "   WARNING: Incomplete theme; "
-                           "results may vary!\n"
-                           "      (you could try: {})".
-                           format(", ".join(complete))))
+            incomplete_theme_warning = (
+                "   WARNING: Incomplete theme; results may vary!\n"
+                "      (you could try: {})".format(", ".join(complete))
+            )
+            print(in_color('yellow', incomplete_theme_warning))
         print("   autohide setting '{}' specified {}."
               .format(*zterm['autohide']))
         if zterm['footlinks'][1] == ZULIPRC_CONFIG:
