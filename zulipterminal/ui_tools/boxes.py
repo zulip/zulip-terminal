@@ -15,11 +15,7 @@ from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
-from zulipterminal.api_types import (
-    Composition,
-    PrivateComposition,
-    StreamComposition,
-)
+from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
 from zulipterminal.config.keys import (
     is_command_key,
     keys_for_command,
