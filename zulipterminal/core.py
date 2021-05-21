@@ -288,8 +288,9 @@ class Controller:
             self.view.message_view.set_focus(focus_position)
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
-        question = urwid.Text('Save this message as a draft?'
-                              ' (This will overwrite the existing draft.)')
+        question = urwid.Text(
+            'Save this message as a draft? (This will overwrite the existing draft.)'
+        )
         save_draft = partial(self.model.save_draft, draft)
         self.loop.widget = PopUpConfirmationView(self, question, save_draft)
 

@@ -534,8 +534,8 @@ class WriteBox(urwid.Pile):
                             content=self.msg_write_box.edit_text
                         )
                     else:
-                        self.view.set_footer_text("Cannot send message without"
-                                                  " specifying recipients.", 3)
+                        self.view.set_footer_text(
+                            "Cannot send message without specifying recipients.", 3)
                         success = None
             if success:
                 self.msg_write_box.edit_text = ''
@@ -590,8 +590,7 @@ class WriteBox(urwid.Pile):
                                             'AUTOCOMPLETE'
                                         ),
                                         primary_key_for_command(
-                                            'AUTOCOMPLETE'
-                                            '_REVERSE'
+                                            'AUTOCOMPLETE_REVERSE'
                                         ))
                             )
                             self.view.set_footer_text(invalid_stream_error, 3)
@@ -623,8 +622,9 @@ class WriteBox(urwid.Pile):
                         self.recipient_emails
                     )
                     if invalid_emails:
-                        invalid_emails_error = ('Invalid recipient(s) - '
-                                                + ', '.join(invalid_emails))
+                        invalid_emails_error = (
+                            f"Invalid recipient(s) - {', '.join(invalid_emails)}"
+                        )
                         self.view.set_footer_text(invalid_emails_error, 3)
                         return key
                     users = self.model.user_dict
@@ -1525,8 +1525,7 @@ class MessageBox(urwid.Pile):
                 if time_since_msg_sent >= edit_time_limit:
                     if self.message['type'] == 'private':
                         self.model.controller.view.set_footer_text(
-                                " Time Limit for editing the message has"
-                                " been exceeded.", 3)
+                            " Time Limit for editing the message has been exceeded.", 3)
                         return key
                     elif self.message['type'] == 'stream':
                         self.model.controller.view.set_footer_text(
