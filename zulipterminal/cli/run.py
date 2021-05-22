@@ -80,56 +80,52 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=description,
                                      formatter_class=formatter_class)
-
-    parser.add_argument('--config-file', '-c',
-                        action='store',
-                        help='config file downloaded from your zulip '
-                             'organization.(e.g. ~/zuliprc)')
-    parser.add_argument('--theme', '-t',
-                        help="choose color theme "
-                             f"(default {DEFAULT_SETTINGS['theme']}).")
-    parser.add_argument('--list-themes',
-                        action="store_true",
-                        help='list all the color themes.')
-    parser.add_argument('--color-depth',
-                        choices=['1', '16', '256', '24bit'],
-                        help="Force the color depth "
-                             f"(default {DEFAULT_SETTINGS['color-depth']}).")
-    notify_group = parser.add_mutually_exclusive_group()
-    notify_group.add_argument('--notify', dest='notify', default=None,
-                              action='store_const', const='enabled',
-                              help='Enable desktop notifications.')
-    notify_group.add_argument('--no-notify', dest='notify', default=None,
-                              action='store_const', const='disabled',
-                              help='Disable desktop notifications.')
-    # debug mode
-    parser.add_argument("-d",
-                        "--debug",
-                        action="store_true",
-                        help="Start zulip terminal in debug mode.")
-
-    parser.add_argument('--profile', dest='profile',
-                        action="store_true",
-                        default=False, help='Profile runtime.')
-
-    autohide_group = parser.add_mutually_exclusive_group()
-    autohide_group.add_argument('--autohide', dest='autohide', default=None,
-                                action="store_const", const='autohide',
-                                help='Autohide list of users and streams.')
-
-    autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
-                                action="store_const", const='no_autohide',
-                                help='Don\'t autohide list of '
-                                     'users and streams.')
-
-    parser.add_argument('-e', '--explore', action='store_true',
-                        help='Do not mark messages as read in the session.')
-
     parser.add_argument('-v',
                         '--version',
                         action='store_true',
                         default=False,
-                        help='Print zulip-terminal version and exit')
+                        help='show zulip-terminal version and exit')
+    parser.add_argument('--config-file', '-c',
+                        action='store',
+                        help='config file downloaded from your zulip '
+                             'organization (default: ~/zuliprc)')
+    parser.add_argument('--theme', '-t',
+                        help="choose color theme "
+                             f"(default: {DEFAULT_SETTINGS['theme']})")
+    parser.add_argument('--list-themes',
+                        action="store_true",
+                        help='list all the color themes and exit')
+    parser.add_argument('--color-depth',
+                        choices=['1', '16', '256', '24bit'],
+                        help="force the color depth "
+                             f"(default: {DEFAULT_SETTINGS['color-depth']})")
+    parser.add_argument('-e', '--explore', action='store_true',
+                        help='do not mark messages as read in the session')
+
+    notify_group = parser.add_mutually_exclusive_group()
+    notify_group.add_argument('--notify', dest='notify', default=None,
+                              action='store_const', const='enabled',
+                              help='enable desktop notifications')
+    notify_group.add_argument('--no-notify', dest='notify', default=None,
+                              action='store_const', const='disabled',
+                              help='disable desktop notifications')
+
+    autohide_group = parser.add_mutually_exclusive_group()
+    autohide_group.add_argument('--autohide', dest='autohide', default=None,
+                                action="store_const", const='autohide',
+                                help='autohide list of users and streams')
+    autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
+                                action="store_const", const='no_autohide',
+                                help='don\'t autohide list of '
+                                     'users and streams')
+
+    parser.add_argument("-d",
+                        "--debug",
+                        action="store_true",
+                        help="enable debug mode")
+    parser.add_argument('--profile', dest='profile',
+                        action="store_true",
+                        default=False, help='profile runtime')
 
     return parser.parse_args(argv)
 
