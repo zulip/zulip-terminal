@@ -284,8 +284,8 @@ class WriteBox(urwid.Pile):
             else:
                 stream_marker = STREAM_MARKER_PUBLIC
             color = stream['color']
-        (self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM]
-         .set_text((color, stream_marker)))
+        self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
+            (color, stream_marker))
 
     def _to_box_autocomplete(self, text: str, state: Optional[int]
                              ) -> Optional[str]:
@@ -1552,8 +1552,7 @@ class MessageBox(urwid.Pile):
             # Set focus to topic box if message body editing is disabled.
             if not msg_body_edit_enabled:
                 write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
-                (write_box.header_write_box.
-                 focus_col) = write_box.FOCUS_HEADER_BOX_TOPIC
+                write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):

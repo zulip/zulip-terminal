@@ -425,8 +425,8 @@ def main(options: Optional[List[str]]=None) -> None:
                     f"  {option}" for option in valid_values
                 ] + [f"Specify the {setting} option in zuliprc file."]
                 exit_with_error(
-                    ("Invalid {} setting '{}' was specified {}."
-                     .format(setting, *zterm[setting])),
+                    "Invalid {} setting '{}' was specified {}."
+                    .format(setting, *zterm[setting]),
                     helper_text="\n".join(helper_text),
                 )
             if setting == 'color-depth':
