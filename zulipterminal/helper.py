@@ -396,12 +396,10 @@ def index_messages(messages: List[Message],
                                       for email in narrow[0][1].split(', ')]
                                      + [model.user_id])
                     if recipients == frozenset(narrow_emails):
-                        (index['private_msg_ids_by_user_ids'][recipients]
-                         .add(msg['id']))
+                        index['private_msg_ids_by_user_ids'][recipients].add(msg['id'])
 
             if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
-                (index['stream_msg_ids_by_stream_id'][msg['stream_id']]
-                 .add(msg['id']))
+                index['stream_msg_ids_by_stream_id'][msg['stream_id']].add(msg['id'])
 
         if (msg['type'] == 'stream' and len(narrow) == 2
                 and narrow[1][1] == msg['subject']):

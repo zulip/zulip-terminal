@@ -1426,6 +1426,5 @@ class Model:
                         self.event_actions[event['type']](event)
                     except Exception:
                         import sys
-                        (self.controller.
-                         raise_exception_in_main_thread(sys.exc_info(),
-                                                        critical=False))
+                        self.controller.raise_exception_in_main_thread(sys.exc_info(),
+                                                                       critical=False)
