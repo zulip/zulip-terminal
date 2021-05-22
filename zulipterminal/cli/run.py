@@ -88,44 +88,44 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument('--config-file', '-c',
                         action='store',
                         help='config file downloaded from your zulip '
-                             'organization (default: ~/zuliprc)')
+                             'organization (default: ~/zuliprc)',)
     parser.add_argument('--theme', '-t',
                         help="choose color theme "
-                             f"(default: {DEFAULT_SETTINGS['theme']})")
+                             f"(default: {DEFAULT_SETTINGS['theme']})",)
     parser.add_argument('--list-themes',
                         action="store_true",
-                        help='list all the color themes and exit')
+                        help='list all the color themes and exit',)
     parser.add_argument('--color-depth',
                         choices=['1', '16', '256', '24bit'],
                         help="force the color depth "
-                             f"(default: {DEFAULT_SETTINGS['color-depth']})")
+                             f"(default: {DEFAULT_SETTINGS['color-depth']})",)
     parser.add_argument('-e', '--explore', action='store_true',
-                        help='do not mark messages as read in the session')
+                        help='do not mark messages as read in the session',)
 
     notify_group = parser.add_mutually_exclusive_group()
     notify_group.add_argument('--notify', dest='notify', default=None,
                               action='store_const', const='enabled',
-                              help='enable desktop notifications')
+                              help='enable desktop notifications',)
     notify_group.add_argument('--no-notify', dest='notify', default=None,
                               action='store_const', const='disabled',
-                              help='disable desktop notifications')
+                              help='disable desktop notifications',)
 
     autohide_group = parser.add_mutually_exclusive_group()
     autohide_group.add_argument('--autohide', dest='autohide', default=None,
                                 action="store_const", const='autohide',
-                                help='autohide list of users and streams')
+                                help='autohide list of users and streams',)
     autohide_group.add_argument('--no-autohide', dest='autohide', default=None,
                                 action="store_const", const='no_autohide',
                                 help='don\'t autohide list of '
-                                     'users and streams')
+                                     'users and streams',)
 
     parser.add_argument("-d",
                         "--debug",
                         action="store_true",
-                        help="enable debug mode")
+                        help="enable debug mode",)
     parser.add_argument('--profile', dest='profile',
                         action="store_true",
-                        default=False, help='profile runtime')
+                        default=False, help='profile runtime',)
 
     return parser.parse_args(argv)
 
