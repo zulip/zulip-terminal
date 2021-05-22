@@ -808,10 +808,13 @@ class MessageBox(urwid.Pile):
             bar_color = self.model.stream_dict[self.stream_id]['color']
             bar_color = f"s{bar_color}"
             if len(curr_narrow) == 2 and curr_narrow[1][0] == 'topic':
-                text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, self.stream_name),
-                    (bar_color, ": topic narrow"),
-                ])
+                text_to_fill = (
+                    'bar',  # type: ignore
+                    [
+                        (bar_color, self.stream_name),
+                        (bar_color, ": topic narrow"),
+                    ]
+                )
             else:
                 text_to_fill = ('bar', [  # type: ignore
                     (bar_color, self.stream_name)

@@ -85,7 +85,8 @@ class TopButton(urwid.Button):
              self.prefix_character,
              f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
              count_text],
-            self.width_for_text_and_count + 5),  # cursor location
+            self.width_for_text_and_count + 5  # cursor location
+            ),
             text_color,
             'selected')
 
