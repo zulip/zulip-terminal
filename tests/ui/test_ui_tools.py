@@ -493,17 +493,17 @@ class TestStreamsView:
         ('here', ['test here'], []),
         ('test here', ['test here'], []),
         # With 'foo' pinned.
-        ('f', ['foo', '', 'fan', 'FOO', 'FOOBAR'], ['foo', ]),
-        ('FOO', ['foo', '', 'FOO', 'FOOBAR'], ['foo', ]),
+        ('f', ['foo', '', 'fan', 'FOO', 'FOOBAR'], ['foo']),
+        ('FOO', ['foo', '', 'FOO', 'FOOBAR'], ['foo']),
         # With 'bar' pinned.
-        ('bar', ['bar'], ['bar', ]),
+        ('bar', ['bar'], ['bar']),
         ('baar', 'search error', []),
     ])
     def test_update_streams(self, mocker, stream_view, new_text, expected_log,
                             to_pin):
         stream_names = [
             'FOO', 'FOOBAR', 'foo', 'fan',
-            'boo', 'BOO', 'bar', 'test here',
+            'boo', 'BOO', 'bar', 'test here'
         ]
         stream_names.sort(key=lambda stream_name: stream_name.lower())
         self.view.pinned_streams = [{'name': name} for name in to_pin]
@@ -632,7 +632,7 @@ class TestTopicsView:
     def test_update_topics(self, mocker, topic_view, new_text, expected_log):
         topic_names = [
             'FOO', 'FOOBAR', 'foo', 'fan',
-            'boo', 'BOO', 'bar', '(no topic)',
+            'boo', 'BOO', 'bar', '(no topic)'
         ]
         self.view.controller.is_in_editor_mode = lambda: True
         new_text = new_text
@@ -990,7 +990,7 @@ class TestMiddleColumnView:
 
         mid_col_view.get_next_unread_topic.assert_called_once_with()
         mid_col_view.controller.narrow_to_topic.assert_called_once_with(
-            stream_name="stream", topic_name="topic",
+            stream_name="stream", topic_name="topic"
         )
 
     @pytest.mark.parametrize('key', keys_for_command('NEXT_UNREAD_TOPIC'))

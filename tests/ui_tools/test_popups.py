@@ -80,7 +80,7 @@ class TestPopUpView:
         self.width = 16
         self.widget = mocker.Mock()
         mocker.patch.object(self.widget, 'rows', return_value=1)
-        self.widgets = [self.widget, ]
+        self.widgets = [self.widget]
         self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
                                         return_value=[])
         self.super_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__')
@@ -594,7 +594,7 @@ class TestMsgInfoView:
                                  expected_attr_map, expected_focus_map,
                                  expected_link_width):
         [link_w], link_width = self.msg_info_view.create_link_buttons(
-            self.controller, initial_link,
+            self.controller, initial_link
         )
 
         assert [link_w.link] == list(initial_link)
