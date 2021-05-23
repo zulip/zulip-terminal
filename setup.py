@@ -46,6 +46,7 @@ linting_deps = [
     'flake8~=3.9.0',
     'flake8-quotes~=3.2.0',
     'flake8-continuation~=1.0.5',
+    'black>=21.5b1',
 ]
 
 dev_helper_deps = [

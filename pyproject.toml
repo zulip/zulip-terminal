@@ -1,0 +1,4 @@
+[tool.black]
+# Default line-length, but use explicit value here since used for isort & flake8
+line-length = 88
+target-version = ['py36']
