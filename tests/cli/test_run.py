@@ -116,8 +116,7 @@ def test_valid_zuliprc_but_no_connection(capsys, mocker, minimal_zuliprc,
         "   color depth setting '256' specified with no config.",
         "   notify setting 'disabled' specified with no config.",
         "\x1b[91m",
-        ("Error connecting to Zulip server: "
-         f"{server_connection_error}.\x1b[0m"),
+        f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
     assert lines == expected_lines
 
@@ -148,10 +147,8 @@ def test_warning_regarding_incomplete_theme(capsys, mocker, monkeypatch,
     expected_lines = [
         "Loading with:",
         f"   theme '{bad_theme}' specified on command line.",
-        "\x1b[93m"
-        "   WARNING: Incomplete theme; results may vary!",
-        f"      (you could try: {'a'}, {'b'})"
-        "\x1b[0m",
+        "\x1b[93m   WARNING: Incomplete theme; results may vary!",
+        f"      (you could try: {'a'}, {'b'})\x1b[0m",
         "   autohide setting 'no_autohide' specified with no config.",
         "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
@@ -203,8 +200,7 @@ def test_main_multiple_autohide_options(capsys, options):
     captured = capsys.readouterr()
     lines = captured.err.strip('\n')
     lines = lines.split("pytest: ", 1)[1]
-    expected = (f"error: argument {options[1]}: not allowed "
-                f"with argument {options[0]}")
+    expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
 
 
@@ -231,8 +227,7 @@ def test_main_multiple_notify_options(capsys, options):
     captured = capsys.readouterr()
     lines = captured.err.strip('\n')
     lines = lines.split("pytest: ", 1)[1]
-    expected = (f"error: argument {options[1]}: not allowed "
-                f"with argument {options[0]}")
+    expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
 
 

@@ -221,8 +221,7 @@ class TestView:
         view.user_search = mocker.Mock()
         size = widget_size(view)
 
-        super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap"
-                                      ".keypress")
+        super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
 
         view.controller.is_in_editor_mode = lambda: False
 
