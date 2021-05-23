@@ -424,13 +424,16 @@ def test__write_zuliprc__fail_file_exists(
 
 
 @pytest.mark.parametrize('mode', [
-    0o77, 0o70, 0o07,
-    0o66, 0o60, 0o06,
-    0o55, 0o50, 0o05,
-    0o44, 0o40, 0o04,
-    0o33, 0o30, 0o03,
-    0o22, 0o20, 0o02,
-    0o11, 0o10, 0o01,
+        # Avoid reformatting to retain readability of grid of values
+        # fmt:off
+        0o77, 0o70, 0o07,
+        0o66, 0o60, 0o06,
+        0o55, 0o50, 0o05,
+        0o44, 0o40, 0o04,
+        0o33, 0o30, 0o03,
+        0o22, 0o20, 0o02,
+        0o11, 0o10, 0o01,
+        # fmt:on
 ])
 def test_show_error_if_loading_zuliprc_with_open_permissions(
     capsys, minimal_zuliprc, mode
