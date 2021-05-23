@@ -2121,32 +2121,32 @@ class TestModel:
             ({
                 "deactivated": False,
                 "id": "20",
-                "name": "joy_cat",
+                "name": "joy_cat"
             }, 'realm_emoji', True),
             ({
                 "deactivated": True,
                 "id": "202020",
-                "name": "joker",
+                "name": "joker"
             }, 'unicode_emoji', True),
             ({
                 "deactivated": False,
                 "id": "22",
-                "name": "zulip",
+                "name": "zulip"
             }, 'zulip_extra_emoji', True),
             ({
                 "deactivated": True,
                 "id": "4",
-                "name": "zulip",
+                "name": "zulip"
             }, 'zulip_extra_emoji', True),
             ({
                 "deactivated": False,
                 "id": "23",
-                "name": "new_emoji",
+                "name": "new_emoji"
             }, 'realm_emoji', True),
             ({
                 "deactivated": True,
                 "id": "3",
-                "name": "singing",
+                "name": "singing"
             }, '', False),
         ],
         ids=[

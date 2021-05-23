@@ -264,20 +264,20 @@ class TestWriteBox:
         ('##**Stream', 0, '##**Stream 1**', []),  # Optional 2-stars
         # With 'Secret stream' pinned.
         ('#Stream', 0, '#**Secret stream**',
-         ['Secret stream', ]),  # 2nd-word startswith match (pinned).
+         ['Secret stream']),  # 2nd-word startswith match (pinned).
         ('#Stream', 1, '#**Stream 1**',
-         ['Secret stream', ]),  # 1st-word startswith match (unpinned).
+         ['Secret stream']),  # 1st-word startswith match (unpinned).
         ('#Stream', 2, '#**Stream 2**',
-         ['Secret stream', ]),  # 1st-word startswith match (unpinned).
+         ['Secret stream']),  # 1st-word startswith match (unpinned).
         ('#Stream', 3, '#**Some general stream**',
-         ['Secret stream', ]),  # 3rd-word starstwith match (unpinned).
+         ['Secret stream']),  # 3rd-word starstwith match (unpinned).
         # With 'Stream 1' and 'Secret stream' pinned.
-        ('#Stream', 0, '#**Stream 1**', ['Secret stream', 'Stream 1', ]),
+        ('#Stream', 0, '#**Stream 1**', ['Secret stream', 'Stream 1']),
         ('#Stream', 1, '#**Secret stream**', ['Secret stream',
-                                              'Stream 1', ]),
-        ('#Stream', 2, '#**Stream 2**', ['Secret stream', 'Stream 1', ]),
+                                              'Stream 1']),
+        ('#Stream', 2, '#**Stream 2**', ['Secret stream', 'Stream 1']),
         ('#Stream', 3, '#**Some general stream**', ['Secret stream',
-                                                    'Stream 1', ]),
+                                                    'Stream 1']),
     ])
     def test_generic_autocomplete_streams(self, write_box, text,
                                           state, required_typeahead, to_pin):
@@ -577,7 +577,7 @@ class TestWriteBox:
     ])
     @pytest.mark.parametrize('msg_edit_id', [10, None], ids=[
         'update_message',
-        'send_message',
+        'send_message'
     ])
     @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
     def test_keypress_SEND_MESSAGE_no_topic(self, mocker, write_box,

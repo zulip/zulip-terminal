@@ -399,7 +399,7 @@ def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
     path = os.path.join(str(tmpdir), "zuliprc")
 
     error_message = _write_zuliprc(
-        path, api_key=key, server_url=url, login_id=id,
+        path, api_key=key, server_url=url, login_id=id
     )
 
     assert error_message == ""
@@ -417,7 +417,7 @@ def test__write_zuliprc__fail_file_exists(
     path = os.path.join(str(tmpdir), "zuliprc")
 
     error_message = _write_zuliprc(
-        path, api_key=key, server_url=url, login_id=id,
+        path, api_key=key, server_url=url, login_id=id
     )
 
     assert error_message == "zuliprc already exists at " + path
@@ -433,14 +433,14 @@ def test__write_zuliprc__fail_file_exists(
     0o11, 0o10, 0o01,
 ])
 def test_show_error_if_loading_zuliprc_with_open_permissions(
-    capsys, minimal_zuliprc, mode,
+    capsys, minimal_zuliprc, mode
 ):
     mode += 0o600
     os.chmod(minimal_zuliprc, mode)
     current_mode = stat.filemode(os.stat(minimal_zuliprc).st_mode)
 
     with pytest.raises(SystemExit) as e:
-        main(["-c", minimal_zuliprc, ])
+        main(["-c", minimal_zuliprc])
 
     assert str(e.value) == '1'
 
