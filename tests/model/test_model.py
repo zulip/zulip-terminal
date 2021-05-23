@@ -843,8 +843,7 @@ class TestModel:
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[])
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
+        create_msg_box_list = mocker.patch('zulipterminal.model.create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
         event = {'type': 'message', 'message': message_fixture}
@@ -864,8 +863,7 @@ class TestModel:
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
+        create_msg_box_list = mocker.patch('zulipterminal.model.create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
         event = {'type': 'message', 'message': message_fixture}
@@ -887,8 +885,7 @@ class TestModel:
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
+        create_msg_box_list = mocker.patch('zulipterminal.model.create_msg_box_list',
                                            return_value=["msg_w"])
         model.notify_user = mocker.Mock()
         set_count = mocker.patch('zulipterminal.model.set_count')
@@ -962,8 +959,7 @@ class TestModel:
         mocker.patch(MODEL + '._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list',
+        create_msg_box_list = mocker.patch('zulipterminal.model.create_msg_box_list',
                                            return_value=["msg_w"])
         set_count = mocker.patch('zulipterminal.model.set_count')
         self.controller.view.message_view = mocker.Mock(log=[])
@@ -2003,8 +1999,7 @@ class TestModel:
         second_msg_w.original_widget.message = {'id': 2}
         self.controller.view.message_view = mocker.Mock(
                                                log=[first_msg_w, second_msg_w])
-        create_msg_box_list = mocker.patch('zulipterminal.model.'
-                                           'create_msg_box_list')
+        create_msg_box_list = mocker.patch('zulipterminal.model.create_msg_box_list')
         model.twenty_four_hr_format = None  # initial value is not True/False
 
         model._handle_update_display_settings_event(event)
