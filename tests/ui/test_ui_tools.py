@@ -1655,7 +1655,7 @@ class TestMessageBox:
             {'display_recipient': 'Verona offtopic'},
             {'subject': 'Test topic (previous)'},
             {'type': 'private'},
-    ], ids=['different_stream_before', 'different_topic_before', 'PM_before'])
+    ], ids=['different_stream_before', 'different_topic_before', 'PM_before', ])
     def test_main_view_generates_stream_header(self, mocker, message,
                                                to_vary_in_last_message):
         self.model.stream_dict = {
@@ -1714,7 +1714,7 @@ class TestMessageBox:
                 }],
             },
             {'type': 'stream'},
-    ], ids=['larger_pm_group', 'stream_before'])
+    ], ids=['larger_pm_group', 'stream_before', ])
     def test_main_view_generates_PM_header(self, mocker, message,
                                            to_vary_in_last_message):
         last_message = dict(message, **to_vary_in_last_message)
