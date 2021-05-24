@@ -2175,37 +2175,41 @@ class TestMessageBox:
 
     @pytest.mark.parametrize(
         'message_links, expected_text, expected_attrib, expected_footlinks_width', [
-            (OrderedDict([
+            case(OrderedDict([
                 ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1,
                                                                     True)),
              ]),
              '1: https://github.com/zulip/zulip-terminal/pull/1',
              [('msg_link_index', 2), (None, 1), ('msg_link', 46)],
-             49),
-            (OrderedDict([
+             49,
+             id='one_footlink'),
+            case(OrderedDict([
                 ('https://foo.com', ('Foo!', 1, True)),
                 ('https://bar.com', ('Bar!', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
-             18),
-            (OrderedDict([
+             18,
+             id='more_than_one_footlink'),
+            case(OrderedDict([
                 ('https://example.com', ('https://example.com', 1, False)),
                 ('http://example.com', ('http://example.com', 2, False)),
              ]),
              None,
              None,
-             0),
-            (OrderedDict([
+             0,
+             id='similar_link_and_text'),
+            case(OrderedDict([
                 ('https://foo.com', ('https://foo.com, Text', 1, True)),
                 ('https://bar.com', ('Text, https://bar.com', 2, True)),
              ]),
              '1: https://foo.com\n2: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
-             18),
-            (OrderedDict([
+             18,
+             id='different_link_and_text'),
+            case(OrderedDict([
                 ('https://foo.com', ('Foo!', 1, True)),
                 ('http://example.com', ('example.com', 2, False)),
                 ('https://bar.com', ('Bar!', 3, True)),
@@ -2213,14 +2217,8 @@ class TestMessageBox:
              '1: https://foo.com\n3: https://bar.com',
              [('msg_link_index', 2), (None, 1), ('msg_link', 15), (None, 1),
               ('msg_link_index', 2), (None, 1), ('msg_link', 15)],
-             18),
-        ],
-        ids=[
-            'one_footlink',
-            'more_than_one_footlink',
-            'similar_link_and_text',
-            'different_link_and_text',
-            'http_default_scheme',
+             18,
+             id='http_default_scheme'),
         ]
     )
     def test_footlinks_view(self, message_links, expected_text,
