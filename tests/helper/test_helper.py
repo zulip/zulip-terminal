@@ -1,4 +1,5 @@
 import pytest
+from pytest import param as case
 
 import zulipterminal.helper
 from zulipterminal.helper import (
@@ -311,24 +312,24 @@ def test_display_error_if_present(mocker, response, footer_updated):
 
 
 @pytest.mark.parametrize('req, narrow, footer_updated', [
-    ({'type': 'private', 'to': 'foo@gmail.com', 'content': 'bar'},
-     [['is', 'private']], False),
-    ({'type': 'private', 'to': 'user@abc.com, user@chat.com', 'content': 'Hi'},
-     [['pm_with', 'user@0abc.com']], True),
-    ({'type': 'private', 'to': 'bar-bar@foo.com', 'content': ':party_parrot:'},
-     [['pm_with', 'user@abc.com, user@chat.com, bar-bar@foo.com']], True),
-    ({'type': 'stream', 'to': 'ZT', 'subject': '1', 'content': 'foo'},
-     [['stream', 'ZT'], ['topic', '1']], False),
-    ({'type': 'stream', 'to': 'here', 'subject': 'pytest', 'content': 'py'},
-     [['stream', 'test here']], True),
-    ({'type': 'stream', 'to': '|new_stream|', 'subject': '(no topic)',
-      'content': 'Hi `|new_stream|`'}, [], False),
-    ({'type': 'stream', 'to': 'zulip-terminal', 'subject': 'issue#T781',
-      'content': 'Added tests'}, [['is', 'starred']], True),
-    ({'type': 'private', 'to': '2@aBd%8@random.com', 'content': 'fist_bump'},
-     [['is', 'mentioned']], True),
-    ({'type': 'stream', 'to': 'PTEST', 'subject': 'TEST', 'content': 'Test'},
-     [['stream', 'PTEST'], ['search', 'FOO']], True)
+    case({'type': 'private', 'to': 'foo@gmail.com', 'content': 'bar'},
+         [['is', 'private']], False),
+    case({'type': 'private', 'to': 'user@abc.com, user@chat.com', 'content': 'Hi'},
+         [['pm_with', 'user@0abc.com']], True),
+    case({'type': 'private', 'to': 'bar-bar@foo.com', 'content': ':party_parrot:'},
+         [['pm_with', 'user@abc.com, user@chat.com, bar-bar@foo.com']], True),
+    case({'type': 'stream', 'to': 'ZT', 'subject': '1', 'content': 'foo'},
+         [['stream', 'ZT'], ['topic', '1']], False),
+    case({'type': 'stream', 'to': 'here', 'subject': 'pytest', 'content': 'py'},
+         [['stream', 'test here']], True),
+    case({'type': 'stream', 'to': '|new_stream|', 'subject': '(no topic)',
+          'content': 'Hi `|new_stream|`'}, [], False),
+    case({'type': 'stream', 'to': 'zulip-terminal', 'subject': 'issue#T781',
+          'content': 'Added tests'}, [['is', 'starred']], True),
+    case({'type': 'private', 'to': '2@aBd%8@random.com', 'content': 'fist_bump'},
+         [['is', 'mentioned']], True),
+    case({'type': 'stream', 'to': 'PTEST', 'subject': 'TEST', 'content': 'Test'},
+         [['stream', 'PTEST'], ['search', 'FOO']], True)
 ])
 def test_notify_if_message_sent_outside_narrow(mocker, req, narrow,
                                                footer_updated):
