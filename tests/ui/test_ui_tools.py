@@ -1549,8 +1549,8 @@ class TestMessageBox:
             'id': 37,
             'subject_links': [],
             'recipient_id': 20,
-            'content': "<p>It's nice and it feels more modern, but I think"
-                       " this will take some time to get used to</p>",
+            'content': ("<p>It's nice and it feels more modern, but I think"
+                        " this will take some time to get used to</p>"),
             'timestamp': 1531716583,
             'sender_realm_str': 'zulip',
             'client': 'populate_db',
