@@ -1820,8 +1820,8 @@ class TestMessageBox:
 
         output_date_time = "Fri Jul 20 21:54"  # corresponding to timestamp
 
-        self.model.formatted_local_time.side_effect = [
-            output_date_time, " ",  # for this- and last-message
+        self.model.formatted_local_time.side_effect = [  # for this- and last-message
+            output_date_time, " ",
         ] * 2  # called once in __init__ and then in main_view explicitly
 
         stars = {msg: ({'flags': ['starred']} if msg == starred_msg else {})
