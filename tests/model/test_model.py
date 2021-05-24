@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 import pytest
+from pytest import param as case
 from zulip import ZulipError
 
 from zulipterminal.helper import initial_index, powerset
@@ -914,41 +915,45 @@ class TestModel:
                                           self.controller, 1)
 
     @pytest.mark.parametrize('response, narrow, recipients, log', [
-        ({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
-          'id': 1}, [], frozenset(), ['msg_w']),
-        ({'type': 'private', 'id': 1},
-         [['is', 'private']], frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'FOO',
-          'display_recipient': 'a'},
-         [['stream', 'a']], frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
-          'display_recipient': 'a'},
-         [['stream', 'a'], ['topic', 'b']],
-         frozenset(), ['msg_w']),
-        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
-          'display_recipient': 'a'},
-         [['stream', 'c'], ['topic', 'b']],
-         frozenset(), []),
-        ({'type': 'private', 'id': 1,
-          'display_recipient': [{'id': 5827}, {'id': 5}]},
-         [['pm_with', 'notification-bot@zulip.com']],
-         frozenset({5827, 5}), ['msg_w']),
-        ({'type': 'private', 'id': 1},
-         [['is', 'search']],
-         frozenset(), []),
-        ({'type': 'private', 'id': 1,
-          'display_recipient': [{'id': 5827}, {'id': 3212}]},
-         [['pm_with', 'notification-bot@zulip.com']],
-         frozenset({5827, 5}), []),
-        ({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'c',
-          'display_recipient': 'a', 'flags': ['mentioned']},
-         [['is', 'mentioned']], frozenset(), ['msg_w']),
-    ], ids=['stream_to_all_messages', 'private_to_all_private',
-            'stream_to_stream', 'stream_to_topic',
-            'stream_to_different_stream_same_topic',
-            'user_pm_x_appears_in_narrow_with_x', 'search',
-            'user_pm_x_does_not_appear_in_narrow_without_x',
-            'mentioned_msg_in_mentioned_msg_narrow'])
+        case({'type': 'stream', 'stream_id': 1, 'subject': 'FOO',
+              'id': 1}, [], frozenset(), ['msg_w'],
+             id='stream_to_all_messages'),
+        case({'type': 'private', 'id': 1},
+             [['is', 'private']], frozenset(), ['msg_w'],
+             id='private_to_all_private'),
+        case({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'FOO',
+              'display_recipient': 'a'},
+             [['stream', 'a']], frozenset(), ['msg_w'],
+             id='stream_to_stream'),
+        case({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
+              'display_recipient': 'a'},
+             [['stream', 'a'], ['topic', 'b']],
+             frozenset(), ['msg_w'],
+             id='stream_to_topic'),
+        case({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'b',
+              'display_recipient': 'a'},
+             [['stream', 'c'], ['topic', 'b']],
+             frozenset(), [],
+             id='stream_to_different_stream_same_topic'),
+        case({'type': 'private', 'id': 1,
+              'display_recipient': [{'id': 5827}, {'id': 5}]},
+             [['pm_with', 'notification-bot@zulip.com']],
+             frozenset({5827, 5}), ['msg_w'],
+             id='user_pm_x_appears_in_narrow_with_x'),
+        case({'type': 'private', 'id': 1},
+             [['is', 'search']],
+             frozenset(), [],
+             id='search'),
+        case({'type': 'private', 'id': 1,
+              'display_recipient': [{'id': 5827}, {'id': 3212}]},
+             [['pm_with', 'notification-bot@zulip.com']],
+             frozenset({5827, 5}), [],
+             id='user_pm_x_does_not_appear_in_narrow_without_x'),
+        case({'type': 'stream', 'id': 1, 'stream_id': 1, 'subject': 'c',
+              'display_recipient': 'a', 'flags': ['mentioned']},
+             [['is', 'mentioned']], frozenset(), ['msg_w'],
+             id='mentioned_msg_in_mentioned_msg_narrow'),
+    ])
     def test__handle_message_event(self, mocker, user_profile, response,
                                    narrow, recipients, model, log):
         model._have_last_message[repr(narrow)] = True
@@ -1077,192 +1082,191 @@ class TestModel:
     @pytest.mark.parametrize(
       'event, expected_times_messages_rerendered, expected_index, topic_view_enabled',
       [
-        ({  # Only subject of 1 message is updated.
-            'message_id': 1,
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [1],
-        }, 1, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'new subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: []},
-        }, False),
-        ({  # Subject of 2 messages is updated
-            'message_id': 1,
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [1, 2],
-        }, 2, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'new subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'new subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: []},
-        }, False),
-        ({  # Message content is updated
-            'message_id': 1,
-            'stream_id': 10,
-            'rendered_content': '<p>new content</p>',
-        }, 1, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': '<p>new content</p>',
-                    'subject': 'old subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: ['old subject']},
-        }, False),
-        ({  # Both message content and subject is updated.
-            'message_id': 1,
-            'rendered_content': '<p>new content</p>',
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [1],
-        }, 2, {  # 2=update of subject & content
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': '<p>new content</p>',
-                    'subject': 'new subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: []},
-        }, False),
-        ({  # Some new type of update which we don't handle yet.
-            'message_id': 1,
-            'foo': 'boo',
-        }, 0, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: ['old subject']},
-        }, False),
-        ({  # message_id not present in index, topic view closed.
-            'message_id': 3,
-            'rendered_content': '<p>new content</p>',
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [3],
-        }, 0, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': set(),
-            'topics': {10: []},  # This resets the cache
-        }, False),
-        ({  # message_id not present in index, topic view is enabled.
-            'message_id': 3,
-            'rendered_content': '<p>new content</p>',
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [3],
-        }, 0, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': set(),
-            'topics': {10: ['new subject', 'old subject']},
-        }, True),
-        ({  # Message content is updated and topic view is enabled.
-            'message_id': 1,
-            'rendered_content': '<p>new content</p>',
-            'subject': 'new subject',
-            'stream_id': 10,
-            'message_ids': [1],
-        }, 2, {
-            'messages': {
-                1: {
-                    'id': 1,
-                    'stream_id': 10,
-                    'content': '<p>new content</p>',
-                    'subject': 'new subject'
-                },
-                2: {
-                    'id': 2,
-                    'stream_id': 10,
-                    'content': 'old content',
-                    'subject': 'old subject'
-                }},
-            'edited_messages': {1},
-            'topics': {10: ['new subject', 'old subject']},
-        }, True),
-      ], ids=[
-        "Only subject of 1 message is updated",
-        "Subject of 2 messages is updated",
-        "Message content is updated",
-        "Both message content and subject is updated",
-        "Some new type of update which we don't handle yet",
-        "message_id not present in index, topic view closed",
-        "message_id not present in index, topic view is enabled",
-        "Message content is updated and topic view is enabled",
+        case({  # Only subject of 1 message is updated.
+                'message_id': 1,
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [1],
+            }, 1, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'new subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: []},
+            }, False,
+            id="Only subject of 1 message is updated"),
+        case({  # Subject of 2 messages is updated
+                'message_id': 1,
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [1, 2],
+            }, 2, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'new subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'new subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: []},
+            }, False,
+            id="Subject of 2 messages is updated"),
+        case({  # Message content is updated
+                'message_id': 1,
+                'stream_id': 10,
+                'rendered_content': '<p>new content</p>',
+            }, 1, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': '<p>new content</p>',
+                        'subject': 'old subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: ['old subject']},
+            }, False,
+            id="Message content is updated"),
+        case({  # Both message content and subject is updated.
+                'message_id': 1,
+                'rendered_content': '<p>new content</p>',
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [1],
+            }, 2, {  # 2=update of subject & content
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': '<p>new content</p>',
+                        'subject': 'new subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: []},
+            }, False,
+            id="Both message content and subject is updated"),
+        case({  # Some new type of update which we don't handle yet.
+                'message_id': 1,
+                'foo': 'boo',
+            }, 0, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: ['old subject']},
+            }, False,
+            id="Some new type of update which we don't handle yet"),
+        case({  # message_id not present in index, topic view closed.
+                'message_id': 3,
+                'rendered_content': '<p>new content</p>',
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [3],
+            }, 0, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': set(),
+                'topics': {10: []},  # This resets the cache
+            }, False,
+            id="message_id not present in index, topic view closed"),
+        case({  # message_id not present in index, topic view is enabled.
+                'message_id': 3,
+                'rendered_content': '<p>new content</p>',
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [3],
+            }, 0, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': set(),
+                'topics': {10: ['new subject', 'old subject']},
+            }, True,
+            id="message_id not present in index, topic view is enabled"),
+        case({  # Message content is updated and topic view is enabled.
+                'message_id': 1,
+                'rendered_content': '<p>new content</p>',
+                'subject': 'new subject',
+                'stream_id': 10,
+                'message_ids': [1],
+            }, 2, {
+                'messages': {
+                    1: {
+                        'id': 1,
+                        'stream_id': 10,
+                        'content': '<p>new content</p>',
+                        'subject': 'new subject'
+                    },
+                    2: {
+                        'id': 2,
+                        'stream_id': 10,
+                        'content': 'old content',
+                        'subject': 'old subject'
+                    }},
+                'edited_messages': {1},
+                'topics': {10: ['new subject', 'old subject']},
+            }, True,
+            id="Message content is updated and topic view is enabled"),
       ])
     def test__handle_update_message_event(self, mocker, model,
                                           event, expected_index,
