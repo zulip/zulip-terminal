@@ -546,7 +546,7 @@ class MessageLinkButton(urwid.Button):
             self._switch_narrow_to(parsed_link)
 
             # Exit pop-up if MessageLinkButton exists in one.
-            if isinstance(self.controller.loop.widget, urwid.Overlay):
+            if self.controller.is_any_popup_open():
                 self.controller.exit_popup()
 
 
