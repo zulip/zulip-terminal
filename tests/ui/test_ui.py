@@ -183,8 +183,9 @@ class TestView:
         view.show_left_panel(visible=visible)
 
         if autohide:
-            (view.body.options.
-             assert_called_once_with(width_type='given', width_amount=width))
+            view.body.options.assert_called_once_with(
+                width_type='given', width_amount=width
+            )
             if visible:
                 assert view.body.focus_position == 0
         else:
@@ -206,8 +207,9 @@ class TestView:
         view.show_right_panel(visible=visible)
 
         if autohide:
-            (view.body.options.
-             assert_called_once_with(width_type='given', width_amount=width))
+            view.body.options.assert_called_once_with(
+                width_type='given', width_amount=width
+            )
             if visible:
                 assert view.body.focus_position == 2
         else:
@@ -279,8 +281,7 @@ class TestView:
         view.users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
         view.user_search.set_edit_text.assert_called_once_with("")
-        (view.controller.enter_editor_mode_with
-         .assert_called_once_with(view.user_search))
+        view.controller.enter_editor_mode_with.assert_called_once_with(view.user_search)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
     @pytest.mark.parametrize('autohide', [True, False], ids=[
@@ -307,10 +308,10 @@ class TestView:
 
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
-        (view.stream_w.stream_search_box.set_edit_text
-         .assert_called_once_with(""))
-        (view.controller.enter_editor_mode_with
-         .assert_called_once_with(view.stream_w.stream_search_box))
+        view.stream_w.stream_search_box.set_edit_text.assert_called_once_with("")
+        view.controller.enter_editor_mode_with.assert_called_once_with(
+            view.stream_w.stream_search_box
+        )
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
     def test_keypress_edit_mode(self, view, mocker, key, widget_size):
@@ -325,5 +326,6 @@ class TestView:
 
         view.keypress(size, key)
 
-        (view.controller.current_editor().keypress
-         .assert_called_once_with((size[1], ), key))
+        view.controller.current_editor().keypress.assert_called_once_with(
+            (size[1], ), key
+        )
