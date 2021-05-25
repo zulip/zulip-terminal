@@ -17,6 +17,7 @@ from zulipterminal.model import (
 
 
 CONTROLLER = 'zulipterminal.core.Controller'
+MODEL = 'zulipterminal.model.Model'
 
 
 class TestModel:
@@ -26,7 +27,7 @@ class TestModel:
         self.controller = mocker.patch(CONTROLLER, return_value=None)
         self.client = mocker.patch(CONTROLLER + '.client')
         self.client.base_url = 'chat.zulip.zulip'
-        mocker.patch('zulipterminal.model.Model._start_presence_updates')
+        mocker.patch(MODEL + '._start_presence_updates')
         self.display_error_if_present = mocker.patch(
                             'zulipterminal.model.display_error_if_present')
         self.notify_if_message_sent_outside_narrow = mocker.patch(
@@ -35,11 +36,9 @@ class TestModel:
     @pytest.fixture
     def model(self, mocker, initial_data, user_profile,
               unicode_emojis):
-        mocker.patch('zulipterminal.model.Model.get_messages',
-                     return_value='')
+        mocker.patch(MODEL + '.get_messages', return_value='')
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
@@ -110,7 +109,7 @@ class TestModel:
     )
     def test_init_muted_topics(self, mocker, initial_data, server_response,
                                locally_processed_data, zulip_feature_level):
-        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
+        mocker.patch(MODEL + '.get_messages', return_value='')
         initial_data['zulip_feature_level'] = zulip_feature_level
         initial_data['muted_topics'] = server_response
         self.client.register = mocker.Mock(return_value=initial_data)
@@ -121,14 +120,12 @@ class TestModel:
 
     def test_init_InvalidAPIKey_response(self, mocker, initial_data):
         # Both network calls indicate the same response
-        mocker.patch('zulipterminal.model.Model.get_messages',
-                     return_value='Invalid API key')
-        mocker.patch('zulipterminal.model.Model._register_desired_events',
+        mocker.patch(MODEL + '.get_messages', return_value='Invalid API key')
+        mocker.patch(MODEL + '._register_desired_events',
                      return_value='Invalid API key')
 
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -141,14 +138,12 @@ class TestModel:
     def test_init_ZulipError_exception(self, mocker, initial_data,
                                        exception_text="X"):
         # Both network calls fail, resulting in exceptions
-        mocker.patch('zulipterminal.model.Model.get_messages',
-                     side_effect=ZulipError(exception_text))
-        mocker.patch('zulipterminal.model.Model._register_desired_events',
+        mocker.patch(MODEL + '.get_messages', side_effect=ZulipError(exception_text))
+        mocker.patch(MODEL + '._register_desired_events',
                      side_effect=ZulipError(exception_text))
 
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -159,9 +154,8 @@ class TestModel:
         assert str(e.value) == exception_text + ' (get_messages, register)'
 
     def test_register_initial_desired_events(self, mocker, initial_data):
-        mocker.patch('zulipterminal.model.Model.get_messages',
-                     return_value='')
-        mocker.patch('zulipterminal.model.Model.get_all_users')
+        mocker.patch(MODEL + '.get_messages', return_value='')
+        mocker.patch(MODEL + '.get_all_users')
         self.client.register.return_value = initial_data
 
         model = Model(self.controller)
@@ -576,9 +570,8 @@ class TestModel:
                                   index_all_messages, initial_data,
                                   num_before=30, num_after=10):
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -676,9 +669,8 @@ class TestModel:
 
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -708,9 +700,8 @@ class TestModel:
                                initial_data, num_before=30, num_after=10):
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -789,10 +780,9 @@ class TestModel:
 
     def test__update_initial_data_raises_exception(self, mocker, initial_data):
         # Initialize Model
-        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
-        mocker.patch('zulipterminal.model.Model.get_all_users',
-                     return_value=[])
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '.get_messages', return_value='')
+        mocker.patch(MODEL + '.get_all_users', return_value=[])
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -822,9 +812,9 @@ class TestModel:
 
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict,
                            user_id):
-        mocker.patch('zulipterminal.model.Model.get_messages', return_value='')
+        mocker.patch(MODEL + '.get_messages', return_value='')
         self.client.register.return_value = initial_data
-        mocker.patch('zulipterminal.model.Model._subscribe_to_streams')
+        mocker.patch(MODEL + '._subscribe_to_streams')
         self.classify_unread_counts = mocker.patch(
             'zulipterminal.model.classify_unread_counts',
             return_value=[])
@@ -849,7 +839,7 @@ class TestModel:
     def test__handle_message_event_with_Falsey_log(self, mocker,
                                                    model, message_fixture):
         model._have_last_message[repr([])] = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
+        mocker.patch(MODEL + '._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[])
@@ -870,7 +860,7 @@ class TestModel:
     def test__handle_message_event_with_valid_log(self, mocker,
                                                   model, message_fixture):
         model._have_last_message[repr([])] = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
+        mocker.patch(MODEL + '._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
@@ -894,7 +884,7 @@ class TestModel:
     def test__handle_message_event_with_flags(self, mocker,
                                               model, message_fixture):
         model._have_last_message[repr([])] = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
+        mocker.patch(MODEL + '._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
@@ -970,7 +960,7 @@ class TestModel:
     def test__handle_message_event(self, mocker, user_profile, response,
                                    narrow, recipients, model, log):
         model._have_last_message[repr(narrow)] = True
-        mocker.patch('zulipterminal.model.Model._update_topic_index')
+        mocker.patch(MODEL + '._update_topic_index')
         index_msg = mocker.patch('zulipterminal.model.index_messages',
                                  return_value={})
         create_msg_box_list = mocker.patch('zulipterminal.model.'
@@ -1303,12 +1293,12 @@ class TestModel:
             'edited_messages': set(),
             'topics': {10: ['old subject']},
         }
-        mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        mocker.patch(MODEL + '._update_rendered_view')
 
         def _set_topics_to_old_and_new(event):
             model.index['topics'][10] = ['new subject', 'old subject']
         fetch_topics = mocker.patch(
-                    'zulipterminal.model.Model._fetch_topics_in_streams',
+                    MODEL + '._fetch_topics_in_streams',
                     side_effect=_set_topics_to_old_and_new)
 
         (model.controller.view.left_panel.is_in_topic_view_with_stream_id.
@@ -1518,7 +1508,7 @@ class TestModel:
             'all': False,
             operation: 'add',
         }
-        mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        mocker.patch(MODEL + '._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         model._handle_update_message_flags_event(event)
@@ -1541,7 +1531,7 @@ class TestModel:
             operation: 'OTHER',  # not 'add' or 'remove'
             'all': False,
         }
-        mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        mocker.patch(MODEL + '._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
         with pytest.raises(RuntimeError):
             model._handle_update_message_flags_event(event)
@@ -1587,7 +1577,7 @@ class TestModel:
             'all': False,
         }
         self.controller.view.starred_button.count = 0
-        mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        mocker.patch(MODEL + '._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
         update_star_count = self.controller.view.starred_button.update_count
 
@@ -1653,7 +1643,7 @@ class TestModel:
             'all': False,
         }
 
-        mocker.patch('zulipterminal.model.Model._update_rendered_view')
+        mocker.patch(MODEL + '._update_rendered_view')
         set_count = mocker.patch('zulipterminal.model.set_count')
 
         model._handle_update_message_flags_event(event)
@@ -2217,7 +2207,7 @@ class TestModel:
 
     def test_poll_for_events__no_disconnect(self, mocker, model,
                                             raising_event):
-        mocker.patch("zulipterminal.model.Model._register_desired_events")
+        mocker.patch(MODEL + "._register_desired_events")
         sleep = mocker.patch("zulipterminal.model.time.sleep")
 
         self.client.get_events.side_effect = [
@@ -2241,7 +2231,7 @@ class TestModel:
     ])
     def test_poll_for_events__reconnect_ok(self, mocker, model, raising_event,
                                            register_return_value):
-        mocker.patch("zulipterminal.model.Model._register_desired_events",
+        mocker.patch(MODEL + "._register_desired_events",
                      side_effect=register_return_value)
         sleep = mocker.patch("zulipterminal.model.time.sleep")
 
