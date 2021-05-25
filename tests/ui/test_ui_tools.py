@@ -650,8 +650,7 @@ class TestTopicsView:
             assert hasattr(topic_view.log[0].original_widget, 'text')
         self.view.controller.update_screen.assert_called_once_with()
 
-    @pytest.mark.parametrize(['topic_name', 'topic_initial_log',
-                              'topic_final_log'], [
+    @pytest.mark.parametrize('topic_name, topic_initial_log, topic_final_log', [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
             ['TOPIC3', 'TOPIC2', 'TOPIC1']),
         ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
@@ -1088,8 +1087,7 @@ class TestRightColumnView:
 
         right_col_view.view.controller.update_screen.assert_not_called()
 
-    @pytest.mark.parametrize(['search_string', 'assert_list',
-                              'match_return_value'], [
+    @pytest.mark.parametrize('search_string, assert_list, match_return_value', [
         ('U', ["USER1", "USER2"], True),
         ('F', [], False)
     ], ids=[
@@ -2175,8 +2173,8 @@ class TestMessageBox:
             ('reaction_mine', 9),
         ]
 
-    @pytest.mark.parametrize(['message_links', 'expected_text',
-                              'expected_attrib', 'expected_footlinks_width'], [
+    @pytest.mark.parametrize(
+        'message_links, expected_text, expected_attrib, expected_footlinks_width', [
             (OrderedDict([
                 ('https://github.com/zulip/zulip-terminal/pull/1', ('#T1', 1,
                                                                     True)),
