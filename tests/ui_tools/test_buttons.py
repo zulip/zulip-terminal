@@ -317,18 +317,18 @@ class TestTopicButton:
         assert topic_button.stream_id == stream_id
         assert topic_button.topic_name == title
 
-    @pytest.mark.parametrize(['stream_name', 'title',
-                              'is_muted_topic_return_value',
-                              'is_muted_called'], [
+    @pytest.mark.parametrize(
+      'stream_name, title, is_muted_topic_return_value, is_muted_called',
+      [
         ('Django', 'topic1', True, True),
         ('Django', 'topic2', False, False),
         ('GSoC', 'topic1', False, False),
-    ], ids=[
+      ], ids=[
         # Assuming 'Django', 'topic1' is muted via muted_topics.
         'stream_and_topic_match',
         'topic_mismatch',
         'stream_mismatch',
-    ])
+      ])
     def test_init_calls_mark_muted(self, mocker, stream_name, title,
                                    is_muted_topic_return_value,
                                    is_muted_called):

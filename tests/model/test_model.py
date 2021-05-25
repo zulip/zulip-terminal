@@ -1019,8 +1019,8 @@ class TestModel:
         assert model.index['topics'][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
-    @pytest.mark.parametrize(['user_id', 'vary_each_msg', 'stream_setting',
-                              'types_when_notify_called'], [
+    @pytest.mark.parametrize(
+      'user_id, vary_each_msg, stream_setting, types_when_notify_called', [
         (5140, {'flags': ['mentioned', 'wildcard_mentioned']}, True,
             []),  # message_fixture sender_id is 5140
         (5179, {'flags': ['mentioned']}, False,
@@ -1031,13 +1031,13 @@ class TestModel:
             ['stream']),
         (5179, {'flags': []}, False,
             ['private']),
-    ], ids=[
+      ], ids=[
         'not_notified_since_self_message',
         'notified_stream_and_private_since_directly_mentioned',
         'notified_stream_and_private_since_wildcard_mentioned',
         'notified_stream_since_stream_has_desktop_notifications',
         'notified_private_since_private_message',
-    ])
+      ])
     def test_notify_users_calling_msg_type(self, mocker, model,
                                            message_fixture,
                                            user_id,
@@ -1082,10 +1082,9 @@ class TestModel:
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
-    @pytest.mark.parametrize(['event',
-                              'expected_times_messages_rerendered',
-                              'expected_index',
-                              'topic_view_enabled'], [
+    @pytest.mark.parametrize(
+      'event, expected_times_messages_rerendered, expected_index, topic_view_enabled',
+      [
         ({  # Only subject of 1 message is updated.
             'message_id': 1,
             'subject': 'new subject',
@@ -1263,7 +1262,7 @@ class TestModel:
             'edited_messages': {1},
             'topics': {10: ['new subject', 'old subject']},
         }, True),
-    ], ids=[
+      ], ids=[
         "Only subject of 1 message is updated",
         "Subject of 2 messages is updated",
         "Message content is updated",
@@ -1272,7 +1271,7 @@ class TestModel:
         "message_id not present in index, topic view closed",
         "message_id not present in index, topic view is enabled",
         "Message content is updated and topic view is enabled",
-    ])
+      ])
     def test__handle_update_message_event(self, mocker, model,
                                           event, expected_index,
                                           expected_times_messages_rerendered,
@@ -1815,8 +1814,8 @@ class TestModel:
             assert model.unread_counts['all_msg'] == 201
         model.controller.update_screen.assert_called_once_with()
 
-    @pytest.mark.parametrize(['event', 'expected_pinned_streams',
-                              'expected_unpinned_streams'], [
+    @pytest.mark.parametrize(
+      'event, expected_pinned_streams, expected_unpinned_streams', [
         (
             {
                 'property': 'pin_to_top',
@@ -1837,10 +1836,10 @@ class TestModel:
             [],
             [{'name': 'design', 'id': 8}, {'name': 'all', 'id': 6}]
         ),
-    ], ids=[
+      ], ids=[
         'pin_stream',
         'unpin_stream',
-    ])
+      ])
     def test__handle_subscription_event_pin_streams(
                                     self, model, mocker,
                                     stream_button, event,

@@ -445,21 +445,16 @@ class TestWriteBox:
         _process_typeaheads.assert_called_once_with(matching_streams, state,
                                                     matching_streams)
 
-    @pytest.mark.parametrize([
-        'stream_name',
-        'stream_id',
-        'is_valid_stream',
-        'expected_marker',
-        'expected_color'
-    ], [
+    @pytest.mark.parametrize(
+     'stream_name, stream_id, is_valid_stream, expected_marker, expected_color', [
       ('Secret stream', 99, True,  STREAM_MARKER_PRIVATE, '#ccc'),
       ('Stream 1',       1, True,  STREAM_MARKER_PUBLIC,  '#b0a5fd'),
       ('Stream 0',       0, False, INVALID_MARKER, 'general_bar'),
-    ], ids=[
+     ], ids=[
         'private_stream',
         'public_stream',
         'invalid_stream_name',
-    ])
+     ])
     def test__set_stream_write_box_style_markers(self, write_box, stream_id,
                                                  stream_name, is_valid_stream,
                                                  expected_marker, stream_dict,
@@ -541,8 +536,8 @@ class TestWriteBox:
         assert (write_box.header_write_box[topic_focus].edit_text
                 == expected_text)
 
-    @pytest.mark.parametrize(['suggestions', 'state', 'expected_state',
-                              'expected_typeahead', 'is_truncated'], [
+    @pytest.mark.parametrize(
+     'suggestions, state, expected_state, expected_typeahead, is_truncated', [
       (['zero', 'one', 'two'], 1, 1, '*one*', False),
       (['zero', 'one', 'two'] * 4, 1, 1, '*one*', True),
       (['zero', 'one', 'two'], None, None, None, False),
@@ -554,7 +549,7 @@ class TestWriteBox:
         'invalid_state-None',
         'invalid_state-greater_than_possible_index',
         'invalid_state-less_than_possible_index',
-    ])
+     ])
     def test__process_typeaheads(self, write_box, suggestions, state,
                                  expected_state, expected_typeahead,
                                  is_truncated, mocker):
@@ -616,9 +611,9 @@ class TestWriteBox:
                         content=write_box.msg_write_box.edit_text,
                     )
 
-    @pytest.mark.parametrize(['key', 'current_typeahead_mode',
-                              'expected_typeahead_mode',
-                              'expect_footer_was_reset'], [
+    @pytest.mark.parametrize(
+      'key, current_typeahead_mode, expected_typeahead_mode, expect_footer_was_reset',
+      [
         # footer does not reset
         (primary_key_for_command('AUTOCOMPLETE'), False, False, False),
         (primary_key_for_command('AUTOCOMPLETE_REVERSE'), False, False, False),
@@ -628,7 +623,7 @@ class TestWriteBox:
         (primary_key_for_command('GO_BACK'), True, False, True),
         ('space', True, False, True),
         ('k', True, False, True),
-    ])
+      ])
     def test_keypress_typeahead_mode_autocomplete_key(self, mocker, write_box,
                                                       widget_size,
                                                       current_typeahead_mode,
