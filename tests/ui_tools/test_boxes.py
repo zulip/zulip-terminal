@@ -830,23 +830,19 @@ class TestPanelSearchBox:
 
         assert panel_search_box.edit_text == "key words"
 
+        panel_view = panel_search_box.panel_view
         if expect_body_focus_set:
             assert panel_search_box.caption == self.search_caption
             # Leave editor mode
-            (panel_search_box.panel_view.view.controller.exit_editor_mode
-             .assert_called_once_with())
+            panel_view.view.controller.exit_editor_mode.assert_called_once_with()
             # Switch focus to body; if have results, move to them
-            panel_search_box.panel_view.set_focus.assert_called_once_with(
-                "body")
-            (panel_search_box.panel_view.body.set_focus
-             .assert_called_once_with(0))
+            panel_view.set_focus.assert_called_once_with("body")
+            panel_view.body.set_focus.assert_called_once_with(0)
         else:
             assert panel_search_box.caption == ''
-            (panel_search_box.panel_view.view.controller.exit_editor_mode
-             .assert_not_called())
-            panel_search_box.panel_view.set_focus.assert_not_called()
-            (panel_search_box.panel_view.body.set_focus
-             .assert_not_called())
+            panel_view.view.controller.exit_editor_mode.assert_not_called()
+            panel_view.set_focus.assert_not_called()
+            panel_view.body.set_focus.assert_not_called()
 
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, panel_search_box, back_key, widget_size):
@@ -857,6 +853,8 @@ class TestPanelSearchBox:
         panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 
+        panel_view = panel_search_box.panel_view
+
         panel_search_box.keypress(size, back_key)
 
         # Reset display
@@ -864,14 +862,12 @@ class TestPanelSearchBox:
         assert panel_search_box.edit_text == panel_search_box.search_text
 
         # Leave editor mode
-        (panel_search_box.panel_view.view.controller.exit_editor_mode
-         .assert_called_once_with())
+        panel_view.view.controller.exit_editor_mode.assert_called_once_with()
 
         # Switch focus to body; focus should return to previous in body
-        panel_search_box.panel_view.set_focus.assert_called_once_with("body")
+        panel_view.set_focus.assert_called_once_with("body")
 
         # pass keypress back
         # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
         #       - should we add a second callback to update the panel?
-        (panel_search_box.panel_view.keypress
-         .assert_called_once_with(size, 'esc'))
+        panel_view.keypress.assert_called_once_with(size, 'esc')
