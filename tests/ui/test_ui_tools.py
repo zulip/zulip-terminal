@@ -1723,8 +1723,8 @@ class TestMessageBox:
         assert isinstance(view_components[0][1], Text)
         assert isinstance(view_components[0][2], Divider)
 
-    @pytest.mark.parametrize(['msg_narrow', 'msg_type', 'assert_header_bar',
-                              'assert_search_bar'], [
+    @pytest.mark.parametrize(
+      'msg_narrow, msg_type, assert_header_bar, assert_search_bar', [
         ([], 0, f"PTEST {STREAM_TOPIC_SEPARATOR} ",
          'All messages'),
         ([], 1, 'You and ', 'All messages'),
@@ -1756,7 +1756,7 @@ class TestMessageBox:
         ([['is', 'mentioned']], 2, 'You and ', 'Mentions'),
         ([['is', 'mentioned'], ['search', 'FOO']], 1, 'You and ',
          'Mentions'),
-    ])
+      ])
     def test_msg_generates_search_and_header_bar(self, mocker,
                                                  messages_successful_response,
                                                  msg_type, msg_narrow,
