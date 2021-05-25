@@ -294,7 +294,7 @@ def test_notify_quotes(monkeypatch, mocker,
     # NOTE: If there is a quoting error, we may get a ValueError too
 
 
-@pytest.mark.parametrize(['response', 'footer_updated'], [
+@pytest.mark.parametrize('response, footer_updated', [
     ({'result': 'error', 'msg': 'Request failed.'}, True),
     ({'result': 'success', 'msg': 'msg content'}, False),
 ])
@@ -310,7 +310,7 @@ def test_display_error_if_present(mocker, response, footer_updated):
         set_footer_text.assert_not_called()
 
 
-@pytest.mark.parametrize(['req', 'narrow', 'footer_updated'], [
+@pytest.mark.parametrize('req, narrow, footer_updated', [
     ({'type': 'private', 'to': 'foo@gmail.com', 'content': 'bar'},
      [['is', 'private']], False),
     ({'type': 'private', 'to': 'user@abc.com, user@chat.com', 'content': 'Hi'},

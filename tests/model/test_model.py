@@ -89,8 +89,8 @@ class TestModel:
         assert (model.twenty_four_hr_format
                 == initial_data['twenty_four_hour_time'])
 
-    @pytest.mark.parametrize(['server_response', 'locally_processed_data',
-                              'zulip_feature_level'], [
+    @pytest.mark.parametrize(
+        'server_response, locally_processed_data, zulip_feature_level', [
             (
                 [['Stream 1', 'muted stream muted topic']],
                 {('Stream 1', 'muted stream muted topic'): None},
@@ -992,8 +992,7 @@ class TestModel:
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert self.controller.view.message_view.log == log
 
-    @pytest.mark.parametrize(['topic_name', 'topic_order_initial',
-                              'topic_order_final'], [
+    @pytest.mark.parametrize('topic_name, topic_order_initial, topic_order_final', [
         ('TOPIC3', ['TOPIC2', 'TOPIC3', 'TOPIC1'],
          ['TOPIC3', 'TOPIC2', 'TOPIC1']),
         ('TOPIC1', ['TOPIC1', 'TOPIC2', 'TOPIC3'],
@@ -1873,8 +1872,7 @@ class TestModel:
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
 
-    @pytest.mark.parametrize(['event', 'feature_level',
-                              'stream_id', 'expected_subscribers'], [
+    @pytest.mark.parametrize('event, feature_level, stream_id, expected_subscribers', [
         ({'op': 'peer_add', 'stream_id': 99, 'user_id': 12}, None,
          99, [1001, 11, 12]),
         ({'op': 'peer_add', 'stream_id': 99, 'user_id': 12}, 34,
@@ -1939,8 +1937,7 @@ class TestModel:
         assert model.stream_dict == stream_dict
 
     # NOTE: This only applies to feature level 34/35+
-    @pytest.mark.parametrize(['event', 'feature_level',
-                              'expected_subscribers'], [
+    @pytest.mark.parametrize('event, feature_level, expected_subscribers', [
         ({'op': 'peer_add', 'user_ids': [13, 14]}, 34, [1001, 11, 12, 13, 14]),
         ({'op': 'peer_add', 'user_ids': [13, 14]}, 35, [1001, 11, 12, 13, 14]),
         ({'op': 'peer_remove', 'user_ids': [12, 11]}, 34, [1001]),
@@ -1967,8 +1964,7 @@ class TestModel:
         assert new_subscribers == expected_subscribers
 
     # NOTE: This only applies to feature level 34/35+
-    @pytest.mark.parametrize(['event', 'feature_level',
-                              'expected_subscribers'], [
+    @pytest.mark.parametrize('event, feature_level, expected_subscribers', [
         ({'op': 'peer_add', 'user_ids': [13]}, 34, [1001, 11, 12, 13]),
         ({'op': 'peer_add', 'user_ids': [13]}, 35, [1001, 11, 12, 13]),
         ({'op': 'peer_remove', 'user_ids': [12]}, 34, [1001, 11]),
@@ -2131,9 +2127,8 @@ class TestModel:
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert all_emoji_data['zulip']['type'] == 'zulip_extra_emoji'
 
-    @pytest.mark.parametrize(['to_vary_in_realm_emoji',
-                              'expected_emoji_type',
-                              'emoji_should_be_active'], [
+    @pytest.mark.parametrize(
+        'to_vary_in_realm_emoji, expected_emoji_type, emoji_should_be_active', [
             ({
                 "deactivated": False,
                 "id": "20",

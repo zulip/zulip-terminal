@@ -317,8 +317,7 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
-    @pytest.mark.parametrize(['text', 'matching_users',
-                              'matching_users_info'], [
+    @pytest.mark.parametrize('text, matching_users, matching_users_info', [
         ('', [
             'Human Myself',
             'Human 1',
@@ -363,8 +362,7 @@ class TestWriteBox:
 
         assert write_box.to_write_box.edit_text == expected_text
 
-    @pytest.mark.parametrize(['text', 'matching_users',
-                              'matching_users_info'], [
+    @pytest.mark.parametrize('text, matching_users, matching_users_info', [
         ('Welcome Bot <welcome-bot@zulip.com>, Human', [
             'Human Myself',
             'Human 1',
@@ -418,7 +416,7 @@ class TestWriteBox:
         _process_typeaheads.assert_called_once_with(matching_users_info, state,
                                                     matching_users)
 
-    @pytest.mark.parametrize(['text', 'state', 'to_pin', 'matching_streams'], [
+    @pytest.mark.parametrize('text, state, to_pin, matching_streams', [
         ('', 1, [], ['Secret stream', 'Some general stream',
                      'Stream 1', 'Stream 2']),
         ('', 1, ['Stream 2'], ['Stream 2', 'Secret stream',
@@ -502,7 +500,7 @@ class TestWriteBox:
         assert (write_box.header_write_box[stream_focus].edit_text
                 == expected_text)
 
-    @pytest.mark.parametrize(['text', 'matching_topics'], [
+    @pytest.mark.parametrize('text, matching_topics', [
         ('', ['Topic 1', 'This is a topic', 'Hello there!']),
         ('Th', ['This is a topic']),
     ], ids=[
@@ -735,7 +733,7 @@ class TestWriteBox:
             assert (write_box.FOCUS_MESSAGE_BOX_BODY
                     == focus_val(expected_focus_col_name))
 
-    @pytest.mark.parametrize(["msg_type", "expected_box_size"], [
+    @pytest.mark.parametrize("msg_type, expected_box_size", [
         ('private',     1),
         ('stream',      4),
         ('stream_edit', 5),

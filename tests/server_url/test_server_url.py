@@ -20,7 +20,7 @@ def test_encode_stream(stream_id, stream_name, expected_encoded_string):
     assert encoded_string == expected_encoded_string
 
 
-@pytest.mark.parametrize(['server_url', 'msg', 'expected_message_url'], [
+@pytest.mark.parametrize('server_url, msg, expected_message_url', [
     (
         'https://chat.zulip.org',
         {

@@ -305,8 +305,7 @@ class TestEditHistoryView:
             'topic': 'party at my house',
             # ...
     }])
-    @pytest.mark.parametrize(['to_vary_in_snapshot', 'tag',
-                              'expected_author_prefix'], [
+    @pytest.mark.parametrize('to_vary_in_snapshot, tag, expected_author_prefix', [
             (
                 {},
                 '(Original Version)',
@@ -387,7 +386,7 @@ class TestEditModeView:
         button = mocker.Mock()
         return EditModeView(controller, button)
 
-    @pytest.mark.parametrize(['index_in_widgets', 'mode'], [
+    @pytest.mark.parametrize('index_in_widgets, mode', [
         (0, 'change_one'),
         (1, 'change_later'),
         (2, 'change_all'),
@@ -679,8 +678,8 @@ class TestStreamInfoView:
 
         assert stream_info_view.markup_desc == expected_markup
 
-    @pytest.mark.parametrize(['message_links', 'expected_text',
-                              'expected_attrib', 'expected_footlinks_width'], [
+    @pytest.mark.parametrize(
+        'message_links, expected_text, expected_attrib, expected_footlinks_width', [
             (OrderedDict([
                 ('https://example.com', ('Example', 1, True)),
                 ('https://generic.com', ('Generic', 2, True)),
