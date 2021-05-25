@@ -872,14 +872,13 @@ class TestModel:
 
         model._handle_message_event(event)
 
-        assert len(self.controller.view.message_view.log) == 2  # Added "msg_w"
+        log = self.controller.view.message_view.log
+        assert len(log) == 2  # Added "msg_w"
         model.notify_user.assert_called_once_with(event['message'])
         # NOTE: So we expect the first element *was* the last_message parameter
-        expected_last_msg = (self.controller.view.message_view.log[0]
-                             .original_widget.message)
-        (create_msg_box_list.
-         assert_called_once_with(model, [message_fixture['id']],
-                                 last_message=expected_last_msg))
+        expected_last_msg = log[0].original_widget.message
+        create_msg_box_list.assert_called_once_with(
+                model, [message_fixture['id']], last_message=expected_last_msg)
 
     def test__handle_message_event_with_flags(self, mocker,
                                               model, message_fixture):
@@ -1301,8 +1300,10 @@ class TestModel:
                     MODEL + '._fetch_topics_in_streams',
                     side_effect=_set_topics_to_old_and_new)
 
-        (model.controller.view.left_panel.is_in_topic_view_with_stream_id.
-            return_value) = topic_view_enabled
+        view = model.controller.view
+        view.left_panel.is_in_topic_view_with_stream_id.return_value = (
+            topic_view_enabled
+        )
 
         model._handle_update_message_event(event)
 
@@ -1313,9 +1314,8 @@ class TestModel:
 
         if topic_view_enabled:
             fetch_topics.assert_called_once_with([event['stream_id']])
-            stream_button = model.controller.view.topic_w.stream_button
-            (model.controller.view.left_panel.show_topic_view.
-                assert_called_once_with(stream_button))
+            stream_button = view.topic_w.stream_button
+            view.left_panel.show_topic_view.assert_called_once_with(stream_button)
             model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize('subject, narrow, new_log_len', [
