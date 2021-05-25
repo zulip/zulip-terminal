@@ -144,8 +144,7 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
         if messages_fetched:
-            (create_msg_box_list.
-             assert_called_once_with(msg_view.model, new_msg_ids))
+            create_msg_box_list.assert_called_once_with(msg_view.model, new_msg_ids)
             self.model.controller.update_screen.assert_called_once_with()
         else:
             create_msg_box_list.assert_not_called()
@@ -249,9 +248,9 @@ class TestMessageView:
         assert msg_view.new_loading is False
         assert msg_view.log[-2:] == ['M1', 'M2']
         expected_last_msg = msg_view.log[0].original_widget.message
-        (create_msg_box_list.
-         assert_called_once_with(msg_view.model, set(),
-                                 last_message=expected_last_msg))
+        create_msg_box_list.assert_called_once_with(
+            msg_view.model, set(), last_message=expected_last_msg
+        )
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(num_before=0,
                                                         num_after=30,
@@ -924,8 +923,9 @@ class TestMiddleColumnView:
 
         mid_col_view.keypress(size, key)
 
-        (mid_col_view.controller.enter_editor_mode_with
-         .assert_called_once_with(mid_col_view.search_box))
+        mid_col_view.controller.enter_editor_mode_with.assert_called_once_with(
+            mid_col_view.search_box
+        )
         mid_col_view.set_focus.assert_called_once_with('header')
 
     @pytest.mark.parametrize('enter_key', keys_for_command('ENTER'))
