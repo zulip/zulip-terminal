@@ -16,15 +16,15 @@ from zulipterminal.model import (
 )
 
 
+CONTROLLER = 'zulipterminal.core.Controller'
+
+
 class TestModel:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: Any) -> None:
         self.urlparse = mocker.patch('urllib.parse.urlparse')
-        self.controller = mocker.patch('zulipterminal.core.'
-                                       'Controller',
-                                       return_value=None)
-        self.client = mocker.patch('zulipterminal.core.'
-                                   'Controller.client')
+        self.controller = mocker.patch(CONTROLLER, return_value=None)
+        self.client = mocker.patch(CONTROLLER + '.client')
         self.client.base_url = 'chat.zulip.zulip'
         mocker.patch('zulipterminal.model.Model._start_presence_updates')
         self.display_error_if_present = mocker.patch(
@@ -441,8 +441,7 @@ class TestModel:
     def test_send_typing_status_by_user_ids(self, mocker, model, status,
                                             recipient_user_ids):
         response = mocker.Mock()
-        mock_api_query = mocker.patch('zulipterminal.core.Controller'
-                                      '.client.set_typing_status',
+        mock_api_query = mocker.patch(CONTROLLER + '.client.set_typing_status',
                                       return_value=response)
 
         model.send_typing_status_by_user_ids(recipient_user_ids,
@@ -774,8 +773,7 @@ class TestModel:
                                                               self.controller)
 
     def test_mark_message_ids_as_read(self, model, mocker: Any) -> None:
-        mock_api_query = mocker.patch('zulipterminal.core.Controller'
-                                      '.client.update_message_flags')
+        mock_api_query = mocker.patch(CONTROLLER + '.client.update_message_flags')
 
         model.mark_message_ids_as_read([1, 2])
 
