@@ -1105,6 +1105,8 @@ class TestModel:
             (["read"], "add"),
             (["read", "starred"], "remove"),
             (["starred", "read"], "remove"),
+            (["read", "mentioned", "wildcard_mentioned"], "add"),
+            (["mentioned", "wildcard_mentioned", "starred"], "remove"),
         ],
     )
     def test_toggle_message_star_status(
@@ -2295,11 +2297,18 @@ class TestModel:
             ("add", 1, ["read"], ["read", "starred"]),
             ("add", 1, ["starred"], ["starred"]),
             ("add", 1, ["read", "starred"], ["read", "starred"]),
+            ("add", 1, ["mentioned"], ["mentioned", "starred"]),
+            ("add", 1, ["mentioned", "starred"], ["mentioned", "starred"]),
+            ("add", 1, ["wildcard_mentioned"], ["wildcard_mentioned", "starred"]),
             ("remove", -1, [], []),
             ("remove", -1, ["read"], ["read"]),
             ("remove", -1, ["starred"], []),
             ("remove", -1, ["read", "starred"], ["read"]),
             ("remove", -1, ["starred", "read"], ["read"]),
+            ("remove", -1, ["mentioned"], ["mentioned"]),
+            ("remove", -1, ["wildcard_mentioned"], ["wildcard_mentioned"]),
+            ("remove", -1, ["mentioned", "starred"], ["mentioned"]),
+            ("remove", -1, ["wildcard_mentioned", "starred"], ["wildcard_mentioned"]),
         ],
     )
     def test_update_star_status(
@@ -2318,7 +2327,23 @@ class TestModel:
 
         model.index = dict(
             messages={msg_id: {"flags": flags_before} for msg_id in indexed_ids},
-            unread_mentioned_msg_ids=set(),
+            mentioned_msg_ids=set(
+                [
+                    msg_id
+                    for msg_id in indexed_ids
+                    if {"mentioned", "wildcard_mentioned"} & set(flags_before)
+                ]
+            ),
+            unread_mentioned_msg_ids=set(
+                [
+                    msg_id
+                    for msg_id in indexed_ids
+                    if (
+                        {"mentioned", "wildcard_mentioned"} & set(flags_before)
+                        and "read" not in flags_before
+                    )
+                ]
+            ),
             starred_msg_ids=set(
                 [msg_id for msg_id in indexed_ids if "starred" in flags_before]
             ),
@@ -2379,11 +2404,19 @@ class TestModel:
             ("add", ["read"], ["read"]),
             ("add", ["starred"], ["starred", "read"]),
             ("add", ["read", "starred"], ["read", "starred"]),
+            ("add", ["mentioned"], ["mentioned", "read"]),
+            ("add", ["read", "mentioned"], ["read", "mentioned"]),
+            ("add", ["mentioned", "starred"], ["mentioned", "starred", "read"]),
+            ("add", ["wildcard_mentioned"], ["wildcard_mentioned", "read"]),
             ("remove", [], []),
             ("remove", ["read"], ["read"]),  # msg cannot be marked 'unread'
             ("remove", ["starred"], ["starred"]),
+            ("remove", ["mentioned"], ["mentioned"]),
             ("remove", ["starred", "read"], ["starred", "read"]),
             ("remove", ["read", "starred"], ["read", "starred"]),
+            ("remove", ["read", "mentioned"], ["read", "mentioned"]),
+            ("remove", ["wildcard_mentioned"], ["wildcard_mentioned"]),
+            ("remove", ["read", "wildcard_mentioned"], ["read", "wildcard_mentioned"]),
         ],
     )
     def test_update_read_status(
