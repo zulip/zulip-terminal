@@ -179,6 +179,7 @@ class TestModel:
         event_types = [
             "message",
             "update_message",
+            "delete_message",
             "reaction",
             "subscription",
             "typing",
@@ -1598,6 +1599,84 @@ class TestModel:
             stream_button = view.topic_w.stream_button
             view.left_panel.show_topic_view.assert_called_once_with(stream_button)
             model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        "event, to_vary_in_index",
+        [
+            case(
+                {
+                    "message_id": 537286,
+                    "message_type": "stream",
+                    "stream_id": 205,
+                    "topic": "Test",
+                },
+                {
+                    "all_msg_ids": {537286, 537287, 537288},
+                    "topic_msg_ids": {205: {"Test": {537286}}},
+                },
+                id="stream_msg_deleted_from_all_msg",
+            ),
+            case(
+                {
+                    "message_id": 537287,
+                    "message_type": "private",
+                    "sender_id": 5140,
+                },
+                {
+                    "private_msg_ids": {537287},
+                    "private_msg_ids_by_user_ids": {(5140, 5179): {537287}},
+                },
+                id="rivate_msg_deleted_from_private_msgs",
+            ),
+            case(
+                {
+                    "message_id": 537288,
+                    "message_type": "private",
+                    "sender_id": 5140,
+                },
+                {
+                    "private_msg_ids": {537287, 537288},
+                    "private_msg_ids_by_user_ids": {
+                        (5140, 5179): {537287},
+                        (5179, 5140, 5180): {537288},
+                    },
+                },
+                id="group_msg_deleted_from_private_msgs",
+            ),
+        ],
+    )
+    def test__handle_delete_message_event(
+        self,
+        mocker,
+        model,
+        empty_index,
+        event,
+        to_vary_in_index,
+    ):
+        event["type"] = "delete_message"
+        message_id = event["message_id"]
+
+        model.index = empty_index
+        model.index.update(to_vary_in_index)
+
+        mocker.patch(MODEL + "._update_rendered_view")
+        self.controller.view.message_view = mocker.Mock(log=[])
+
+        assert message_id in model.index["messages"].keys()
+
+        model._handle_delete_message_event(event)
+
+        assert message_id not in model.index["messages"]
+        assert message_id not in model.index["all_msg_ids"]
+        assert message_id not in model.index["edited_messages"]
+        if event["message_type"] == "private":
+            assert message_id not in model.index["private_msg_ids"]
+            assert message_id not in model.index["private_msg_ids_by_user_ids"].values()
+        else:
+            stream_id, topic = event["stream_id"], event["topic"]
+            assert message_id not in model.index["stream_msg_ids_by_stream_id"].values()
+            assert message_id not in model.index["topic_msg_ids"][stream_id][topic]
+        model._update_rendered_view.assert_called_once_with(message_id)
 
     @pytest.mark.parametrize(
         "subject, narrow, new_log_len",

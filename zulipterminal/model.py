@@ -121,6 +121,7 @@ class Model:
             [
                 ("message", self._handle_message_event),
                 ("update_message", self._handle_update_message_event),
+                ("delete_message", self._handle_delete_message_event),
                 ("reaction", self._handle_reaction_event),
                 ("subscription", self._handle_subscription_event),
                 ("typing", self._handle_typing_event),
@@ -1159,6 +1160,45 @@ class Model:
 
         # Update the index.
         self.index["topics"][stream_id] = topic_list
+
+    def _handle_delete_message_event(self, event: Event) -> None:
+        """
+        Handles message delete event.
+        TODO: Handle bulk_message_deletion when we support that
+        """
+        assert event["type"] == "delete_message"
+
+        message_id = event["message_id"]
+        indexed_message = self.index["messages"].get(message_id, None)
+
+        if indexed_message:
+            # Remove all traces of the message from index if present and
+            # update the rendered view.
+            # FIXME?: Do we need to archive the message instead of completely
+            # erasing from index?
+            self.index["messages"].pop(message_id, None)
+            self.index["all_msg_ids"].discard(message_id)
+            self.index["edited_messages"].discard(message_id)
+
+            if event["message_type"] == "private":
+                self.index["private_msg_ids"].discard(message_id)
+                sender_id = event["sender_id"]
+                private_msg_set = self.index["private_msg_ids_by_user_ids"]
+                for user_id_set, msg_ids in private_msg_set.items():
+                    if sender_id in user_id_set and message_id in msg_ids:
+                        private_msg_set[user_id_set].discard(message_id)
+            else:
+                stream_id, topic = event["stream_id"], event["topic"]
+                stream_msg_ids = self.index["stream_msg_ids_by_stream_id"].get(
+                    stream_id, None
+                )
+                if stream_msg_ids:
+                    stream_msg_ids.discard(message_id)
+                topic_msg_ids = self.index["topic_msg_ids"][stream_id].get(topic, None)
+                if topic_msg_ids:
+                    topic_msg_ids.discard(message_id)
+
+            self._update_rendered_view(message_id)
 
     def _handle_update_message_event(self, event: Event) -> None:
         """
