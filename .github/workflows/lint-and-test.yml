@@ -43,6 +43,19 @@ jobs:
       - name: Run isort
         run: ./tools/run-isort-check
 
+  black:
+    runs-on: ubuntu-latest
+    name: Lint - Code formatting (black)
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Install with linting tools
+        run: pip install .[linting]
+      - name: Check code & tests meet black standards
+        run: black --check zulipterminal/ tests/
+
   pytest:
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
