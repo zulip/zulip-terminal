@@ -3,35 +3,17 @@ name: Linting & tests
 on: [push, pull_request]
 
 jobs:
-  mypy:
+  lint-all:
+    strategy:
+      # Not failing fast allows all matrix jobs to try & finish even if one fails early
+      fail-fast: false
+      matrix:
+        lint:
+          - {TYPE: "mypy", NAME: "Lint - Type consistency (mypy)"}
+          - {TYPE: "flake8", NAME: "Lint - PEP8 & more (flake8)"}
+          - {TYPE: "isort", NAME: "Lint - Import order (isort)"}
     runs-on: ubuntu-latest
-    name: Lint - Type consistency (mypy)
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - name: Install with linting tools
-        run: pip install .[linting]
-      - name: Run mypy
-        run: ./tools/run-mypy
-
-  flake8:
-    runs-on: ubuntu-latest
-    name: Lint - PEP8 & more (flake8)
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - name: Install with linting tools
-        run: pip install .[linting]
-      - name: Run flake8
-        run: flake8
-
-  isort:
-    runs-on: ubuntu-latest
-    name: Lint - Import order (isort)
+    name: ${{ matrix.lint.NAME }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
@@ -40,8 +22,9 @@ jobs:
       - name: Install with linting tools
         # NOTE: Install pytest so that isort recognizes it as a known library
         run: pip install .[linting] && pip install pytest
-      - name: Run isort
-        run: ./tools/run-isort-check
+      - name: Run ${{ matrix.lint.TYPE }}
+        run: ./tools/lint-all --only ${{ matrix.lint.TYPE }}
+
 
   pytest:
     strategy:

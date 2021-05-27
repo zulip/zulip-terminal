@@ -46,6 +46,9 @@ linting_deps = [
     'flake8~=3.9.0',
     'flake8-quotes~=3.2.0',
     'flake8-continuation~=1.0.5',
+    'zulint @'
+    'git+https://github.com/zulip/zulint.git'
+    '@639c0d34c23ac559ef0f7b9510cf95f73f6d0eb9'
 ]
 
 dev_helper_deps = [

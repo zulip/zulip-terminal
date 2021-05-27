@@ -7,7 +7,7 @@ import sys
 from pathlib import PurePath
 from typing import Dict, List, cast
 
-import lister
+from zulint import lister
 
 
 EXCLUDE_FILES = ['tools/fetch-pull-request', 'tools/fetch-rebase-pull-request']

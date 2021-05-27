@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+
+cmds = ["flake8"]
+files = ["zulipterminal", "tests", "tools", "setup.py"]
+
+result = subprocess.call(cmds + files)
+
+if result == 0:
+    print("All files are flake8 compliant.")
+else:
+    print(result)
+
+sys.exit(result)
