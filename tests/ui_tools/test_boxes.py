@@ -1,5 +1,5 @@
 import pytest
-from pytest import param
+from pytest import param as case
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
@@ -781,14 +781,14 @@ class TestPanelSearchBox:
         # NOTE: In both backspace cases it is not validated (backspace is not
         #       shown), but still is handled during editing as normal
         # NOTE: Unicode backspace case likely doesn't get triggered
-        param('', 'backspace', False, id="no_text-disallow_urwid_backspace"),
-        param('', '\u0008', False, id="no_text-disallow_unicode_backspace"),
-        param('', '\u2003', False, id="no_text-disallow_unicode_em_space"),
-        param('', 'x', True, id="no_text-allow_entry_of_x"),
-        param('', '\u0394', True, id="no_text-allow_entry_of_delta"),
-        param('', ' ', False, id="no_text-disallow_entry_of_space"),
-        param('x', ' ', True, id="text-allow_entry_of_space"),
-        param('x', 'backspace', False, id="text-disallow_urwid_backspace"),
+        case('', 'backspace', False, id="no_text-disallow_urwid_backspace"),
+        case('', '\u0008', False, id="no_text-disallow_unicode_backspace"),
+        case('', '\u2003', False, id="no_text-disallow_unicode_em_space"),
+        case('', 'x', True, id="no_text-allow_entry_of_x"),
+        case('', '\u0394', True, id="no_text-allow_entry_of_delta"),
+        case('', ' ', False, id="no_text-disallow_entry_of_space"),
+        case('x', ' ', True, id="text-allow_entry_of_space"),
+        case('x', 'backspace', False, id="text-disallow_urwid_backspace"),
     ])
     def test_valid_char(self, panel_search_box,
                         search_text, entered_string, expected_result):
