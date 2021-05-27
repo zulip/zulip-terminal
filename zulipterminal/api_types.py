@@ -5,6 +5,15 @@ from typing_extensions import Literal, TypedDict
 
 EditPropagateMode = Literal["change_one", "change_all", "change_later"]
 EmojiType = Literal["realm_emoji", "unicode_emoji", "zulip_extra_emoji"]
+# Limited flags which could be present in update_message_flag events.
+ModifiableMessageFlag = Literal["read", "starred", "collapsed"]
+MessageFlag = Literal[
+    ModifiableMessageFlag,
+    "mentioned",
+    "wildcard_mentioned",
+    "has_alert_word",
+    "historical",
+]
 
 
 class PrivateComposition(TypedDict):
@@ -38,7 +47,7 @@ class Message(TypedDict, total=False):
     is_me_message: bool
     reactions: List[Dict[str, Any]]
     submessages: List[Dict[str, Any]]
-    flags: List[str]
+    flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str
     sender_realm_str: str
@@ -92,7 +101,7 @@ class Subscription(TypedDict):
 class MessageEvent(TypedDict):
     type: Literal["message"]
     message: Message
-    flags: List[str]
+    flags: List[MessageFlag]
 
 
 class UpdateMessageEvent(TypedDict):
@@ -143,7 +152,7 @@ class UpdateMessageFlagsEvent(TypedDict):
     messages: List[int]
     operation: str  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
     op: str
-    flag: str
+    flag: ModifiableMessageFlag
     all: bool
 
 
