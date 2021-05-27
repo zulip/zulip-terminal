@@ -960,9 +960,16 @@ class MessageBox(urwid.Pile):
 
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
-                if element == '\n' and metadata.get('bq_len', 0) > 0:
-                    metadata['bq_len'] -= 1
-                    continue
+                if element == '\n':
+                    if metadata.get('bq_len', 0) > 0:
+                        metadata['bq_len'] -= 1
+                        continue
+                    # Skip adding extra newline after blockquote.
+                    elif (isinstance(markup[-1], tuple)
+                          and markup[-1][0] == 'msg_quote'
+                          and isinstance(markup[-1][1], list)
+                          and markup[-1][1][-1] == '\n'):
+                        continue
                 markup.append(element)
             elif tag == 'div' and (
                  set(tag_classes) & set(unrendered_div_classes)):
