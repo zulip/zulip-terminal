@@ -1364,7 +1364,7 @@ class Model:
 
     def _handle_update_message_event(self, event: Event) -> None:
         """
-        Handle updated (edited) messages (changed content/subject)
+        Handle updated (edited) messages (changed content/subject/flags)
         """
         assert event["type"] == "update_message"
         # Update edited message status from single message id
@@ -1380,6 +1380,35 @@ class Model:
         if "rendered_content" in event and indexed_message:
             indexed_message["content"] = event["rendered_content"]
             self.index["messages"][message_id] = indexed_message
+            self._update_rendered_view(message_id)
+
+        # Update the index and unread_count if flag changed and message is indexed
+        mention_flags_set = {"mentioned", "wildcard_mentioned"}
+        if (
+            indexed_message
+            and "flags" in event
+            and set(event["flags"]) != set(indexed_message["flags"])
+        ):
+            mentioned_before = bool(set(indexed_message["flags"]) & mention_flags_set)
+            mentioned_after = bool(set(event["flags"]) & mention_flags_set)
+
+            if not mentioned_before and mentioned_after:
+                if len(self.narrow) == 1 and self.narrow[0][1] == "mentioned":
+                    self.index["mentioned_msg_ids"].add(message_id)
+                if "read" not in indexed_message["flags"]:
+                    self.unread_counts["all_mentions"] += 1
+                    self.controller.view.mentioned_button.update_count(
+                        self.unread_counts["all_mentions"]
+                    )
+            elif mentioned_before and not mentioned_after:
+                self.index["mentioned_msg_ids"].discard(message_id)
+                if "read" not in indexed_message["flags"]:
+                    self.unread_counts["all_mentions"] -= 1
+                    self.controller.view.mentioned_button.update_count(
+                        self.unread_counts["all_mentions"]
+                    )
+
+            self.index["messages"][message_id]["flags"] = event["flags"]
             self._update_rendered_view(message_id)
 
         # NOTE: This is independent of messages being indexed
