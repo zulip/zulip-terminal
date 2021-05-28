@@ -1164,7 +1164,7 @@ class Model:
 
     def _handle_update_message_event(self, event: Event) -> None:
         """
-        Handle updated (edited) messages (changed content/subject)
+        Handle updated (edited) messages (changed content/subject/flags)
         """
         assert event["type"] == "update_message"
         # Update edited message status from single message id
@@ -1181,6 +1181,53 @@ class Model:
             indexed_message["content"] = event["rendered_content"]
             self.index["messages"][message_id] = indexed_message
             self._update_rendered_view(message_id)
+
+        # Update the index and unread_count if flag changed and message is indexed
+        mention_flags_set = {"mentioned", "wildcard_mentioned"}
+        if (
+            indexed_message
+            and "flags" in event
+            and set(event["flags"]) != set(indexed_message["flags"])
+        ):
+            mentioned_before = bool(set(indexed_message["flags"]) & mention_flags_set)
+            mentioned_after = bool(set(event["flags"]) & mention_flags_set)
+            self.index["messages"][message_id]["flags"] = event["flags"]
+
+            if not mentioned_before and mentioned_after:
+                self.index["mentioned_msg_ids"].add(message_id)
+                if "read" not in indexed_message["flags"]:
+                    self.controller.view.mentioned_button.update_count(
+                        self.controller.view.mentioned_button.count + 1
+                    )
+            elif mentioned_before and not mentioned_after:
+                self.index["mentioned_msg_ids"].discard(message_id)
+                if "read" not in indexed_message["flags"]:
+                    self.controller.view.mentioned_button.update_count(
+                        self.controller.view.mentioned_button.count - 1
+                    )
+
+            self._update_rendered_view(message_id)
+
+        # Update the unread_count if message is not indexed. We can't index the message
+        # since we don't get the full message structure from server for this event.
+        elif not indexed_message and "flags" in event:
+            unread_mentions = self.initial_data["unread_msgs"]["mentions"]
+            unread_mentioned_before = message_id in unread_mentions
+            mentioned_after = bool(set(event["flags"]) & mention_flags_set)
+
+            if not unread_mentioned_before and mentioned_after:
+                self.controller.view.mentioned_button.update_count(
+                    self.controller.view.mentioned_button.count + 1
+                )
+                if message_id not in unread_mentions:
+                    unread_mentions.append(message_id)
+            elif unread_mentioned_before and not mentioned_after:
+                self.controller.view.mentioned_button.update_count(
+                    self.controller.view.mentioned_button.count - 1
+                )
+                unread_mentions.remove(message_id)
+
+            self.controller.update_screen()
 
         # NOTE: This is independent of messages being indexed
         # Previous assertion:
