@@ -344,6 +344,7 @@ class TestView:
     )
     @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
     def test_keypress_OPEN_DRAFT(self, view, mocker, draft, key, widget_size):
+        view.body = mocker.Mock()
         view.middle_column = mocker.Mock()
         view.set_footer_text = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
@@ -367,6 +368,7 @@ class TestView:
                     emails=draft["to"], recipient_user_ids=[1, 2]
                 )
 
+            assert view.body.focus_col == 1
             assert view.write_box.msg_write_box.edit_text == draft["content"]
             assert view.write_box.msg_write_box.edit_pos == len(draft["content"])
             view.middle_column.set_focus.assert_called_once_with("footer")

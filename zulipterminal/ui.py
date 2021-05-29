@@ -262,6 +262,7 @@ class View(urwid.WidgetWrap):
                 content = saved_draft["content"]
                 self.write_box.msg_write_box.edit_text = content
                 self.write_box.msg_write_box.edit_pos = len(content)
+                self.body.focus_col = 1
                 self.middle_column.set_focus("footer")
             else:
                 self.set_footer_text("No draft message was saved in this session.", 3)
