@@ -111,27 +111,33 @@ class WriteBox(urwid.Pile):
         # Send 'stop' updates only for PM narrows.
         if self.to_write_box and self.recipient_user_ids:
             self.model.send_typing_status_by_user_ids(
-                self.recipient_user_ids,
-                status='stop'
+                self.recipient_user_ids, status='stop'
             )
             self.send_next_typing_update = datetime.now()
             self.idle_status_tracking = False
 
-    def private_box_view(self, *, emails: Optional[List[str]]=None,
-                         recipient_user_ids: Optional[List[int]]=None) -> None:
+    def private_box_view(
+        self,
+        *,
+        emails: Optional[List[str]] = None,
+        recipient_user_ids: Optional[List[int]] = None,
+    ) -> None:
         # Neither or both arguments should be set
-        assert ((emails is not None and recipient_user_ids is not None)
-                or (emails is None and recipient_user_ids is None))
+        assert (emails is not None and recipient_user_ids is not None) or (
+            emails is None and recipient_user_ids is None
+        )
 
         self.set_editor_mode()
 
         if recipient_user_ids and emails:
             self.recipient_user_ids = recipient_user_ids
             self.recipient_emails = emails
-            recipient_info = ", ".join([
-                f"{self.model.user_dict[email]['full_name']} <{email}>"
-                for email in emails
-            ])
+            recipient_info = ", ".join(
+                [
+                    f"{self.model.user_dict[email]['full_name']} <{email}>"
+                    for email in emails
+                ]
+            )
         else:
             self.recipient_user_ids = []
             self.recipient_emails = []
@@ -142,22 +148,29 @@ class WriteBox(urwid.Pile):
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE'),
         )
         self.to_write_box.set_completer_delims("")
 
         self.msg_write_box = ReadlineEdit(
-            multiline=True, max_char=self.model.max_message_length)
+            multiline=True, max_char=self.model.max_message_length
+        )
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE'),
         )
         self.header_write_box = urwid.Columns([self.to_write_box])
         header_line_box = urwid.LineBox(
             self.header_write_box,
-            tlcorner='━', tline='━', trcorner='━', lline='',
-            blcorner='─', bline='─', brcorner='─', rline=''
+            tlcorner='━',
+            tline='━',
+            trcorner='━',
+            lline='',
+            blcorner='─',
+            bline='─',
+            brcorner='─',
+            rline='',
         )
         self.contents = [
             (header_line_box, self.options()),
@@ -180,7 +193,8 @@ class WriteBox(urwid.Pile):
                 self.last_key_update = datetime.now()
                 if self.last_key_update > self.send_next_typing_update:
                     self.model.send_typing_status_by_user_ids(
-                                self.recipient_user_ids, status='start')
+                        self.recipient_user_ids, status='start'
+                    )
                     self.send_next_typing_update += start_period_delta
                     # Initiate tracker function only if it isn't already
                     # initiated.
@@ -191,49 +205,51 @@ class WriteBox(urwid.Pile):
         @asynch
         def track_idleness_and_update_status() -> None:
             while datetime.now() < self.last_key_update + stop_period_delta:
-                idle_check_time = (self.last_key_update
-                                   + stop_period_delta
-                                   - datetime.now())
+                idle_check_time = (
+                    self.last_key_update + stop_period_delta - datetime.now()
+                )
                 sleep(idle_check_time.total_seconds())
             self.send_stop_typing_status()
 
         urwid.connect_signal(self.msg_write_box, 'change', on_type_send_status)
 
     def update_recipient_emails(self, write_box: ReadlineEdit) -> None:
-        self.recipient_emails = re.findall(
-            r'[\w\.-]+@[\w\.-]+',
-            write_box.edit_text
-        )
+        self.recipient_emails = re.findall(r'[\w\.-]+@[\w\.-]+', write_box.edit_text)
 
-    def stream_box_view(self, stream_id: int, caption: str='', title: str=''
-                        ) -> None:
+    def stream_box_view(
+        self, stream_id: int, caption: str = '', title: str = ''
+    ) -> None:
         self.set_editor_mode()
         self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
-                                            stream_id=stream_id)
+            stream_id=stream_id
+        )
         self.to_write_box = None
         self.msg_write_box = ReadlineEdit(
-            multiline=True, max_char=self.model.max_message_length)
+            multiline=True, max_char=self.model.max_message_length
+        )
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE'),
         )
         self.stream_write_box = ReadlineEdit(
-            edit_text=caption, max_char=self.model.max_stream_name_length)
+            edit_text=caption, max_char=self.model.max_stream_name_length
+        )
         self.stream_write_box.enable_autocomplete(
             func=self._stream_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE'),
         )
         self.stream_write_box.set_completer_delims("")
 
         self.title_write_box = ReadlineEdit(
-            edit_text=title, max_char=self.model.max_topic_length)
+            edit_text=title, max_char=self.model.max_topic_length
+        )
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
             key=primary_key_for_command('AUTOCOMPLETE'),
-            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE')
+            key_reverse=primary_key_for_command('AUTOCOMPLETE_REVERSE'),
         )
         self.title_write_box.set_completer_delims("")
 
@@ -243,15 +259,25 @@ class WriteBox(urwid.Pile):
             color = self.model.stream_dict[self.stream_id]['color']
             if self.model.stream_dict[self.stream_id]['invite_only']:
                 stream_marker = STREAM_MARKER_PRIVATE
-        self.header_write_box = urwid.Columns([
-            ('pack', urwid.Text((color, STREAM_MARKER_PUBLIC))),
-            self.stream_write_box,
-            ('pack', urwid.Text(STREAM_TOPIC_SEPARATOR)),
-            self.title_write_box], dividechars=1)
+        self.header_write_box = urwid.Columns(
+            [
+                ('pack', urwid.Text((color, STREAM_MARKER_PUBLIC))),
+                self.stream_write_box,
+                ('pack', urwid.Text(STREAM_TOPIC_SEPARATOR)),
+                self.title_write_box,
+            ],
+            dividechars=1,
+        )
         header_line_box = urwid.LineBox(
             self.header_write_box,
-            tlcorner='━', tline='━', trcorner='━', lline='',
-            blcorner='─', bline='─', brcorner='─', rline=''
+            tlcorner='━',
+            tline='━',
+            trcorner='━',
+            lline='',
+            blcorner='─',
+            bline='─',
+            brcorner='─',
+            rline='',
         )
         write_box = [
             (header_line_box, self.options()),
@@ -261,47 +287,43 @@ class WriteBox(urwid.Pile):
 
         # Use and set a callback to set the stream marker
         self._set_stream_write_box_style(None, caption)
-        urwid.connect_signal(self.stream_write_box, 'change',
-                             self._set_stream_write_box_style)
+        urwid.connect_signal(
+            self.stream_write_box, 'change', self._set_stream_write_box_style
+        )
 
-    def stream_box_edit_view(self, stream_id: int, caption: str='',
-                             title: str='') -> None:
+    def stream_box_edit_view(
+        self, stream_id: int, caption: str = '', title: str = ''
+    ) -> None:
         self.stream_box_view(stream_id, caption, title)
         self.edit_mode_button = EditModeButton(self.model.controller, 20)
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
 
-    def _set_stream_write_box_style(self, widget: ReadlineEdit,
-                                    new_text: str) -> None:
+    def _set_stream_write_box_style(self, widget: ReadlineEdit, new_text: str) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
         stream_marker = INVALID_MARKER
         color = 'general_bar'
         if self.model.is_valid_stream(new_text):
-            stream = self.model.stream_dict[
-                     self.model.stream_id_from_name(new_text)]
+            stream = self.model.stream_dict[self.model.stream_id_from_name(new_text)]
             if stream['invite_only']:
                 stream_marker = STREAM_MARKER_PRIVATE
             else:
                 stream_marker = STREAM_MARKER_PUBLIC
             color = stream['color']
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
-            (color, stream_marker))
+            (color, stream_marker)
+        )
 
-    def _to_box_autocomplete(self, text: str, state: Optional[int]
-                             ) -> Optional[str]:
+    def _to_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         users_list = self.view.users
         recipients = text.rsplit(',', 1)
 
         # Use the most recent recipient for autocomplete.
-        previous_recipients = (
-            f"{recipients[0]}, " if len(recipients) > 1 else ""
-        )
+        previous_recipients = f"{recipients[0]}, " if len(recipients) > 1 else ""
         latest_text = recipients[-1].strip()
 
         matching_users = [
-            user
-            for user in users_list
-            if match_user_name_and_email(user, latest_text)
+            user for user in users_list if match_user_name_and_email(user, latest_text)
         ]
 
         # Append the potential autocompleted recipients to the string
@@ -315,36 +337,32 @@ class WriteBox(urwid.Pile):
 
         return self._process_typeaheads(updated_recipients, state, user_names)
 
-    def _topic_box_autocomplete(self, text: str, state: Optional[int]
-                                ) -> Optional[str]:
+    def _topic_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         topic_names = self.model.topics_in_stream(self.stream_id)
 
         topic_typeaheads = match_topics(topic_names, text)
 
         # Typeaheads and suggestions are the same.
-        return self._process_typeaheads(topic_typeaheads, state,
-                                        topic_typeaheads)
+        return self._process_typeaheads(topic_typeaheads, state, topic_typeaheads)
 
-    def _stream_box_autocomplete(self, text: str, state: Optional[int]
-                                 ) -> Optional[str]:
+    def _stream_box_autocomplete(
+        self, text: str, state: Optional[int]
+    ) -> Optional[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream['name']
-                   for stream in streams_list]
+        streams = [stream['name'] for stream in streams_list]
 
         # match_streams takes stream names and typeaheads,
         # but we don't have typeaheads here.
         # FIXME: Refactor match_stream
         stream_data = list(zip(streams, streams))
-        matched_streams = match_stream(stream_data, text,
-                                       self.view.pinned_streams)
+        matched_streams = match_stream(stream_data, text, self.view.pinned_streams)
 
         # matched_streams[0] and matched_streams[1] contains the same data.
-        return self._process_typeaheads(matched_streams[0], state,
-                                        matched_streams[1])
+        return self._process_typeaheads(matched_streams[0], state, matched_streams[1])
 
-    def generic_autocomplete(self, text: str, state: Optional[int]
-                             ) -> Optional[str]:
-        autocomplete_map = OrderedDict([
+    def generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
+        autocomplete_map = OrderedDict(
+            [
                 ('@_', self.autocomplete_users),
                 ('@_**', self.autocomplete_users),
                 ('@', self.autocomplete_mentions),
@@ -353,21 +371,17 @@ class WriteBox(urwid.Pile):
                 ('#', self.autocomplete_streams),
                 ('#**', self.autocomplete_streams),
                 (':', self.autocomplete_emojis),
-            ])
+            ]
+        )
 
         # Look in a reverse order to find the last autocomplete prefix used in
         # the text. For instance, if text='@#example', use '#' as the prefix.
         # FIXME: Mentions can actually start with '#', and streams with
         #        anything; this implementation simply chooses the right-most
         #        match of the longest length
-        prefix_indices = {
-            prefix: text.rfind(prefix)
-            for prefix in autocomplete_map
-        }
+        prefix_indices = {prefix: text.rfind(prefix) for prefix in autocomplete_map}
         found_prefix_indices = {
-            prefix: index
-            for prefix, index in prefix_indices.items()
-            if index > -1
+            prefix: index for prefix, index in prefix_indices.items() if index > -1
         }
         # Return text if it doesn't have any of the autocomplete prefixes.
         if not found_prefix_indices:
@@ -384,116 +398,119 @@ class WriteBox(urwid.Pile):
 
         # NOTE: The following block only executes if any of the autocomplete
         # prefixes exist.
-        typeaheads, suggestions = (
-            autocomplete_func(text[prefix_index:], prefix)
-        )
+        typeaheads, suggestions = autocomplete_func(text[prefix_index:], prefix)
 
-        typeahead = self._process_typeaheads(typeaheads, state,
-                                             suggestions)
+        typeahead = self._process_typeaheads(typeaheads, state, suggestions)
         if typeahead:
             typeahead = text[:prefix_index] + typeahead
         return typeahead
 
-    def _process_typeaheads(self, typeaheads: List[str], state: Optional[int],
-                            suggestions: List[str]) -> Optional[str]:
+    def _process_typeaheads(
+        self, typeaheads: List[str], state: Optional[int], suggestions: List[str]
+    ) -> Optional[str]:
         num_suggestions = 10
         fewer_typeaheads = typeaheads[:num_suggestions]
         reduced_suggestions = suggestions[:num_suggestions]
         is_truncated = len(fewer_typeaheads) != len(typeaheads)
 
-        if (state is not None and state < len(fewer_typeaheads)
-                and state >= -len(fewer_typeaheads)):
+        if (
+            state is not None
+            and state < len(fewer_typeaheads)
+            and state >= -len(fewer_typeaheads)
+        ):
             typeahead: Optional[str] = fewer_typeaheads[state]
         else:
             typeahead = None
             state = None
         self.is_in_typeahead_mode = True
-        self.view.set_typeahead_footer(reduced_suggestions,
-                                       state, is_truncated)
+        self.view.set_typeahead_footer(reduced_suggestions, state, is_truncated)
         return typeahead
 
-    def autocomplete_mentions(self, text: str, prefix_string: str
-                              ) -> Tuple[List[str], List[str]]:
+    def autocomplete_mentions(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
 
-        user_typeahead, user_names = self.autocomplete_users(
-            text, prefix_string
-        )
-        group_typeahead, groups = self.autocomplete_groups(
-            text, prefix_string
-        )
+        user_typeahead, user_names = self.autocomplete_users(text, prefix_string)
+        group_typeahead, groups = self.autocomplete_groups(text, prefix_string)
 
         combined_typeahead = user_typeahead + group_typeahead
         combined_names = user_names + groups
 
         return combined_typeahead, combined_names
 
-    def autocomplete_users(self, text: str, prefix_string: str
-                           ) -> Tuple[List[str], List[str]]:
+    def autocomplete_users(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
         users_list = self.view.users
-        matching_users = [user
-                          for user in users_list
-                          if match_user(user, text[len(prefix_string):])]
+        matching_users = [
+            user for user in users_list if match_user(user, text[len(prefix_string) :])
+        ]
         matching_ids = set([user['user_id'] for user in matching_users])
-        matching_recipient_ids = (set(self.recipient_user_ids)
-                                  & set(matching_ids))
+        matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
         # Display subscribed users/recipients first.
-        sorted_matching_users = sorted(matching_users,
-                                       key=lambda user: user['user_id']
-                                       in matching_recipient_ids,
-                                       reverse=True)
+        sorted_matching_users = sorted(
+            matching_users,
+            key=lambda user: user['user_id'] in matching_recipient_ids,
+            reverse=True,
+        )
 
         user_names = [user['full_name'] for user in sorted_matching_users]
         extra_prefix = "{}{}".format(
             '*' if prefix_string[-1] != '*' else '',
             '*' if prefix_string[-2:] != '**' else '',
         )
-        user_typeahead = format_string(user_names,
-                                       prefix_string + extra_prefix + '{}**')
+        user_typeahead = format_string(
+            user_names, prefix_string + extra_prefix + '{}**'
+        )
 
         return user_typeahead, user_names
 
-    def autocomplete_groups(self, text: str, prefix_string: str
-                            ) -> Tuple[List[str], List[str]]:
+    def autocomplete_groups(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
         prefix_length = len(prefix_string)
-        groups = [group_name
-                  for group_name in self.model.user_group_names
-                  if match_group(group_name, text[prefix_length:])]
+        groups = [
+            group_name
+            for group_name in self.model.user_group_names
+            if match_group(group_name, text[prefix_length:])
+        ]
 
         extra_prefix = '*' if prefix_string[-1] != '*' else ''
-        group_typeahead = format_string(groups,
-                                        prefix_string + extra_prefix + '{}*')
+        group_typeahead = format_string(groups, prefix_string + extra_prefix + '{}*')
         return group_typeahead, groups
 
-    def autocomplete_streams(self, text: str, prefix_string: str
-                             ) -> Tuple[List[str], List[str]]:
+    def autocomplete_streams(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream['name']
-                   for stream in streams_list]
+        streams = [stream['name'] for stream in streams_list]
         stream_typeahead = format_string(streams, '#**{}**')
         stream_data = list(zip(stream_typeahead, streams))
 
         prefix_length = len(prefix_string)
 
-        matched_data = match_stream(stream_data, text[prefix_length:],
-                                    self.view.pinned_streams)
+        matched_data = match_stream(
+            stream_data, text[prefix_length:], self.view.pinned_streams
+        )
         return matched_data
 
-    def autocomplete_emojis(self, text: str, prefix_string: str
-                            ) -> Tuple[List[str], List[str]]:
+    def autocomplete_emojis(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
         emoji_list = list(self.model.active_emoji_data.keys())
-        emojis = [emoji
-                  for emoji in emoji_list
-                  if match_emoji(emoji, text[1:])]
+        emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
         emoji_typeahead = format_string(emojis, ':{}:')
 
         return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode:
-            if not (is_command_key('AUTOCOMPLETE', key)
-                    or is_command_key('AUTOCOMPLETE_REVERSE', key)):
+            if not (
+                is_command_key('AUTOCOMPLETE', key)
+                or is_command_key('AUTOCOMPLETE_REVERSE', key)
+            ):
                 # set default footer when done with autocomplete
                 self.is_in_typeahead_mode = False
                 self.view.set_footer_text()
@@ -507,9 +524,11 @@ class WriteBox(urwid.Pile):
                     topic = self.title_write_box.edit_text
 
                 if self.msg_edit_id:
-                    args = dict(message_id=self.msg_edit_id,
-                                topic=topic,
-                                propagate_mode=self.edit_mode_button.mode)
+                    args = dict(
+                        message_id=self.msg_edit_id,
+                        topic=topic,
+                        propagate_mode=self.edit_mode_button.mode,
+                    )
                     if self.msg_body_edit_enabled:
                         args['content'] = self.msg_write_box.edit_text
 
@@ -518,7 +537,7 @@ class WriteBox(urwid.Pile):
                     success = self.model.send_stream_message(
                         stream=self.stream_write_box.edit_text,
                         topic=topic,
-                        content=self.msg_write_box.edit_text
+                        content=self.msg_write_box.edit_text,
                     )
             else:
                 if self.msg_edit_id:
@@ -531,11 +550,12 @@ class WriteBox(urwid.Pile):
                     if self.recipient_emails:
                         success = self.model.send_private_message(
                             recipients=self.recipient_emails,
-                            content=self.msg_write_box.edit_text
+                            content=self.msg_write_box.edit_text,
                         )
                     else:
                         self.view.set_footer_text(
-                            "Cannot send message without specifying recipients.", 3)
+                            "Cannot send message without specifying recipients.", 3
+                        )
                         success = None
             if success:
                 self.msg_write_box.edit_text = ''
@@ -580,31 +600,29 @@ class WriteBox(urwid.Pile):
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 if self.to_write_box is None:
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
-                        stream_name = (header[self.FOCUS_HEADER_BOX_STREAM]
-                                       .edit_text)
+                        stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 'Invalid stream name.'
-                                ' Use {} or {} to autocomplete.'
-                                .format(primary_key_for_command(
-                                            'AUTOCOMPLETE'
-                                        ),
-                                        primary_key_for_command(
-                                            'AUTOCOMPLETE_REVERSE'
-                                        ))
+                                ' Use {} or {} to autocomplete.'.format(
+                                    primary_key_for_command('AUTOCOMPLETE'),
+                                    primary_key_for_command('AUTOCOMPLETE_REVERSE'),
+                                )
                             )
                             self.view.set_footer_text(invalid_stream_error, 3)
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
-                                                    stream_name=stream_name)
+                            stream_name=stream_name
+                        )
                         self.recipient_user_ids = user_ids
-                        self.stream_id = self.model.stream_id_from_name(
-                                                                stream_name)
+                        self.stream_id = self.model.stream_id_from_name(stream_name)
 
                         header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
                         return key
-                    elif (header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
-                          and self.msg_edit_id):
+                    elif (
+                        header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
+                        and self.msg_edit_id
+                    ):
                         header.focus_col = self.FOCUS_HEADER_BOX_EDIT
                         return key
                     elif header.focus_col == self.FOCUS_HEADER_BOX_EDIT:
@@ -628,9 +646,9 @@ class WriteBox(urwid.Pile):
                         self.view.set_footer_text(invalid_emails_error, 3)
                         return key
                     users = self.model.user_dict
-                    self.recipient_user_ids = [users[email]['user_id']
-                                               for email in
-                                               self.recipient_emails]
+                    self.recipient_user_ids = [
+                        users[email]['user_id'] for email in self.recipient_emails
+                    ]
 
             if not self.msg_body_edit_enabled:
                 return key
@@ -649,8 +667,7 @@ class WriteBox(urwid.Pile):
 
 class MessageBox(urwid.Pile):
     # type of last_message is Optional[Message], but needs refactoring
-    def __init__(self, message: Message, model: 'Model',
-                 last_message: Any) -> None:
+    def __init__(self, message: Message, model: 'Model', last_message: Any) -> None:
         self.model = model
         self.message = message
         self.stream_name = ''
@@ -658,12 +675,8 @@ class MessageBox(urwid.Pile):
         self.topic_name = ''
         self.email = ''  # FIXME: Can we remove this?
         self.user_id: Optional[int] = None
-        self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
-            OrderedDict()
-        )
-        self.topic_links: 'OrderedDict[str, Tuple[str, int, bool]]' = (
-            OrderedDict()
-        )
+        self.message_links: 'OrderedDict[str, Tuple[str, int, bool]]' = OrderedDict()
+        self.topic_links: 'OrderedDict[str, Tuple[str, int, bool]]' = OrderedDict()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
@@ -675,7 +688,9 @@ class MessageBox(urwid.Pile):
             for link in self.message.get('topic_links', []):
                 # Modernized response
                 self.topic_links[link['url']] = (
-                    link['text'], len(self.topic_links) + 1, True
+                    link['text'],
+                    len(self.topic_links) + 1,
+                    True,
                 )
 
             self.stream_name = self.message['display_recipient']
@@ -694,19 +709,23 @@ class MessageBox(urwid.Pile):
                 self.recipient_emails = [self.model.user_email]
                 self.recipient_ids = [self.model.user_id]
             else:
-                self.recipients_names = ', '.join(list(
-                            recipient['full_name']
-                            for recipient in self.message['display_recipient']
-                            if recipient['email'] != self.model.user_email
-                        ))
+                self.recipients_names = ', '.join(
+                    list(
+                        recipient['full_name']
+                        for recipient in self.message['display_recipient']
+                        if recipient['email'] != self.model.user_email
+                    )
+                )
                 self.recipient_emails = [
                     recipient['email']
                     for recipient in self.message['display_recipient']
                     if recipient['email'] != self.model.user_email
                 ]
-                self.recipient_ids = [recipient['id'] for recipient
-                                      in self.message['display_recipient']
-                                      if recipient['id'] != self.model.user_id]
+                self.recipient_ids = [
+                    recipient['id']
+                    for recipient in self.message['display_recipient']
+                    if recipient['id'] != self.model.user_id
+                ]
 
         # mouse_event helper variable
         self.displaying_selection_hint = False
@@ -715,11 +734,9 @@ class MessageBox(urwid.Pile):
 
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
-        if (len(self.model.narrow) == 1
-                and self.model.narrow[0][0] == 'pm_with'):
+        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == 'pm_with':
             return False
-        if (len(self.model.narrow) == 2
-                and self.model.narrow[1][0] == 'topic'):
+        if len(self.model.narrow) == 2 and self.model.narrow[1][0] == 'topic':
             return False
 
         last_msg = self.last_message
@@ -730,11 +747,15 @@ class MessageBox(urwid.Pile):
                 and self.stream_name == last_msg['display_recipient']
             )
         elif self.message['type'] == 'private':
-            recipient_ids = [{recipient['id']
-                              for recipient in message['display_recipient']
-                              if 'id' in recipient}
-                             for message in (self.message, last_msg)
-                             if 'display_recipient' in message]
+            recipient_ids = [
+                {
+                    recipient['id']
+                    for recipient in message['display_recipient']
+                    if 'id' in recipient
+                }
+                for message in (self.message, last_msg)
+                if 'display_recipient' in message
+            ]
             return not (
                 len(recipient_ids) == 2
                 and recipient_ids[0] == recipient_ids[1]
@@ -745,39 +766,46 @@ class MessageBox(urwid.Pile):
 
     def _is_private_message_to_self(self) -> bool:
         recipient_list = self.message['display_recipient']
-        return (len(recipient_list) == 1
-                and recipient_list[0]['email'] == self.model.user_email)
+        return (
+            len(recipient_list) == 1
+            and recipient_list[0]['email'] == self.model.user_email
+        )
 
     def stream_header(self) -> Any:
         assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]['color']
         bar_color = f"s{color}"
-        stream_title_markup = ('bar', [
-            (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
-            ('title', f" {self.topic_name}")
-        ])
+        stream_title_markup = (
+            'bar',
+            [
+                (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
+                ('title', f" {self.topic_name}"),
+            ],
+        )
         stream_title = urwid.Text(stream_title_markup)
-        header = urwid.Columns([
-            ('pack', stream_title),
-            (1, urwid.Text((color, ' '))),
-            urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER),
-                           color),
-        ])
+        header = urwid.Columns(
+            [
+                ('pack', stream_title),
+                (1, urwid.Text((color, ' '))),
+                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), color),
+            ]
+        )
         header.markup = stream_title_markup
         return header
 
     def private_header(self) -> Any:
-        title_markup = ('header', [
-            ('general_narrow', 'You and '),
-            ('general_narrow', self.recipients_names)
-        ])
+        title_markup = (
+            'header',
+            [('general_narrow', 'You and '), ('general_narrow', self.recipients_names)],
+        )
         title = urwid.Text(title_markup)
-        header = urwid.Columns([
-            ('pack', title),
-            (1, urwid.Text(('general_bar', ' '))),
-            urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER),
-                           'general_bar'),
-        ])
+        header = urwid.Columns(
+            [
+                ('pack', title),
+                (1, urwid.Text(('general_bar', ' '))),
+                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), 'general_bar'),
+            ]
+        )
         header.markup = title_markup
         return header
 
@@ -791,8 +819,9 @@ class MessageBox(urwid.Pile):
         curr_narrow = self.model.narrow
         is_search_narrow = self.model.is_search_narrow()
         if is_search_narrow:
-            curr_narrow = [sub_narrow for sub_narrow in curr_narrow
-                           if sub_narrow[0] != 'search']
+            curr_narrow = [
+                sub_narrow for sub_narrow in curr_narrow if sub_narrow[0] != 'search'
+            ]
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
@@ -813,27 +842,26 @@ class MessageBox(urwid.Pile):
                     [
                         (bar_color, self.stream_name),
                         (bar_color, ": topic narrow"),
-                    ]
+                    ],
                 )
             else:
-                text_to_fill = ('bar', [  # type: ignore
-                    (bar_color, self.stream_name)
-                ])
+                text_to_fill = ('bar', [(bar_color, self.stream_name)])  # type: ignore
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = 'Group private conversation'
         else:
             text_to_fill = 'Private conversation'
 
         if is_search_narrow:
-            title_markup = ('header', [
-                ('general_narrow', text_to_fill),
-                (None, ' '),
-                ('filter_results', 'Search Results')
-            ])
+            title_markup = (
+                'header',
+                [
+                    ('general_narrow', text_to_fill),
+                    (None, ' '),
+                    ('filter_results', 'Search Results'),
+                ],
+            )
         else:
-            title_markup = ('header', [
-                ('general_narrow', text_to_fill)
-            ])
+            title_markup = ('header', [('general_narrow', text_to_fill)])
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, 'bar')
         header.text_to_fill = text_to_fill
@@ -852,26 +880,30 @@ class MessageBox(urwid.Pile):
                 reaction_stats[reaction['emoji_name']].add(user_id)
 
             sorted_stats = sorted(
-                (reaction, count)
-                for reaction, count in reaction_stats.items()
+                (reaction, count) for reaction, count in reaction_stats.items()
             )
 
             my_user_id = self.model.user_id
             reaction_texts = [
-                ('reaction_mine' if my_user_id in ids else 'reaction',
-                 f":{reaction}: {len(ids)}")
+                (
+                    'reaction_mine' if my_user_id in ids else 'reaction',
+                    f":{reaction}: {len(ids)}",
+                )
                 for reaction, ids in sorted_stats
             ]
 
             spaced_reaction_texts = [
                 entry
-                for pair in zip(reaction_texts,
-                                ' ' * len(reaction_texts))
+                for pair in zip(reaction_texts, ' ' * len(reaction_texts))
                 for entry in pair
             ]
             return urwid.Padding(
                 urwid.Text(spaced_reaction_texts),
-                align='left', width=('relative', 90), left=25, min_width=50)
+                align='left',
+                width=('relative', 90),
+                left=25,
+                min_width=50,
+            )
         except Exception:
             return ''
 
@@ -883,7 +915,7 @@ class MessageBox(urwid.Pile):
         *,
         maximum_footlinks: int,
         padded: bool,
-        wrap: str
+        wrap: str,
     ) -> Tuple[Any, int]:
         """
         Returns a Tuple that consists footlinks view (widget) and its required
@@ -909,8 +941,7 @@ class MessageBox(urwid.Pile):
                 ('msg_link', link),
             ]
             footlinks_width = max(
-                footlinks_width,
-                sum([len(text) for style, text in styled_footlink])
+                footlinks_width, sum([len(text) for style, text in styled_footlink])
             )
             footlinks.extend([*styled_footlink, '\n'])
 
@@ -921,18 +952,26 @@ class MessageBox(urwid.Pile):
 
         text_widget = urwid.Text(footlinks, wrap=wrap)
         if padded:
-            return urwid.Padding(text_widget, align='left', left=8,
-                                 width=('relative', 100), min_width=10,
-                                 right=2), footlinks_width
+            return (
+                urwid.Padding(
+                    text_widget,
+                    align='left',
+                    left=8,
+                    width=('relative', 100),
+                    min_width=10,
+                    right=2,
+                ),
+                footlinks_width,
+            )
         else:
             return text_widget, footlinks_width
 
     @classmethod
-    def soup2markup(cls, soup: Any, metadata: Dict[str, Any],
-                    **state: Any
-                    ) -> Tuple[List[Any],
-                               'OrderedDict[str, Tuple[str, int, bool]]',
-                               List[Tuple[str, str]]]:
+    def soup2markup(
+        cls, soup: Any, metadata: Dict[str, Any], **state: Any
+    ) -> Tuple[
+        List[Any], 'OrderedDict[str, Tuple[str, int, bool]]', List[Tuple[str, str]]
+    ]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = ['']
@@ -967,8 +1006,7 @@ class MessageBox(urwid.Pile):
                     metadata['bq_len'] -= 1
                     continue
                 markup.append(element)
-            elif tag == 'div' and (
-                 set(tag_classes) & set(unrendered_div_classes)):
+            elif tag == 'div' and (set(tag_classes) & set(unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
                 # NOTE: Though `matches` is generalized for multiple
                 # matches it is very unlikely that there would be any.
@@ -991,12 +1029,12 @@ class MessageBox(urwid.Pile):
             elif tag == 'span' and 'emoji' in tag_classes:
                 # EMOJI
                 markup.append(('msg_emoji', tag_text))
-            elif tag == 'span' and (
-                    {'katex-display', 'katex'} & set(tag_classes)):
+            elif tag == 'span' and ({'katex-display', 'katex'} & set(tag_classes)):
                 # MATH TEXT
                 markup.append(tag_text)
             elif tag == 'span' and (
-                    {'user-group-mention', 'user-mention'} & set(tag_classes)):
+                {'user-group-mention', 'user-mention'} & set(tag_classes)
+            ):
                 # USER MENTIONS & USER-GROUP MENTIONS
                 markup.append(('msg_mention', tag_text))
             elif tag == 'a':
@@ -1024,7 +1062,7 @@ class MessageBox(urwid.Pile):
                 link_without_scheme, text_without_scheme = [
                     data.split('://')[1] if '://' in data else data
                     for data in [link, text]
-                ]   # Split on '://' is for cases where text == link.
+                ]  # Split on '://' is for cases where text == link.
                 if link_without_scheme == text_without_scheme:
                     last_segment = text.split('/')[-1]
                     if '.' in last_segment:
@@ -1034,7 +1072,8 @@ class MessageBox(urwid.Pile):
                         new_text = text.split(metadata['server_url'])[-1]
                     else:
                         new_text = (
-                            parsed_link.netloc if parsed_link.netloc
+                            parsed_link.netloc
+                            if parsed_link.netloc
                             else text.split('/')[0]
                         )  # Domain name.
                     if new_text != text_without_scheme:
@@ -1047,14 +1086,16 @@ class MessageBox(urwid.Pile):
                 # Detect duplicate links to save screen real estate.
                 if link not in metadata['message_links']:
                     metadata['message_links'][link] = (
-                        text, len(metadata['message_links']) + 1, show_footlink
+                        text,
+                        len(metadata['message_links']) + 1,
+                        show_footlink,
                     )
                 else:
                     # Append the text if its link already exist with a
                     # different text.
-                    saved_text, saved_link_index, saved_footlink_status = (
-                        metadata['message_links'][link]
-                    )
+                    saved_text, saved_link_index, saved_footlink_status = metadata[
+                        'message_links'
+                    ][link]
                     if saved_text != text:
                         metadata['message_links'][link] = (
                             f"{saved_text}, {text}",
@@ -1062,17 +1103,16 @@ class MessageBox(urwid.Pile):
                             show_footlink or saved_footlink_status,
                         )
 
-                markup.extend([
-                    ('msg_link', text),
-                    ' ',
-                    ('msg_link_index',
-                     f"[{metadata['message_links'][link][1]}]"),
-                ])
+                markup.extend(
+                    [
+                        ('msg_link', text),
+                        ' ',
+                        ('msg_link_index', f"[{metadata['message_links'][link][1]}]"),
+                    ]
+                )
             elif tag == 'blockquote':
                 # BLOCKQUOTE TEXT
-                markup.append((
-                    'msg_quote', cls.soup2markup(element, metadata)[0]
-                ))
+                markup.append(('msg_quote', cls.soup2markup(element, metadata)[0]))
             elif tag == 'code':
                 # CODE (INLINE?)
                 markup.append(('msg_code', tag_text))
@@ -1097,14 +1137,12 @@ class MessageBox(urwid.Pile):
                 if tag == 'ol':
                     start_number = int(tag_attrs.get('start', 1))
                     state['list_index'] = start_number
-                    markup.extend(cls.soup2markup(element, metadata,
-                                                  **state)[0])
+                    markup.extend(cls.soup2markup(element, metadata, **state)[0])
                     del state['list_index']  # reset at end of this list
                 else:
                     if 'list_index' in state:
                         del state['list_index']  # this is unordered
-                    markup.extend(cls.soup2markup(element, metadata,
-                                                  **state)[0])
+                    markup.extend(cls.soup2markup(element, metadata, **state)[0])
                 del state['indent_level']  # reset indents after any list
             elif tag == 'li':
                 # LIST ITEMS (LI)
@@ -1120,9 +1158,9 @@ class MessageBox(urwid.Pile):
                     state['list_index'] += 1
                 else:
                     chars = [
-                            '\N{BULLET}',
-                            '\N{RING OPERATOR}',    # small hollow
-                            '\N{HYPHEN}',
+                        '\N{BULLET}',
+                        '\N{RING OPERATOR}',  # small hollow
+                        '\N{HYPHEN}',
                     ]
                     markup.append(f"{'  ' * indent}{chars[(indent - 1) % 3]} ")
                 state['list_start'] = False
@@ -1143,9 +1181,7 @@ class MessageBox(urwid.Pile):
                 # TODO: Address 12-hour format support with application-wide
                 # support for different formats.
                 time_string = local_time.strftime('%a, %b %-d %Y, %-H:%M (%Z)')
-                markup.append((
-                    'msg_time', f" {TIME_MENTION_MARKER} {time_string} "
-                ))
+                markup.append(('msg_time', f" {TIME_MENTION_MARKER} {time_string} "))
 
                 source_text = f"Original text was {tag_text.strip()}"
                 metadata['time_mentions'].append((time_string, source_text))
@@ -1168,24 +1204,31 @@ class MessageBox(urwid.Pile):
         message = {
             key: {
                 'is_starred': 'starred' in msg['flags'],
-                'author': (msg['sender_full_name']
-                           if 'sender_full_name' in msg else None),
-                'time': (self.model.formatted_local_time(
-                                        msg['timestamp'], show_seconds=False)
-                         if 'timestamp' in msg else None),
-                'datetime': (datetime.fromtimestamp(msg['timestamp'])
-                             if 'timestamp' in msg else None),
+                'author': (
+                    msg['sender_full_name'] if 'sender_full_name' in msg else None
+                ),
+                'time': (
+                    self.model.formatted_local_time(
+                        msg['timestamp'], show_seconds=False
+                    )
+                    if 'timestamp' in msg
+                    else None
+                ),
+                'datetime': (
+                    datetime.fromtimestamp(msg['timestamp'])
+                    if 'timestamp' in msg
+                    else None
+                ),
             }
-            for key, msg in dict(this=self.message,
-                                 last=self.last_message).items()
+            for key, msg in dict(this=self.message, last=self.last_message).items()
         }
         different = {  # How this message differs from the previous one
             'recipients': recipient_header is not None,
             'author': message['this']['author'] != message['last']['author'],
-            '24h': (message['last']['datetime'] is not None
-                    and ((message['this']['datetime']
-                          - message['last']['datetime'])
-                         .days)),
+            '24h': (
+                message['last']['datetime'] is not None
+                and ((message['this']['datetime'] - message['last']['datetime']).days)
+            ),
             'timestamp': (
                 message['last']['time'] is not None
                 and message['this']['time'] != message['last']['time']
@@ -1205,23 +1248,22 @@ class MessageBox(urwid.Pile):
                 text['author'] = ('name', message['this']['author'])
             if message['this']['is_starred']:
                 text['star'] = ('starred', "*")
-            if any(different[key]
-                   for key in ('recipients', 'author', 'timestamp')):
+            if any(different[key] for key in ('recipients', 'author', 'timestamp')):
                 this_year = date.today().year
                 msg_year = message['this']['datetime'].year
                 if this_year != msg_year:
-                    text['time'] = (
-                        'time',
-                        f"{msg_year} - {message['this']['time']}"
-                    )
+                    text['time'] = ('time', f"{msg_year} - {message['this']['time']}")
                 else:
                     text['time'] = ('time', message['this']['time'])
 
-            content_header = urwid.Columns([
-                ('weight', 10, urwid.Text(text['author'])),
-                (26, urwid.Text(text['time'], align='right')),
-                (1, urwid.Text(text['star'], align='right')),
-                ], dividechars=1)
+            content_header = urwid.Columns(
+                [
+                    ('weight', 10, urwid.Text(text['author'])),
+                    (26, urwid.Text(text['time'], align='right')),
+                    (1, urwid.Text(text['star'], align='right')),
+                ],
+                dividechars=1,
+            )
         else:
             content_header = None
 
@@ -1229,15 +1271,12 @@ class MessageBox(urwid.Pile):
         # sender's full name and show it in bold.
         if self.message['is_me_message']:
             self.message['content'] = self.message['content'].replace(
-                '/me',
-                f"<strong>{self.message['sender_full_name']}</strong>",
-                1
+                '/me', f"<strong>{self.message['sender_full_name']}</strong>", 1
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = (
-            self.transform_content(self.message['content'],
-                                   self.model.server_url)
+        content, self.message_links, self.time_mentions = self.transform_content(
+            self.message['content'], self.model.server_url
         )
 
         if self.message['id'] in self.model.index['edited_messages']:
@@ -1248,19 +1287,29 @@ class MessageBox(urwid.Pile):
             left_padding = 8
 
         content = urwid.Padding(
-            urwid.Columns([
-                (edited_label_size,
-                 urwid.Text('EDITED')),
-                urwid.LineBox(
-                    urwid.Columns([
-                        (1, urwid.Text('')),
-                        urwid.Text(content),
-                    ]), tline='', bline='', rline='',
-                    lline=MESSAGE_CONTENT_MARKER
-                )
-            ]),
-            align='left', left=left_padding,
-            width=('relative', 100), min_width=10, right=5)
+            urwid.Columns(
+                [
+                    (edited_label_size, urwid.Text('EDITED')),
+                    urwid.LineBox(
+                        urwid.Columns(
+                            [
+                                (1, urwid.Text('')),
+                                urwid.Text(content),
+                            ]
+                        ),
+                        tline='',
+                        bline='',
+                        rline='',
+                        lline=MESSAGE_CONTENT_MARKER,
+                    ),
+                ]
+            ),
+            align='left',
+            left=left_padding,
+            width=('relative', 100),
+            min_width=10,
+            right=5,
+        )
 
         # Reactions
         reactions = self.reactions_view(self.message['reactions'])
@@ -1284,10 +1333,13 @@ class MessageBox(urwid.Pile):
         return [part for part, condition in parts if condition]
 
     @classmethod
-    def transform_content(cls, content: Any, server_url: str
-                          ) -> Tuple[Tuple[None, Any],
-                                     'OrderedDict[str, Tuple[str, int, bool]]',
-                                     List[Tuple[str, str]]]:
+    def transform_content(
+        cls, content: Any, server_url: str
+    ) -> Tuple[
+        Tuple[None, Any],
+        'OrderedDict[str, Tuple[str, int, bool]]',
+        List[Tuple[str, str]],
+    ]:
         soup = BeautifulSoup(content, 'lxml')
         body = soup.find(name='body')
 
@@ -1298,9 +1350,7 @@ class MessageBox(urwid.Pile):
         )  # type: Dict[str, Any]
 
         if body and body.find(name='blockquote'):
-            metadata['bq_len'] = (
-                cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
-            )
+            metadata['bq_len'] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
         markup, message_links, time_mentions = cls.soup2markup(body, metadata)
         return (None, markup), message_links, time_mentions
@@ -1362,8 +1412,9 @@ class MessageBox(urwid.Pile):
         # is designed to take focus.
         return True
 
-    def mouse_event(self, size: urwid_Size, event: str, button: int,
-                    col: int, row: int, focus: bool) -> bool:
+    def mouse_event(
+        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+    ) -> bool:
         if event == 'mouse press':
             if button == 1:
                 if self.model.controller.is_in_editor_mode():
@@ -1372,11 +1423,13 @@ class MessageBox(urwid.Pile):
                 return True
         elif event == 'mouse drag':
             selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
-            self.model.controller.view.set_footer_text([
-                'Try pressing ',
-                ('code', f" {selection_key} "),
-                ' and dragging to select text.'
-            ])
+            self.model.controller.view.set_footer_text(
+                [
+                    'Try pressing ',
+                    ('code', f" {selection_key} "),
+                    ' and dragging to select text.',
+                ]
+            )
             self.displaying_selection_hint = True
         elif event == 'mouse release' and self.displaying_selection_hint:
             self.model.controller.view.set_footer_text()
@@ -1398,10 +1451,7 @@ class MessageBox(urwid.Pile):
                     stream_id=self.stream_id,
                 )
         elif is_command_key('STREAM_MESSAGE', key):
-            if (
-                len(self.model.narrow) != 0
-                and self.model.narrow[0][0] == "stream"
-               ):
+            if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message['display_recipient'],
                     stream_id=self.stream_id,
@@ -1422,10 +1472,7 @@ class MessageBox(urwid.Pile):
         elif is_command_key('TOGGLE_NARROW', key):
             self.model.unset_search_narrow()
             if self.message['type'] == 'private':
-                if (
-                    len(self.model.narrow) == 1
-                    and self.model.narrow[0][0] == 'pm_with'
-                   ):
+                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == 'pm_with':
                     self.model.controller.narrow_to_all_pm(
                         contextual_message_id=self.message["id"],
                     )
@@ -1471,10 +1518,10 @@ class MessageBox(urwid.Pile):
         elif is_command_key('MENTION_REPLY', key):
             self.keypress(size, 'enter')
             mention = f"@**{self.message['sender_full_name']}** "
-            self.model.controller.view.write_box.msg_write_box.set_edit_text(
-                mention)
+            self.model.controller.view.write_box.msg_write_box.set_edit_text(mention)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
-                len(mention))
+                len(mention)
+            )
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('QUOTE_REPLY', key):
             self.keypress(size, 'enter')
@@ -1482,12 +1529,12 @@ class MessageBox(urwid.Pile):
             # To correctly quote a message that contains quote/code-blocks,
             # we need to fence quoted message containing ``` with ````,
             # ```` with ````` and so on.
-            message_raw_content = self.model.client.get_raw_message(
-                self.message['id'])['raw_content']
+            message_raw_content = self.model.client.get_raw_message(self.message['id'])[
+                'raw_content'
+            ]
             fence = get_unused_fence(message_raw_content)
 
-            absolute_url = near_message_url(
-                self.model.server_url[:-1], self.message)
+            absolute_url = near_message_url(self.model.server_url[:-1], self.message)
 
             # Compose box should look something like this:
             #   @_**Zeeshan|514** [said](link to message):
@@ -1495,46 +1542,50 @@ class MessageBox(urwid.Pile):
             #   message_content
             #   ```
             quote = '@_**{0}|{1}** [said]({2}):\n{3}quote\n{4}\n{3}\n'.format(
-                        self.message['sender_full_name'],
-                        self.message['sender_id'],
-                        absolute_url,
-                        fence,
-                        message_raw_content)
+                self.message['sender_full_name'],
+                self.message['sender_id'],
+                absolute_url,
+                fence,
+                message_raw_content,
+            )
 
-            self.model.controller.view.write_box.msg_write_box.set_edit_text(
-                quote)
-            self.model.controller.view.write_box.msg_write_box.set_edit_pos(
-                len(quote))
+            self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
+            self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('EDIT_MESSAGE', key):
             if self.message['sender_id'] != self.model.user_id:
                 self.model.controller.view.set_footer_text(
-                        " You can't edit messages sent by other users.", 3)
+                    " You can't edit messages sent by other users.", 3
+                )
                 return key
             # Check if editing is allowed in the realm
             elif not self.model.initial_data['realm_allow_message_editing']:
                 self.model.controller.view.set_footer_text(
-                    " Editing sent message is disabled.", 3)
+                    " Editing sent message is disabled.", 3
+                )
                 return key
             # Check if message is still editable, i.e. within
             # the time limit. A limit of 0 signifies no limit
             # on message body editing.
             msg_body_edit_enabled = True
-            if self.model.initial_data[
-                    'realm_message_content_edit_limit_seconds'] > 0:
+            if self.model.initial_data['realm_message_content_edit_limit_seconds'] > 0:
                 time_since_msg_sent = time() - self.message['timestamp']
                 edit_time_limit = self.model.initial_data[
-                        'realm_message_content_edit_limit_seconds']
+                    'realm_message_content_edit_limit_seconds'
+                ]
                 if time_since_msg_sent >= edit_time_limit:
                     if self.message['type'] == 'private':
                         self.model.controller.view.set_footer_text(
-                            " Time Limit for editing the message has been exceeded.", 3)
+                            " Time Limit for editing the message has been exceeded.", 3
+                        )
                         return key
                     elif self.message['type'] == 'stream':
                         self.model.controller.view.set_footer_text(
-                                " Only topic editing allowed."
-                                " Time Limit for editing the message body has"
-                                " been exceeded.", 3)
+                            " Only topic editing allowed."
+                            " Time Limit for editing the message body has"
+                            " been exceeded.",
+                            3,
+                        )
                         msg_body_edit_enabled = False
 
             if self.message['type'] == 'private':
@@ -1543,7 +1594,7 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
                     caption=self.message['display_recipient'],
-                    title=self.message['subject']
+                    title=self.message['subject'],
                 )
             msg_id = self.message['id']
             msg = self.model.client.get_raw_message(msg_id)['raw_content']
@@ -1559,10 +1610,9 @@ class MessageBox(urwid.Pile):
 
             self.model.controller.view.middle_column.set_focus('footer')
         elif is_command_key('MSG_INFO', key):
-            self.model.controller.show_msg_info(self.message,
-                                                self.topic_links,
-                                                self.message_links,
-                                                self.time_mentions)
+            self.model.controller.show_msg_info(
+                self.message, self.topic_links, self.message_links, self.time_mentions
+            )
         return key
 
 
@@ -1572,28 +1622,37 @@ class SearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = (
-            f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
-        )
+        search_text = f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
         self.text_box = ReadlineEdit(f"{search_text} ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.conversation_focus = urwid.Text(" ")
-        self.search_bar = urwid.Columns([
-            ('pack', self.conversation_focus),
-            ('pack', urwid.Text("  ")),
-            self.text_box,
-        ])
+        self.search_bar = urwid.Columns(
+            [
+                ('pack', self.conversation_focus),
+                ('pack', urwid.Text("  ")),
+                self.text_box,
+            ]
+        )
         self.msg_narrow = urwid.Text("DONT HIDE")
         self.recipient_bar = urwid.LineBox(
-            self.msg_narrow, title="Current message recipients",
-            tline='─', lline='', trcorner='─', tlcorner='─',
-            blcorner='─', rline='', bline='─', brcorner='─')
+            self.msg_narrow,
+            title="Current message recipients",
+            tline='─',
+            lline='',
+            trcorner='─',
+            tlcorner='─',
+            blcorner='─',
+            rline='',
+            bline='─',
+            brcorner='─',
+        )
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if ((is_command_key('ENTER', key) and self.text_box.edit_text == '')
-                or is_command_key('GO_BACK', key)):
+        if (
+            is_command_key('ENTER', key) and self.text_box.edit_text == ''
+        ) or is_command_key('GO_BACK', key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus('body')
@@ -1614,16 +1673,14 @@ class PanelSearchBox(urwid.Edit):
     Search Box to search panel views in real-time.
     """
 
-    def __init__(self, panel_view: Any, search_command: str,
-                 update_function: Callable[..., None]) -> None:
+    def __init__(
+        self, panel_view: Any, search_command: str, update_function: Callable[..., None]
+    ) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = (
-            f"Search [{', '.join(keys_for_command(search_command))}]: "
-        )
+        self.search_text = f"Search [{', '.join(keys_for_command(search_command))}]: "
         self.search_error = urwid.AttrMap(
-            urwid.Text([' ', INVALID_MARKER, ' No Results']),
-            'search_error'
+            urwid.Text([' ', INVALID_MARKER, ' No Results']), 'search_error'
         )
         urwid.connect_signal(self, 'change', update_function)
         super().__init__(caption='', edit_text=self.search_text)
@@ -1647,8 +1704,9 @@ class PanelSearchBox(urwid.Edit):
             return unicodedata.category(ch) not in ('Cc', 'Zs')
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if ((is_command_key('ENTER', key) and self.get_edit_text() == '')
-                or is_command_key('GO_BACK', key)):
+        if (
+            is_command_key('ENTER', key) and self.get_edit_text() == ''
+        ) or is_command_key('GO_BACK', key):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")

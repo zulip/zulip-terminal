@@ -45,23 +45,33 @@ class View(urwid.WidgetWrap):
         return LeftColumnView(View.LEFT_WIDTH, self)
 
     def middle_column_view(self) -> Any:
-        self.middle_column = MiddleColumnView(self, self.model, self.write_box,
-                                              self.search_box)
-        return urwid.LineBox(self.middle_column,
-                             title='Messages', title_attr='column_title',
-                             tline=COLUMN_TITLE_BAR_LINE,
-                             bline='', trcorner='│', tlcorner='│')
+        self.middle_column = MiddleColumnView(
+            self, self.model, self.write_box, self.search_box
+        )
+        return urwid.LineBox(
+            self.middle_column,
+            title='Messages',
+            title_attr='column_title',
+            tline=COLUMN_TITLE_BAR_LINE,
+            bline='',
+            trcorner='│',
+            tlcorner='│',
+        )
 
     def right_column_view(self) -> Any:
         self.users_view = RightColumnView(View.RIGHT_WIDTH, self)
         return urwid.LineBox(
             self.users_view,
-            title="Users", title_attr='column_title',
+            title="Users",
+            title_attr='column_title',
             tlcorner=COLUMN_TITLE_BAR_LINE,
             tline=COLUMN_TITLE_BAR_LINE,
             trcorner=COLUMN_TITLE_BAR_LINE,
-            lline='', blcorner='─', rline='',
-            bline='', brcorner=''
+            lline='',
+            blcorner='─',
+            rline='',
+            bline='',
+            brcorner='',
         )
 
     def get_random_help(self) -> List[Any]:
@@ -77,8 +87,9 @@ class View(urwid.WidgetWrap):
         ]
 
     @asynch
-    def set_footer_text(self, text_list: Optional[List[Any]]=None,
-                        duration: Optional[float]=None) -> None:
+    def set_footer_text(
+        self, text_list: Optional[List[Any]] = None, duration: Optional[float] = None
+    ) -> None:
         if text_list is None:
             text = self.get_random_help()
         else:
@@ -91,9 +102,9 @@ class View(urwid.WidgetWrap):
             self.set_footer_text()
 
     @asynch
-    def set_typeahead_footer(self, suggestions: List[str],
-                             state: Optional[int],
-                             is_truncated: bool) -> None:
+    def set_typeahead_footer(
+        self, suggestions: List[str], state: Optional[int], is_truncated: bool
+    ) -> None:
         if suggestions:
             # Wrap by space.
             footer_text: List[Any] = [' ' + s + ' ' for s in suggestions]
@@ -135,23 +146,26 @@ class View(urwid.WidgetWrap):
         # NOTE: set_focus_changed_callback is actually called before the
         # focus is set, so the message is not read yet, it will be read when
         # the focus is changed again either vertically or horizontally.
-        self.body._contents.set_focus_changed_callback(
-            self.message_view.read_message)
+        self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
         title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-                     full_name=self.model.user_full_name,
-                     email=self.model.user_email,
-                     server_name=self.model.server_name,
-                     url=self.model.server_url)
+            full_name=self.model.user_full_name,
+            email=self.model.user_email,
+            server_name=self.model.server_name,
+            url=self.model.server_url,
+        )
 
-        title_bar = urwid.Columns([
-            urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-            (len(title_text), urwid.Text([title_text])),
-            urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-        ])
+        title_bar = urwid.Columns(
+            [
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+                (len(title_text), urwid.Text([title_text])),
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+            ]
+        )
 
-        w = urwid.Frame(self.body, title_bar, focus_part='body',
-                        footer=self.footer_view())
+        w = urwid.Frame(
+            self.body, title_bar, focus_part='body', footer=self.footer_view()
+        )
         return w
 
     def show_left_panel(self, *, visible: bool) -> None:
@@ -182,11 +196,13 @@ class View(urwid.WidgetWrap):
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif (is_command_key('SEARCH_MESSAGES', key)
-                or is_command_key('NEXT_UNREAD_TOPIC', key)
-                or is_command_key('NEXT_UNREAD_PM', key)
-                or is_command_key('STREAM_MESSAGE', key)
-                or is_command_key('PRIVATE_MESSAGE', key)):
+        elif (
+            is_command_key('SEARCH_MESSAGES', key)
+            or is_command_key('NEXT_UNREAD_TOPIC', key)
+            or is_command_key('NEXT_UNREAD_PM', key)
+            or is_command_key('STREAM_MESSAGE', key)
+            or is_command_key('PRIVATE_MESSAGE', key)
+        ):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
@@ -208,8 +224,9 @@ class View(urwid.WidgetWrap):
             self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
             return key
-        elif (is_command_key('SEARCH_STREAMS', key)
-              or is_command_key('SEARCH_TOPICS', key)):
+        elif is_command_key('SEARCH_STREAMS', key) or is_command_key(
+            'SEARCH_TOPICS', key
+        ):
             # jump stream search
             self.body.focus_position = 0
             self.left_panel.keypress(size, 'q')
@@ -226,9 +243,7 @@ class View(urwid.WidgetWrap):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
                 if saved_draft['type'] == 'stream':
-                    stream_id = self.model.stream_id_from_name(
-                        saved_draft['to']
-                    )
+                    stream_id = self.model.stream_id_from_name(saved_draft['to'])
                     self.write_box.stream_box_view(
                         caption=saved_draft['to'],
                         title=saved_draft['subject'],
@@ -279,7 +294,6 @@ class View(urwid.WidgetWrap):
 
 
 class Screen(urwid.raw_display.Screen):
-
     def write(self, data: Any) -> None:
         if WSL:
             # replace urwid's SI/SO, which produce artifacts under WSL.

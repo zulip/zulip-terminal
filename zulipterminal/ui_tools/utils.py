@@ -6,10 +6,13 @@ from zulipterminal.api_types import Message
 from zulipterminal.ui_tools.boxes import MessageBox
 
 
-def create_msg_box_list(model: Any, messages: Optional[Iterable[Any]]=None,
-                        *,
-                        focus_msg_id: Optional[int]=None,
-                        last_message: Optional[Message]=None) -> List[Any]:
+def create_msg_box_list(
+    model: Any,
+    messages: Optional[Iterable[Any]] = None,
+    *,
+    focus_msg_id: Optional[int] = None,
+    last_message: Optional[Message] = None,
+) -> List[Any]:
     """
     MessageBox for every message displayed is created here.
     """
@@ -40,11 +43,9 @@ def create_msg_box_list(model: Any, messages: Optional[Iterable[Any]]=None,
             focus_msg = message_list.index(msg) - muted_msgs
         if msg['id'] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
-        w_list.append(urwid.AttrMap(
-                    MessageBox(msg, model, last_msg),
-                    msg_flag,
-                    'msg_selected'
-        ))
+        w_list.append(
+            urwid.AttrMap(MessageBox(msg, model, last_msg), msg_flag, 'msg_selected')
+        )
         last_msg = msg
     if focus_msg is not None:
         model.set_focus_in_current_narrow(focus_msg)

@@ -335,14 +335,16 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
 ])
 # fmt: on
 
-HELP_CATEGORIES = OrderedDict([
-    ('general', 'General'),
-    ('navigation', 'Navigation'),
-    ('searching', 'Searching'),
-    ('msg_actions', 'Message actions'),
-    ('stream_list', 'Stream list actions'),
-    ('msg_compose', 'Composing a Message'),
-])
+HELP_CATEGORIES = OrderedDict(
+    [
+        ('general', 'General'),
+        ('navigation', 'Navigation'),
+        ('searching', 'Searching'),
+        ('msg_actions', 'Message actions'),
+        ('stream_list', 'Stream list actions'),
+        ('msg_compose', 'Composing a Message'),
+    ]
+)
 
 
 class InvalidCommand(Exception):
@@ -381,5 +383,8 @@ def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
     """
-    return [key_binding for key_binding in KEY_BINDINGS.values()
-            if not key_binding.get('excluded_from_random_tips', False)]
+    return [
+        key_binding
+        for key_binding in KEY_BINDINGS.values()
+        if not key_binding.get('excluded_from_random_tips', False)
+    ]

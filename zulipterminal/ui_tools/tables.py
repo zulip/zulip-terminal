@@ -32,8 +32,9 @@ def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
 StyledTableData = List[Union[str, Tuple[Optional[str], str]]]
 
 
-def pad_row_strip(row_strip: StyledTableData, fill_char: str=' ',
-                  fill_width: int=1) -> StyledTableData:
+def pad_row_strip(
+    row_strip: StyledTableData, fill_char: str = ' ', fill_width: int = 1
+) -> StyledTableData:
     """
     Returns back a padded row strip.
 
@@ -68,9 +69,13 @@ def pad_row_strip(row_strip: StyledTableData, fill_char: str=' ',
     return row_strip
 
 
-def row_with_styled_content(row: List[str], column_alignments: List[str],
-                            column_widths: List[int], vertical_bar: str,
-                            row_style: Optional[str]=None) -> StyledTableData:
+def row_with_styled_content(
+    row: List[str],
+    column_alignments: List[str],
+    column_widths: List[int],
+    vertical_bar: str,
+    row_style: Optional[str] = None,
+) -> StyledTableData:
     """
     Constructs styled row strip, for markup table, using unicode characters
     and row elements.
@@ -87,9 +92,14 @@ def row_with_styled_content(row: List[str], column_alignments: List[str],
     return pad_row_strip(row_strip)
 
 
-def row_with_only_border(lcorner: str, line: str, connector: str, rcorner: str,
-                         column_widths: List[int],
-                         newline: bool=True) -> StyledTableData:
+def row_with_only_border(
+    lcorner: str,
+    line: str,
+    connector: str,
+    rcorner: str,
+    column_widths: List[int],
+    newline: bool = True,
+) -> StyledTableData:
     """
     Given left corner, line, connecter and right corner unicode character,
     constructs a border row strip for markup table.
@@ -112,30 +122,33 @@ def render_table(table_element: Any) -> StyledTableData:
 
     # Calculate the width required for each column.
     column_widths = [
-        len(max(column, key=lambda string: len(string)))
-        for column in zip(*cells)
+        len(max(column, key=lambda string: len(string))) for column in zip(*cells)
     ]
 
     top_border = row_with_only_border('┌', '─', '┬', '┐', column_widths)
     middle_border = row_with_only_border('├', '─', '┼', '┤', column_widths)
-    bottom_border = row_with_only_border('└', '─', '┴', '┘', column_widths,
-                                         newline=False)
+    bottom_border = row_with_only_border(
+        '└', '─', '┴', '┘', column_widths, newline=False
+    )
 
     # Construct the table, row-by-row.
     table: StyledTableData = []
 
     # Add the header/0th row and the borders that surround it to the table.
     table.extend(top_border)
-    table.extend(row_with_styled_content(cells.pop(0), column_alignments,
-                                         column_widths, '│',
-                                         row_style='table_head'))
+    table.extend(
+        row_with_styled_content(
+            cells.pop(0), column_alignments, column_widths, '│', row_style='table_head'
+        )
+    )
     table.extend(middle_border)
 
     # Add the body rows to the table followed by the bottom-most border in the
     # end.
     for row in cells:
-        table.extend(row_with_styled_content(row, column_alignments,
-                                             column_widths, '│'))
+        table.extend(
+            row_with_styled_content(row, column_alignments, column_widths, '│')
+        )
     table.extend(bottom_border)
 
     return table
