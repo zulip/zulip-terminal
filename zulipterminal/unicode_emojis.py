@@ -193,7 +193,6 @@ EMOJI_DATA = OrderedDict([
     ('candle', {'code': '1f56f'}),
     ('candy', {'code': '1f36c'}),
     ('canoe', {'code': '1f6f6'}),
-    ('cant_talk', {'code': '1f637'}),
     ('capital_abcd', {'code': '1f520'}),
     ('capital_letters', {'code': '1f520'}),
     ('capricorn', {'code': '2651'}),
