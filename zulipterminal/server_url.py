@@ -10,8 +10,7 @@ def hash_util_encode(string: str) -> str:
     Referred from zerver/lib/url_encoding.py
     """
     # `safe` has a default value of "/", but we want those encoded, too.
-    return urllib.parse.quote(
-        string, safe=b"").replace(".", "%2E").replace("%", ".")
+    return urllib.parse.quote(string, safe=b"").replace(".", "%2E").replace("%", ".")
 
 
 def encode_stream(stream_id: int, stream_name: str) -> str:
@@ -56,10 +55,7 @@ def near_pm_message_url(server_url: str, message: Message) -> str:
     Referred from zerver/lib/url_encoding.py.
     """
     message_id = str(message['id'])
-    str_user_ids = [
-        str(recipient['id'])
-        for recipient in message['display_recipient']
-    ]
+    str_user_ids = [str(recipient['id']) for recipient in message['display_recipient']]
 
     pm_str = ','.join(str_user_ids) + '-pm'
     parts = [

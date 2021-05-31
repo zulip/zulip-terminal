@@ -26,10 +26,10 @@ class TopButton(urwid.Button):
         caption: str,
         show_function: Callable[[], Any],
         width: int,
-        prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
-        text_color: Optional[str]=None,
-        count: int=0,
-        count_style: Optional[str]=None,
+        prefix_character: Union[str, Tuple[Any, str]] = '\N{BULLET}',
+        text_color: Optional[str] = None,
+        count: int = 0,
+        count_style: Optional[str] = None,
     ) -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
@@ -53,7 +53,7 @@ class TopButton(urwid.Button):
         self.controller = controller
         urwid.connect_signal(self, 'click', self.activate)
 
-    def update_count(self, count: int, text_color: Optional[str]=None) -> None:
+    def update_count(self, count: int, text_color: Optional[str] = None) -> None:
         new_color = self.original_color if text_color is None else text_color
 
         self.count = count
@@ -64,14 +64,15 @@ class TopButton(urwid.Button):
 
         self.update_widget((self.count_style, count_text), new_color)
 
-    def update_widget(self, count_text: Tuple[Optional[str], str],
-                      text_color: Optional[str]) -> Any:
+    def update_widget(
+        self, count_text: Tuple[Optional[str], str], text_color: Optional[str]
+    ) -> Any:
         # Note that we don't modify self._caption
-        max_caption_length = (self.width_for_text_and_count
-                              - len(count_text[1]))
+        max_caption_length = self.width_for_text_and_count - len(count_text[1])
         if len(self._caption) > max_caption_length:
-            caption = (self._caption[:max_caption_length - 1]
-                       + '\N{HORIZONTAL ELLIPSIS}')
+            caption = (
+                self._caption[: max_caption_length - 1] + '\N{HORIZONTAL ELLIPSIS}'
+            )
         else:
             caption = self._caption
         num_extra_spaces = (
@@ -80,15 +81,19 @@ class TopButton(urwid.Button):
 
         # NOTE: Generated text does not include space at end
         # NOTE: Some are styles, so are not included in f-string
-        self._w = urwid.AttrMap(urwid.SelectableIcon(
-            [" ",
-             self.prefix_character,
-             f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
-             count_text],
-            self.width_for_text_and_count + 5  # cursor location
+        self._w = urwid.AttrMap(
+            urwid.SelectableIcon(
+                [
+                    " ",
+                    self.prefix_character,
+                    f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
+                    count_text,
+                ],
+                self.width_for_text_and_count + 5,  # cursor location
             ),
             text_color,
-            'selected')
+            'selected',
+        )
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -105,10 +110,8 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = (
-            f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
-        )
+    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+        button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
             controller=controller,
@@ -122,10 +125,8 @@ class HomeButton(TopButton):
 
 
 class PMButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = (
-            f"Private messages [{primary_key_for_command('ALL_PM')}]"
-        )
+    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+        button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
@@ -134,15 +135,13 @@ class PMButton(TopButton):
             width=width,
             prefix_character='',
             count=count,
-            count_style='unread_count'
+            count_style='unread_count',
         )
 
 
 class MentionedButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = (
-            f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
-        )
+    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+        button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
             controller=controller,
@@ -156,10 +155,8 @@ class MentionedButton(TopButton):
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int=0) -> None:
-        button_text = (
-            f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
-        )
+    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+        button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
             controller=controller,
@@ -173,9 +170,14 @@ class StarredButton(TopButton):
 
 
 class StreamButton(TopButton):
-    def __init__(self, properties: StreamData,
-                 controller: Any, view: Any, width: int,
-                 count: int=0) -> None:
+    def __init__(
+        self,
+        properties: StreamData,
+        controller: Any,
+        view: Any,
+        width: int,
+        count: int = 0,
+    ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
         self.stream_name = properties['name']
@@ -193,13 +195,14 @@ class StreamButton(TopButton):
                 background = entry[5] if len(entry) > 4 else entry[2]
                 inverse_text = background if background else 'black'
                 break
-        view.palette.append((
-            self.color, '', '', 'bold', f"{self.color}, bold", background))
-        view.palette.append((
-            's' + self.color, '', '', 'standout', inverse_text, self.color))
+        view.palette.append(
+            (self.color, '', '', 'bold', f"{self.color}, bold", background)
+        )
+        view.palette.append(
+            ('s' + self.color, '', '', 'standout', inverse_text, self.color)
+        )
 
-        stream_marker = (STREAM_MARKER_PRIVATE if is_private
-                         else STREAM_MARKER_PUBLIC)
+        stream_marker = STREAM_MARKER_PRIVATE if is_private else STREAM_MARKER_PUBLIC
         narrow_function = partial(
             controller.narrow_to_stream,
             stream_name=self.stream_name,
@@ -220,13 +223,11 @@ class StreamButton(TopButton):
 
     def mark_muted(self) -> None:
         self.update_widget(('muted', MUTE_MARKER), 'muted')
-        self.view.home_button.update_count(
-            self.model.unread_counts['all_msg'])
+        self.view.home_button.update_count(self.model.unread_counts['all_msg'])
 
     def mark_unmuted(self, unread_count: int) -> None:
         self.update_count(unread_count)
-        self.view.home_button.update_count(
-            self.model.unread_counts['all_msg'])
+        self.view.home_button.update_count(self.model.unread_counts['all_msg'])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key('TOGGLE_TOPIC', key):
@@ -239,11 +240,17 @@ class StreamButton(TopButton):
 
 
 class UserButton(TopButton):
-    def __init__(self, user: Dict[str, Any], controller: Any,
-                 view: Any, width: int,
-                 state_marker: str,
-                 color: Optional[str]=None, count: int=0,
-                 is_current_user: bool=False) -> None:
+    def __init__(
+        self,
+        user: Dict[str, Any],
+        controller: Any,
+        view: Any,
+        width: int,
+        state_marker: str,
+        color: Optional[str] = None,
+        count: int = 0,
+        is_current_user: bool = False,
+    ) -> None:
         # Properties accessed externally
         self.email = user['email']
         self.user_id = user['user_id']
@@ -273,14 +280,19 @@ class UserButton(TopButton):
         )
         self._view.body.focus.original_widget.set_focus('footer')
         self._view.write_box.private_box_view(
-            emails=[self.email],
-            recipient_user_ids=[self.user_id]
+            emails=[self.email], recipient_user_ids=[self.user_id]
         )
 
 
 class TopicButton(TopButton):
-    def __init__(self, stream_id: int, topic: str,
-                 controller: Any, width: int=0, count: int=0) -> None:
+    def __init__(
+        self,
+        stream_id: int,
+        topic: str,
+        controller: Any,
+        width: int = 0,
+        count: int = 0,
+    ) -> None:
         self.stream_name = controller.model.stream_dict[stream_id]['name']
         self.topic_name = topic
         self.stream_id = stream_id
@@ -305,7 +317,8 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(('muted',  MUTE_MARKER), 'muted')
+        self.update_widget(('muted', MUTE_MARKER), 'muted')
+
     # TODO: Handle event-based approach for topic-muting.
 
 
@@ -322,8 +335,9 @@ class ParsedNarrowLink(TypedDict, total=False):
 
 
 class MessageLinkButton(urwid.Button):
-    def __init__(self, controller: Any, caption: str, link: str,
-                 display_attr: Optional[str]) -> None:
+    def __init__(
+        self, controller: Any, caption: str, link: str, display_attr: Optional[str]
+    ) -> None:
         self.controller = controller
         self.model = self.controller.model
         self.view = self.controller.view
@@ -333,8 +347,7 @@ class MessageLinkButton(urwid.Button):
         self.update_widget(caption, display_attr)
         urwid.connect_signal(self, 'click', callback=self.handle_link)
 
-    def update_widget(self, caption: str,
-                      display_attr: Optional[str]=None) -> None:
+    def update_widget(self, caption: str, display_attr: Optional[str] = None) -> None:
         """
         Overrides the existing button widget for custom styling.
         """
@@ -400,47 +413,56 @@ class MessageLinkButton(urwid.Button):
             stream_data = cls._decode_stream_data(fragments[2])
             parsed_link = dict(narrow='stream', stream=stream_data)
 
-        elif (len_fragments == 5 and fragments[1] == 'stream'
-                and fragments[3] == 'topic'):
+        elif (
+            len_fragments == 5 and fragments[1] == 'stream' and fragments[3] == 'topic'
+        ):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
-            parsed_link = dict(narrow='stream:topic', stream=stream_data,
-                               topic_name=topic_name)
+            parsed_link = dict(
+                narrow='stream:topic', stream=stream_data, topic_name=topic_name
+            )
 
-        elif (len_fragments == 5 and fragments[1] == 'stream'
-                and fragments[3] == 'near'):
+        elif len_fragments == 5 and fragments[1] == 'stream' and fragments[3] == 'near':
             stream_data = cls._decode_stream_data(fragments[2])
             message_id = cls._decode_message_id(fragments[4])
-            parsed_link = dict(narrow='stream:near', stream=stream_data,
-                               message_id=message_id)
+            parsed_link = dict(
+                narrow='stream:near', stream=stream_data, message_id=message_id
+            )
 
-        elif (len_fragments == 7 and fragments[1] == 'stream'
-                and fragments[3] == 'topic' and fragments[5] == 'near'):
+        elif (
+            len_fragments == 7
+            and fragments[1] == 'stream'
+            and fragments[3] == 'topic'
+            and fragments[5] == 'near'
+        ):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
             message_id = cls._decode_message_id(fragments[6])
-            parsed_link = dict(narrow='stream:topic:near', stream=stream_data,
-                               topic_name=topic_name, message_id=message_id)
+            parsed_link = dict(
+                narrow='stream:topic:near',
+                stream=stream_data,
+                topic_name=topic_name,
+                message_id=message_id,
+            )
 
         return parsed_link
 
-    def _validate_and_patch_stream_data(self,
-                                        parsed_link: ParsedNarrowLink) -> str:
+    def _validate_and_patch_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
         """
         Validates stream data and patches the optional value in the nested
         DecodedStream dict.
         """
         stream_id = parsed_link['stream']['stream_id']
         stream_name = parsed_link['stream']['stream_name']
-        assert (
-            (stream_id is None and stream_name is not None)
-            or (stream_id is not None and stream_name is None)
+        assert (stream_id is None and stream_name is not None) or (
+            stream_id is not None and stream_name is None
         )
 
         model = self.model
         # Validate stream ID and name.
-        if ((stream_id and not model.is_user_subscribed_to_stream(stream_id))
-                or (stream_name and not model.is_valid_stream(stream_name))):
+        if (stream_id and not model.is_user_subscribed_to_stream(stream_id)) or (
+            stream_name and not model.is_valid_stream(stream_name)
+        ):
             # TODO: Narrow to the concerned stream in a 'preview' mode or
             # report whether the stream id is invalid instead.
             return 'The stream seems to be either unknown or unsubscribed'
@@ -534,11 +556,13 @@ class EditModeButton(urwid.Button):
     def __init__(self, controller: Any, width: int) -> None:
         self.controller = controller
         self.width = width
-        super().__init__(label="",
-                         on_press=controller.show_topic_edit_mode)
+        super().__init__(label="", on_press=controller.show_topic_edit_mode)
         self.set_selected_mode('change_later')  # set default mode
 
     def set_selected_mode(self, mode: EditPropagateMode) -> None:
         self.mode = mode
-        self._w = urwid.AttrMap(urwid.SelectableIcon(
-            EDIT_MODE_CAPTIONS[self.mode], self.width), None, 'selected')
+        self._w = urwid.AttrMap(
+            urwid.SelectableIcon(EDIT_MODE_CAPTIONS[self.mode], self.width),
+            None,
+            'selected',
+        )

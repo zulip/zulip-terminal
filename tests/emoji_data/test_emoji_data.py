@@ -8,5 +8,4 @@ def test_generated_emoji_list_sorted():
 
 
 def test_unicode_emojis_fixture_sorted(unicode_emojis):
-    assert unicode_emojis == OrderedDict(
-                                sorted(unicode_emojis.items()))
+    assert unicode_emojis == OrderedDict(sorted(unicode_emojis.items()))

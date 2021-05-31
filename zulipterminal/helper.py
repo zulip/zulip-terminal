@@ -98,6 +98,7 @@ def asynch(func: Callable[..., None]) -> Callable[..., None]:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
+
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         # If calling when pytest is running simply return the function
@@ -108,15 +109,17 @@ def asynch(func: Callable[..., None]) -> Callable[..., None]:
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
         return thread.start()
+
     return wrapper
 
 
-def _set_count_in_model(new_count: int, changed_messages: List[Message],
-                        unread_counts: UnreadCounts) -> None:
+def _set_count_in_model(
+    new_count: int, changed_messages: List[Message], unread_counts: UnreadCounts
+) -> None:
     """
-        This function doesn't explicitly set counts in model,
-        but updates `unread_counts` (which can update the model
-        if it's passed in, but is not tied to it).
+    This function doesn't explicitly set counts in model,
+    but updates `unread_counts` (which can update the model
+    if it's passed in, but is not tied to it).
     """
     # broader unread counts (for all_*) are updated
     # later conditionally in _set_count_in_view.
@@ -133,27 +136,34 @@ def _set_count_in_model(new_count: int, changed_messages: List[Message],
     for message in changed_messages:
         if message['type'] == 'stream':
             stream_id = message['stream_id']
-            update_unreads(unread_counts['unread_topics'],
-                           (stream_id, message['subject']))
+            update_unreads(
+                unread_counts['unread_topics'], (stream_id, message['subject'])
+            )
             update_unreads(unread_counts['streams'], stream_id)
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(message['display_recipient']) <= 2:
             update_unreads(unread_counts['unread_pms'], message['sender_id'])
         else:  # If it's a group pm
-            update_unreads(unread_counts['unread_huddles'],
-                           frozenset(recipient['id'] for recipient
-                                     in message['display_recipient']))
+            update_unreads(
+                unread_counts['unread_huddles'],
+                frozenset(
+                    recipient['id'] for recipient in message['display_recipient']
+                ),
+            )
 
 
-def _set_count_in_view(controller: Any, new_count: int,
-                       changed_messages: List[Message],
-                       unread_counts: UnreadCounts) -> None:
+def _set_count_in_view(
+    controller: Any,
+    new_count: int,
+    changed_messages: List[Message],
+    unread_counts: UnreadCounts,
+) -> None:
     """
-        This function for the most part contains the logic for setting the
-        count in the UI buttons. The later buttons (all_msg, all_pms)
-        additionally set the current count in the model and make use of the
-        same in the UI.
+    This function for the most part contains the logic for setting the
+    count in the UI buttons. The later buttons (all_msg, all_pms)
+    additionally set the current count in the model and make use of the
+    same in the UI.
     """
     stream_buttons_list = controller.view.stream_w.streams_btn_list
     is_open_topic_view = controller.view.left_panel.is_in_topic_view
@@ -185,8 +195,7 @@ def _set_count_in_view(controller: Any, new_count: int,
             else:
                 for stream_button in stream_buttons_list:
                     if stream_button.stream_id == stream_id:
-                        stream_button.update_count(stream_button.count
-                                                   + new_count)
+                        stream_button.update_count(stream_button.count + new_count)
                         break
             # FIXME: Update unread_counts['unread_topics']?
             if controller.model.is_muted_topic(stream_id, msg_topic):
@@ -196,8 +205,7 @@ def _set_count_in_view(controller: Any, new_count: int,
                 # We update the respective TopicButton count accordingly.
                 for topic_button in topic_buttons_list:
                     if topic_button.topic_name == msg_topic:
-                        topic_button.update_count(topic_button.count
-                                                  + new_count)
+                        topic_button.update_count(topic_button.count + new_count)
         else:
             for user_button in user_buttons_list:
                 if user_button.user_id == user_id:
@@ -231,9 +239,7 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     controller.update_screen()
 
 
-def index_messages(messages: List[Message],
-                   model: Any,
-                   index: Index) -> Index:
+def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     STRUCTURE OF INDEX
     {
@@ -387,22 +393,26 @@ def index_messages(messages: List[Message],
 
             if msg['type'] == 'private':
                 index['private_msg_ids'].add(msg['id'])
-                recipients = frozenset({
-                    recipient['id'] for recipient in msg['display_recipient']
-                })
+                recipients = frozenset(
+                    {recipient['id'] for recipient in msg['display_recipient']}
+                )
 
                 if narrow[0][0] == 'pm_with':
-                    narrow_emails = ([model.user_dict[email]['user_id']
-                                      for email in narrow[0][1].split(', ')]
-                                     + [model.user_id])
+                    narrow_emails = [
+                        model.user_dict[email]['user_id']
+                        for email in narrow[0][1].split(', ')
+                    ] + [model.user_id]
                     if recipients == frozenset(narrow_emails):
                         index['private_msg_ids_by_user_ids'][recipients].add(msg['id'])
 
             if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
                 index['stream_msg_ids_by_stream_id'][msg['stream_id']].add(msg['id'])
 
-        if (msg['type'] == 'stream' and len(narrow) == 2
-                and narrow[1][1] == msg['subject']):
+        if (
+            msg['type'] == 'stream'
+            and len(narrow) == 2
+            and narrow[1][1] == msg['subject']
+        ):
             topics_in_stream = index['topic_msg_ids'][msg['stream_id']]
             if not topics_in_stream.get(msg['subject']):
                 topics_in_stream[msg['subject']] = set()
@@ -505,16 +515,17 @@ def match_emoji(emoji: str, text: str) -> bool:
 
 
 def match_topics(topic_names: List[str], search_text: str) -> List[str]:
-    return [name for name in topic_names
-            if name.lower().startswith(search_text.lower())]
+    return [
+        name for name in topic_names if name.lower().startswith(search_text.lower())
+    ]
 
 
 DataT = TypeVar('DataT')
 
 
-def match_stream(data: List[Tuple[DataT, str]], search_text: str,
-                 pinned_streams: List[StreamData]
-                 ) -> Tuple[List[DataT], List[str]]:
+def match_stream(
+    data: List[Tuple[DataT, str]], search_text: str, pinned_streams: List[StreamData]
+) -> Tuple[List[DataT], List[str]]:
     """
     Returns a list of DataT (streams) and a list of their corresponding names
     whose words match with the 'text' in the following order:
@@ -528,9 +539,11 @@ def match_stream(data: List[Tuple[DataT, str]], search_text: str,
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.
-    assert data == sorted(sorted(data, key=lambda data: data[1].lower()),
-                          key=lambda data: data[1] in pinned_stream_names,
-                          reverse=True)
+    assert data == sorted(
+        sorted(data, key=lambda data: data[1].lower()),
+        key=lambda data: data[1] in pinned_stream_names,
+        reverse=True,
+    )
 
     delimiters = '-_/'
     trans = str.maketrans(delimiters, len(delimiters) * ' ')
@@ -540,10 +553,12 @@ def match_stream(data: List[Tuple[DataT, str]], search_text: str,
     ]
 
     matches: 'OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]' = (
-        OrderedDict([
-            ('pinned', defaultdict(list)),
-            ('unpinned', defaultdict(list)),
-        ])
+        OrderedDict(
+            [
+                ('pinned', defaultdict(list)),
+                ('unpinned', defaultdict(list)),
+            ]
+        )
     )
 
     for datum, splits in stream_splits:
@@ -581,15 +596,15 @@ def format_string(names: List[str], wrapping_text: str) -> List[str]:
     return [wrapping_text.format(name) for name in names]
 
 
-def powerset(iterable: Iterable[Any],
-             map_func: Callable[[Any], Any]=set) -> List[Any]:
+def powerset(
+    iterable: Iterable[Any], map_func: Callable[[Any], Any] = set
+) -> List[Any]:
     """
     >> powerset([1,2,3])
     returns: [set(), {1}, {2}, {3}, {1, 2}, {1, 3}, {2, 3}, {1, 2, 3}]"
     """
     s = list(iterable)
-    powerset = chain.from_iterable(combinations(s, r)
-                                   for r in range(len(s) + 1))
+    powerset = chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
     return list(map(map_func, list(powerset)))
 
 
@@ -617,44 +632,52 @@ def notify(title: str, html_text: str) -> str:
     if MACOS:
         command_list = [
             "osascript",
-            "-e", "on run(argv)",
-            "-e", "return display notification item 1 of argv with title "
+            "-e",
+            "on run(argv)",
+            "-e",
+            "return display notification item 1 of argv with title "
             'item 2 of argv sound name "ZT_NOTIFICATION_SOUND"',
-            "-e", "end",
-            "--", text, title
+            "-e",
+            "end",
+            "--",
+            text,
+            title,
         ]
     elif LINUX:
         command_list = ["notify-send", "--", title, text]
 
     if command_list is not None:
         try:
-            subprocess.run(command_list, stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
+            subprocess.run(
+                command_list, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
         except FileNotFoundError:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
 
 
-def display_error_if_present(response: Dict[str, Any], controller: Any
-                             ) -> None:
+def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
     if response['result'] == 'error' and hasattr(controller, 'view'):
         controller.view.set_footer_text(response['msg'], 3)
 
 
-def check_narrow_and_notify(outer_narrow: List[Any],
-                            inner_narrow: List[Any],
-                            controller: Any) -> None:
+def check_narrow_and_notify(
+    outer_narrow: List[Any], inner_narrow: List[Any], controller: Any
+) -> None:
     current_narrow = controller.model.narrow
 
-    if (current_narrow != [] and current_narrow != outer_narrow
-            and current_narrow != inner_narrow):
-        controller.view.set_footer_text(
-            'Message is sent outside of current narrow.', 3)
+    if (
+        current_narrow != []
+        and current_narrow != outer_narrow
+        and current_narrow != inner_narrow
+    ):
+        controller.view.set_footer_text('Message is sent outside of current narrow.', 3)
 
 
-def notify_if_message_sent_outside_narrow(message: Composition,
-                                          controller: Any) -> None:
+def notify_if_message_sent_outside_narrow(
+    message: Composition, controller: Any
+) -> None:
     current_narrow = controller.model.narrow
 
     if message['type'] == 'stream':
@@ -686,10 +709,8 @@ def get_unused_fence(content: str) -> str:
     fence_length_regex = '^ {0,3}(`{3,})'
     max_length_fence = 3
 
-    matches = findall(fence_length_regex, content,
-                      flags=MULTILINE)
+    matches = findall(fence_length_regex, content, flags=MULTILINE)
     if len(matches) != 0:
-        max_length_fence = max(max_length_fence,
-                               len(max(matches, key=len)) + 1)
+        max_length_fence = max(max_length_fence, len(max(matches, key=len)) + 1)
 
     return '`' * max_length_fence

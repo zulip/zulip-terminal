@@ -7,8 +7,9 @@ from zulipterminal.ui import View
 class TestView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
-        self.controller = mocker.patch('zulipterminal.core.Controller',
-                                       return_value=None)
+        self.controller = mocker.patch(
+            'zulipterminal.core.Controller', return_value=None
+        )
         self.model = mocker.patch('zulipterminal.core.Controller.model')
         self.write_box = mocker.patch('zulipterminal.ui.WriteBox')
         self.search_box = mocker.patch('zulipterminal.ui.SearchBox')
@@ -17,8 +18,7 @@ class TestView:
     def view(self, mocker):
         main_window = mocker.patch('zulipterminal.ui.View.main_window')
         # View is an urwid.Frame instance, a Box widget.
-        mocker.patch('zulipterminal.ui.View.sizing',
-                     return_value=frozenset({'box'}))
+        mocker.patch('zulipterminal.ui.View.sizing', return_value=frozenset({'box'}))
         return View(self.controller)
 
     def test_init(self, mocker):
@@ -42,8 +42,9 @@ class TestView:
         middle_view = mocker.patch('zulipterminal.ui.MiddleColumnView')
         line_box = mocker.patch('zulipterminal.ui.urwid.LineBox')
         return_value = view.middle_column_view()
-        middle_view.assert_called_once_with(view, view.model,
-                                            view.write_box, view.search_box)
+        middle_view.assert_called_once_with(
+            view, view.model, view.write_box, view.search_box
+        )
         assert view.middle_column == middle_view()
         assert return_value == line_box()
 
@@ -56,8 +57,9 @@ class TestView:
         assert return_value == line_box()
 
     def test_set_footer_text_default(self, view, mocker):
-        mocker.patch('zulipterminal.ui.View.get_random_help',
-                     return_value=['some help text'])
+        mocker.patch(
+            'zulipterminal.ui.View.get_random_help', return_value=['some help text']
+        )
 
         view.set_footer_text()
 
@@ -70,40 +72,49 @@ class TestView:
         view._w.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
 
-    def test_set_footer_text_with_duration(self, view, mocker,
-                                           custom_text="custom", duration=5.3):
-        mocker.patch('zulipterminal.ui.View.get_random_help',
-                     return_value=['some help text'])
+    def test_set_footer_text_with_duration(
+        self, view, mocker, custom_text="custom", duration=5.3
+    ):
+        mocker.patch(
+            'zulipterminal.ui.View.get_random_help', return_value=['some help text']
+        )
         mock_sleep = mocker.patch('time.sleep')
 
         view.set_footer_text([custom_text], duration)
 
-        view._w.footer.set_text.assert_has_calls([
-            mocker.call([custom_text]),
-            mocker.call(['some help text'])
-        ])
+        view._w.footer.set_text.assert_has_calls(
+            [mocker.call([custom_text]), mocker.call(['some help text'])]
+        )
         mock_sleep.assert_called_once_with(duration)
         assert view.controller.update_screen.call_count == 2
 
-    @pytest.mark.parametrize('suggestions, state, truncated, footer_text', [
-        ([], None, False, [' [No matches found]']),
-        (['some', 'text'], None, False, [[' '], ' some ', ' text ']),
-        (['some', 'text'], None, True,
-         [[' '], ' some ', ' text ', ' [more] ']),
-        (['some', 'text'], 0, False, [[' '], ('code', ' some '), ' text ']),
-        (['some', 'text'], 0, True,
-         [[' '], ('code', ' some '), ' text ', ' [more] ']),
-        (['some', 'text'], -1, False, [[' '], ' some ', ('code', ' text ')]),
-    ], ids=[
-        'no_matches',
-        'no_highlight',
-        'no_highlight_truncated',
-        'first_suggestion_highlighted',
-        'first_suggestion_highlighted_truncated',
-        'last_suggestion_highlighted',
-        ])
-    def test_set_typeahead_footer(self, mocker, view, state, suggestions,
-                                  truncated, footer_text):
+    @pytest.mark.parametrize(
+        'suggestions, state, truncated, footer_text',
+        [
+            ([], None, False, [' [No matches found]']),
+            (['some', 'text'], None, False, [[' '], ' some ', ' text ']),
+            (['some', 'text'], None, True, [[' '], ' some ', ' text ', ' [more] ']),
+            (['some', 'text'], 0, False, [[' '], ('code', ' some '), ' text ']),
+            (
+                ['some', 'text'],
+                0,
+                True,
+                [[' '], ('code', ' some '), ' text ', ' [more] '],
+            ),
+            (['some', 'text'], -1, False, [[' '], ' some ', ('code', ' text ')]),
+        ],
+        ids=[
+            'no_matches',
+            'no_highlight',
+            'no_highlight_truncated',
+            'first_suggestion_highlighted',
+            'first_suggestion_highlighted_truncated',
+            'last_suggestion_highlighted',
+        ],
+    )
+    def test_set_typeahead_footer(
+        self, mocker, view, state, suggestions, truncated, footer_text
+    ):
         set_footer_text = mocker.patch('zulipterminal.ui.View.set_footer_text')
         view.set_typeahead_footer(suggestions, state, truncated)
         set_footer_text.assert_called_once_with(footer_text)
@@ -118,6 +129,7 @@ class TestView:
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
         def just_set_message_view(self):
             self.message_view = mocker.Mock(read_message=lambda: None)
+
         monkeypatch.setattr(View, 'middle_column_view', just_set_message_view)
 
         right = mocker.patch('zulipterminal.ui.View.right_column_view')
@@ -138,8 +150,7 @@ class TestView:
         self.model.server_url = server
         self.model.server_name = server_name
 
-        title_length = (len(email) + len(full_name)
-                        + len(server) + len(server_name) + 11)
+        title_length = len(email) + len(full_name) + len(server) + len(server_name) + 11
 
         view = View(self.controller)
 
@@ -148,32 +159,35 @@ class TestView:
         right.assert_called_once_with()
 
         expected_column_calls = [
-            mocker.call([
-                (View.LEFT_WIDTH, left()),
-                ('weight', 10, mocker.ANY),  # ANY is a center
-                (0, right()),
-                ], focus_column=0),
+            mocker.call(
+                [
+                    (View.LEFT_WIDTH, left()),
+                    ('weight', 10, mocker.ANY),  # ANY is a center
+                    (0, right()),
+                ],
+                focus_column=0,
+            ),
             mocker.call()._contents.set_focus_changed_callback(
-                view.message_view.read_message),
-            mocker.call([
-                title_divider(),
-                (title_length, text()),
-                title_divider(),
-                ])
+                view.message_view.read_message
+            ),
+            mocker.call(
+                [
+                    title_divider(),
+                    (title_length, text()),
+                    title_divider(),
+                ]
+            ),
         ]
         col.assert_has_calls(expected_column_calls)
 
         assert view.body == col()
         frame.assert_called_once_with(
-            view.body, col(), focus_part='body', footer=footer_view())
+            view.body, col(), focus_part='body', footer=footer_view()
+        )
 
     @pytest.mark.parametrize('autohide', [True, False])
-    @pytest.mark.parametrize('visible, width', [
-        (True, View.LEFT_WIDTH),
-        (False, 0)
-    ])
-    def test_show_left_panel(self, mocker, view,
-                             visible, width, autohide):
+    @pytest.mark.parametrize('visible, width', [(True, View.LEFT_WIDTH), (False, 0)])
+    def test_show_left_panel(self, mocker, view, visible, width, autohide):
         view.left_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
@@ -192,12 +206,8 @@ class TestView:
             view.body.options.assert_not_called()
 
     @pytest.mark.parametrize('autohide', [True, False])
-    @pytest.mark.parametrize('visible, width', [
-        (True, View.RIGHT_WIDTH),
-        (False, 0)
-    ])
-    def test_show_right_panel(self, mocker, view,
-                              visible, width, autohide):
+    @pytest.mark.parametrize('visible, width', [(True, View.RIGHT_WIDTH), (False, 0)])
+    def test_show_right_panel(self, mocker, view, visible, width, autohide):
         view.right_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
@@ -215,8 +225,9 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    def test_keypress_normal_mode_navigation(self, view, mocker, widget_size,
-                                             navigation_key_expected_key_pair):
+    def test_keypress_normal_mode_navigation(
+        self, view, mocker, widget_size, navigation_key_expected_key_pair
+    ):
         key, expected_key = navigation_key_expected_key_pair
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
@@ -258,10 +269,8 @@ class TestView:
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_PEOPLE'))
-    @pytest.mark.parametrize('autohide', [True, False], ids=[
-        'autohide', 'no_autohide'])
-    def test_keypress_autohide_users(self, view, mocker, autohide, key,
-                                     widget_size):
+    @pytest.mark.parametrize('autohide', [True, False], ids=['autohide', 'no_autohide'])
+    def test_keypress_autohide_users(self, view, mocker, autohide, key, widget_size):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.controller.autohide = autohide
@@ -284,10 +293,8 @@ class TestView:
         view.controller.enter_editor_mode_with.assert_called_once_with(view.user_search)
 
     @pytest.mark.parametrize('key', keys_for_command('SEARCH_STREAMS'))
-    @pytest.mark.parametrize('autohide', [True, False], ids=[
-        'autohide', 'no_autohide'])
-    def test_keypress_autohide_streams(self, view, mocker, autohide, key,
-                                       widget_size):
+    @pytest.mark.parametrize('autohide', [True, False], ids=['autohide', 'no_autohide'])
+    def test_keypress_autohide_streams(self, view, mocker, autohide, key, widget_size):
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.stream_search_box = mocker.Mock()
@@ -327,5 +334,5 @@ class TestView:
         view.keypress(size, key)
 
         view.controller.current_editor().keypress.assert_called_once_with(
-            (size[1], ), key
+            (size[1],), key
         )

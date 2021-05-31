@@ -92,7 +92,8 @@ class Model:
         self.user_email = ""
         self.user_full_name = ""
         self.server_url = '{uri.scheme}://{uri.netloc}/'.format(
-                          uri=urlparse(self.client.base_url))
+            uri=urlparse(self.client.base_url)
+        )
         self.server_name = ""
 
         self._notified_user_of_notification_failure = False
@@ -116,19 +117,17 @@ class Model:
         ]
 
         # Events desired with their corresponding callback
-        self.event_actions: 'OrderedDict[str, Callable[[Event], None]]' = (
-            OrderedDict([
+        self.event_actions: 'OrderedDict[str, Callable[[Event], None]]' = OrderedDict(
+            [
                 ('message', self._handle_message_event),
                 ('update_message', self._handle_update_message_event),
                 ('reaction', self._handle_reaction_event),
                 ('subscription', self._handle_subscription_event),
                 ('typing', self._handle_typing_event),
-                ('update_message_flags',
-                 self._handle_update_message_flags_event),
-                ('update_display_settings',
-                 self._handle_update_display_settings_event),
+                ('update_message_flags', self._handle_update_message_flags_event),
+                ('update_display_settings', self._handle_update_display_settings_event),
                 ('realm_emoji', self._handle_update_emoji_event),
-            ])
+            ]
         )
 
         self.initial_data: Dict[str, Any] = {}
@@ -138,9 +137,7 @@ class Model:
         self._fetch_initial_data()
 
         self.server_version = self.initial_data['zulip_version']
-        self.server_feature_level = (
-            self.initial_data.get('zulip_feature_level')
-        )
+        self.server_feature_level = self.initial_data.get('zulip_feature_level')
 
         self.users = self.get_all_users()
 
@@ -157,8 +154,9 @@ class Model:
         muted_topics = self.initial_data['muted_topics']
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
         self._muted_topics: Dict[Tuple[str, str], Optional[int]] = {
-            (stream_name, topic): (None if self.server_feature_level is None
-                                   else date_muted[0])
+            (stream_name, topic): (
+                None if self.server_feature_level is None else date_muted[0]
+            )
             for stream_name, topic, *date_muted in muted_topics
         }
 
@@ -173,7 +171,8 @@ class Model:
         self._store_content_length_restrictions()
 
         self.active_emoji_data = self.generate_all_emoji_data(
-                                        self.initial_data['realm_emoji'])
+            self.initial_data['realm_emoji']
+        )
 
         self.twenty_four_hr_format = self.initial_data['twenty_four_hour_time']
         self.new_user_input = True
@@ -196,19 +195,21 @@ class Model:
         """
         return 'search' in [subnarrow[0] for subnarrow in self.narrow]
 
-    def set_narrow(self, *,
-                   stream: Optional[str]=None,
-                   topic: Optional[str]=None,
-                   pms: bool=False,
-                   pm_with: Optional[str]=None,
-                   starred: bool=False,
-                   mentioned: bool=False) -> bool:
+    def set_narrow(
+        self,
+        *,
+        stream: Optional[str] = None,
+        topic: Optional[str] = None,
+        pms: bool = False,
+        pm_with: Optional[str] = None,
+        starred: bool = False,
+        mentioned: bool = False,
+    ) -> bool:
         selected_params = {k for k, v in locals().items() if k != 'self' and v}
         valid_narrows: Dict[FrozenSet[str], List[Any]] = {
             frozenset(): [],
             frozenset(['stream']): [['stream', stream]],
-            frozenset(['stream', 'topic']): [['stream', stream],
-                                             ['topic', topic]],
+            frozenset(['stream', 'topic']): [['stream', stream], ['topic', topic]],
             frozenset(['pms']): [['is', 'private']],
             frozenset(['pm_with']): [['pm_with', pm_with]],
             frozenset(['starred']): [['is', 'starred']],
@@ -227,8 +228,7 @@ class Model:
             if pm_with is not None and new_narrow[0][0] == 'pm_with':
                 users = pm_with.split(', ')
                 self.recipients = frozenset(
-                    [self.user_dict[user]['user_id'] for user in users]
-                    + [self.user_id]
+                    [self.user_dict[user]['user_id'] for user in users] + [self.user_id]
                 )
             else:
                 self.recipients = frozenset()
@@ -252,8 +252,7 @@ class Model:
         # we pop the ['search', 'text'] term in the narrow, before
         # setting a new narrow.
         if self.is_search_narrow():
-            self.narrow = [item for item in self.narrow
-                           if item[0] != 'search']
+            self.narrow = [item for item in self.narrow if item[0] != 'search']
 
     def get_message_ids_in_current_narrow(self) -> Set[int]:
         narrow = self.narrow
@@ -290,16 +289,10 @@ class Model:
             # all messages contains all messages
             not self.narrow
             # mentions
-            or (
-                self.narrow[0][1] == 'mentioned'
-                and 'mentioned' in message['flags']
-            )
+            or (self.narrow[0][1] == 'mentioned' and 'mentioned' in message['flags'])
             # All-PMs
             # FIXME Buggy condition?
-            or (
-                self.narrow[0][1] == message['type']
-                and len(self.narrow) == 1
-            )
+            or (self.narrow[0][1] == message['type'] and len(self.narrow) == 1)
             # stream or stream+topic
             or (
                 self.narrow[0][0] == 'stream'
@@ -307,8 +300,10 @@ class Model:
                 and message['display_recipient'] == self.narrow[0][1]
                 and (
                     len(self.narrow) == 1  # stream
-                    or (len(self.narrow) == 2  # stream+topic
-                        and self.narrow[1][1] == message['subject'])
+                    or (
+                        len(self.narrow) == 2  # stream+topic
+                        and self.narrow[1][1] == message['subject']
+                    )
                 )
             )
             # PM-with
@@ -316,20 +311,19 @@ class Model:
                 self.narrow[0][0] == 'pm_with'
                 and message['type'] == 'private'
                 and len(self.narrow) == 1
-                and self.recipients == frozenset([
-                    user['id'] for user in message['display_recipient']
-                    ])
+                and self.recipients
+                == frozenset([user['id'] for user in message['display_recipient']])
             )
         )
 
     def _notify_server_of_presence(self) -> Dict[str, Any]:
         response = self.client.update_presence(
-                request={
-                    # TODO: Determine `status` from terminal tab focus.
-                    'status': 'active' if self.new_user_input else 'idle',
-                    'new_user_input': self.new_user_input,
-                }
-            )
+            request={
+                # TODO: Determine `status` from terminal tab focus.
+                'status': 'active' if self.new_user_input else 'idle',
+                'new_user_input': self.new_user_input,
+            }
+        )
         self.new_user_input = False
         return response
 
@@ -348,13 +342,12 @@ class Model:
                 self.users = self.get_all_users()
                 if hasattr(self.controller, 'view'):
                     self.controller.view.users_view.update_user_list(
-                        user_list=self.users)
+                        user_list=self.users
+                    )
             time.sleep(60)
 
     @asynch
-    def react_to_message(self,
-                         message: Message,
-                         reaction_to_toggle: str) -> None:
+    def react_to_message(self, message: Message, reaction_to_toggle: str) -> None:
         # FIXME Only support thumbs_up for now
         assert reaction_to_toggle == 'thumbs_up'
 
@@ -362,12 +355,15 @@ class Model:
             emoji_name='thumbs_up',
             emoji_code='1f44d',
             reaction_type='unicode_emoji',
-            message_id=str(message['id']))
+            message_id=str(message['id']),
+        )
         existing_reactions = [
             reaction['emoji_code']
             for reaction in message['reactions']
-            if (reaction['user'].get('user_id', None) == self.user_id
-                or reaction['user'].get('id', None) == self.user_id)
+            if (
+                reaction['user'].get('user_id', None) == self.user_id
+                or reaction['user'].get('id', None) == self.user_id
+            )
         ]
         if reaction_to_toggle_spec['emoji_code'] in existing_reactions:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
@@ -396,29 +392,27 @@ class Model:
     def mark_message_ids_as_read(self, id_list: List[int]) -> None:
         if not id_list:
             return
-        response = self.client.update_message_flags({
-            'messages': id_list,
-            'flag': 'read',
-            'op': 'add',
-        })
+        response = self.client.update_message_flags(
+            {
+                'messages': id_list,
+                'flag': 'read',
+                'op': 'add',
+            }
+        )
         display_error_if_present(response, self.controller)
 
     @asynch
-    def send_typing_status_by_user_ids(self, recipient_user_ids: List[int],
-                                       *, status: Literal['start', 'stop']
-                                       ) -> None:
+    def send_typing_status_by_user_ids(
+        self, recipient_user_ids: List[int], *, status: Literal['start', 'stop']
+    ) -> None:
         if recipient_user_ids:
-            request = {
-                'to': recipient_user_ids,
-                'op': status
-            }
+            request = {'to': recipient_user_ids, 'op': status}
             response = self.client.set_typing_status(request)
             display_error_if_present(response, self.controller)
         else:
             raise RuntimeError('Empty recipient list.')
 
-    def send_private_message(self, recipients: List[str],
-                             content: str) -> bool:
+    def send_private_message(self, recipients: List[str], content: str) -> bool:
         if recipients:
             composition = PrivateComposition(
                 type='private',
@@ -429,15 +423,12 @@ class Model:
             display_error_if_present(response, self.controller)
             message_was_sent = response['result'] == 'success'
             if message_was_sent:
-                notify_if_message_sent_outside_narrow(
-                    composition, self.controller
-                )
+                notify_if_message_sent_outside_narrow(composition, self.controller)
             return message_was_sent
         else:
             raise RuntimeError('Empty recipients list.')
 
-    def send_stream_message(self, stream: str, topic: str,
-                            content: str) -> bool:
+    def send_stream_message(self, stream: str, topic: str, content: str) -> bool:
         composition = StreamComposition(
             type='stream',
             to=stream,
@@ -460,9 +451,13 @@ class Model:
         display_error_if_present(response, self.controller)
         return response['result'] == 'success'
 
-    def update_stream_message(self, topic: str, message_id: int,
-                              propagate_mode: EditPropagateMode,
-                              content: Optional[str]=None) -> bool:
+    def update_stream_message(
+        self,
+        topic: str,
+        message_id: int,
+        propagate_mode: EditPropagateMode,
+        content: Optional[str] = None,
+    ) -> bool:
         request = {
             "message_id": message_id,
             "propagate_mode": propagate_mode,
@@ -482,9 +477,9 @@ class Model:
 
         return response['result'] == 'success'
 
-    def generate_all_emoji_data(self,
-                                custom_emoji: Dict[str, RealmEmojiData]
-                                ) -> NamedEmojiData:
+    def generate_all_emoji_data(
+        self, custom_emoji: Dict[str, RealmEmojiData]
+    ) -> NamedEmojiData:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data['type'] = 'unicode_emoji'
@@ -498,18 +493,19 @@ class Model:
             if not emoji['deactivated']
         }
         zulip_extra_emoji: NamedEmojiData = {
-                'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
+            'zulip': {'code': 'zulip', 'type': 'zulip_extra_emoji'}
         }
-        all_emoji_data = {**typed_unicode_emoji_data,
-                          **custom_emoji_data,
-                          **zulip_extra_emoji}.items()
-        active_emoji_data = OrderedDict(sorted(all_emoji_data,
-                                               key=lambda e: e[0]))
+        all_emoji_data = {
+            **typed_unicode_emoji_data,
+            **custom_emoji_data,
+            **zulip_extra_emoji,
+        }.items()
+        active_emoji_data = OrderedDict(sorted(all_emoji_data, key=lambda e: e[0]))
         return active_emoji_data
 
-    def get_messages(self, *,
-                     num_after: int, num_before: int,
-                     anchor: Optional[int]) -> str:
+    def get_messages(
+        self, *, num_after: int, num_before: int, anchor: Optional[int]
+    ) -> str:
         # anchor value may be specific message (int) or next unread (None)
         first_anchor = anchor is None
         anchor_value = anchor if anchor is not None else 0
@@ -526,8 +522,7 @@ class Model:
         response = self.client.get_messages(message_filters=request)
         if response['result'] == 'success':
             response['messages'] = [
-                self.modernize_message_response(msg)
-                for msg in response['messages']
+                self.modernize_message_response(msg) for msg in response['messages']
             ]
 
             self.index = index_messages(response['messages'], self, self.index)
@@ -543,9 +538,7 @@ class Model:
                 just_found_last_msg = len(response['messages']) < query_range
 
             had_last_msg = self._have_last_message.get(narrow_str, False)
-            self._have_last_message[narrow_str] = (
-                had_last_msg or just_found_last_msg
-            )
+            self._have_last_message[narrow_str] = had_last_msg or just_found_last_msg
 
             return ""
         display_error_if_present(response, self.controller)
@@ -558,15 +551,17 @@ class Model:
         These fields were added in server version 4.0, ZFL 53.
         """
         self.max_stream_name_length = self.initial_data.get(
-            'max_stream_name_length', MAX_STREAM_NAME_LENGTH)
+            'max_stream_name_length', MAX_STREAM_NAME_LENGTH
+        )
         self.max_topic_length = self.initial_data.get(
-            'max_topic_length', MAX_TOPIC_NAME_LENGTH)
+            'max_topic_length', MAX_TOPIC_NAME_LENGTH
+        )
         self.max_message_length = self.initial_data.get(
-            'max_message_length', MAX_MESSAGE_LENGTH)
+            'max_message_length', MAX_MESSAGE_LENGTH
+        )
 
     @staticmethod
-    def modernize_message_response(message: Message
-                                   ) -> Message:
+    def modernize_message_response(message: Message) -> Message:
         """
         Converts received message into the modern message response format.
 
@@ -584,7 +579,8 @@ class Model:
         # (List[Dict[str, str]])
         if 'topic_links' in message:
             topic_links = [
-                {'url': link, 'text': ''} for link in message['topic_links']
+                {'url': link, 'text': ''}
+                for link in message['topic_links']
                 if type(link) == str
             ]
             if topic_links:
@@ -592,8 +588,9 @@ class Model:
 
         return message
 
-    def fetch_message_history(self, message_id: int
-                              ) -> List[Dict[str, Union[int, str]]]:
+    def fetch_message_history(
+        self, message_id: int
+    ) -> List[Dict[str, Union[int, str]]]:
         """
         Fetches message edit history for a message using its ID.
         """
@@ -612,8 +609,9 @@ class Model:
         for stream_id in stream_list:
             response = self.client.get_stream_topics(stream_id)
             if response['result'] == 'success':
-                self.index['topics'][stream_id] = [topic['name'] for
-                                                   topic in response['topics']]
+                self.index['topics'][stream_id] = [
+                    topic['name'] for topic in response['topics']
+                ]
             else:
                 display_error_if_present(response, self.controller)
                 return response['msg']
@@ -651,20 +649,19 @@ class Model:
         # NOTE: Exceptions do not work well with threads
         with ThreadPoolExecutor(max_workers=1) as executor:
             futures: Dict[str, Future[str]] = {
-                'get_messages': executor.submit(self.get_messages,
-                                                num_after=10,
-                                                num_before=30,
-                                                anchor=None),
-                'register': executor.submit(self._register_desired_events,
-                                            fetch_data=True),
+                'get_messages': executor.submit(
+                    self.get_messages, num_after=10, num_before=30, anchor=None
+                ),
+                'register': executor.submit(
+                    self._register_desired_events, fetch_data=True
+                ),
             }
 
             # Wait for threads to complete
             wait(futures.values())
 
         results: Dict[str, str] = {
-            name: self.exception_safe_result(future)
-            for name, future in futures.items()
+            name: self.exception_safe_result(future) for name, future in futures.items()
         }
         if not any(results.values()):
             self.user_id = self.initial_data['user_id']
@@ -682,23 +679,27 @@ class Model:
             ]
             raise ServerConnectionFailure(", ".join(failure_text))
 
-    def get_other_subscribers_in_stream(self, stream_id: Optional[int]=None,
-                                        stream_name: Optional[str]=None
-                                        ) -> List[int]:
+    def get_other_subscribers_in_stream(
+        self, stream_id: Optional[int] = None, stream_name: Optional[str] = None
+    ) -> List[int]:
         assert stream_id is not None or stream_name is not None
 
         if stream_id:
             assert self.is_user_subscribed_to_stream(stream_id)
 
-            return [sub
-                    for sub in self.stream_dict[stream_id]['subscribers']
-                    if sub != self.user_id]
+            return [
+                sub
+                for sub in self.stream_dict[stream_id]['subscribers']
+                if sub != self.user_id
+            ]
         else:
-            return [sub
-                    for _, stream in self.stream_dict.items()
-                    for sub in stream['subscribers']
-                    if stream['name'] == stream_name
-                    if sub != self.user_id]
+            return [
+                sub
+                for _, stream in self.stream_dict.items()
+                for sub in stream['subscribers']
+                if stream['name'] == stream_name
+                if sub != self.user_id
+            ]
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
@@ -754,8 +755,10 @@ class Model:
                             if aggregate_status != 'active':
                                 aggregate_status = status
                         if status == 'offline':
-                            if (aggregate_status != 'active'
-                                    and aggregate_status != 'idle'):
+                            if (
+                                aggregate_status != 'active'
+                                and aggregate_status != 'idle'
+                            ):
                                 aggregate_status = status
 
                 status = aggregate_status
@@ -784,14 +787,26 @@ class Model:
             self.user_id_email_dict[bot['user_id']] = email
 
         # Generate filtered lists for active & idle users
-        active = [properties for properties in self.user_dict.values()
-                  if properties['status'] == 'active']
-        idle = [properties for properties in self.user_dict.values()
-                if properties['status'] == 'idle']
-        offline = [properties for properties in self.user_dict.values()
-                   if properties['status'] == 'offline']
-        inactive = [properties for properties in self.user_dict.values()
-                    if properties['status'] == 'inactive']
+        active = [
+            properties
+            for properties in self.user_dict.values()
+            if properties['status'] == 'active'
+        ]
+        idle = [
+            properties
+            for properties in self.user_dict.values()
+            if properties['status'] == 'idle'
+        ]
+        offline = [
+            properties
+            for properties in self.user_dict.values()
+            if properties['status'] == 'offline'
+        ]
+        inactive = [
+            properties
+            for properties in self.user_dict.values()
+            if properties['status'] == 'inactive'
+        ]
 
         # Construct user_list from sorted components of each list
         user_list = sorted(active, key=lambda u: u['full_name'].casefold())
@@ -819,11 +834,15 @@ class Model:
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
-            return StreamData({'name': stream['name'],
-                               'id': stream['stream_id'],
-                               'color': stream['color'],
-                               'invite_only': stream['invite_only'],
-                               'description': stream['description']})
+            return StreamData(
+                {
+                    'name': stream['name'],
+                    'id': stream['stream_id'],
+                    'color': stream['color'],
+                    'invite_only': stream['invite_only'],
+                    'description': stream['description'],
+                }
+            )
 
         new_pinned_streams = []
         new_unpinned_streams = []
@@ -851,29 +870,34 @@ class Model:
 
         self.muted_streams = self.muted_streams.union(new_muted_streams)
 
-    def _group_info_from_realm_user_groups(self,
-                                           groups: List[Dict[str, Any]]
-                                           ) -> List[str]:
+    def _group_info_from_realm_user_groups(
+        self, groups: List[Dict[str, Any]]
+    ) -> List[str]:
         """
         Stores group information in the model and returns a list of
         group_names which helps in group typeahead. (Eg: @*terminal*)
         """
         for sub_group in groups:
             self.user_group_by_id[sub_group['id']] = {
-                key: sub_group[key] for key in sub_group if key != 'id'}
-        user_group_names = [self.user_group_by_id[group_id]['name']
-                            for group_id in self.user_group_by_id]
+                key: sub_group[key] for key in sub_group if key != 'id'
+            }
+        user_group_names = [
+            self.user_group_by_id[group_id]['name']
+            for group_id in self.user_group_by_id
+        ]
         # Sort groups for typeahead to work alphabetically (case-insensitive)
         user_group_names.sort(key=str.lower)
         return user_group_names
 
     def toggle_stream_muted_status(self, stream_id: int) -> None:
-        request = [{
-            'stream_id': stream_id,
-            'property': 'is_muted',
-            'value': not self.is_muted_stream(stream_id)
-            # True for muting and False for unmuting.
-        }]
+        request = [
+            {
+                'stream_id': stream_id,
+                'property': 'is_muted',
+                'value': not self.is_muted_stream(stream_id)
+                # True for muting and False for unmuting.
+            }
+        ]
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)
 
@@ -887,11 +911,13 @@ class Model:
         return stream_id in [stream['id'] for stream in self.pinned_streams]
 
     def toggle_stream_pinned_status(self, stream_id: int) -> bool:
-        request = [{
-            'stream_id': stream_id,
-            'property': 'pin_to_top',
-            'value': not self.is_pinned_stream(stream_id)
-        }]
+        request = [
+            {
+                'stream_id': stream_id,
+                'property': 'pin_to_top',
+                'value': not self.is_pinned_stream(stream_id),
+            }
+        ]
         response = self.client.update_subscription_settings(request)
         return response['result'] == 'success'
 
@@ -904,8 +930,8 @@ class Model:
                                         pinning/unpinning streams)
         """
         assert event['type'] == "subscription"
-        def get_stream_by_id(streams: List[StreamData], stream_id: int
-                             ) -> StreamData:
+
+        def get_stream_by_id(streams: List[StreamData], stream_id: int) -> StreamData:
             for stream in streams:
                 if stream['id'] == stream_id:
                     return stream
@@ -917,9 +943,7 @@ class Model:
                     stream_id = event['stream_id']
 
                     # FIXME: Does this always contain the stream_id?
-                    stream_button = (
-                        self.controller.view.stream_id_to_button[stream_id]
-                    )
+                    stream_button = self.controller.view.stream_id_to_button[stream_id]
 
                     unread_count = self.unread_counts['streams'][stream_id]
                     if event['value']:  # Unmuting streams
@@ -935,19 +959,15 @@ class Model:
                     stream_id = event['stream_id']
 
                     # FIXME: Does this always contain the stream_id?
-                    stream_button = (
-                        self.controller.view.stream_id_to_button[stream_id]
-                    )
+                    stream_button = self.controller.view.stream_id_to_button[stream_id]
 
                     if event['value']:
-                        stream = get_stream_by_id(self.unpinned_streams,
-                                                  stream_id)
+                        stream = get_stream_by_id(self.unpinned_streams, stream_id)
                         if stream:
                             self.unpinned_streams.remove(stream)
                             self.pinned_streams.append(stream)
                     else:
-                        stream = get_stream_by_id(self.pinned_streams,
-                                                  stream_id)
+                        stream = get_stream_by_id(self.pinned_streams, stream_id)
                         if stream:
                             self.pinned_streams.remove(stream)
                             self.unpinned_streams.append(stream)
@@ -982,25 +1002,24 @@ class Model:
         if hasattr(self.controller, 'view'):
             # If the user is in pm narrow with the person typing
             narrow = self.narrow
-            if (len(narrow) == 1 and narrow[0][0] == 'pm_with'
-                    and event['sender']['email'] in narrow[0][1].split(',')):
+            if (
+                len(narrow) == 1
+                and narrow[0][0] == 'pm_with'
+                and event['sender']['email'] in narrow[0][1].split(',')
+            ):
                 if event['op'] == 'start':
                     user = self.user_dict[event['sender']['email']]
-                    self.controller.view.set_footer_text([
-                        ' ',
-                        ('code', user['full_name']),
-                        ' is typing...'
-                    ])
+                    self.controller.view.set_footer_text(
+                        [' ', ('code', user['full_name']), ' is typing...']
+                    )
                 elif event['op'] == 'stop':
                     self.controller.view.set_footer_text()
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
-    def get_invalid_recipient_emails(self, recipient_emails: List[str]
-                                     ) -> List[str]:
+    def get_invalid_recipient_emails(self, recipient_emails: List[str]) -> List[str]:
 
-        return [email for email in recipient_emails
-                if email not in self.user_dict]
+        return [email for email in recipient_emails if email not in self.user_dict]
 
     def is_valid_stream(self, stream_name: str) -> bool:
         for stream in self.stream_dict.values():
@@ -1030,17 +1049,17 @@ class Model:
                 ]
                 recipient = ', '.join(extra_targets)
         elif message['type'] == 'stream' and (
-            {'mentioned', 'wildcard_mentioned'}.intersection(
-                set(message['flags'])
-            )
+            {'mentioned', 'wildcard_mentioned'}.intersection(set(message['flags']))
             or self.stream_dict[message['stream_id']]['desktop_notifications']
         ):
             recipient = '{display_recipient} -> {subject}'.format(**message)
 
         if recipient:
-            return notify(f"{self.server_name}:\n"
-                          f"{message['sender_full_name']} (to {recipient})",
-                          message['content'])
+            return notify(
+                f"{self.server_name}:\n"
+                f"{message['sender_full_name']} (to {recipient})",
+                message['content'],
+            )
         return ""
 
     def _handle_message_event(self, event: Event) -> None:
@@ -1059,26 +1078,28 @@ class Model:
             # consecutive block independently). However, it is critical to keep
             # the topics index synchronized as it used whenever the topics list
             # view is reconstructed later.
-            self._update_topic_index(message['stream_id'],
-                                     message['subject'])
+            self._update_topic_index(message['stream_id'], message['subject'])
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
             if hasattr(self.controller, 'view'):
                 view = self.controller.view
-                if (view.left_panel.is_in_topic_view_with_stream_id(
-                        message['stream_id'])):
+                if view.left_panel.is_in_topic_view_with_stream_id(
+                    message['stream_id']
+                ):
                     view.topic_w.update_topics_list(
-                        message['stream_id'], message['subject'],
-                        message['sender_id'])
+                        message['stream_id'], message['subject'], message['sender_id']
+                    )
                     self.controller.update_screen()
 
         # We can notify user regardless of whether UI is rendered or not,
         # but depend upon the UI to indicate failures.
         failed_command = self.notify_user(message)
-        if (failed_command
-                and hasattr(self.controller, 'view')
-                and not self._notified_user_of_notification_failure):
+        if (
+            failed_command
+            and hasattr(self.controller, 'view')
+            and not self._notified_user_of_notification_failure
+        ):
             notice_template = (
                 "You have enabled notifications, but your notification "
                 "command '{}' could not be found."
@@ -1088,8 +1109,9 @@ class Model:
                 "\n\n"
                 "Press '{}' to close this window."
             )
-            notice = notice_template.format(failed_command,
-                                            primary_key_for_command("GO_BACK"))
+            notice = notice_template.format(
+                failed_command, primary_key_for_command("GO_BACK")
+            )
             self.controller.popup_with_message(notice, width=50)
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
@@ -1099,15 +1121,17 @@ class Model:
         if 'read' not in message['flags']:
             set_count([message['id']], self.controller, 1)
 
-        if (hasattr(self.controller, 'view')
-                and self._have_last_message.get(repr(self.narrow), False)):
+        if hasattr(self.controller, 'view') and self._have_last_message.get(
+            repr(self.narrow), False
+        ):
             msg_log = self.controller.view.message_view.log
             if msg_log:
                 last_message = msg_log[-1].original_widget.message
             else:
                 last_message = None
-            msg_w_list = create_msg_box_list(self, [message['id']],
-                                             last_message=last_message)
+            msg_w_list = create_msg_box_list(
+                self, [message['id']], last_message=last_message
+            )
             if not msg_w_list:
                 return
             else:
@@ -1175,11 +1199,9 @@ class Model:
             if stream_id in self.index['topics']:
                 if hasattr(self.controller, 'view'):
                     view = self.controller.view
-                    if (view.left_panel.is_in_topic_view_with_stream_id(
-                            stream_id)):
+                    if view.left_panel.is_in_topic_view_with_stream_id(stream_id):
                         self._fetch_topics_in_streams([stream_id])
-                        view.left_panel.show_topic_view(
-                            view.topic_w.stream_button)
+                        view.left_panel.show_topic_view(view.topic_w.stream_button)
                         self.controller.update_screen()
                     else:
                         self.index['topics'][stream_id] = []
@@ -1219,8 +1241,7 @@ class Model:
         Handle change to message flags (eg. starred, read)
         """
         assert event['type'] == "update_message_flags"
-        if (self.server_feature_level is None
-                or self.server_feature_level < 32):
+        if self.server_feature_level is None or self.server_feature_level < 32:
             operation = event['operation']
         else:
             operation = event['op']
@@ -1248,8 +1269,10 @@ class Model:
             elif operation == 'remove':
                 if flag_to_change in msg['flags']:
                     msg['flags'].remove(flag_to_change)
-                if (message_id in self.index['starred_msg_ids']
-                        and flag_to_change == 'starred'):
+                if (
+                    message_id in self.index['starred_msg_ids']
+                    and flag_to_change == 'starred'
+                ):
                     self.index['starred_msg_ids'].remove(message_id)
             else:
                 raise RuntimeError(event, msg['flags'])
@@ -1258,15 +1281,17 @@ class Model:
             self._update_rendered_view(message_id)
 
         if operation == 'add' and flag_to_change == 'read':
-            set_count(list(message_ids_to_mark & indexed_message_ids),
-                      self.controller, -1)
+            set_count(
+                list(message_ids_to_mark & indexed_message_ids), self.controller, -1
+            )
 
-        if (flag_to_change == 'starred' and operation in ["add", "remove"]):
+        if flag_to_change == 'starred' and operation in ["add", "remove"]:
             # update starred count in view
             len_ids = len(message_ids_to_mark)
             count = -len_ids if operation == "remove" else len_ids
             self.controller.view.starred_button.update_count(
-                self.controller.view.starred_button.count + count)
+                self.controller.view.starred_button.count + count
+            )
             self.controller.update_screen()
 
     def formatted_local_time(
@@ -1291,8 +1316,7 @@ class Model:
         # by the users in the organisation along with a boolean value
         # representing the active state of each emoji.
         assert event['type'] == "realm_emoji"
-        self.active_emoji_data = self.generate_all_emoji_data(
-                                                    event['realm_emoji'])
+        self.active_emoji_data = self.generate_all_emoji_data(event['realm_emoji'])
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
@@ -1305,15 +1329,17 @@ class Model:
             if msg_box.message['id'] == msg_id:
                 # Remove the message if it no longer belongs in the current
                 # narrow.
-                if (len(self.narrow) == 2
-                        and msg_box.message['subject'] != self.narrow[1][1]):
+                if (
+                    len(self.narrow) == 2
+                    and msg_box.message['subject'] != self.narrow[1][1]
+                ):
                     view.message_view.log.remove(msg_w)
                     # Change narrow if there are no messages left in the
                     # current narrow.
                     if not view.message_view.log:
                         msg_w_list = create_msg_box_list(
-                                        self, [msg_id],
-                                        last_message=msg_box.last_message)
+                            self, [msg_id], last_message=msg_box.last_message
+                        )
                         if msg_w_list:
                             # FIXME Still depends on widget
                             widget = msg_w_list[0].original_widget
@@ -1326,8 +1352,8 @@ class Model:
                     return
 
                 msg_w_list = create_msg_box_list(
-                                self, [msg_id],
-                                last_message=msg_box.last_message)
+                    self, [msg_id], last_message=msg_box.last_message
+                )
                 if not msg_w_list:
                     return
                 else:
@@ -1340,8 +1366,10 @@ class Model:
                     if len(view.message_view.log) != (msg_pos + 1):
                         next_msg_w = view.message_view.log[msg_pos + 1]
                         msg_w_list = create_msg_box_list(
-                            self, [next_msg_w.original_widget.message['id']],
-                            last_message=new_msg_w.original_widget.message)
+                            self,
+                            [next_msg_w.original_widget.message['id']],
+                            last_message=new_msg_w.original_widget.message,
+                        )
                         view.message_view.log[msg_pos + 1] = msg_w_list[0]
                     self.controller.update_screen()
                     return
@@ -1359,20 +1387,21 @@ class Model:
                 msg_id = msg_box.message['id']
                 last_msg = msg_box.last_message
                 msg_pos = view.message_view.log.index(msg_w)
-                msg_w_list = create_msg_box_list(self, [msg_id],
-                                                 last_message=last_msg)
+                msg_w_list = create_msg_box_list(self, [msg_id], last_message=last_msg)
                 view.message_view.log[msg_pos] = msg_w_list[0]
         self.controller.update_screen()
 
-    def _register_desired_events(self, *, fetch_data: bool=False) -> str:
+    def _register_desired_events(self, *, fetch_data: bool = False) -> str:
         fetch_types = None if not fetch_data else self.initial_data_to_fetch
         event_types = list(self.event_actions)
         try:
-            response = self.client.register(event_types=event_types,
-                                            fetch_event_types=fetch_types,
-                                            client_gravatar=True,
-                                            apply_markdown=True,
-                                            include_subscribers=True)
+            response = self.client.register(
+                event_types=event_types,
+                fetch_event_types=fetch_types,
+                client_gravatar=True,
+                apply_markdown=True,
+                include_subscribers=True,
+            )
         except zulip.ZulipError as e:
             return str(e)
 
@@ -1400,8 +1429,7 @@ class Model:
                     time.sleep(reregister_timeout)
 
             response = self.client.get_events(
-                queue_id=queue_id,
-                last_event_id=last_event_id
+                queue_id=queue_id, last_event_id=last_event_id
             )
 
             if 'error' in response['result']:
@@ -1426,5 +1454,7 @@ class Model:
                         self.event_actions[event['type']](event)
                     except Exception:
                         import sys
-                        self.controller.raise_exception_in_main_thread(sys.exc_info(),
-                                                                       critical=False)
+
+                        self.controller.raise_exception_in_main_thread(
+                            sys.exc_info(), critical=False
+                        )

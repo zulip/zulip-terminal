@@ -28,8 +28,9 @@ class TestController:
         # Patch these unconditionally to avoid calling in __init__
         self.poll_for_events = mocker.patch(CORE + '.Model.poll_for_events')
         mocker.patch(CORE + '.Controller.show_loading')
-        self.main_loop = mocker.patch(CORE + '.urwid.MainLoop',
-                                      return_value=mocker.Mock())
+        self.main_loop = mocker.patch(
+            CORE + '.urwid.MainLoop', return_value=mocker.Mock()
+        )
 
         self.config_file = 'path/to/zuliprc'
         self.theme_name = 'zt_dark'
@@ -38,10 +39,16 @@ class TestController:
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
         self.maximum_footlinks = 3
-        result = Controller(self.config_file, self.maximum_footlinks,
-                            self.theme_name, self.theme, 256,
-                            self.in_explore_mode, self.autohide,
-                            self.notify_enabled)
+        result = Controller(
+            self.config_file,
+            self.maximum_footlinks,
+            self.theme_name,
+            self.theme,
+            256,
+            self.in_explore_mode,
+            self.autohide,
+            self.notify_enabled,
+        )
         result.view.message_view = mocker.Mock()  # set in View.__init__
         result.model.server_url = SERVER_URL
         return result
@@ -57,10 +64,12 @@ class TestController:
         assert controller.theme == self.theme
         assert controller.maximum_footlinks == self.maximum_footlinks
         assert self.main_loop.call_count == 1
-        controller.loop.watch_pipe.assert_has_calls([
-            mocker.call(controller._draw_screen),
-            mocker.call(controller._raise_exception)
-        ])
+        controller.loop.watch_pipe.assert_has_calls(
+            [
+                mocker.call(controller._draw_screen),
+                mocker.call(controller._raise_exception),
+            ]
+        )
 
     def test_initial_editor_mode(self, controller):
         assert not controller.is_in_editor_mode()
@@ -89,8 +98,9 @@ class TestController:
 
         assert not controller.is_in_editor_mode()
 
-    def test_narrow_to_stream(self, mocker, controller,
-                              stream_button, index_stream) -> None:
+    def test_narrow_to_stream(
+        self, mocker, controller, stream_button, index_stream
+    ) -> None:
         controller.model.narrow = []
         controller.model.index = index_stream
         controller.view.message_view = mocker.patch('urwid.ListBox')
@@ -106,20 +116,19 @@ class TestController:
         controller.narrow_to_stream(stream_name="PTEST")
 
         assert controller.model.stream_id == stream_button.stream_id
-        assert controller.model.narrow == [['stream',
-                                            stream_button.stream_name]]
+        assert controller.model.narrow == [['stream', stream_button.stream_name]]
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widget = (controller.view.message_view.log
-                  .extend.call_args_list[0][0][0][0])
+        widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         stream_id = stream_button.stream_id
         id_list = index_stream['stream_msg_ids_by_stream_id'][stream_id]
         assert {widget.original_widget.message['id']} == id_list
 
-    def test_narrow_to_topic(self, mocker, controller,
-                             msg_box, index_topic):
-        expected_narrow = [['stream', msg_box.stream_name],
-                           ['topic', msg_box.topic_name]]
+    def test_narrow_to_topic(self, mocker, controller, msg_box, index_topic):
+        expected_narrow = [
+            ['stream', msg_box.stream_name],
+            ['topic', msg_box.topic_name],
+        ]
         controller.model.narrow = []
         controller.model.index = index_topic
         controller.view.message_view = mocker.patch('urwid.ListBox')
@@ -132,15 +141,13 @@ class TestController:
         controller.model.muted_streams = []
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
-        controller.narrow_to_topic(stream_name="PTEST",
-                                   topic_name=msg_box.topic_name)
+        controller.narrow_to_topic(stream_name="PTEST", topic_name=msg_box.topic_name)
 
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widget = (controller.view.message_view.log
-                  .extend.call_args_list[0][0][0][0])
+        widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
         id_list = index_topic['topic_msg_ids'][stream_id][topic_name]
         assert {widget.original_widget.message['id']} == id_list
@@ -152,9 +159,7 @@ class TestController:
         controller.model.user_id = 5140
         controller.model.user_email = "some@email"
         controller.model.user_dict = {
-            user_button.email: {
-                'user_id': user_button.user_id
-            }
+            user_button.email: {'user_id': user_button.user_id}
         }
 
         emails = [user_button.email]
@@ -165,14 +170,11 @@ class TestController:
         controller.view.message_view.log.clear.assert_called_once_with()
         recipients = frozenset([controller.model.user_id, user_button.user_id])
         assert controller.model.recipients == recipients
-        widget = (controller.view.message_view.log
-                  .extend.call_args_list[0][0][0][0])
+        widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         id_list = index_user['private_msg_ids_by_user_ids'][recipients]
         assert {widget.original_widget.message['id']} == id_list
 
-    def test_narrow_to_all_messages(
-        self, mocker, controller, index_all_messages
-    ):
+    def test_narrow_to_all_messages(self, mocker, controller, index_all_messages):
         controller.model.narrow = [['stream', 'PTEST']]
         controller.model.index = index_all_messages
         controller.view.message_view = mocker.patch('urwid.ListBox')
@@ -191,8 +193,7 @@ class TestController:
         assert controller.model.narrow == []
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widgets = (controller.view.message_view.log.extend
-                   .call_args_list[0][0][0])
+        widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         id_list = index_all_messages['all_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
@@ -209,15 +210,12 @@ class TestController:
         assert controller.model.narrow == [['is', 'private']]
         controller.view.message_view.log.clear.assert_called_once_with()
 
-        widgets = (controller.view.message_view.log.extend
-                   .call_args_list[0][0][0])
+        widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         id_list = index_user['private_msg_ids']
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_narrow_to_all_starred(
-        self, mocker, controller, index_all_starred
-    ):
+    def test_narrow_to_all_starred(self, mocker, controller, index_all_starred):
         controller.model.narrow = []
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -238,14 +236,11 @@ class TestController:
         controller.view.message_view.log.clear.assert_called_once_with()
 
         id_list = index_all_starred['starred_msg_ids']
-        widgets = (controller.view.message_view.log.extend
-                   .call_args_list[0][0][0])
+        widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_narrow_to_all_mentions(
-        self, mocker, controller, index_all_mentions
-    ):
+    def test_narrow_to_all_mentions(self, mocker, controller, index_all_mentions):
         controller.model.narrow = []
         controller.model.index = index_all_mentions
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -266,15 +261,12 @@ class TestController:
         controller.view.message_view.log.clear.assert_called_once_with()
 
         id_list = index_all_mentions['mentioned_msg_ids']
-        widgets = (controller.view.message_view.log.extend
-                   .call_args_list[0][0][0])
+        widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message['id'] for widget in widgets}
         assert msg_ids == id_list
 
     def test_main(self, mocker, controller):
-        controller.view.palette = {
-            'default': 'theme_properties'
-        }
+        controller.view.palette = {'default': 'theme_properties'}
         mock_tsk = mocker.patch('zulipterminal.ui.Screen.tty_signal_keys')
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
 
@@ -282,13 +274,12 @@ class TestController:
 
         assert controller.loop.run.call_count == 1
 
-    @pytest.mark.parametrize('muted_streams, action', [
-        ({205, 89}, 'unmuting'),
-        ({89}, 'muting')
-    ])
-    def test_stream_muting_confirmation_popup(self, mocker, controller,
-                                              stream_button, muted_streams,
-                                              action):
+    @pytest.mark.parametrize(
+        'muted_streams, action', [({205, 89}, 'unmuting'), ({89}, 'muting')]
+    )
+    def test_stream_muting_confirmation_popup(
+        self, mocker, controller, stream_button, muted_streams, action
+    ):
         pop_up = mocker.patch(CORE + '.PopUpConfirmationView')
         text = mocker.patch(CORE + '.urwid.Text')
         partial = mocker.patch(CORE + '.partial')
@@ -298,40 +289,50 @@ class TestController:
         controller.stream_muting_confirmation_popup(stream_button)
         text.assert_called_with(
             ("bold", f"Confirm {action} of stream '{stream_button.stream_name}' ?"),
-            "center")
+            "center",
+        )
         pop_up.assert_called_once_with(controller, text(), partial())
 
-    @pytest.mark.parametrize('initial_narrow, final_narrow', [
-        ([], [['search', 'FOO']]),
-        ([['search', 'BOO']], [['search', 'FOO']]),
-        ([['stream', 'PTEST']], [['stream', 'PTEST'], ['search', 'FOO']]),
-        ([['pm_with', 'foo@zulip.com'], ['search', 'BOO']],
-         [['pm_with', 'foo@zulip.com'], ['search', 'FOO']]),
-        ([['stream', 'PTEST'], ['topic', 'RDS']],
-         [['stream', 'PTEST'], ['topic', 'RDS'], ['search', 'FOO']]),
-    ], ids=[
-        'Default_all_msg_search', 'redo_default_search',
-        'search_within_stream', 'pm_search_again',
-        'search_within_topic_narrow',
-    ])
-    @pytest.mark.parametrize('msg_ids', [
-        ({200, 300, 400}),
-        (set()),
-        ({100})
-    ])
-    def test_search_message(self, initial_narrow, final_narrow,
-                            controller, mocker, msg_ids):
+    @pytest.mark.parametrize(
+        'initial_narrow, final_narrow',
+        [
+            ([], [['search', 'FOO']]),
+            ([['search', 'BOO']], [['search', 'FOO']]),
+            ([['stream', 'PTEST']], [['stream', 'PTEST'], ['search', 'FOO']]),
+            (
+                [['pm_with', 'foo@zulip.com'], ['search', 'BOO']],
+                [['pm_with', 'foo@zulip.com'], ['search', 'FOO']],
+            ),
+            (
+                [['stream', 'PTEST'], ['topic', 'RDS']],
+                [['stream', 'PTEST'], ['topic', 'RDS'], ['search', 'FOO']],
+            ),
+        ],
+        ids=[
+            'Default_all_msg_search',
+            'redo_default_search',
+            'search_within_stream',
+            'pm_search_again',
+            'search_within_topic_narrow',
+        ],
+    )
+    @pytest.mark.parametrize('msg_ids', [({200, 300, 400}), (set()), ({100})])
+    def test_search_message(
+        self, initial_narrow, final_narrow, controller, mocker, msg_ids
+    ):
         get_message = mocker.patch('zulipterminal.model.Model.get_messages')
         create_msg = mocker.patch('zulipterminal.core.create_msg_box_list')
         mocker.patch(
             'zulipterminal.model.Model.get_message_ids_in_current_narrow',
-            return_value=msg_ids)
+            return_value=msg_ids,
+        )
         controller.model.index = {'search': {500}}  # Any initial search index
         controller.view.message_view = mocker.patch('urwid.ListBox')
         controller.model.narrow = initial_narrow
 
         def set_msg_ids(*args, **kwargs):
             controller.model.index['search'].update(msg_ids)
+
         get_message.side_effect = set_msg_ids
         assert controller.model.index['search'] == {500}
 
@@ -339,21 +340,28 @@ class TestController:
 
         assert controller.model.narrow == final_narrow
         get_message.assert_called_once_with(
-            num_after=0, num_before=30, anchor=10000000000)
+            num_after=0, num_before=30, anchor=10000000000
+        )
         create_msg.assert_called_once_with(controller.model, msg_ids)
         assert controller.model.index == {'search': msg_ids}
 
-    @pytest.mark.parametrize('screen_size, expected_popup_size', [
-        ((150, 90), (3 * 150 // 4, 3 * 90 // 4)),
-        ((90, 75), (7 * 90 // 8, 3 * 75 // 4)),
-        ((70, 60), (70, 3 * 60 // 4)),
-    ], ids=[
-        'above_linear_range', 'in_linear_range', 'below_linear_range',
-    ])
-    def test_maximum_popup_dimensions(self, mocker, controller,
-                                      screen_size, expected_popup_size):
-        controller.loop.screen.get_cols_rows = mocker.Mock(
-            return_value=screen_size)
+    @pytest.mark.parametrize(
+        'screen_size, expected_popup_size',
+        [
+            ((150, 90), (3 * 150 // 4, 3 * 90 // 4)),
+            ((90, 75), (7 * 90 // 8, 3 * 75 // 4)),
+            ((70, 60), (70, 3 * 60 // 4)),
+        ],
+        ids=[
+            'above_linear_range',
+            'in_linear_range',
+            'below_linear_range',
+        ],
+    )
+    def test_maximum_popup_dimensions(
+        self, mocker, controller, screen_size, expected_popup_size
+    ):
+        controller.loop.screen.get_cols_rows = mocker.Mock(return_value=screen_size)
 
         popup_size = controller.maximum_popup_dimensions()
 

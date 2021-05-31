@@ -50,7 +50,7 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     'area:msg': 'standout',
     'area:stream': 'standout',
     'area:error': 'standout',
-    'search_error': 'standout'
+    'search_error': 'standout',
 }
 
 
@@ -72,9 +72,9 @@ DEF_base = dict(
     black='g19',
 )
 
-DEF = dict(DEF_base,
-           **{f"{color}:bold": f"{code}, bold"
-              for color, code in DEF_base.items()})
+DEF = dict(
+    DEF_base, **{f"{color}:bold": f"{code}, bold" for color, code in DEF_base.items()}
+)
 
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
@@ -515,8 +515,11 @@ def aliased_themes() -> Dict[str, str]:
 
 
 def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
-    complete = {name for name, styles in THEMES.items()
-                if {s[0] for s in styles}.issuperset(required_styles)}
+    complete = {
+        name
+        for name, styles in THEMES.items()
+        if {s[0] for s in styles}.issuperset(required_styles)
+    }
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
 
@@ -528,13 +531,13 @@ def theme_with_monochrome_added(theme: ThemeSpec) -> ThemeSpec:
         if style_name not in required_styles:  # incomplete theme
             continue
         mono_style = required_styles[style_name]
-        if len(style) > 4:     # 256 colors+
+        if len(style) > 4:  # 256 colors+
             new_style = style[:3] + (mono_style,) + style[4:]
         elif len(style) == 4:  # 16 colors + mono (overwrite mono)
             new_style = style[:3] + (mono_style,)
         elif len(style) == 3:  # 16 colors only
             new_style = style[:3] + (mono_style,)
-        else:                  # 1-to-1 mapping (same as other style)
+        else:  # 1-to-1 mapping (same as other style)
             new_style = style
         updated_theme.append(new_style)
     return updated_theme
