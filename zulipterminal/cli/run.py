@@ -23,10 +23,10 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
 
-TRACEBACK_LOG_FILENAME = 'zulip-terminal-tracebacks.log'
-API_CALL_LOG_FILENAME = 'zulip-terminal-API-requests.log'
-ZULIPRC_CONFIG = 'in zuliprc file'
-NO_CONFIG = 'with no config'
+TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
+API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
+ZULIPRC_CONFIG = "in zuliprc file"
+NO_CONFIG = "with no config"
 
 # Create a logger for this application
 zt_logger = logging.getLogger(__name__)
@@ -43,23 +43,23 @@ requests_logger.setLevel(logging.DEBUG)
 
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
-    'theme': 'zt_dark',
-    'autohide': 'no_autohide',
-    'notify': 'disabled',
-    'footlinks': 'enabled',
-    'color-depth': '256',
-    'maximum-footlinks': '3',
+    "theme": "zt_dark",
+    "autohide": "no_autohide",
+    "notify": "disabled",
+    "footlinks": "enabled",
+    "color-depth": "256",
+    "maximum-footlinks": "3",
 }
 
 
 def in_color(color: str, text: str) -> str:
     color_for_str = {
-        'red': '1',
-        'green': '2',
-        'yellow': '3',
-        'blue': '4',
-        'purple': '5',
-        'cyan': '6',
+        "red": "1",
+        "green": "2",
+        "yellow": "3",
+        "blue": "4",
+        "purple": "5",
+        "cyan": "6",
     }
     # We can use 3 instead of 9 if high-contrast is eg. less compatible?
     return f"\033[9{color_for_str[color]}m{text}\033[0m"
@@ -83,75 +83,75 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         description=description, formatter_class=formatter_class
     )
     parser.add_argument(
-        '-v',
-        '--version',
-        action='store_true',
+        "-v",
+        "--version",
+        action="store_true",
         default=False,
-        help='show zulip-terminal version and exit',
+        help="show zulip-terminal version and exit",
     )
     parser.add_argument(
-        '--config-file',
-        '-c',
-        action='store',
-        help='config file downloaded from your zulip '
-        'organization (default: ~/zuliprc)',
+        "--config-file",
+        "-c",
+        action="store",
+        help="config file downloaded from your zulip "
+        "organization (default: ~/zuliprc)",
     )
     parser.add_argument(
-        '--theme',
-        '-t',
+        "--theme",
+        "-t",
         help=f"choose color theme (default: {DEFAULT_SETTINGS['theme']})",
     )
     parser.add_argument(
-        '--list-themes',
+        "--list-themes",
         action="store_true",
-        help='list all the color themes and exit',
+        help="list all the color themes and exit",
     )
     parser.add_argument(
-        '--color-depth',
-        choices=['1', '16', '256', '24bit'],
+        "--color-depth",
+        choices=["1", "16", "256", "24bit"],
         help=f"force the color depth (default: {DEFAULT_SETTINGS['color-depth']})",
     )
     parser.add_argument(
-        '-e',
-        '--explore',
-        action='store_true',
-        help='do not mark messages as read in the session',
+        "-e",
+        "--explore",
+        action="store_true",
+        help="do not mark messages as read in the session",
     )
 
     notify_group = parser.add_mutually_exclusive_group()
     notify_group.add_argument(
-        '--notify',
-        dest='notify',
+        "--notify",
+        dest="notify",
         default=None,
-        action='store_const',
-        const='enabled',
-        help='enable desktop notifications',
+        action="store_const",
+        const="enabled",
+        help="enable desktop notifications",
     )
     notify_group.add_argument(
-        '--no-notify',
-        dest='notify',
+        "--no-notify",
+        dest="notify",
         default=None,
-        action='store_const',
-        const='disabled',
-        help='disable desktop notifications',
+        action="store_const",
+        const="disabled",
+        help="disable desktop notifications",
     )
 
     autohide_group = parser.add_mutually_exclusive_group()
     autohide_group.add_argument(
-        '--autohide',
-        dest='autohide',
+        "--autohide",
+        dest="autohide",
         default=None,
         action="store_const",
-        const='autohide',
-        help='autohide list of users and streams',
+        const="autohide",
+        help="autohide list of users and streams",
     )
     autohide_group.add_argument(
-        '--no-autohide',
-        dest='autohide',
+        "--no-autohide",
+        dest="autohide",
         default=None,
         action="store_const",
-        const='no_autohide',
-        help='don\'t autohide list of users and streams',
+        const="no_autohide",
+        help="don't autohide list of users and streams",
     )
 
     parser.add_argument(
@@ -161,32 +161,32 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="enable debug mode",
     )
     parser.add_argument(
-        '--profile',
-        dest='profile',
+        "--profile",
+        dest="profile",
         action="store_true",
         default=False,
-        help='profile runtime',
+        help="profile runtime",
     )
 
     return parser.parse_args(argv)
 
 
 def styled_input(label: str) -> str:
-    return input(in_color('blue', label))
+    return input(in_color("blue", label))
 
 
 def get_login_id(realm_url: str) -> str:
     res_json = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
-    require_email_format_usernames = res_json['require_email_format_usernames']
-    email_auth_enabled = res_json['email_auth_enabled']
+    require_email_format_usernames = res_json["require_email_format_usernames"]
+    email_auth_enabled = res_json["email_auth_enabled"]
 
     if not require_email_format_usernames and email_auth_enabled:
-        label = 'Email or Username: '
+        label = "Email or Username: "
     elif not require_email_format_usernames:
-        label = 'Username: '
+        label = "Username: "
     else:
         # TODO: Validate Email address
-        label = 'Email: '
+        label = "Email: "
 
     return styled_input(label)
 
@@ -195,12 +195,12 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
     from getpass import getpass
 
     login_id = get_login_id(realm_url)
-    password = getpass(in_color('blue', "Password: "))
+    password = getpass(in_color("blue", "Password: "))
     response = requests.post(
         url=f"{realm_url}/api/v1/fetch_api_key",
         data={
-            'username': login_id,
-            'password': password,
+            "username": login_id,
+            "password": password,
         },
     )
     return response, login_id
@@ -218,7 +218,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         f"\n   {in_color('green', 'zulip.your-org.com')} (self-hosted servers)"
         f"\n   {in_color('green', 'chat.zulip.org')} (the Zulip community server)"
     )
-    realm_url = styled_input('Zulip URL: ')
+    realm_url = styled_input("Zulip URL: ")
     if realm_url.startswith("localhost"):
         realm_url = f"http://{realm_url}"
     elif not realm_url.startswith("http"):
@@ -229,13 +229,13 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     res, login_id = get_api_key(realm_url)
 
     while res.status_code != 200:
-        print(in_color('red', "\nIncorrect Email(or Username) or Password!\n"))
+        print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         res, login_id = get_api_key(realm_url)
 
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
-        api_key=str(res.json()['api_key']),
+        api_key=str(res.json()["api_key"]),
         server_url=realm_url,
     )
     if not save_zuliprc_failure:
@@ -253,7 +253,7 @@ def _write_zuliprc(
     """
     try:
         with open(
-            os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), 'w'
+            os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
             f.write(f"[api]\nemail={login_id}\nkey={api_key}\nsite={server_url}")
         return ""
@@ -273,7 +273,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
             # Remove zuliprc file if created.
             if path.exists(zuliprc_path):
                 remove(zuliprc_path)
-            print(in_color('red', "\nInvalid Credentials, Please try again!\n"))
+            print(in_color("red", "\nInvalid Credentials, Please try again!\n"))
         except EOFError:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
@@ -284,7 +284,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
     if is_readable_by_group_or_others:
         print(
             in_color(
-                'red',
+                "red",
                 "ERROR: Please ensure your zuliprc is NOT publicly accessible:\n"
                 "  {0}\n"
                 "(it currently has permissions '{1}')\n"
@@ -306,13 +306,13 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         exit_with_error(f"Failed to parse zuliprc file at {zuliprc_path}")
 
     # Initialize with default settings
-    NO_CONFIG = 'with no config'
+    NO_CONFIG = "with no config"
     settings = {
         setting: (default, NO_CONFIG) for setting, default in DEFAULT_SETTINGS.items()
     }
 
-    if 'zterm' in zuliprc:
-        config = zuliprc['zterm']
+    if "zterm" in zuliprc:
+        config = zuliprc["zterm"]
         for conf in config:
             settings[conf] = (config[conf], ZULIPRC_CONFIG)
 
@@ -324,7 +324,7 @@ def list_themes() -> str:
     text = "The following themes are available:\n"
     for theme in available_themes:
         suffix = ""
-        if theme == DEFAULT_SETTINGS['theme']:
+        if theme == DEFAULT_SETTINGS["theme"]:
             suffix += "[default theme]"
         text += f"  {theme} {suffix}\n"
     return text + (
@@ -341,7 +341,7 @@ def main(options: Optional[List[str]] = None) -> None:
     argv = options if options is not None else sys.argv[1:]
     args = parse_args(argv)
 
-    set_encoding('utf-8')
+    set_encoding("utf-8")
 
     if args.debug:
         print(
@@ -371,40 +371,40 @@ def main(options: Optional[List[str]] = None) -> None:
     if args.config_file:
         zuliprc_path = args.config_file
     else:
-        zuliprc_path = '~/zuliprc'
+        zuliprc_path = "~/zuliprc"
 
     try:
         zterm = parse_zuliprc(zuliprc_path)
 
         if args.autohide:
-            zterm['autohide'] = (args.autohide, 'on command line')
+            zterm["autohide"] = (args.autohide, "on command line")
 
         if args.theme:
-            theme_to_use = (args.theme, 'on command line')
+            theme_to_use = (args.theme, "on command line")
         else:
-            theme_to_use = zterm['theme']
+            theme_to_use = zterm["theme"]
 
         if (
-            zterm['footlinks'][1] == ZULIPRC_CONFIG
-            and zterm['maximum-footlinks'][1] == ZULIPRC_CONFIG
+            zterm["footlinks"][1] == ZULIPRC_CONFIG
+            and zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG
         ):
             exit_with_error(
                 "Footlinks property is not allowed alongside maximum-footlinks"
             )
 
         if (
-            zterm['maximum-footlinks'][1] == ZULIPRC_CONFIG
-            and int(zterm['maximum-footlinks'][0]) < 0
+            zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG
+            and int(zterm["maximum-footlinks"][0]) < 0
         ):
             exit_with_error("Minimum value allowed for maximum-footlinks is 0")
 
-        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
-            if zterm['footlinks'][0] == DEFAULT_SETTINGS['footlinks']:
+        if zterm["footlinks"][1] == ZULIPRC_CONFIG:
+            if zterm["footlinks"][0] == DEFAULT_SETTINGS["footlinks"]:
                 maximum_footlinks = 3
             else:
                 maximum_footlinks = 0
         else:
-            maximum_footlinks = int(zterm['maximum-footlinks'][0])
+            maximum_footlinks = int(zterm["maximum-footlinks"][0])
 
         available_themes = all_themes()
         theme_aliases = aliased_themes()
@@ -425,16 +425,16 @@ def main(options: Optional[List[str]] = None) -> None:
             )
 
         if args.color_depth:
-            zterm['color-depth'] = (args.color_depth, 'on command line')
+            zterm["color-depth"] = (args.color_depth, "on command line")
 
-        color_depth_str = zterm['color-depth'][0]
-        if color_depth_str == '24bit':
+        color_depth_str = zterm["color-depth"][0]
+        if color_depth_str == "24bit":
             color_depth = 2 ** 24
         else:
             color_depth = int(color_depth_str)
 
         if args.notify:
-            zterm['notify'] = (args.notify, 'on command line')
+            zterm["notify"] = (args.notify, "on command line")
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
@@ -444,29 +444,29 @@ def main(options: Optional[List[str]] = None) -> None:
                 "   WARNING: Incomplete theme; results may vary!\n"
                 "      (you could try: {})".format(", ".join(complete))
             )
-            print(in_color('yellow', incomplete_theme_warning))
-        print("   autohide setting '{}' specified {}.".format(*zterm['autohide']))
-        if zterm['footlinks'][1] == ZULIPRC_CONFIG:
+            print(in_color("yellow", incomplete_theme_warning))
+        print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
+        if zterm["footlinks"][1] == ZULIPRC_CONFIG:
             print(
                 "   maximum footlinks value '{}' specified {} from footlinks.".format(
-                    maximum_footlinks, zterm['footlinks'][1]
+                    maximum_footlinks, zterm["footlinks"][1]
                 )
             )
         else:
             print(
                 "   maximum footlinks value '{}' specified {}.".format(
-                    *zterm['maximum-footlinks']
+                    *zterm["maximum-footlinks"]
                 )
             )
-        print("   color depth setting '{}' specified {}.".format(*zterm['color-depth']))
-        print("   notify setting '{}' specified {}.".format(*zterm['notify']))
+        print("   color depth setting '{}' specified {}.".format(*zterm["color-depth"]))
+        print("   notify setting '{}' specified {}.".format(*zterm["notify"]))
 
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
-            'autohide': ['autohide', 'no_autohide'],
-            'notify': ['enabled', 'disabled'],
-            'color-depth': ['1', '16', '256', '24bit'],
+            "autohide": ["autohide", "no_autohide"],
+            "notify": ["enabled", "disabled"],
+            "color-depth": ["1", "16", "256", "24bit"],
         }
         boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in valid_settings.items():
@@ -482,7 +482,7 @@ def main(options: Optional[List[str]] = None) -> None:
                     ),
                     helper_text="\n".join(helper_text),
                 )
-            if setting == 'color-depth':
+            if setting == "color-depth":
                 break
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
 
@@ -526,7 +526,7 @@ def main(options: Optional[List[str]] = None) -> None:
 
                 pudb.post_mortem()
 
-        if hasattr(e, 'extra_info'):
+        if hasattr(e, "extra_info"):
             print(in_color("red", f"\n{e.extra_info}"), file=sys.stderr)  # type: ignore
 
         print(
@@ -565,5 +565,5 @@ def main(options: Optional[List[str]] = None) -> None:
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

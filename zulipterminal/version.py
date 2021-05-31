@@ -1,8 +1,8 @@
-ZT_VERSION = '0.6.0+git'
+ZT_VERSION = "0.6.0+git"
 
 SUPPORTED_SERVER_VERSIONS = [
-    ('2.1', None),
-    ('3.0', 25),
+    ("2.1", None),
+    ("3.0", 25),
 ]
 
 MINIMUM_SUPPORTED_SERVER_VERSION = SUPPORTED_SERVER_VERSIONS[0]

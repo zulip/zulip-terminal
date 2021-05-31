@@ -18,8 +18,8 @@ from zulipterminal.helper import (
 def test_index_messages_narrow_all_messages(
     mocker, messages_successful_response, index_all_messages, initial_index
 ) -> None:
-    messages = messages_successful_response['messages']
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    messages = messages_successful_response["messages"]
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
     assert index_messages(messages, model, model.index) == index_all_messages
@@ -28,10 +28,10 @@ def test_index_messages_narrow_all_messages(
 def test_index_messages_narrow_stream(
     mocker, messages_successful_response, index_stream, initial_index
 ) -> None:
-    messages = messages_successful_response['messages']
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    messages = messages_successful_response["messages"]
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['stream', 'PTEST']]
+    model.narrow = [["stream", "PTEST"]]
     model.is_search_narrow.return_value = False
     model.stream_id = 205
     assert index_messages(messages, model, model.index) == index_stream
@@ -40,10 +40,10 @@ def test_index_messages_narrow_stream(
 def test_index_messages_narrow_topic(
     mocker, messages_successful_response, index_topic, initial_index
 ) -> None:
-    messages = messages_successful_response['messages']
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    messages = messages_successful_response["messages"]
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['stream', '7'], ['topic', 'Test']]
+    model.narrow = [["stream", "7"], ["topic", "Test"]]
     model.is_search_narrow.return_value = False
     model.stream_id = 205
     assert index_messages(messages, model, model.index) == index_topic
@@ -52,15 +52,15 @@ def test_index_messages_narrow_topic(
 def test_index_messages_narrow_user(
     mocker, messages_successful_response, index_user, initial_index
 ) -> None:
-    messages = messages_successful_response['messages']
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    messages = messages_successful_response["messages"]
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['pm_with', 'boo@zulip.com']]
+    model.narrow = [["pm_with", "boo@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
-        'boo@zulip.com': {
-            'user_id': 5179,
+        "boo@zulip.com": {
+            "user_id": 5179,
         }
     }
     assert index_messages(messages, model, model.index) == index_user
@@ -69,23 +69,23 @@ def test_index_messages_narrow_user(
 def test_index_messages_narrow_user_multiple(
     mocker, messages_successful_response, index_user_multiple, initial_index
 ) -> None:
-    messages = messages_successful_response['messages']
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    messages = messages_successful_response["messages"]
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['pm_with', 'boo@zulip.com, bar@zulip.com']]
+    model.narrow = [["pm_with", "boo@zulip.com, bar@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
-        'boo@zulip.com': {
-            'user_id': 5179,
+        "boo@zulip.com": {
+            "user_id": 5179,
         },
-        'bar@zulip.com': {'user_id': 5180},
+        "bar@zulip.com": {"user_id": 5180},
     }
     assert index_messages(messages, model, model.index) == index_user_multiple
 
 
 @pytest.mark.parametrize(
-    'edited_msgs',
+    "edited_msgs",
     [
         {537286, 537287, 537288},
         {537286},
@@ -99,26 +99,26 @@ def test_index_messages_narrow_user_multiple(
 def test_index_edited_message(
     mocker, messages_successful_response, empty_index, edited_msgs, initial_index
 ):
-    messages = messages_successful_response['messages']
+    messages = messages_successful_response["messages"]
     for msg in messages:
-        if msg['id'] in edited_msgs:
-            msg['edit_history'] = []
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+        if msg["id"] in edited_msgs:
+            msg["edit_history"] = []
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
 
     expected_index = dict(
         empty_index, edited_messages=edited_msgs, all_msg_ids={537286, 537287, 537288}
     )
-    for msg_id, msg in expected_index['messages'].items():
+    for msg_id, msg in expected_index["messages"].items():
         if msg_id in edited_msgs:
-            msg['edit_history'] = []
+            msg["edit_history"] = []
 
     assert index_messages(messages, model, model.index) == expected_index
 
 
 @pytest.mark.parametrize(
-    'msgs_with_stars',
+    "msgs_with_stars",
     [
         {537286, 537287, 537288},
         {537286},
@@ -132,27 +132,27 @@ def test_index_edited_message(
 def test_index_starred(
     mocker, messages_successful_response, empty_index, msgs_with_stars, initial_index
 ):
-    messages = messages_successful_response['messages']
+    messages = messages_successful_response["messages"]
     for msg in messages:
-        if msg['id'] in msgs_with_stars and 'starred' not in msg['flags']:
-            msg['flags'].append('starred')
+        if msg["id"] in msgs_with_stars and "starred" not in msg["flags"]:
+            msg["flags"].append("starred")
 
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['is', 'starred']]
+    model.narrow = [["is", "starred"]]
     model.is_search_narrow.return_value = False
     expected_index = dict(
         empty_index, private_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
     )
-    for msg_id, msg in expected_index['messages'].items():
-        if msg_id in msgs_with_stars and 'starred' not in msg['flags']:
-            msg['flags'].append('starred')
+    for msg_id, msg in expected_index["messages"].items():
+        if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
+            msg["flags"].append("starred")
 
     assert index_messages(messages, model, model.index) == expected_index
 
 
 @pytest.mark.parametrize(
-    'mentioned_messages',
+    "mentioned_messages",
     [
         {537286, 537287, 537288},
         {537286},
@@ -166,14 +166,14 @@ def test_index_starred(
 def test_index_mentioned_messages(
     mocker, messages_successful_response, empty_index, mentioned_messages, initial_index
 ):
-    messages = messages_successful_response['messages']
+    messages = messages_successful_response["messages"]
     for msg in messages:
-        if msg['id'] in mentioned_messages and 'mentioned' not in msg['flags']:
-            msg['flags'].append('mentioned')
+        if msg["id"] in mentioned_messages and "mentioned" not in msg["flags"]:
+            msg["flags"].append("mentioned")
 
-    model = mocker.patch('zulipterminal.model.Model.__init__', return_value=None)
+    model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [['is', 'mentioned']]
+    model.narrow = [["is", "mentioned"]]
     model.is_search_narrow.return_value = False
     expected_index = dict(
         empty_index,
@@ -181,15 +181,15 @@ def test_index_mentioned_messages(
         mentioned_msg_ids=mentioned_messages,
     )
 
-    for msg_id, msg in expected_index['messages'].items():
-        if msg_id in mentioned_messages and 'mentioned' not in msg['flags']:
-            msg['flags'].append('mentioned')
+    for msg_id, msg in expected_index["messages"].items():
+        if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
+            msg["flags"].append("mentioned")
 
     assert index_messages(messages, model, model.index) == expected_index
 
 
 @pytest.mark.parametrize(
-    'iterable, map_func, expected_powerset',
+    "iterable, map_func, expected_powerset",
     [
         ([], set, [set()]),
         ([1], set, [set(), {1}]),
@@ -203,34 +203,34 @@ def test_powerset(iterable, map_func, expected_powerset):
 
 
 @pytest.mark.parametrize(
-    'muted_streams, muted_topics, vary_in_unreads',
+    "muted_streams, muted_topics, vary_in_unreads",
     [
         (
             [99],
-            [['Some general stream', 'Some general unread topic']],
+            [["Some general stream", "Some general unread topic"]],
             {
-                'all_msg': 8,
-                'streams': {99: 1},
-                'unread_topics': {(99, 'Some private unread topic'): 1},
-                'all_mentions': 0,
+                "all_msg": 8,
+                "streams": {99: 1},
+                "unread_topics": {(99, "Some private unread topic"): 1},
+                "all_mentions": 0,
             },
         ),
         (
             [1000],
-            [['Secret stream', 'Some private unread topic']],
+            [["Secret stream", "Some private unread topic"]],
             {
-                'all_msg': 8,
-                'streams': {1000: 3},
-                'unread_topics': {(1000, 'Some general unread topic'): 3},
-                'all_mentions': 0,
+                "all_msg": 8,
+                "streams": {1000: 3},
+                "unread_topics": {(1000, "Some general unread topic"): 3},
+                "all_mentions": 0,
             },
         ),
-        ([1], [], {'all_mentions': 0}),
+        ([1], [], {"all_mentions": 0}),
     ],
     ids=[
-        'mute_private_stream_mute_general_stream_topic',
-        'mute_general_stream_mute_private_stream_topic',
-        'no_mute_some_other_stream_muted',
+        "mute_private_stream_mute_general_stream_topic",
+        "mute_general_stream_mute_private_stream_topic",
+        "no_mute_some_other_stream_muted",
     ],
 )
 def test_classify_unread_counts(
@@ -247,7 +247,7 @@ def test_classify_unread_counts(
     model.initial_data = initial_data
     model.is_muted_topic = mocker.Mock(
         side_effect=(
-            lambda stream_id, topic: [model.stream_dict[stream_id]['name'], topic]
+            lambda stream_id, topic: [model.stream_dict[stream_id]["name"], topic]
             in muted_topics
         )
     )
@@ -258,15 +258,15 @@ def test_classify_unread_counts(
 
 
 @pytest.mark.parametrize(
-    'color', ['#ffffff', '#f0f0f0', '#f0f1f2', '#fff', '#FFF', '#F3F5FA']
+    "color", ["#ffffff", "#f0f0f0", "#f0f1f2", "#fff", "#FFF", "#F3F5FA"]
 )
 def test_color_formats(mocker, color):
     canon = canonicalize_color(color)
-    assert canon == '#fff'
+    assert canon == "#fff"
 
 
 @pytest.mark.parametrize(
-    'color', ['#', '#f', '#ff', '#ffff', '#fffff', '#fffffff', '#abj', '#398a0s']
+    "color", ["#", "#f", "#ff", "#ffff", "#fffff", "#fffffff", "#abj", "#398a0s"]
 )
 def test_invalid_color_format(mocker, color):
     with pytest.raises(ValueError) as e:
@@ -275,7 +275,7 @@ def test_invalid_color_format(mocker, color):
 
 
 @pytest.mark.parametrize(
-    'OS, is_notification_sent',
+    "OS, is_notification_sent",
     [
         pytest.param(
             [True, False, False],
@@ -290,36 +290,36 @@ def test_invalid_color_format(mocker, color):
 def test_notify(mocker, OS, is_notification_sent):
     title = "Author"
     text = "Hello!"
-    mocker.patch('zulipterminal.helper.WSL', OS[0])
-    mocker.patch('zulipterminal.helper.MACOS', OS[1])
-    mocker.patch('zulipterminal.helper.LINUX', OS[2])
-    subprocess = mocker.patch('zulipterminal.helper.subprocess')
+    mocker.patch("zulipterminal.helper.WSL", OS[0])
+    mocker.patch("zulipterminal.helper.MACOS", OS[1])
+    mocker.patch("zulipterminal.helper.LINUX", OS[2])
+    subprocess = mocker.patch("zulipterminal.helper.subprocess")
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
 
 
 @pytest.mark.parametrize(
-    'text',
+    "text",
     ["x", "Spaced text.", "'", '"'],
     ids=["x", "spaced_text", "single", "double"],
 )
 @pytest.mark.parametrize(
-    'title',
-    ["X", 'Spaced title', "'", '"'],
+    "title",
+    ["X", "Spaced title", "'", '"'],
     ids=["X", "spaced_title", "single", "double"],
 )
 @pytest.mark.parametrize(
-    'OS, cmd_length',
+    "OS, cmd_length",
     [
-        ('LINUX', 4),
-        ('MACOS', 10),
-        pytest.param('WSL', 2, marks=pytest.mark.xfail(reason="WSL notify disabled")),
+        ("LINUX", 4),
+        ("MACOS", 10),
+        pytest.param("WSL", 2, marks=pytest.mark.xfail(reason="WSL notify disabled")),
     ],
 )
 def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
-    subprocess = mocker.patch('zulipterminal.helper.subprocess')
+    subprocess = mocker.patch("zulipterminal.helper.subprocess")
 
-    for os in ('LINUX', 'MACOS', 'WSL'):
+    for os in ("LINUX", "MACOS", "WSL"):
         if os != OS:
             monkeypatch.setattr(zulipterminal.helper, os, False)
         else:
@@ -335,10 +335,10 @@ def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
 
 
 @pytest.mark.parametrize(
-    'response, footer_updated',
+    "response, footer_updated",
     [
-        ({'result': 'error', 'msg': 'Request failed.'}, True),
-        ({'result': 'success', 'msg': 'msg content'}, False),
+        ({"result": "error", "msg": "Request failed."}, True),
+        ({"result": "success", "msg": "msg content"}, False),
     ],
 )
 def test_display_error_if_present(mocker, response, footer_updated):
@@ -348,77 +348,77 @@ def test_display_error_if_present(mocker, response, footer_updated):
     display_error_if_present(response, controller)
 
     if footer_updated:
-        set_footer_text.assert_called_once_with(response['msg'], 3)
+        set_footer_text.assert_called_once_with(response["msg"], 3)
     else:
         set_footer_text.assert_not_called()
 
 
 @pytest.mark.parametrize(
-    'req, narrow, footer_updated',
+    "req, narrow, footer_updated",
     [
         case(
-            {'type': 'private', 'to': 'foo@gmail.com', 'content': 'bar'},
-            [['is', 'private']],
+            {"type": "private", "to": "foo@gmail.com", "content": "bar"},
+            [["is", "private"]],
             False,
-            id='all_private__pm__not_notified',
+            id="all_private__pm__not_notified",
         ),
         case(
-            {'type': 'private', 'to': 'user@abc.com, user@chat.com', 'content': 'Hi'},
-            [['pm_with', 'user@0abc.com']],
+            {"type": "private", "to": "user@abc.com, user@chat.com", "content": "Hi"},
+            [["pm_with", "user@0abc.com"]],
             True,
-            id='private_conv__other_pm__notified',
+            id="private_conv__other_pm__notified",
         ),
         case(
-            {'type': 'private', 'to': 'bar-bar@foo.com', 'content': ':party_parrot:'},
-            [['pm_with', 'user@abc.com, user@chat.com, bar-bar@foo.com']],
+            {"type": "private", "to": "bar-bar@foo.com", "content": ":party_parrot:"},
+            [["pm_with", "user@abc.com, user@chat.com, bar-bar@foo.com"]],
             True,
-            id='private_conv__other_pm2__notified',
+            id="private_conv__other_pm2__notified",
         ),
         case(
-            {'type': 'stream', 'to': 'ZT', 'subject': '1', 'content': 'foo'},
-            [['stream', 'ZT'], ['topic', '1']],
+            {"type": "stream", "to": "ZT", "subject": "1", "content": "foo"},
+            [["stream", "ZT"], ["topic", "1"]],
             False,
-            id='stream_topic__same_stream_topic__not_notified',
+            id="stream_topic__same_stream_topic__not_notified",
         ),
         case(
-            {'type': 'stream', 'to': 'here', 'subject': 'pytest', 'content': 'py'},
-            [['stream', 'test here']],
+            {"type": "stream", "to": "here", "subject": "pytest", "content": "py"},
+            [["stream", "test here"]],
             True,
-            id='stream__different_stream__notified',
+            id="stream__different_stream__notified",
         ),
         case(
             {
-                'type': 'stream',
-                'to': '|new_stream|',
-                'subject': '(no topic)',
-                'content': 'Hi `|new_stream|`',
+                "type": "stream",
+                "to": "|new_stream|",
+                "subject": "(no topic)",
+                "content": "Hi `|new_stream|`",
             },
             [],
             False,
-            id='all_messages__stream__not_notified',
+            id="all_messages__stream__not_notified",
         ),
         case(
             {
-                'type': 'stream',
-                'to': 'zulip-terminal',
-                'subject': 'issue#T781',
-                'content': 'Added tests',
+                "type": "stream",
+                "to": "zulip-terminal",
+                "subject": "issue#T781",
+                "content": "Added tests",
             },
-            [['is', 'starred']],
+            [["is", "starred"]],
             True,
-            id='starred__stream__notified',
+            id="starred__stream__notified",
         ),
         case(
-            {'type': 'private', 'to': '2@aBd%8@random.com', 'content': 'fist_bump'},
-            [['is', 'mentioned']],
+            {"type": "private", "to": "2@aBd%8@random.com", "content": "fist_bump"},
+            [["is", "mentioned"]],
             True,
-            id='mentioned__private_no_mention__notified',
+            id="mentioned__private_no_mention__notified",
         ),
         case(
-            {'type': 'stream', 'to': 'PTEST', 'subject': 'TEST', 'content': 'Test'},
-            [['stream', 'PTEST'], ['search', 'FOO']],
+            {"type": "stream", "to": "PTEST", "subject": "TEST", "content": "Test"},
+            [["stream", "PTEST"], ["search", "FOO"]],
             True,
-            id='stream_search__stream_match_not_search__notified',
+            id="stream_search__stream_match_not_search__notified",
         ),
     ],
 )
@@ -431,20 +431,20 @@ def test_notify_if_message_sent_outside_narrow(mocker, req, narrow, footer_updat
 
     if footer_updated:
         set_footer_text.assert_called_once_with(
-            'Message is sent outside of current narrow.', 3
+            "Message is sent outside of current narrow.", 3
         )
     else:
         set_footer_text.assert_not_called()
 
 
 @pytest.mark.parametrize(
-    'quoted_string, expected_unquoted_string',
+    "quoted_string, expected_unquoted_string",
     [
-        ('(no.20topic)', '(no topic)'),
-        ('.3Cstrong.3Exss.3C.2Fstrong.3E', '<strong>xss</strong>'),
-        ('.23test-here.20.23T1.20.23T2.20.23T3', '#test-here #T1 #T2 #T3'),
-        ('.2Edot', '.dot'),
-        ('.3Aparty_parrot.3A', ':party_parrot:'),
+        ("(no.20topic)", "(no topic)"),
+        (".3Cstrong.3Exss.3C.2Fstrong.3E", "<strong>xss</strong>"),
+        (".23test-here.20.23T1.20.23T2.20.23T3", "#test-here #T1 #T2 #T3"),
+        (".2Edot", ".dot"),
+        (".3Aparty_parrot.3A", ":party_parrot:"),
     ],
 )
 def test_hash_util_decode(quoted_string, expected_unquoted_string):
@@ -454,15 +454,15 @@ def test_hash_util_decode(quoted_string, expected_unquoted_string):
 
 
 @pytest.mark.parametrize(
-    'message_content, expected_fence',
+    "message_content, expected_fence",
     [
-        ('Hi `test_here`', '```'),
-        ('```quote\nZ(dot)T(dot)\n```\nempty body', '````'),
-        ('```python\ndef zulip():\n  pass\n```\ncode-block', '````'),
-        ('````\ndont_know_what_this_does\n````', '`````'),
-        ('````quote\n```\ndef zulip():\n  pass\n```\n````', '`````'),
-        ('```math\n\\int_a^b f(t)\\, dt = F(b) - F(a)\n```', '````'),
-        ('```spoiler Header Text\nSpoiler content\n```', '````'),
+        ("Hi `test_here`", "```"),
+        ("```quote\nZ(dot)T(dot)\n```\nempty body", "````"),
+        ("```python\ndef zulip():\n  pass\n```\ncode-block", "````"),
+        ("````\ndont_know_what_this_does\n````", "`````"),
+        ("````quote\n```\ndef zulip():\n  pass\n```\n````", "`````"),
+        ("```math\n\\int_a^b f(t)\\, dt = F(b) - F(a)\n```", "````"),
+        ("```spoiler Header Text\nSpoiler content\n```", "````"),
     ],
     ids=[
         "inline_code",

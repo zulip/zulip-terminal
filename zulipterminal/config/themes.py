@@ -8,68 +8,68 @@ ThemeSpec = List[Tuple[Optional[str], ...]]
 # monochrome (1-bit) mode - independently of the specified theme
 
 required_styles = {  # style-name: monochrome-bit-depth-style
-    None: '',
-    'selected': 'standout',
-    'msg_selected': 'standout',
-    'header': 'bold',
-    'general_narrow': 'standout',
-    'general_bar': '',
-    'name': '',
-    'unread': 'strikethrough',
-    'user_active': 'bold',
-    'user_idle': '',
-    'user_offline': '',
-    'user_inactive': '',
-    'title': 'bold',
-    'column_title': 'bold',
-    'time': '',
-    'bar': 'standout',
-    'popup_contrast': 'standout',
-    'msg_emoji': 'bold',
-    'reaction': 'bold',
-    'reaction_mine': 'standout',
-    'msg_mention': 'bold',
-    'msg_link': '',
-    'msg_link_index': 'bold',
-    'msg_quote': 'underline',
-    'msg_code': 'bold',
-    'msg_bold': 'bold',
-    'msg_time': 'bold',
-    'footer': 'standout',
-    'starred': 'bold',
-    'popup_category': 'bold',
-    'unread_count': 'bold',
-    'starred_count': '',
-    'filter_results': 'bold',
-    'edit_topic': 'standout',
-    'edit_tag': 'standout',
-    'edit_author': 'bold',
-    'edit_time': 'bold',
-    'popup_border': 'bold',
-    'area:help': 'standout',
-    'area:msg': 'standout',
-    'area:stream': 'standout',
-    'area:error': 'standout',
-    'search_error': 'standout',
+    None: "",
+    "selected": "standout",
+    "msg_selected": "standout",
+    "header": "bold",
+    "general_narrow": "standout",
+    "general_bar": "",
+    "name": "",
+    "unread": "strikethrough",
+    "user_active": "bold",
+    "user_idle": "",
+    "user_offline": "",
+    "user_inactive": "",
+    "title": "bold",
+    "column_title": "bold",
+    "time": "",
+    "bar": "standout",
+    "popup_contrast": "standout",
+    "msg_emoji": "bold",
+    "reaction": "bold",
+    "reaction_mine": "standout",
+    "msg_mention": "bold",
+    "msg_link": "",
+    "msg_link_index": "bold",
+    "msg_quote": "underline",
+    "msg_code": "bold",
+    "msg_bold": "bold",
+    "msg_time": "bold",
+    "footer": "standout",
+    "starred": "bold",
+    "popup_category": "bold",
+    "unread_count": "bold",
+    "starred_count": "",
+    "filter_results": "bold",
+    "edit_topic": "standout",
+    "edit_tag": "standout",
+    "edit_author": "bold",
+    "edit_time": "bold",
+    "popup_border": "bold",
+    "area:help": "standout",
+    "area:msg": "standout",
+    "area:stream": "standout",
+    "area:error": "standout",
+    "search_error": "standout",
 }
 
 
 # 256-color base names for default theme (bold values added below)
 DEF_base = dict(
-    dark_red='#a00',
-    brown='#880',
-    dark_blue='#24a',
-    dark_cyan='#088',
-    dark_gray='#666',
-    light_gray='#ccc',
-    light_red='#f00',
-    light_green='#0f0',
-    dark_green='#080',
-    yellow='#ff0',
-    light_blue='#28d',
-    light_magenta='#c8f',
-    white='#fff',
-    black='g19',
+    dark_red="#a00",
+    brown="#880",
+    dark_blue="#24a",
+    dark_cyan="#088",
+    dark_gray="#666",
+    light_gray="#ccc",
+    light_red="#f00",
+    light_green="#0f0",
+    dark_green="#080",
+    yellow="#ff0",
+    light_blue="#28d",
+    light_magenta="#c8f",
+    white="#fff",
+    black="g19",
 )
 
 DEF = dict(
@@ -78,44 +78,44 @@ DEF = dict(
 
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
-BLACK = 'h234'  # dark0_hard
-WHITE = 'h246'  # light4_256
+BLACK = "h234"  # dark0_hard
+WHITE = "h246"  # light4_256
 WHITEBOLD = f"{WHITE}, bold"
-DARKBLUE = 'h24'  # faded_blue
-DARKRED = 'h88'  # faded_red
-LIGHTBLUE = 'h109'  # bright_blue
+DARKBLUE = "h24"  # faded_blue
+DARKRED = "h88"  # faded_red
+LIGHTBLUE = "h109"  # bright_blue
 LIGHTBLUEBOLD = f"{LIGHTBLUE}, bold"
-YELLOW = 'h172'  # neutral_yellow
+YELLOW = "h172"  # neutral_yellow
 YELLOWBOLD = f"{YELLOW}, bold"
-LIGHTGREEN = 'h142'  # bright_green
-LIGHTRED = 'h167'  # bright_red
+LIGHTGREEN = "h142"  # bright_green
+LIGHTRED = "h167"  # bright_red
 LIGHTREDBOLD = f"{LIGHTRED}, bold"
-GRAY = 'h244'  # gray_244
-LIGHTMAGENTA = 'h132'  # neutral_purple
+GRAY = "h244"  # gray_244
+LIGHTMAGENTA = "h132"  # neutral_purple
 LIGHTMAGENTABOLD = f"{LIGHTMAGENTA}, bold"
 
 # Colors used in gruvbox_dark24
-BLACK24 = '#1d2021'  # dark0_hard
-WHITE24 = '#a89984'  # light4
+BLACK24 = "#1d2021"  # dark0_hard
+WHITE24 = "#a89984"  # light4
 WHITEBOLD24 = f"{WHITE24}, bold"
-DARKBLUE24 = '#076678'  # faded_blue
-DARKRED24 = '#9d0006'  # faded_red
-LIGHTBLUE24 = '#83a598'  # bright_blue
+DARKBLUE24 = "#076678"  # faded_blue
+DARKRED24 = "#9d0006"  # faded_red
+LIGHTBLUE24 = "#83a598"  # bright_blue
 LIGHTBLUEBOLD24 = f"{LIGHTBLUE24}, bold"
-YELLOW24 = '#d79921'  # neutral_yellow
+YELLOW24 = "#d79921"  # neutral_yellow
 YELLOWBOLD24 = f"{YELLOW24}, bold"
-LIGHTGREEN24 = '#b8bb26'  # bright_green
-LIGHTRED24 = '#fb4934'  # bright_red
+LIGHTGREEN24 = "#b8bb26"  # bright_green
+LIGHTRED24 = "#fb4934"  # bright_red
 LIGHTREDBOLD24 = f"{LIGHTRED24}, bold"
-GRAY24 = '#928374'  # gray_244
-LIGHTMAGENTA24 = '#b16286'  # neutral_purple
+GRAY24 = "#928374"  # gray_244
+LIGHTMAGENTA24 = "#b16286"  # neutral_purple
 LIGHTMAGENTABOLD24 = f"{LIGHTMAGENTA24}, bold"
 
 THEME_ALIASES = {
-    'default': 'zt_dark',
-    'gruvbox': 'gruvbox_dark',
-    'light': 'zt_light',
-    'blue': 'zt_blue',
+    "default": "zt_dark",
+    "gruvbox": "gruvbox_dark",
+    "light": "zt_light",
+    "blue": "zt_blue",
 }
 
 # fmt: off

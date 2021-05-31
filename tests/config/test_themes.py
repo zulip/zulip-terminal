@@ -10,11 +10,11 @@ from zulipterminal.config.themes import (
 
 
 expected_complete_themes = {
-    'zt_dark',
-    'gruvbox_dark',
-    'zt_light',
-    'zt_blue',
-    'gruvbox_dark24',
+    "zt_dark",
+    "gruvbox_dark",
+    "zt_light",
+    "zt_blue",
+    "gruvbox_dark24",
 }
 
 
@@ -24,7 +24,7 @@ def test_all_themes():
 
 # Check built-in themes are complete for quality-control purposes
 @pytest.mark.parametrize(
-    'theme_name',
+    "theme_name",
     [
         theme
         if theme in expected_complete_themes
@@ -50,26 +50,26 @@ def test_complete_and_incomplete_themes():
 
 
 @pytest.mark.parametrize(
-    'theme, expected_new_theme, req_styles',
+    "theme, expected_new_theme, req_styles",
     [
-        ([('a', 'another')], [], {}),
-        ([('a', 'another')], [('a', 'another')], {'a': ''}),
-        ([('a', 'fg', 'bg')], [('a', 'fg', 'bg', 'x')], {'a': 'x'}),
-        ([('a', 'fg', 'bg', 'bold')], [('a', 'fg', 'bg', 'x')], {'a': 'x'}),
+        ([("a", "another")], [], {}),
+        ([("a", "another")], [("a", "another")], {"a": ""}),
+        ([("a", "fg", "bg")], [("a", "fg", "bg", "x")], {"a": "x"}),
+        ([("a", "fg", "bg", "bold")], [("a", "fg", "bg", "x")], {"a": "x"}),
         (
-            [('a', 'fg', 'bg', 'bold', 'h1', 'h2')],
-            [('a', 'fg', 'bg', 'x', 'h1', 'h2')],
-            {'a': 'x'},
+            [("a", "fg", "bg", "bold", "h1", "h2")],
+            [("a", "fg", "bg", "x", "h1", "h2")],
+            {"a": "x"},
         ),
     ],
     ids=[
-        'incomplete_theme',
-        'one_to_one',
-        '16_color_add_mono',
-        '16_color_mono_overwrite',
-        '256_color',
+        "incomplete_theme",
+        "one_to_one",
+        "16_color_add_mono",
+        "16_color_mono_overwrite",
+        "256_color",
     ],
 )
 def test_theme_with_monochrome_added(mocker, theme, expected_new_theme, req_styles):
-    mocker.patch.dict('zulipterminal.config.themes.required_styles', req_styles)
+    mocker.patch.dict("zulipterminal.config.themes.required_styles", req_styles)
     assert theme_with_monochrome_added(theme) == expected_new_theme

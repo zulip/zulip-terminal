@@ -4,11 +4,11 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
 @pytest.mark.parametrize(
-    'msg, narrow, muted_streams, is_muted_topic_return_value, muted',
+    "msg, narrow, muted_streams, is_muted_topic_return_value, muted",
     [
         (  # PM TEST
             {
-                'type': 'private',
+                "type": "private",
                 # ...
             },
             [],
@@ -18,29 +18,29 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
         ),
         (
             {
-                'type': 'stream',
+                "type": "stream",
                 # ...
             },
-            [['stream', 'foo'], ['topic', 'boo']],
+            [["stream", "foo"], ["topic", "boo"]],
             [1, 2],
             False,
             False,
         ),
         (
             {
-                'type': 'stream',
-                'stream_id': 1,
+                "type": "stream",
+                "stream_id": 1,
                 # ...
             },
-            [['stream', 'foo']],
+            [["stream", "foo"]],
             [1, 2],
             False,
             True,
         ),
         (
             {
-                'type': 'stream',
-                'stream_id': 2,
+                "type": "stream",
+                "stream_id": 2,
                 # ...
             },
             [],
@@ -50,9 +50,9 @@ from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
         ),
         (
             {
-                'type': 'stream',
-                'stream_id': 3,
-                'subject': 'foo koo',
+                "type": "stream",
+                "stream_id": 3,
+                "subject": "foo koo",
                 # ...
             },
             [],
@@ -67,7 +67,7 @@ def test_is_muted(
 ):
     model = mocker.Mock()
     model.is_muted_stream = mocker.Mock(
-        return_value=(msg.get('stream_id', '') in muted_streams)
+        return_value=(msg.get("stream_id", "") in muted_streams)
     )
     model.narrow = narrow
     model.is_muted_topic.return_value = is_muted_topic_return_value
@@ -76,7 +76,7 @@ def test_is_muted(
 
 
 @pytest.mark.parametrize(
-    'narrow, messages, focus_msg_id, muted, unsubscribed, len_w_list',
+    "narrow, messages, focus_msg_id, muted, unsubscribed, len_w_list",
     [
         (
             # No muted messages
@@ -89,7 +89,7 @@ def test_is_muted(
         ),
         (
             # No muted messages
-            [['stream', 'foo']],
+            [["stream", "foo"]],
             [1],
             None,
             False,
@@ -98,7 +98,7 @@ def test_is_muted(
         ),
         (
             # No muted messages
-            [['stream', 'foo']],
+            [["stream", "foo"]],
             [1],
             None,
             True,
@@ -131,28 +131,28 @@ def test_create_msg_box_list(
     model = mocker.Mock()
     model.narrow = narrow
     model.index = {
-        'all_msg_ids': {1, 2},
-        'messages': {
+        "all_msg_ids": {1, 2},
+        "messages": {
             1: {
-                'id': 1,
-                'flags': ['read'],
-                'timestamp': 10,
+                "id": 1,
+                "flags": ["read"],
+                "timestamp": 10,
             },
             2: {
-                'id': 2,
-                'flags': [],
-                'timestamp': 10,
+                "id": 2,
+                "flags": [],
+                "timestamp": 10,
             },
         },
-        'pointer': {},
+        "pointer": {},
     }
-    msg_box = mocker.patch('zulipterminal.ui_tools.utils.MessageBox')
-    mocker.patch('zulipterminal.ui_tools.utils.urwid.AttrMap', return_value='MSG')
+    msg_box = mocker.patch("zulipterminal.ui_tools.utils.MessageBox")
+    mocker.patch("zulipterminal.ui_tools.utils.urwid.AttrMap", return_value="MSG")
     mock_muted = mocker.patch(
-        'zulipterminal.ui_tools.utils.is_muted', return_value=muted
+        "zulipterminal.ui_tools.utils.is_muted", return_value=muted
     )
     mocker.patch(
-        'zulipterminal.ui_tools.utils.is_unsubscribed_message',
+        "zulipterminal.ui_tools.utils.is_unsubscribed_message",
         return_value=unsubscribed,
     )
 

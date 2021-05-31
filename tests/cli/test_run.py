@@ -18,14 +18,14 @@ from zulipterminal.version import ZT_VERSION
 
 
 @pytest.mark.parametrize(
-    'color, code',
+    "color, code",
     [
-        ('red', '\x1b[91m'),
-        ('green', '\x1b[92m'),
-        ('yellow', '\x1b[93m'),
-        ('blue', '\x1b[94m'),
-        ('purple', '\x1b[95m'),
-        ('cyan', '\x1b[96m'),
+        ("red", "\x1b[91m"),
+        ("green", "\x1b[92m"),
+        ("yellow", "\x1b[93m"),
+        ("blue", "\x1b[94m"),
+        ("purple", "\x1b[95m"),
+        ("cyan", "\x1b[96m"),
     ],
 )
 def test_in_color(color, code, text="some text"):
@@ -33,35 +33,35 @@ def test_in_color(color, code, text="some text"):
 
 
 @pytest.mark.parametrize(
-    'json, label',
+    "json, label",
     [
         (
             dict(require_email_format_usernames=False, email_auth_enabled=True),
-            'Email or Username',
+            "Email or Username",
         ),
         (
             dict(require_email_format_usernames=False, email_auth_enabled=False),
-            'Username',
+            "Username",
         ),
-        (dict(require_email_format_usernames=True, email_auth_enabled=True), 'Email'),
-        (dict(require_email_format_usernames=True, email_auth_enabled=False), 'Email'),
+        (dict(require_email_format_usernames=True, email_auth_enabled=True), "Email"),
+        (dict(require_email_format_usernames=True, email_auth_enabled=False), "Email"),
     ],
 )
 def test_get_login_id(mocker, json, label):
     response = mocker.Mock(json=lambda: json)
-    mocked_get = mocker.patch('requests.get', return_value=response)
+    mocked_get = mocker.patch("requests.get", return_value=response)
     mocked_styled_input = mocker.patch(
-        'zulipterminal.cli.run.styled_input', return_value='input return value'
+        "zulipterminal.cli.run.styled_input", return_value="input return value"
     )
 
-    result = get_login_id('REALM_URL')
+    result = get_login_id("REALM_URL")
 
-    assert result == 'input return value'
-    mocked_get.assert_called_with(url='REALM_URL/api/v1/server_settings')
-    mocked_styled_input.assert_called_with(label + ': ')
+    assert result == "input return value"
+    mocked_get.assert_called_with(url="REALM_URL/api/v1/server_settings")
+    mocked_styled_input.assert_called_with(label + ": ")
 
 
-@pytest.mark.parametrize('options', ['-h', '--help'])
+@pytest.mark.parametrize("options", ["-h", "--help"])
 def test_main_help(capsys, options):
     with pytest.raises(SystemExit):
         main([options])
@@ -70,25 +70,25 @@ def test_main_help(capsys, options):
 
     lines = captured.out.strip().split("\n")
 
-    assert lines[0].startswith('usage: ')
+    assert lines[0].startswith("usage: ")
 
     required_arguments = {
-        '--theme THEME, -t THEME',
-        '-h, --help',
-        '-d, --debug',
-        '--list-themes',
-        '--profile',
-        '--config-file CONFIG_FILE, -c CONFIG_FILE',
-        '--autohide',
-        '--no-autohide',
-        '-v, --version',
-        '-e, --explore',
-        '--color-depth',
-        '--notify',
-        '--no-notify',
+        "--theme THEME, -t THEME",
+        "-h, --help",
+        "-d, --debug",
+        "--list-themes",
+        "--profile",
+        "--config-file CONFIG_FILE, -c CONFIG_FILE",
+        "--autohide",
+        "--no-autohide",
+        "-v, --version",
+        "-e, --explore",
+        "--color-depth",
+        "--notify",
+        "--no-notify",
     }
     optional_argument_lines = {
-        line[2:] for line in lines if len(line) > 2 and line[2] == '-'
+        line[2:] for line in lines if len(line) > 2 and line[2] == "-"
     }
     for line in optional_argument_lines:
         assert any(line.startswith(arg) for arg in required_arguments)
@@ -109,14 +109,14 @@ def test_valid_zuliprc_but_no_connection(
     capsys, mocker, minimal_zuliprc, server_connection_error="some_error"
 ):
     mocker.patch(
-        'zulipterminal.core.Controller.__init__',
+        "zulipterminal.core.Controller.__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc])
 
-    assert str(e.value) == '1'
+    assert str(e.value) == "1"
 
     captured = capsys.readouterr()
 
@@ -136,7 +136,7 @@ def test_valid_zuliprc_but_no_connection(
     assert captured.err == ""
 
 
-@pytest.mark.parametrize('bad_theme', ['c', 'd'])
+@pytest.mark.parametrize("bad_theme", ["c", "d"])
 def test_warning_regarding_incomplete_theme(
     capsys,
     mocker,
@@ -146,21 +146,21 @@ def test_warning_regarding_incomplete_theme(
     server_connection_error="sce",
 ):
     mocker.patch(
-        'zulipterminal.core.Controller.__init__',
+        "zulipterminal.core.Controller.__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
 
     monkeypatch.setitem(THEMES, bad_theme, [])
-    mocker.patch('zulipterminal.cli.run.all_themes', return_value=('a', 'b', 'c', 'd'))
+    mocker.patch("zulipterminal.cli.run.all_themes", return_value=("a", "b", "c", "d"))
     mocker.patch(
-        'zulipterminal.cli.run.complete_and_incomplete_themes',
-        return_value=(['a', 'b'], ['c', 'd']),
+        "zulipterminal.cli.run.complete_and_incomplete_themes",
+        return_value=(["a", "b"], ["c", "d"]),
     )
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc, "-t", bad_theme])
 
-    assert str(e.value) == '1'
+    assert str(e.value) == "1"
 
     captured = capsys.readouterr()
 
@@ -182,7 +182,7 @@ def test_warning_regarding_incomplete_theme(
     assert captured.err == ""
 
 
-@pytest.mark.parametrize('options', ['-v', '--version'])
+@pytest.mark.parametrize("options", ["-v", "--version"])
 def test_zt_version(capsys, options):
     with pytest.raises(SystemExit) as e:
         main([options])
@@ -191,19 +191,19 @@ def test_zt_version(capsys, options):
 
     captured = capsys.readouterr()
 
-    lines = captured.out.strip('\n')
-    expected = 'Zulip Terminal ' + ZT_VERSION
+    lines = captured.out.strip("\n")
+    expected = "Zulip Terminal " + ZT_VERSION
     assert lines == expected
 
     assert captured.err == ""
 
 
 @pytest.mark.parametrize(
-    'option, autohide',
+    "option, autohide",
     [
-        ('--autohide', 'autohide'),
-        ('--no-autohide', 'no_autohide'),
-        ('--debug', None),  # no-autohide by default
+        ("--autohide", "autohide"),
+        ("--no-autohide", "no_autohide"),
+        ("--debug", None),  # no-autohide by default
     ],
 )
 def test_parse_args_valid_autohide_option(option, autohide):
@@ -212,7 +212,7 @@ def test_parse_args_valid_autohide_option(option, autohide):
 
 
 @pytest.mark.parametrize(
-    'options', [['--autohide', '--no-autohide'], ['--no-autohide', '--autohide']]
+    "options", [["--autohide", "--no-autohide"], ["--no-autohide", "--autohide"]]
 )
 def test_main_multiple_autohide_options(capsys, options):
     with pytest.raises(SystemExit) as e:
@@ -221,18 +221,18 @@ def test_main_multiple_autohide_options(capsys, options):
     assert str(e.value) == "2"
 
     captured = capsys.readouterr()
-    lines = captured.err.strip('\n')
+    lines = captured.err.strip("\n")
     lines = lines.split("pytest: ", 1)[1]
     expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
 
 
 @pytest.mark.parametrize(
-    'option, notify_option',
+    "option, notify_option",
     [
-        ('--notify', 'enabled'),
-        ('--no-notify', 'disabled'),
-        ('--profile', None),  # disabled by default
+        ("--notify", "enabled"),
+        ("--no-notify", "disabled"),
+        ("--profile", None),  # disabled by default
     ],
 )
 def test__parse_args_valid_notify_option(option, notify_option):
@@ -241,10 +241,10 @@ def test__parse_args_valid_notify_option(option, notify_option):
 
 
 @pytest.mark.parametrize(
-    'options',
+    "options",
     [
-        ['--notify', '--no-notify'],
-        ['--no-notify', '--notify'],
+        ["--notify", "--no-notify"],
+        ["--no-notify", "--notify"],
     ],
 )
 def test_main_multiple_notify_options(capsys, options):
@@ -254,7 +254,7 @@ def test_main_multiple_notify_options(capsys, options):
     assert str(e.value) == "2"
 
     captured = capsys.readouterr()
-    lines = captured.err.strip('\n')
+    lines = captured.err.strip("\n")
     lines = lines.split("pytest: ", 1)[1]
     expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
@@ -298,7 +298,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     monkeypatch.setenv("HOME", zuliprc_path)
 
     # Give some arbitrary input and fake that it's always valid
-    mocker.patch.object(builtins, 'input', lambda _: 'text\n')
+    mocker.patch.object(builtins, "input", lambda _: "text\n")
     response = mocker.Mock(json=lambda: dict(api_key=""), status_code=200)
     mocker.patch("zulipterminal.cli.run.get_api_key", return_value=(response, None))
 
@@ -372,7 +372,7 @@ def test_successful_main_function_with_config(
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
     expected_lines = [
-        'Loading with:',
+        "Loading with:",
         "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
         "   autohide setting 'autohide' specified in zuliprc file.",
         f"   maximum footlinks value {footlinks_output}",
@@ -418,7 +418,7 @@ def test_main_error_with_invalid_zuliprc_options(
 
 
 @pytest.mark.parametrize(
-    'error_code, helper_text',
+    "error_code, helper_text",
     [
         (1, ""),
         (2, "helper"),
@@ -467,7 +467,7 @@ def test__write_zuliprc__fail_file_exists(
 
 
 @pytest.mark.parametrize(
-    'mode',
+    "mode",
     [
         # Avoid reformatting to retain readability of grid of values
         # fmt:off
@@ -491,11 +491,11 @@ def test_show_error_if_loading_zuliprc_with_open_permissions(
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc])
 
-    assert str(e.value) == '1'
+    assert str(e.value) == "1"
 
     captured = capsys.readouterr()
 
-    lines = captured.out.split('\n')[:-1]
+    lines = captured.out.split("\n")[:-1]
     expected_last_lines = [
         f"(it currently has permissions '{current_mode}')",
         "This can often be achieved with a command such as:",
