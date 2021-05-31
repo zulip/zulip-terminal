@@ -11,6 +11,7 @@ class KeyBinding(TypedDict, total=False):
     key_category: str
 
 
+# fmt: off
 KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     # Key that is displayed in the UI is determined by the method
     # primary_key_for_command. (Currently the first key in the list)
@@ -332,6 +333,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'key_category': 'msg_compose',
     }),
 ])
+# fmt: on
 
 HELP_CATEGORIES = OrderedDict([
     ('general', 'General'),
