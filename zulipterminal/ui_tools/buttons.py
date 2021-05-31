@@ -26,10 +26,10 @@ class TopButton(urwid.Button):
         caption: str,
         show_function: Callable[[], Any],
         width: int,
-        prefix_character: Union[str, Tuple[Any, str]] = "\N{BULLET}",
-        text_color: Optional[str] = None,
-        count: int = 0,
-        count_style: Optional[str] = None,
+        prefix_character: Union[str, Tuple[Any, str]]='\N{BULLET}',
+        text_color: Optional[str]=None,
+        count: int=0,
+        count_style: Optional[str]=None,
     ) -> None:
         if isinstance(prefix_character, tuple):
             prefix = prefix_character[1]
@@ -38,11 +38,11 @@ class TopButton(urwid.Button):
         assert len(prefix) in (0, 1)
         self._caption = caption
         self.prefix_character = prefix_character
-        self.post_prefix_spacing = " " if prefix else ""
+        self.post_prefix_spacing = ' ' if prefix else ''
         self.count = count
         self.count_style = count_style
 
-        prefix_length = 0 if prefix == "" else 2
+        prefix_length = 0 if prefix == '' else 2
         # Space either side, at least one space between
         self.width_for_text_and_count = width - 3 - prefix_length
 
@@ -51,28 +51,27 @@ class TopButton(urwid.Button):
         super().__init__("")
         self.update_count(count, text_color)
         self.controller = controller
-        urwid.connect_signal(self, "click", self.activate)
+        urwid.connect_signal(self, 'click', self.activate)
 
-    def update_count(self, count: int, text_color: Optional[str] = None) -> None:
+    def update_count(self, count: int, text_color: Optional[str]=None) -> None:
         new_color = self.original_color if text_color is None else text_color
 
         self.count = count
         if count == 0:
-            count_text = ""
+            count_text = ''
         else:
             count_text = str(count)
 
         self.update_widget((self.count_style, count_text), new_color)
 
-    def update_widget(
-        self, count_text: Tuple[Optional[str], str], text_color: Optional[str]
-    ) -> Any:
+    def update_widget(self, count_text: Tuple[Optional[str], str],
+                      text_color: Optional[str]) -> Any:
         # Note that we don't modify self._caption
-        max_caption_length = self.width_for_text_and_count - len(count_text[1])
+        max_caption_length = (self.width_for_text_and_count
+                              - len(count_text[1]))
         if len(self._caption) > max_caption_length:
-            caption = (
-                self._caption[: max_caption_length - 1] + "\N{HORIZONTAL ELLIPSIS}"
-            )
+            caption = (self._caption[:max_caption_length - 1]
+                       + '\N{HORIZONTAL ELLIPSIS}')
         else:
             caption = self._caption
         num_extra_spaces = (
@@ -81,19 +80,15 @@ class TopButton(urwid.Button):
 
         # NOTE: Generated text does not include space at end
         # NOTE: Some are styles, so are not included in f-string
-        self._w = urwid.AttrMap(
-            urwid.SelectableIcon(
-                [
-                    " ",
-                    self.prefix_character,
-                    f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
-                    count_text,
-                ],
-                self.width_for_text_and_count + 5,  # cursor location
+        self._w = urwid.AttrMap(urwid.SelectableIcon(
+            [" ",
+             self.prefix_character,
+             f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
+             count_text],
+            self.width_for_text_and_count + 5  # cursor location
             ),
             text_color,
-            "selected",
-        )
+            'selected')
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -102,7 +97,7 @@ class TopButton(urwid.Button):
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("ENTER", key):
+        if is_command_key('ENTER', key):
             self.activate(key)
             return None
         else:  # This is in the else clause, to avoid multiple activation
@@ -110,81 +105,84 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
-        button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
+        button_text = (
+            f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
+        )
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_messages,
             width=width,
-            prefix_character="",
+            prefix_character='',
             count=count,
-            count_style="unread_count",
+            count_style='unread_count',
         )
 
 
 class PMButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
-        button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
+        button_text = (
+            f"Private messages [{primary_key_for_command('ALL_PM')}]"
+        )
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_pm,
             width=width,
-            prefix_character="",
+            prefix_character='',
             count=count,
-            count_style="unread_count",
+            count_style='unread_count'
         )
 
 
 class MentionedButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
-        button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
+        button_text = (
+            f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
+        )
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_mentions,
             width=width,
-            prefix_character="",
+            prefix_character='',
             count=count,
-            count_style="unread_count",
+            count_style='unread_count',
         )
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
-        button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
+    def __init__(self, controller: Any, width: int, count: int=0) -> None:
+        button_text = (
+            f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
+        )
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_starred,
             width=width,
-            prefix_character="",
+            prefix_character='',
             count=count,  # Number of starred messages, not unread count
-            count_style="starred_count",
+            count_style='starred_count',
         )
 
 
 class StreamButton(TopButton):
-    def __init__(
-        self,
-        properties: StreamData,
-        controller: Any,
-        view: Any,
-        width: int,
-        count: int = 0,
-    ) -> None:
+    def __init__(self, properties: StreamData,
+                 controller: Any, view: Any, width: int,
+                 count: int=0) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
-        self.stream_name = properties["name"]
-        self.stream_id = properties["id"]
-        self.color = properties["color"]
-        is_private = properties["invite_only"]
-        self.description = properties["description"]
+        self.stream_name = properties['name']
+        self.stream_id = properties['id']
+        self.color = properties['color']
+        is_private = properties['invite_only']
+        self.description = properties['description']
 
         self.model = controller.model
         self.count = count
@@ -193,16 +191,15 @@ class StreamButton(TopButton):
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
-                inverse_text = background if background else "black"
+                inverse_text = background if background else 'black'
                 break
-        view.palette.append(
-            (self.color, "", "", "bold", f"{self.color}, bold", background)
-        )
-        view.palette.append(
-            ("s" + self.color, "", "", "standout", inverse_text, self.color)
-        )
+        view.palette.append((
+            self.color, '', '', 'bold', f"{self.color}, bold", background))
+        view.palette.append((
+            's' + self.color, '', '', 'standout', inverse_text, self.color))
 
-        stream_marker = STREAM_MARKER_PRIVATE if is_private else STREAM_MARKER_PUBLIC
+        stream_marker = (STREAM_MARKER_PRIVATE if is_private
+                         else STREAM_MARKER_PUBLIC)
         narrow_function = partial(
             controller.narrow_to_stream,
             stream_name=self.stream_name,
@@ -214,7 +211,7 @@ class StreamButton(TopButton):
             width=width,
             prefix_character=(self.color, stream_marker),
             count=count,
-            count_style="unread_count",
+            count_style='unread_count',
         )
 
         # Mark muted streams 'M' during button creation.
@@ -222,38 +219,34 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
-        self.view.home_button.update_count(self.model.unread_counts["all_msg"])
+        self.update_widget(('muted', MUTE_MARKER), 'muted')
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
 
     def mark_unmuted(self, unread_count: int) -> None:
         self.update_count(unread_count)
-        self.view.home_button.update_count(self.model.unread_counts["all_msg"])
+        self.view.home_button.update_count(
+            self.model.unread_counts['all_msg'])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("TOGGLE_TOPIC", key):
+        if is_command_key('TOGGLE_TOPIC', key):
             self.view.left_panel.show_topic_view(self)
-        elif is_command_key("TOGGLE_MUTE_STREAM", key):
+        elif is_command_key('TOGGLE_MUTE_STREAM', key):
             self.controller.stream_muting_confirmation_popup(self)
-        elif is_command_key("STREAM_DESC", key):
+        elif is_command_key('STREAM_DESC', key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
 
 
 class UserButton(TopButton):
-    def __init__(
-        self,
-        user: Dict[str, Any],
-        controller: Any,
-        view: Any,
-        width: int,
-        state_marker: str,
-        color: Optional[str] = None,
-        count: int = 0,
-        is_current_user: bool = False,
-    ) -> None:
+    def __init__(self, user: Dict[str, Any], controller: Any,
+                 view: Any, width: int,
+                 state_marker: str,
+                 color: Optional[str]=None, count: int=0,
+                 is_current_user: bool=False) -> None:
         # Properties accessed externally
-        self.email = user["email"]
-        self.user_id = user["user_id"]
+        self.email = user['email']
+        self.user_id = user['user_id']
 
         self._view = view  # Used in _narrow_with_compose
 
@@ -262,7 +255,7 @@ class UserButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=user["full_name"],
+            caption=user['full_name'],
             show_function=self._narrow_with_compose,
             width=width,
             prefix_character=(color, state_marker),
@@ -270,7 +263,7 @@ class UserButton(TopButton):
             count=count,
         )
         if is_current_user:
-            self.update_widget(("current_user", "(you)"), color)
+            self.update_widget(('current_user', '(you)'), color)
 
     def _narrow_with_compose(self) -> None:
         # Switches directly to composing with user
@@ -278,22 +271,17 @@ class UserButton(TopButton):
         self.controller.narrow_to_user(
             recipient_emails=[self.email],
         )
-        self._view.body.focus.original_widget.set_focus("footer")
+        self._view.body.focus.original_widget.set_focus('footer')
         self._view.write_box.private_box_view(
-            emails=[self.email], recipient_user_ids=[self.user_id]
+            emails=[self.email],
+            recipient_user_ids=[self.user_id]
         )
 
 
 class TopicButton(TopButton):
-    def __init__(
-        self,
-        stream_id: int,
-        topic: str,
-        controller: Any,
-        width: int = 0,
-        count: int = 0,
-    ) -> None:
-        self.stream_name = controller.model.stream_dict[stream_id]["name"]
+    def __init__(self, stream_id: int, topic: str,
+                 controller: Any, width: int=0, count: int=0) -> None:
+        self.stream_name = controller.model.stream_dict[stream_id]['name']
         self.topic_name = topic
         self.stream_id = stream_id
         self.model = controller.model
@@ -308,17 +296,16 @@ class TopicButton(TopButton):
             caption=self.topic_name,
             show_function=narrow_function,
             width=width,
-            prefix_character="",
+            prefix_character='',
             count=count,
-            count_style="unread_count",
+            count_style='unread_count',
         )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
-
+        self.update_widget(('muted',  MUTE_MARKER), 'muted')
     # TODO: Handle event-based approach for topic-muting.
 
 
@@ -335,32 +322,32 @@ class ParsedNarrowLink(TypedDict, total=False):
 
 
 class MessageLinkButton(urwid.Button):
-    def __init__(
-        self, controller: Any, caption: str, link: str, display_attr: Optional[str]
-    ) -> None:
+    def __init__(self, controller: Any, caption: str, link: str,
+                 display_attr: Optional[str]) -> None:
         self.controller = controller
         self.model = self.controller.model
         self.view = self.controller.view
         self.link = link
 
-        super().__init__("")
+        super().__init__('')
         self.update_widget(caption, display_attr)
-        urwid.connect_signal(self, "click", callback=self.handle_link)
+        urwid.connect_signal(self, 'click', callback=self.handle_link)
 
-    def update_widget(self, caption: str, display_attr: Optional[str] = None) -> None:
+    def update_widget(self, caption: str,
+                      display_attr: Optional[str]=None) -> None:
         """
         Overrides the existing button widget for custom styling.
         """
         # Set cursor position next to len(caption) to avoid the cursor.
         icon = urwid.SelectableIcon(caption, cursor_position=len(caption) + 1)
-        self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+        self._w = urwid.AttrMap(icon, display_attr, focus_map='selected')
 
     def handle_link(self, *_: Any) -> None:
         """
         Classifies and handles link.
         """
         server_url = self.model.server_url
-        if self.link.startswith(urljoin(server_url, "/#narrow/")):
+        if self.link.startswith(urljoin(server_url, '/#narrow/')):
             self.handle_narrow_link()
 
     @staticmethod
@@ -369,8 +356,8 @@ class MessageLinkButton(urwid.Button):
         Returns a dict with optional stream ID and stream name.
         """
         # Modern links come patched with the stream ID and '-' as delimiters.
-        if re.match("^[0-9]+-", encoded_stream_data):
-            stream_id, *_ = encoded_stream_data.split("-")
+        if re.match('^[0-9]+-', encoded_stream_data):
+            stream_id, *_ = encoded_stream_data.split('-')
             # Given how encode_stream() in zerver/lib/url_encoding.py
             # replaces ' ' with '-' in the stream name, skip extracting the
             # stream name to avoid any ambiguity.
@@ -405,77 +392,68 @@ class MessageLinkButton(urwid.Button):
         #    {encoded.20topic.20name}
         # d. narrow/stream/[{stream_id}-]{stream-name}/topic/
         #    {encoded.20topic.20name}/near/{message_id}
-        fragments = urlparse(link.rstrip("/")).fragment.split("/")
+        fragments = urlparse(link.rstrip('/')).fragment.split('/')
         len_fragments = len(fragments)
         parsed_link = ParsedNarrowLink()
 
-        if len_fragments == 3 and fragments[1] == "stream":
+        if len_fragments == 3 and fragments[1] == 'stream':
             stream_data = cls._decode_stream_data(fragments[2])
-            parsed_link = dict(narrow="stream", stream=stream_data)
+            parsed_link = dict(narrow='stream', stream=stream_data)
 
-        elif (
-            len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "topic"
-        ):
+        elif (len_fragments == 5 and fragments[1] == 'stream'
+                and fragments[3] == 'topic'):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
-            parsed_link = dict(
-                narrow="stream:topic", stream=stream_data, topic_name=topic_name
-            )
+            parsed_link = dict(narrow='stream:topic', stream=stream_data,
+                               topic_name=topic_name)
 
-        elif len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "near":
+        elif (len_fragments == 5 and fragments[1] == 'stream'
+                and fragments[3] == 'near'):
             stream_data = cls._decode_stream_data(fragments[2])
             message_id = cls._decode_message_id(fragments[4])
-            parsed_link = dict(
-                narrow="stream:near", stream=stream_data, message_id=message_id
-            )
+            parsed_link = dict(narrow='stream:near', stream=stream_data,
+                               message_id=message_id)
 
-        elif (
-            len_fragments == 7
-            and fragments[1] == "stream"
-            and fragments[3] == "topic"
-            and fragments[5] == "near"
-        ):
+        elif (len_fragments == 7 and fragments[1] == 'stream'
+                and fragments[3] == 'topic' and fragments[5] == 'near'):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
             message_id = cls._decode_message_id(fragments[6])
-            parsed_link = dict(
-                narrow="stream:topic:near",
-                stream=stream_data,
-                topic_name=topic_name,
-                message_id=message_id,
-            )
+            parsed_link = dict(narrow='stream:topic:near', stream=stream_data,
+                               topic_name=topic_name, message_id=message_id)
 
         return parsed_link
 
-    def _validate_and_patch_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
+    def _validate_and_patch_stream_data(self,
+                                        parsed_link: ParsedNarrowLink) -> str:
         """
         Validates stream data and patches the optional value in the nested
         DecodedStream dict.
         """
-        stream_id = parsed_link["stream"]["stream_id"]
-        stream_name = parsed_link["stream"]["stream_name"]
-        assert (stream_id is None and stream_name is not None) or (
-            stream_id is not None and stream_name is None
+        stream_id = parsed_link['stream']['stream_id']
+        stream_name = parsed_link['stream']['stream_name']
+        assert (
+            (stream_id is None and stream_name is not None)
+            or (stream_id is not None and stream_name is None)
         )
 
         model = self.model
         # Validate stream ID and name.
-        if (stream_id and not model.is_user_subscribed_to_stream(stream_id)) or (
-            stream_name and not model.is_valid_stream(stream_name)
-        ):
+        if ((stream_id and not model.is_user_subscribed_to_stream(stream_id))
+                or (stream_name and not model.is_valid_stream(stream_name))):
             # TODO: Narrow to the concerned stream in a 'preview' mode or
             # report whether the stream id is invalid instead.
-            return "The stream seems to be either unknown or unsubscribed"
+            return 'The stream seems to be either unknown or unsubscribed'
 
         # Patch the optional value.
         if not stream_id:
             stream_id = cast(int, model.stream_id_from_name(stream_name))
-            parsed_link["stream"]["stream_id"] = stream_id
+            parsed_link['stream']['stream_id'] = stream_id
         else:
-            stream_name = cast(str, model.stream_dict[stream_id]["name"])
-            parsed_link["stream"]["stream_name"] = stream_name
+            stream_name = cast(str, model.stream_dict[stream_id]['name'])
+            parsed_link['stream']['stream_name'] = stream_name
 
-        return ""
+        return ''
 
     def _validate_narrow_link(self, parsed_link: ParsedNarrowLink) -> str:
         """
@@ -483,55 +461,55 @@ class MessageLinkButton(urwid.Button):
         appropriate validation error.
         """
         if not parsed_link:
-            return "The narrow link seems to be either broken or unsupported"
+            return 'The narrow link seems to be either broken or unsupported'
 
         # Validate stream data.
-        if "stream" in parsed_link:
+        if 'stream' in parsed_link:
             error = self._validate_and_patch_stream_data(parsed_link)
             if error:
                 return error
 
         # Validate topic name.
-        if "topic_name" in parsed_link:
-            topic_name = parsed_link["topic_name"]
-            stream_id = parsed_link["stream"]["stream_id"]
+        if 'topic_name' in parsed_link:
+            topic_name = parsed_link['topic_name']
+            stream_id = parsed_link['stream']['stream_id']
 
             if topic_name not in self.model.topics_in_stream(stream_id):
-                return "Invalid topic name"
+                return 'Invalid topic name'
 
         # Validate message ID for near.
-        if "near" in parsed_link["narrow"]:
-            message_id = parsed_link.get("message_id")
+        if 'near' in parsed_link['narrow']:
+            message_id = parsed_link.get('message_id')
 
             if message_id is None:
-                return "Invalid message ID"
+                return 'Invalid message ID'
 
-        return ""
+        return ''
 
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
         """
         Switches narrow via narrow_to_* methods.
         """
-        narrow = parsed_link["narrow"]
-        if "stream" == narrow:
+        narrow = parsed_link['narrow']
+        if 'stream' == narrow:
             self.controller.narrow_to_stream(
-                stream_name=parsed_link["stream"]["stream_name"],
+                stream_name=parsed_link['stream']['stream_name'],
             )
-        elif "stream:near" == narrow:
+        elif 'stream:near' == narrow:
             self.controller.narrow_to_stream(
-                stream_name=parsed_link["stream"]["stream_name"],
-                contextual_message_id=parsed_link["message_id"],
+                stream_name=parsed_link['stream']['stream_name'],
+                contextual_message_id=parsed_link['message_id'],
             )
-        elif "stream:topic" == narrow:
+        elif 'stream:topic' == narrow:
             self.controller.narrow_to_topic(
-                stream_name=parsed_link["stream"]["stream_name"],
-                topic_name=parsed_link["topic_name"],
+                stream_name=parsed_link['stream']['stream_name'],
+                topic_name=parsed_link['topic_name'],
             )
-        elif "stream:topic:near" == narrow:
+        elif 'stream:topic:near' == narrow:
             self.controller.narrow_to_topic(
-                stream_name=parsed_link["stream"]["stream_name"],
-                topic_name=parsed_link["topic_name"],
-                contextual_message_id=parsed_link["message_id"],
+                stream_name=parsed_link['stream']['stream_name'],
+                topic_name=parsed_link['topic_name'],
+                contextual_message_id=parsed_link['message_id'],
             )
 
     def handle_narrow_link(self) -> None:
@@ -556,13 +534,11 @@ class EditModeButton(urwid.Button):
     def __init__(self, controller: Any, width: int) -> None:
         self.controller = controller
         self.width = width
-        super().__init__(label="", on_press=controller.show_topic_edit_mode)
-        self.set_selected_mode("change_later")  # set default mode
+        super().__init__(label="",
+                         on_press=controller.show_topic_edit_mode)
+        self.set_selected_mode('change_later')  # set default mode
 
     def set_selected_mode(self, mode: EditPropagateMode) -> None:
         self.mode = mode
-        self._w = urwid.AttrMap(
-            urwid.SelectableIcon(EDIT_MODE_CAPTIONS[self.mode], self.width),
-            None,
-            "selected",
-        )
+        self._w = urwid.AttrMap(urwid.SelectableIcon(
+            EDIT_MODE_CAPTIONS[self.mode], self.width), None, 'selected')

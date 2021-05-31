@@ -335,16 +335,14 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
 ])
 # fmt: on
 
-HELP_CATEGORIES = OrderedDict(
-    [
-        ("general", "General"),
-        ("navigation", "Navigation"),
-        ("searching", "Searching"),
-        ("msg_actions", "Message actions"),
-        ("stream_list", "Stream list actions"),
-        ("msg_compose", "Composing a Message"),
-    ]
-)
+HELP_CATEGORIES = OrderedDict([
+    ('general', 'General'),
+    ('navigation', 'Navigation'),
+    ('searching', 'Searching'),
+    ('msg_actions', 'Message actions'),
+    ('stream_list', 'Stream list actions'),
+    ('msg_compose', 'Composing a Message'),
+])
 
 
 class InvalidCommand(Exception):
@@ -357,7 +355,7 @@ def is_command_key(command: str, key: str) -> bool:
     or the key otherwise.
     """
     try:
-        return key in KEY_BINDINGS[command]["keys"]
+        return key in KEY_BINDINGS[command]['keys']
     except KeyError as exception:
         raise InvalidCommand(command)
 
@@ -367,7 +365,7 @@ def keys_for_command(command: str) -> List[str]:
     Returns the actual keys for a given mapped command
     """
     try:
-        return list(KEY_BINDINGS[command]["keys"])
+        return list(KEY_BINDINGS[command]['keys'])
     except KeyError as exception:
         raise InvalidCommand(command)
 
@@ -383,8 +381,5 @@ def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
     """
-    return [
-        key_binding
-        for key_binding in KEY_BINDINGS.values()
-        if not key_binding.get("excluded_from_random_tips", False)
-    ]
+    return [key_binding for key_binding in KEY_BINDINGS.values()
+            if not key_binding.get('excluded_from_random_tips', False)]

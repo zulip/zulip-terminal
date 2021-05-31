@@ -33,12 +33,11 @@ class TestPopUpConfirmationView:
         self.controller = mocker.Mock()
         self.controller.view.LEFT_WIDTH = 27
         self.callback = mocker.Mock()
-        self.list_walker = mocker.patch(
-            VIEWS + ".urwid.SimpleFocusListWalker", return_value=[]
-        )
-        self.divider = mocker.patch(VIEWS + ".urwid.Divider")
-        self.text = mocker.patch(VIEWS + ".urwid.Text")
-        self.wrapper_w = mocker.patch(VIEWS + ".urwid.WidgetWrap")
+        self.list_walker = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker",
+                                        return_value=[])
+        self.divider = mocker.patch(VIEWS + '.urwid.Divider')
+        self.text = mocker.patch(VIEWS + '.urwid.Text')
+        self.wrapper_w = mocker.patch(VIEWS + '.urwid.WidgetWrap')
         return PopUpConfirmationView(
             self.controller,
             self.text,
@@ -50,8 +49,7 @@ class TestPopUpConfirmationView:
         assert popup_view.success_callback == self.callback
         self.divider.assert_called_once_with()
         self.list_walker.assert_called_once_with(
-            [self.text, self.divider(), self.wrapper_w()]
-        )
+            [self.text, self.divider(), self.wrapper_w()])
 
     def test_exit_popup_yes(self, mocker, popup_view):
         popup_view.exit_popup_yes(mocker.Mock())
@@ -63,7 +61,7 @@ class TestPopUpConfirmationView:
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
     def test_exit_popup_GO_BACK(self, mocker, popup_view, key, widget_size):
         size = widget_size(popup_view)
         popup_view.keypress(size, key)
@@ -75,23 +73,20 @@ class TestPopUpView:
     @pytest.fixture(autouse=True)
     def pop_up_view(self, mocker):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
-        self.command = "COMMAND"
-        self.title = "Generic title"
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        self.command = 'COMMAND'
+        self.title = 'Generic title'
         self.width = 16
         self.widget = mocker.Mock()
-        mocker.patch.object(self.widget, "rows", return_value=1)
+        mocker.patch.object(self.widget, 'rows', return_value=1)
         self.widgets = [self.widget]
-        self.list_walker = mocker.patch(
-            VIEWS + ".urwid.SimpleFocusListWalker", return_value=[]
-        )
-        self.super_init = mocker.patch(VIEWS + ".urwid.ListBox.__init__")
-        self.super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
-        self.pop_up_view = PopUpView(
-            self.controller, self.widgets, self.command, self.width, self.title
-        )
+        self.list_walker = mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker',
+                                        return_value=[])
+        self.super_init = mocker.patch(VIEWS + '.urwid.ListBox.__init__')
+        self.super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
+        self.pop_up_view = PopUpView(self.controller, self.widgets,
+                                     self.command, self.width, self.title)
 
     def test_init(self):
         assert self.pop_up_view.controller == self.controller
@@ -101,7 +96,7 @@ class TestPopUpView:
         self.list_walker.assert_called_once_with(self.widgets)
         self.super_init.assert_called_once_with(self.pop_up_view.log)
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    @pytest.mark.parametrize('key', keys_for_command('GO_BACK'))
     def test_keypress_GO_BACK(self, key, widget_size):
         size = widget_size(self.pop_up_view)
         self.pop_up_view.keypress(size, key)
@@ -109,29 +104,24 @@ class TestPopUpView:
 
     def test_keypress_command_key(self, mocker, widget_size):
         size = widget_size(self.pop_up_view)
-        mocker.patch(
-            VIEWS + ".is_command_key",
-            side_effect=(lambda command, key: command == self.command),
-        )
-        self.pop_up_view.keypress(size, "cmd_key")
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key: command == self.command
+        ))
+        self.pop_up_view.keypress(size, 'cmd_key')
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.pop_up_view)
         # Patch `is_command_key` to not raise an 'Invalid Command' exception
         # when its parameters are (self.command, key) as there is no
         # self.command='COMMAND' command in keys.py.
-        mocker.patch(
-            VIEWS + ".is_command_key",
-            side_effect=(
-                lambda command, key: False
-                if command == self.command
-                else is_command_key(command, key)
-            ),
-        )
+        mocker.patch(VIEWS + '.is_command_key', side_effect=(
+            lambda command, key:
+            False if command == self.command
+            else is_command_key(command, key)
+        ))
         self.pop_up_view.keypress(size, key)
         self.super_keypress.assert_called_once_with(size, expected_key)
 
@@ -140,68 +130,57 @@ class TestAboutView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
 
-        self.about_view = AboutView(
-            self.controller,
-            "About",
-            zt_version=ZT_VERSION,
-            server_version=server_version,
-            server_feature_level=server_feature_level,
-            theme_name="zt_dark",
-            color_depth=256,
-            notify_enabled=False,
-            autohide_enabled=False,
-            maximum_footlinks=3,
-        )
+        self.about_view = AboutView(self.controller, 'About',
+                                    zt_version=ZT_VERSION,
+                                    server_version=server_version,
+                                    server_feature_level=server_feature_level,
+                                    theme_name='zt_dark',
+                                    color_depth=256,
+                                    notify_enabled=False,
+                                    autohide_enabled=False,
+                                    maximum_footlinks=3)
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("ABOUT")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('ABOUT')})
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.about_view)
         self.about_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
     def test_keypress_exit_popup_invalid_key(self, widget_size):
-        key = "a"
+        key = 'a'
         size = widget_size(self.about_view)
         self.about_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.about_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.about_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
     def test_feature_level_content(self, mocker, zulip_version):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
         server_version, server_feature_level = zulip_version
 
-        about_view = AboutView(
-            self.controller,
-            "About",
-            zt_version=ZT_VERSION,
-            server_version=server_version,
-            server_feature_level=server_feature_level,
-            theme_name="zt_dark",
-            color_depth=256,
-            notify_enabled=False,
-            autohide_enabled=False,
-            maximum_footlinks=3,
-        )
+        about_view = AboutView(self.controller, 'About', zt_version=ZT_VERSION,
+                               server_version=server_version,
+                               server_feature_level=server_feature_level,
+                               theme_name='zt_dark',
+                               color_depth=256,
+                               notify_enabled=False,
+                               autohide_enabled=False,
+                               maximum_footlinks=3)
 
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
@@ -212,23 +191,26 @@ class TestEditHistoryView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
+        self.controller.model.fetch_message_history = (
+            mocker.Mock(return_value=[])
         )
-        self.controller.model.fetch_message_history = mocker.Mock(return_value=[])
-        self.controller.model.formatted_local_time.return_value = "Tue Mar 13 10:55:22"
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.controller.model.formatted_local_time.return_value = (
+           "Tue Mar 13 10:55:22"
+        )
+        mocker.patch(VIEWS + '.urwid.SimpleFocusListWalker', return_value=[])
         # NOTE: Given that the EditHistoryView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
-        self.message = {"id": 1}
+        self.message = {'id': 1}
         self.edit_history_view = EditHistoryView(
             controller=self.controller,
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
-            title="Edit History",
+            title='Edit History',
         )
 
     def test_init(self):
@@ -238,10 +220,10 @@ class TestEditHistoryView:
         assert self.edit_history_view.message_links == OrderedDict()
         assert self.edit_history_view.time_mentions == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
-            message_id=self.message["id"],
+            message_id=self.message['id'],
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    @pytest.mark.parametrize('key', keys_for_command('MSG_INFO'))
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.edit_history_view)
 
@@ -251,15 +233,14 @@ class TestEditHistoryView:
 
     def test_keypress_exit_popup_invalid_key(self, widget_size):
         size = widget_size(self.edit_history_view)
-        key = "a"
+        key = 'a'
 
         self.edit_history_view.keypress(size, key)
 
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("EDIT_HISTORY"), *keys_for_command("GO_BACK")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('EDIT_HISTORY'),
+                                     *keys_for_command('GO_BACK')})
     def test_keypress_show_msg_info(self, key, widget_size):
         size = widget_size(self.edit_history_view)
 
@@ -272,49 +253,36 @@ class TestEditHistoryView:
             time_mentions=list(),
         )
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         size = widget_size(self.edit_history_view)
         key, expected_key = navigation_key_expected_key_pair
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
 
         self.edit_history_view.keypress(size, key)
 
         super_keypress.assert_called_once_with(size, expected_key)
 
-    @pytest.mark.parametrize(
-        "snapshot",
-        [
-            {
-                "content": "Howdy!",
-                "timestamp": 1530129134,
-                "topic": "party at my house",
-                # ...
-            }
-        ],
-    )
-    @pytest.mark.parametrize(
-        "user_id, user_name_from_id_called",
-        [
+    @pytest.mark.parametrize('snapshot', [{
+            'content': 'Howdy!',
+            'timestamp': 1530129134,
+            'topic': 'party at my house',
+            # ...
+    }])
+    @pytest.mark.parametrize('user_id, user_name_from_id_called', [
             (1001, True),
             (None, False),
         ],
         ids=[
-            "with_user_id",
-            "without_user_id",
-        ],
+            'with_user_id',
+            'without_user_id',
+        ]
     )
-    def test__make_edit_block(
-        self,
-        mocker,
-        snapshot,
-        user_id,
-        user_name_from_id_called,
-        tag="(Current Version)",
-    ):
+    def test__make_edit_block(self, mocker, snapshot, user_id,
+                              user_name_from_id_called,
+                              tag='(Current Version)'):
         self._get_author_prefix = mocker.patch(
-            VIEWS + ".EditHistoryView._get_author_prefix",
+            VIEWS + '.EditHistoryView._get_author_prefix',
         )
         snapshot = dict(**snapshot, user_id=user_id) if user_id else snapshot
 
@@ -326,91 +294,82 @@ class TestEditHistoryView:
         assert isinstance(contents[1], Columns)  # Subheader.
         assert isinstance(contents[1][0], Text)  # Subheader: Author.
         assert isinstance(contents[1][1], Text)  # Subheader: Timestamp.
-        assert isinstance(contents[2], Text)  # Content.
+        assert isinstance(contents[2], Text)     # Content.
         assert contents[0][1].text == tag
-        assert (
-            self.controller.model.user_name_from_id.called == user_name_from_id_called
-        )
+        assert (self.controller.model.user_name_from_id.called
+                == user_name_from_id_called)
 
-    @pytest.mark.parametrize(
-        "snapshot",
-        [
-            {
-                "content": "Howdy!",
-                "timestamp": 1530129134,
-                "topic": "party at my house",
-                # ...
-            }
-        ],
-    )
-    @pytest.mark.parametrize(
-        "to_vary_in_snapshot, tag, expected_author_prefix",
-        [
+    @pytest.mark.parametrize('snapshot', [{
+            'content': 'Howdy!',
+            'timestamp': 1530129134,
+            'topic': 'party at my house',
+            # ...
+    }])
+    @pytest.mark.parametrize('to_vary_in_snapshot, tag, expected_author_prefix', [
             (
                 {},
-                "(Original Version)",
-                "Posted",
+                '(Original Version)',
+                'Posted',
             ),
             (
                 {
-                    "prev_content": "Hi!",
-                    "prev_topic": "no party at my house",
+                    'prev_content': 'Hi!',
+                    'prev_topic': 'no party at my house',
                 },
-                "",
-                "Content & Topic edited",
+                '',
+                'Content & Topic edited',
             ),
             (
                 {
-                    "prev_content": "Hi!",
+                    'prev_content': 'Hi!',
                 },
-                "",
-                "Content edited",
+                '',
+                'Content edited',
             ),
             (
                 {
-                    "prev_topic": "no party at my house",
+                    'prev_topic': 'no party at my house',
                 },
-                "",
-                "Topic edited",
+                '',
+                'Topic edited',
             ),
             (
                 {
-                    "prev_content": "Howdy!",
-                    "prev_topic": "party at my house",
+                    'prev_content': 'Howdy!',
+                    'prev_topic': 'party at my house',
                 },
-                "",
-                "Edited but no changes made",
+                '',
+                'Edited but no changes made',
             ),
             (
                 {
-                    "prev_content": "Hi!",
-                    "prev_topic": "party at my house",
+                    'prev_content': 'Hi!',
+                    'prev_topic': 'party at my house',
                 },
-                "",
-                "Content edited",
+                '',
+                'Content edited',
             ),
             (
                 {
-                    "prev_content": "Howdy!",
-                    "prev_topic": "no party at my house",
+                    'prev_content': 'Howdy!',
+                    'prev_topic': 'no party at my house',
                 },
-                "",
-                "Topic edited",
+                '',
+                'Topic edited',
             ),
         ],
         ids=[
-            "posted",
-            "content_&_topic_edited",
-            "content_edited",
-            "topic_edited",
-            "false_alarm_content_&_topic",
-            "content_edited_with_false_alarm_topic",
-            "topic_edited_with_false_alarm_content",
-        ],
+            'posted',
+            'content_&_topic_edited',
+            'content_edited',
+            'topic_edited',
+            'false_alarm_content_&_topic',
+            'content_edited_with_false_alarm_topic',
+            'topic_edited_with_false_alarm_content',
+        ]
     )
-    def test__get_author_prefix(
-        self, snapshot, to_vary_in_snapshot, tag, expected_author_prefix
-    ):
+    def test__get_author_prefix(self, snapshot, to_vary_in_snapshot, tag,
+                                expected_author_prefix):
         snapshot = dict(**snapshot, **to_vary_in_snapshot)
 
         return_value = EditHistoryView._get_author_prefix(snapshot, tag)
@@ -427,18 +386,14 @@ class TestEditModeView:
         button = mocker.Mock()
         return EditModeView(controller, button)
 
-    @pytest.mark.parametrize(
-        "index_in_widgets, mode",
-        [
-            (0, "change_one"),
-            (1, "change_later"),
-            (2, "change_all"),
-        ],
-    )
-    @pytest.mark.parametrize("key", keys_for_command("ENTER"))
-    def test_select_edit_mode(
-        self, mocker, edit_mode_view, widget_size, index_in_widgets, mode, key
-    ):
+    @pytest.mark.parametrize('index_in_widgets, mode', [
+        (0, 'change_one'),
+        (1, 'change_later'),
+        (2, 'change_all'),
+    ])
+    @pytest.mark.parametrize('key', keys_for_command('ENTER'))
+    def test_select_edit_mode(self, mocker, edit_mode_view, widget_size,
+                              index_in_widgets, mode, key):
         radio_button = edit_mode_view.widgets[index_in_widgets]
         size = widget_size(radio_button)
 
@@ -452,11 +407,10 @@ class TestHelpView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.help_view = HelpView(self.controller, "Help Menu")
+        self.help_view = HelpView(self.controller, 'Help Menu')
 
     def test_keypress_any_key(self, widget_size):
         key = "a"
@@ -464,20 +418,18 @@ class TestHelpView:
         self.help_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("HELP")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('HELP')})
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.help_view)
         self.help_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.help_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.help_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -486,28 +438,21 @@ class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch, message_fixture):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         # The subsequent patches (index and initial_data) set
         # show_edit_history_label to False for this autoused fixture.
-        self.controller.model.index = {"edited_messages": set()}
+        self.controller.model.index = {'edited_messages': set()}
         self.controller.model.initial_data = {
-            "realm_allow_edit_history": False,
+            'realm_allow_edit_history': False,
         }
         self.controller.model.formatted_local_time.side_effect = [
-            "Tue Mar 13 10:55:22",
-            "Tue Mar 13 10:55:37",
+           "Tue Mar 13 10:55:22", "Tue Mar 13 10:55:37",
         ]
-        self.msg_info_view = MsgInfoView(
-            self.controller,
-            message_fixture,
-            "Message Information",
-            OrderedDict(),
-            OrderedDict(),
-            list(),
-        )
+        self.msg_info_view = MsgInfoView(self.controller, message_fixture,
+                                         'Message Information', OrderedDict(),
+                                         OrderedDict(), list())
 
     def test_init(self, message_fixture):
         assert self.msg_info_view.msg == message_fixture
@@ -521,43 +466,33 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("EDIT_HISTORY"))
-    @pytest.mark.parametrize("realm_allow_edit_history", [True, False])
-    @pytest.mark.parametrize(
-        "edited_message_id",
-        [
+    @pytest.mark.parametrize('key', keys_for_command('EDIT_HISTORY'))
+    @pytest.mark.parametrize('realm_allow_edit_history', [True, False])
+    @pytest.mark.parametrize('edited_message_id', [
             537286,
             537287,
             537288,
         ],
         ids=[
-            "stream_message_id",
-            "pm_message_id",
-            "group_pm_message_id",
-        ],
+            'stream_message_id',
+            'pm_message_id',
+            'group_pm_message_id',
+        ]
     )
-    def test_keypress_edit_history(
-        self,
-        message_fixture,
-        key,
-        widget_size,
-        realm_allow_edit_history,
-        edited_message_id,
-    ):
+    def test_keypress_edit_history(self, message_fixture, key, widget_size,
+                                   realm_allow_edit_history,
+                                   edited_message_id):
         self.controller.model.index = {
-            "edited_messages": set([edited_message_id]),
+            'edited_messages': set([edited_message_id]),
         }
         self.controller.model.initial_data = {
-            "realm_allow_edit_history": realm_allow_edit_history,
+            'realm_allow_edit_history': realm_allow_edit_history,
         }
-        msg_info_view = MsgInfoView(
-            self.controller,
-            message_fixture,
-            title="Message Information",
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
+        msg_info_view = MsgInfoView(self.controller, message_fixture,
+                                    title='Message Information',
+                                    topic_links=OrderedDict(),
+                                    message_links=OrderedDict(),
+                                    time_mentions=list())
         size = widget_size(msg_info_view)
 
         msg_info_view.keypress(size, key)
@@ -572,9 +507,8 @@ class TestMsgInfoView:
         else:
             self.controller.show_edit_history.assert_not_called()
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("MSG_INFO")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('MSG_INFO')})
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.msg_info_view)
         self.msg_info_view.keypress(size, key)
@@ -585,122 +519,98 @@ class TestMsgInfoView:
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
-    @pytest.mark.parametrize(
-        "to_vary_in_each_message",
-        [
-            {
-                "reactions": [
-                    {
-                        "emoji_name": "thumbs_up",
-                        "emoji_code": "1f44d",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
-                        },
-                        "reaction_type": "unicode_emoji",
-                    },
-                    {
-                        "emoji_name": "zulip",
-                        "emoji_code": "zulip",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
-                        },
-                        "reaction_type": "zulip_extra_emoji",
-                    },
-                    {
-                        "emoji_name": "zulip",
-                        "emoji_code": "zulip",
-                        "user": {
-                            "email": "AARON@zulip.com",
-                            "full_name": "aaron",
-                            "id": 1,
-                        },
-                        "reaction_type": "zulip_extra_emoji",
-                    },
-                    {
-                        "emoji_name": "heart",
-                        "emoji_code": "2764",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
-                        },
-                        "reaction_type": "unicode_emoji",
-                    },
-                ]
-            }
-        ],
-    )
+    @pytest.mark.parametrize('to_vary_in_each_message', [
+        {'reactions': [{
+                'emoji_name': 'thumbs_up',
+                'emoji_code': '1f44d',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'zulip',
+                'emoji_code': 'zulip',
+                'user': {
+                    'email': 'AARON@zulip.com',
+                    'full_name': 'aaron',
+                    'id': 1,
+                },
+                'reaction_type': 'zulip_extra_emoji'
+            }, {
+                'emoji_name': 'heart',
+                'emoji_code': '2764',
+                'user': {
+                    'email': 'iago@zulip.com',
+                    'full_name': 'Iago',
+                    'id': 5,
+                },
+                'reaction_type': 'unicode_emoji'
+            }]}
+        ])
     def test_height_reactions(self, message_fixture, to_vary_in_each_message):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
-        self.msg_info_view = MsgInfoView(
-            self.controller,
-            varied_message,
-            "Message Information",
-            OrderedDict(),
-            OrderedDict(),
-            list(),
-        )
+        self.msg_info_view = MsgInfoView(self.controller, varied_message,
+                                         'Message Information', OrderedDict(),
+                                         OrderedDict(), list())
         # 9 = 3 labels + 1 blank line + 1 'Reactions' (category) + 4 reactions.
         expected_height = 9
         assert self.msg_info_view.height == expected_height
 
-    @pytest.mark.parametrize(
-        [
-            "initial_link",
-            "expected_text",
-            "expected_attr_map",
-            "expected_focus_map",
-            "expected_link_width",
-        ],
-        [
-            (
-                OrderedDict([("https://bar.com", ("Foo", 1, True))]),
-                "1: Foo\nhttps://bar.com",
-                {None: "popup_contrast"},
-                {None: "selected"},
-                15,
-            ),
-            (
-                OrderedDict([("https://foo.com", ("", 1, True))]),
-                "1: https://foo.com",
-                {None: "popup_contrast"},
-                {None: "selected"},
-                18,
-            ),
-        ],
-        ids=[
-            "link_with_link_text",
-            "link_without_link_text",
-        ],
+    @pytest.mark.parametrize([
+            'initial_link',
+            'expected_text',
+            'expected_attr_map',
+            'expected_focus_map',
+            'expected_link_width'
+        ], [(
+            OrderedDict([('https://bar.com', ('Foo', 1, True))]),
+            '1: Foo\nhttps://bar.com',
+            {None: 'popup_contrast'},
+            {None: 'selected'},
+            15,
+        ), (
+            OrderedDict([('https://foo.com', ('', 1, True))]),
+            '1: https://foo.com',
+            {None: 'popup_contrast'},
+            {None: 'selected'},
+            18,
+        )], ids=[
+            'link_with_link_text',
+            'link_without_link_text',
+        ]
     )
-    def test_create_link_buttons(
-        self,
-        initial_link,
-        expected_text,
-        expected_attr_map,
-        expected_focus_map,
-        expected_link_width,
-    ):
+    def test_create_link_buttons(self, initial_link, expected_text,
+                                 expected_attr_map, expected_focus_map,
+                                 expected_link_width):
         [link_w], link_width = self.msg_info_view.create_link_buttons(
             self.controller, initial_link
         )
 
         assert [link_w.link] == list(initial_link)
-        assert link_w._wrapped_widget.original_widget.text == expected_text
-        assert link_w._wrapped_widget.focus_map == expected_focus_map
-        assert link_w._wrapped_widget.attr_map == expected_attr_map
+        assert (link_w._wrapped_widget.original_widget.text
+                == expected_text)
+        assert (link_w._wrapped_widget.focus_map
+                == expected_focus_map)
+        assert (link_w._wrapped_widget.attr_map
+                == expected_attr_map)
         assert link_width == expected_link_width
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.msg_info_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.msg_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -709,20 +619,19 @@ class TestStreamInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         self.controller.model.is_muted_stream.return_value = False
         self.controller.model.is_pinned_stream.return_value = False
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         self.stream_id = 10
         self.controller.model.stream_dict = {
             self.stream_id: {
-                "name": "books",
-                "invite_only": False,
-                "rendered_description": "<p>Hey</p>",
-                "subscribers": [],
-                "stream_weekly_traffic": 123,
+                'name': 'books',
+                'invite_only': False,
+                'rendered_description': '<p>Hey</p>',
+                'subscribers': [],
+                'stream_weekly_traffic': 123,
             }
         }
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
@@ -733,7 +642,7 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MEMBERS"))
+    @pytest.mark.parametrize('key', keys_for_command('STREAM_MEMBERS'))
     def test_keypress_stream_members(self, mocker, key, widget_size):
         size = widget_size(self.stream_info_view)
         self.stream_info_view.keypress(size, key)
@@ -741,41 +650,27 @@ class TestStreamInfoView:
             stream_id=self.stream_id,
         )
 
-    @pytest.mark.parametrize(
-        "rendered_description, expected_markup",
-        [
-            (
-                "<p>Simple</p>",
-                (None, ["", "", "Simple"]),
-            ),
-            (
-                '<p>A city in Italy <a href="http://genericlink.com">ABC</a>'
-                "<strong>Bold</strong>",
-                (
-                    None,
-                    [
-                        "",
-                        "",
-                        "A city in Italy ",
-                        ("msg_link", "ABC"),
-                        " ",
-                        ("msg_link_index", "[1]"),
-                        ("msg_bold", "Bold"),
-                    ],
-                ),
-            ),
-        ],
-    )
-    def test_markup_descrption(
-        self, rendered_description, expected_markup, stream_id=10
-    ):
+    @pytest.mark.parametrize('rendered_description, expected_markup', [
+        (
+            '<p>Simple</p>',
+            (None, ['', '', 'Simple']),
+        ),
+        (
+            '<p>A city in Italy <a href="http://genericlink.com">ABC</a>'
+            '<strong>Bold</strong>',
+            (None, ['', '', 'A city in Italy ', ('msg_link', 'ABC'), ' ',
+                    ('msg_link_index', '[1]'), ('msg_bold', 'Bold')]),
+        ),
+    ])
+    def test_markup_descrption(self, rendered_description, expected_markup,
+                               stream_id=10):
         self.controller.model.stream_dict = {
             stream_id: {
-                "name": "ZT",
-                "invite_only": False,
-                "subscribers": [],
-                "stream_weekly_traffic": 123,
-                "rendered_description": rendered_description,
+                'name': 'ZT',
+                'invite_only': False,
+                'subscribers': [],
+                'stream_weekly_traffic': 123,
+                'rendered_description': rendered_description,
             }
         }
 
@@ -784,61 +679,46 @@ class TestStreamInfoView:
         assert stream_info_view.markup_desc == expected_markup
 
     @pytest.mark.parametrize(
-        "message_links, expected_text, expected_attrib, expected_footlinks_width",
-        [
-            (
-                OrderedDict(
-                    [
-                        ("https://example.com", ("Example", 1, True)),
-                        ("https://generic.com", ("Generic", 2, True)),
-                    ]
-                ),
-                "1: https://example.com\n2: https://generic.com",
-                [
-                    ("msg_link_index", 2),
-                    (None, 1),
-                    ("msg_link", 19),
-                    (None, 1),
-                    ("msg_link_index", 2),
-                    (None, 1),
-                    ("msg_link", 19),
-                ],
-                22,
-            ),
+        'message_links, expected_text, expected_attrib, expected_footlinks_width', [
+            (OrderedDict([
+                ('https://example.com', ('Example', 1, True)),
+                ('https://generic.com', ('Generic', 2, True)),
+             ]),
+             '1: https://example.com\n2: https://generic.com',
+             [('msg_link_index', 2), (None, 1), ('msg_link', 19), (None, 1),
+              ('msg_link_index', 2), (None, 1), ('msg_link', 19)],
+             22),
         ],
     )
-    def test_footlinks(
-        self, message_links, expected_text, expected_attrib, expected_footlinks_width
-    ):
+    def test_footlinks(self, message_links, expected_text, expected_attrib,
+                       expected_footlinks_width):
         footlinks, footlinks_width = MessageBox.footlinks_view(
             message_links,
             maximum_footlinks=10,
             padded=False,
-            wrap="space",
+            wrap='space',
         )
 
         assert footlinks.text == expected_text
         assert footlinks.attrib == expected_attrib
         assert footlinks_width == expected_footlinks_width
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("STREAM_DESC")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('STREAM_DESC')})
     def test_keypress_exit_popup(self, key, widget_size):
         size = widget_size(self.stream_info_view)
         self.stream_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_info_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.stream_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
         mute_checkbox = self.stream_info_view.widgets[7]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
@@ -849,7 +729,7 @@ class TestStreamInfoView:
 
         toggle_mute_status.assert_called_once_with(stream_id)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    @pytest.mark.parametrize('key', (*keys_for_command('ENTER'), ' '))
     def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
         pin_checkbox = self.stream_info_view.widgets[8]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
@@ -865,18 +745,17 @@ class TestStreamMembersView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch):
         self.controller = mocker.Mock()
-        mocker.patch.object(
-            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
-        )
+        mocker.patch.object(self.controller, 'maximum_popup_dimensions',
+                            return_value=(64, 64))
         self.controller.model.get_other_subscribers_in_stream.return_value = []
-        self.controller.model.user_full_name = ""
+        self.controller.model.user_full_name = ''
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         stream_id = 10
-        self.stream_members_view = StreamMembersView(self.controller, stream_id)
+        self.stream_members_view = StreamMembersView(
+            self.controller, stream_id)
 
-    @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("STREAM_MEMBERS")}
-    )
+    @pytest.mark.parametrize('key', {*keys_for_command('GO_BACK'),
+                                     *keys_for_command('STREAM_MEMBERS')})
     def test_keypress_exit_popup(self, key, widget_size):
         stream_id = self.stream_members_view.stream_id
         size = widget_size(self.stream_members_view)
@@ -885,11 +764,10 @@ class TestStreamMembersView:
             stream_id=stream_id,
         )
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+    def test_keypress_navigation(self, mocker, widget_size,
+                                 navigation_key_expected_key_pair):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_members_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(VIEWS + '.urwid.ListBox.keypress')
         self.stream_members_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)

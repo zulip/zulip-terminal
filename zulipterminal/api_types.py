@@ -3,18 +3,18 @@ from typing import Any, Dict, List, Optional, Union
 from typing_extensions import Literal, TypedDict
 
 
-EditPropagateMode = Literal["change_one", "change_all", "change_later"]
-EmojiType = Literal["realm_emoji", "unicode_emoji", "zulip_extra_emoji"]
+EditPropagateMode = Literal['change_one', 'change_all', 'change_later']
+EmojiType = Literal['realm_emoji', 'unicode_emoji', 'zulip_extra_emoji']
 
 
 class PrivateComposition(TypedDict):
-    type: Literal["private"]
+    type: Literal['private']
     content: str
     to: List[str]  # emails  # TODO: Migrate to using List[int] (user ids)
 
 
 class StreamComposition(TypedDict):
-    type: Literal["stream"]
+    type: Literal['stream']
     content: str
     to: str  # stream name  # TODO: Migrate to using int (stream id)
     subject: str  # TODO: Migrate to using topic
@@ -86,13 +86,13 @@ class Subscription(TypedDict):
 
 
 class MessageEvent(TypedDict):
-    type: Literal["message"]
+    type: Literal['message']
     message: Message
     flags: List[str]
 
 
 class UpdateMessageEvent(TypedDict):
-    type: Literal["update_message"]
+    type: Literal['update_message']
     message_id: int
     # FIXME: These groups of types are not always present
     # A: Content needs re-rendering
@@ -104,7 +104,7 @@ class UpdateMessageEvent(TypedDict):
 
 
 class ReactionEvent(TypedDict):
-    type: Literal["reaction"]
+    type: Literal['reaction']
     op: str
     user: Dict[str, Any]  # 'email', 'user_id', 'full_name'
     reaction_type: EmojiType
@@ -114,7 +114,7 @@ class ReactionEvent(TypedDict):
 
 
 class SubscriptionEvent(TypedDict):
-    type: Literal["subscription"]
+    type: Literal['subscription']
     op: str
     property: str
 
@@ -129,13 +129,13 @@ class SubscriptionEvent(TypedDict):
 
 
 class TypingEvent(TypedDict):
-    type: Literal["typing"]
+    type: Literal['typing']
     sender: Dict[str, Any]  # 'email', ...
     op: str
 
 
 class UpdateMessageFlagsEvent(TypedDict):
-    type: Literal["update_message_flags"]
+    type: Literal['update_message_flags']
     messages: List[int]
     operation: str  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
     op: str
@@ -144,7 +144,7 @@ class UpdateMessageFlagsEvent(TypedDict):
 
 
 class UpdateDisplaySettings(TypedDict):
-    type: Literal["update_display_settings"]
+    type: Literal['update_display_settings']
     setting_name: str
     setting: bool
 
@@ -159,7 +159,7 @@ class RealmEmojiData(TypedDict):
 
 
 class UpdateRealmEmojiEvent(TypedDict):
-    type: Literal["realm_emoji"]
+    type: Literal['realm_emoji']
     realm_emoji: Dict[str, RealmEmojiData]
 
 

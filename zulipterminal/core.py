@@ -41,17 +41,9 @@ class Controller:
     the application.
     """
 
-    def __init__(
-        self,
-        config_file: str,
-        maximum_footlinks: int,
-        theme_name: str,
-        theme: ThemeSpec,
-        color_depth: int,
-        in_explore_mode: bool,
-        autohide: bool,
-        notify: bool,
-    ) -> None:
+    def __init__(self, config_file: str, maximum_footlinks: int,
+                 theme_name: str, theme: ThemeSpec, color_depth: int,
+                 in_explore_mode: bool, autohide: bool, notify: bool) -> None:
         self.theme_name = theme_name
         self.theme = theme
         self.color_depth = color_depth
@@ -64,7 +56,8 @@ class Controller:
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
-        self.client = zulip.Client(config_file=config_file, client=client_identifier)
+        self.client = zulip.Client(config_file=config_file,
+                                   client=client_identifier)
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -72,7 +65,9 @@ class Controller:
 
         screen = Screen()
         screen.set_terminal_properties(colors=self.color_depth)
-        self.loop = urwid.MainLoop(self.view, self.theme, screen=screen)
+        self.loop = urwid.MainLoop(self.view,
+                                   self.theme,
+                                   screen=screen)
 
         # urwid pipe for concurrent screen update handling
         self._update_pipe = self.loop.watch_pipe(self._draw_screen)
@@ -85,15 +80,15 @@ class Controller:
         # Register new ^C handler
         signal.signal(signal.SIGINT, self.exit_handler)
 
-    def raise_exception_in_main_thread(
-        self, exc_info: ExceptionInfo, *, critical: bool
-    ) -> None:
+    def raise_exception_in_main_thread(self,
+                                       exc_info: ExceptionInfo,
+                                       *, critical: bool) -> None:
         """
         Sets an exception from another thread, which is cleanly handled
         from within the Controller thread via _raise_exception
         """
         # Exceptions shouldn't occur before the pipe is set
-        assert hasattr(self, "_exception_pipe")
+        assert hasattr(self, '_exception_pipe')
 
         if isinstance(exc_info, tuple):
             self._exception_info = exc_info
@@ -102,10 +97,10 @@ class Controller:
             self._exception_info = (
                 RuntimeError,
                 f"Invalid cross-thread exception info '{exc_info}'",
-                None,
+                None
             )
             self._critical_exception = True
-        os.write(self._exception_pipe, b"1")
+        os.write(self._exception_pipe, b'1')
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
@@ -123,43 +118,44 @@ class Controller:
 
     @asynch
     def show_loading(self) -> None:
+
         def spinning_cursor() -> Any:
             while True:
-                yield from "|/-\\"
+                yield from '|/-\\'
 
         spinner = spinning_cursor()
         sys.stdout.write("\033[92mWelcome to Zulip.\033[0m\n")
-        while not hasattr(self, "view"):
+        while not hasattr(self, 'view'):
             next_spinner = "Loading " + next(spinner)
             sys.stdout.write(next_spinner)
             sys.stdout.flush()
             time.sleep(0.1)
-            sys.stdout.write("\b" * len(next_spinner))
+            sys.stdout.write('\b' * len(next_spinner))
 
         self.capture_stdout()
 
-    def capture_stdout(self, path: str = "debug.log") -> None:
-        if hasattr(self, "_stdout"):
+    def capture_stdout(self, path: str='debug.log') -> None:
+        if hasattr(self, '_stdout'):
             return
 
         self._stdout = sys.stdout
-        sys.stdout = open(path, "a")
+        sys.stdout = open(path, 'a')
 
     def restore_stdout(self) -> None:
-        if not hasattr(self, "_stdout"):
+        if not hasattr(self, '_stdout'):
             return
 
         sys.stdout.flush()
         sys.stdout.close()
         sys.stdout = self._stdout
-        sys.stdout.write("\n")
+        sys.stdout.write('\n')
         del self._stdout
 
     def update_screen(self) -> None:
         # Update should not happen until pipe is set
-        assert hasattr(self, "_update_pipe")
+        assert hasattr(self, '_update_pipe')
         # Write something to update pipe to trigger draw_screen
-        os.write(self._update_pipe, b"1")
+        os.write(self._update_pipe, b'1')
 
     def _draw_screen(self, *args: Any, **kwargs: Any) -> Literal[True]:
         self.loop.draw_screen()
@@ -193,37 +189,24 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
-        border_lines = dict(
-            tlcorner="▛",
-            tline="▀",
-            trcorner="▜",
-            rline="▐",
-            lline="▌",
-            blcorner="▙",
-            bline="▄",
-            brcorner="▟",
-        )
-        text = urwid.Text(to_show.title, align="center")
+        border_lines = dict(tlcorner='▛', tline='▀', trcorner='▜',
+                            rline='▐', lline='▌',
+                            blcorner='▙', bline='▄', brcorner='▟')
+        text = urwid.Text(to_show.title, align='center')
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
         title_box = urwid.LineBox(
-            title_box_adapter,
-            tlcorner="▄",
-            tline="▄",
-            trcorner="▄",
-            rline="",
-            lline="",
-            blcorner="",
-            bline="",
-            brcorner="",
+            title_box_adapter, tlcorner='▄', tline='▄', trcorner='▄',
+            rline='', lline='', blcorner='', bline='', brcorner=''
         )
-        title = urwid.AttrMap(title_box, "popup_border")
+        title = urwid.AttrMap(title_box, 'popup_border')
         content = urwid.LineBox(to_show, **border_lines)
         self.loop.widget = urwid.Overlay(
-            urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
+            urwid.AttrMap(urwid.Frame(header=title, body=content),
+                          'popup_border'),
             self.view,
-            align="center",
-            valign="middle",
+            align='center',
+            valign='middle',
             # +2 to both of the following, due to LineBox
             # +2 to height, due to title enhancement
             width=to_show.width + 2,
@@ -235,78 +218,63 @@ class Controller:
 
     def show_help(self) -> None:
         help_view = HelpView(self, "Help Menu (up/down scrolls)")
-        self.show_pop_up(help_view, "area:help")
+        self.show_pop_up(help_view, 'area:help')
 
     def show_topic_edit_mode(self, button: Any) -> None:
-        self.show_pop_up(EditModeView(self, button), "area:msg")
+        self.show_pop_up(EditModeView(self, button), 'area:msg')
 
-    def show_msg_info(
-        self,
-        msg: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
-        msg_info_view = MsgInfoView(
-            self,
-            msg,
-            "Message Information (up/down scrolls)",
-            topic_links,
-            message_links,
-            time_mentions,
-        )
-        self.show_pop_up(msg_info_view, "area:msg")
+    def show_msg_info(self, msg: Message,
+                      topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                      message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+                      time_mentions: List[Tuple[str, str]],
+                      ) -> None:
+        msg_info_view = MsgInfoView(self, msg,
+                                    "Message Information (up/down scrolls)",
+                                    topic_links, message_links, time_mentions)
+        self.show_pop_up(msg_info_view, 'area:msg')
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
-        self.show_pop_up(show_stream_view, "area:stream")
+        self.show_pop_up(show_stream_view, 'area:stream')
 
     def show_stream_members(self, stream_id: int) -> None:
         stream_members_view = StreamMembersView(self, stream_id)
-        self.show_pop_up(stream_members_view, "area:stream")
+        self.show_pop_up(stream_members_view, 'area:stream')
 
     def popup_with_message(self, text: str, width: int) -> None:
-        self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
+        self.show_pop_up(NoticeView(self, text, width, "NOTICE"),
+                         'area:error')
 
     def show_about(self) -> None:
         self.show_pop_up(
-            AboutView(
-                self,
-                "About",
-                zt_version=ZT_VERSION,
-                server_version=self.model.server_version,
-                server_feature_level=self.model.server_feature_level,
-                theme_name=self.theme_name,
-                color_depth=self.color_depth,
-                notify_enabled=self.notify_enabled,
-                autohide_enabled=self.autohide,
-                maximum_footlinks=self.maximum_footlinks,
-            ),
-            "area:help",
+            AboutView(self, 'About',
+                      zt_version=ZT_VERSION,
+                      server_version=self.model.server_version,
+                      server_feature_level=self.model.server_feature_level,
+                      theme_name=self.theme_name,
+                      color_depth=self.color_depth,
+                      notify_enabled=self.notify_enabled,
+                      autohide_enabled=self.autohide,
+                      maximum_footlinks=self.maximum_footlinks),
+            'area:help'
         )
 
     def show_edit_history(
-        self,
-        message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        self, message: Message,
+        topic_links: 'OrderedDict[str, Tuple[str, int, bool]]',
+        message_links: 'OrderedDict[str, Tuple[str, int, bool]]',
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
-            EditHistoryView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                "Edit History (up/down scrolls)",
-            ),
-            "area:msg",
+            EditHistoryView(self, message, topic_links,
+                            message_links, time_mentions,
+                            'Edit History (up/down scrolls)'),
+            'area:msg'
         )
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
-        self.model.index["search"].clear()
+        self.model.index['search'].clear()
         self.model.set_search_narrow(text)
 
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
@@ -321,7 +289,7 @@ class Controller:
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
         question = urwid.Text(
-            "Save this message as a draft? (This will overwrite the existing draft.)"
+            'Save this message as a draft? (This will overwrite the existing draft.)'
         )
         save_draft = partial(self.model.save_draft, draft)
         self.loop.widget = PopUpConfirmationView(self, question, save_draft)
@@ -330,13 +298,14 @@ class Controller:
         currently_muted = self.model.is_muted_stream(button.stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"
         question = urwid.Text(
-            ("bold", f"Confirm {type_of_action} of stream '{button.stream_name}' ?"),
-            "center",
+            ("bold",
+             f"Confirm {type_of_action} of stream '{button.stream_name}' ?"),
+            "center"
         )
-        mute_this_stream = partial(
-            self.model.toggle_stream_muted_status, button.stream_id
-        )
-        self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+        mute_this_stream = partial(self.model.toggle_stream_muted_status,
+                                   button.stream_id)
+        self.loop.widget = PopUpConfirmationView(self, question,
+                                                 mute_this_stream)
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
@@ -347,10 +316,14 @@ class Controller:
 
         # if no messages are found get more messages
         if len(msg_id_list) == 0:
-            self.model.get_messages(num_before=30, num_after=10, anchor=anchor)
+            self.model.get_messages(num_before=30,
+                                    num_after=10,
+                                    anchor=anchor)
             msg_id_list = self.model.get_message_ids_in_current_narrow()
 
-        w_list = create_msg_box_list(self.model, msg_id_list, focus_msg_id=anchor)
+        w_list = create_msg_box_list(self.model,
+                                     msg_id_list,
+                                     focus_msg_id=anchor)
 
         focus_position = self.model.get_focus_in_current_narrow()
         if focus_position == set():  # No available focus; set to end
@@ -399,7 +372,9 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
-    def narrow_to_all_pm(self, *, contextual_message_id: Optional[int] = None) -> None:
+    def narrow_to_all_pm(
+        self, *, contextual_message_id: Optional[int] = None
+    ) -> None:
         self._narrow_to(anchor=contextual_message_id, pms=True)
 
     def narrow_to_all_starred(self) -> None:
@@ -427,7 +402,6 @@ class Controller:
                 raise exc[0].with_traceback(exc[1], exc[2])
             else:
                 import traceback
-
                 exception_logfile = "zulip-terminal-thread-exceptions.log"
                 with open(exception_logfile, "a") as logfile:
                     traceback.print_exception(*exc, file=logfile)
@@ -460,9 +434,9 @@ class Controller:
         try:
             # TODO: Enable resuming? (in which case, remove ^Z below)
             disabled_keys = {
-                "susp": "undefined",  # Disable ^Z - no suspending
-                "stop": "undefined",  # Disable ^S - enabling shortcut key use
-                "quit": "undefined",  # Disable ^\, ^4
+                'susp': 'undefined',  # Disable ^Z - no suspending
+                'stop': 'undefined',  # Disable ^S - enabling shortcut key use
+                'quit': 'undefined',  # Disable ^\, ^4
             }
             old_signal_list = self.loop.screen.tty_signal_keys(**disabled_keys)
             self.loop.run()
