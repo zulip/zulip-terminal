@@ -30,7 +30,7 @@ from zulipterminal.api_types import Composition, EmojiType, Message
 
 MACOS = platform.system() == "Darwin"
 LINUX = platform.system() == "Linux"
-WSL = 'microsoft' in platform.release().lower()
+WSL = "microsoft" in platform.release().lower()
 
 
 class StreamData(TypedDict):
@@ -123,7 +123,7 @@ def _set_count_in_model(
     """
     # broader unread counts (for all_*) are updated
     # later conditionally in _set_count_in_view.
-    KeyT = TypeVar('KeyT')
+    KeyT = TypeVar("KeyT")
 
     def update_unreads(unreads: Dict[KeyT, int], key: KeyT) -> None:
         if key in unreads:
@@ -134,21 +134,21 @@ def _set_count_in_model(
             unreads[key] = new_count
 
     for message in changed_messages:
-        if message['type'] == 'stream':
-            stream_id = message['stream_id']
+        if message["type"] == "stream":
+            stream_id = message["stream_id"]
             update_unreads(
-                unread_counts['unread_topics'], (stream_id, message['subject'])
+                unread_counts["unread_topics"], (stream_id, message["subject"])
             )
-            update_unreads(unread_counts['streams'], stream_id)
+            update_unreads(unread_counts["streams"], stream_id)
         # self-pm has only one display_recipient
         # 1-1 pms have 2 display_recipient
-        elif len(message['display_recipient']) <= 2:
-            update_unreads(unread_counts['unread_pms'], message['sender_id'])
+        elif len(message["display_recipient"]) <= 2:
+            update_unreads(unread_counts["unread_pms"], message["sender_id"])
         else:  # If it's a group pm
             update_unreads(
-                unread_counts['unread_huddles'],
+                unread_counts["unread_huddles"],
                 frozenset(
-                    recipient['id'] for recipient in message['display_recipient']
+                    recipient["id"] for recipient in message["display_recipient"]
                 ),
             )
 
@@ -175,21 +175,21 @@ def _set_count_in_view(
     all_pm = controller.view.pm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
-        user_id = message['sender_id']
+        user_id = message["sender_id"]
 
         # If we sent this message, don't increase the count
         if user_id == controller.model.user_id:
             continue
 
-        msg_type = message['type']
+        msg_type = message["type"]
         add_to_counts = True
-        if 'mentioned' in message['flags']:
-            unread_counts['all_mentions'] += new_count
-            all_mentioned.update_count(unread_counts['all_mentions'])
+        if "mentioned" in message["flags"]:
+            unread_counts["all_mentions"] += new_count
+            all_mentioned.update_count(unread_counts["all_mentions"])
 
-        if msg_type == 'stream':
-            stream_id = message['stream_id']
-            msg_topic = message['subject']
+        if msg_type == "stream":
+            stream_id = message["stream_id"]
+            msg_topic = message["subject"]
             if controller.model.is_muted_stream(stream_id):
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
@@ -211,30 +211,30 @@ def _set_count_in_view(
                 if user_button.user_id == user_id:
                     user_button.update_count(user_button.count + new_count)
                     break
-            unread_counts['all_pms'] += new_count
-            all_pm.update_count(unread_counts['all_pms'])
+            unread_counts["all_pms"] += new_count
+            all_pm.update_count(unread_counts["all_pms"])
 
         if add_to_counts:
-            unread_counts['all_msg'] += new_count
-            all_msg.update_count(unread_counts['all_msg'])
+            unread_counts["all_msg"] += new_count
+            all_msg.update_count(unread_counts["all_msg"])
 
 
 def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     # This method applies new_count for 'new message' (1) or 'read' (-1)
     # (we could ensure this in a different way by a different type)
     assert new_count == 1 or new_count == -1
-    messages = controller.model.index['messages']
+    messages = controller.model.index["messages"]
     unread_counts: UnreadCounts = controller.model.unread_counts
     changed_messages = [messages[id] for id in id_list]
     _set_count_in_model(new_count, changed_messages, unread_counts)
 
     # if view is not yet loaded. Usually the case when first message is read.
-    while not hasattr(controller, 'view'):
+    while not hasattr(controller, "view"):
         time.sleep(0.1)
 
     _set_count_in_view(controller, new_count, changed_messages, unread_counts)
 
-    while not hasattr(controller, 'loop'):
+    while not hasattr(controller, "loop"):
         time.sleep(0.1)
     controller.update_screen()
 
@@ -370,60 +370,60 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     narrow = model.narrow
     for msg in messages:
 
-        if 'edit_history' in msg.keys():
-            index['edited_messages'].add(msg['id'])
+        if "edit_history" in msg.keys():
+            index["edited_messages"].add(msg["id"])
 
-        index['messages'][msg['id']] = msg
+        index["messages"][msg["id"]] = msg
         if not narrow:
-            index['all_msg_ids'].add(msg['id'])
+            index["all_msg_ids"].add(msg["id"])
 
         elif model.is_search_narrow():
-            index['search'].add(msg['id'])
+            index["search"].add(msg["id"])
             continue
 
         if len(narrow) == 1:
 
-            if narrow[0][1] == 'starred':
-                if 'starred' in msg['flags']:
-                    index['starred_msg_ids'].add(msg['id'])
+            if narrow[0][1] == "starred":
+                if "starred" in msg["flags"]:
+                    index["starred_msg_ids"].add(msg["id"])
 
-            if narrow[0][1] == 'mentioned':
-                if 'mentioned' in msg['flags']:
-                    index['mentioned_msg_ids'].add(msg['id'])
+            if narrow[0][1] == "mentioned":
+                if "mentioned" in msg["flags"]:
+                    index["mentioned_msg_ids"].add(msg["id"])
 
-            if msg['type'] == 'private':
-                index['private_msg_ids'].add(msg['id'])
+            if msg["type"] == "private":
+                index["private_msg_ids"].add(msg["id"])
                 recipients = frozenset(
-                    {recipient['id'] for recipient in msg['display_recipient']}
+                    {recipient["id"] for recipient in msg["display_recipient"]}
                 )
 
-                if narrow[0][0] == 'pm_with':
+                if narrow[0][0] == "pm_with":
                     narrow_emails = [
-                        model.user_dict[email]['user_id']
-                        for email in narrow[0][1].split(', ')
+                        model.user_dict[email]["user_id"]
+                        for email in narrow[0][1].split(", ")
                     ] + [model.user_id]
                     if recipients == frozenset(narrow_emails):
-                        index['private_msg_ids_by_user_ids'][recipients].add(msg['id'])
+                        index["private_msg_ids_by_user_ids"][recipients].add(msg["id"])
 
-            if msg['type'] == 'stream' and msg['stream_id'] == model.stream_id:
-                index['stream_msg_ids_by_stream_id'][msg['stream_id']].add(msg['id'])
+            if msg["type"] == "stream" and msg["stream_id"] == model.stream_id:
+                index["stream_msg_ids_by_stream_id"][msg["stream_id"]].add(msg["id"])
 
         if (
-            msg['type'] == 'stream'
+            msg["type"] == "stream"
             and len(narrow) == 2
-            and narrow[1][1] == msg['subject']
+            and narrow[1][1] == msg["subject"]
         ):
-            topics_in_stream = index['topic_msg_ids'][msg['stream_id']]
-            if not topics_in_stream.get(msg['subject']):
-                topics_in_stream[msg['subject']] = set()
-            topics_in_stream[msg['subject']].add(msg['id'])
+            topics_in_stream = index["topic_msg_ids"][msg["stream_id"]]
+            if not topics_in_stream.get(msg["subject"]):
+                topics_in_stream[msg["subject"]] = set()
+            topics_in_stream[msg["subject"]].add(msg["id"])
 
     return index
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:
     # TODO: support group pms
-    unread_msg_counts = model.initial_data['unread_msgs']
+    unread_msg_counts = model.initial_data["unread_msgs"]
 
     unread_counts = UnreadCounts(
         all_msg=0,
@@ -435,40 +435,40 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         streams=defaultdict(int),
     )
 
-    mentions_count = len(unread_msg_counts['mentions'])
-    unread_counts['all_mentions'] += mentions_count
+    mentions_count = len(unread_msg_counts["mentions"])
+    unread_counts["all_mentions"] += mentions_count
 
-    for pm in unread_msg_counts['pms']:
-        count = len(pm['unread_message_ids'])
-        unread_counts['unread_pms'][pm['sender_id']] = count
-        unread_counts['all_msg'] += count
-        unread_counts['all_pms'] += count
+    for pm in unread_msg_counts["pms"]:
+        count = len(pm["unread_message_ids"])
+        unread_counts["unread_pms"][pm["sender_id"]] = count
+        unread_counts["all_msg"] += count
+        unread_counts["all_pms"] += count
 
-    for stream in unread_msg_counts['streams']:
-        count = len(stream['unread_message_ids'])
-        stream_id = stream['stream_id']
+    for stream in unread_msg_counts["streams"]:
+        count = len(stream["unread_message_ids"])
+        stream_id = stream["stream_id"]
         # unsubscribed streams may be in raw unreads, but are not tracked
         if not model.is_user_subscribed_to_stream(stream_id):
             continue
-        if model.is_muted_topic(stream_id, stream['topic']):
+        if model.is_muted_topic(stream_id, stream["topic"]):
             continue
-        stream_topic = (stream_id, stream['topic'])
-        unread_counts['unread_topics'][stream_topic] = count
-        if not unread_counts['streams'].get(stream_id):
-            unread_counts['streams'][stream_id] = count
+        stream_topic = (stream_id, stream["topic"])
+        unread_counts["unread_topics"][stream_topic] = count
+        if not unread_counts["streams"].get(stream_id):
+            unread_counts["streams"][stream_id] = count
         else:
-            unread_counts['streams'][stream_id] += count
+            unread_counts["streams"][stream_id] += count
         if stream_id not in model.muted_streams:
-            unread_counts['all_msg'] += count
+            unread_counts["all_msg"] += count
 
     # store unread count of group pms in `unread_huddles`
-    for group_pm in unread_msg_counts['huddles']:
-        count = len(group_pm['unread_message_ids'])
-        user_ids = group_pm['user_ids_string'].split(',')
+    for group_pm in unread_msg_counts["huddles"]:
+        count = len(group_pm["unread_message_ids"])
+        user_ids = group_pm["user_ids_string"].split(",")
         user_ids = frozenset(map(int, user_ids))
-        unread_counts['unread_huddles'][user_ids] = count
-        unread_counts['all_msg'] += count
-        unread_counts['all_pms'] += count
+        unread_counts["unread_huddles"][user_ids] = count
+        unread_counts["all_msg"] += count
+        unread_counts["all_pms"] += count
 
     return unread_counts
 
@@ -478,11 +478,11 @@ def match_user(user: Any, text: str) -> bool:
     Matches if the user full name, last name or email matches
     with `text` or not.
     """
-    full_name = user['full_name'].lower()
+    full_name = user["full_name"].lower()
     keywords = full_name.split()
     # adding full_name helps in further narrowing down the right user.
     keywords.append(full_name)
-    keywords.append(user['email'].lower())
+    keywords.append(user["email"].lower())
     for keyword in keywords:
         if keyword.startswith(text.lower()):
             return True
@@ -494,8 +494,8 @@ def match_user_name_and_email(user: Any, text: str) -> bool:
     Matches if the user's full name, last name, email or a combination
     in the form of "name <email>" matches with `text`.
     """
-    full_name = user['full_name'].lower()
-    email = user['email'].lower()
+    full_name = user["full_name"].lower()
+    email = user["email"].lower()
     keywords = full_name.split()
     keywords.append(full_name)
     keywords.append(email)
@@ -520,7 +520,7 @@ def match_topics(topic_names: List[str], search_text: str) -> List[str]:
     ]
 
 
-DataT = TypeVar('DataT')
+DataT = TypeVar("DataT")
 
 
 def match_stream(
@@ -535,7 +535,7 @@ def match_stream(
     Note: This function expects `data` to be sorted, in a non-decreasing
     order, and ordered by their pinning status.
     """
-    pinned_stream_names = [stream['name'] for stream in pinned_streams]
+    pinned_stream_names = [stream["name"] for stream in pinned_streams]
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.
@@ -545,25 +545,25 @@ def match_stream(
         reverse=True,
     )
 
-    delimiters = '-_/'
-    trans = str.maketrans(delimiters, len(delimiters) * ' ')
+    delimiters = "-_/"
+    trans = str.maketrans(delimiters, len(delimiters) * " ")
     stream_splits = [
         ((datum, [stream_name] + stream_name.translate(trans).split()[1:]))
         for datum, stream_name in data
     ]
 
-    matches: 'OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]' = (
+    matches: "OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]" = (
         OrderedDict(
             [
-                ('pinned', defaultdict(list)),
-                ('unpinned', defaultdict(list)),
+                ("pinned", defaultdict(list)),
+                ("unpinned", defaultdict(list)),
             ]
         )
     )
 
     for datum, splits in stream_splits:
         stream_name = splits[0]
-        kind = 'pinned' if stream_name in pinned_stream_names else 'unpinned'
+        kind = "pinned" if stream_name in pinned_stream_names else "unpinned"
         for match_position, word in enumerate(splits):
             if word.lower().startswith(search_text.lower()):
                 matches[kind][match_position].append((datum, stream_name))
@@ -613,10 +613,10 @@ def canonicalize_color(color: str) -> str:
     Given a color of the format '#xxxxxx' or '#xxx', produces one of the
     format '#xxx'. Always produces lowercase hex digits.
     """
-    if match('^#[0-9A-Fa-f]{6}$', color, ASCII) is not None:
+    if match("^#[0-9A-Fa-f]{6}$", color, ASCII) is not None:
         # '#xxxxxx' color, stored by current zulip server
         return (color[:2] + color[3] + color[5]).lower()
-    elif match('^#[0-9A-Fa-f]{3}$', color, ASCII) is not None:
+    elif match("^#[0-9A-Fa-f]{3}$", color, ASCII) is not None:
         # '#xxx' color, which may be stored by the zulip server <= 2.0.0
         # Potentially later versions too
         return color.lower()
@@ -658,8 +658,8 @@ def notify(title: str, html_text: str) -> str:
 
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
-    if response['result'] == 'error' and hasattr(controller, 'view'):
-        controller.view.set_footer_text(response['msg'], 3)
+    if response["result"] == "error" and hasattr(controller, "view"):
+        controller.view.set_footer_text(response["msg"], 3)
 
 
 def check_narrow_and_notify(
@@ -672,7 +672,7 @@ def check_narrow_and_notify(
         and current_narrow != outer_narrow
         and current_narrow != inner_narrow
     ):
-        controller.view.set_footer_text('Message is sent outside of current narrow.', 3)
+        controller.view.set_footer_text("Message is sent outside of current narrow.", 3)
 
 
 def notify_if_message_sent_outside_narrow(
@@ -680,13 +680,13 @@ def notify_if_message_sent_outside_narrow(
 ) -> None:
     current_narrow = controller.model.narrow
 
-    if message['type'] == 'stream':
-        stream_narrow = [['stream', message['to']]]
-        topic_narrow = stream_narrow + [['topic', message['subject']]]
+    if message["type"] == "stream":
+        stream_narrow = [["stream", message["to"]]]
+        topic_narrow = stream_narrow + [["topic", message["subject"]]]
         check_narrow_and_notify(stream_narrow, topic_narrow, controller)
-    elif message['type'] == 'private':
-        pm_narrow = [['is', 'private']]
-        pm_with_narrow = [['pm_with', ",".join(message['to'])]]
+    elif message["type"] == "private":
+        pm_narrow = [["is", "private"]]
+        pm_with_narrow = [["pm_with", ",".join(message["to"])]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
 
 
@@ -697,7 +697,7 @@ def hash_util_decode(string: str) -> str:
     """
     # Acknowledge custom string replacements in zulip/zulip's
     # zerver/lib/url_encoding.py before unquote.
-    return unquote(string.replace('.', '%'))
+    return unquote(string.replace(".", "%"))
 
 
 def get_unused_fence(content: str) -> str:
@@ -706,11 +706,11 @@ def get_unused_fence(content: str) -> str:
     of continuous back-ticks. Referred and translated from
     zulip/static/shared/js/fenced_code.js.
     """
-    fence_length_regex = '^ {0,3}(`{3,})'
+    fence_length_regex = "^ {0,3}(`{3,})"
     max_length_fence = 3
 
     matches = findall(fence_length_regex, content, flags=MULTILINE)
     if len(matches) != 0:
         max_length_fence = max(max_length_fence, len(max(matches, key=len)) + 1)
 
-    return '`' * max_length_fence
+    return "`" * max_length_fence

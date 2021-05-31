@@ -10,8 +10,8 @@ def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
              [row1, row1, row1],
              [row2, row2, row2]]
     """
-    headers = table_element.thead.tr.find_all('th')
-    rows = table_element.tbody.find_all('tr')
+    headers = table_element.thead.tr.find_all("th")
+    rows = table_element.tbody.find_all("tr")
     column_alignments = []
 
     # Add +1 to count the header row as well.
@@ -20,11 +20,11 @@ def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
     # Fill up `cells` with the header/0th row and extract alignments.
     for header in headers:
         cells[0].append(header.text)
-        column_alignments.append(header.get(('align'), 'left'))
+        column_alignments.append(header.get(("align"), "left"))
 
     # Fill up `cells` with body rows.
     for index, row in enumerate(rows, start=1):
-        for tdata in row.find_all('td'):
+        for tdata in row.find_all("td"):
             cells[index].append(tdata.text)
     return (column_alignments, cells)
 
@@ -33,7 +33,7 @@ StyledTableData = List[Union[str, Tuple[Optional[str], str]]]
 
 
 def pad_row_strip(
-    row_strip: StyledTableData, fill_char: str = ' ', fill_width: int = 1
+    row_strip: StyledTableData, fill_char: str = " ", fill_width: int = 1
 ) -> StyledTableData:
     """
     Returns back a padded row strip.
@@ -80,7 +80,7 @@ def row_with_styled_content(
     Constructs styled row strip, for markup table, using unicode characters
     and row elements.
     """
-    aligner = {'center': str.center, 'left': str.ljust, 'right': str.rjust}
+    aligner = {"center": str.center, "left": str.ljust, "right": str.rjust}
     row_strip: StyledTableData = [vertical_bar]
     for column_num, cell in enumerate(row):
         aligned_text = aligner[column_alignments[column_num]](
@@ -88,7 +88,7 @@ def row_with_styled_content(
         )
         row_strip.extend([(row_style, aligned_text), vertical_bar])
     row_strip.pop()  # Remove the extra vertical_bar.
-    row_strip.append(vertical_bar + '\n')
+    row_strip.append(vertical_bar + "\n")
     return pad_row_strip(row_strip)
 
 
@@ -109,7 +109,7 @@ def row_with_only_border(
         border.extend([line * width, connector])
     border.pop()  # Remove the extra connector.
     if newline:
-        rcorner += '\n'
+        rcorner += "\n"
     border.append(rcorner)
     return pad_row_strip(border, fill_char=line)
 
@@ -125,10 +125,10 @@ def render_table(table_element: Any) -> StyledTableData:
         len(max(column, key=lambda string: len(string))) for column in zip(*cells)
     ]
 
-    top_border = row_with_only_border('┌', '─', '┬', '┐', column_widths)
-    middle_border = row_with_only_border('├', '─', '┼', '┤', column_widths)
+    top_border = row_with_only_border("┌", "─", "┬", "┐", column_widths)
+    middle_border = row_with_only_border("├", "─", "┼", "┤", column_widths)
     bottom_border = row_with_only_border(
-        '└', '─', '┴', '┘', column_widths, newline=False
+        "└", "─", "┴", "┘", column_widths, newline=False
     )
 
     # Construct the table, row-by-row.
@@ -138,7 +138,7 @@ def render_table(table_element: Any) -> StyledTableData:
     table.extend(top_border)
     table.extend(
         row_with_styled_content(
-            cells.pop(0), column_alignments, column_widths, '│', row_style='table_head'
+            cells.pop(0), column_alignments, column_widths, "│", row_style="table_head"
         )
     )
     table.extend(middle_border)
@@ -147,7 +147,7 @@ def render_table(table_element: Any) -> StyledTableData:
     # end.
     for row in cells:
         table.extend(
-            row_with_styled_content(row, column_alignments, column_widths, '│')
+            row_with_styled_content(row, column_alignments, column_widths, "│")
         )
     table.extend(bottom_border)
 

@@ -37,13 +37,13 @@ class TestWriteBox:
         write_box.model.max_topic_length = 60
         write_box.model.max_message_length = 10000
         write_box.model.user_group_names = [
-            groups['name'] for groups in user_groups_fixture
+            groups["name"] for groups in user_groups_fixture
         ]
 
         write_box.view.pinned_streams = []
         write_box.view.unpinned_streams = sorted(
-            [{'name': stream['name']} for stream in streams_fixture],
-            key=lambda stream: stream['name'].lower(),
+            [{"name": stream["name"]} for stream in streams_fixture],
+            key=lambda stream: stream["name"].lower(),
         )
 
         return write_box
@@ -65,7 +65,7 @@ class TestWriteBox:
 
         assert not write_box.model.send_typing_status_by_user_ids.called
 
-    @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
+    @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_not_calling_send_private_message_without_recipients(
         self, key, mocker, write_box, widget_size
     ):
@@ -79,10 +79,10 @@ class TestWriteBox:
         assert not write_box.model.send_private_message.called
 
     @pytest.mark.parametrize(
-        'text, state',
+        "text, state",
         [
-            ('Plain Text', 0),
-            ('Plain Text', 1),
+            ("Plain Text", 0),
+            ("Plain Text", 1),
         ],
     )
     def test_generic_autocomplete_no_prefix(self, mocker, write_box, text, state):
@@ -91,61 +91,61 @@ class TestWriteBox:
         write_box.view.set_typeahead_footer.assert_not_called()
 
     @pytest.mark.parametrize(
-        'text, state, footer_text',
+        "text, state, footer_text",
         [
             # no-text mentions
             (
-                '@',
+                "@",
                 0,
                 [
-                    'Human Myself',
-                    'Human 1',
-                    'Human 2',
-                    'Group 1',
-                    'Group 2',
-                    'Group 3',
-                    'Group 4',
+                    "Human Myself",
+                    "Human 1",
+                    "Human 2",
+                    "Group 1",
+                    "Group 2",
+                    "Group 3",
+                    "Group 4",
                 ],
             ),
-            ('@*', 0, ['Group 1', 'Group 2', 'Group 3', 'Group 4']),
-            ('@**', 0, ['Human Myself', 'Human 1', 'Human 2']),
+            ("@*", 0, ["Group 1", "Group 2", "Group 3", "Group 4"]),
+            ("@**", 0, ["Human Myself", "Human 1", "Human 2"]),
             # mentions
-            ('@Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
-            ('@**Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
-            ('@_Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
-            ('@_*Human', None, []),  # NOTE: Optional single star fails
-            ('@_**Human', 0, ['Human Myself', 'Human 1', 'Human 2']),
-            ('@Human', None, ['Human Myself', 'Human 1', 'Human 2']),
-            ('@NoMatch', None, []),
+            ("@Human", 0, ["Human Myself", "Human 1", "Human 2"]),
+            ("@**Human", 0, ["Human Myself", "Human 1", "Human 2"]),
+            ("@_Human", 0, ["Human Myself", "Human 1", "Human 2"]),
+            ("@_*Human", None, []),  # NOTE: Optional single star fails
+            ("@_**Human", 0, ["Human Myself", "Human 1", "Human 2"]),
+            ("@Human", None, ["Human Myself", "Human 1", "Human 2"]),
+            ("@NoMatch", None, []),
             # streams
             (
-                '#Stream',
+                "#Stream",
                 0,
-                ['Stream 1', 'Stream 2', 'Secret stream', 'Some general stream'],
+                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
             ),
-            ('#*Stream', None, []),  # NOTE: Optional single star fails
+            ("#*Stream", None, []),  # NOTE: Optional single star fails
             (
-                '#**Stream',
+                "#**Stream",
                 0,
-                ['Stream 1', 'Stream 2', 'Secret stream', 'Some general stream'],
+                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
             ),  # Optional 2-stars
             (
-                '#Stream',
+                "#Stream",
                 None,
-                ['Stream 1', 'Stream 2', 'Secret stream', 'Some general stream'],
+                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
             ),
-            ('#NoMatch', None, []),
+            ("#NoMatch", None, []),
             # emojis
-            (':smi', 0, ['smile', 'smiley', 'smirk']),
-            (':smi', None, ['smile', 'smiley', 'smirk']),
-            (':NoMatch', None, []),
+            (":smi", 0, ["smile", "smiley", "smirk"]),
+            (":smi", None, ["smile", "smiley", "smirk"]),
+            (":NoMatch", None, []),
         ],
     )
     def test_generic_autocomplete_set_footer(
         self, mocker, write_box, state, footer_text, text
     ):
         write_box.view.set_typeahead_footer = mocker.patch(
-            'zulipterminal.ui.View.set_typeahead_footer'
+            "zulipterminal.ui.View.set_typeahead_footer"
         )
         write_box.generic_autocomplete(text, state)
 
@@ -154,90 +154,90 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'text, state, required_typeahead',
+        "text, state, required_typeahead",
         [
-            ('@Human', 0, '@**Human Myself**'),
-            ('@Human', 1, '@**Human 1**'),
-            ('@Human', 2, '@**Human 2**'),
-            ('@Human', -1, '@**Human 2**'),
-            ('@Human', -2, '@**Human 1**'),
-            ('@Human', -3, '@**Human Myself**'),
-            ('@Human', -4, None),
-            ('@_Human', 0, '@_**Human Myself**'),
-            ('@_Human', 1, '@_**Human 1**'),
-            ('@_Human', 2, '@_**Human 2**'),
-            ('@H', 1, '@**Human 1**'),
-            ('@Hu', 1, '@**Human 1**'),
-            ('@Hum', 1, '@**Human 1**'),
-            ('@Huma', 1, '@**Human 1**'),
-            ('@Human', 1, '@**Human 1**'),
-            ('@Human 1', 0, '@**Human 1**'),
-            ('@_H', 1, '@_**Human 1**'),
-            ('@_Hu', 1, '@_**Human 1**'),
-            ('@_Hum', 1, '@_**Human 1**'),
-            ('@_Huma', 1, '@_**Human 1**'),
-            ('@_Human', 1, '@_**Human 1**'),
-            ('@_Human 1', 0, '@_**Human 1**'),
-            ('@Group', 0, '@*Group 1*'),
-            ('@Group', 1, '@*Group 2*'),
-            ('@G', 0, '@*Group 1*'),
-            ('@Gr', 0, '@*Group 1*'),
-            ('@Gro', 0, '@*Group 1*'),
-            ('@Grou', 0, '@*Group 1*'),
-            ('@G', 1, '@*Group 2*'),
-            ('@Gr', 1, '@*Group 2*'),
-            ('@Gro', 1, '@*Group 2*'),
-            ('@Grou', 1, '@*Group 2*'),
+            ("@Human", 0, "@**Human Myself**"),
+            ("@Human", 1, "@**Human 1**"),
+            ("@Human", 2, "@**Human 2**"),
+            ("@Human", -1, "@**Human 2**"),
+            ("@Human", -2, "@**Human 1**"),
+            ("@Human", -3, "@**Human Myself**"),
+            ("@Human", -4, None),
+            ("@_Human", 0, "@_**Human Myself**"),
+            ("@_Human", 1, "@_**Human 1**"),
+            ("@_Human", 2, "@_**Human 2**"),
+            ("@H", 1, "@**Human 1**"),
+            ("@Hu", 1, "@**Human 1**"),
+            ("@Hum", 1, "@**Human 1**"),
+            ("@Huma", 1, "@**Human 1**"),
+            ("@Human", 1, "@**Human 1**"),
+            ("@Human 1", 0, "@**Human 1**"),
+            ("@_H", 1, "@_**Human 1**"),
+            ("@_Hu", 1, "@_**Human 1**"),
+            ("@_Hum", 1, "@_**Human 1**"),
+            ("@_Huma", 1, "@_**Human 1**"),
+            ("@_Human", 1, "@_**Human 1**"),
+            ("@_Human 1", 0, "@_**Human 1**"),
+            ("@Group", 0, "@*Group 1*"),
+            ("@Group", 1, "@*Group 2*"),
+            ("@G", 0, "@*Group 1*"),
+            ("@Gr", 0, "@*Group 1*"),
+            ("@Gro", 0, "@*Group 1*"),
+            ("@Grou", 0, "@*Group 1*"),
+            ("@G", 1, "@*Group 2*"),
+            ("@Gr", 1, "@*Group 2*"),
+            ("@Gro", 1, "@*Group 2*"),
+            ("@Grou", 1, "@*Group 2*"),
             # Expected sequence of autocompletes from '@'
-            ('@', 0, '@**Human Myself**'),
-            ('@', 1, '@**Human 1**'),
-            ('@', 2, '@**Human 2**'),
-            ('@', 3, '@*Group 1*'),
-            ('@', 4, '@*Group 2*'),
-            ('@', 5, '@*Group 3*'),
-            ('@', 6, '@*Group 4*'),
-            ('@', 7, None),  # Reached last match
-            ('@', 8, None),  # Beyond end
+            ("@", 0, "@**Human Myself**"),
+            ("@", 1, "@**Human 1**"),
+            ("@", 2, "@**Human 2**"),
+            ("@", 3, "@*Group 1*"),
+            ("@", 4, "@*Group 2*"),
+            ("@", 5, "@*Group 3*"),
+            ("@", 6, "@*Group 4*"),
+            ("@", 7, None),  # Reached last match
+            ("@", 8, None),  # Beyond end
             # Expected sequence of autocompletes from '@**' (no groups)
-            ('@**', 0, '@**Human Myself**'),
-            ('@**', 1, '@**Human 1**'),
-            ('@**', 2, '@**Human 2**'),
-            ('@**', 3, None),  # Reached last match
-            ('@**', 4, None),  # Beyond end
+            ("@**", 0, "@**Human Myself**"),
+            ("@**", 1, "@**Human 1**"),
+            ("@**", 2, "@**Human 2**"),
+            ("@**", 3, None),  # Reached last match
+            ("@**", 4, None),  # Beyond end
             # Expected sequence of autocompletes from '@*' (only groups)
-            ('@*', 0, '@*Group 1*'),
-            ('@*', 1, '@*Group 2*'),
-            ('@*', 2, '@*Group 3*'),
-            ('@*', 3, '@*Group 4*'),
-            ('@*', 4, None),  # Reached last match
-            ('@*', 5, None),  # Beyond end
+            ("@*", 0, "@*Group 1*"),
+            ("@*", 1, "@*Group 2*"),
+            ("@*", 2, "@*Group 3*"),
+            ("@*", 3, "@*Group 4*"),
+            ("@*", 4, None),  # Reached last match
+            ("@*", 5, None),  # Beyond end
             # Expected sequence of autocompletes from '@_'
-            ('@_', 0, '@_**Human Myself**'),  # NOTE: No silent group mention
-            ('@_', 1, '@_**Human 1**'),
-            ('@_', 2, '@_**Human 2**'),
-            ('@_', 3, None),  # Reached last match
-            ('@_', 4, None),  # Beyond end
-            ('@_', -1, '@_**Human 2**'),
+            ("@_", 0, "@_**Human Myself**"),  # NOTE: No silent group mention
+            ("@_", 1, "@_**Human 1**"),
+            ("@_", 2, "@_**Human 2**"),
+            ("@_", 3, None),  # Reached last match
+            ("@_", 4, None),  # Beyond end
+            ("@_", -1, "@_**Human 2**"),
             # Complex autocomplete prefixes.
-            ('(@H', 0, '(@**Human Myself**'),
-            ('(@H', 1, '(@**Human 1**'),
-            ('-@G', 0, '-@*Group 1*'),
-            ('-@G', 1, '-@*Group 2*'),
-            ('_@H', 0, '_@**Human Myself**'),
-            ('_@G', 0, '_@*Group 1*'),
-            ('@@H', 0, '@@**Human Myself**'),
-            (':@H', 0, ':@**Human Myself**'),
-            ('#@H', 0, '#@**Human Myself**'),
-            ('@_@H', 0, '@_@**Human Myself**'),
-            ('>@_H', 0, '>@_**Human Myself**'),
-            ('>@_H', 1, '>@_**Human 1**'),
-            ('@_@_H', 0, '@_@_**Human Myself**'),
-            ('@@_H', 0, '@@_**Human Myself**'),
-            (':@_H', 0, ':@_**Human Myself**'),
-            ('#@_H', 0, '#@_**Human Myself**'),
-            ('@@_H', 0, '@@_**Human Myself**'),
-            ('@@_*H', 0, None),  # Optional single star fails
-            ('@@_**H', 0, '@@_**Human Myself**'),  # Optional stars
+            ("(@H", 0, "(@**Human Myself**"),
+            ("(@H", 1, "(@**Human 1**"),
+            ("-@G", 0, "-@*Group 1*"),
+            ("-@G", 1, "-@*Group 2*"),
+            ("_@H", 0, "_@**Human Myself**"),
+            ("_@G", 0, "_@*Group 1*"),
+            ("@@H", 0, "@@**Human Myself**"),
+            (":@H", 0, ":@**Human Myself**"),
+            ("#@H", 0, "#@**Human Myself**"),
+            ("@_@H", 0, "@_@**Human Myself**"),
+            (">@_H", 0, ">@_**Human Myself**"),
+            (">@_H", 1, ">@_**Human 1**"),
+            ("@_@_H", 0, "@_@_**Human Myself**"),
+            ("@@_H", 0, "@@_**Human Myself**"),
+            (":@_H", 0, ":@_**Human Myself**"),
+            ("#@_H", 0, "#@_**Human Myself**"),
+            ("@@_H", 0, "@@_**Human Myself**"),
+            ("@@_*H", 0, None),  # Optional single star fails
+            ("@@_**H", 0, "@@_**Human Myself**"),  # Optional stars
         ],
     )
     def test_generic_autocomplete_mentions(
@@ -247,16 +247,16 @@ class TestWriteBox:
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
-        'text, state, required_typeahead, recipients',
+        "text, state, required_typeahead, recipients",
         [
-            ('@', 0, '@**Human 2**', [12]),
-            ('@', 1, '@**Human Myself**', [12]),
-            ('@', 2, '@**Human 1**', [12]),
-            ('@', -1, '@*Group 4*', [12]),
-            ('@', 0, '@**Human 1**', [11, 12]),
-            ('@', 1, '@**Human 2**', [11, 12]),
-            ('@', 2, '@**Human Myself**', [11, 12]),
-            ('@', -1, '@*Group 4*', [11, 12]),
+            ("@", 0, "@**Human 2**", [12]),
+            ("@", 1, "@**Human Myself**", [12]),
+            ("@", 2, "@**Human 1**", [12]),
+            ("@", -1, "@*Group 4*", [12]),
+            ("@", 0, "@**Human 1**", [11, 12]),
+            ("@", 1, "@**Human 2**", [11, 12]),
+            ("@", 2, "@**Human Myself**", [11, 12]),
+            ("@", -1, "@*Group 4*", [11, 12]),
         ],
     )
     def test_generic_autocomplete_mentions_subscribers(
@@ -267,78 +267,78 @@ class TestWriteBox:
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
-        'text, state, required_typeahead, to_pin',
+        "text, state, required_typeahead, to_pin",
         [
             # With no streams pinned.
-            ('#Stream', 0, '#**Stream 1**', []),  # 1st-word startswith match.
-            ('#Stream', 1, '#**Stream 2**', []),  # 1st-word startswith match.
-            ('#Stream', 2, '#**Secret stream**', []),  # 2nd-word startswith match.
-            ('#Stream', 3, '#**Some general stream**', []),  # 3rd-word startswith.
-            ('#S', 0, '#**Secret stream**', []),  # 1st-word startswith match.
-            ('#S', 1, '#**Some general stream**', []),  # 1st-word startswith.
-            ('#S', 2, '#**Stream 1**', []),  # 1st-word startswith match.
-            ('#S', 3, '#**Stream 2**', []),  # 1st-word startswith match.
-            ('#S', -1, '#**Stream 2**', []),
-            ('#S', -2, '#**Stream 1**', []),
-            ('#S', -3, '#**Some general stream**', []),
-            ('#S', -4, '#**Secret stream**', []),
-            ('#S', -5, None, []),
-            ('#So', 0, '#**Some general stream**', []),
-            ('#So', 1, None, []),
-            ('#Se', 0, '#**Secret stream**', []),
-            ('#Se', 1, None, []),
-            ('#St', 0, '#**Stream 1**', []),
-            ('#St', 1, '#**Stream 2**', []),
-            ('#g', 0, '#**Some general stream**', []),
-            ('#g', 1, None, []),
-            ('#Stream 1', 0, '#**Stream 1**', []),  # Complete match.
-            ('#nomatch', 0, None, []),
-            ('#ene', 0, None, []),
+            ("#Stream", 0, "#**Stream 1**", []),  # 1st-word startswith match.
+            ("#Stream", 1, "#**Stream 2**", []),  # 1st-word startswith match.
+            ("#Stream", 2, "#**Secret stream**", []),  # 2nd-word startswith match.
+            ("#Stream", 3, "#**Some general stream**", []),  # 3rd-word startswith.
+            ("#S", 0, "#**Secret stream**", []),  # 1st-word startswith match.
+            ("#S", 1, "#**Some general stream**", []),  # 1st-word startswith.
+            ("#S", 2, "#**Stream 1**", []),  # 1st-word startswith match.
+            ("#S", 3, "#**Stream 2**", []),  # 1st-word startswith match.
+            ("#S", -1, "#**Stream 2**", []),
+            ("#S", -2, "#**Stream 1**", []),
+            ("#S", -3, "#**Some general stream**", []),
+            ("#S", -4, "#**Secret stream**", []),
+            ("#S", -5, None, []),
+            ("#So", 0, "#**Some general stream**", []),
+            ("#So", 1, None, []),
+            ("#Se", 0, "#**Secret stream**", []),
+            ("#Se", 1, None, []),
+            ("#St", 0, "#**Stream 1**", []),
+            ("#St", 1, "#**Stream 2**", []),
+            ("#g", 0, "#**Some general stream**", []),
+            ("#g", 1, None, []),
+            ("#Stream 1", 0, "#**Stream 1**", []),  # Complete match.
+            ("#nomatch", 0, None, []),
+            ("#ene", 0, None, []),
             # Complex autocomplete prefixes.
-            ('[#Stream', 0, '[#**Stream 1**', []),
-            ('(#Stream', 1, '(#**Stream 2**', []),
-            ('@#Stream', 0, '@#**Stream 1**', []),
-            ('@_#Stream', 0, '@_#**Stream 1**', []),
-            (':#Stream', 0, ':#**Stream 1**', []),
-            ('##Stream', 0, '##**Stream 1**', []),
-            ('##*Stream', 0, None, []),  # NOTE: Optional single star fails
-            ('##**Stream', 0, '##**Stream 1**', []),  # Optional 2-stars
+            ("[#Stream", 0, "[#**Stream 1**", []),
+            ("(#Stream", 1, "(#**Stream 2**", []),
+            ("@#Stream", 0, "@#**Stream 1**", []),
+            ("@_#Stream", 0, "@_#**Stream 1**", []),
+            (":#Stream", 0, ":#**Stream 1**", []),
+            ("##Stream", 0, "##**Stream 1**", []),
+            ("##*Stream", 0, None, []),  # NOTE: Optional single star fails
+            ("##**Stream", 0, "##**Stream 1**", []),  # Optional 2-stars
             # With 'Secret stream' pinned.
             (
-                '#Stream',
+                "#Stream",
                 0,
-                '#**Secret stream**',
-                ['Secret stream'],
+                "#**Secret stream**",
+                ["Secret stream"],
             ),  # 2nd-word startswith match (pinned).
             (
-                '#Stream',
+                "#Stream",
                 1,
-                '#**Stream 1**',
-                ['Secret stream'],
+                "#**Stream 1**",
+                ["Secret stream"],
             ),  # 1st-word startswith match (unpinned).
             (
-                '#Stream',
+                "#Stream",
                 2,
-                '#**Stream 2**',
-                ['Secret stream'],
+                "#**Stream 2**",
+                ["Secret stream"],
             ),  # 1st-word startswith match (unpinned).
             (
-                '#Stream',
+                "#Stream",
                 3,
-                '#**Some general stream**',
-                ['Secret stream'],
+                "#**Some general stream**",
+                ["Secret stream"],
             ),  # 3rd-word starstwith match (unpinned).
             # With 'Stream 1' and 'Secret stream' pinned.
-            ('#Stream', 0, '#**Stream 1**', ['Secret stream', 'Stream 1']),
-            ('#Stream', 1, '#**Secret stream**', ['Secret stream', 'Stream 1']),
-            ('#Stream', 2, '#**Stream 2**', ['Secret stream', 'Stream 1']),
-            ('#Stream', 3, '#**Some general stream**', ['Secret stream', 'Stream 1']),
+            ("#Stream", 0, "#**Stream 1**", ["Secret stream", "Stream 1"]),
+            ("#Stream", 1, "#**Secret stream**", ["Secret stream", "Stream 1"]),
+            ("#Stream", 2, "#**Stream 2**", ["Secret stream", "Stream 1"]),
+            ("#Stream", 3, "#**Some general stream**", ["Secret stream", "Stream 1"]),
         ],
     )
     def test_generic_autocomplete_streams(
         self, write_box, text, state, required_typeahead, to_pin
     ):
-        streams_to_pin = [{'name': stream_name} for stream_name in to_pin]
+        streams_to_pin = [{"name": stream_name} for stream_name in to_pin]
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
@@ -346,30 +346,30 @@ class TestWriteBox:
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
-        'text, state, required_typeahead',
+        "text, state, required_typeahead",
         [
-            (':rock_o', 0, ':rock_on:'),
-            (':rock_o', 1, None),
-            (':rock_o', -1, ':rock_on:'),
-            (':rock_o', -2, None),
-            (':smi', 0, ':smile:'),
-            (':smi', 1, ':smiley:'),
-            (':smi', 2, ':smirk:'),
-            (':jo', 0, ':joker:'),
-            (':jo', 1, ':joy_cat:'),
-            (':jok', 0, ':joker:'),
-            (':', 0, ':happy:'),
-            (':', 1, ':joker:'),
-            (':', -2, ':smiley:'),
-            (':', -1, ':smirk:'),
-            (':nomatch', 0, None),
-            (':nomatch', -1, None),
+            (":rock_o", 0, ":rock_on:"),
+            (":rock_o", 1, None),
+            (":rock_o", -1, ":rock_on:"),
+            (":rock_o", -2, None),
+            (":smi", 0, ":smile:"),
+            (":smi", 1, ":smiley:"),
+            (":smi", 2, ":smirk:"),
+            (":jo", 0, ":joker:"),
+            (":jo", 1, ":joy_cat:"),
+            (":jok", 0, ":joker:"),
+            (":", 0, ":happy:"),
+            (":", 1, ":joker:"),
+            (":", -2, ":smiley:"),
+            (":", -1, ":smirk:"),
+            (":nomatch", 0, None),
+            (":nomatch", -1, None),
             # Complex autocomplete prefixes.
-            ('(:smi', 0, '(:smile:'),
-            ('&:smi', 1, '&:smiley:'),
-            ('@:smi', 0, '@:smile:'),
-            ('@_:smi', 0, '@_:smile:'),
-            ('#:smi', 0, '#:smile:'),
+            ("(:smi", 0, "(:smile:"),
+            ("&:smi", 1, "&:smiley:"),
+            ("@:smi", 0, "@:smile:"),
+            ("@_:smi", 0, "@_:smile:"),
+            ("#:smi", 0, "#:smile:"),
         ],
     )
     def test_generic_autocomplete_emojis(
@@ -379,28 +379,28 @@ class TestWriteBox:
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
-        'text, matching_users, matching_users_info',
+        "text, matching_users, matching_users_info",
         [
             (
-                '',
-                ['Human Myself', 'Human 1', 'Human 2'],
+                "",
+                ["Human Myself", "Human 1", "Human 2"],
                 [
-                    'Human Myself <FOOBOO@gmail.com>',
-                    'Human 1 <person1@example.com>',
-                    'Human 2 <person2@example.com>',
+                    "Human Myself <FOOBOO@gmail.com>",
+                    "Human 1 <person1@example.com>",
+                    "Human 2 <person2@example.com>",
                 ],
             ),
-            ('My', ['Human Myself'], ['Human Myself <FOOBOO@gmail.com>']),
+            ("My", ["Human Myself"], ["Human Myself <FOOBOO@gmail.com>"]),
         ],
         ids=[
-            'no_search_text',
-            'single_word_search_text',
+            "no_search_text",
+            "single_word_search_text",
         ],
     )
     def test__to_box_autocomplete(
         self, mocker, write_box, text, matching_users, matching_users_info, state=1
     ):
-        _process_typeaheads = mocker.patch(BOXES + '.WriteBox._process_typeaheads')
+        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
 
@@ -409,85 +409,85 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'text, expected_text',
+        "text, expected_text",
         [
-            ('Hu', 'Human Myself <FOOBOO@gmail.com>'),
-            ('Human M', 'Human Myself <FOOBOO@gmail.com>'),
-            ('Human Myself <FOOBOO', 'Human Myself <FOOBOO@gmail.com>'),
+            ("Hu", "Human Myself <FOOBOO@gmail.com>"),
+            ("Human M", "Human Myself <FOOBOO@gmail.com>"),
+            ("Human Myself <FOOBOO", "Human Myself <FOOBOO@gmail.com>"),
         ],
     )
     def test__to_box_autocomplete_with_spaces(
         self, write_box, text, expected_text, widget_size
     ):
         write_box.private_box_view(
-            emails=['feedback@zulip.com'], recipient_user_ids=[1]
+            emails=["feedback@zulip.com"], recipient_user_ids=[1]
         )
         write_box.to_write_box.set_edit_text(text)
         write_box.to_write_box.set_edit_pos(len(text))
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
+        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.to_write_box.edit_text == expected_text
 
     @pytest.mark.parametrize(
-        'text, matching_users, matching_users_info',
+        "text, matching_users, matching_users_info",
         [
             (
-                'Welcome Bot <welcome-bot@zulip.com>, Human',
-                ['Human Myself', 'Human 1', 'Human 2'],
+                "Welcome Bot <welcome-bot@zulip.com>, Human",
+                ["Human Myself", "Human 1", "Human 2"],
                 [
-                    'Welcome Bot <welcome-bot@zulip.com>, '
-                    'Human Myself <FOOBOO@gmail.com>',
-                    'Welcome Bot <welcome-bot@zulip.com>, '
-                    'Human 1 <person1@example.com>',
-                    'Welcome Bot <welcome-bot@zulip.com>, '
-                    'Human 2 <person2@example.com>',
+                    "Welcome Bot <welcome-bot@zulip.com>, "
+                    "Human Myself <FOOBOO@gmail.com>",
+                    "Welcome Bot <welcome-bot@zulip.com>, "
+                    "Human 1 <person1@example.com>",
+                    "Welcome Bot <welcome-bot@zulip.com>, "
+                    "Human 2 <person2@example.com>",
                 ],
             ),
             (
-                'Welcome Bot <welcome-bot@zulip.com>, Notification Bot '
-                '<notification-bot@zulip.com>, person2',
-                ['Human 2'],
+                "Welcome Bot <welcome-bot@zulip.com>, Notification Bot "
+                "<notification-bot@zulip.com>, person2",
+                ["Human 2"],
                 [
-                    'Welcome Bot <welcome-bot@zulip.com>, Notification Bot '
-                    '<notification-bot@zulip.com>, Human 2 <person2@example.com>'
+                    "Welcome Bot <welcome-bot@zulip.com>, Notification Bot "
+                    "<notification-bot@zulip.com>, Human 2 <person2@example.com>"
                 ],
             ),
             (
-                'Email Gateway <emailgateway@zulip.com>,Human',
-                ['Human Myself', 'Human 1', 'Human 2'],
+                "Email Gateway <emailgateway@zulip.com>,Human",
+                ["Human Myself", "Human 1", "Human 2"],
                 [
-                    'Email Gateway <emailgateway@zulip.com>, '
-                    'Human Myself <FOOBOO@gmail.com>',
-                    'Email Gateway <emailgateway@zulip.com>, '
-                    'Human 1 <person1@example.com>',
-                    'Email Gateway <emailgateway@zulip.com>, '
-                    'Human 2 <person2@example.com>',
+                    "Email Gateway <emailgateway@zulip.com>, "
+                    "Human Myself <FOOBOO@gmail.com>",
+                    "Email Gateway <emailgateway@zulip.com>, "
+                    "Human 1 <person1@example.com>",
+                    "Email Gateway <emailgateway@zulip.com>, "
+                    "Human 2 <person2@example.com>",
                 ],
             ),
             (
-                'Human 1 <person1@example.com>, Notification Bot '
-                '<notification-bot@zulip.com>,person2',
-                ['Human 2'],
+                "Human 1 <person1@example.com>, Notification Bot "
+                "<notification-bot@zulip.com>,person2",
+                ["Human 2"],
                 [
-                    'Human 1 <person1@example.com>, Notification Bot '
-                    '<notification-bot@zulip.com>, Human 2 <person2@example.com>'
+                    "Human 1 <person1@example.com>, Notification Bot "
+                    "<notification-bot@zulip.com>, Human 2 <person2@example.com>"
                 ],
             ),
         ],
         ids=[
-            'name_search_text_with_space_after_separator',
-            'email_search_text_with_space_after_separator',
-            'name_search_text_without_space_after_separator',
-            'email_search_text_without_space_after_separator',
+            "name_search_text_with_space_after_separator",
+            "email_search_text_with_space_after_separator",
+            "name_search_text_without_space_after_separator",
+            "email_search_text_without_space_after_separator",
         ],
     )
     def test__to_box_autocomplete_with_multiple_recipients(
         self, mocker, write_box, text, matching_users, matching_users_info, state=1
     ):
-        _process_typeaheads = mocker.patch(BOXES + '.WriteBox._process_typeaheads')
+        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
 
@@ -496,48 +496,48 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'text, state, to_pin, matching_streams',
+        "text, state, to_pin, matching_streams",
         [
             (
-                '',
+                "",
                 1,
                 [],
-                ['Secret stream', 'Some general stream', 'Stream 1', 'Stream 2'],
+                ["Secret stream", "Some general stream", "Stream 1", "Stream 2"],
             ),
             (
-                '',
+                "",
                 1,
-                ['Stream 2'],
-                ['Stream 2', 'Secret stream', 'Some general stream', 'Stream 1'],
+                ["Stream 2"],
+                ["Stream 2", "Secret stream", "Some general stream", "Stream 1"],
             ),
             (
-                'St',
+                "St",
                 1,
                 [],
-                ['Stream 1', 'Stream 2', 'Secret stream', 'Some general stream'],
+                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
             ),
             (
-                'St',
+                "St",
                 1,
-                ['Stream 2'],
-                ['Stream 2', 'Stream 1', 'Secret stream', 'Some general stream'],
+                ["Stream 2"],
+                ["Stream 2", "Stream 1", "Secret stream", "Some general stream"],
             ),
         ],
         ids=[
-            'no_search_text',
-            'no_search_text_with_pinned_stream',
-            'single_word_search_text',
-            'single_word_search_text_with_pinned_stream',
+            "no_search_text",
+            "no_search_text_with_pinned_stream",
+            "single_word_search_text",
+            "single_word_search_text_with_pinned_stream",
         ],
     )
     def test__stream_box_autocomplete(
         self, mocker, write_box, text, state, to_pin, matching_streams
     ):
-        streams_to_pin = [{'name': stream_name} for stream_name in to_pin]
+        streams_to_pin = [{"name": stream_name} for stream_name in to_pin]
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
-        _process_typeaheads = mocker.patch(BOXES + '.WriteBox._process_typeaheads')
+        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
 
         write_box._stream_box_autocomplete(text, state)
 
@@ -546,16 +546,16 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'stream_name, stream_id, is_valid_stream, expected_marker, expected_color',
+        "stream_name, stream_id, is_valid_stream, expected_marker, expected_color",
         [
-            ('Secret stream', 99, True, STREAM_MARKER_PRIVATE, '#ccc'),
-            ('Stream 1', 1, True, STREAM_MARKER_PUBLIC, '#b0a5fd'),
-            ('Stream 0', 0, False, INVALID_MARKER, 'general_bar'),
+            ("Secret stream", 99, True, STREAM_MARKER_PRIVATE, "#ccc"),
+            ("Stream 1", 1, True, STREAM_MARKER_PUBLIC, "#b0a5fd"),
+            ("Stream 0", 0, False, INVALID_MARKER, "general_bar"),
         ],
         ids=[
-            'private_stream',
-            'public_stream',
-            'invalid_stream_name',
+            "private_stream",
+            "public_stream",
+            "invalid_stream_name",
         ],
     )
     def test__set_stream_write_box_style_markers(
@@ -584,16 +584,16 @@ class TestWriteBox:
         assert stream_marker.attrib[0][0] == expected_color
 
     @pytest.mark.parametrize(
-        'text, expected_text',
+        "text, expected_text",
         [
-            ('Som', 'Some general stream'),
-            ('Some gen', 'Some general stream'),
+            ("Som", "Some general stream"),
+            ("Some gen", "Some general stream"),
         ],
     )
     def test__stream_box_autocomplete_with_spaces(
         self, mocker, write_box, widget_size, text, expected_text
     ):
-        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
+        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
         write_box.header_write_box[stream_focus].set_edit_text(text)
@@ -602,26 +602,26 @@ class TestWriteBox:
         write_box.header_write_box.focus_col = stream_focus
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
+        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.header_write_box[stream_focus].edit_text == expected_text
 
     @pytest.mark.parametrize(
-        'text, matching_topics',
+        "text, matching_topics",
         [
-            ('', ['Topic 1', 'This is a topic', 'Hello there!']),
-            ('Th', ['This is a topic']),
+            ("", ["Topic 1", "This is a topic", "Hello there!"]),
+            ("Th", ["This is a topic"]),
         ],
         ids=[
-            'no_search_text',
-            'single_word_search_text',
+            "no_search_text",
+            "single_word_search_text",
         ],
     )
     def test__topic_box_autocomplete(
         self, mocker, write_box, text, topics, matching_topics, state=1
     ):
         write_box.model.topics_in_stream.return_value = topics
-        _process_typeaheads = mocker.patch(BOXES + '.WriteBox._process_typeaheads')
+        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
 
         write_box._topic_box_autocomplete(text, state)
 
@@ -630,16 +630,16 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'text, expected_text',
+        "text, expected_text",
         [
-            ('Th', 'This is a topic'),
-            ('This i', 'This is a topic'),
+            ("Th", "This is a topic"),
+            ("This i", "This is a topic"),
         ],
     )
     def test__topic_box_autocomplete_with_spaces(
         self, mocker, write_box, widget_size, text, expected_text, topics
     ):
-        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
+        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         write_box.model.topics_in_stream.return_value = topics
         topic_focus = write_box.FOCUS_HEADER_BOX_TOPIC
@@ -649,25 +649,25 @@ class TestWriteBox:
         write_box.header_write_box.focus_col = topic_focus
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command('AUTOCOMPLETE'))
+        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.header_write_box[topic_focus].edit_text == expected_text
 
     @pytest.mark.parametrize(
-        'suggestions, state, expected_state, expected_typeahead, is_truncated',
+        "suggestions, state, expected_state, expected_typeahead, is_truncated",
         [
-            (['zero', 'one', 'two'], 1, 1, '*one*', False),
-            (['zero', 'one', 'two'] * 4, 1, 1, '*one*', True),
-            (['zero', 'one', 'two'], None, None, None, False),
-            (['zero', 'one', 'two'], 5, None, None, False),
-            (['zero', 'one', 'two'], -5, None, None, False),
+            (["zero", "one", "two"], 1, 1, "*one*", False),
+            (["zero", "one", "two"] * 4, 1, 1, "*one*", True),
+            (["zero", "one", "two"], None, None, None, False),
+            (["zero", "one", "two"], 5, None, None, False),
+            (["zero", "one", "two"], -5, None, None, False),
         ],
         ids=[
-            'fewer_than_10_typeaheads',
-            'more_than_10_typeaheads',
-            'invalid_state-None',
-            'invalid_state-greater_than_possible_index',
-            'invalid_state-less_than_possible_index',
+            "fewer_than_10_typeaheads",
+            "more_than_10_typeaheads",
+            "invalid_state-None",
+            "invalid_state-greater_than_possible_index",
+            "invalid_state-less_than_possible_index",
         ],
     )
     def test__process_typeaheads(
@@ -681,7 +681,7 @@ class TestWriteBox:
         mocker,
     ):
         write_box.view.set_typeahead_footer = mocker.patch(
-            'zulipterminal.ui.View.set_typeahead_footer'
+            "zulipterminal.ui.View.set_typeahead_footer"
         )
         # Use an example formatting to differentiate between
         # typeaheads and suggestions.
@@ -695,22 +695,22 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        'topic_entered_by_user, topic_sent_to_server',
+        "topic_entered_by_user, topic_sent_to_server",
         [
-            ('', '(no topic)'),
-            ('hello', 'hello'),
-            ('  ', '(no topic)'),
+            ("", "(no topic)"),
+            ("hello", "hello"),
+            ("  ", "(no topic)"),
         ],
         ids=[
-            'empty_topic',
-            'non_empty_topic',
-            'topic_with_whitespace',
+            "empty_topic",
+            "non_empty_topic",
+            "topic_with_whitespace",
         ],
     )
     @pytest.mark.parametrize(
-        'msg_edit_id', [10, None], ids=['update_message', 'send_message']
+        "msg_edit_id", [10, None], ids=["update_message", "send_message"]
     )
-    @pytest.mark.parametrize('key', keys_for_command('SEND_MESSAGE'))
+    @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_keypress_SEND_MESSAGE_no_topic(
         self,
         mocker,
@@ -720,10 +720,10 @@ class TestWriteBox:
         topic_sent_to_server,
         key,
         widget_size,
-        propagate_mode='change_one',
+        propagate_mode="change_one",
     ):
         write_box.stream_write_box = mocker.Mock()
-        write_box.msg_write_box = mocker.Mock(edit_text='')
+        write_box.msg_write_box = mocker.Mock(edit_text="")
         write_box.title_write_box = mocker.Mock(edit_text=topic_entered_by_user)
         write_box.to_write_box = None
         size = widget_size(write_box)
@@ -747,17 +747,17 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize(
-        'key, current_typeahead_mode, expected_typeahead_mode, expect_footer_was_reset',
+        "key, current_typeahead_mode, expected_typeahead_mode, expect_footer_was_reset",
         [
             # footer does not reset
-            (primary_key_for_command('AUTOCOMPLETE'), False, False, False),
-            (primary_key_for_command('AUTOCOMPLETE_REVERSE'), False, False, False),
-            (primary_key_for_command('AUTOCOMPLETE'), True, True, False),
-            (primary_key_for_command('AUTOCOMPLETE_REVERSE'), True, True, False),
+            (primary_key_for_command("AUTOCOMPLETE"), False, False, False),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False, False),
+            (primary_key_for_command("AUTOCOMPLETE"), True, True, False),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True, False),
             # footer resets
-            (primary_key_for_command('GO_BACK'), True, False, True),
-            ('space', True, False, True),
-            ('k', True, False, True),
+            (primary_key_for_command("GO_BACK"), True, False, True),
+            ("space", True, False, True),
+            ("k", True, False, True),
         ],
     )
     def test_keypress_typeahead_mode_autocomplete_key(
@@ -793,114 +793,114 @@ class TestWriteBox:
         ],
         [
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_STREAM',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
                 "stream",
                 True,
                 False,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
-                id='stream_name_to_topic_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                id="stream_name_to_topic_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
                 "stream",
                 True,
                 False,
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
-                id='topic_to_message_box',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="topic_to_message_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
                 "stream",
                 False,
                 True,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_EDIT',
-                id='topic_edit_only-topic_to_edit_mode_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                id="topic_edit_only-topic_to_edit_mode_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_EDIT',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
                 "stream",
                 False,
                 True,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
-                id='topic_edit_only-edit_mode_to_topic_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                id="topic_edit_only-edit_mode_to_topic_box",
             ),
             case(
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
                 "stream",
                 True,
                 False,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_STREAM',
-                id='message_to_stream_name_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
+                id="message_to_stream_name_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_STREAM',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
                 "stream",
                 True,
                 True,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
-                id='edit_box-stream_name_to_topic_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                id="edit_box-stream_name_to_topic_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_TOPIC',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
                 "stream",
                 True,
                 True,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_EDIT',
-                id='edit_box-topic_to_edit_mode_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                id="edit_box-topic_to_edit_mode_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_EDIT',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
                 "stream",
                 True,
                 True,
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
-                id='edit_box-edit_mode_to_message_box',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="edit_box-edit_mode_to_message_box",
             ),
             case(
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
                 "stream",
                 True,
                 True,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_STREAM',
-                id='edit_box-message_to_stream_name_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
+                id="edit_box-message_to_stream_name_box",
             ),
             case(
-                'CONTAINER_HEADER',
-                'HEADER_BOX_RECIPIENT',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_RECIPIENT",
                 "private",
                 True,
                 False,
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
-                id='recipient_to_message_box',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="recipient_to_message_box",
             ),
             case(
-                'CONTAINER_MESSAGE',
-                'MESSAGE_BOX_BODY',
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
                 "private",
                 True,
                 False,
-                'CONTAINER_HEADER',
-                'HEADER_BOX_RECIPIENT',
-                id='message_to_recipient_box',
+                "CONTAINER_HEADER",
+                "HEADER_BOX_RECIPIENT",
+                id="message_to_recipient_box",
             ),
         ],
     )
@@ -920,7 +920,7 @@ class TestWriteBox:
         mocker,
         stream_id=10,
     ):
-        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
+        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
 
         if box_type == "stream":
             if message_being_edited:
@@ -934,7 +934,7 @@ class TestWriteBox:
         size = widget_size(write_box)
 
         def focus_val(x: str) -> int:
-            return getattr(write_box, 'FOCUS_' + x)
+            return getattr(write_box, "FOCUS_" + x)
 
         write_box.focus_position = focus_val(initial_focus_name)
         write_box.msg_body_edit_enabled = msg_body_edit_enabled
@@ -959,28 +959,28 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "msg_type, expected_box_size",
         [
-            ('private', 1),
-            ('stream', 4),
-            ('stream_edit', 5),
+            ("private", 1),
+            ("stream", 4),
+            ("stream_edit", 5),
         ],
         ids=[
-            'private_message',
-            'stream_message',
-            'stream_edit_message',
+            "private_message",
+            "stream_message",
+            "stream_edit_message",
         ],
     )
     def test_write_box_header_contents(
         self, write_box, expected_box_size, mocker, msg_type
     ):
-        mocker.patch(BOXES + '.WriteBox._set_stream_write_box_style')
-        mocker.patch(BOXES + '.WriteBox.set_editor_mode')
-        if msg_type == 'stream':
+        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
+        mocker.patch(BOXES + ".WriteBox.set_editor_mode")
+        if msg_type == "stream":
             write_box.stream_box_view(1000)
-        elif msg_type == 'stream_edit':
+        elif msg_type == "stream_edit":
             write_box.stream_box_edit_view(1000)
         else:
             write_box.private_box_view(
-                emails=['feedback@zulip.com'], recipient_user_ids=[1]
+                emails=["feedback@zulip.com"], recipient_user_ids=[1]
             )
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
@@ -1017,14 +1017,14 @@ class TestPanelSearchBox:
             # NOTE: In both backspace cases it is not validated (backspace is not
             #       shown), but still is handled during editing as normal
             # NOTE: Unicode backspace case likely doesn't get triggered
-            case('', 'backspace', False, id="no_text-disallow_urwid_backspace"),
-            case('', '\u0008', False, id="no_text-disallow_unicode_backspace"),
-            case('', '\u2003', False, id="no_text-disallow_unicode_em_space"),
-            case('', 'x', True, id="no_text-allow_entry_of_x"),
-            case('', '\u0394', True, id="no_text-allow_entry_of_delta"),
-            case('', ' ', False, id="no_text-disallow_entry_of_space"),
-            case('x', ' ', True, id="text-allow_entry_of_space"),
-            case('x', 'backspace', False, id="text-disallow_urwid_backspace"),
+            case("", "backspace", False, id="no_text-disallow_urwid_backspace"),
+            case("", "\u0008", False, id="no_text-disallow_unicode_backspace"),
+            case("", "\u2003", False, id="no_text-disallow_unicode_em_space"),
+            case("", "x", True, id="no_text-allow_entry_of_x"),
+            case("", "\u0394", True, id="no_text-allow_entry_of_delta"),
+            case("", " ", False, id="no_text-disallow_entry_of_space"),
+            case("x", " ", True, id="text-allow_entry_of_space"),
+            case("x", "backspace", False, id="text-disallow_urwid_backspace"),
         ],
     )
     def test_valid_char(
@@ -1068,7 +1068,7 @@ class TestPanelSearchBox:
             panel_view.set_focus.assert_called_once_with("body")
             panel_view.body.set_focus.assert_called_once_with(0)
         else:
-            assert panel_search_box.caption == ''
+            assert panel_search_box.caption == ""
             panel_view.view.controller.exit_editor_mode.assert_not_called()
             panel_view.set_focus.assert_not_called()
             panel_view.body.set_focus.assert_not_called()
@@ -1097,4 +1097,4 @@ class TestPanelSearchBox:
         # pass keypress back
         # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
         #       - should we add a second callback to update the panel?
-        panel_view.keypress.assert_called_once_with(size, 'esc')
+        panel_view.keypress.assert_called_once_with(size, "esc")

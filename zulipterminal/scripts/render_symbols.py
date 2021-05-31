@@ -6,21 +6,21 @@ from urwid import set_encoding
 from zulipterminal.config import symbols
 
 
-set_encoding('utf-8')
+set_encoding("utf-8")
 
 palette = [
-    ('header', 'white, bold', 'dark blue'),
-    ('footer', 'black', 'white'),
+    ("header", "white, bold", "dark blue"),
+    ("footer", "black", "white"),
 ]
 
 symbol_dict = {
     name: symbol
     for name, symbol in vars(symbols).items()
-    if not name.startswith('__') and not name.endswith('__')
+    if not name.startswith("__") and not name.endswith("__")
 }
 max_symbol_name_length = max([len(name) for name in symbol_dict.keys()])
 
-symbol_names_list = [urwid.Text(name, align='center') for name in symbol_dict.keys()]
+symbol_names_list = [urwid.Text(name, align="center") for name in symbol_dict.keys()]
 symbols_list = [urwid.Text(symbol) for symbol in symbol_dict.values()]
 
 symbols_display_box = urwid.Columns(
@@ -36,15 +36,15 @@ symbols_display_box = urwid.Columns(
 columns_length = max_symbol_name_length + 10
 
 line_box = urwid.LineBox(
-    symbols_display_box, title="Render Symbols", title_attr='header'
+    symbols_display_box, title="Render Symbols", title_attr="header"
 )
-info_box = urwid.Text(('footer', u" Exit: ^C (ctrl c)"), align='center')
+info_box = urwid.Text(("footer", " Exit: ^C (ctrl c)"), align="center")
 display_box = urwid.Pile([line_box, info_box])
 
 # Allot extra width to the display_box to render a neat layout.
 body = urwid.Filler(
-    urwid.Padding(display_box, width=columns_length + 5, align='center'),
-    valign='middle',
+    urwid.Padding(display_box, width=columns_length + 5, align="center"),
+    valign="middle",
 )
 
 
