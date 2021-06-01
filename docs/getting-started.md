@@ -8,7 +8,7 @@ Now let's help you get started with using Zulip Terminal. First, if you haven't 
 
 ## Overview
 
-This tutorial was designed to be interactive. We highly recomend opening up Zulip Terminal and following along! We'll try out a few keyboard shortcuts and send a couple messages to help familiarize ourselves with Zulip Terminal. Here's an overview of the features we'll be walking you through:
+This tutorial was designed to be interactive. We highly recommend opening up Zulip Terminal and following along! We'll try out a few keyboard shortcuts and send a couple of messages to help familiarize ourselves with Zulip Terminal. Here's an overview of the features we'll be walking you through:
 
 0. [Open Zulip Terminal](#Open-Zulip-Terminal)
 1. [Understand the Layout](#Understand-the-Layout)
