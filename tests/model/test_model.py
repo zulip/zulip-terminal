@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
@@ -1449,6 +1449,32 @@ class TestModel:
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
+    @pytest.fixture
+    def update_message_event_index_factory(self):
+        """
+        Generate index for update message event tests
+        """
+        TopicsDataType = Dict[int, List[str]]  # stream_id, followed by list of topics
+
+        def _factory(
+            msg_stream_id: int, topics: TopicsDataType, message_ids: List[int]
+        ):
+            return {
+                "messages": {
+                    message_id: {
+                        "id": message_id,
+                        "stream_id": msg_stream_id,
+                        "subject": "old subject",
+                        "content": "old content",
+                    }
+                    for message_id in message_ids
+                },
+                "edited_messages": set(),
+                "topics": topics,
+            }
+
+        return _factory
+
     @pytest.mark.parametrize(
         "event, expected_times_messages_rerendered, expected_index, topic_view_enabled",
         [
@@ -1680,7 +1706,9 @@ class TestModel:
                         },
                     },
                     "edited_messages": {1},
-                    "topics": {10: ["new subject", "old subject"]},
+                    "topics": {
+                        10: ["new subject", "old subject"],
+                    },
                 },
                 True,
                 id="Message content is updated and topic view is enabled",
@@ -1695,22 +1723,13 @@ class TestModel:
         expected_index,
         expected_times_messages_rerendered,
         topic_view_enabled,
+        update_message_event_index_factory,
     ):
         event["type"] = "update_message"
 
-        model.index = {
-            "messages": {
-                message_id: {
-                    "id": message_id,
-                    "stream_id": 10,
-                    "content": "old content",
-                    "subject": "old subject",
-                }
-                for message_id in [1, 2]
-            },
-            "edited_messages": set(),
-            "topics": {10: ["old subject"]},
-        }
+        model.index = update_message_event_index_factory(
+            msg_stream_id=10, topics={10: ["old subject"]}, message_ids=[1, 2]
+        )
         mocker.patch(MODEL + "._update_rendered_view")
 
         def _set_topics_to_old_and_new(event):
