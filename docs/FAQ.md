@@ -84,9 +84,9 @@ If you are unable to open links in messages, then try double right-click on the 
 
 Alternatively, you might try different modifier keys (eg. shift, ctrl, alt) with a right-click.
 
-If you are still facing problems, please discuss it at
-[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open an issue
-for it mentioning your terminal name, version, and OS.
+If you are still facing problems, please discuss them at
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open issues
+for them mentioning your terminal name, version, and OS.
 
 ## Links don't render completely as a footlink
 
