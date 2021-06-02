@@ -320,6 +320,61 @@ class TestView:
             view.stream_w.stream_search_box
         )
 
+    @pytest.mark.parametrize(
+        "draft",
+        [
+            {
+                "type": "stream",
+                "to": "zulip terminal",
+                "subject": "open draft",
+                "content": "this is a stream message content",
+            },
+            {
+                "type": "private",
+                "to": ["foo@zulip.com", "bar@gmail.com"],
+                "content": "this is a private message content",
+            },
+            None,
+        ],
+        ids=[
+            "stream_draft_composition",
+            "private_draft_composition",
+            "no_draft_composition",
+        ],
+    )
+    @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
+    def test_keypress_OPEN_DRAFT(self, view, mocker, draft, key, widget_size):
+        view.middle_column = mocker.Mock()
+        view.set_footer_text = mocker.Mock()
+        view.controller.is_in_editor_mode = lambda: False
+        view.model.stream_id_from_name.return_value = 10
+        view.model.session_draft_message.return_value = draft
+        view.model.user_dict = {
+            "foo@zulip.com": {"user_id": 1},
+            "bar@gmail.com": {"user_id": 2},
+        }
+
+        size = widget_size(view)
+        view.keypress(size, key)
+
+        if draft:
+            if draft["type"] == "stream":
+                view.write_box.stream_box_view.assert_called_once_with(
+                    caption=draft["to"], title=draft["subject"], stream_id=10
+                )
+            else:
+                view.write_box.private_box_view.assert_called_once_with(
+                    emails=draft["to"], recipient_user_ids=[1, 2]
+                )
+
+            assert view.write_box.msg_write_box.edit_text == draft["content"]
+            assert view.write_box.msg_write_box.edit_pos == len(draft["content"])
+            view.middle_column.set_focus.assert_called_once_with("footer")
+        else:
+            view.set_footer_text.assert_called_once_with(
+                "No draft message was saved in this session.", 3
+            )
+
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
     def test_keypress_edit_mode(self, view, mocker, key, widget_size):
         view.users_view = mocker.Mock()
