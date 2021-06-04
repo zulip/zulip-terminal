@@ -151,18 +151,6 @@ def test_index_starred(
     assert index_messages(messages, model, model.index) == expected_index
 
 
-@pytest.mark.parametrize(
-    "mentioned_messages",
-    [
-        {537286, 537287, 537288},
-        {537286},
-        {537287},
-        {537288},
-        {537286, 537287},
-        {537286, 537288},
-        {537287, 537288},
-    ],
-)
 def test_index_mentioned_messages(
     mocker, messages_successful_response, empty_index, mentioned_messages, initial_index
 ):

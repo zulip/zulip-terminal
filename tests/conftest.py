@@ -456,6 +456,21 @@ def topics():
     return ["Topic 1", "This is a topic", "Hello there!"]
 
 
+@pytest.fixture(
+    params=[
+        {537286, 537287, 537288},
+        {537286},
+        {537287},
+        {537288},
+        {537286, 537287},
+        {537286, 537288},
+        {537287, 537288},
+    ],
+)
+def mentioned_messages(request):
+    return deepcopy(request.param)
+
+
 @pytest.fixture
 def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
     """
@@ -743,19 +758,8 @@ def index_all_starred(empty_index, request):
     return index
 
 
-@pytest.fixture(
-    params=[
-        {537286, 537287, 537288},
-        {537286},
-        {537287},
-        {537288},
-        {537286, 537287},
-        {537286, 537288},
-        {537287, 537288},
-    ]
-)
-def index_all_mentions(empty_index, request):
-    mentioned_messages = request.param
+@pytest.fixture()
+def index_all_mentions(empty_index, mentioned_messages):
     index = dict(
         empty_index,
         mentioned_msg_ids=mentioned_messages,
