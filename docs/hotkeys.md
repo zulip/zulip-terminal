@@ -55,6 +55,7 @@
 |Add/remove star status of the current message|<kbd>ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
+|View current message in browser (from message information)|<kbd>v</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|

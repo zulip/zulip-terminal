@@ -236,6 +236,13 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
     }),
+    ('VIEW_IN_BROWSER', {
+        'keys': ['v'],
+        'help_text':
+            'View current message in browser (from message information)',
+        'excluded_from_random_tips': True,
+        'key_category': 'msg_actions',
+    }),
     ('STREAM_DESC', {
         'keys': ['i'],
         'help_text': 'Show/hide stream information & modify settings',

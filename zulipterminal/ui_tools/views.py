@@ -25,6 +25,7 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import Message, asynch, match_stream, match_user
+from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     HomeButton,
@@ -1297,9 +1298,11 @@ class MsgInfoView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
         )
+        view_in_browser_keys = ", ".join(map(repr, keys_for_command("VIEW_IN_BROWSER")))
 
         msg_info = [
             (
@@ -1308,6 +1311,10 @@ class MsgInfoView(PopUpView):
                     ("Date & Time", date_and_time),
                     ("Sender", msg["sender_full_name"]),
                     ("Sender's Email ID", msg["sender_email"]),
+                    (
+                        "View message in browser",
+                        f"Press {view_in_browser_keys} to view message in browser",
+                    ),
                 ],
             ),
         ]
@@ -1410,6 +1417,9 @@ class MsgInfoView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
+        elif is_command_key("VIEW_IN_BROWSER", key):
+            url = near_message_url(self.server_url[:-1], self.msg)
+            self.controller.open_in_browser(url)
         return super().keypress(size, key)
 
 
