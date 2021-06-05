@@ -1824,6 +1824,49 @@ class TestModel:
         else:
             assert not view.write_box.update_topic_compose_header.called
 
+    @pytest.mark.parametrize("original_stream_id", [1, 2])
+    @pytest.mark.parametrize("compose_box_open", [False, True])
+    def test_update_stream_header_mid_compose(
+        self,
+        mocker,
+        model,
+        compose_box_open,
+        original_stream_id,
+        update_message_event_index_factory,
+    ):
+        event = {
+            "type": "update_message",
+            "message_id": 1,
+            "message_ids": [1, 2],
+            "orig_subject": "old subject",
+            "stream_id": 1,
+            "new_stream_id": 2,
+        }
+
+        model.index = update_message_event_index_factory(
+            msg_stream_id=1,
+            topics={1: ["old subject", "other subject"], 2: []},
+            message_ids=[1, 2],
+        )
+
+        view = model.controller.view
+        view.write_box.update_stream_compose_header = mocker.Mock()
+
+        if compose_box_open:
+            view.write_box.compose_box_status = "open_with_stream"
+            view.write_box.stream_id = original_stream_id
+
+        model._handle_update_message_event(event)
+
+        # TODO: Optimize using a `vary_in_` or similar approach.
+        if compose_box_open and original_stream_id == event["stream_id"]:
+            view.write_box.update_stream_compose_header.assert_called_once_with(
+                model.stream_dict[event["new_stream_id"]]["name"],
+                event["new_stream_id"],
+            )
+        else:
+            assert not view.write_box.update_stream_compose_header.called
+
     @pytest.mark.parametrize(
         "subject, narrow, new_log_len",
         [
