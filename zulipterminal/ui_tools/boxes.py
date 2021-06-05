@@ -447,6 +447,18 @@ class WriteBox(urwid.Pile):
             "being composed to has been changed."
         )
 
+    def update_stream_compose_header(
+        self, new_stream_name: str, new_stream_id: int
+    ) -> None:
+        self.stream_id = new_stream_id
+        self.stream_write_box.set_edit_text(new_stream_name)
+        self.stream_write_box.set_edit_pos(len(new_stream_name))
+
+        self.view.controller.report_warning(
+            "The stream header has been updated because the topic currently being "
+            "composed to has been moved to another stream."
+        )
+
     def _to_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         users_list = self.view.users
         recipients = text.rsplit(",", 1)

@@ -771,6 +771,28 @@ class TestWriteBox:
             "being composed to has been changed."
         )
 
+    def test_update_stream_compose_header(
+        self,
+        mocker,
+        write_box,
+        current_stream_id=1,
+        new_stream_id=2,
+        new_stream_name="Stream 2",
+    ):
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
+        write_box.view.controller.report_warning = mocker.Mock()
+        write_box.stream_box_view(current_stream_id)
+
+        write_box.update_stream_compose_header(new_stream_name, new_stream_id)
+
+        assert write_box.stream_id == new_stream_id
+        assert write_box.stream_write_box.edit_text == new_stream_name
+        assert write_box.stream_write_box.edit_pos == len(new_stream_name)
+        write_box.view.controller.report_warning.assert_called_once_with(
+            "The stream header has been updated because the topic currently being "
+            "composed to has been moved to another stream."
+        )
+
     @pytest.mark.parametrize(
         "text, matching_users, matching_users_info",
         [
