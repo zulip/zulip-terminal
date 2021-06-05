@@ -750,6 +750,27 @@ class TestWriteBox:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
+    def test_update_topic_compose_header(
+        self,
+        mocker,
+        write_box,
+        current_topic="some topic",
+        new_topic="new topic",
+        stream_id=1,
+    ):
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
+        write_box.view.controller.report_warning = mocker.Mock()
+        write_box.stream_box_view(stream_id, title=current_topic)
+
+        write_box.update_topic_compose_header(new_topic)
+
+        assert write_box.title_write_box.edit_text == new_topic
+        assert write_box.title_write_box.edit_pos == len(new_topic)
+        write_box.view.controller.report_warning.assert_called_once_with(
+            "The topic header has been updated because the name of the topic currently "
+            "being composed to has been changed."
+        )
+
     @pytest.mark.parametrize(
         "text, matching_users, matching_users_info",
         [
