@@ -302,13 +302,18 @@ class StreamsViewDivider(urwid.Divider):
 class StreamsView(urwid.Frame):
     def __init__(self, streams_btn_list: List[Any], view: Any) -> None:
         self.view = view
-        self.log = urwid.SimpleFocusListWalker(streams_btn_list)
+        # Stream List
         self.streams_btn_list = streams_btn_list
-        self.focus_index_before_search = 0
+        self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         list_box = urwid.ListBox(self.log)
+        # Stream Search
+        self.empty_search = False
+        self.focus_index_before_search = 0
+        self.search_lock = threading.Lock()
         self.stream_search_box = PanelSearchBox(
             self, "SEARCH_STREAMS", self.update_streams
         )
+
         super().__init__(
             list_box,
             header=urwid.LineBox(
@@ -323,8 +328,6 @@ class StreamsView(urwid.Frame):
                 brcorner="─",
             ),
         )
-        self.search_lock = threading.Lock()
-        self.empty_search = False
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -404,17 +407,22 @@ class TopicsView(urwid.Frame):
         self, topics_btn_list: List[Any], view: Any, stream_button: Any
     ) -> None:
         self.view = view
-        self.log = urwid.SimpleFocusListWalker(topics_btn_list)
-        self.topics_btn_list = topics_btn_list
         self.stream_button = stream_button
-        self.focus_index_before_search = 0
+        # Topic List
+        self.topics_btn_list = topics_btn_list
+        self.log = urwid.SimpleFocusListWalker(topics_btn_list)
         self.list_box = urwid.ListBox(self.log)
+        # Topic Search
+        self.empty_search = False
+        self.focus_index_before_search = 0
+        self.search_lock = threading.Lock()
         self.topic_search_box = PanelSearchBox(
             self, "SEARCH_TOPICS", self.update_topics
         )
         self.header_list = urwid.Pile(
             [self.stream_button, urwid.Divider("─"), self.topic_search_box]
         )
+
         super().__init__(
             self.list_box,
             header=urwid.LineBox(
@@ -429,8 +437,6 @@ class TopicsView(urwid.Frame):
                 brcorner="─",
             ),
         )
-        self.search_lock = threading.Lock()
-        self.empty_search = False
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
