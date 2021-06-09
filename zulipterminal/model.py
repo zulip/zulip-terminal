@@ -1327,6 +1327,12 @@ class Model:
         for msg_w in view.message_view.log:
             msg_box = msg_w.original_widget
             if msg_box.message["id"] == msg_id:
+                # Remove the message if deleted
+                # FIXME: Do we need to check narrow before removing?
+                if msg_id not in self.index["messages"]:
+                    view.message_view.log.remove(msg_w)
+                    self.controller.update_screen()
+                    return
                 # Remove the message if it no longer belongs in the current
                 # narrow.
                 if (
