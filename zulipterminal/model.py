@@ -1172,6 +1172,17 @@ class Model:
         indexed_message = self.index["messages"].get(message_id, None)
 
         if indexed_message:
+            # Update unread_count if message was unread before being deleted
+            # We need to do this before removing the message from index.
+            if "read" not in indexed_message["flags"]:
+                set_count([message_id], self.controller, -1)
+            # Update starred_count if message was starred before being deleted
+            if "starred" in indexed_message["flags"]:
+                self.index["starred_msg_ids"].discard(message_id)
+                self.controller.view.starred_button.update_count(
+                    self.controller.view.starred_button.count - 1
+                )
+
             # Remove all traces of the message from index if present and
             # update the rendered view.
             # FIXME?: Do we need to archive the message instead of completely
@@ -1179,6 +1190,8 @@ class Model:
             self.index["messages"].pop(message_id, None)
             self.index["all_msg_ids"].discard(message_id)
             self.index["edited_messages"].discard(message_id)
+            if {"mentioned", "wildcard_mentioned"} & set(indexed_message["flags"]):
+                self.index["mentioned_msg_ids"].discard(message_id)
 
             if event["message_type"] == "private":
                 self.index["private_msg_ids"].discard(message_id)

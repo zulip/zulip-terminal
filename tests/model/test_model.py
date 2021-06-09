@@ -1601,7 +1601,8 @@ class TestModel:
             model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(
-        "event, to_vary_in_index",
+        "event, to_vary_in_index, to_vary_in_message, expected_set_count_called,"
+        "expected_star_count_called",
         [
             case(
                 {
@@ -1614,7 +1615,58 @@ class TestModel:
                     "all_msg_ids": {537286, 537287, 537288},
                     "topic_msg_ids": {205: {"Test": {537286}}},
                 },
-                id="stream_msg_deleted_from_all_msg",
+                {537286: {"flags": ["read"]}},
+                False,
+                False,
+                id="read_stream_msg_deleted_from_all_msg",
+            ),
+            case(
+                {
+                    "message_id": 537286,
+                    "message_type": "stream",
+                    "stream_id": 205,
+                    "topic": "Test",
+                },
+                {
+                    "mentioned_msg_ids": {537286},
+                    "topic_msg_ids": {205: {"Test": {537286}}},
+                },
+                {537286: {"flags": ["read", "mentioned"]}},
+                False,
+                False,
+                id="read+mentioned_stream_msg_deleted_from_mentions",
+            ),
+            case(
+                {
+                    "message_id": 537286,
+                    "message_type": "stream",
+                    "stream_id": 205,
+                    "topic": "Test",
+                },
+                {
+                    "starred_msg_ids": {537286},
+                    "topic_msg_ids": {205: {"Test": {537286}}},
+                },
+                {537286: {"flags": ["read", "starred"]}},
+                False,
+                True,
+                id="read+starred_stream_msg_deleted_from_starred",
+            ),
+            case(
+                {
+                    "message_id": 537286,
+                    "message_type": "stream",
+                    "stream_id": 205,
+                    "topic": "Test",
+                },
+                {
+                    "mentioned_msg_ids": {537286},
+                    "topic_msg_ids": {205: {"Test": {537286}}},
+                },
+                {537286: {"flags": ["wildcard_mentioned"]}},
+                True,
+                False,
+                id="unread+wildcard_mentioned_stream_msg_deleted_from_mentioned",
             ),
             case(
                 {
@@ -1626,7 +1678,26 @@ class TestModel:
                     "private_msg_ids": {537287},
                     "private_msg_ids_by_user_ids": {(5140, 5179): {537287}},
                 },
-                id="rivate_msg_deleted_from_private_msgs",
+                {537287: {"flags": []}},
+                True,
+                False,
+                id="unread_private_msg_deleted_from_private_msgs",
+            ),
+            case(
+                {
+                    "message_id": 537287,
+                    "message_type": "private",
+                    "sender_id": 5140,
+                },
+                {
+                    "private_msg_ids": {537287, 537288},
+                    "starred_msg_ids": {537287},
+                    "private_msg_ids_by_user_ids": {(5140, 5179): {537287}},
+                },
+                {537287: {"flags": ["read", "starred"]}},
+                False,
+                True,
+                id="starred_private_msg_deleted_from_starred+private_msgs",
             ),
             case(
                 {
@@ -1641,7 +1712,10 @@ class TestModel:
                         (5179, 5140, 5180): {537288},
                     },
                 },
-                id="group_msg_deleted_from_private_msgs",
+                {537288: {"flags": ["read", "wildcard_mentioned"]}},
+                False,
+                False,
+                id="read+wildcard_mentioned_group_msg_deleted_from_private_msgs",
             ),
         ],
     )
@@ -1652,23 +1726,35 @@ class TestModel:
         empty_index,
         event,
         to_vary_in_index,
+        to_vary_in_message,
+        expected_set_count_called,
+        expected_star_count_called,
     ):
         event["type"] = "delete_message"
         message_id = event["message_id"]
 
         model.index = empty_index
         model.index.update(to_vary_in_index)
+        model.index["messages"].update(to_vary_in_message)
 
         mocker.patch(MODEL + "._update_rendered_view")
+        set_count = mocker.patch("zulipterminal.model.set_count")
         self.controller.view.message_view = mocker.Mock(log=[])
 
         assert message_id in model.index["messages"].keys()
 
         model._handle_delete_message_event(event)
 
+        if expected_set_count_called:
+            set_count.assert_called_once_with([message_id], self.controller, -1)
+        if expected_star_count_called:
+            self.controller.view.starred_button.update_count.assert_called
+
         assert message_id not in model.index["messages"]
         assert message_id not in model.index["all_msg_ids"]
         assert message_id not in model.index["edited_messages"]
+        assert message_id not in model.index["mentioned_msg_ids"]
+        assert message_id not in model.index["starred_msg_ids"]
         if event["message_type"] == "private":
             assert message_id not in model.index["private_msg_ids"]
             assert message_id not in model.index["private_msg_ids_by_user_ids"].values()
