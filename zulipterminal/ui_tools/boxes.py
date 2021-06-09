@@ -188,25 +188,23 @@ class WriteBox(urwid.Pile):
     def private_box_view(
         self,
         *,
-        emails: Optional[List[str]] = None,
         recipient_user_ids: Optional[List[int]] = None,
     ) -> None:
-        # Neither or both arguments should be set
-        assert (emails is not None and recipient_user_ids is not None) or (
-            emails is None and recipient_user_ids is None
-        )
 
         self.set_editor_mode()
 
         self.compose_box_status = "open_with_private"
 
-        if recipient_user_ids and emails:
+        if recipient_user_ids:
             self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
-            self.recipient_emails = emails
+            self.recipient_emails = [
+                self.model.user_id_email_dict[user_id]
+                for user_id in self.recipient_user_ids
+            ]
             recipient_info = ", ".join(
                 [
                     f"{self.model.user_dict[email]['full_name']} <{email}>"
-                    for email in emails
+                    for email in self.recipient_emails
                 ]
             )
         else:
@@ -1687,7 +1685,6 @@ class MessageBox(urwid.Pile):
         if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
-                    emails=self.recipient_emails,
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message["type"] == "stream":
@@ -1758,7 +1755,6 @@ class MessageBox(urwid.Pile):
         elif is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
-                emails=[self.message["sender_email"]],
                 recipient_user_ids=[self.message["sender_id"]],
             )
         elif is_command_key("MENTION_REPLY", key):
