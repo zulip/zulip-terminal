@@ -69,7 +69,7 @@ class TestWriteBox:
 
     def test_not_calling_typing_method_without_recipients(self, mocker, write_box):
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
-        write_box.private_box_view(emails=[], recipient_user_ids=[])
+        write_box.private_box_view(recipient_user_ids=[])
         # Set idle_status_tracking to True to avoid setting off the
         # idleness tracker function.
         write_box.idle_status_tracking = True
@@ -134,10 +134,10 @@ class TestWriteBox:
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
-        "emails, user_ids, expect_method_called, typing_recipient_user_ids",
+        "user_ids, expect_method_called, typing_recipient_user_ids",
         [
-            (["FOOBOO@gmail.com"], [1001], False, []),
-            (["FOOBOO@gmail.com", "person1@example.com"], [1001, 11], True, [11]),
+            ([1001], False, []),
+            ([1001, 11], True, [11]),
         ],
         ids=["pm_only_with_oneself", "group_pm"],
     )
@@ -146,14 +146,15 @@ class TestWriteBox:
         mocker,
         write_box,
         expect_method_called,
-        emails,
         logged_on_user,
         user_ids,
         typing_recipient_user_ids,
+        user_id_email_dict,
     ):
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
+        write_box.model.user_id_email_dict = user_id_email_dict
         write_box.model.user_id = logged_on_user["user_id"]
-        write_box.private_box_view(emails=emails, recipient_user_ids=user_ids)
+        write_box.private_box_view(recipient_user_ids=user_ids)
         # Set idle_status_tracking to True to avoid setting off the
         # idleness tracker function.
         write_box.idle_status_tracking = True
@@ -180,7 +181,7 @@ class TestWriteBox:
         self, key, mocker, write_box, widget_size
     ):
         write_box.model.send_private_message = mocker.Mock()
-        write_box.private_box_view(emails=[], recipient_user_ids=[])
+        write_box.private_box_view(recipient_user_ids=[])
         write_box.msg_write_box.edit_text = "random text"
 
         size = widget_size(write_box)
@@ -190,12 +191,11 @@ class TestWriteBox:
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test__compose_attributes_reset_for_private_compose(
-        self, key, mocker, write_box, widget_size
+        self, key, mocker, write_box, widget_size, user_id_email_dict
     ):
         mocker.patch("urwid.connect_signal")
-        write_box.private_box_view(
-            emails=["person1@example.com"], recipient_user_ids=[11]
-        )
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.private_box_view(recipient_user_ids=[11])
         write_box.msg_write_box.edit_text = "random text"
 
         size = widget_size(write_box)
@@ -825,11 +825,10 @@ class TestWriteBox:
         ],
     )
     def test__to_box_autocomplete_with_spaces(
-        self, write_box, text, expected_text, widget_size
+        self, write_box, text, expected_text, widget_size, user_id_email_dict
     ):
-        write_box.private_box_view(
-            emails=["feedback@zulip.com"], recipient_user_ids=[1]
-        )
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.private_box_view(recipient_user_ids=[1])
         write_box.to_write_box.set_edit_text(text)
         write_box.to_write_box.set_edit_pos(len(text))
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
@@ -1410,18 +1409,17 @@ class TestWriteBox:
         ],
     )
     def test_write_box_header_contents(
-        self, write_box, expected_box_size, mocker, msg_type
+        self, write_box, expected_box_size, mocker, msg_type, user_id_email_dict
     ):
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         mocker.patch(WRITEBOX + ".set_editor_mode")
+        write_box.model.user_id_email_dict = user_id_email_dict
         if msg_type == "stream":
             write_box.stream_box_view(1000)
         elif msg_type == "stream_edit":
             write_box.stream_box_edit_view(1000)
         else:
-            write_box.private_box_view(
-                emails=["feedback@zulip.com"], recipient_user_ids=[1]
-            )
+            write_box.private_box_view(recipient_user_ids=[1])
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
 

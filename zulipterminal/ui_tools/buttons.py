@@ -267,9 +267,7 @@ class UserButton(TopButton):
             recipient_emails=[self.email],
         )
         self._view.body.focus.original_widget.set_focus("footer")
-        self._view.write_box.private_box_view(
-            emails=[self.email], recipient_user_ids=[self.user_id]
-        )
+        self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("USER_INFO", key):

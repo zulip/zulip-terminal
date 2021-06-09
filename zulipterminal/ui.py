@@ -281,12 +281,7 @@ class View(urwid.WidgetWrap):
                     )
                 elif saved_draft["type"] == "private":
                     recipient_user_ids = saved_draft["to"]
-                    recipient_emails = [
-                        self.model.user_id_email_dict[user_id]
-                        for user_id in recipient_user_ids
-                    ]
                     self.write_box.private_box_view(
-                        emails=recipient_emails,
                         recipient_user_ids=recipient_user_ids,
                     )
                 content = saved_draft["content"]
