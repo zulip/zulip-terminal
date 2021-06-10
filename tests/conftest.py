@@ -458,16 +458,30 @@ def topics():
 
 @pytest.fixture(
     params=[
-        {537286, 537287, 537288},
-        {537286},
-        {537287},
-        {537288},
-        {537286, 537287},
-        {537286, 537288},
-        {537287, 537288},
+        ({537286}, {537286}),
+        ({537286, 537287}, set()),
+        (set(), {537286, 537287}),
+        ({537286, 537288}, {537287}),
+        ({537287}, {537286, 537288}),
+        ({537288}, {537286, 537287, 537288}),
+        ({537286, 537287, 537288}, {537286}),
+        ({537286, 537288}, {537286, 537288}),
+    ],
+    ids=[
+        "stream_mention__stream_wildcard",
+        "stream+pm_mention__no_wildcard",
+        "no_mention__stream+pm_wildcard",
+        "stream+group_mention__pm_wildcard",
+        "pm_mention__stream+group_wildcard",
+        "group_mention__all_wildcard",
+        "all_mention__stream_wildcard",
+        "stream+group_mention__wildcard",
     ],
 )
-def mentioned_messages(request):
+def mentioned_messages_combination(request):
+    """
+    Returns a combination of mentioned and wildcard_mentioned messages
+    """
     return deepcopy(request.param)
 
 
@@ -759,15 +773,21 @@ def index_all_starred(empty_index, request):
 
 
 @pytest.fixture()
-def index_all_mentions(empty_index, mentioned_messages):
+def index_all_mentions(empty_index, mentioned_messages_combination):
+    mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     index = dict(
         empty_index,
-        mentioned_msg_ids=mentioned_messages,
+        mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
         private_msg_ids={537287, 537288},
     )
     for msg_id, msg in index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
+        if (
+            msg_id in wildcard_mentioned_messages
+            and "wildcard_mentioned" not in msg["flags"]
+        ):
+            msg["flags"].append("wildcard_mentioned")
     return index
 
 

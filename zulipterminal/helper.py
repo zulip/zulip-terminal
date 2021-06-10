@@ -185,7 +185,7 @@ def _set_count_in_view(
 
         msg_type = message["type"]
         add_to_counts = True
-        if "mentioned" in message["flags"]:
+        if {"mentioned", "wildcard_mentioned"} & set(message["flags"]):
             unread_counts["all_mentions"] += new_count
             all_mentioned.update_count(unread_counts["all_mentions"])
 
@@ -387,7 +387,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     index["starred_msg_ids"].add(msg["id"])
 
             if narrow[0][1] == "mentioned":
-                if "mentioned" in msg["flags"]:
+                if {"mentioned", "wildcard_mentioned"} & set(msg["flags"]):
                     index["mentioned_msg_ids"].add(msg["id"])
 
             if msg["type"] == "private":

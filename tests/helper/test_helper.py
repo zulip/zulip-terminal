@@ -152,12 +152,22 @@ def test_index_starred(
 
 
 def test_index_mentioned_messages(
-    mocker, messages_successful_response, empty_index, mentioned_messages, initial_index
+    mocker,
+    messages_successful_response,
+    empty_index,
+    mentioned_messages_combination,
+    initial_index,
 ):
     messages = messages_successful_response["messages"]
+    mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     for msg in messages:
         if msg["id"] in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
+        if (
+            msg["id"] in wildcard_mentioned_messages
+            and "wildcard_mentioned" not in msg["flags"]
+        ):
+            msg["flags"].append("wildcard_mentioned")
 
     model = mocker.patch("zulipterminal.model.Model.__init__", return_value=None)
     model.index = initial_index
@@ -166,12 +176,17 @@ def test_index_mentioned_messages(
     expected_index = dict(
         empty_index,
         private_msg_ids={537287, 537288},
-        mentioned_msg_ids=mentioned_messages,
+        mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
     )
 
     for msg_id, msg in expected_index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
+        if (
+            msg["id"] in wildcard_mentioned_messages
+            and "wildcard_mentioned" not in msg["flags"]
+        ):
+            msg["flags"].append("wildcard_mentioned")
 
     assert index_messages(messages, model, model.index) == expected_index
 

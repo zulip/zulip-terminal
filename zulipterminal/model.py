@@ -289,7 +289,10 @@ class Model:
             # all messages contains all messages
             not self.narrow
             # mentions
-            or (self.narrow[0][1] == "mentioned" and "mentioned" in message["flags"])
+            or (
+                self.narrow[0][1] == "mentioned"
+                and bool({"mentioned", "wildcard_mentioned"} & set(message["flags"]))
+            )
             # All-PMs
             # FIXME Buggy condition?
             or (self.narrow[0][1] == message["type"] and len(self.narrow) == 1)
