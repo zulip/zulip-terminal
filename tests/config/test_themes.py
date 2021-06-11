@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 
 import pytest
 
@@ -8,6 +9,7 @@ from zulipterminal.config.themes import (
     THEMES,
     all_themes,
     complete_and_incomplete_themes,
+    parse_themefile,
     theme_with_monochrome_added,
 )
 
@@ -140,3 +142,52 @@ def test_complete_and_incomplete_themes():
 def test_theme_with_monochrome_added(mocker, theme, expected_new_theme, req_styles):
     mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
     assert theme_with_monochrome_added(theme) == expected_new_theme
+
+
+@pytest.mark.parametrize(
+    "color_depth, expected_urwid_theme",
+    [
+        (1, [("s1", "", "", ""), ("s2", "", "", "bold")]),
+        (
+            16,
+            [
+                ("s1", "white , bold", "dark magenta"),
+                ("s2", "white , bold , italics", "dark magenta"),
+            ],
+        ),
+        (
+            256,
+            [
+                ("s1", "", "", "", "#fff , bold", "h90"),
+                ("s2", "", "", "", "#fff , bold , italics", "h90"),
+            ],
+        ),
+        (
+            2 ** 24,
+            [
+                ("s1", "", "", "", "#ffffff , bold", "#870087"),
+                ("s2", "", "", "", "#ffffff , bold , italics", "#870087"),
+            ],
+        ),
+    ],
+    ids=[
+        "mono-chrome",
+        "16-color",
+        "256-color",
+        "24-bit-color",
+    ],
+)
+def test_parse_themefile(mocker, color_depth, expected_urwid_theme):
+    class Color(Enum):
+        WHITE__BOLD = "white          #fff   #ffffff , bold"
+        WHITE__BOLD_ITALICS = "white  #fff   #ffffff , bold , italics"
+        DARK_MAGENTA = "dark_magenta  h90    #870087"
+
+    STYLES = {
+        "s1": (Color.WHITE__BOLD, Color.DARK_MAGENTA),
+        "s2": (Color.WHITE__BOLD_ITALICS, Color.DARK_MAGENTA),
+    }
+
+    req_styles = {"s1": "", "s2": "bold"}
+    mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
+    assert parse_themefile(STYLES, color_depth) == expected_urwid_theme
