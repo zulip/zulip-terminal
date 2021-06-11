@@ -9,6 +9,7 @@ from zulipterminal.config.themes import (
     THEMES,
     all_themes,
     complete_and_incomplete_themes,
+    generate_theme,
     parse_themefile,
     theme_with_monochrome_added,
 )
@@ -107,6 +108,42 @@ def test_builtin_theme_completeness(theme_name):
 
     assert len(styles_in_theme) == len(REQUIRED_STYLES)
     assert all(required_style in styles_in_theme for required_style in REQUIRED_STYLES)
+
+
+@pytest.mark.parametrize(
+    "theme_name, depth",
+    [
+        ("zt_dark", 1),
+        ("zt_dark", 16),
+        ("zt_dark", 256),
+        ("zt_light", 16),
+        ("zt_blue", 16),
+        ("gruvbox_dark", 16),
+        ("gruvbox_dark", 256),
+        ("gruvbox_dark24", 2 ** 24),
+        ("gruvbox_dark24", 2 ** 24),
+    ],
+)
+def test_migrated_themes(theme_name, depth):
+    def split_and_strip(style):
+        style = style.split(",")
+        style = [s.strip() for s in style]
+        return style
+
+    old_theme = theme_with_monochrome_added(THEMES[theme_name])
+
+    new_theme = generate_theme(theme_name.replace("24", ""), depth)
+
+    for new_style, old_style in zip(new_theme, old_theme):
+        assert new_style[0] == old_style[0]
+        if depth == 1:
+            assert new_style[3] == old_style[3]
+        elif depth == 16:
+            assert split_and_strip(new_style[1]) == split_and_strip(old_style[1])
+            assert split_and_strip(new_style[2]) == split_and_strip(old_style[2])
+        else:
+            assert split_and_strip(new_style[4]) == split_and_strip(old_style[4])
+            assert split_and_strip(new_style[5]) == split_and_strip(old_style[5])
 
 
 def test_complete_and_incomplete_themes():
