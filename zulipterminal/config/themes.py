@@ -1,9 +1,14 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
 
 
-ThemeSpec = List[Tuple[Optional[str], ...]]
+StyleSpec = Union[
+    Tuple[Optional[str], str, str],
+    Tuple[Optional[str], str, str, Optional[str]],
+    Tuple[Optional[str], str, str, Optional[str], str, str],
+]
+ThemeSpec = List[StyleSpec]
 
 # fmt: off
 # The keys in REQUIRED_STYLES specify what styles are necessary for a theme to
@@ -572,11 +577,11 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     return sorted(list(complete)), sorted(incomplete)
 
 
-def theme_with_monochrome_added(theme: ThemeSpec) -> ThemeSpec:
+def theme_with_monochrome_added(theme: ThemeSpec) -> Any:
     updated_theme = []
     for style in theme:
         style_name = style[0]
-        if style_name not in REQUIRED_STYLES:  # incomplete theme
+        if style_name not in REQUIRED_STYLES:
             continue
         mono_style = REQUIRED_STYLES[style_name]
         if len(style) > 4:  # 256 colors+
@@ -597,3 +602,40 @@ NEW_THEMES = {
     "zt_light": zt_light,
     "zt_blue": zt_blue,
 }
+
+
+def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
+    theme_styles = NEW_THEMES[theme_name].STYLES
+    urwid_theme = parse_themefile(theme_styles, color_depth)
+    return urwid_theme
+
+
+def parse_themefile(
+    theme_styles: Dict[Optional[str], Tuple[Any, Any]], color_depth: int
+) -> ThemeSpec:
+    urwid_theme = []
+    for style_name, (fg, bg) in theme_styles.items():
+        fg_code16, fg_code256, fg_code24, *fg_props = fg.value.split()
+        bg_code16, bg_code256, bg_code24, *bg_props = bg.value.split()
+
+        new_style: StyleSpec
+        if color_depth == 1:
+            new_style = (style_name, "", "", REQUIRED_STYLES[style_name])
+
+        elif color_depth == 16:
+            fg = " ".join([fg_code16] + fg_props).replace("_", " ")
+            bg = " ".join([bg_code16] + bg_props).replace("_", " ")
+            new_style = (style_name, fg, bg)
+
+        elif color_depth == 256:
+            fg = " ".join([fg_code256] + fg_props)
+            bg = " ".join([bg_code256] + bg_props)
+            new_style = (style_name, "", "", "", fg, bg)
+
+        elif color_depth == 2 ** 24:
+            fg = " ".join([fg_code24] + fg_props)
+            bg = " ".join([bg_code24] + bg_props)
+            new_style = (style_name, "", "", "", fg, bg)
+
+        urwid_theme.append(new_style)
+    return urwid_theme
