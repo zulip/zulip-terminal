@@ -83,7 +83,7 @@ DEF = dict(
 # Colors used in gruvbox-256
 # See https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 BLACK = "h234"  # dark0_hard
-WHITE = "h246"  # light4_256
+WHITE = "h250"  # light2
 WHITEBOLD = f"{WHITE}, bold"
 DARKBLUE = "h24"  # faded_blue
 DARKRED = "h88"  # faded_red
@@ -95,12 +95,15 @@ LIGHTGREEN = "h142"  # bright_green
 LIGHTRED = "h167"  # bright_red
 LIGHTREDBOLD = f"{LIGHTRED}, bold"
 GRAY = "h244"  # gray_244
+LIGHTGRAY = "h248"  # light3
 LIGHTMAGENTA = "h132"  # neutral_purple
 LIGHTMAGENTABOLD = f"{LIGHTMAGENTA}, bold"
+DARKCYAN = "h66"  # neutral_blue
+BROWN = "h136"  # faded_yellow
 
 # Colors used in gruvbox_dark24
 BLACK24 = "#1d2021"  # dark0_hard
-WHITE24 = "#a89984"  # light4
+WHITE24 = "#d5c4a1"  # light2
 WHITEBOLD24 = f"{WHITE24}, bold"
 DARKBLUE24 = "#076678"  # faded_blue
 DARKRED24 = "#9d0006"  # faded_red
@@ -112,8 +115,11 @@ LIGHTGREEN24 = "#b8bb26"  # bright_green
 LIGHTRED24 = "#fb4934"  # bright_red
 LIGHTREDBOLD24 = f"{LIGHTRED24}, bold"
 GRAY24 = "#928374"  # gray_244
+LIGHTGRAY24 = "#bdae93"  # light3
 LIGHTMAGENTA24 = "#b16286"  # neutral_purple
 LIGHTMAGENTABOLD24 = f"{LIGHTMAGENTA24}, bold"
+DARKCYAN24 = "#458588"  # neutral_blue
+BROWN24 = "#b57614"  # faded_yellow
 
 THEME_ALIASES = {
     "default": "zt_dark",
@@ -236,7 +242,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_selected',   'black',           'white',
          None,             BLACK,             WHITE),
         ('header',         'dark cyan',       'dark blue',
-         None,             'dark cyan',       DARKBLUE),
+         None,             DARKCYAN,          DARKBLUE),
         ('general_narrow', 'white',           'dark blue',
          None,             WHITE,             DARKBLUE),
         ('general_bar',    'white',           'black',
@@ -276,7 +282,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_link_index', 'light blue, bold', 'black',
          None,             LIGHTBLUEBOLD,     BLACK),
         ('msg_quote',      'brown',           'black',
-         None,             'brown',           BLACK),
+         None,             BROWN,             BLACK),
         ('msg_code',       'black',           'white',
          None,             BLACK,             WHITE),
         ('msg_bold',       'white, bold',     'black',
@@ -284,17 +290,17 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_time',       'black',           'white',
          None,             BLACK,             WHITE),
         ('footer',         'black',           'light gray',
-         None,             BLACK,             GRAY),
+         None,             BLACK,             LIGHTGRAY),
         ('footer_contrast', 'white',          'black',
          None,             WHITE,             BLACK),
         ('starred',        'light red, bold', 'black',
          None,             LIGHTREDBOLD,      BLACK),
         ('popup_category', 'light blue, bold', 'black',
-         None,             LIGHTBLUE,         BLACK),
+         None,             LIGHTBLUEBOLD,     BLACK),
         ('unread_count',   'yellow',          'black',
          None,             YELLOW,            BLACK),
         ('starred_count',  'light gray',      'black',
-         None,             GRAY,              BLACK),
+         None,             LIGHTGRAY,         BLACK),
         ('table_head',     'white, bold',     'black',
          None,             WHITEBOLD,         BLACK),
         ('filter_results', 'black',           'light green',
@@ -340,7 +346,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_selected',   'black',           'white',
          None,             BLACK24,           WHITE24),
         ('header',         'dark cyan',       'dark blue',
-         None,             'dark cyan',       DARKBLUE24),
+         None,             DARKCYAN24,        DARKBLUE24),
         ('general_narrow', 'white',           'dark blue',
          None,             WHITE24,           DARKBLUE24),
         ('general_bar',    'white',           'black',
@@ -380,7 +386,7 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_link_index', 'light blue, bold', 'black',
          None,             LIGHTBLUEBOLD24,   BLACK24),
         ('msg_quote',      'brown',           'black',
-         None,             'brown',           BLACK24),
+         None,             BROWN24,           BLACK24),
         ('msg_code',       'black',           'white',
          None,             BLACK24,           WHITE24),
         ('msg_bold',       'white, bold',     'black',
@@ -388,17 +394,17 @@ THEMES: Dict[str, ThemeSpec] = {
         ('msg_time',       'black',           'white',
          None,             BLACK24,           WHITE24),
         ('footer',         'black',           'light gray',
-         None,             BLACK24,           GRAY24),
+         None,             BLACK24,           LIGHTGRAY24),
         ('footer_contrast', 'white',          'black',
          None,             WHITE24,           BLACK24),
         ('starred',        'light red, bold', 'black',
          None,             LIGHTREDBOLD24,    BLACK24),
         ('popup_category', 'light blue, bold', 'black',
-         None,             LIGHTBLUE24,       BLACK24),
+         None,             LIGHTBLUEBOLD24,   BLACK24),
         ('unread_count',   'yellow',          'black',
          None,             YELLOW24,          BLACK24),
-        ('starred_count',  'white',          'black',
-         None,             WHITE24,          BLACK24),
+        ('starred_count',  'light gray',     'black',
+         None,             LIGHTGRAY24,      BLACK24),
         ('table_head',     'white, bold',     'black',
          None,             WHITEBOLD24,       BLACK24),
         ('filter_results', 'black',           'light green',
