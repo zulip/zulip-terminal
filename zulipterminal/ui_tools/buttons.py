@@ -360,6 +360,15 @@ class EmojiButton(TopButton):
         reacted_check_mark = CHECK_MARK if user_reacted else ""
         return f" {reacted_check_mark} {count_text} "
 
+    def mouse_event(
+        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
+    ) -> bool:
+        if event == "mouse press":
+            if button == 1:
+                self.keypress(size, primary_key_for_command("ENTER"))
+                return True
+        return super().mouse_event(size, event, button, col, row, focus)
+
     def update_emoji_button(self) -> None:
         self.toggle_selection(self.emoji_code, self.emoji_name)
         is_reaction_added = self._has_user_reacted_to_msg() != self.is_selected(

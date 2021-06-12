@@ -2034,6 +2034,21 @@ class EmojiPickerView(PopUpView):
         )
         return sorted_emoji_buttons
 
+    def mouse_event(
+        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
+    ) -> bool:
+        if event == "mouse press":
+            if button == 1 and self.controller.is_in_editor_mode():
+                super().keypress(size, "enter")
+                return True
+            if button == 4:
+                self.keypress(size, "up")
+                return True
+            elif button == 5:
+                self.keypress(size, "down")
+                return True
+        return super().mouse_event(size, event, button, col, row, focus)
+
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (
             is_command_key("SEARCH_EMOJIS", key)
