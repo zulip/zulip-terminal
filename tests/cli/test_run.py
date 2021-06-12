@@ -5,7 +5,6 @@ import stat
 import pytest
 
 from zulipterminal.cli.run import (
-    THEMES,
     _write_zuliprc,
     exit_with_error,
     get_login_id,
@@ -140,7 +139,6 @@ def test_valid_zuliprc_but_no_connection(
 def test_warning_regarding_incomplete_theme(
     capsys,
     mocker,
-    monkeypatch,
     minimal_zuliprc,
     bad_theme,
     server_connection_error="sce",
@@ -149,13 +147,12 @@ def test_warning_regarding_incomplete_theme(
         "zulipterminal.core.Controller.__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
-
-    monkeypatch.setitem(THEMES, bad_theme, [])
     mocker.patch("zulipterminal.cli.run.all_themes", return_value=("a", "b", "c", "d"))
     mocker.patch(
         "zulipterminal.cli.run.complete_and_incomplete_themes",
         return_value=(["a", "b"], ["c", "d"]),
     )
+    mocker.patch("zulipterminal.cli.run.generate_theme")
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc, "-t", bad_theme])
