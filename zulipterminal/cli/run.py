@@ -12,11 +12,10 @@ import requests
 from urwid import display_common, set_encoding
 
 from zulipterminal.config.themes import (
-    THEMES,
     aliased_themes,
     all_themes,
     complete_and_incomplete_themes,
-    theme_with_monochrome_added,
+    generate_theme,
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
@@ -486,10 +485,7 @@ def main(options: Optional[List[str]] = None) -> None:
                 break
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
 
-        if color_depth == 1:
-            theme_data = theme_with_monochrome_added(THEMES[theme_to_use[0]])
-        else:
-            theme_data = THEMES[theme_to_use[0]]
+        theme_data = generate_theme(theme_to_use[0], color_depth)
 
         Controller(
             zuliprc_path,
