@@ -3,63 +3,64 @@ from typing import Dict, List, Optional, Tuple
 
 ThemeSpec = List[Tuple[Optional[str], ...]]
 
-# The keys in required_styles specify what styles are necessary for a theme to
+# fmt: off
+# The keys in REQUIRED_STYLES specify what styles are necessary for a theme to
 # be complete, while the values are those used to style each element in
 # monochrome (1-bit) mode - independently of the specified theme
-
-required_styles = {  # style-name: monochrome-bit-depth-style
-    None: "",
-    "selected": "standout",
-    "msg_selected": "standout",
-    "header": "bold",
-    "general_narrow": "standout",
-    "general_bar": "",
-    "name": "",
-    "unread": "strikethrough",
-    "user_active": "bold",
-    "user_idle": "",
-    "user_offline": "",
-    "user_inactive": "",
-    "title": "bold",
-    "column_title": "bold",
-    "time": "",
-    "bar": "standout",
-    "popup_contrast": "standout",
-    "msg_emoji": "bold",
-    "reaction": "bold",
-    "reaction_mine": "standout",
-    "msg_mention": "bold",
-    "msg_link": "",
-    "msg_link_index": "bold",
-    "msg_quote": "underline",
-    "msg_code": "bold",
-    "msg_bold": "bold",
-    "msg_time": "bold",
-    "footer": "standout",
-    "footer_contrast": "standout",
-    "starred": "bold",
-    "popup_category": "bold",
-    "unread_count": "bold",
-    "starred_count": "",
-    "table_head": "bold",
-    "filter_results": "bold",
-    "edit_topic": "standout",
-    "edit_tag": "standout",
-    "edit_author": "bold",
-    "edit_time": "bold",
-    "current_user": "",
-    "muted": "bold",
-    "popup_border": "bold",
-    "area:help": "standout",
-    "area:msg": "standout",
-    "area:stream": "standout",
-    "area:error": "standout",
-    "search_error": "standout",
-    "task:success": "standout",
-    "task:error": "standout",
-    "task:warning": "standout",
+REQUIRED_STYLES = {
+    # style name      : monochrome style
+    None              : '',
+    'selected'        : 'standout',
+    'msg_selected'    : 'standout',
+    'header'          : 'bold',
+    'general_narrow'  : 'standout',
+    'general_bar'     : '',
+    'name'            : '',
+    'unread'          : 'strikethrough',
+    'user_active'     : 'bold',
+    'user_idle'       : '',
+    'user_offline'    : '',
+    'user_inactive'   : '',
+    'title'           : 'bold',
+    'column_title'    : 'bold',
+    'time'            : '',
+    'bar'             : 'standout',
+    'popup_contrast'  : 'standout',
+    'msg_emoji'       : 'bold',
+    'reaction'        : 'bold',
+    'reaction_mine'   : 'standout',
+    'msg_mention'     : 'bold',
+    'msg_link'        : '',
+    'msg_link_index'  : 'bold',
+    'msg_quote'       : 'underline',
+    'msg_code'        : 'bold',
+    'msg_bold'        : 'bold',
+    'msg_time'        : 'bold',
+    'footer'          : 'standout',
+    'footer_contrast' : 'standout',
+    'starred'         : 'bold',
+    'popup_category'  : 'bold',
+    'unread_count'    : 'bold',
+    'starred_count'   : '',
+    'table_head'      : 'bold',
+    'filter_results'  : 'bold',
+    'edit_topic'      : 'standout',
+    'edit_tag'        : 'standout',
+    'edit_author'     : 'bold',
+    'edit_time'       : 'bold',
+    'current_user'    : '',
+    'muted'           : 'bold',
+    'popup_border'    : 'bold',
+    'area:help'       : 'standout',
+    'area:msg'        : 'standout',
+    'area:stream'     : 'standout',
+    'area:error'      : 'standout',
+    'search_error'    : 'standout',
+    'task:success'    : 'standout',
+    'task:error'      : 'standout',
+    'task:warning'    : 'standout',
 }
-
+# fmt: on
 
 # 256-color base names for default theme (bold values added below)
 DEF_base = dict(
@@ -563,7 +564,7 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     complete = {
         name
         for name, styles in THEMES.items()
-        if {s[0] for s in styles} == set(required_styles)
+        if {s[0] for s in styles} == set(REQUIRED_STYLES)
     }
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
@@ -573,9 +574,9 @@ def theme_with_monochrome_added(theme: ThemeSpec) -> ThemeSpec:
     updated_theme = []
     for style in theme:
         style_name = style[0]
-        if style_name not in required_styles:  # incomplete theme
+        if style_name not in REQUIRED_STYLES:  # incomplete theme
             continue
-        mono_style = required_styles[style_name]
+        mono_style = REQUIRED_STYLES[style_name]
         if len(style) > 4:  # 256 colors+
             new_style = style[:3] + (mono_style,) + style[4:]
         elif len(style) == 4:  # 16 colors + mono (overwrite mono)

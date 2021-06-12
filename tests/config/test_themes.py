@@ -1,10 +1,10 @@
 import pytest
 
 from zulipterminal.config.themes import (
+    REQUIRED_STYLES,
     THEMES,
     all_themes,
     complete_and_incomplete_themes,
-    required_styles,
     theme_with_monochrome_added,
 )
 
@@ -36,8 +36,8 @@ def test_builtin_theme_completeness(theme_name):
     theme = THEMES[theme_name]
     styles_in_theme = {style[0] for style in theme}
 
-    assert len(styles_in_theme) == len(required_styles)
-    assert all(required_style in styles_in_theme for required_style in required_styles)
+    assert len(styles_in_theme) == len(REQUIRED_STYLES)
+    assert all(required_style in styles_in_theme for required_style in REQUIRED_STYLES)
 
 
 def test_complete_and_incomplete_themes():
@@ -71,5 +71,5 @@ def test_complete_and_incomplete_themes():
     ],
 )
 def test_theme_with_monochrome_added(mocker, theme, expected_new_theme, req_styles):
-    mocker.patch.dict("zulipterminal.config.themes.required_styles", req_styles)
+    mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
     assert theme_with_monochrome_added(theme) == expected_new_theme
