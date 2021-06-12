@@ -1361,6 +1361,20 @@ class TestEmojiPickerView:
         assert emojis_display_name == assert_list
         assert self.emoji_picker_view.get_focus() == "header"
 
+    @pytest.mark.parametrize(
+        "event, button, keypress",
+        [
+            ("mouse press", 4, "up"),
+            ("mouse press", 5, "down"),
+        ],
+    )
+    def test_mouse_event(self, mocker, widget_size, event, button, keypress):
+        emoji_picker = self.emoji_picker_view
+        mocker.patch.object(emoji_picker, "keypress")
+        size = widget_size(emoji_picker)
+        emoji_picker.mouse_event(size, event, button, 0, 0, mocker.Mock())
+        emoji_picker.keypress.assert_called_once_with(size, keypress)
+
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_EMOJIS"))
     def test_keypress_search_emoji(self, key, widget_size):
         size = widget_size(self.emoji_picker_view)
