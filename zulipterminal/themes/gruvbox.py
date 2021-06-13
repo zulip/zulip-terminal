@@ -56,6 +56,7 @@ STYLES = {
     'msg_emoji'        : (Color.NEUTRAL_PURPLE,        Color.DARK0_HARD),
     'reaction'         : (Color.NEUTRAL_PURPLE__BOLD,  Color.DARK0_HARD),
     'reaction_mine'    : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
+    'msg_math'         : (Color.DARK0_HARD,            Color.GRAY_244),
     'msg_mention'      : (Color.BRIGHT_RED__BOLD,      Color.DARK0_HARD),
     'msg_link'         : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
     'msg_link_index'   : (Color.BRIGHT_BLUE__BOLD,     Color.DARK0_HARD),

@@ -1121,7 +1121,7 @@ class MessageBox(urwid.Pile):
                 if element.find("annotation"):
                     tag_text = element.find("annotation").text
 
-                markup.append(tag_text)
+                markup.append(("msg_math", tag_text))
             elif tag == "span" and (
                 {"user-group-mention", "user-mention"} & set(tag_classes)
             ):
