@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
@@ -22,4 +22,21 @@ STATE_ICON = {
     "idle": STATUS_IDLE,
     "offline": STATUS_OFFLINE,
     "inactive": STATUS_INACTIVE,
+}
+
+
+BOT_TYPE_BY_ID = {
+    1: "Generic Bot",
+    2: "Incoming Webhook Bot",
+    3: "Outgoing Webhook Bot",
+    4: "Embedded Bot",
+}
+
+
+ROLE_BY_ID: Dict[Optional[int], Dict[str, str]] = {
+    100: {"bool": "is_owner", "name": "Owner"},
+    200: {"bool": "is_admin", "name": "Administrator"},
+    300: {"bool": "is_moderator", "name": "Moderator"},
+    400: {"bool": "", "name": "Member"},
+    600: {"bool": "is_guest", "name": "Guest"},
 }
