@@ -36,6 +36,7 @@ REQUIRED_STYLES = {
     'msg_emoji'       : 'bold',
     'reaction'        : 'bold',
     'reaction_mine'   : 'standout',
+    'msg_math'        : 'standout',
     'msg_mention'     : 'bold',
     'msg_link'        : '',
     'msg_link_index'  : 'bold',

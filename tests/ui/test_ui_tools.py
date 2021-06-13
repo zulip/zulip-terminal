@@ -1734,7 +1734,7 @@ class TestMessageBox:
                 # ```
                 '<span class="katex-display"><span class="katex"><semantics>'
                 "<annotation>some-math</annotation></semantics></span></span>",
-                ["some-math"],
+                [("msg_math", "some-math")],
                 id="katex_HTML_response_math_fenced_markdown",
             ),
             case(
@@ -1742,7 +1742,7 @@ class TestMessageBox:
                 # $$ some-math $$
                 '<span class="katex"><semantics><annotation>some-math</annotation>'
                 "</semantics></span>",
-                ["some-math"],
+                [("msg_math", "some-math")],
                 id="katex_HTML_response_double_$_fenced_markdown",
             ),
             case("<ul><li>text</li></ul>", ["", "  \N{BULLET} ", "", "text"], id="ul"),
