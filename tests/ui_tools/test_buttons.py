@@ -853,7 +853,7 @@ class TestMessageLinkButton:
         assert mocked_button.controller.narrow_to_topic.called == narrow_to_topic_called
 
     @pytest.mark.parametrize(
-        "error, set_footer_text_called, _switch_narrow_to_called, exit_popup_called",
+        "error, report_error_called, _switch_narrow_to_called, exit_popup_called",
         [
             ("Some Validation Error", True, False, False),
             ("", False, True, True),
@@ -867,7 +867,7 @@ class TestMessageLinkButton:
         self,
         mocker,
         error,
-        set_footer_text_called,
+        report_error_called,
         _switch_narrow_to_called,
         exit_popup_called,
     ):
@@ -883,6 +883,6 @@ class TestMessageLinkButton:
 
         assert mocked_button._parse_narrow_link.called
         assert mocked_button._validate_narrow_link.called
-        assert mocked_button.view.set_footer_text.called == set_footer_text_called
+        assert mocked_button.controller.report_error.called == report_error_called
         assert mocked_button._switch_narrow_to.called == _switch_narrow_to_called
         assert mocked_button.controller.exit_popup.called == exit_popup_called

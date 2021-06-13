@@ -661,7 +661,7 @@ def notify(title: str, html_text: str) -> str:
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
     if response["result"] == "error" and hasattr(controller, "view"):
-        controller.view.set_footer_text(response["msg"], 3)
+        controller.report_error(response["msg"])
 
 
 def check_narrow_and_notify(
@@ -674,7 +674,7 @@ def check_narrow_and_notify(
         and current_narrow != outer_narrow
         and current_narrow != inner_narrow
     ):
-        controller.view.set_footer_text("Message is sent outside of current narrow.", 3)
+        controller.report_success("Message is sent outside of current narrow.")
 
 
 def notify_if_message_sent_outside_narrow(

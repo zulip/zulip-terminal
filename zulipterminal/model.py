@@ -376,7 +376,7 @@ class Model:
 
     def save_draft(self, draft: Composition) -> None:
         self._draft = deepcopy(draft)
-        self.controller.view.set_footer_text("Saved message as draft", 3)
+        self.controller.report_success("Saved message as draft")
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:
@@ -471,9 +471,8 @@ class Model:
         if response["result"] == "success":
             old_topic = self.index["messages"][message_id].get("subject", None)
             new_topic = request["topic"]
-            view = self.controller.view
             if old_topic != new_topic:
-                view.set_footer_text("You changed a message's topic.", 3)
+                self.controller.report_success("You changed a message's topic.")
 
         return response["result"] == "success"
 

@@ -343,14 +343,14 @@ def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
 )
 def test_display_error_if_present(mocker, response, footer_updated):
     controller = mocker.Mock()
-    set_footer_text = controller.view.set_footer_text
+    report_error = controller.report_error
 
     display_error_if_present(response, controller)
 
     if footer_updated:
-        set_footer_text.assert_called_once_with(response["msg"], 3)
+        report_error.assert_called_once_with(response["msg"])
     else:
-        set_footer_text.assert_not_called()
+        report_error.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -424,17 +424,17 @@ def test_display_error_if_present(mocker, response, footer_updated):
 )
 def test_notify_if_message_sent_outside_narrow(mocker, req, narrow, footer_updated):
     controller = mocker.Mock()
-    set_footer_text = controller.view.set_footer_text
+    report_success = controller.report_success
     controller.model.narrow = narrow
 
     notify_if_message_sent_outside_narrow(req, controller)
 
     if footer_updated:
-        set_footer_text.assert_called_once_with(
-            "Message is sent outside of current narrow.", 3
+        report_success.assert_called_once_with(
+            "Message is sent outside of current narrow."
         )
     else:
-        set_footer_text.assert_not_called()
+        report_success.assert_not_called()
 
 
 @pytest.mark.parametrize(
