@@ -1728,9 +1728,23 @@ class TestMessageBox:
                 id="time_UNIX_timestamp_input",
             ),
             case(
-                '<span class="katex-display">some-math</span>', ["some-math"], id="math"
+                # Markdown:
+                # ```math
+                # some-math
+                # ```
+                '<span class="katex-display"><span class="katex"><semantics>'
+                "<annotation>some-math</annotation></semantics></span></span>",
+                ["some-math"],
+                id="katex_HTML_response_math_fenced_markdown",
             ),
-            case('<span class="katex">some-math</span>', ["some-math"], id="math2"),
+            case(
+                # Markdown:
+                # $$ some-math $$
+                '<span class="katex"><semantics><annotation>some-math</annotation>'
+                "</semantics></span>",
+                ["some-math"],
+                id="katex_HTML_response_double_$_fenced_markdown",
+            ),
             case("<ul><li>text</li></ul>", ["", "  \N{BULLET} ", "", "text"], id="ul"),
             case(
                 "<ul>\n<li>text</li>\n</ul>",
