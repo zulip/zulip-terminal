@@ -356,7 +356,7 @@ class TestView:
     def test_keypress_OPEN_DRAFT(self, view, mocker, draft, key, widget_size):
         view.body = mocker.Mock()
         view.middle_column = mocker.Mock()
-        view.set_footer_text = mocker.Mock()
+        view.controller.report_error = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         view.model.stream_id_from_name.return_value = 10
         view.model.session_draft_message.return_value = draft
@@ -383,8 +383,8 @@ class TestView:
             assert view.write_box.msg_write_box.edit_pos == len(draft["content"])
             view.middle_column.set_focus.assert_called_once_with("footer")
         else:
-            view.set_footer_text.assert_called_once_with(
-                "No draft message was saved in this session.", 3
+            view.controller.report_error.assert_called_once_with(
+                "No draft message was saved in this session."
             )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))

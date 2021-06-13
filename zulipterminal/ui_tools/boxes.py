@@ -568,8 +568,8 @@ class WriteBox(urwid.Pile):
                             content=self.msg_write_box.edit_text,
                         )
                     else:
-                        self.view.set_footer_text(
-                            "Cannot send message without specifying recipients.", 3
+                        self.view.controller.report_error(
+                            "Cannot send message without specifying recipients."
                         )
                         success = None
             if success:
@@ -624,7 +624,7 @@ class WriteBox(urwid.Pile):
                                     primary_key_for_command("AUTOCOMPLETE_REVERSE"),
                                 )
                             )
-                            self.view.set_footer_text(invalid_stream_error, 3)
+                            self.view.controller.report_error(invalid_stream_error)
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                             stream_name=stream_name
@@ -658,7 +658,7 @@ class WriteBox(urwid.Pile):
                         invalid_emails_error = (
                             f"Invalid recipient(s) - {', '.join(invalid_emails)}"
                         )
-                        self.view.set_footer_text(invalid_emails_error, 3)
+                        self.view.controller.report_error(invalid_emails_error)
                         return key
                     users = self.model.user_dict
                     self.recipient_user_ids = [
@@ -1443,7 +1443,8 @@ class MessageBox(urwid.Pile):
                     "Try pressing ",
                     ("footer_contrast", f" {selection_key} "),
                     " and dragging to select text.",
-                ]
+                ],
+                "task:warning",
             )
             self.displaying_selection_hint = True
         elif event == "mouse release" and self.displaying_selection_hint:
@@ -1569,15 +1570,13 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
             if self.message["sender_id"] != self.model.user_id:
-                self.model.controller.view.set_footer_text(
-                    " You can't edit messages sent by other users.", 3
+                self.model.controller.report_error(
+                    " You can't edit messages sent by other users."
                 )
                 return key
             # Check if editing is allowed in the realm
             elif not self.model.initial_data["realm_allow_message_editing"]:
-                self.model.controller.view.set_footer_text(
-                    " Editing sent message is disabled.", 3
-                )
+                self.model.controller.report_error(" Editing sent message is disabled.")
                 return key
             # Check if message is still editable, i.e. within
             # the time limit. A limit of 0 signifies no limit
@@ -1590,16 +1589,15 @@ class MessageBox(urwid.Pile):
                 ]
                 if time_since_msg_sent >= edit_time_limit:
                     if self.message["type"] == "private":
-                        self.model.controller.view.set_footer_text(
-                            " Time Limit for editing the message has been exceeded.", 3
+                        self.model.controller.report_error(
+                            " Time Limit for editing the message has been exceeded."
                         )
                         return key
                     elif self.message["type"] == "stream":
-                        self.model.controller.view.set_footer_text(
+                        self.model.controller.report_warning(
                             " Only topic editing allowed."
                             " Time Limit for editing the message body has"
                             " been exceeded.",
-                            3,
                         )
                         msg_body_edit_enabled = False
 

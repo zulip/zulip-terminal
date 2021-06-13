@@ -278,26 +278,26 @@ class TestController:
     def test_open_in_browser_success(self, mocker, controller, url):
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
-        controller.view.set_footer_text = mocker.Mock()
+        controller.report_success = mocker.Mock()
         mock_get = mocker.patch(CORE + ".webbrowser.get")
         mock_open = mock_get.return_value.open
 
         controller.open_in_browser(url)
 
         mock_open.assert_called_once_with(url)
-        controller.view.set_footer_text.assert_called_once_with(
-            f"The link was successfully opened using {mock_get.return_value.name}", 3
+        controller.report_success.assert_called_once_with(
+            f"The link was successfully opened using {mock_get.return_value.name}"
         )
 
     def test_open_in_browser_fail__no_browser_controller(self, mocker, controller):
         os.environ["DISPLAY"] = ":0"
         error = "No runnable browser found"
-        controller.view.set_footer_text = mocker.Mock()
+        controller.report_error = mocker.Mock()
         mocker.patch(CORE + ".webbrowser.get").side_effect = webbrowser.Error(error)
 
         controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
 
-        controller.view.set_footer_text.assert_called_once_with(f"ERROR: {error}", 3)
+        controller.report_error.assert_called_once_with(f"ERROR: {error}")
 
     def test_main(self, mocker, controller):
         controller.view.palette = {"default": "theme_properties"}

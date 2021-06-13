@@ -269,7 +269,9 @@ class View(urwid.WidgetWrap):
                 self.body.focus_col = 1
                 self.middle_column.set_focus("footer")
             else:
-                self.set_footer_text("No draft message was saved in this session.", 3)
+                self.controller.report_error(
+                    "No draft message was saved in this session."
+                )
             return key
         elif is_command_key("ABOUT", key):
             self.controller.show_about()

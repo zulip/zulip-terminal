@@ -667,11 +667,11 @@ class TestModel:
         self.client.update_message.assert_called_once_with(req)
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
-        set_footer_text = model.controller.view.set_footer_text
+        report_success = model.controller.report_success
         if result and footer_updated:
-            set_footer_text.assert_called_once_with("You changed a message's topic.", 3)
+            report_success.assert_called_once_with("You changed a message's topic.")
         else:
-            set_footer_text.assert_not_called()
+            report_success.assert_not_called()
 
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(
