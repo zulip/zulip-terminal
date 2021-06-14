@@ -80,7 +80,7 @@ class TestView:
         )
         mock_sleep = mocker.patch("time.sleep")
 
-        view.set_footer_text([custom_text], duration)
+        view.set_footer_text([custom_text], duration=duration)
 
         view._w.footer.set_text.assert_has_calls(
             [mocker.call([custom_text]), mocker.call(["some help text"])]
