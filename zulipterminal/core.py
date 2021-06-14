@@ -334,6 +334,24 @@ class Controller:
             # Set a footer text if no runnable browser is located
             self.view.set_footer_text(f"ERROR: {e}", 3)
 
+    def report_error(self, text: str) -> None:
+        """
+        Helper to show an error message in footer
+        """
+        self.view.set_footer_text(text, "task:error", 3)
+
+    def report_success(self, text: str) -> None:
+        """
+        Helper to show a success message in footer
+        """
+        self.view.set_footer_text(text, "task:success", 3)
+
+    def report_warning(self, text: str) -> None:
+        """
+        Helper to show a warning message in footer
+        """
+        self.view.set_footer_text(text, "task:warning", 3)
+
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
         self.model.index["search"].clear()

@@ -89,13 +89,17 @@ class View(urwid.WidgetWrap):
 
     @asynch
     def set_footer_text(
-        self, text_list: Optional[List[Any]] = None, duration: Optional[float] = None
+        self,
+        text_list: Optional[List[Any]] = None,
+        style: str = "footer",
+        duration: Optional[float] = None,
     ) -> None:
         if text_list is None:
             text = self.get_random_help()
         else:
             text = text_list
         self._w.footer.set_text(text)
+        self._w.footer.set_attr_map({None: style})
         self.controller.update_screen()
         if duration is not None:
             assert duration > 0
