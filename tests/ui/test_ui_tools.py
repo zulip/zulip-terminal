@@ -702,15 +702,6 @@ class TestTopicsView:
         topic_view.keypress(size, key)
         topic_view.view.left_panel.show_stream_view.assert_called_once_with()
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_RIGHT"))
-    def test_keypress_GO_RIGHT(self, mocker, topic_view, key, widget_size):
-        size = widget_size(topic_view)
-        mocker.patch(VIEWS + ".urwid.Frame.keypress")
-        topic_view.view.body.focus_col = None
-        topic_view.keypress(size, key)
-        assert topic_view.view.body.focus_col == 1
-        topic_view.view.show_left_panel.assert_called_once_with(visible=False)
-
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_TOPICS"))
     def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)

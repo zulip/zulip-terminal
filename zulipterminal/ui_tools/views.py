@@ -472,9 +472,6 @@ class TopicsView(urwid.Frame):
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
             self.view.left_panel.show_stream_view()
-        elif is_command_key("GO_RIGHT", key):
-            self.view.show_left_panel(visible=False)
-            self.view.body.focus_col = 1
         if is_command_key("SEARCH_TOPICS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
