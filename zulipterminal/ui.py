@@ -211,13 +211,13 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
-            self.model.controller.narrow_to_all_pm()
+            self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
         elif is_command_key("ALL_STARRED", key):
-            self.model.controller.narrow_to_all_starred()
+            self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
         elif is_command_key("ALL_MENTIONS", key):
-            self.model.controller.narrow_to_all_mentions()
+            self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
