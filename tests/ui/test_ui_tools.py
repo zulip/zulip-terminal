@@ -1899,14 +1899,12 @@ class TestMessageBox:
                     "display_recipient": [
                         {
                             "is_mirror_dummy": False,
-                            "short_name": "aaron",
                             "email": "AARON@zulip.com",
                             "id": 1,
                             "full_name": "aaron",
                         },
                         {
                             "is_mirror_dummy": False,
-                            "short_name": "iago",
                             "email": "iago@zulip.com",
                             "id": 5,
                             "full_name": "Iago",
