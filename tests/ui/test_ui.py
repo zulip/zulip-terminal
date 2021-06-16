@@ -94,14 +94,24 @@ class TestView:
             ([], None, False, [" [No matches found]"]),
             (["some", "text"], None, False, [[" "], " some ", " text "]),
             (["some", "text"], None, True, [[" "], " some ", " text ", " [more] "]),
-            (["some", "text"], 0, False, [[" "], ("code", " some "), " text "]),
+            (
+                ["some", "text"],
+                0,
+                False,
+                [[" "], ("footer_contrast", " some "), " text "],
+            ),
             (
                 ["some", "text"],
                 0,
                 True,
-                [[" "], ("code", " some "), " text ", " [more] "],
+                [[" "], ("footer_contrast", " some "), " text ", " [more] "],
             ),
-            (["some", "text"], -1, False, [[" "], " some ", ("code", " text ")]),
+            (
+                ["some", "text"],
+                -1,
+                False,
+                [[" "], " some ", ("footer_contrast", " text ")],
+            ),
         ],
         ids=[
             "no_matches",

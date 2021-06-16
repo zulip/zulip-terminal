@@ -1010,7 +1010,7 @@ class Model:
                 if event["op"] == "start":
                     user = self.user_dict[event["sender"]["email"]]
                     self.controller.view.set_footer_text(
-                        [" ", ("code", user["full_name"]), " is typing..."]
+                        [" ", ("footer_contrast", user["full_name"]), " is typing..."]
                     )
                 elif event["op"] == "stop":
                     self.controller.view.set_footer_text()

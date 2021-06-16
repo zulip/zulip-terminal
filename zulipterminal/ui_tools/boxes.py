@@ -1441,7 +1441,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.set_footer_text(
                 [
                     "Try pressing ",
-                    ("code", f" {selection_key} "),
+                    ("footer_contrast", f" {selection_key} "),
                     " and dragging to select text.",
                 ]
             )
