@@ -1,5 +1,5 @@
-import datetime
 from collections import OrderedDict, defaultdict
+from datetime import date
 
 import pytest
 import pytz
@@ -2142,9 +2142,9 @@ class TestMessageBox:
         starred_msg,
         to_vary_in_last_message,
     ):
-        date = mocker.patch(BOXES + ".date")
-        date.today.return_value = datetime.date(current_year, 1, 1)
-        date.side_effect = lambda *args, **kw: datetime.date(*args, **kw)
+        mocked_date = mocker.patch(BOXES + ".date")
+        mocked_date.today.return_value = date(current_year, 1, 1)
+        mocked_date.side_effect = lambda *args, **kw: date(*args, **kw)
 
         output_date_time = "Fri Jul 20 21:54"  # corresponding to timestamp
 

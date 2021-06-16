@@ -1,9 +1,9 @@
-import datetime
 import json
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
+from datetime import datetime
 from typing import (
     Any,
     Callable,
@@ -1402,7 +1402,7 @@ class Model:
     def formatted_local_time(
         self, timestamp: int, *, show_seconds: bool, show_year: bool = False
     ) -> str:
-        local_time = datetime.datetime.fromtimestamp(timestamp)
+        local_time = datetime.fromtimestamp(timestamp)
         format_codes = (
             "%a %b %d "
             f"{'%Y ' if show_year else ''}"

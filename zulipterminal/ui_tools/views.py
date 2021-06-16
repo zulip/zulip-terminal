@@ -1,6 +1,6 @@
-import datetime
 import threading
 from collections import OrderedDict
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import pytz
@@ -1149,7 +1149,7 @@ class UserInfoView(PopUpView):
             display_data["Timezone"] = data["timezone"].replace("_", " ")
 
             # Converting all timestamps to UTC
-            utc_time = datetime.datetime.now()
+            utc_time = datetime.now()
             tz = pytz.timezone(data["timezone"])
             time = utc_time.astimezone(tz).replace(tzinfo=None).timestamp()
 
