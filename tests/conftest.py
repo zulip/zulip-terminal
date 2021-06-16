@@ -144,7 +144,6 @@ def logged_on_user():
         "user_id": 1001,
         "full_name": "Human Myself",
         "email": "FOOBOO@gmail.com",
-        "short_name": "Human",
     }
 
 
@@ -317,11 +316,9 @@ pm_template = {
             "id": 5179,
             "is_mirror_dummy": False,
             "full_name": "Boo Boo",
-            "short_name": "boo",
             "email": "boo@zulip.com",
         },
         {
-            "short_name": "foo",
             "id": 5140,
             "is_mirror_dummy": False,
             "full_name": "Foo Foo",
@@ -352,18 +349,15 @@ group_pm_template = {
             "id": 5179,
             "is_mirror_dummy": False,
             "full_name": "Boo Boo",
-            "short_name": "boo",
             "email": "boo@zulip.com",
         },
         {
-            "short_name": "foo",
             "id": 5140,
             "is_mirror_dummy": False,
             "full_name": "Foo Foo",
             "email": "foo@zulip.com",
         },
         {
-            "short_name": "bar",
             "id": 5180,
             "is_mirror_dummy": False,
             "full_name": "Bar Bar",
@@ -777,7 +771,6 @@ def index_all_mentions(empty_index, request):
 def user_profile(logged_on_user):
     return {  # FIXME These should all be self-consistent with others?
         "max_message_id": 589270,
-        "short_name": logged_on_user["short_name"],
         "full_name": logged_on_user["full_name"],
         "email": logged_on_user["email"],
         "is_bot": False,
