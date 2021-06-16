@@ -83,7 +83,7 @@ class View(urwid.WidgetWrap):
         random_command = random.choice(allowed_commands)
         return [
             "Help(?): ",
-            ("code", " " + ", ".join(random_command["keys"]) + " "),
+            ("footer_contrast", " " + ", ".join(random_command["keys"]) + " "),
             " " + random_command["help_text"],
         ]
 
@@ -110,7 +110,7 @@ class View(urwid.WidgetWrap):
             # Wrap by space.
             footer_text: List[Any] = [" " + s + " " for s in suggestions]
             if state is not None:
-                footer_text[state] = ("code", footer_text[state])
+                footer_text[state] = ("footer_contrast", footer_text[state])
             if is_truncated:
                 footer_text += [" [more] "]
             footer_text.insert(0, [" "])  # Add leading space.
