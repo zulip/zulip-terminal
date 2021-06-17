@@ -40,7 +40,6 @@ class Message(TypedDict, total=False):
     submessages: List[Dict[str, Any]]
     flags: List[str]
     sender_full_name: str
-    sender_short_name: str
     sender_email: str
     sender_realm_str: str
     display_recipient: Any
@@ -54,6 +53,8 @@ class Message(TypedDict, total=False):
     # Unused/Unsupported fields
     # NOTE: Deprecated; a server implementation detail not useful in a client.
     # recipient_id: int
+    # NOTE: Removed from Zulip 3.1 / ZFL 26; unused before that.
+    # sender_short_name: str
 
 
 # Elements and types taken from https://zulip.com/api/get-events
