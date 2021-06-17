@@ -329,7 +329,6 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'subject_links': [],
                 'sender_id': 73,
                 'type': 'private',
-                'recipient_id': 124,
                 'reactions': [],
                 'display_recipient': [
                     {
@@ -355,7 +354,6 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'timestamp': 1521863062,
                 'sender_id': 72,
                 'sender_full_name': 'King Hamlet',
-                'recipient_id': 119,
                 'content': 'https://github.com/zulip/zulip-terminal',
                 'type': 'stream',
                 'sender_email': 'hamlet@zulip.com',

@@ -1877,7 +1877,6 @@ class TestMessageBox:
                     "subject": "Verona2",
                     "id": 37,
                     "subject_links": [],
-                    "recipient_id": 20,
                     "content": (
                         "<p>It's nice and it feels more modern, but I think"
                         " this will take some time to get used to</p>"
@@ -1919,7 +1918,6 @@ class TestMessageBox:
                     "subject": "",
                     "id": 107,
                     "subject_links": [],
-                    "recipient_id": 1,
                     "content": "<p>what are you planning to do this week</p>",
                     "timestamp": 1532103879,
                     "sender_realm_str": "zulip",
