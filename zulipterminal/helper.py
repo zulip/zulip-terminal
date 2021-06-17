@@ -685,7 +685,7 @@ def notify_if_message_sent_outside_narrow(
         check_narrow_and_notify(stream_narrow, topic_narrow, controller)
     elif message["type"] == "private":
         pm_narrow = [["is", "private"]]
-        pm_with_narrow = [["pm_with", ",".join(message["to"])]]
+        pm_with_narrow = [["pm_with", ", ".join(message["to"])]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
 
 
