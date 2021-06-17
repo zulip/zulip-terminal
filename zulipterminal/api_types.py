@@ -27,7 +27,6 @@ class Message(TypedDict, total=False):
     id: int
     sender_id: int
     content: str
-    recipient_id: int
     timestamp: int
     client: str
     subject: str  # Only for stream msgs.
@@ -51,6 +50,10 @@ class Message(TypedDict, total=False):
     content_type: str
     match_content: str  # If keyword search specified in narrow params.
     match_subject: str  # If keyword search specified in narrow params.
+
+    # Unused/Unsupported fields
+    # NOTE: Deprecated; a server implementation detail not useful in a client.
+    # recipient_id: int
 
 
 # Elements and types taken from https://zulip.com/api/get-events

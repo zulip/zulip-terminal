@@ -279,7 +279,6 @@ stream_msg_template = {
     "sender_full_name": "Foo Foo",
     "timestamp": 1520918722,
     "client": "website",
-    "recipient_id": 6076,
     "sender_email": "foo@zulip.com",
     "type": "stream",
     "sender_realm_str": "",
@@ -302,7 +301,6 @@ pm_template = {
     "sender_full_name": "Foo Foo",
     "timestamp": 1520918736,
     "client": "website",
-    "recipient_id": 5780,
     "is_me_message": False,
     "sender_email": "foo@zulip.com",
     "flags": ["read"],
@@ -339,7 +337,6 @@ group_pm_template = {
     "sender_full_name": "Foo Foo",
     "timestamp": 1520918737,
     "client": "website",
-    "recipient_id": 5780,  # FIXME Unsure
     "is_me_message": False,
     "sender_email": "foo@zulip.com",
     "flags": ["read"],
