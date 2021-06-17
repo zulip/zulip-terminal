@@ -365,6 +365,16 @@ def test_display_error_if_present(mocker, response, footer_updated):
         case(
             {
                 "type": "private",
+                "to": ["foo@zulip.com", "bar@zulip.com"],
+                "content": "Hi",
+            },
+            [["pm_with", "foo@zulip.com, bar@zulip.com"]],
+            False,
+            id="group_private_conv__same_group_pm__not_notified",
+        ),
+        case(
+            {
+                "type": "private",
                 "to": ["user@abc.com", "user@chat.com"],
                 "content": "Hi",
             },
