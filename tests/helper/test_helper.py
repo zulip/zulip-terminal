@@ -357,19 +357,23 @@ def test_display_error_if_present(mocker, response, footer_updated):
     "req, narrow, footer_updated",
     [
         case(
-            {"type": "private", "to": "foo@gmail.com", "content": "bar"},
+            {"type": "private", "to": ["foo@gmail.com"], "content": "bar"},
             [["is", "private"]],
             False,
             id="all_private__pm__not_notified",
         ),
         case(
-            {"type": "private", "to": "user@abc.com, user@chat.com", "content": "Hi"},
+            {
+                "type": "private",
+                "to": ["user@abc.com", "user@chat.com"],
+                "content": "Hi",
+            },
             [["pm_with", "user@0abc.com"]],
             True,
             id="private_conv__other_pm__notified",
         ),
         case(
-            {"type": "private", "to": "bar-bar@foo.com", "content": ":party_parrot:"},
+            {"type": "private", "to": ["bar-bar@foo.com"], "content": ":party_parrot:"},
             [["pm_with", "user@abc.com, user@chat.com, bar-bar@foo.com"]],
             True,
             id="private_conv__other_pm2__notified",
@@ -409,7 +413,7 @@ def test_display_error_if_present(mocker, response, footer_updated):
             id="starred__stream__notified",
         ),
         case(
-            {"type": "private", "to": "2@aBd%8@random.com", "content": "fist_bump"},
+            {"type": "private", "to": ["2@aBd%8@random.com"], "content": "fist_bump"},
             [["is", "mentioned"]],
             True,
             id="mentioned__private_no_mention__notified",
