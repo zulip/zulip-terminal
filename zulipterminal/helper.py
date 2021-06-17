@@ -323,7 +323,6 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'content': 'Hi @**Cordelia Lear**',
                 'sender_full_name': 'Iago',
                 'flags': [],
-                'sender_short_name': 'iago',
                 'sender_email': 'iago@zulip.com',
                 'subject': '',
                 'subject_links': [],

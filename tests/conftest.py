@@ -291,7 +291,6 @@ stream_msg_template = {
     "subject_links": [],
     "avatar_url": "dummy_avatar_url",
     "is_me_message": False,
-    "sender_short_name": "foo",
     "content": "Stream content here.",
     "display_recipient": "PTEST",
 }
@@ -312,7 +311,6 @@ pm_template = {
     "type": "private",
     "avatar_url": "dummy_avatar_url",
     "subject_links": [],
-    "sender_short_name": "foo",
     "content": "Hey PM content here.",
     "display_recipient": [
         {
@@ -348,7 +346,6 @@ group_pm_template = {
     "type": "private",
     "avatar_url": "dummy_avatar_url",
     "subject_links": [],
-    "sender_short_name": "foo",
     "content": "Hey PM content here again.",
     "display_recipient": [
         {
