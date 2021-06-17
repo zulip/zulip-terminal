@@ -64,7 +64,9 @@ An additional feature to other front-ends is **explore mode**, which can be enab
 
 One session of Zulip Terminal represents a connection of one user to one Zulip server. Each session refers to a zuliprc file to identify how to connect to the server, so by running Zulip Terminal and specifying a different zuliprc file (using `-c` or `--config-file`), you may connect to a different server. You might choose to do that after exiting from one Zulip Terminal session, or open another terminal and run it concurrently there.
 
-Since we expect the above to be straightforward for most users and it allows the code to remain dramatically simpler, we are unlikely to support multiple Zulip servers within the same session in at least the short/medium term. However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
+Since we expect the above to be straightforward for most users and it allows the code to remain dramatically simpler, we are unlikely to support multiple Zulip servers within the same session in at least the short/medium term.
+However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
+In the longer term we may move to multiple servers per session, which is tracked in [zulip-terminal#961](https://github.com/zulip/zulip-terminal/issues/961).
 
 ## Unable to render symbols
 
