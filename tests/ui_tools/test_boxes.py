@@ -10,7 +10,8 @@ from zulipterminal.config.symbols import (
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
 
 
-BOXES = "zulipterminal.ui_tools.boxes"
+MODULE = "zulipterminal.ui_tools.boxes"
+WRITEBOX = MODULE + ".WriteBox"
 
 
 class TestWriteBox:
@@ -471,7 +472,7 @@ class TestWriteBox:
     def test_generic_autocomplete_user_mentions(
         self, write_box, mocker, text, expected_distinct_prefix, state=1
     ):
-        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+        _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box.generic_autocomplete(text, state)
 
@@ -635,7 +636,7 @@ class TestWriteBox:
     def test__to_box_autocomplete(
         self, mocker, write_box, text, matching_users, matching_users_info, state=1
     ):
-        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+        _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
 
@@ -742,7 +743,7 @@ class TestWriteBox:
     def test__to_box_autocomplete_with_multiple_recipients(
         self, mocker, write_box, text, matching_users, matching_users_info, state=1
     ):
-        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+        _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
 
@@ -792,7 +793,7 @@ class TestWriteBox:
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
-        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+        _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._stream_box_autocomplete(text, state)
 
@@ -848,7 +849,7 @@ class TestWriteBox:
     def test__stream_box_autocomplete_with_spaces(
         self, mocker, write_box, widget_size, text, expected_text
     ):
-        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
         write_box.header_write_box[stream_focus].set_edit_text(text)
@@ -876,7 +877,7 @@ class TestWriteBox:
         self, mocker, write_box, text, topics, matching_topics, state=1
     ):
         write_box.model.topics_in_stream.return_value = topics
-        _process_typeaheads = mocker.patch(BOXES + ".WriteBox._process_typeaheads")
+        _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._topic_box_autocomplete(text, state)
 
@@ -894,7 +895,7 @@ class TestWriteBox:
     def test__topic_box_autocomplete_with_spaces(
         self, mocker, write_box, widget_size, text, expected_text, topics
     ):
-        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         write_box.model.topics_in_stream.return_value = topics
         topic_focus = write_box.FOCUS_HEADER_BOX_TOPIC
@@ -1177,11 +1178,11 @@ class TestWriteBox:
         mocker,
         stream_id=10,
     ):
-        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
 
         if box_type == "stream":
             if message_being_edited:
-                mocker.patch(BOXES + ".EditModeButton")
+                mocker.patch(MODULE + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
                 write_box.msg_edit_state = _MessageEditState(
                     message_id=10, old_topic="some old topic"
@@ -1231,8 +1232,8 @@ class TestWriteBox:
     def test_write_box_header_contents(
         self, write_box, expected_box_size, mocker, msg_type
     ):
-        mocker.patch(BOXES + ".WriteBox._set_stream_write_box_style")
-        mocker.patch(BOXES + ".WriteBox.set_editor_mode")
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
+        mocker.patch(WRITEBOX + ".set_editor_mode")
         if msg_type == "stream":
             write_box.stream_box_view(1000)
         elif msg_type == "stream_edit":
@@ -1251,7 +1252,7 @@ class TestPanelSearchBox:
     @pytest.fixture
     def panel_search_box(self, mocker):
         # X is the return from keys_for_command("UNTESTED_TOKEN")
-        mocker.patch(BOXES + ".keys_for_command", return_value="X")
+        mocker.patch(MODULE + ".keys_for_command", return_value="X")
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
