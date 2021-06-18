@@ -3,6 +3,9 @@ import pytest
 from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
+MODULE = "zulipterminal.ui_tools.utils"
+
+
 @pytest.mark.parametrize(
     "msg, narrow, muted_streams, is_muted_topic_return_value, muted",
     [
@@ -146,13 +149,11 @@ def test_create_msg_box_list(
         },
         "pointer": {},
     }
-    msg_box = mocker.patch("zulipterminal.ui_tools.utils.MessageBox")
-    mocker.patch("zulipterminal.ui_tools.utils.urwid.AttrMap", return_value="MSG")
-    mock_muted = mocker.patch(
-        "zulipterminal.ui_tools.utils.is_muted", return_value=muted
-    )
+    msg_box = mocker.patch(MODULE + ".MessageBox")
+    mocker.patch(MODULE + ".urwid.AttrMap", return_value="MSG")
+    mock_muted = mocker.patch(MODULE + ".is_muted", return_value=muted)
     mocker.patch(
-        "zulipterminal.ui_tools.utils.is_unsubscribed_message",
+        MODULE + ".is_unsubscribed_message",
         return_value=unsubscribed,
     )
 
