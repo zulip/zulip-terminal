@@ -19,7 +19,8 @@ from zulipterminal.ui_tools.views import (
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
 
-VIEWS = "zulipterminal.ui_tools.views"
+MODULE = "zulipterminal.ui_tools.views"
+LISTWALKER = MODULE + ".urwid.SimpleFocusListWalker"
 
 # Test classes are grouped/ordered below as:
 #  * an independent popup class
@@ -33,12 +34,10 @@ class TestPopUpConfirmationView:
         self.controller = mocker.Mock()
         self.controller.view.LEFT_WIDTH = 27
         self.callback = mocker.Mock()
-        self.list_walker = mocker.patch(
-            VIEWS + ".urwid.SimpleFocusListWalker", return_value=[]
-        )
-        self.divider = mocker.patch(VIEWS + ".urwid.Divider")
-        self.text = mocker.patch(VIEWS + ".urwid.Text")
-        self.wrapper_w = mocker.patch(VIEWS + ".urwid.WidgetWrap")
+        self.list_walker = mocker.patch(LISTWALKER, return_value=[])
+        self.divider = mocker.patch(MODULE + ".urwid.Divider")
+        self.text = mocker.patch(MODULE + ".urwid.Text")
+        self.wrapper_w = mocker.patch(MODULE + ".urwid.WidgetWrap")
         return PopUpConfirmationView(
             self.controller,
             self.text,
@@ -84,11 +83,9 @@ class TestPopUpView:
         self.widget = mocker.Mock()
         mocker.patch.object(self.widget, "rows", return_value=1)
         self.widgets = [self.widget]
-        self.list_walker = mocker.patch(
-            VIEWS + ".urwid.SimpleFocusListWalker", return_value=[]
-        )
-        self.super_init = mocker.patch(VIEWS + ".urwid.ListBox.__init__")
-        self.super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        self.list_walker = mocker.patch(LISTWALKER, return_value=[])
+        self.super_init = mocker.patch(MODULE + ".urwid.ListBox.__init__")
+        self.super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.pop_up_view = PopUpView(
             self.controller, self.widgets, self.command, self.width, self.title
         )
@@ -110,7 +107,7 @@ class TestPopUpView:
     def test_keypress_command_key(self, mocker, widget_size):
         size = widget_size(self.pop_up_view)
         mocker.patch(
-            VIEWS + ".is_command_key",
+            MODULE + ".is_command_key",
             side_effect=(lambda command, key: command == self.command),
         )
         self.pop_up_view.keypress(size, "cmd_key")
@@ -125,7 +122,7 @@ class TestPopUpView:
         # when its parameters are (self.command, key) as there is no
         # self.command='COMMAND' command in keys.py.
         mocker.patch(
-            VIEWS + ".is_command_key",
+            MODULE + ".is_command_key",
             side_effect=(
                 lambda command, key: False
                 if command == self.command
@@ -143,7 +140,7 @@ class TestAboutView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
 
         self.about_view = AboutView(
@@ -178,7 +175,7 @@ class TestAboutView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.about_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.about_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -187,7 +184,7 @@ class TestAboutView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         server_version, server_feature_level = zulip_version
 
         about_view = AboutView(
@@ -217,7 +214,7 @@ class TestEditHistoryView:
         )
         self.controller.model.fetch_message_history = mocker.Mock(return_value=[])
         self.controller.model.formatted_local_time.return_value = "Tue Mar 13 10:55:22"
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         # NOTE: Given that the EditHistoryView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
@@ -277,7 +274,7 @@ class TestEditHistoryView:
     ):
         size = widget_size(self.edit_history_view)
         key, expected_key = navigation_key_expected_key_pair
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
 
         self.edit_history_view.keypress(size, key)
 
@@ -314,7 +311,7 @@ class TestEditHistoryView:
         tag="(Current Version)",
     ):
         self._get_author_prefix = mocker.patch(
-            VIEWS + ".EditHistoryView._get_author_prefix",
+            MODULE + ".EditHistoryView._get_author_prefix",
         )
         snapshot = dict(**snapshot, user_id=user_id) if user_id else snapshot
 
@@ -423,7 +420,7 @@ class TestEditModeView:
     def edit_mode_view(self, mocker):
         controller = mocker.Mock()
         controller.maximum_popup_dimensions.return_value = (64, 64)
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         button = mocker.Mock()
         return EditModeView(controller, button)
 
@@ -455,7 +452,7 @@ class TestHelpView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         self.help_view = HelpView(self.controller, "Help Menu")
 
     def test_keypress_any_key(self, widget_size):
@@ -477,7 +474,7 @@ class TestHelpView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.help_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.help_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -489,7 +486,7 @@ class TestMsgInfoView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         # The subsequent patches (index and initial_data) set
         # show_edit_history_label to False for this autoused fixture.
         self.controller.model.index = {"edited_messages": set()}
@@ -584,7 +581,7 @@ class TestMsgInfoView:
     def test_keypress_view_in_browser(self, mocker, widget_size, message_fixture, key):
         size = widget_size(self.msg_info_view)
         self.msg_info_view.server_url = "https://chat.zulip.org/"
-        mocker.patch(VIEWS + ".near_message_url")
+        mocker.patch(MODULE + ".near_message_url")
 
         self.msg_info_view.keypress(size, key)
 
@@ -711,7 +708,7 @@ class TestMsgInfoView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.msg_info_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.msg_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -725,7 +722,7 @@ class TestStreamInfoView:
         )
         self.controller.model.is_muted_stream.return_value = False
         self.controller.model.is_pinned_stream.return_value = False
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         self.stream_id = 10
         self.controller.model.stream_dict = {
             self.stream_id: {
@@ -845,7 +842,7 @@ class TestStreamInfoView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_info_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.stream_info_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
 
@@ -881,7 +878,7 @@ class TestStreamMembersView:
         )
         self.controller.model.get_other_subscribers_in_stream.return_value = []
         self.controller.model.user_full_name = ""
-        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        mocker.patch(LISTWALKER, return_value=[])
         stream_id = 10
         self.stream_members_view = StreamMembersView(self.controller, stream_id)
 
@@ -901,6 +898,6 @@ class TestStreamMembersView:
     ):
         key, expected_key = navigation_key_expected_key_pair
         size = widget_size(self.stream_members_view)
-        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
         self.stream_members_view.keypress(size, key)
         super_keypress.assert_called_once_with(size, expected_key)
