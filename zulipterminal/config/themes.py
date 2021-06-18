@@ -41,11 +41,14 @@ required_styles = {  # style-name: monochrome-bit-depth-style
     "popup_category": "bold",
     "unread_count": "bold",
     "starred_count": "",
+    "table_head": "bold",
     "filter_results": "bold",
     "edit_topic": "standout",
     "edit_tag": "standout",
     "edit_author": "bold",
     "edit_time": "bold",
+    "current_user": "",
+    "muted": "bold",
     "popup_border": "bold",
     "area:help": "standout",
     "area:msg": "standout",
@@ -560,7 +563,7 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     complete = {
         name
         for name, styles in THEMES.items()
-        if {s[0] for s in styles}.issuperset(required_styles)
+        if {s[0] for s in styles} == set(required_styles)
     }
     incomplete = list(set(THEMES) - complete)
     return sorted(list(complete)), sorted(incomplete)
