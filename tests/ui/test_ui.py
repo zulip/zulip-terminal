@@ -4,25 +4,28 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui import View
 
 
+CONTROLLER = "zulipterminal.core.Controller"
+MODULE = "zulipterminal.ui"
+VIEW = MODULE + ".View"
+
+
 class TestView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
-        self.controller = mocker.patch(
-            "zulipterminal.core.Controller", return_value=None
-        )
-        self.model = mocker.patch("zulipterminal.core.Controller.model")
-        self.write_box = mocker.patch("zulipterminal.ui.WriteBox")
-        self.search_box = mocker.patch("zulipterminal.ui.SearchBox")
+        self.controller = mocker.patch(CONTROLLER, return_value=None)
+        self.model = mocker.patch(CONTROLLER + ".model")
+        self.write_box = mocker.patch(MODULE + ".WriteBox")
+        self.search_box = mocker.patch(MODULE + ".SearchBox")
 
     @pytest.fixture
     def view(self, mocker):
-        main_window = mocker.patch("zulipterminal.ui.View.main_window")
+        main_window = mocker.patch(VIEW + ".main_window")
         # View is an urwid.Frame instance, a Box widget.
-        mocker.patch("zulipterminal.ui.View.sizing", return_value=frozenset({"box"}))
+        mocker.patch(VIEW + ".sizing", return_value=frozenset({"box"}))
         return View(self.controller)
 
     def test_init(self, mocker):
-        main_window = mocker.patch("zulipterminal.ui.View.main_window")
+        main_window = mocker.patch(VIEW + ".main_window")
         view = View(self.controller)
         assert view.controller == self.controller
         assert view.model == self.model
@@ -34,13 +37,13 @@ class TestView:
         main_window.assert_called_once_with()
 
     def test_left_column_view(self, mocker, view):
-        left_view = mocker.patch("zulipterminal.ui.LeftColumnView")
+        left_view = mocker.patch(MODULE + ".LeftColumnView")
         return_value = view.left_column_view()
         assert return_value == left_view(view)
 
     def test_middle_column_view(self, view, mocker):
-        middle_view = mocker.patch("zulipterminal.ui.MiddleColumnView")
-        line_box = mocker.patch("zulipterminal.ui.urwid.LineBox")
+        middle_view = mocker.patch(MODULE + ".MiddleColumnView")
+        line_box = mocker.patch(MODULE + ".urwid.LineBox")
         return_value = view.middle_column_view()
         middle_view.assert_called_once_with(
             view, view.model, view.write_box, view.search_box
@@ -49,17 +52,15 @@ class TestView:
         assert return_value == line_box()
 
     def test_right_column_view(self, view, mocker):
-        right_view = mocker.patch("zulipterminal.ui.RightColumnView")
-        line_box = mocker.patch("zulipterminal.ui.urwid.LineBox")
+        right_view = mocker.patch(MODULE + ".RightColumnView")
+        line_box = mocker.patch(MODULE + ".urwid.LineBox")
         return_value = view.right_column_view()
         right_view.assert_called_once_with(View.RIGHT_WIDTH, view)
         assert view.users_view == right_view()
         assert return_value == line_box()
 
     def test_set_footer_text_default(self, view, mocker):
-        mocker.patch(
-            "zulipterminal.ui.View.get_random_help", return_value=["some help text"]
-        )
+        mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
 
         view.set_footer_text()
 
@@ -75,9 +76,7 @@ class TestView:
     def test_set_footer_text_with_duration(
         self, view, mocker, custom_text="custom", duration=5.3
     ):
-        mocker.patch(
-            "zulipterminal.ui.View.get_random_help", return_value=["some help text"]
-        )
+        mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
         mock_sleep = mocker.patch("time.sleep")
 
         view.set_footer_text([custom_text], duration=duration)
@@ -125,7 +124,7 @@ class TestView:
     def test_set_typeahead_footer(
         self, mocker, view, state, suggestions, truncated, footer_text
     ):
-        set_footer_text = mocker.patch("zulipterminal.ui.View.set_footer_text")
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
         view.set_typeahead_footer(suggestions, state, truncated)
         set_footer_text.assert_called_once_with(footer_text)
 
@@ -134,7 +133,7 @@ class TestView:
         assert isinstance(footer.text, str)
 
     def test_main_window(self, mocker, monkeypatch):
-        left = mocker.patch("zulipterminal.ui.View.left_column_view")
+        left = mocker.patch(VIEW + ".left_column_view")
 
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
         def just_set_message_view(self):
@@ -142,12 +141,12 @@ class TestView:
 
         monkeypatch.setattr(View, "middle_column_view", just_set_message_view)
 
-        right = mocker.patch("zulipterminal.ui.View.right_column_view")
-        col = mocker.patch("zulipterminal.ui.urwid.Columns")
-        frame = mocker.patch("zulipterminal.ui.urwid.Frame")
-        title_divider = mocker.patch("zulipterminal.ui.urwid.Divider")
-        text = mocker.patch("zulipterminal.ui.urwid.Text")
-        footer_view = mocker.patch("zulipterminal.ui.View.footer_view")
+        right = mocker.patch(VIEW + ".right_column_view")
+        col = mocker.patch(MODULE + ".urwid.Columns")
+        frame = mocker.patch(MODULE + ".urwid.Frame")
+        title_divider = mocker.patch(MODULE + ".urwid.Divider")
+        text = mocker.patch(MODULE + ".urwid.Text")
+        footer_view = mocker.patch(VIEW + ".footer_view")
 
         full_name = "Bob James"
         email = "Bob@bob.com"
@@ -244,7 +243,7 @@ class TestView:
         view.user_search = mocker.Mock()
         size = widget_size(view)
 
-        super_keypress = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        super_keypress = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
 
         view.controller.is_in_editor_mode = lambda: False
 
@@ -290,7 +289,7 @@ class TestView:
         view.right_panel = mocker.Mock()
         size = widget_size(view)
 
-        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
 
         view.body.focus_position = None
@@ -316,7 +315,7 @@ class TestView:
         view.right_panel = mocker.Mock()
         size = widget_size(view)
 
-        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
 
         view.body.focus_position = None
@@ -393,7 +392,7 @@ class TestView:
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
 
-        super_view = mocker.patch("zulipterminal.ui.urwid.WidgetWrap.keypress")
+        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
 
         view.controller.is_in_editor_mode = lambda: True
         size = widget_size(view)
