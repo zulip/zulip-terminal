@@ -15,9 +15,9 @@ from zulipterminal.ui_tools.buttons import (
 )
 
 
-BUTTONS = "zulipterminal.ui_tools.buttons"
-TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
-STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
+MODULE = "zulipterminal.ui_tools.buttons"
+MSGLINKBUTTON = MODULE + ".MessageLinkButton"
+
 
 SERVER_URL = "https://chat.zulip.zulip"
 
@@ -67,7 +67,7 @@ class TestTopButton:
     def test_text_content(
         self, mocker, prefix, width, count, short_text, caption="caption"
     ):
-        mocker.patch(STREAMBUTTON + ".mark_muted")
+        mocker.patch(MODULE + ".StreamButton.mark_muted")
         show_function = mocker.Mock()
 
         # To test having more space available with no bullet, but using
@@ -122,7 +122,7 @@ class TestTopButton:
             count_style="starred_count",
         )
         # Avoid testing use in initialization by patching afterwards
-        update_widget = mocker.patch(TOPBUTTON + ".update_widget")
+        update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
         top_button.update_count(new_count)
 
@@ -271,7 +271,7 @@ class TestUserButton:
         ],
     )
     def test_text_content(self, mocker, width, count, short_text, caption="caption"):
-        mocker.patch(STREAMBUTTON + ".mark_muted")
+        mocker.patch(MODULE + ".StreamButton.mark_muted")
         user: Dict[str, Any] = {
             "email": "some_email",  # value unimportant
             "user_id": 5,  # value unimportant
@@ -312,7 +312,7 @@ class TestUserButton:
             "user_id": user_id,
             "full_name": caption,
         }
-        activate = mocker.patch(BUTTONS + ".UserButton.activate")
+        activate = mocker.patch(MODULE + ".UserButton.activate")
         user_button = UserButton(
             user,
             controller=mocker.Mock(),
@@ -349,7 +349,7 @@ class TestTopicButton:
         }
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
-        top_button = mocker.patch(TOPBUTTON + ".__init__")
+        top_button = mocker.patch(MODULE + ".TopButton.__init__")
         params = dict(controller=controller, width=width, count=count)
 
         topic_button = TopicButton(
@@ -384,9 +384,7 @@ class TestTopicButton:
     def test_init_calls_mark_muted(
         self, mocker, stream_name, title, is_muted_topic_return_value, is_muted_called
     ):
-        mark_muted = mocker.patch(
-            "zulipterminal.ui_tools.buttons.TopicButton.mark_muted"
-        )
+        mark_muted = mocker.patch(MODULE + ".TopicButton.mark_muted")
         controller = mocker.Mock()
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value
@@ -418,8 +416,8 @@ class TestMessageLinkButton:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
-        self.super_init = mocker.patch(BUTTONS + ".urwid.Button.__init__")
-        self.connect_signal = mocker.patch(BUTTONS + ".urwid.connect_signal")
+        self.super_init = mocker.patch(MODULE + ".urwid.Button.__init__")
+        self.connect_signal = mocker.patch(MODULE + ".urwid.connect_signal")
 
     def message_link_button(self, caption="", link="", display_attr=None):
         self.caption = caption
@@ -430,7 +428,7 @@ class TestMessageLinkButton:
         )
 
     def test_init(self, mocker):
-        self.update_widget = mocker.patch(BUTTONS + ".MessageLinkButton.update_widget")
+        self.update_widget = mocker.patch(MSGLINKBUTTON + ".update_widget")
 
         mocked_button = self.message_link_button()
 
@@ -452,7 +450,7 @@ class TestMessageLinkButton:
     def test_update_widget(
         self, mocker, caption, expected_cursor_position, display_attr=None
     ):
-        self.selectable_icon = mocker.patch(BUTTONS + ".urwid.SelectableIcon")
+        self.selectable_icon = mocker.patch(MODULE + ".urwid.SelectableIcon")
 
         # The method update_widget() is called in MessageLinkButton's init.
         mocked_button = self.message_link_button(
@@ -479,9 +477,7 @@ class TestMessageLinkButton:
     )
     def test_handle_link(self, mocker, link, handle_narrow_link_called):
         self.controller.model.server_url = SERVER_URL
-        self.handle_narrow_link = mocker.patch(
-            BUTTONS + ".MessageLinkButton.handle_narrow_link"
-        )
+        self.handle_narrow_link = mocker.patch(MSGLINKBUTTON + ".handle_narrow_link")
         mocked_button = self.message_link_button(link=link)
 
         mocked_button.handle_link()
@@ -888,11 +884,9 @@ class TestMessageLinkButton:
         exit_popup_called,
     ):
         self.controller.loop.widget = mocker.Mock(spec=Overlay)
-        mocker.patch(BUTTONS + ".MessageLinkButton._parse_narrow_link")
-        mocker.patch(
-            BUTTONS + ".MessageLinkButton._validate_narrow_link", return_value=error
-        )
-        mocker.patch(BUTTONS + ".MessageLinkButton._switch_narrow_to")
+        mocker.patch(MSGLINKBUTTON + "._parse_narrow_link")
+        mocker.patch(MSGLINKBUTTON + "._validate_narrow_link", return_value=error)
+        mocker.patch(MSGLINKBUTTON + "._switch_narrow_to")
         mocked_button = self.message_link_button()
 
         mocked_button.handle_narrow_link()
