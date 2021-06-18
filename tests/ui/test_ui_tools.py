@@ -30,13 +30,12 @@ from zulipterminal.ui_tools.views import (
 )
 
 
-VIEWS = "zulipterminal.ui_tools.views"
-MESSAGEBOX = "zulipterminal.ui_tools.boxes.MessageBox"
-BOXES = "zulipterminal.ui_tools.boxes"
+SUBDIR = "zulipterminal.ui_tools"
+BOXES = SUBDIR + ".boxes"
+VIEWS = SUBDIR + ".views"
+MESSAGEVIEW = VIEWS + ".MessageView"
+MIDCOLVIEW = VIEWS + ".MiddleColumnView"
 
-# FIXME This likely indicates we can improve the code
-TOPBUTTON = "zulipterminal.ui_tools.buttons.TopButton"
-STREAMBUTTON = "zulipterminal.ui_tools.buttons.StreamButton"
 
 SERVER_URL = "https://chat.zulip.zulip"
 
@@ -84,9 +83,9 @@ class TestMessageView:
 
     @pytest.fixture
     def msg_view(self, mocker, msg_box):
-        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
-        mocker.patch(VIEWS + ".MessageView.read_message")
-        mocker.patch(VIEWS + ".MessageView.set_focus")
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".read_message")
+        mocker.patch(MESSAGEVIEW + ".set_focus")
         msg_view = MessageView(self.model, self.view)
         msg_view.log = mocker.Mock()
         msg_view.body = mocker.Mock()
@@ -100,9 +99,9 @@ class TestMessageView:
 
     @pytest.mark.parametrize("narrow_focus_pos, focus_msg", [(set(), 1), (0, 0)])
     def test_main_view(self, mocker, narrow_focus_pos, focus_msg):
-        mocker.patch(VIEWS + ".MessageView.read_message")
+        mocker.patch(MESSAGEVIEW + ".read_message")
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
-        mocker.patch(VIEWS + ".MessageView.set_focus")
+        mocker.patch(MESSAGEVIEW + ".set_focus")
         msg_list = ["MSG1", "MSG2"]
         mocker.patch(VIEWS + ".create_msg_box_list", return_value=msg_list)
         self.model.get_focus_in_current_narrow.return_value = narrow_focus_pos
@@ -297,8 +296,8 @@ class TestMessageView:
     def test_keypress_GO_DOWN(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
         msg_view.new_loading = False
-        mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
-        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        mocker.patch(MESSAGEVIEW + ".set_focus_valign")
         msg_view.log.next_position.return_value = 1
         msg_view.keypress(size, key)
         msg_view.log.next_position.assert_called_once_with(msg_view.focus_position)
@@ -312,12 +311,12 @@ class TestMessageView:
     ):
         size = widget_size(msg_view)
         msg_view.new_loading = False
-        mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
-        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        mocker.patch(MESSAGEVIEW + ".set_focus_valign")
 
         msg_view.log.next_position = Exception()
         mocker.patch(
-            VIEWS + ".MessageView.focus",
+            MESSAGEVIEW + ".focus",
             mocker.MagicMock() if view_is_focused else None,
         )
         mocker.patch.object(msg_view, "load_new_messages")
@@ -335,8 +334,8 @@ class TestMessageView:
     @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
     def test_keypress_GO_UP(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
-        mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
-        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        mocker.patch(MESSAGEVIEW + ".set_focus_valign")
         msg_view.old_loading = False
         msg_view.log.prev_position.return_value = 1
         msg_view.keypress(size, key)
@@ -351,12 +350,12 @@ class TestMessageView:
     ):
         size = widget_size(msg_view)
         msg_view.old_loading = False
-        mocker.patch(VIEWS + ".MessageView.focus_position", return_value=0)
-        mocker.patch(VIEWS + ".MessageView.set_focus_valign")
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        mocker.patch(MESSAGEVIEW + ".set_focus_valign")
 
         msg_view.log.prev_position = Exception()
         mocker.patch(
-            VIEWS + ".MessageView.focus",
+            MESSAGEVIEW + ".focus",
             mocker.MagicMock() if view_is_focused else None,
         )
         mocker.patch.object(msg_view, "load_old_messages")
@@ -372,10 +371,10 @@ class TestMessageView:
         assert return_value == key
 
     def test_read_message(self, mocker, msg_box):
-        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
-        mocker.patch(VIEWS + ".MessageView.set_focus")
-        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
+        mocker.patch(MESSAGEVIEW + ".set_focus")
+        mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
         msg_view.model.controller.in_explore_mode = False
@@ -398,7 +397,7 @@ class TestMessageView:
             },
             "pointer": {"[]": 0},
         }
-        mocker.patch(VIEWS + ".MessageView.focus_position")
+        mocker.patch(MESSAGEVIEW + ".focus_position")
         msg_view.focus_position = 1
         msg_view.model.controller.view.body.focus_col = 1
         msg_view.log = list(msg_view.model.index["messages"])
@@ -424,9 +423,9 @@ class TestMessageView:
         self.model.mark_message_ids_as_read.assert_not_called()
 
     def test_read_message_in_explore_mode(self, mocker, msg_box):
-        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
-        mocker.patch(VIEWS + ".MessageView.set_focus")
-        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".set_focus")
+        mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
         msg_view = MessageView(self.model, self.view)
         msg_w = mocker.Mock()
         msg_view.body = mocker.Mock()
@@ -440,9 +439,9 @@ class TestMessageView:
         assert not self.model.mark_message_ids_as_read.called
 
     def test_read_message_search_narrow(self, mocker, msg_box):
-        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
-        mocker.patch(VIEWS + ".MessageView.set_focus")
-        mocker.patch(VIEWS + ".MessageView.update_search_box_narrow")
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".set_focus")
+        mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.controller.view = mocker.Mock()
         msg_w = mocker.Mock()
@@ -459,8 +458,8 @@ class TestMessageView:
     def test_read_message_last_unread_message_focused(
         self, mocker, message_fixture, empty_index, msg_box
     ):
-        mocker.patch(VIEWS + ".MessageView.main_view", return_value=[msg_box])
-        mocker.patch(VIEWS + ".MessageView.set_focus")
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".set_focus")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
         msg_view.model.controller.in_explore_mode = False
@@ -679,10 +678,8 @@ class TestTopicsView:
     def test_update_topics_list(
         self, mocker, topic_view, topic_name, topic_initial_log, topic_final_log
     ):
-        mocker.patch(TOPBUTTON + ".__init__", return_value=None)
-        set_focus_valign = mocker.patch(
-            "zulipterminal.ui_tools.buttons.urwid.ListBox.set_focus_valign"
-        )
+        mocker.patch(SUBDIR + ".buttons.TopButton.__init__", return_value=None)
+        set_focus_valign = mocker.patch(VIEWS + ".urwid.ListBox.set_focus_valign")
         topic_view.view.controller.model.stream_dict = {86: {"name": "PTEST"}}
         topic_view.view.controller.model.is_muted_topic = mocker.Mock(
             return_value=False
@@ -758,7 +755,7 @@ class TestUsersView:
     def test_mouse_event_left_click(
         self, mocker, user_view, widget_size, compose_box_is_open
     ):
-        super_mouse_event = mocker.patch("zulipterminal.ui.urwid.ListBox.mouse_event")
+        super_mouse_event = mocker.patch(VIEWS + ".urwid.ListBox.mouse_event")
         user_view.controller.is_in_editor_mode.return_value = compose_box_is_open
         size = widget_size(user_view)
         focus = mocker.Mock()
@@ -797,7 +794,7 @@ class TestUsersView:
 class TestMiddleColumnView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
-        mocker.patch(VIEWS + ".MessageView", return_value="MSG_LIST")
+        mocker.patch(MESSAGEVIEW + "", return_value="MSG_LIST")
         self.model = mocker.Mock()
         self.view = mocker.Mock()
         self.write_box = mocker.Mock()
@@ -862,9 +859,9 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.header")
-        mocker.patch(VIEWS + ".MiddleColumnView.footer")
-        mocker.patch(VIEWS + ".MiddleColumnView.set_focus")
+        mocker.patch(MIDCOLVIEW + ".header")
+        mocker.patch(MIDCOLVIEW + ".footer")
+        mocker.patch(MIDCOLVIEW + ".set_focus")
 
         mid_col_view.keypress(size, key)
 
@@ -883,8 +880,8 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.set_focus")
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".set_focus")
 
         mid_col_view.keypress(size, key)
 
@@ -899,10 +896,10 @@ class TestMiddleColumnView:
         self, mid_col_view, mocker, widget_size, reply_message_key, enter_key
     ):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.body")
-        mocker.patch(VIEWS + ".MiddleColumnView.footer")
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.set_focus")
+        mocker.patch(MIDCOLVIEW + ".body")
+        mocker.patch(MIDCOLVIEW + ".footer")
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".set_focus")
 
         mid_col_view.keypress(size, reply_message_key)
 
@@ -913,10 +910,10 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
     def test_keypress_STREAM_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.body")
-        mocker.patch(VIEWS + ".MiddleColumnView.footer")
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.set_focus")
+        mocker.patch(MIDCOLVIEW + ".body")
+        mocker.patch(MIDCOLVIEW + ".footer")
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".set_focus")
 
         mid_col_view.keypress(size, key)
 
@@ -927,10 +924,10 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize("key", keys_for_command("REPLY_AUTHOR"))
     def test_keypress_REPLY_AUTHOR(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.body")
-        mocker.patch(VIEWS + ".MiddleColumnView.footer")
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.set_focus")
+        mocker.patch(MIDCOLVIEW + ".body")
+        mocker.patch(MIDCOLVIEW + ".footer")
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".set_focus")
 
         mid_col_view.keypress(size, key)
 
@@ -943,9 +940,9 @@ class TestMiddleColumnView:
         self, mid_col_view, mocker, widget_size, key
     ):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
+        mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch(
-            VIEWS + ".MiddleColumnView.get_next_unread_topic",
+            MIDCOLVIEW + ".get_next_unread_topic",
             return_value=("1", "topic"),
         )
         mid_col_view.model.stream_dict = {"1": {"name": "stream"}}
@@ -961,10 +958,8 @@ class TestMiddleColumnView:
         self, mid_col_view, mocker, widget_size, key
     ):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(
-            VIEWS + ".MiddleColumnView.get_next_unread_topic", return_value=None
-        )
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".get_next_unread_topic", return_value=None)
 
         return_value = mid_col_view.keypress(size, key)
         assert return_value == key
@@ -974,8 +969,8 @@ class TestMiddleColumnView:
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.get_next_unread_pm", return_value=1)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=1)
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
 
         mid_col_view.keypress(size, key)
@@ -990,8 +985,8 @@ class TestMiddleColumnView:
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.get_next_unread_pm", return_value=None)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=None)
 
         return_value = mid_col_view.keypress(size, key)
         assert return_value == key
@@ -999,8 +994,8 @@ class TestMiddleColumnView:
     @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
     def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
-        mocker.patch(VIEWS + ".MiddleColumnView.focus_position")
-        mocker.patch(VIEWS + ".MiddleColumnView.get_next_unread_pm", return_value=None)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=None)
         mid_col_view.footer = mocker.Mock()
         return_value = mid_col_view.keypress(size, key)
         mid_col_view.footer.private_box_view.assert_called_once_with()
@@ -1180,7 +1175,7 @@ class TestLeftColumnView:
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
-        mocker.patch(STREAMBUTTON + ".mark_muted")
+        mocker.patch(VIEWS + ".StreamButton.mark_muted")
         left_col_view = LeftColumnView(width, self.view)
         home_button.assert_called_once_with(
             left_col_view.controller, count=2, width=width
@@ -1200,7 +1195,6 @@ class TestLeftColumnView:
         stream_view = mocker.patch(VIEWS + ".StreamsView")
         line_box = mocker.patch(VIEWS + ".urwid.LineBox")
         divider = mocker.patch(VIEWS + ".StreamsViewDivider")
-        mocker.patch(STREAMBUTTON + ".mark_muted")
 
         left_col_view = LeftColumnView(width, self.view)
 
@@ -1306,7 +1300,9 @@ class TestMessageBox:
             timestamp=150989984,
         )
         self.model.user_email = "foo@zulip.com"
-        mocker.patch(MESSAGEBOX + "._is_private_message_to_self", return_value=True)
+        mocker.patch(
+            BOXES + ".MessageBox._is_private_message_to_self", return_value=True
+        )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
 
@@ -1913,7 +1909,7 @@ class TestMessageBox:
         ],
     )
     def test_main_view_renders_slash_me(self, mocker, message, content, is_me_message):
-        mocker.patch(VIEWS + ".urwid.Text")
+        mocker.patch(BOXES + ".urwid.Text")
         message["content"] = content
         message["is_me_message"] = is_me_message
         msg_box = MessageBox(message, self.model, message)
@@ -2149,7 +2145,7 @@ class TestMessageBox:
         starred_msg,
         to_vary_in_last_message,
     ):
-        date = mocker.patch("zulipterminal.ui_tools.boxes.date")
+        date = mocker.patch(BOXES + ".date")
         date.today.return_value = datetime.date(current_year, 1, 1)
         date.side_effect = lambda *args, **kw: datetime.date(*args, **kw)
 
@@ -2338,7 +2334,7 @@ class TestMessageBox:
         write_box = msg_box.model.controller.view.write_box
         write_box.msg_edit_state = None
         write_box.msg_body_edit_enabled = None
-        mocker.patch("zulipterminal.ui_tools.boxes.time", return_value=100)
+        mocker.patch(BOXES + ".time", return_value=100)
         # private messages cannot be edited after time-limit, if there is one.
         if (
             varied_message["type"] == "private"
