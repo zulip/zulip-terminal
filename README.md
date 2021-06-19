@@ -160,8 +160,10 @@ Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) com
 To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
-Please read our [commit message guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html) and
-[git guide](http://zulip.readthedocs.io/en/latest/git/index.html). **NOTE** Due to the difference in project scale, git commit titles in the Zulip Terminal project read slightly differently - please review our recent git log for examples and see the [GitLint](#gitlint) section below for more guidelines.
+For commit structure and style, please review the [Commit Style](#commit-style) section below.
+
+If you are new to `git` (or not!), you may benefit from the [Zulip git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
+When contributing, it's important to note that we use a **rebase-oriented workflow**.
 
 A simple [tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/developer-feature-tutorial.md) is available for implementing the `typing` indicator.
 Follow it to understand how to implement a new feature for zulip-terminal.
@@ -243,21 +245,42 @@ If using make with pip, there are corresponding make targets for running linting
 
 NOTE: The lint script runs a number of separate linters to simplify the development workflow, but each individual linter can be run separately if you find this useful.
 
-#### GitLint
+#### Commit Style
+
+We aim to follow a standard commit style to keep the `git log` consistent and easy to read.
+
+Much like working with code, it's great to refer to the git log, for the style we're actively using.
+
+Our overall style for commit structure and messages broadly follows the general [Zulip version control guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html), so we recommend reading that first.
+
+Our commit titles have slight variations from the general Zulip style, with each:
+* starting with one or more areas in lower case, followed by a colon and space
+* area being slash-separated modified files without extensions, or the type of the change
+* ending with a concise description starting with a capital and ending with a full-stop (period)
+* having a maximum overall length of 72 (fitting github web interface without abbreviation)
+
+Some example commit titles:
+* `file3/file1/file2: Improve behavior of something.` - a general commit updating files `file1.txt`, `file2.py` and `file3.md`
+* `refactor: file1/file2: Extract some common function.` - a pure refactor which doesn't change the functional behavior
+* `bugfix: file1: Avoid some noticeable bug.` - an ideally small commit to fix a bug
+* `tests: file1: Improve test for something.` - only improve tests for `file1`, likely in `test_file1.py`
+* `requirements: Upgrade some-dependency from 9.2 to 9.3.` - upgrade a dependency from version 9.2 to version 9.3
+
+Generally with changes to code we request you update linting and tests to pass on a per-commit basis (not just per pull request).
+If you update tests, you can add eg. `Tests updated.` in your commit text.
+
+Ideally we prefer that behavioral changes are accompanied by test improvements or additions, and an accompanying `Tests added.` or similar is then useful.
+
+To aid in satisfying some of these rules you can use `GitLint`, as described in the following section.
+**However**, please check your commits manually versus these style rules, since GitLint cannot check everything - including language or grammar!
+
+##### GitLint
 
 If you plan to submit git commits in pull-requests (PRs), then we highly suggest installing the `gitlint` commit-message hook by running `gitlint install-hook` (or `pipenv run gitlint install-hook` with pipenv setups). While the content still depends upon your writing skills, this ensures a more consistent formatting structure between commits, including by different authors.
 
 If the hook is installed as described above, then after completing the text for a commit, it will be checked by gitlint against the style we have set up, and will offer advice if there are any issues it notices. If gitlint finds any, it will ask if you wish to commit with the message as it is (`y` for 'yes'), stop the commit process (`n` for 'no'), or edit the commit message (`e` for 'edit').
 
 Other gitlint options are available; for example it is possible to apply it to a range of commits with the `--commits` option, eg. `gitlint --commits HEAD~2..HEAD` would apply it to the last few commits.
-
-**NOTE** Not all style suggestions are identified by gitlint at this time, including:
-* If modifying code (not just tests), list modified filenames without extensions between slashes in only one area of the commit title (eg. `run/model/core/README: Some description.`)
-* If modifying tests in addition to code, just note this in the body of the commit after a blank line (eg. `Tests updated.`)
-* If there are multiple areas in the commit title, they are typically used to describe the type of change, which is currently primarily used for a `bugfix`, `refactor` or `tests` (if only modifying tests).
-* Updates to dependencies have a `requirements` area only
-
-Generally it is best to refer to the git log to get an idea of the general style to follow, and in particular look for similar types of commits to the ones you are writing.
 
 ### Tips for working with tests (pytest)
 
