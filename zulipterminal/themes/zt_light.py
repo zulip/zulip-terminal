@@ -36,7 +36,6 @@ STYLES = {
     'msg_link'        : (Color.DARK_BLUE,           Color.WHITE),
     'msg_link_index'  : (Color.DARK_BLUE__BOLD,     Color.WHITE),
     'msg_quote'       : (Color.BLACK,               Color.BROWN),
-    'msg_code'        : (Color.BLACK,               Color.LIGHT_GRAY),
     'msg_bold'        : (Color.WHITE__BOLD,         Color.DARK_GRAY),
     'msg_time'        : (Color.WHITE,               Color.DARK_GRAY),
     'footer'          : (Color.WHITE,               Color.DARK_GRAY),

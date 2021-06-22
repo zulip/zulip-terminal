@@ -43,7 +43,6 @@ REQUIRED_STYLES = {
     'msg_link'        : '',
     'msg_link_index'  : 'bold',
     'msg_quote'       : 'underline',
-    'msg_code'        : 'bold',
     'msg_bold'        : 'bold',
     'msg_time'        : 'bold',
     'footer'          : 'standout',
