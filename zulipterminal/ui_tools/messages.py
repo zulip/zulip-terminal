@@ -511,8 +511,13 @@ class MessageBox(urwid.Pile):
                 # BLOCKQUOTE TEXT
                 markup.append(("msg_quote", cls.soup2markup(element, metadata)[0]))
             elif tag == "code":
-                # CODE (INLINE?)
-                markup.append(("msg_code", tag_text))
+                """
+                CODE INLINE
+                -----------
+                Use the same style as plain text codeblocks
+                which is the `whitespace` token of pygments.
+                """
+                markup.append(("pygments:w", tag_text))
             elif tag == "div" and "codehilite" in tag_classes:
                 """
                 CODE BLOCK

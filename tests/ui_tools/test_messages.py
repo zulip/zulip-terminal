@@ -108,7 +108,7 @@ class TestMessageBox:
                 [("msg_mention", "@A Group")],
                 id="group-mention",
             ),
-            case("<code>some code", [("msg_code", "some code")], id="code"),
+            case("<code>some code", [("pygments:w", "some code")], id="inline-code"),
             case(
                 '<div class="codehilite" data-code-language="python">'
                 "<pre><span></span>"
