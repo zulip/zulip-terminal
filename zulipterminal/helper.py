@@ -70,6 +70,7 @@ class Index(TypedDict):
     all_msg_ids: Set[int]
     starred_msg_ids: Set[int]
     mentioned_msg_ids: Set[int]
+    unread_mentioned_msg_ids: Set[int]
     private_msg_ids: Set[int]
     private_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
     stream_msg_ids_by_stream_id: Dict[int, Set[int]]
@@ -87,6 +88,7 @@ initial_index = Index(
     all_msg_ids=set(),
     starred_msg_ids=set(),
     mentioned_msg_ids=set(),
+    unread_mentioned_msg_ids=set(),
     private_msg_ids=set(),
     private_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
@@ -302,6 +304,11 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
         'mentioned_msg_ids': {
             14423,
             33234,
+            ...
+        },
+        'unread_mentioned_msg_ids': {
+            13244,
+            22315,
             ...
         },
         'stream_msg_ids_by_stream_id': {

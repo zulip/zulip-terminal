@@ -190,6 +190,11 @@ class Model:
             self.initial_data["realm_emoji"]
         )
 
+        # Store initial unread mentioned messages in Index.
+        self.index["unread_mentioned_msg_ids"] = set(
+            self.initial_data["unread_msgs"]["mentions"]
+        )
+
         self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
         self.new_user_input = True
         self._start_presence_updates()
