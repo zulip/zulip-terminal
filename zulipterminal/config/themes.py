@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 
+from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
+
 
 ThemeSpec = List[Tuple[Optional[str], ...]]
 
@@ -587,3 +589,11 @@ def theme_with_monochrome_added(theme: ThemeSpec) -> ThemeSpec:
             new_style = style
         updated_theme.append(new_style)
     return updated_theme
+
+
+NEW_THEMES = {
+    "gruvbox_dark": gruvbox,
+    "zt_dark": zt_dark,
+    "zt_light": zt_light,
+    "zt_blue": zt_blue,
+}
