@@ -55,6 +55,7 @@ if typing.TYPE_CHECKING:
 
 class _MessageEditState(NamedTuple):
     message_id: int
+    old_topic: str
 
 
 class WriteBox(urwid.Pile):
@@ -543,10 +544,17 @@ class WriteBox(urwid.Pile):
                     topic = self.title_write_box.edit_text
 
                 if self.msg_edit_state is not None:
+                    trimmed_topic = topic.strip()
+                    # Trimmed topic must be compared since that is server check
+                    if trimmed_topic == self.msg_edit_state.old_topic:
+                        propagate_mode = "change_one"  # No change in topic
+                    else:
+                        propagate_mode = self.edit_mode_button.mode
+
                     args = dict(
                         message_id=self.msg_edit_state.message_id,
-                        topic=topic,
-                        propagate_mode=self.edit_mode_button.mode,
+                        topic=topic,  # NOTE: Send untrimmed topic always for now
+                        propagate_mode=propagate_mode,
                     )
                     if self.msg_body_edit_enabled:
                         args["content"] = self.msg_write_box.edit_text
@@ -1616,7 +1624,9 @@ class MessageBox(urwid.Pile):
             msg_id = self.message["id"]
             msg = self.model.client.get_raw_message(msg_id)["raw_content"]
             write_box = self.model.controller.view.write_box
-            write_box.msg_edit_state = _MessageEditState(message_id=msg_id)
+            write_box.msg_edit_state = _MessageEditState(
+                message_id=msg_id, old_topic=self.message["subject"]
+            )
             write_box.msg_write_box.set_edit_text(msg)
             write_box.msg_write_box.set_edit_pos(len(msg))
             write_box.msg_body_edit_enabled = msg_body_edit_enabled

@@ -846,7 +846,7 @@ class TestWriteBox:
     )
     @pytest.mark.parametrize(
         "msg_edit_state",
-        [_MessageEditState(message_id=10), None],
+        [_MessageEditState(message_id=10, old_topic="old topic"), None],
         ids=["update_message", "send_message"],
     )
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
@@ -1065,7 +1065,9 @@ class TestWriteBox:
             if message_being_edited:
                 mocker.patch(BOXES + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
-                write_box.msg_edit_state = _MessageEditState(message_id=10)
+                write_box.msg_edit_state = _MessageEditState(
+                    message_id=10, old_topic="some old topic"
+                )
             else:
                 write_box.stream_box_view(stream_id)
         else:
