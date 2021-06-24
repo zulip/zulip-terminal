@@ -7,7 +7,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
+from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
 
 
 BOXES = "zulipterminal.ui_tools.boxes"
@@ -51,7 +51,7 @@ class TestWriteBox:
     def test_init(self, write_box):
         assert write_box.model == self.view.model
         assert write_box.view == self.view
-        assert write_box.msg_edit_id is None
+        assert write_box.msg_edit_state is None
 
     def test_not_calling_typing_method_without_recipients(self, mocker, write_box):
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
@@ -963,14 +963,16 @@ class TestWriteBox:
         ],
     )
     @pytest.mark.parametrize(
-        "msg_edit_id", [10, None], ids=["update_message", "send_message"]
+        "msg_edit_state",
+        [_MessageEditState(message_id=10), None],
+        ids=["update_message", "send_message"],
     )
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_keypress_SEND_MESSAGE_no_topic(
         self,
         mocker,
         write_box,
-        msg_edit_id,
+        msg_edit_state,
         topic_entered_by_user,
         topic_sent_to_server,
         key,
@@ -982,16 +984,16 @@ class TestWriteBox:
         write_box.title_write_box = mocker.Mock(edit_text=topic_entered_by_user)
         write_box.to_write_box = None
         size = widget_size(write_box)
-        write_box.msg_edit_id = msg_edit_id
+        write_box.msg_edit_state = msg_edit_state
         write_box.edit_mode_button = mocker.Mock(mode=propagate_mode)
 
         write_box.keypress(size, key)
 
-        if msg_edit_id:
+        if msg_edit_state:
             write_box.model.update_stream_message.assert_called_once_with(
                 topic=topic_sent_to_server,
                 content=write_box.msg_write_box.edit_text,
-                message_id=msg_edit_id,
+                message_id=msg_edit_state.message_id,
                 propagate_mode=propagate_mode,
             )
         else:
@@ -1181,7 +1183,7 @@ class TestWriteBox:
             if message_being_edited:
                 mocker.patch(BOXES + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
-                write_box.msg_edit_id = 10
+                write_box.msg_edit_state = _MessageEditState(message_id=10)
             else:
                 write_box.stream_box_view(stream_id)
         else:

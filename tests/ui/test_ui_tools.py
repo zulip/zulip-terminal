@@ -2291,7 +2291,7 @@ class TestMessageBox:
             "raw_content": "Edit this message"
         }
         write_box = msg_box.model.controller.view.write_box
-        write_box.msg_edit_id = None
+        write_box.msg_edit_state = None
         write_box.msg_body_edit_enabled = None
         mocker.patch("zulipterminal.ui_tools.boxes.time", return_value=100)
         # private messages cannot be edited after time-limit, if there is one.
@@ -2305,13 +2305,13 @@ class TestMessageBox:
         msg_box.keypress(size, key)
 
         if expect_editing_to_succeed:
-            assert write_box.msg_edit_id == varied_message["id"]
+            assert write_box.msg_edit_state.message_id == varied_message["id"]
             write_box.msg_write_box.set_edit_text.assert_called_once_with(
                 "Edit this message"
             )
             assert write_box.msg_body_edit_enabled == msg_body_edit_enabled
         else:
-            assert write_box.msg_edit_id is None
+            assert write_box.msg_edit_state is None
             write_box.msg_write_box.set_edit_text.assert_not_called()
 
     @pytest.mark.parametrize(

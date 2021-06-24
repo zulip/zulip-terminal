@@ -5,7 +5,7 @@ from collections import Counter, OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from sys import platform
 from time import sleep, time
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import dateutil.parser
@@ -53,14 +53,18 @@ if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
 
 
+class _MessageEditState(NamedTuple):
+    message_id: int
+
+
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
 
-        # If editing a message, its id - otherwise None
-        self.msg_edit_id: Optional[int] = None
+        # If editing a message, its state - otherwise None
+        self.msg_edit_state: Optional[_MessageEditState] = None
         # Determines if the message body (content) can be edited
         self.msg_body_edit_enabled = True
 
@@ -585,9 +589,9 @@ class WriteBox(urwid.Pile):
                 else:
                     topic = self.title_write_box.edit_text
 
-                if self.msg_edit_id:
+                if self.msg_edit_state is not None:
                     args = dict(
-                        message_id=self.msg_edit_id,
+                        message_id=self.msg_edit_state.message_id,
                         topic=topic,
                         propagate_mode=self.edit_mode_button.mode,
                     )
@@ -602,10 +606,10 @@ class WriteBox(urwid.Pile):
                         content=self.msg_write_box.edit_text,
                     )
             else:
-                if self.msg_edit_id:
+                if self.msg_edit_state is not None:
                     success = self.model.update_private_message(
                         content=self.msg_write_box.edit_text,
-                        msg_id=self.msg_edit_id,
+                        msg_id=self.msg_edit_state.message_id,
                     )
                 else:
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
@@ -626,18 +630,18 @@ class WriteBox(urwid.Pile):
                         success = None
             if success:
                 self.msg_write_box.edit_text = ""
-                if self.msg_edit_id:
-                    self.msg_edit_id = None
+                if self.msg_edit_state is not None:
+                    self.msg_edit_state = None
                     self.keypress(size, "esc")
         elif is_command_key("GO_BACK", key):
-            self.msg_edit_id = None
+            self.msg_edit_state = None
             self.msg_body_edit_enabled = True
             self.send_stop_typing_status()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
         elif is_command_key("SAVE_AS_DRAFT", key):
-            if not self.msg_edit_id:
+            if self.msg_edit_state is None:
                 if self.to_write_box:
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
@@ -693,7 +697,7 @@ class WriteBox(urwid.Pile):
                         return key
                     elif (
                         header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
-                        and self.msg_edit_id
+                        and self.msg_edit_state is not None
                     ):
                         header.focus_col = self.FOCUS_HEADER_BOX_EDIT
                         return key
@@ -1668,7 +1672,7 @@ class MessageBox(urwid.Pile):
             msg_id = self.message["id"]
             msg = self.model.client.get_raw_message(msg_id)["raw_content"]
             write_box = self.model.controller.view.write_box
-            write_box.msg_edit_id = msg_id
+            write_box.msg_edit_state = _MessageEditState(message_id=msg_id)
             write_box.msg_write_box.set_edit_text(msg)
             write_box.msg_write_box.set_edit_pos(len(msg))
             write_box.msg_body_edit_enabled = msg_body_edit_enabled
