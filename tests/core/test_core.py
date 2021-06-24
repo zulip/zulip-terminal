@@ -148,6 +148,8 @@ class TestController:
         assert controller.model.stream_id == msg_box.stream_id
         assert controller.model.narrow == expected_narrow
         controller.view.message_view.log.clear.assert_called_once_with()
+        assert (controller.model
+                .index['stream_msg_ids_by_stream_id'][205] == set())
 
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
