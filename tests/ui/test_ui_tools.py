@@ -2306,6 +2306,7 @@ class TestMessageBox:
 
         if expect_editing_to_succeed:
             assert write_box.msg_edit_state.message_id == varied_message["id"]
+            assert write_box.msg_edit_state.old_topic == varied_message["subject"]
             write_box.msg_write_box.set_edit_text.assert_called_once_with(
                 "Edit this message"
             )
