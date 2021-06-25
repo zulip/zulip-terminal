@@ -55,6 +55,7 @@ class TestWriteBox:
     def test_init(self, write_box):
         assert write_box.model == self.view.model
         assert write_box.view == self.view
+        assert write_box.compose_box_status == "closed"
         assert write_box.msg_edit_state is None
         assert write_box.msg_body_edit_enabled is True
         assert write_box.stream_id is None
@@ -1094,7 +1095,7 @@ class TestWriteBox:
         write_box.stream_write_box = mocker.Mock()
         write_box.msg_write_box = mocker.Mock(edit_text="")
         write_box.title_write_box = mocker.Mock(edit_text=topic_entered_by_user)
-        write_box.to_write_box = None
+        write_box.compose_box_status = "open_with_stream"
         size = widget_size(write_box)
         write_box.msg_edit_state = msg_edit_state
         write_box.edit_mode_button = mocker.Mock(mode=propagate_mode)

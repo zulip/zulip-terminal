@@ -11,6 +11,7 @@ import dateutil.parser
 import urwid
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
+from typing_extensions import Literal
 from tzlocal import get_localzone
 from urwid_readline import ReadlineEdit
 
@@ -73,6 +74,11 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
+
+        # Used to indicate user's compose status, "closed" by default
+        self.compose_box_status: Literal[
+            "open_with_private", "open_with_stream", "closed"
+        ] = "closed"
 
         # If editing a message, its state - otherwise None
         self.msg_edit_state: Optional[_MessageEditState] = None
@@ -145,7 +151,7 @@ class WriteBox(urwid.Pile):
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
         if (
-            self.to_write_box
+            self.compose_box_status == "open_with_private"
             and self.typing_recipient_user_ids
             and self.sent_start_typing_status
         ):
@@ -168,6 +174,8 @@ class WriteBox(urwid.Pile):
         )
 
         self.set_editor_mode()
+
+        self.compose_box_status = "open_with_private"
 
         if recipient_user_ids and emails:
             self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
@@ -308,6 +316,7 @@ class WriteBox(urwid.Pile):
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
         self.set_editor_mode()
+        self.compose_box_status = "open_with_stream"
         self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
             stream_id=stream_id
@@ -684,7 +693,7 @@ class WriteBox(urwid.Pile):
 
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
-            if not self.to_write_box:
+            if self.compose_box_status == "open_with_stream":
                 if re.fullmatch(r"\s*", self.title_write_box.edit_text):
                     topic = "(no topic)"
                 else:
@@ -744,6 +753,7 @@ class WriteBox(urwid.Pile):
         elif is_command_key("GO_BACK", key):
             self.msg_edit_state = None
             self.msg_body_edit_enabled = True
+            self.compose_box_status = "closed"
             self.send_stop_typing_status()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
@@ -753,7 +763,7 @@ class WriteBox(urwid.Pile):
             return key
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
-                if self.to_write_box:
+                if self.compose_box_status == "open_with_private":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )
@@ -765,7 +775,7 @@ class WriteBox(urwid.Pile):
                         to=self.recipient_emails,
                         content=self.msg_write_box.edit_text,
                     )
-                elif self.stream_id:
+                elif self.compose_box_status == "open_with_stream":
                     this_draft = StreamComposition(
                         type="stream",
                         to=self.stream_write_box.edit_text,
@@ -785,7 +795,7 @@ class WriteBox(urwid.Pile):
             header = self.header_write_box
             # toggle focus position
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
-                if self.to_write_box is None:
+                if self.compose_box_status == "open_with_stream":
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
                         stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
                         if not self.model.is_valid_stream(stream_name):
@@ -842,7 +852,7 @@ class WriteBox(urwid.Pile):
                 self.focus_position = self.FOCUS_CONTAINER_MESSAGE
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
-            if self.to_write_box is None:
+            if self.compose_box_status == "open_with_stream":
                 header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
