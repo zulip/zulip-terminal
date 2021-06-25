@@ -78,37 +78,39 @@ class WriteBox(urwid.Pile):
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
             "open_with_private", "open_with_stream", "closed"
-        ] = "closed"
+        ]
 
         # If editing a message, its state - otherwise None
-        self.msg_edit_state: Optional[_MessageEditState] = None
+        self.msg_edit_state: Optional[_MessageEditState]
         # Determines if the message body (content) can be edited
-        self.msg_body_edit_enabled = True
+        self.msg_body_edit_enabled: bool
 
         self.is_in_typeahead_mode = False
 
         # Set to int for stream box only
-        self.stream_id: Optional[int] = None
+        self.stream_id: Optional[int]
 
         # Used in PM and stream boxes
         # (empty list implies PM box empty, or not initialized)
         # Prioritizes autocomplete in message body
-        self.recipient_user_ids: List[int] = []
+        self.recipient_user_ids: List[int]
 
         # Updates server on PM typing events
         # Is separate from recipient_user_ids because we
         # don't include the user's own id in this list
-        self.typing_recipient_user_ids: List[int] = []
+        self.typing_recipient_user_ids: List[int]
 
         # Private message recipient text entry, None if stream-box
         # or not initialized
-        self.to_write_box: Optional[ReadlineEdit] = None
+        self.to_write_box: Optional[ReadlineEdit]
 
         # For tracking sending typing status updates
-        self.send_next_typing_update = datetime.now()
-        self.last_key_update = datetime.now()
-        self.idle_status_tracking = False
-        self.sent_start_typing_status = False
+        self.send_next_typing_update: datetime
+        self.last_key_update: datetime
+        self.idle_status_tracking: bool
+        self.sent_start_typing_status: bool
+
+        self._set_compose_attributes_to_defaults()
 
         # Constant indices into self.contents
         # (CONTAINER=vertical, HEADER/MESSAGE=horizontal)
@@ -123,6 +125,27 @@ class WriteBox(urwid.Pile):
         # FIXME: These elements don't acquire focus; replace prefix & in above?
         self.FOCUS_HEADER_PREFIX_STREAM = 0
         self.FOCUS_HEADER_PREFIX_TOPIC = 2
+
+    def _set_compose_attributes_to_defaults(self) -> None:
+        self.compose_box_status = "closed"
+
+        self.msg_edit_state = None
+        self.msg_body_edit_enabled = True
+
+        self.stream_id = None
+        self.to_write_box = None
+
+        # Maintain synchrony between *_user_ids by setting them
+        # to empty lists together using the helper method.
+        self._set_regular_and_typing_recipient_user_ids(None)
+
+        self.send_next_typing_update = datetime.now()
+        self.last_key_update = datetime.now()
+        self.idle_status_tracking = False
+        self.sent_start_typing_status = False
+
+        if hasattr(self, "msg_write_box"):
+            self.msg_write_box.edit_text = ""
 
     def main_view(self, new: bool) -> Any:
         if new:
@@ -321,7 +344,6 @@ class WriteBox(urwid.Pile):
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
             stream_id=stream_id
         )
-        self.to_write_box = None
         self.msg_write_box = ReadlineEdit(
             multiline=True, max_char=self.model.max_message_length
         )
@@ -751,10 +773,8 @@ class WriteBox(urwid.Pile):
                     self.msg_edit_state = None
                     self.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("GO_BACK", key):
-            self.msg_edit_state = None
-            self.msg_body_edit_enabled = True
-            self.compose_box_status = "closed"
             self.send_stop_typing_status()
+            self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")

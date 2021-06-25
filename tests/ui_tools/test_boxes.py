@@ -188,6 +188,38 @@ class TestWriteBox:
 
         assert not write_box.model.send_private_message.called
 
+    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    def test__compose_attributes_reset_for_private_compose(
+        self, key, mocker, write_box, widget_size
+    ):
+        mocker.patch("urwid.connect_signal")
+        write_box.private_box_view(
+            emails=["person1@example.com"], recipient_user_ids=[11]
+        )
+        write_box.msg_write_box.edit_text = "random text"
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        assert write_box.to_write_box is None
+        assert write_box.msg_write_box.edit_text == ""
+        assert write_box.compose_box_status == "closed"
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    def test__compose_attributes_reset_for_stream_compose(
+        self, key, mocker, write_box, widget_size
+    ):
+        write_box._set_stream_write_box_style = mocker.Mock()
+        write_box.stream_box_view(stream_id=1)
+        write_box.msg_write_box.edit_text = "random text"
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        assert write_box.stream_id is None
+        assert write_box.msg_write_box.edit_text == ""
+        assert write_box.compose_box_status == "closed"
+
     @pytest.mark.parametrize(
         ["raw_recipients", "tidied_recipients"],
         [
