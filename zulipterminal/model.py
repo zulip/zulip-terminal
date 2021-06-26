@@ -1400,6 +1400,7 @@ class Model:
                     self.controller.view.mentioned_button.update_count(
                         self.unread_counts["all_mentions"]
                     )
+                    self.index["unread_mentioned_msg_ids"].add(message_id)
             elif mentioned_before and not mentioned_after:
                 self.index["mentioned_msg_ids"].discard(message_id)
                 if "read" not in indexed_message["flags"]:
@@ -1407,6 +1408,7 @@ class Model:
                     self.controller.view.mentioned_button.update_count(
                         self.unread_counts["all_mentions"]
                     )
+                    self.index["unread_mentioned_msg_ids"].remove(message_id)
 
             self.index["messages"][message_id]["flags"] = event["flags"]
             self._update_rendered_view(message_id)
@@ -1414,7 +1416,7 @@ class Model:
         # Update the unread_count if message is not indexed. We can't index the message
         # since we don't get the full message structure from server for this event.
         elif not indexed_message and "flags" in event:
-            unread_mentions = self.initial_data["unread_msgs"]["mentions"]
+            unread_mentions = self.index["unread_mentioned_msg_ids"]
             unread_mentioned_before = message_id in unread_mentions
             unread_mentioned_after = "read" not in event["flags"] and bool(
                 set(event["flags"]) & mention_flags_set
@@ -1426,7 +1428,7 @@ class Model:
                     self.unread_counts["all_mentions"]
                 )
                 if message_id not in unread_mentions:
-                    unread_mentions.append(message_id)
+                    unread_mentions.add(message_id)
             elif unread_mentioned_before and not unread_mentioned_after:
                 self.unread_counts["all_mentions"] -= 1
                 self.controller.view.mentioned_button.update_count(
@@ -1520,6 +1522,11 @@ class Model:
             if operation == "add":
                 if flag_to_change not in msg["flags"]:
                     msg["flags"].append(flag_to_change)
+                    if (
+                        flag_to_change == "read"
+                        and message_id in self.index["unread_mentioned_msg_ids"]
+                    ):
+                        self.index["unread_mentioned_msg_ids"].remove(message_id)
                 if flag_to_change == "starred":
                     self.index["starred_msg_ids"].add(message_id)
             elif operation == "remove":
