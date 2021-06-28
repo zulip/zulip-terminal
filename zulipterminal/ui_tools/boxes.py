@@ -1806,7 +1806,7 @@ class PanelSearchBox(urwid.Edit):
     ) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = f"Search [{', '.join(keys_for_command(search_command))}]: "
+        self.search_text = f" Search [{', '.join(keys_for_command(search_command))}]: "
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
@@ -1841,7 +1841,7 @@ class PanelSearchBox(urwid.Edit):
             self.panel_view.keypress(size, "esc")
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.set_caption([("filter_results", "Search Results"), " "])
+            self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
