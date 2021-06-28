@@ -1841,7 +1841,7 @@ class PanelSearchBox(urwid.Edit):
             self.panel_view.keypress(size, "esc")
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.set_caption([("filter_results", " Search Results "), " "])
+            self.set_caption([("filter_results", " Search Results \n"), " > "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)

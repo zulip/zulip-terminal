@@ -1247,7 +1247,7 @@ class TestWriteBox:
 
 
 class TestPanelSearchBox:
-    search_caption = " Search Results  "
+    search_caption = " Search Results \n > "
 
     @pytest.fixture
     def panel_search_box(self, mocker):
