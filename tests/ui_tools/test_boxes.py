@@ -1248,7 +1248,7 @@ class TestWriteBox:
 
 
 class TestPanelSearchBox:
-    search_caption = "Search Results "
+    search_caption = " Search Results  "
 
     @pytest.fixture
     def panel_search_box(self, mocker):
@@ -1259,7 +1259,7 @@ class TestPanelSearchBox:
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
 
     def test_init(self, panel_search_box):
-        assert panel_search_box.search_text == "Search [X]: "
+        assert panel_search_box.search_text == " Search [X]: "
         assert panel_search_box.caption == panel_search_box.search_text
         assert panel_search_box.edit_text == ""
 
