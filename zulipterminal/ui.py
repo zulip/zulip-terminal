@@ -227,7 +227,6 @@ class View(urwid.WidgetWrap):
             self.users_view.keypress(size, key)
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
-            self.controller.enter_editor_mode_with(self.user_search)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
@@ -237,11 +236,6 @@ class View(urwid.WidgetWrap):
             self.left_panel.keypress(size, key)
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
-            if self.left_panel.is_in_topic_view:
-                search_box = self.topic_w.topic_search_box
-            else:
-                search_box = self.stream_w.stream_search_box
-            self.controller.enter_editor_mode_with(search_box)
             return key
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
