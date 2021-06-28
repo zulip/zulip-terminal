@@ -570,6 +570,9 @@ class TestStreamsView:
         assert stream_view.focus_index_before_search == 3
         stream_view.set_focus.assert_called_once_with("header")
         stream_view.stream_search_box.set_caption.assert_called_once_with(" ")
+        self.view.controller.enter_editor_mode_with.assert_called_once_with(
+            stream_view.stream_search_box
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
@@ -701,6 +704,9 @@ class TestTopicsView:
         topic_view.header_list.set_focus.assert_called_once_with(2)
         assert topic_view.focus_index_before_search == 3
         topic_view.topic_search_box.set_caption.assert_called_once_with(" ")
+        self.view.controller.enter_editor_mode_with.assert_called_once_with(
+            topic_view.topic_search_box
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
@@ -1128,6 +1134,9 @@ class TestRightColumnView:
         right_col_view.keypress(size, key)
         right_col_view.set_focus.assert_called_once_with("header")
         right_col_view.user_search.set_caption.assert_called_once_with(" ")
+        self.view.controller.enter_editor_mode_with.assert_called_once_with(
+            right_col_view.user_search
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, right_col_view, mocker, key, widget_size):

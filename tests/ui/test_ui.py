@@ -284,48 +284,34 @@ class TestView:
         view.body = mocker.Mock()
         view.controller.autohide = autohide
         view.body.contents = ["streams", "messages", mocker.Mock()]
-        view.user_search = mocker.Mock()
         view.left_panel = mocker.Mock()
         view.right_panel = mocker.Mock()
         size = widget_size(view)
-
-        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
-
         view.body.focus_position = None
 
         view.keypress(size, key)
 
         view.users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
-        view.controller.enter_editor_mode_with.assert_called_once_with(view.user_search)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_autohide_streams(self, view, mocker, autohide, key, widget_size):
-        view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
-        view.stream_w.stream_search_box = mocker.Mock()
         view.controller.autohide = autohide
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), "messages", "users"]
         view.left_panel = mocker.Mock()
-        view.left_panel.is_in_topic_view = False
         view.right_panel = mocker.Mock()
         size = widget_size(view)
-
-        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
-
         view.body.focus_position = None
 
         view.keypress(size, key)
 
         view.left_panel.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 0
-        view.controller.enter_editor_mode_with.assert_called_once_with(
-            view.stream_w.stream_search_box
-        )
 
     @pytest.mark.parametrize(
         "draft",
