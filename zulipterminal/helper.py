@@ -31,11 +31,6 @@ from zulipterminal.api_types import Composition, EmojiType, Message
 from zulipterminal.platform_code import PLATFORM
 
 
-MACOS = PLATFORM == "MacOS"
-LINUX = PLATFORM == "Linux"
-WSL = PLATFORM == "WSL"
-
-
 class StreamData(TypedDict):
     name: str
     id: int
@@ -644,7 +639,7 @@ def notify(title: str, html_text: str) -> str:
     text = document.text_content()
 
     command_list = None
-    if MACOS:
+    if PLATFORM == "MacOS":
         command_list = [
             "osascript",
             "-e",
@@ -658,7 +653,7 @@ def notify(title: str, html_text: str) -> str:
             text,
             title,
         ]
-    elif LINUX:
+    elif PLATFORM == "Linux":
         command_list = ["notify-send", "--", title, text]
 
     if command_list is not None:

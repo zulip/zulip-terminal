@@ -15,8 +15,9 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import LINUX, asynch, suppress_output
+from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
@@ -359,7 +360,11 @@ class Controller:
         """
         # Don't try to open web browser if running without a GUI
         # TODO: Explore and eventually support opening links in text-browsers.
-        if LINUX and not os.environ.get("DISPLAY") and os.environ.get("TERM"):
+        if (
+            PLATFORM == "Linux"
+            and not os.environ.get("DISPLAY")
+            and os.environ.get("TERM")
+        ):
             self.report_error(
                 "No DISPLAY environment variable specified. This could "
                 "likely mean the ZT host is running without a GUI."

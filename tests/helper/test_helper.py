@@ -4,7 +4,6 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
-import zulipterminal.helper
 from zulipterminal.api_types import Composition
 from zulipterminal.helper import (
     Index,
@@ -18,6 +17,7 @@ from zulipterminal.helper import (
     notify_if_message_sent_outside_narrow,
     powerset,
 )
+from zulipterminal.platform_code import AllPlatforms, SupportedPlatforms
 
 
 MODULE = "zulipterminal.helper"
@@ -314,26 +314,25 @@ def test_invalid_color_format(mocker: MockerFixture, color: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "OS, is_notification_sent",
+    "PLATFORM, is_notification_sent",
     [
+        # PLATFORM: Literal["WSL", "MacOS", "Linux", "unsupported"]
         pytest.param(
-            [True, False, False],
-            True,  # OS: [WSL, MACOS, LINUX]
+            "WSL",
+            True,
             marks=pytest.mark.xfail(reason="WSL notify disabled"),
         ),
-        ([False, True, False], True),
-        ([False, False, True], True),
-        ([False, False, False], False),  # Unsupported OS
+        ("MacOS", True),
+        ("Linux", True),
+        ("unsupported", False),  # Unsupported OS
     ],
 )
 def test_notify(
-    mocker: MockerFixture, OS: List[bool], is_notification_sent: bool
+    mocker: MockerFixture, PLATFORM: AllPlatforms, is_notification_sent: bool
 ) -> None:
     title = "Author"
     text = "Hello!"
-    mocker.patch(MODULE + ".WSL", OS[0])
-    mocker.patch(MODULE + ".MACOS", OS[1])
-    mocker.patch(MODULE + ".LINUX", OS[2])
+    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
     subprocess = mocker.patch(MODULE + ".subprocess")
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
@@ -350,28 +349,23 @@ def test_notify(
     ids=["X", "spaced_title", "single", "double"],
 )
 @pytest.mark.parametrize(
-    "OS, cmd_length",
+    "PLATFORM, cmd_length",
     [
-        ("LINUX", 4),
-        ("MACOS", 10),
+        ("Linux", 4),
+        ("MacOS", 10),
         pytest.param("WSL", 2, marks=pytest.mark.xfail(reason="WSL notify disabled")),
     ],
 )
 def test_notify_quotes(
     monkeypatch: pytest.MonkeyPatch,
     mocker: MockerFixture,
-    OS: str,
+    PLATFORM: SupportedPlatforms,
     cmd_length: int,
     title: str,
     text: str,
 ) -> None:
     subprocess = mocker.patch(MODULE + ".subprocess")
-
-    for os in ("LINUX", "MACOS", "WSL"):
-        if os != OS:
-            monkeypatch.setattr(zulipterminal.helper, os, False)
-        else:
-            monkeypatch.setattr(zulipterminal.helper, os, True)
+    platform = mocker.patch(MODULE + ".PLATFORM", PLATFORM)
 
     notify(title, text)
 
