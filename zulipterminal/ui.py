@@ -11,7 +11,8 @@ from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
     COLUMN_TITLE_BAR_LINE,
 )
-from zulipterminal.helper import WSL, asynch
+from zulipterminal.helper import asynch
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView,
@@ -316,7 +317,7 @@ class View(urwid.WidgetWrap):
 
 class Screen(urwid.raw_display.Screen):
     def write(self, data: Any) -> None:
-        if WSL:
+        if PLATFORM == "WSL":
             # replace urwid's SI/SO, which produce artifacts under WSL.
             # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
             # Above link describes the change.
