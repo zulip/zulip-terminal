@@ -208,8 +208,7 @@ class View(urwid.WidgetWrap):
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
             self.body.focus_col = 1
-            self.middle_column.keypress(size, key)
-            return key
+            return self.middle_column.keypress(size, key)
         elif is_command_key("ALL_PM", key):
             self.model.controller.narrow_to_all_pm()
             self.body.focus_col = 1
@@ -222,19 +221,17 @@ class View(urwid.WidgetWrap):
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
-            self.users_view.keypress(size, key)
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
-            return key
+            return self.right_panel.keypress(size, key)
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
             self.body.focus_position = 0
-            self.left_panel.keypress(size, key)
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
-            return key
+            return self.left_panel.keypress(size, key)
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
