@@ -252,17 +252,26 @@ class TestView:
 
         super_keypress.assert_called_once_with(size, key)
 
-    @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
-    def test_keypress_ALL_MENTIONS(self, view, mocker, key, widget_size):
+    @pytest.mark.parametrize(
+        "key, narrow_method",
+        [
+            (keys_for_command("ALL_MENTIONS"), "narrow_to_all_mentions"),
+            (keys_for_command("ALL_PM"), "narrow_to_all_pm"),
+            (keys_for_command("ALL_STARRED"), "narrow_to_all_starred"),
+        ],
+    )
+    def test_keypress_special_narrows(
+        self, view, mocker, key, narrow_method, widget_size
+    ):
         view.body = mocker.Mock()
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
-        view.controller.narrow_to_all_mentions = mocker.Mock()
+        mocked_narrow = mocker.patch.object(view.controller, narrow_method)
 
         view.keypress(size, key)
 
-        view.controller.narrow_to_all_mentions.assert_called_once_with()
+        mocked_narrow.assert_called_once_with()
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
