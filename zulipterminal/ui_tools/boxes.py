@@ -693,6 +693,7 @@ class MessageBox(urwid.Pile):
         self.message_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
         self.topic_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
         self.time_mentions: List[Tuple[str, str]] = list()
+        self.spoilers: List[Tuple[int, List[Any], List[Any]]] = list()
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -985,13 +986,21 @@ class MessageBox(urwid.Pile):
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
     ) -> Tuple[
-        List[Any], "OrderedDict[str, Tuple[str, int, bool]]", List[Tuple[str, str]]
+        List[Any],
+        "OrderedDict[str, Tuple[str, int, bool]]",
+        List[Tuple[str, str]],
+        List[Tuple[int, List[Any], List[Any]]],
     ]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
         if soup is None:  # This is not iterable, so return promptly
-            return markup, metadata["message_links"], metadata["time_mentions"]
+            return (
+                markup,
+                metadata["message_links"],
+                metadata["time_mentions"],
+                metadata["spoilers"],
+            )
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             "br": "",  # No indicator of absence
@@ -1239,9 +1248,33 @@ class MessageBox(urwid.Pile):
                     ]
                 )
                 markup.extend(bottom_border)
+                # Spoiler content.
+                content = element.find(class_="spoiler-content")
+
+                # Remove surrounding newlines.
+                content_contents = content.contents
+                if len(content_contents) > 2:
+                    if content_contents[-1] == "\n":
+                        content.contents.pop(-1)
+                    if content_contents[0] == "\n":
+                        content.contents.pop(0)
+                if len(content_contents) == 1 and content_contents[0] == "\n":
+                    content.contents.pop(0)
+
+                # FIXME: Do not soup2markup content in the MessageBox as it
+                # will render 'sensitive' spoiler anchor tags in the footlinks.
+                processed_content = cls.soup2markup(content, metadata)[0]
+                metadata["spoilers"].append(
+                    (processed_header_len, processed_header, processed_content)
+                )
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
-        return markup, metadata["message_links"], metadata["time_mentions"]
+        return (
+            markup,
+            metadata["message_links"],
+            metadata["time_mentions"],
+            metadata["spoilers"],
+        )
 
     def main_view(self) -> List[Any]:
 
@@ -1329,9 +1362,12 @@ class MessageBox(urwid.Pile):
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
-        )
+        (
+            content,
+            self.message_links,
+            self.time_mentions,
+            self.spoilers,
+        ) = self.transform_content(self.message["content"], self.model.server_url)
 
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7
@@ -1393,6 +1429,7 @@ class MessageBox(urwid.Pile):
         Tuple[None, Any],
         "OrderedDict[str, Tuple[str, int, bool]]",
         List[Tuple[str, str]],
+        List[Tuple[int, List[Any], List[Any]]],
     ]:
         soup = BeautifulSoup(content, "lxml")
         body = soup.find(name="body")
@@ -1401,13 +1438,14 @@ class MessageBox(urwid.Pile):
             server_url=server_url,
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )  # type: Dict[str, Any]
 
         if body and body.find(name="blockquote"):
             metadata["bq_len"] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
-        markup, message_links, time_mentions = cls.soup2markup(body, metadata)
-        return (None, markup), message_links, time_mentions
+        markup, message_links, time_mentions, spoilers = cls.soup2markup(body, metadata)
+        return (None, markup), message_links, time_mentions, spoilers
 
     @staticmethod
     def indent_quoted_content(soup: Any, padding_char: str) -> int:
