@@ -20,7 +20,7 @@ from zulipterminal.ui_tools.views import (
 from zulipterminal.urwid_types import urwid_Box
 
 
-class View(urwid.WidgetWrap):
+class View(urwid.Frame):
     """
     A class responsible for providing the application's interface.
     """
@@ -40,7 +40,24 @@ class View(urwid.WidgetWrap):
 
         self.message_view: Any = None
 
-        super().__init__(self.main_window())
+        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
+            full_name=self.model.user_full_name,
+            email=self.model.user_email,
+            server_name=self.model.server_name,
+            url=self.model.server_url,
+        )
+
+        title_bar = urwid.Columns(
+            [
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+                (len(title_text), urwid.Text([title_text])),
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+            ]
+        )
+
+        super().__init__(
+            self.main_window(), title_bar, focus_part="body", footer=self.footer_view()
+        )
 
     def left_column_view(self) -> Any:
         return LeftColumnView(View.LEFT_WIDTH, self)
@@ -153,25 +170,7 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
-        )
-
-        title_bar = urwid.Columns(
-            [
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-                (len(title_text), urwid.Text([title_text])),
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-            ]
-        )
-
-        w = urwid.Frame(
-            self.body, title_bar, focus_part="body", footer=self.footer_view()
-        )
-        return w
+        return self.body
 
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
