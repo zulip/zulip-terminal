@@ -1051,6 +1051,14 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "GO_BACK", width, title)
 
 
+class SpoilerView(PopUpView):
+    def __init__(self, controller: Any, title: str, content: str) -> None:
+        width, _ = controller.maximum_popup_dimensions()
+        widget = [urwid.Text(content)]
+
+        super().__init__(controller, widget, "ENTER", width, title)
+
+
 class AboutView(PopUpView):
     def __init__(
         self,
