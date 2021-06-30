@@ -248,6 +248,7 @@ class Controller:
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         msg_info_view = MsgInfoView(
             self,
@@ -256,6 +257,7 @@ class Controller:
             topic_links,
             message_links,
             time_mentions,
+            spoilers,
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -293,6 +295,7 @@ class Controller:
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             EditHistoryView(
@@ -301,6 +304,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 "Edit History (up/down scrolls)",
             ),
             "area:msg",

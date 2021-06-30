@@ -1294,11 +1294,13 @@ class MsgInfoView(PopUpView):
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
@@ -1417,6 +1419,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
@@ -1468,6 +1471,7 @@ class EditHistoryView(PopUpView):
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1475,6 +1479,7 @@ class EditHistoryView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         width = 64
         widgets: List[Any] = []
 
@@ -1573,6 +1578,7 @@ class EditHistoryView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)

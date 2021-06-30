@@ -229,6 +229,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             title="Edit History",
         )
 
@@ -238,6 +239,7 @@ class TestEditHistoryView:
         assert self.edit_history_view.topic_links == OrderedDict()
         assert self.edit_history_view.message_links == OrderedDict()
         assert self.edit_history_view.time_mentions == list()
+        assert self.edit_history_view.spoilers == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
             message_id=self.message["id"],
         )
@@ -271,6 +273,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
     def test_keypress_navigation(
@@ -542,6 +545,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture):
@@ -549,6 +553,7 @@ class TestMsgInfoView:
         assert self.msg_info_view.topic_links == OrderedDict()
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
+        assert self.msg_info_view.spoilers == list()
 
     def test_keypress_any_key(self, widget_size):
         key = "a"
@@ -592,6 +597,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -603,6 +609,7 @@ class TestMsgInfoView:
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
+                spoilers=list(),
             )
         else:
             self.controller.show_edit_history.assert_not_called()
@@ -687,6 +694,7 @@ class TestMsgInfoView:
             "Message Information",
             OrderedDict(),
             OrderedDict(),
+            list(),
             list(),
         )
         # 10 = 4 labels + 1 blank line + 1 'Reactions' (category)
