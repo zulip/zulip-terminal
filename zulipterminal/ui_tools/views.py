@@ -556,25 +556,29 @@ class MiddleColumnView(urwid.Frame):
         return None
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget
+        key = super().keypress(size, key)
+
         if is_command_key("GO_BACK", key):
             self.header.keypress(size, "esc")
             self.footer.keypress(size, "esc")
             self.set_focus("body")
-
+            return
+        # May not be needed
         elif self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
             self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus("header")
-            return key
+            return
 
         elif is_command_key("REPLY_MESSAGE", key):
             self.body.keypress(size, "enter")
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1
-            return key
+            return
 
         elif is_command_key("STREAM_MESSAGE", key):
             self.body.keypress(size, "c")
@@ -585,14 +589,14 @@ class MiddleColumnView(urwid.Frame):
                 self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
             self.set_focus("footer")
             self.footer.focus_position = 0
-            return key
+            return
 
         elif is_command_key("REPLY_AUTHOR", key):
             self.body.keypress(size, "R")
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1
-            return key
+            return
 
         elif is_command_key("NEXT_UNREAD_TOPIC", key):
             # narrow to next unread topic
@@ -604,33 +608,41 @@ class MiddleColumnView(urwid.Frame):
                 stream_name=self.model.stream_dict[stream_id]["name"],
                 topic_name=topic,
             )
-            return key
+            return
 
         elif is_command_key("NEXT_UNREAD_PM", key):
             # narrow to next unread pm
             pm = self.get_next_unread_pm()
             if pm is None:
-                return key
+                return key  # ????
             email = self.model.user_id_email_dict[pm]
             self.controller.narrow_to_user(
                 recipient_emails=[email],
                 contextual_message_id=pm,
             )
+            return
 
         elif is_command_key("PRIVATE_MESSAGE", key):
             # Create new PM message
             self.footer.private_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
-            return key
+            return
 
         elif is_command_key("GO_LEFT", key):
+            # Intercept 'left' on it's way to Columns.keypress()
+            # and let it continue it's path.
             self.view.show_left_panel(visible=True)
+            return key
 
         elif is_command_key("GO_RIGHT", key):
+            # Intercept 'right' on it's way to Columns.keypress()
+            # and let it continue it's path.
             self.view.show_right_panel(visible=True)
+            return key
 
-        return super().keypress(size, key)
+        # return unhandled
+        return key
 
 
 class RightColumnView(urwid.Frame):
@@ -752,10 +764,13 @@ class RightColumnView(urwid.Frame):
         return user_w
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget
+        key = super().keypress(size, key)
+
         if is_command_key("SEARCH_PEOPLE", key):
             self.allow_update_user_list = False
             self.set_focus("header")
-            return key
+            return
 
         elif is_command_key("GO_BACK", key):
             self.user_search.reset_search_text()
@@ -764,12 +779,16 @@ class RightColumnView(urwid.Frame):
             self.set_body(self.body)
             self.set_focus("body")
             self.view.controller.update_screen()
-            return key
+            return
 
         elif is_command_key("GO_LEFT", key):
+            # Intercept 'left' on it's way to Columns.keypress()
+            # and let it continue it's path.
             self.view.show_right_panel(visible=False)
+            return key
 
-        return super().keypress(size, key)
+        # return unhandled
+        return key
 
 
 class LeftColumnView(urwid.Pile):
@@ -922,6 +941,10 @@ class LeftColumnView(urwid.Pile):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget and handle 'up' and 'down'
+        key = super().keypress(size, key)
+
+        # May not be needed
         if is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
@@ -930,12 +953,16 @@ class LeftColumnView(urwid.Pile):
                 self.view.topic_w.keypress(size, key)
             else:
                 self.view.stream_w.keypress(size, key)
-            return key
+            return
 
         elif is_command_key("GO_RIGHT", key):
+            # Intercept 'right' on it's way to Columns.keypress()
+            # and let it continue it's path.
             self.view.show_left_panel(visible=False)
+            return key
 
-        return super().keypress(size, key)
+        # return unhandled.
+        return key
 
 
 PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, str]]]]]
