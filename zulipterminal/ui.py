@@ -195,8 +195,13 @@ class View(urwid.Frame):
             self.body.focus_position = 2
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
+        # Pass to focus widget.
+        key = super().keypress(size, key)
+
         self.model.new_user_input = True
+        # May not be needed
         if self.controller.is_in_editor_mode():
+            print(key)
             return self.controller.current_editor().keypress((size[1],), key)
 
         # Redirect commands to message_view.
@@ -208,20 +213,22 @@ class View(urwid.Frame):
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
             self.body.focus_col = 1
-            self.middle_column.keypress(size, key)
-            return key
+            return self.middle_column.keypress(size, key)
 
         elif is_command_key("ALL_PM", key):
             self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
+            return
 
         elif is_command_key("ALL_STARRED", key):
             self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
+            return
 
         elif is_command_key("ALL_MENTIONS", key):
             self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
+            return
 
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
@@ -231,7 +238,7 @@ class View(urwid.Frame):
             self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
-            return key
+            return
 
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
@@ -247,7 +254,7 @@ class View(urwid.Frame):
                 search_box = self.stream_w.stream_search_box
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
-            return key
+            return
 
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
@@ -278,18 +285,18 @@ class View(urwid.Frame):
                 self.controller.report_error(
                     "No draft message was saved in this session."
                 )
-            return key
+            return
 
         elif is_command_key("ABOUT", key):
             self.controller.show_about()
-            return key
+            return
 
         elif is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()
-            return key
+            return
 
-        return super().keypress(size, key)
+        return key
 
 
 class Screen(urwid.raw_display.Screen):
