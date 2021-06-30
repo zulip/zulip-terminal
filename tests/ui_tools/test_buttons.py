@@ -7,6 +7,7 @@ from urwid import AttrMap, Overlay
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
+    SpoilerButton,
     StarredButton,
     StreamButton,
     TopButton,
@@ -412,6 +413,66 @@ class TestTopicButton:
         topic_button.view.left_panel = mocker.Mock()
         topic_button.keypress(size, key)
         topic_button.view.left_panel.show_stream_view.assert_called_once_with()
+
+
+class TestSpoilerButton:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.controller = mocker.Mock()
+        self.super_init = mocker.patch(BUTTONS + ".urwid.Button.__init__")
+        self.connect_signal = mocker.patch(BUTTONS + ".urwid.connect_signal")
+
+    def spoiler_button(
+        self, header_len=0, header=[""], content=[""], display_attr=None
+    ):
+        self.content = content
+        self.header_len = header_len
+        self.header = header
+        self.display_attr = display_attr
+        return SpoilerButton(self.controller, header_len, header, content, display_attr)
+
+    def test_init(self, mocker):
+        self.update_widget = mocker.patch(BUTTONS + ".SpoilerButton.update_widget")
+
+        mocked_button = self.spoiler_button()
+
+        assert mocked_button.controller == self.controller
+        assert mocked_button.content == self.content
+        self.super_init.assert_called_once_with("")
+        self.update_widget.assert_called_once_with(
+            self.header_len, self.header, self.display_attr
+        )
+        assert self.connect_signal.called
+
+    @pytest.mark.parametrize(
+        "header, header_len, expected_cursor_position",
+        [
+            (["Test"], 4, 5),
+            (["Check"], 5, 6),
+        ],
+    )
+    def test_update_widget(
+        self, mocker, header, header_len, expected_cursor_position, display_attr=None
+    ):
+        self.selectable_icon = mocker.patch(BUTTONS + ".urwid.SelectableIcon")
+
+        # The method update_widget() is called in SpoilerButton's init.
+        mocked_button = self.spoiler_button(
+            header=header, header_len=header_len, display_attr=display_attr
+        )
+        self.selectable_icon.assert_called_once_with(
+            header, cursor_position=expected_cursor_position
+        )
+        assert isinstance(mocked_button._w, AttrMap)
+
+    def test_show_spoiler(self, mocker):
+        mocked_button = self.spoiler_button()
+
+        mocked_button.show_spoiler()
+
+        mocked_button.controller.show_spoiler.assert_called_once_with(
+            mocked_button.content
+        )
 
 
 class TestMessageLinkButton:
