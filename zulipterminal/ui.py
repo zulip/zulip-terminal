@@ -200,12 +200,10 @@ class View(urwid.Frame):
 
         self.model.new_user_input = True
         # May not be needed
-        if self.controller.is_in_editor_mode():
-            print(key)
-            return self.controller.current_editor().keypress((size[1],), key)
-
+        # if self.controller.is_in_editor_mode():
+        #     return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif (
+        if (
             is_command_key("SEARCH_MESSAGES", key)
             or is_command_key("NEXT_UNREAD_TOPIC", key)
             or is_command_key("NEXT_UNREAD_PM", key)

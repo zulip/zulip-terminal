@@ -325,7 +325,7 @@ class StreamsView(urwid.Frame):
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
-        if not self.view.controller.is_in_editor_mode():
+        if not hasattr(self.view.controller, "view"):
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong stream list.
@@ -433,7 +433,7 @@ class TopicsView(urwid.Frame):
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
-        if not self.view.controller.is_in_editor_mode():
+        if not hasattr(self.view.controller, "view"):
             return
         # wait for any previously started search to finish to avoid
         # displaying wrong topics list.
@@ -586,8 +586,8 @@ class MiddleColumnView(urwid.Frame):
             self.set_focus("body")
             return
         # May not be needed
-        elif self.focus_position in ["footer", "header"]:
-            return super().keypress(size, key)
+        # elif self.focus_position in ["footer", "header"]:
+        #     return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
             self.controller.enter_editor_mode_with(self.search_box)
