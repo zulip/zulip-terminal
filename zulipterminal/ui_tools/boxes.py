@@ -651,9 +651,12 @@ class WriteBox(urwid.Pile):
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
                     self.update_recipient_emails(self.to_write_box)
-                    invalid_emails = self.model.get_invalid_recipient_emails(
-                        self.recipient_emails
-                    )
+                    invalid_emails = [
+                        recipient_email
+                        for recipient_email in self.recipient_emails
+                        if not self.model.is_valid_private_recipient(recipient_email)
+                    ]
+
                     if invalid_emails:
                         invalid_emails_error = (
                             f"Invalid recipient(s) - {', '.join(invalid_emails)}"
