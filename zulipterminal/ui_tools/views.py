@@ -364,10 +364,13 @@ class StreamsView(urwid.Frame):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget
+        key = super().keypress(size, key)
+
         if is_command_key("SEARCH_STREAMS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
-            return key
+            return
 
         elif is_command_key("GO_BACK", key):
             self.stream_search_box.reset_search_text()
@@ -376,9 +379,10 @@ class StreamsView(urwid.Frame):
             self.set_focus("body")
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
-            return key
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
 
 
 class TopicsView(urwid.Frame):
@@ -471,11 +475,14 @@ class TopicsView(urwid.Frame):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget
+        key = super().keypress(size, key)
+
         if is_command_key("SEARCH_TOPICS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
             self.header_list.set_focus(2)
-            return key
+            return
 
         elif is_command_key("GO_BACK", key):
             self.topic_search_box.reset_search_text()
@@ -484,9 +491,10 @@ class TopicsView(urwid.Frame):
             self.set_focus("body")
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
-            return key
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
 
 
 class UsersView(urwid.ListBox):
