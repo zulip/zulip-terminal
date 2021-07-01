@@ -1085,11 +1085,19 @@ class PopUpView(urwid.ListBox):
                     )
         return widgets
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
+    def keypress(self, size: urwid_Size, key: str, bypass: bool = False) -> str:
+        # Pass to focus widget and handle navigation.
+        key = super().keypress(size, key)
+
+        if bypass:
+            return key
+
         if is_command_key("GO_BACK", key) or is_command_key(self.command, key):
             self.controller.exit_popup()
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
 
 
 class NoticeView(PopUpView):
@@ -1201,6 +1209,7 @@ class PopUpConfirmationView(urwid.Overlay):
     def exit_popup_no(self, args: Any) -> None:
         self.controller.exit_popup()
 
+    # Not needed
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("GO_BACK", key):
             self.controller.exit_popup()
@@ -1299,10 +1308,15 @@ class StreamInfoView(PopUpView):
         self.controller.model.toggle_stream_pinned_status(self.stream_id)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
+        # Pass to focus widget and handle navigation and exit.
+        key = super().keypress(size, key)
+
         if is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled
+        return key
 
 
 class StreamMembersView(PopUpView):
@@ -1326,11 +1340,15 @@ class StreamMembersView(PopUpView):
         super().__init__(controller, widgets, "STREAM_DESC", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
+        # Pass to focus widget and handle navigation
+        key = super().keypress(size, key, bypass=True)
+
         if is_command_key("GO_BACK", key) or is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_info(stream_id=self.stream_id)
-            return key
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
 
 
 class MsgInfoView(PopUpView):
@@ -1459,6 +1477,9 @@ class MsgInfoView(PopUpView):
         return link_widgets, link_width
 
     def keypress(self, size: urwid_Size, key: str) -> str:
+        # Pass to focus widget and handle navigation and exit.
+        key = super().keypress(size, key)
+
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
             self.controller.show_edit_history(
                 message=self.msg,
@@ -1466,12 +1487,15 @@ class MsgInfoView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
+            return
 
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
             self.controller.open_in_browser(url)
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
 
 
 class EditModeView(PopUpView):
@@ -1617,6 +1641,9 @@ class EditHistoryView(PopUpView):
         return author_prefix
 
     def keypress(self, size: urwid_Size, key: str) -> str:
+        # Pass to focus widget and handle navigation
+        key = super().keypress(size, key, bypass=True)
+
         if is_command_key("GO_BACK", key) or is_command_key("EDIT_HISTORY", key):
             self.controller.show_msg_info(
                 msg=self.message,
@@ -1624,6 +1651,7 @@ class EditHistoryView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
-            return key
+            return
 
-        return super().keypress(size, key)
+        # Return unhandled.
+        return key
