@@ -164,30 +164,41 @@ class MessageView(urwid.ListBox):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Pass to focus widget except 'up', 'down', 'page up' and 'page down'
+        # FIXME: Use super.keypress for navigation and messageview.keypress
+        # for loading messages before reaching end. Issue exists on Github.
+        if not any(
+            map(
+                lambda cmd: is_command_key(cmd, key),
+                ["GO_UP", "GO_DOWN", "SCROLL_UP", "SCROLL_DOWN"],
+            )
+        ):
+            key = super().keypress(size, key)
+
         if is_command_key("GO_DOWN", key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, "above")
                 self.set_focus_valign("middle")
 
-                return key
+                return
             except Exception:
                 if self.focus:
                     id = self.focus.original_widget.message["id"]
                     self.load_new_messages(id)
-                return key
+                return
 
         elif is_command_key("GO_UP", key) and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, "below")
                 self.set_focus_valign("middle")
-                return key
+                return
             except Exception:
                 if self.focus:
                     id = self.focus.original_widget.message["id"]
                     self.load_old_messages(id)
-                return key
+                return
 
         elif is_command_key("SCROLL_UP", key) and not self.old_loading:
             if self.focus is not None and self.focus_position == 0:
@@ -201,18 +212,20 @@ class MessageView(urwid.ListBox):
             else:
                 return super().keypress(size, "page down")
 
+        # These both should be in MessageBox
         elif is_command_key("THUMBS_UP", key):
             if self.focus is not None:
                 self.model.react_to_message(
                     self.focus.original_widget.message, reaction_to_toggle="thumbs_up"
                 )
+            return
 
         elif is_command_key("TOGGLE_STAR_STATUS", key):
             if self.focus is not None:
                 message = self.focus.original_widget.message
                 self.model.toggle_message_star_status(message)
+            return
 
-        key = super().keypress(size, key)
         return key
 
     def update_search_box_narrow(self, message_view: Any) -> None:
