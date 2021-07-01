@@ -9,7 +9,12 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
-from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
+from zulipterminal.ui_tools.boxes import (
+    PanelSearchBox,
+    SearchBox,
+    WriteBox,
+    _MessageEditState,
+)
 
 
 MODULE = "zulipterminal.ui_tools.boxes"
@@ -1353,7 +1358,6 @@ class TestWriteBox:
 
         if box_type == "stream":
             if message_being_edited:
-                mocker.patch(MODULE + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
                 write_box.msg_edit_state = _MessageEditState(
                     message_id=10, old_topic="some old topic"
@@ -1422,6 +1426,57 @@ class TestWriteBox:
             write_box.private_box_view(recipient_user_ids=[1])
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("SEND_MESSAGE"), None),
+            (primary_key_for_command("GO_BACK"), None),
+            (primary_key_for_command("MARKDOWN_HELP"), None),
+            (primary_key_for_command("SAVE_AS_DRAFT"), None),
+            (primary_key_for_command("CYCLE_COMPOSE_FOCUS"), None),
+            ("a", None),  # Editing keys
+            ("2", None),  # Editing keys
+            ("ctrl _", None),  # Editing keys
+            ("left", "left"),  # Nav keys (If at the edge of edit_text)
+        ],
+    )
+    def test_keypress_return_value(
+        self, mocker, write_box, key, expected_return_value, widget_size
+    ):
+        size = widget_size(write_box)
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
+        write_box.stream_box_view(10)
+
+        return_value = write_box.keypress(size, key)
+
+        assert return_value == expected_return_value
+
+
+class TestSearchBox:
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("ENTER"), None),
+            (primary_key_for_command("GO_BACK"), None),
+            ("a", None),  # Editing keys
+            ("2", None),  # Editing keys
+            ("end", None),  # Editing keys
+            ("left", "left"),  # Nav keys (If at the edge of edit_text)
+            ("up", "up"),  # Nav keys
+        ],
+    )
+    def test_keypress_return_value(
+        self, mocker, key, expected_return_value, widget_size
+    ):
+        search_box = SearchBox(mocker.Mock())
+        if key == primary_key_for_command("ENTER") and expected_return_value is None:
+            search_box.text_box.edit_text = "test"
+        size = widget_size(search_box)
+
+        return_value = search_box.keypress(size, key)
+
+        assert return_value == expected_return_value
 
 
 class TestPanelSearchBox:
@@ -1522,17 +1577,35 @@ class TestPanelSearchBox:
 
         panel_search_box.keypress(size, back_key)
 
-        # Reset display
-        assert panel_search_box.caption == panel_search_box.search_text
-        assert panel_search_box.edit_text == ""
-
         # Leave editor mode
         panel_view.view.controller.exit_editor_mode.assert_called_once_with()
-
-        # Switch focus to body; focus should return to previous in body
-        panel_view.set_focus.assert_called_once_with("body")
 
         # pass keypress back
         # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
         #       - should we add a second callback to update the panel?
         panel_view.keypress.assert_called_once_with(size, "esc")
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("ENTER"), None),
+            (primary_key_for_command("ENTER"), primary_key_for_command("GO_BACK")),
+            (primary_key_for_command("GO_BACK"), primary_key_for_command("GO_BACK")),
+            ("a", None),  # Editing keys
+            ("2", None),  # Editing keys
+            ("end", None),  # Editing keys
+            ("left", "left"),  # Nav keys (If at the edge of edit_text)
+            ("up", "up"),  # Nav keys
+        ],
+    )
+    def test_keypress_return_value(
+        self, panel_search_box, key, expected_return_value, widget_size
+    ):
+        if key == primary_key_for_command("ENTER") and expected_return_value is None:
+            panel_search_box.edit_text = "test"
+            panel_search_box.panel_view.empty_search = False
+        size = widget_size(panel_search_box)
+
+        return_value = panel_search_box.keypress(size, key)
+
+        assert return_value == expected_return_value

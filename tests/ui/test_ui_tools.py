@@ -2879,3 +2879,31 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, key)
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("REPLY_MESSAGE"), None),
+            (primary_key_for_command("STREAM_MESSAGE"), None),
+            (primary_key_for_command("STREAM_NARROW"), None),
+            (primary_key_for_command("TOGGLE_NARROW"), None),
+            (primary_key_for_command("TOPIC_NARROW"), None),
+            (primary_key_for_command("ALL_MESSAGES"), None),
+            (primary_key_for_command("REPLY_AUTHOR"), None),
+            (primary_key_for_command("MENTION_REPLY"), None),
+            (primary_key_for_command("QUOTE_REPLY"), None),
+            (primary_key_for_command("EDIT_MESSAGE"), None),
+            (primary_key_for_command("MSG_INFO"), None),
+            ("k", "k"),  # Any other key is returned
+        ],
+    )
+    def test_keypress_return_value(
+        self, mocker, msg_box, key, expected_return_value, widget_size
+    ):
+        size = widget_size(msg_box)
+        mocker.patch(BOXES + ".get_unused_fence")
+        mocker.patch(BOXES + ".near_message_url")
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value == expected_return_value
