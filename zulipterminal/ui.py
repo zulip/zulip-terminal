@@ -198,6 +198,7 @@ class View(urwid.Frame):
         self.model.new_user_input = True
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
+
         # Redirect commands to message_view.
         elif (
             is_command_key("SEARCH_MESSAGES", key)
@@ -209,15 +210,19 @@ class View(urwid.Frame):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
+
         elif is_command_key("ALL_PM", key):
             self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
+
         elif is_command_key("ALL_STARRED", key):
             self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
+
         elif is_command_key("ALL_MENTIONS", key):
             self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
+
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
@@ -227,6 +232,7 @@ class View(urwid.Frame):
             self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
             return key
+
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
@@ -242,6 +248,7 @@ class View(urwid.Frame):
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
             return key
+
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
@@ -272,9 +279,11 @@ class View(urwid.Frame):
                     "No draft message was saved in this session."
                 )
             return key
+
         elif is_command_key("ABOUT", key):
             self.controller.show_about()
             return key
+
         elif is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()

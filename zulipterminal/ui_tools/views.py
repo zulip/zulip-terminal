@@ -368,6 +368,7 @@ class StreamsView(urwid.Frame):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
             return key
+
         elif is_command_key("GO_BACK", key):
             self.stream_search_box.reset_search_text()
             self.log.clear()
@@ -376,6 +377,7 @@ class StreamsView(urwid.Frame):
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
+
         return super().keypress(size, key)
 
 
@@ -474,6 +476,7 @@ class TopicsView(urwid.Frame):
             self.set_focus("header")
             self.header_list.set_focus(2)
             return key
+
         elif is_command_key("GO_BACK", key):
             self.topic_search_box.reset_search_text()
             self.log.clear()
@@ -482,6 +485,7 @@ class TopicsView(urwid.Frame):
             self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
+
         return super().keypress(size, key)
 
 
@@ -601,6 +605,7 @@ class MiddleColumnView(urwid.Frame):
                 topic_name=topic,
             )
             return key
+
         elif is_command_key("NEXT_UNREAD_PM", key):
             # narrow to next unread pm
             pm = self.get_next_unread_pm()
@@ -611,16 +616,20 @@ class MiddleColumnView(urwid.Frame):
                 recipient_emails=[email],
                 contextual_message_id=pm,
             )
+
         elif is_command_key("PRIVATE_MESSAGE", key):
             # Create new PM message
             self.footer.private_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key
+
         elif is_command_key("GO_LEFT", key):
             self.view.show_left_panel(visible=True)
+
         elif is_command_key("GO_RIGHT", key):
             self.view.show_right_panel(visible=True)
+
         return super().keypress(size, key)
 
 
@@ -747,6 +756,7 @@ class RightColumnView(urwid.Frame):
             self.allow_update_user_list = False
             self.set_focus("header")
             return key
+
         elif is_command_key("GO_BACK", key):
             self.user_search.reset_search_text()
             self.allow_update_user_list = True
@@ -755,8 +765,10 @@ class RightColumnView(urwid.Frame):
             self.set_focus("body")
             self.view.controller.update_screen()
             return key
+
         elif is_command_key("GO_LEFT", key):
             self.view.show_right_panel(visible=False)
+
         return super().keypress(size, key)
 
 
@@ -919,8 +931,10 @@ class LeftColumnView(urwid.Pile):
             else:
                 self.view.stream_w.keypress(size, key)
             return key
+
         elif is_command_key("GO_RIGHT", key):
             self.view.show_left_panel(visible=False)
+
         return super().keypress(size, key)
 
 
@@ -1142,6 +1156,7 @@ class PopUpConfirmationView(urwid.Overlay):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("GO_BACK", key):
             self.controller.exit_popup()
+
         return super().keypress(size, key)
 
 
@@ -1238,6 +1253,7 @@ class StreamInfoView(PopUpView):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
+
         return super().keypress(size, key)
 
 
@@ -1265,6 +1281,7 @@ class StreamMembersView(PopUpView):
         if is_command_key("GO_BACK", key) or is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_info(stream_id=self.stream_id)
             return key
+
         return super().keypress(size, key)
 
 
@@ -1401,9 +1418,11 @@ class MsgInfoView(PopUpView):
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
+
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
             self.controller.open_in_browser(url)
+
         return super().keypress(size, key)
 
 
@@ -1558,4 +1577,5 @@ class EditHistoryView(PopUpView):
                 time_mentions=self.time_mentions,
             )
             return key
+
         return super().keypress(size, key)
