@@ -31,26 +31,32 @@ class TopButton(urwid.Button):
         count: int = 0,
         count_style: Optional[str] = None,
     ) -> None:
-        if isinstance(prefix_character, tuple):
-            prefix = prefix_character[1]
-        else:
-            prefix = prefix_character
-        assert len(prefix) in (0, 1)
         self.controller = controller
         self._caption = caption
         self.show_function = show_function
         self.prefix_character = prefix_character
-        self.post_prefix_spacing = " " if prefix else ""
         self.original_color = text_color
         self.count = count
         self.count_style = count_style
 
-        prefix_length = 0 if prefix == "" else 2
-        # Space either side, at least one space between
-        self.width_for_text_and_count = width - 3 - prefix_length
-
         super().__init__("")
+
+        self.button_prefix = urwid.Text("")
+        self._label.set_wrap_mode("ellipsis")
+        self._label.get_cursor_coords = lambda x: None
+        self.button_suffix = urwid.Text("")
+
+        cols = urwid.Columns(
+            [
+                ("pack", self.button_prefix),
+                self._label,
+                ("pack", self.button_suffix),
+            ]
+        )
+        self._w = urwid.AttrMap(cols, None, "selected")
+
         self.update_count(count, text_color)
+
         urwid.connect_signal(self, "click", self.activate)
 
     def update_count(self, count: int, text_color: Optional[str] = None) -> None:
@@ -67,33 +73,17 @@ class TopButton(urwid.Button):
     def update_widget(
         self, count_text: Tuple[Optional[str], str], text_color: Optional[str]
     ) -> Any:
-        # Note that we don't modify self._caption
-        max_caption_length = self.width_for_text_and_count - len(count_text[1])
-        if len(self._caption) > max_caption_length:
-            caption = (
-                self._caption[: max_caption_length - 1] + "\N{HORIZONTAL ELLIPSIS}"
-            )
+        if self.prefix_character:
+            prefix = [" ", self.prefix_character, " "]
         else:
-            caption = self._caption
-        num_extra_spaces = (
-            self.width_for_text_and_count - len(count_text[1]) - len(caption)
-        )
-
-        # NOTE: Generated text does not include space at end
-        # NOTE: Some are styles, so are not included in f-string
-        self._w = urwid.AttrMap(
-            urwid.SelectableIcon(
-                [
-                    " ",
-                    self.prefix_character,
-                    f"{self.post_prefix_spacing}{caption}{num_extra_spaces * ' '} ",
-                    count_text,
-                ],
-                self.width_for_text_and_count + 5,  # cursor location
-            ),
-            text_color,
-            "selected",
-        )
+            prefix = [" "]
+        if count_text[1]:
+            suffix = [" ", count_text, " "]
+        else:
+            suffix = ["  "]
+        self.button_prefix.set_text(prefix)
+        self.set_label((text_color, self._caption))
+        self.button_suffix.set_text(suffix)
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
