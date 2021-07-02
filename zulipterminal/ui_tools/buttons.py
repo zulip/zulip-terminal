@@ -277,11 +277,12 @@ class UserButton(TopButton):
 class TopicButton(TopButton):
     def __init__(
         self,
+        *,
         stream_id: int,
         topic: str,
         controller: Any,
         view: Any,
-        count: int = 0,
+        count: int,
     ) -> None:
         self.stream_name = controller.model.stream_dict[stream_id]["name"]
         self.topic_name = topic

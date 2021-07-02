@@ -470,11 +470,11 @@ class TopicsView(urwid.Frame):
         # No previous topics with same topic names are found
         # hence we create a new topic button for it.
         new_topic_button = TopicButton(
-            stream_id,
-            topic_name,
-            self.view.controller,
-            self.view,
-            0,
+            stream_id=stream_id,
+            topic=topic_name,
+            controller=self.view.controller,
+            view=self.view,
+            count=0,
         )
         self.log.insert(0, new_topic_button)
         self.list_box.set_focus_valign("bottom")
