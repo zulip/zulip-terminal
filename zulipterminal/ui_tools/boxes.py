@@ -373,7 +373,10 @@ class WriteBox(urwid.Pile):
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
         self.stream_box_view(stream_id, caption, title)
-        self.edit_mode_button = EditModeButton(self.model.controller, 20)
+        self.edit_mode_button = EditModeButton(
+            controller=self.model.controller,
+            width=20,
+        )
 
         self.header_write_box.widget_list.append(self.edit_mode_button)
 

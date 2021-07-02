@@ -552,7 +552,7 @@ class MessageLinkButton(urwid.Button):
 
 
 class EditModeButton(urwid.Button):
-    def __init__(self, controller: Any, width: int) -> None:
+    def __init__(self, *, controller: Any, width: int) -> None:
         self.controller = controller
         self.width = width
         super().__init__(label="", on_press=controller.show_topic_edit_mode)
