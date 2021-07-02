@@ -1219,7 +1219,7 @@ class TestLeftColumnView:
         stream_button.assert_has_calls(
             [
                 mocker.call(
-                    stream,
+                    properties=stream,
                     controller=self.view.controller,
                     view=self.view,
                     count=1,

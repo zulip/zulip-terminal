@@ -835,7 +835,7 @@ class LeftColumnView(urwid.Pile):
     def streams_view(self) -> Any:
         streams_btn_list = [
             StreamButton(
-                stream,
+                properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
@@ -848,7 +848,7 @@ class LeftColumnView(urwid.Pile):
 
         streams_btn_list += [
             StreamButton(
-                stream,
+                properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),

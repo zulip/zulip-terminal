@@ -158,10 +158,11 @@ class StarredButton(TopButton):
 class StreamButton(TopButton):
     def __init__(
         self,
+        *,
         properties: StreamData,
         controller: Any,
         view: Any,
-        count: int = 0,
+        count: int,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
