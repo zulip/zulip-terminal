@@ -820,7 +820,9 @@ class LeftColumnView(urwid.Pile):
 
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
-        self.view.starred_button = StarredButton(self.controller, count=count)
+        self.view.starred_button = StarredButton(
+            controller=self.controller, count=count
+        )
         menu_btn_list = [
             self.view.home_button,
             self.view.pm_button,

@@ -142,7 +142,7 @@ class MentionedButton(TopButton):
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any, count: int = 0) -> None:
+    def __init__(self, *, controller: Any, count: int) -> None:
         button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
