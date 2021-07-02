@@ -216,6 +216,22 @@ class WriteBox(urwid.Pile):
     def update_recipient_emails(self, write_box: ReadlineEdit) -> None:
         self.recipient_emails = re.findall(r"[\w\.-]+@[\w\.-]+", write_box.edit_text)
 
+    def _validate_recipients_and_notify_invalid_ones(
+        self, write_box: ReadlineEdit
+    ) -> bool:
+        invalid_emails = [
+            recipient_email
+            for recipient_email in self.recipient_emails
+            if not self.model.is_valid_private_recipient(recipient_email)
+        ]
+
+        if invalid_emails:
+            invalid_emails_error = f"Invalid recipient(s) - {', '.join(invalid_emails)}"
+            self.view.controller.report_error(invalid_emails_error)
+            return False
+
+        return True
+
     def stream_box_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
@@ -651,17 +667,10 @@ class WriteBox(urwid.Pile):
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
                     self.update_recipient_emails(self.to_write_box)
-                    invalid_emails = [
-                        recipient_email
-                        for recipient_email in self.recipient_emails
-                        if not self.model.is_valid_private_recipient(recipient_email)
-                    ]
-
-                    if invalid_emails:
-                        invalid_emails_error = (
-                            f"Invalid recipient(s) - {', '.join(invalid_emails)}"
-                        )
-                        self.view.controller.report_error(invalid_emails_error)
+                    all_valid = self._validate_recipients_and_notify_invalid_ones(
+                        self.to_write_box
+                    )
+                    if not all_valid:
                         return key
                     users = self.model.user_dict
                     self.recipient_user_ids = [
