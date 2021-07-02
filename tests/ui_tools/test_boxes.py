@@ -176,7 +176,14 @@ class TestWriteBox:
 
         write_box.to_write_box.edit_text = raw_recipients
         write_box.to_write_box.set_edit_pos(len(raw_recipients))
-        expected_lines = "Invalid recipient(s) - " + invalid_recipients
+        expected_lines = [
+            "Invalid recipient(s) - " + invalid_recipients,
+            " - Use ",
+            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+            " or ",
+            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE_REVERSE")),
+            " to autocomplete.",
+        ]
 
         size = widget_size(write_box)
         write_box.keypress(size, key)
