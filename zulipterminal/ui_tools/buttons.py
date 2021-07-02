@@ -335,7 +335,7 @@ class ParsedNarrowLink(TypedDict, total=False):
 
 class MessageLinkButton(urwid.Button):
     def __init__(
-        self, controller: Any, caption: str, link: str, display_attr: Optional[str]
+        self, *, controller: Any, caption: str, link: str, display_attr: Optional[str]
     ) -> None:
         self.controller = controller
         self.model = self.controller.model
