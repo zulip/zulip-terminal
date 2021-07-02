@@ -114,7 +114,7 @@ class HomeButton(TopButton):
 
 
 class PMButton(TopButton):
-    def __init__(self, controller: Any, count: int = 0) -> None:
+    def __init__(self, *, controller: Any, count: int) -> None:
         button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
