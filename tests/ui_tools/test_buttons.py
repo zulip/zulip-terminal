@@ -22,113 +22,102 @@ SERVER_URL = "https://chat.zulip.zulip"
 
 
 class TestTopButton:
-    @pytest.mark.parametrize(
-        "prefix",
-        [
-            None,
-            "\N{BULLET}",
-            "-",
-            ("blue", "o"),
-            "",
-        ],
-    )
-    @pytest.mark.parametrize(
-        "width, count, short_text",
-        [
-            (8, 0, "ca…"),
-            (9, 0, "cap…"),
-            (9, 1, "ca…"),
-            (10, 0, "capt…"),
-            (10, 1, "cap…"),
-            (11, 0, "capti…"),
-            (11, 1, "capt…"),
-            (11, 10, "cap…"),
-            (12, 0, "caption"),
-            (12, 1, "capti…"),
-            (12, 10, "capt…"),
-            (12, 100, "cap…"),
-            (13, 0, "caption"),
-            (13, 10, "capti…"),
-            (13, 100, "capt…"),
-            (13, 1000, "cap…"),
-            (15, 0, "caption"),
-            (15, 1, "caption"),
-            (15, 10, "caption"),
-            (15, 100, "caption"),
-            (15, 1000, "capti…"),
-            (25, 0, "caption"),
-            (25, 1, "caption"),
-            (25, 19, "caption"),
-            (25, 199, "caption"),
-            (25, 1999, "caption"),
-        ],
-    )
-    def test_text_content(
-        self, mocker, prefix, width, count, short_text, caption="caption"
-    ):
-        mocker.patch(MODULE + ".StreamButton.mark_muted")
-        show_function = mocker.Mock()
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.controller = mocker.Mock()
+        self.show_function = mocker.Mock()
+        self.urwid = mocker.patch(MODULE + ".urwid")
 
-        # To test having more space available with no bullet, but using
-        # same short text, reduce the effective space available
-        if prefix == "":
-            width -= 2
-
-        if isinstance(prefix, tuple):
-            prefix = prefix[1]  # just checking text, not color
-
-        if prefix is None:
-            top_button = TopButton(
-                controller=mocker.Mock(),
-                caption=caption,
-                show_function=show_function,
-                width=width,
-                count=count,
-            )
-            prefix = "\N{BULLET}"
-        else:
-            top_button = TopButton(
-                controller=mocker.Mock(),
-                caption=caption,
-                show_function=show_function,
-                prefix_character=prefix,
-                width=width,
-                count=count,
-            )
-
-        text = top_button._w._original_widget.get_text()
-        count_str = "" if count == 0 else str(count)
-        expected_text = " {}{}{}{}".format(
-            (prefix + " ") if prefix else "",
-            short_text,
-            (width - 2 - (2 if prefix else 0) - len(short_text) - len(count_str)) * " ",
-            count_str,
+    @pytest.fixture
+    def top_button(self, mocker):
+        top_button = TopButton(
+            controller=self.controller,
+            caption="caption",
+            show_function=self.show_function,
+            prefix_character="-",
+            width=0,
+            count=0,
         )
-        assert len(text[0]) == len(expected_text) == (width - 1)
-        assert text[0] == expected_text
+        return top_button
 
+    def test_init(self, mocker, top_button):
+
+        assert top_button.controller == self.controller
+        assert top_button._caption == "caption"
+        assert top_button.show_function == self.show_function
+        assert top_button.prefix_character == "-"
+        assert top_button.original_color is None
+        assert top_button.count == 0
+        assert top_button.count_style is None
+
+        assert top_button._label.wrap == "ellipsis"
+        assert top_button._label.get_cursor_coords("size") is None
+
+        self.urwid.Columns.assert_called_once_with(
+            [
+                ("pack", top_button.button_prefix),
+                top_button._label,
+                ("pack", top_button.button_suffix),
+            ]
+        )
+        self.urwid.AttrMap.assert_called_once_with(
+            self.urwid.Columns(), None, "selected"
+        )
+        self.urwid.connect_signal.assert_called_once_with(
+            top_button, "click", top_button.activate
+        )
+
+    @pytest.mark.parametrize("text_color", ["color", None])
     @pytest.mark.parametrize(
         "old_count, new_count, new_count_str",
         [(10, 11, "11"), (0, 1, "1"), (11, 10, "10"), (1, 0, "")],
     )
-    def test_update_count(self, mocker, old_count, new_count, new_count_str, width=12):
-        top_button = TopButton(
-            controller=mocker.Mock(),
-            caption="caption",
-            show_function=mocker.Mock(),
-            width=width,
-            count=old_count,
-            count_style="starred_count",
-        )
-        # Avoid testing use in initialization by patching afterwards
-        update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
+    def test_update_count(
+        self, mocker, top_button, old_count, new_count, new_count_str, text_color
+    ):
+        top_button.count = old_count
+        top_button.update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
-        top_button.update_count(new_count)
+        top_button.update_count(new_count, text_color)
 
-        update_widget.assert_called_once_with(
+        top_button.update_widget.assert_called_once_with(
             (top_button.count_style, new_count_str),
-            None,
+            text_color,
         )
+
+    @pytest.mark.parametrize(
+        "prefix, expected_prefix", [("-", [" ", "-", " "]), ("", [" "])]
+    )
+    @pytest.mark.parametrize("text_color", ["color", None])
+    @pytest.mark.parametrize(
+        "count_text, expected_suffix",
+        [
+            (("color", "3"), [" ", ("color", "3"), " "]),
+            (("color", ""), ["  "]),
+            ((None, "3"), [" ", (None, "3"), " "]),
+            ((None, ""), ["  "]),
+        ],
+    )
+    def test_update_widget(
+        self,
+        mocker,
+        top_button,
+        prefix,
+        expected_prefix,
+        text_color,
+        count_text,
+        expected_suffix,
+    ):
+        top_button.prefix_character = prefix
+        top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
+        top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
+        top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
+
+        top_button.update_widget(count_text, text_color)
+
+        top_button.button_prefix.set_text.assert_called_once_with(expected_prefix)
+        top_button.set_label.assert_called_once_with((text_color, top_button._caption))
+        top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
 
 
 class TestStarredButton:
