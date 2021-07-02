@@ -229,12 +229,13 @@ class StreamButton(TopButton):
 class UserButton(TopButton):
     def __init__(
         self,
+        *,
         user: Dict[str, Any],
         controller: Any,
         view: Any,
         state_marker: str,
         color: Optional[str] = None,
-        count: int = 0,
+        count: int,
         is_current_user: bool = False,
     ) -> None:
         # Properties accessed externally
