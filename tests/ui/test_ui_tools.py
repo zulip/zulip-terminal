@@ -1196,7 +1196,9 @@ class TestLeftColumnView:
             controller=left_col_view.controller, count=2
         )
         pm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
-        starred_button.assert_called_once_with(left_col_view.controller, count=3)
+        starred_button.assert_called_once_with(
+            controller=left_col_view.controller, count=3
+        )
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 1000]))
     def test_streams_view(self, mocker, streams, pinned):
