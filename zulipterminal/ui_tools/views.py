@@ -814,7 +814,7 @@ class LeftColumnView(urwid.Pile):
         self.view.pm_button = PMButton(controller=self.controller, count=count)
 
         self.view.mentioned_button = MentionedButton(
-            self.controller,
+            controller=self.controller,
             count=self.model.unread_counts["all_mentions"],
         )
 
