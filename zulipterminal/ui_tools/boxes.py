@@ -600,6 +600,11 @@ class WriteBox(urwid.Pile):
                         msg_id=self.msg_edit_id,
                     )
                 else:
+                    all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
+                        self.to_write_box
+                    )
+                    if not all_valid:
+                        return key
                     self.update_recipient_emails(self.to_write_box)
                     if self.recipient_emails:
                         success = self.model.send_private_message(
@@ -626,6 +631,11 @@ class WriteBox(urwid.Pile):
         elif is_command_key("SAVE_AS_DRAFT", key):
             if not self.msg_edit_id:
                 if self.to_write_box:
+                    all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
+                        self.to_write_box
+                    )
+                    if not all_valid:
+                        return key
                     self.update_recipient_emails(self.to_write_box)
                     this_draft: Composition = PrivateComposition(
                         type="private",
