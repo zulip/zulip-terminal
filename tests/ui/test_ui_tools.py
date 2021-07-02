@@ -1114,7 +1114,7 @@ class TestRightColumnView:
         if status != "inactive":
             unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
-                self.view.users[0],
+                user=self.view.users[0],
                 controller=self.view.controller,
                 view=self.view,
                 color="user_" + self.view.users[0]["status"],

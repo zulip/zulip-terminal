@@ -175,7 +175,7 @@ class TestUserButton:
         }
         activate = mocker.patch(MODULE + ".UserButton.activate")
         user_button = UserButton(
-            user,
+            user=user,
             controller=mocker.Mock(),
             view=mocker.Mock(),
             color=mocker.Mock(),

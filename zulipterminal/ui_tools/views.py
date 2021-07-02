@@ -754,7 +754,7 @@ class RightColumnView(urwid.Frame):
             is_current_user = user["user_id"] == self.view.model.user_id
             users_btn_list.append(
                 UserButton(
-                    user,
+                    user=user,
                     controller=self.view.controller,
                     view=self.view,
                     state_marker=STATE_ICON[status],
