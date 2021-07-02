@@ -96,6 +96,7 @@ class TopButton(urwid.Button):
         if is_command_key("ENTER", key):
             self.activate(key)
             return None
+
         else:  # This is in the else clause, to avoid multiple activation
             return super().keypress(size, key)
 
@@ -218,12 +219,15 @@ class StreamButton(TopButton):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
             self.view.left_panel.show_topic_view(self)
+
         elif is_command_key("TOGGLE_MUTE_STREAM", key):
             self.controller.stream_muting_confirmation_popup(
                 self.stream_id, self.stream_name
             )
+
         elif is_command_key("STREAM_DESC", key):
             self.model.controller.show_stream_info(self.stream_id)
+
         return super().keypress(size, key)
 
 
@@ -272,6 +276,7 @@ class UserButton(TopButton):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("USER_INFO", key):
             self.controller.show_user_info(self.user_id)
+            
         return super().keypress(size, key)
 
 
@@ -317,6 +322,7 @@ class TopicButton(TopButton):
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
             self.view.left_panel.show_stream_view()
+
         return super().keypress(size, key)
 
 
