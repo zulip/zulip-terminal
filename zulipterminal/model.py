@@ -1019,8 +1019,15 @@ class Model:
                 else:
                     raise RuntimeError("Unknown typing event operation")
 
-    def is_valid_private_recipient(self, recipient_email: str) -> bool:
-        return recipient_email in self.user_dict
+    def is_valid_private_recipient(
+        self,
+        recipient_email: str,
+        recipient_name: str,
+    ) -> bool:
+        return (
+            recipient_email in self.user_dict
+            and self.user_dict[recipient_email]["full_name"] == recipient_name
+        )
 
     def is_valid_stream(self, stream_name: str) -> bool:
         for stream in self.stream_dict.values():

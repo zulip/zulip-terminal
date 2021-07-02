@@ -216,18 +216,41 @@ class WriteBox(urwid.Pile):
     def update_recipient_emails(self, write_box: ReadlineEdit) -> None:
         self.recipient_emails = re.findall(r"[\w\.-]+@[\w\.-]+", write_box.edit_text)
 
-    def _validate_recipients_and_notify_invalid_ones(
+    def _tidy_valid_recipients_and_notify_invalid_ones(
         self, write_box: ReadlineEdit
     ) -> bool:
-        invalid_emails = [
-            recipient_email
-            for recipient_email in self.recipient_emails
-            if not self.model.is_valid_private_recipient(recipient_email)
+        tidied_recipients = list()
+        invalid_recipients = list()
+
+        recipients = [
+            recipient.strip()
+            for recipient in write_box.edit_text.split(",")
+            if recipient.strip()  # This condition avoids whitespace recipients (",  ,")
         ]
 
-        if invalid_emails:
-            invalid_emails_error = f"Invalid recipient(s) - {', '.join(invalid_emails)}"
-            self.view.controller.report_error(invalid_emails_error)
+        for recipient in recipients:
+            cleaned_recipient_list = re.findall(
+                r"^(.*?)(?:\s*?<?([\w\.-]+@[\w\.-]+)>?(.*))?$", recipient
+            )
+            recipient_name, recipient_email, invalid_text = cleaned_recipient_list[0]
+            # Discard invalid_text as part of tidying up the recipient.
+
+            if recipient_email and self.model.is_valid_private_recipient(
+                recipient_email, recipient_name
+            ):
+                tidied_recipients.append(f"{recipient_name} <{recipient_email}>")
+            else:
+                invalid_recipients.append(recipient)
+                tidied_recipients.append(recipient)
+
+        write_box.edit_text = ", ".join(tidied_recipients)
+        write_box.edit_pos = len(write_box.edit_text)
+
+        if invalid_recipients:
+            invalid_recipients_error = (
+                f"Invalid recipient(s) - {', '.join(invalid_recipients)}"
+            )
+            self.view.controller.report_error(invalid_recipients_error)
             return False
 
         return True
@@ -666,12 +689,15 @@ class WriteBox(urwid.Pile):
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
-                    self.update_recipient_emails(self.to_write_box)
-                    all_valid = self._validate_recipients_and_notify_invalid_ones(
+                    all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )
                     if not all_valid:
                         return key
+                    # We extract emails into self.recipient_emails only once we know
+                    # that all the recipients are valid, to avoid including any
+                    # invalid ones.
+                    self.update_recipient_emails(self.to_write_box)
                     users = self.model.user_dict
                     self.recipient_user_ids = [
                         users[email]["user_id"] for email in self.recipient_emails
