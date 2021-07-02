@@ -1551,7 +1551,12 @@ class MsgInfoView(PopUpView):
 
             display_attr = None if index % 2 else "popup_contrast"
             link_widgets.append(
-                MessageLinkButton(controller, caption, link, display_attr)
+                MessageLinkButton(
+                    controller=controller,
+                    caption=caption,
+                    link=link,
+                    display_attr=display_attr,
+                )
             )
 
         return link_widgets, link_width

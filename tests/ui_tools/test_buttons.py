@@ -290,7 +290,10 @@ class TestMessageLinkButton:
         self.link = link
         self.display_attr = display_attr
         return MessageLinkButton(
-            self.controller, self.caption, self.link, self.display_attr
+            controller=self.controller,
+            caption=self.caption,
+            link=self.link,
+            display_attr=self.display_attr,
         )
 
     def test_init(self, mocker):
