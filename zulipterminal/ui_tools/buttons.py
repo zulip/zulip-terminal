@@ -92,13 +92,13 @@ class TopButton(urwid.Button):
         self.controller.view.body.focus_col = 1
         self.show_function()
 
-    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+    def keypress(self, size: urwid_Size, key: Optional[str]) -> Optional[str]:
+        # Handle activate only for ENTER, ignore space
         if is_command_key("ENTER", key):
-            self.activate(key)
-            return None
-
-        else:  # This is in the else clause, to avoid multiple activation
             return super().keypress(size, key)
+
+        # key wasn't handled.
+        return key
 
 
 class HomeButton(TopButton):
@@ -216,19 +216,26 @@ class StreamButton(TopButton):
         self.update_count(unread_count)
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
-    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+    def keypress(self, size: urwid_Size, key: Optional[str]) -> Optional[str]:
+        # Handle activation.
+        key = super().keypress(size, key)
+
         if is_command_key("TOGGLE_TOPIC", key):
             self.view.left_panel.show_topic_view(self)
+            return None
 
         elif is_command_key("TOGGLE_MUTE_STREAM", key):
             self.controller.stream_muting_confirmation_popup(
                 self.stream_id, self.stream_name
             )
+            return None
 
         elif is_command_key("STREAM_DESC", key):
             self.model.controller.show_stream_info(self.stream_id)
+            return None
 
-        return super().keypress(size, key)
+        # key wasn't handled.
+        return key
 
 
 class UserButton(TopButton):
@@ -273,11 +280,16 @@ class UserButton(TopButton):
         self._view.body.focus.original_widget.set_focus("footer")
         self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
-    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+    def keypress(self, size: urwid_Size, key: Optional[str]) -> Optional[str]:
+        # Handle activation.
+        key = super().keypress(size, key)
+
         if is_command_key("USER_INFO", key):
             self.controller.show_user_info(self.user_id)
-            
-        return super().keypress(size, key)
+            return None
+
+        # key wasn't handled.
+        return key
 
 
 class TopicButton(TopButton):
@@ -318,12 +330,17 @@ class TopicButton(TopButton):
 
     # TODO: Handle event-based approach for topic-muting.
 
-    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+    def keypress(self, size: urwid_Size, key: Optional[str]) -> Optional[str]:
+        # Handle activation.
+        key = super().keypress(size, key)
+
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
             self.view.left_panel.show_stream_view()
+            return None
 
-        return super().keypress(size, key)
+        # key wasn't handled.
+        return key
 
 
 class DecodedStream(TypedDict):

@@ -5,7 +5,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import AttrMap, Overlay, Widget
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.ui_tools.buttons import (
     DecodedStream,
     MessageLinkButton,
@@ -31,7 +31,6 @@ class TestTopButton:
     def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.Mock()
         self.show_function = mocker.Mock()
-        self.urwid = mocker.patch(MODULE + ".urwid")
 
     @pytest.fixture
     def top_button(self, mocker: MockerFixture) -> TopButton:
@@ -44,7 +43,16 @@ class TestTopButton:
         )
         return top_button
 
-    def test_init(self, mocker: MockerFixture, top_button: TopButton) -> None:
+    def test_init(self, mocker: MockerFixture) -> None:
+        urwid = mocker.patch(MODULE + ".urwid")
+
+        top_button = TopButton(
+            controller=self.controller,
+            caption="caption",
+            show_function=self.show_function,
+            prefix_character="-",
+            count=0,
+        )
 
         assert top_button.controller == self.controller
         assert top_button._caption == "caption"
@@ -57,17 +65,15 @@ class TestTopButton:
         assert top_button._label.wrap == "ellipsis"
         assert top_button._label.get_cursor_coords("size") is None
 
-        self.urwid.Columns.assert_called_once_with(
+        urwid.Columns.assert_called_once_with(
             [
                 ("pack", top_button.button_prefix),
                 top_button._label,
                 ("pack", top_button.button_suffix),
             ]
         )
-        self.urwid.AttrMap.assert_called_once_with(
-            self.urwid.Columns(), None, "selected"
-        )
-        self.urwid.connect_signal.assert_called_once_with(
+        urwid.AttrMap.assert_called_once_with(urwid.Columns(), None, "selected")
+        urwid.connect_signal.assert_called_once_with(
             top_button, "click", top_button.activate
         )
 
@@ -131,6 +137,57 @@ class TestTopButton:
         top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
         set_attr_map.assert_called_once_with({None: text_color})
 
+    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
+    def test_keypress_activate_on_ENTER(
+        self,
+        mocker: MockerFixture,
+        top_button: TopButton,
+        enter_key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        super_keypress = mocker.patch(MODULE + ".urwid.Button.keypress")
+        size = widget_size(top_button)
+
+        top_button.keypress(size, enter_key)
+
+        super_keypress.assert_called_once_with(size, enter_key)
+
+    def test_keypress_not_activate_on_SPACE(
+        self,
+        mocker: MockerFixture,
+        top_button: TopButton,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        super_keypress = mocker.patch(MODULE + ".urwid.Button.keypress")
+        size = widget_size(top_button)
+        key = " "
+
+        top_button.keypress(size, key)
+
+        super_keypress.assert_not_called
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("ENTER"), None),
+            (" ", " "),
+            ("k", "k"),  # Any other key is returned unhandled
+        ],
+    )
+    def test_keypress_return_value(
+        self,
+        mocker: MockerFixture,
+        top_button: TopButton,
+        widget_size: Callable[[Widget], urwid_Size],
+        key: str,
+        expected_return_value: Optional[str],
+    ) -> None:
+        size = widget_size(top_button)
+
+        return_value = top_button.keypress(size, key)
+
+        assert return_value == expected_return_value
+
 
 class TestStarredButton:
     def test_count_style_init_argument_value(
@@ -174,39 +231,50 @@ class TestStreamButton:
         stream_button.keypress(size, key)
         pop_up.assert_called_once_with(stream_id, stream_name)
 
-
-class TestUserButton:
-    # FIXME Place this in a general test of a derived class?
-    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
-    def test_activate_called_once_on_keypress(
+    @pytest.mark.parametrize("key", keys_for_command("STREAM_DESC"))
+    def test_keypress_STREAM_DESC(
         self,
         mocker: MockerFixture,
-        enter_key: str,
+        key: str,
         widget_size: Callable[[Widget], urwid_Size],
-        caption: str = "some user",
-        email: str = "some_email",
-        user_id: int = 5,
+        stream_button: StreamButton,
+        stream_id: int = 205,
     ) -> None:
-        user: Dict[str, Any] = {
-            "email": email,
-            "user_id": user_id,
-            "full_name": caption,
-        }
-        activate = mocker.patch(MODULE + ".UserButton.activate")
-        user_button = UserButton(
-            user=user,
-            controller=mocker.Mock(),
-            view=mocker.Mock(),
-            color=mocker.Mock(),
-            state_marker="*",
-            count=mocker.Mock(),
+        size = widget_size(stream_button)
+        stream_button.model.controller = mocker.Mock()
+
+        stream_button.keypress(size, key)
+        stream_button.model.controller.show_stream_info.assert_called_once_with(
+            stream_id
         )
-        size = widget_size(user_button)
 
-        user_button.keypress(size, enter_key)
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("TOGGLE_TOPIC"), None),
+            (primary_key_for_command("TOGGLE_MUTE_STREAM"), None),
+            (primary_key_for_command("STREAM_DESC"), None),
+            (primary_key_for_command("ENTER"), None),
+            (" ", " "),
+            ("k", "k"),  # Any other key is returned unhandled
+        ],
+    )
+    def test_keypress_return_value(
+        self,
+        mocker: MockerFixture,
+        stream_button: StreamButton,
+        widget_size: Callable[[Widget], urwid_Size],
+        key: str,
+        expected_return_value: Optional[str],
+    ) -> None:
+        size = widget_size(stream_button)
 
-        assert activate.call_count == 1
+        return_value = stream_button.keypress(size, key)
 
+        assert return_value == expected_return_value
+
+
+class TestUserButton:
     @pytest.mark.parametrize("key", keys_for_command("USER_INFO"))
     def test_keypress_USER_INFO(
         self,
@@ -221,6 +289,29 @@ class TestUserButton:
         user_button.keypress(size, key)
 
         pop_up.assert_called_once_with(user_button.user_id)
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("USER_INFO"), None),
+            (primary_key_for_command("ENTER"), None),
+            (" ", " "),
+            ("k", "k"),  # Any other key is returned unhandled
+        ],
+    )
+    def test_keypress_return_value(
+        self,
+        mocker: MockerFixture,
+        user_button: StreamButton,
+        widget_size: Callable[[Widget], urwid_Size],
+        key: str,
+        expected_return_value: Optional[str],
+    ) -> None:
+        size = widget_size(user_button)
+
+        return_value = user_button.keypress(size, key)
+
+        assert return_value == expected_return_value
 
 
 class TestTopicButton:
@@ -319,6 +410,29 @@ class TestTopicButton:
         topic_button.view.left_panel = mocker.Mock()
         topic_button.keypress(size, key)
         topic_button.view.left_panel.show_stream_view.assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        "key, expected_return_value",
+        [
+            (primary_key_for_command("TOGGLE_TOPIC"), None),
+            (primary_key_for_command("ENTER"), None),
+            (" ", " "),
+            ("k", "k"),  # Any other key is returned unhandled
+        ],
+    )
+    def test_keypress_return_value(
+        self,
+        mocker: MockerFixture,
+        stream_button: StreamButton,
+        widget_size: Callable[[Widget], urwid_Size],
+        key: str,
+        expected_return_value: Optional[str],
+    ) -> None:
+        size = widget_size(stream_button)
+
+        return_value = stream_button.keypress(size, key)
+
+        assert return_value == expected_return_value
 
 
 class TestMessageLinkButton:
