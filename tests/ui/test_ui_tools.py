@@ -1192,7 +1192,9 @@ class TestLeftColumnView:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".StreamButton.mark_muted")
         left_col_view = LeftColumnView(self.view)
-        home_button.assert_called_once_with(left_col_view.controller, count=2)
+        home_button.assert_called_once_with(
+            controller=left_col_view.controller, count=2
+        )
         pm_button.assert_called_once_with(left_col_view.controller, count=0)
         starred_button.assert_called_once_with(left_col_view.controller, count=3)
 

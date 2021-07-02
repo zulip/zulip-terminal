@@ -100,7 +100,7 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, controller: Any, count: int = 0) -> None:
+    def __init__(self, *, controller: Any, count: int) -> None:
         button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
