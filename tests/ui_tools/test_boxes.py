@@ -122,8 +122,13 @@ class TestWriteBox:
             "untidy_middle_recipient_out_of_three",
         ],
     )
-    @pytest.mark.parametrize("key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
-    def test_tidying_recipients_on_cycling_out(
+    @pytest.mark.parametrize(
+        "key",
+        keys_for_command("SEND_MESSAGE")
+        + keys_for_command("SAVE_AS_DRAFT")
+        + keys_for_command("CYCLE_COMPOSE_FOCUS"),
+    )
+    def test_tidying_recipients_on_keypresses(
         self, mocker, write_box, widget_size, key, raw_recipients, tidied_recipients
     ):
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=True)
@@ -148,7 +153,12 @@ class TestWriteBox:
         ],
         ids=["name_email_mismatch", "no_name_specified", "no_email_specified"],
     )
-    @pytest.mark.parametrize("key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
+    @pytest.mark.parametrize(
+        "key",
+        keys_for_command("SEND_MESSAGE")
+        + keys_for_command("SAVE_AS_DRAFT")
+        + keys_for_command("CYCLE_COMPOSE_FOCUS"),
+    )
     def test_footer_notification_on_invalid_recipients(
         self,
         write_box,
