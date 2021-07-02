@@ -247,9 +247,17 @@ class WriteBox(urwid.Pile):
         write_box.edit_pos = len(write_box.edit_text)
 
         if invalid_recipients:
-            invalid_recipients_error = (
-                f"Invalid recipient(s) - {', '.join(invalid_recipients)}"
-            )
+            invalid_recipients_error = [
+                "Invalid recipient(s) - " + ", ".join(invalid_recipients),
+                " - Use ",
+                ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+                " or ",
+                (
+                    "footer_contrast",
+                    primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+                " to autocomplete.",
+            ]
             self.view.controller.report_error(invalid_recipients_error)
             return False
 
