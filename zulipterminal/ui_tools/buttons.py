@@ -128,7 +128,7 @@ class PMButton(TopButton):
 
 
 class MentionedButton(TopButton):
-    def __init__(self, controller: Any, count: int = 0) -> None:
+    def __init__(self, *, controller: Any, count: int) -> None:
         button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
