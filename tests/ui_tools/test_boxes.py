@@ -79,6 +79,107 @@ class TestWriteBox:
         assert not write_box.model.send_private_message.called
 
     @pytest.mark.parametrize(
+        ["raw_recipients", "tidied_recipients"],
+        [
+            ("Human 1 person1@example.com", "Human 1 <person1@example.com>"),
+            (
+                "Human 2 person2@example.com random text",
+                "Human 2 <person2@example.com>",
+            ),
+            (
+                "Human Myself FOOBOO@gmail.com random, Human 1 <person1@example.com>",
+                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+            ),
+            (
+                "Human Myself <FOOBOO@gmail.com>, Human 1 person1@example.com random",
+                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+            ),
+            (
+                "Human Myself FOOBOO@gmail.com random,"
+                "Human 1 person1@example.com random",
+                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+            ),
+            (
+                "Human Myself FOOBOO@gmail.com random, Human 1 person1@example.com "
+                "random, Human 2 person2@example.com random",
+                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>, "
+                "Human 2 <person2@example.com>",
+            ),
+            (
+                "Human Myself FOOBOO@gmail.com, Human 1 person1@example.com random, "
+                "Human 2 person2@example.com",
+                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>, "
+                "Human 2 <person2@example.com>",
+            ),
+        ],
+        ids=[
+            "untidy_with_improper_formatting",
+            "untidy_with_extra_text",
+            "untidy_first_recipient_out_of_two",
+            "untidy_second_recipient_out_of_two",
+            "two_untidy_recipients",
+            "three_untidy_recipients",
+            "untidy_middle_recipient_out_of_three",
+        ],
+    )
+    @pytest.mark.parametrize("key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
+    def test_tidying_recipients_on_cycling_out(
+        self, mocker, write_box, widget_size, key, raw_recipients, tidied_recipients
+    ):
+        write_box.model.is_valid_private_recipient = mocker.Mock(return_value=True)
+        write_box.private_box_view()
+        write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+        write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
+
+        write_box.to_write_box.set_edit_text(raw_recipients)
+        write_box.to_write_box.set_edit_pos(len(raw_recipients))
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        assert write_box.to_write_box.edit_text == tidied_recipients
+
+    @pytest.mark.parametrize(
+        ["raw_recipients", "invalid_recipients"],
+        [
+            ("Human 1 <person2@example.com>", "Human 1 <person2@example.com>"),
+            ("person1@example.com", "person1@example.com"),
+            ("Human 1", "Human 1"),
+        ],
+        ids=["name_email_mismatch", "no_name_specified", "no_email_specified"],
+    )
+    @pytest.mark.parametrize("key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
+    def test_footer_notification_on_invalid_recipients(
+        self,
+        write_box,
+        key,
+        mocker,
+        widget_size,
+        raw_recipients,
+        invalid_recipients,
+    ):
+
+        write_box.model.is_valid_private_recipient = mocker.Mock(return_value=False)
+        write_box.private_box_view()
+        write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
+        write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
+
+        write_box.to_write_box.edit_text = raw_recipients
+        write_box.to_write_box.set_edit_pos(len(raw_recipients))
+        expected_lines = "Invalid recipient(s) - " + invalid_recipients
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        self.view.controller.report_error.assert_called_once_with(expected_lines)
+        # If there are invalid recipients, we expect the focus
+        # to remain in the to_write_box.
+        assert write_box.focus_position == write_box.FOCUS_CONTAINER_HEADER
+        assert (
+            write_box.header_write_box.focus_col == write_box.FOCUS_HEADER_BOX_RECIPIENT
+        )
+
+    @pytest.mark.parametrize(
         "text, state",
         [
             ("Plain Text", 0),
