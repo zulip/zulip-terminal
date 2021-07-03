@@ -13,6 +13,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
     PopUpView,
+    SpoilerView,
     StreamInfoView,
     StreamMembersView,
 )
@@ -228,6 +229,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             title="Edit History",
         )
 
@@ -237,6 +239,7 @@ class TestEditHistoryView:
         assert self.edit_history_view.topic_links == OrderedDict()
         assert self.edit_history_view.message_links == OrderedDict()
         assert self.edit_history_view.time_mentions == list()
+        assert self.edit_history_view.spoilers == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
             message_id=self.message["id"],
         )
@@ -270,6 +273,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
     def test_keypress_navigation(
@@ -482,6 +486,40 @@ class TestHelpView:
         super_keypress.assert_called_once_with(size, expected_key)
 
 
+class TestSpoilerView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker, monkeypatch):
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.spoiler_view = SpoilerView(self.controller, "Spoiler View", [""])
+
+    def test_keypress_any_key(self, widget_size):
+        key = "a"
+        size = widget_size(self.spoiler_view)
+        self.spoiler_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize(
+        "key", {*keys_for_command("GO_BACK"), *keys_for_command("ENTER")}
+    )
+    def test_keypress_exit_popup(self, key, widget_size):
+        size = widget_size(self.spoiler_view)
+        self.spoiler_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(
+        self, mocker, widget_size, navigation_key_expected_key_pair
+    ):
+        key, expected_key = navigation_key_expected_key_pair
+        size = widget_size(self.spoiler_view)
+        super_keypress = mocker.patch(VIEWS + ".urwid.ListBox.keypress")
+        self.spoiler_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
 class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, monkeypatch, message_fixture):
@@ -507,6 +545,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture):
@@ -514,6 +553,7 @@ class TestMsgInfoView:
         assert self.msg_info_view.topic_links == OrderedDict()
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
+        assert self.msg_info_view.spoilers == list()
 
     def test_keypress_any_key(self, widget_size):
         key = "a"
@@ -557,6 +597,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -568,6 +609,7 @@ class TestMsgInfoView:
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
+                spoilers=list(),
             )
         else:
             self.controller.show_edit_history.assert_not_called()
@@ -652,6 +694,7 @@ class TestMsgInfoView:
             "Message Information",
             OrderedDict(),
             OrderedDict(),
+            list(),
             list(),
         )
         # 10 = 4 labels + 1 blank line + 1 'Reactions' (category)

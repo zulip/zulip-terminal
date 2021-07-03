@@ -32,6 +32,7 @@ from zulipterminal.ui_tools.buttons import (
     MentionedButton,
     MessageLinkButton,
     PMButton,
+    SpoilerButton,
     StarredButton,
     StreamButton,
     TopicButton,
@@ -1051,6 +1052,14 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "GO_BACK", width, title)
 
 
+class SpoilerView(PopUpView):
+    def __init__(self, controller: Any, title: str, content: str) -> None:
+        width, _ = controller.maximum_popup_dimensions()
+        widget = [urwid.Text(content)]
+
+        super().__init__(controller, widget, "ENTER", width, title)
+
+
 class AboutView(PopUpView):
     def __init__(
         self,
@@ -1170,7 +1179,7 @@ class StreamInfoView(PopUpView):
         )
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
-        self.markup_desc, message_links, _ = MessageBox.transform_content(
+        self.markup_desc, message_links, *_ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,
         )
@@ -1286,11 +1295,13 @@ class MsgInfoView(PopUpView):
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
@@ -1328,6 +1339,8 @@ class MsgInfoView(PopUpView):
             msg_info.append(("Message Links", []))
         if time_mentions:
             msg_info.append(("Time mentions", time_mentions))
+        if spoilers:
+            msg_info.append(("Spoilers", []))
         if msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
@@ -1378,6 +1391,25 @@ class MsgInfoView(PopUpView):
             )
             popup_width = max(popup_width, message_link_width)
 
+        if spoilers:
+            spoiler_buttons = []
+            spoiler_width = 0
+            for index, (header_len, header, content) in enumerate(spoilers):
+                spoiler_width = max(header_len, spoiler_width)
+                display_attr = None if index % 2 else "popup_contrast"
+                spoiler_buttons.append(
+                    SpoilerButton(controller, header_len, header, content, display_attr)
+                )
+
+            # slice_index = Number of labels before message links + 1 newline
+            #               + 1 'Spoilers' category label.
+            slice_index = len(msg_info[0][1]) + 2
+            slice_index += sum([len(w) + 2 for w in button_widgets])
+            button_widgets.append(spoiler_buttons)
+
+            widgets = widgets[:slice_index] + spoiler_buttons + widgets[slice_index:]
+            popup_width = max(popup_width, spoiler_width)
+
         super().__init__(controller, widgets, "MSG_INFO", popup_width, title)
 
     @staticmethod
@@ -1409,6 +1441,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
@@ -1460,6 +1493,7 @@ class EditHistoryView(PopUpView):
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1467,6 +1501,7 @@ class EditHistoryView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         width = 64
         widgets: List[Any] = []
 
@@ -1565,6 +1600,7 @@ class EditHistoryView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)

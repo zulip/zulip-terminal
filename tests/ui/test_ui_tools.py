@@ -1778,6 +1778,57 @@ class TestMessageBox:
                 [("msg_emoji", ":github:")],
                 id="custom_emoji",
             ),
+            case(
+                '<div class="spoiler-block"><div class="spoiler-header"></div>'
+                '<div aria-hidden="true" class="spoiler-content">'
+                "<p>Test</p></div></div>",
+                [
+                    "┌─",
+                    "────────",
+                    "─┬─",
+                    "───────",
+                    "─┐\n",
+                    "│ ",
+                    ("msg_spoiler", "Spoiler:"),
+                    " │ ",
+                    "",
+                    "",
+                    "",
+                    "Spoiler",
+                    " │\n",
+                    "└─",
+                    "────────",
+                    "─┴─",
+                    "───────",
+                    "─┘",
+                ],
+                id="spoiler_no_header",
+            ),
+            case(
+                '<div class="spoiler-block"><div class="spoiler-header">'
+                '<p>Header</p></div><div aria-hidden="true" class="spoiler-content">'
+                "<p>Test</p></div></div>",
+                [
+                    "┌─",
+                    "────────",
+                    "─┬─",
+                    "──────",
+                    "─┐\n",
+                    "│ ",
+                    ("msg_spoiler", "Spoiler:"),
+                    " │ ",
+                    "",
+                    "",
+                    "Header",
+                    " │\n",
+                    "└─",
+                    "────────",
+                    "─┴─",
+                    "──────",
+                    "─┘",
+                ],
+                id="spoiler_with_header",
+            ),
         ],
     )
     def test_soup2markup(self, content, expected_markup, mocker):
@@ -1789,6 +1840,7 @@ class TestMessageBox:
             server_url=SERVER_URL,
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             bq_len=0,
         )
 

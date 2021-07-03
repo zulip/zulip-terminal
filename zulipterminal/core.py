@@ -27,6 +27,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
+    SpoilerView,
     StreamInfoView,
     StreamMembersView,
 )
@@ -247,6 +248,7 @@ class Controller:
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         msg_info_view = MsgInfoView(
             self,
@@ -255,6 +257,7 @@ class Controller:
             topic_links,
             message_links,
             time_mentions,
+            spoilers,
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -292,6 +295,7 @@ class Controller:
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             EditHistoryView(
@@ -300,6 +304,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 "Edit History (up/down scrolls)",
             ),
             "area:msg",
@@ -349,6 +354,11 @@ class Controller:
         Helper to show a warning message in footer
         """
         self.view.set_footer_text(text, "task:warning", 3)
+
+    def show_spoiler(self, content: str) -> None:
+        self.show_pop_up(
+            SpoilerView(self, "Spoiler (up/down scrolls)", content), "area:msg"
+        )
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
