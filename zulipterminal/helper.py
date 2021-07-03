@@ -1,5 +1,4 @@
 import os
-import subprocess
 import time
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
@@ -24,11 +23,9 @@ from typing import (
 )
 from urllib.parse import unquote
 
-import lxml.html
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
-from zulipterminal.platform_code import PLATFORM
 
 
 class StreamData(TypedDict):
@@ -632,39 +629,6 @@ def canonicalize_color(color: str) -> str:
         return color.lower()
     else:
         raise ValueError(f'Unknown format for color "{color}"')
-
-
-def notify(title: str, html_text: str) -> str:
-    document = lxml.html.document_fromstring(html_text)
-    text = document.text_content()
-
-    command_list = None
-    if PLATFORM == "MacOS":
-        command_list = [
-            "osascript",
-            "-e",
-            "on run(argv)",
-            "-e",
-            "return display notification item 1 of argv with title "
-            'item 2 of argv sound name "ZT_NOTIFICATION_SOUND"',
-            "-e",
-            "end",
-            "--",
-            text,
-            title,
-        ]
-    elif PLATFORM == "Linux":
-        command_list = ["notify-send", "--", title, text]
-
-    if command_list is not None:
-        try:
-            subprocess.run(
-                command_list, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-        except FileNotFoundError:
-            # This likely means the notification command could not be found
-            return command_list[0]
-    return ""
 
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
