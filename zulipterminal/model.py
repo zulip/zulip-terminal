@@ -47,10 +47,10 @@ from zulipterminal.helper import (
     display_error_if_present,
     index_messages,
     initial_index,
-    notify,
     notify_if_message_sent_outside_narrow,
     set_count,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 

@@ -130,6 +130,7 @@ type_consistent_testfiles = [
     "test_keys.py",
     "test_themes.py",
     "test_color.py",
+    "test_platform_code.py",
 ]
 
 for file_path in python_files:
