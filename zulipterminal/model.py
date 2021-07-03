@@ -1384,9 +1384,22 @@ class Model:
         if "subject" in event:
             new_subject = event["subject"]
             stream_id = event["stream_id"]
+            old_subject = event["orig_subject"]
 
-            # Update any indexed messages & re-render them
+            # Remove each message_id from the old topic's `topic_msg_ids` set
+            # if it exists, and update & re-render the message if it is indexed.
             for msg_id in event["message_ids"]:
+                # Ensure that the new topic is not the same as the old one
+                # (no-op topic edit).
+                if new_subject != old_subject:
+                    # Remove the msg_id from the relevant `topic_msg_ids` set,
+                    # if that topic's set has already been initiated.
+                    if old_subject in self.index["topic_msg_ids"][stream_id]:
+                        self.index["topic_msg_ids"][stream_id][old_subject].discard(
+                            msg_id
+                        )
+
+                # Update and re-render indexed messages.
                 indexed_msg = self.index["messages"].get(msg_id)
                 if indexed_msg:
                     indexed_msg["subject"] = new_subject
