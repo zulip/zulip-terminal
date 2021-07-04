@@ -151,6 +151,7 @@ class Model:
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
+        self.visual_notified_streams: Set[int] = set()
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
@@ -911,6 +912,8 @@ class Model:
         new_pinned_streams = []
         new_unpinned_streams = []
         new_muted_streams = set()
+        new_visual_notified_streams = set()
+
         for subscription in subscriptions:
             # Canonicalize color formats, since zulip server versions may use
             # different formats
@@ -924,6 +927,8 @@ class Model:
                 new_unpinned_streams.append(streamData)
             if not subscription["in_home_view"]:
                 new_muted_streams.add(subscription["stream_id"])
+            if subscription["desktop_notifications"]:
+                new_visual_notified_streams.add(subscription["stream_id"])
 
         if new_pinned_streams:
             self.pinned_streams.extend(new_pinned_streams)
@@ -933,6 +938,9 @@ class Model:
             sort_streams(self.unpinned_streams)
 
         self.muted_streams = self.muted_streams.union(new_muted_streams)
+        self.visual_notified_streams = self.visual_notified_streams.union(
+            new_visual_notified_streams
+        )
 
     def _group_info_from_realm_user_groups(
         self, groups: List[Dict[str, Any]]

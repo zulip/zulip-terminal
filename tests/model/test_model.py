@@ -1040,10 +1040,17 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
-    @pytest.mark.parametrize("muted", powerset([1, 2, 99, 1000]))
-    def test__subscribe_to_streams(self, initial_data, muted, model):
+    @pytest.mark.parametrize("muted", powerset([99, 1000]))
+    @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
+    def test__subscribe_to_streams(
+        self, initial_data, muted, visual_notification_enabled, model
+    ):
         subs = [
-            dict(entry, in_home_view=entry["stream_id"] not in muted)
+            dict(
+                entry,
+                in_home_view=entry["stream_id"] not in muted,
+                desktop_notifications=entry["stream_id"] in visual_notification_enabled,
+            )
             for entry in initial_data["subscriptions"]
         ]
 
@@ -1056,6 +1063,7 @@ class TestModel:
         assert model.muted_streams == muted
         assert model.pinned_streams == []  # FIXME generalize/parametrize
         assert len(model.unpinned_streams)  # FIXME generalize/parametrize
+        assert model.visual_notified_streams == visual_notification_enabled
 
     def test__handle_message_event_with_Falsey_log(
         self, mocker, model, message_fixture
