@@ -999,6 +999,17 @@ class Model:
         """
         return stream_id in self.visual_notified_streams
 
+    def toggle_stream_visual_notifications(self, stream_id: int) -> None:
+        request = [
+            {
+                "stream_id": stream_id,
+                "property": "desktop_notifications",
+                "value": not self.is_visual_notifications_enabled(stream_id),
+            }
+        ]
+        response = self.client.update_subscription_settings(request)
+        display_error_if_present(response, self.controller)
+
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
 

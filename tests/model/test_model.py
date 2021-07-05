@@ -2117,6 +2117,44 @@ class TestModel:
         model.client.update_subscription_settings.assert_called_once_with(request)
 
     @pytest.mark.parametrize(
+        "initial_visual_notified_streams, expected_new_value",
+        [
+            ({315}, True),
+            ({205, 315}, False),
+            (set(), True),
+            ({205}, False),
+        ],
+        ids=[
+            "visual_notification_enable_205",
+            "visual_notification_disable_205",
+            "first_notification_enable_205",
+            "last_notification_disable_205",
+        ],
+    )
+    def test_toggle_stream_visual_notifications(
+        self,
+        model,
+        initial_visual_notified_streams,
+        expected_new_value,
+        response={"result": "success"},
+        stream_id=205,
+    ):
+        model.visual_notified_streams = initial_visual_notified_streams
+        model.client.update_subscription_settings.return_value = response
+
+        model.toggle_stream_visual_notifications(stream_id)
+
+        request = [
+            {
+                "stream_id": stream_id,
+                "property": "desktop_notifications",
+                "value": expected_new_value,
+            }
+        ]
+        model.client.update_subscription_settings.assert_called_once_with(request)
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    @pytest.mark.parametrize(
         "narrow, event, called",
         [
             # Not in PM Narrow
