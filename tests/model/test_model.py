@@ -2489,6 +2489,27 @@ class TestModel:
         assert model.is_muted_stream(stream_id) == is_muted
 
     @pytest.mark.parametrize(
+        "visual_notified_streams, stream_id, is_enabled",
+        [
+            ({1}, 1, True),
+            ({1, 3, 7}, 2, False),
+            (set(), 1, False),
+        ],
+        ids=[
+            "notifications_enabled",
+            "notifications_disabled",
+            "notifications_disabled_no_streams_to_notify",
+        ],
+    )
+    def test_is_visual_notifications_enabled(
+        self, visual_notified_streams, stream_id, is_enabled, stream_dict, model
+    ):
+        model.stream_dict = stream_dict
+        model.visual_notified_streams = visual_notified_streams
+
+        assert model.is_visual_notifications_enabled(stream_id) == is_enabled
+
+    @pytest.mark.parametrize(
         "topic, is_muted",
         [
             ((1, "stream muted & unmuted topic"), False),
