@@ -2090,9 +2090,20 @@ class TestModel:
         model.narrow = narrow
         model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
 
+        if narrow and "pm_with" in narrow[0]:
+            sender_full_name = model.user_dict[event["sender"]["email"]]["full_name"]
+
         model._handle_typing_event(event)
 
         assert model.controller.view.set_footer_text.called == called
+
+        if called:
+            if event["op"] == "start":
+                model.controller.view.set_footer_text.assert_called_once_with(
+                    [" ", ("footer_contrast", sender_full_name), " is typing..."],
+                )
+            elif event["op"] == "stop":
+                model.controller.view.set_footer_text.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "event, final_muted_streams, ",
