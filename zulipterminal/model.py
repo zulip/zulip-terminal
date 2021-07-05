@@ -993,6 +993,12 @@ class Model:
         response = self.client.update_subscription_settings(request)
         return response["result"] == "success"
 
+    def is_visual_notifications_enabled(self, stream_id: int) -> bool:
+        """
+        Returns true if the stream had "desktop_notifications" enabled
+        """
+        return stream_id in self.visual_notified_streams
+
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
 
