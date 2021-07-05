@@ -2089,6 +2089,7 @@ class TestModel:
         mocker.patch("zulipterminal.ui.View.set_footer_text")
         model.narrow = narrow
         model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
+        TYPING_STARTED_EXPIRY_PERIOD = 15
 
         if narrow and "pm_with" in narrow[0]:
             sender_full_name = model.user_dict[event["sender"]["email"]]["full_name"]
@@ -2101,6 +2102,7 @@ class TestModel:
             if event["op"] == "start":
                 model.controller.view.set_footer_text.assert_called_once_with(
                     [" ", ("footer_contrast", sender_full_name), " is typing..."],
+                    TYPING_STARTED_EXPIRY_PERIOD,
                 )
             elif event["op"] == "stop":
                 model.controller.view.set_footer_text.assert_called_once_with()

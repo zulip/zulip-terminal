@@ -1001,6 +1001,9 @@ class Model:
         Handle typing notifications (in private messages)
         """
         assert event["type"] == "typing"
+
+        TYPING_STARTED_EXPIRY_PERIOD = 15
+
         if hasattr(self.controller, "view"):
             # If the user is in pm narrow with the person typing
             narrow = self.narrow
@@ -1012,7 +1015,11 @@ class Model:
                 if event["op"] == "start":
                     user = self.user_dict[event["sender"]["email"]]
                     self.controller.view.set_footer_text(
-                        [" ", ("footer_contrast", user["full_name"]), " is typing..."]
+                        [" ", ("footer_contrast", user["full_name"]), " is typing..."],
+                        # Restore the footer if there hasn't been a corresponding
+                        # typing 'stop' event after a 'start' event for greater
+                        # than 15 seconds.
+                        TYPING_STARTED_EXPIRY_PERIOD,
                     )
                 elif event["op"] == "stop":
                     self.controller.view.set_footer_text()
