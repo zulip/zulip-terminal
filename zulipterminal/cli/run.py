@@ -439,10 +439,16 @@ def main(options: Optional[List[str]] = None) -> None:
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use[0] in incomplete:
-            incomplete_theme_warning = (
-                "   WARNING: Incomplete theme; results may vary!\n"
-                "      (you could try: {})".format(", ".join(complete))
-            )
+            if complete:
+                incomplete_theme_warning = (
+                    "   WARNING: Incomplete theme; results may vary!\n"
+                    "      (you could try: {})".format(", ".join(complete))
+                )
+            else:
+                incomplete_theme_warning = (
+                    "   WARNING: Incomplete theme; results may vary!\n"
+                    "      (all themes are incomplete)"
+                )
             print(in_color("yellow", incomplete_theme_warning))
         print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
         if zterm["footlinks"][1] == ZULIPRC_CONFIG:

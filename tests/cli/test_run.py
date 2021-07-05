@@ -135,12 +135,20 @@ def test_valid_zuliprc_but_no_connection(
     assert captured.err == ""
 
 
-@pytest.mark.parametrize("bad_theme", ["c", "d"])
+@pytest.mark.parametrize(
+    "bad_theme, expected_complete_incomplete_themes, expected_warning",
+    [
+        ("c", (["a", "b"], ["c", "d"]), "(you could try: a, b)"),
+        ("d", ([], ["a", "b", "c", "d"]), "(all themes are incomplete)"),
+    ],
+)
 def test_warning_regarding_incomplete_theme(
     capsys,
     mocker,
     minimal_zuliprc,
     bad_theme,
+    expected_complete_incomplete_themes,
+    expected_warning,
     server_connection_error="sce",
 ):
     mocker.patch(
@@ -150,7 +158,7 @@ def test_warning_regarding_incomplete_theme(
     mocker.patch("zulipterminal.cli.run.all_themes", return_value=("a", "b", "c", "d"))
     mocker.patch(
         "zulipterminal.cli.run.complete_and_incomplete_themes",
-        return_value=(["a", "b"], ["c", "d"]),
+        return_value=expected_complete_incomplete_themes,
     )
     mocker.patch("zulipterminal.cli.run.generate_theme")
 
@@ -166,7 +174,7 @@ def test_warning_regarding_incomplete_theme(
         "Loading with:",
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
-        f"      (you could try: {'a'}, {'b'})\x1b[0m",
+        f"      {expected_warning}\x1b[0m",
         "   autohide setting 'no_autohide' specified with no config.",
         "   maximum footlinks value '3' specified with no config.",
         "   color depth setting '256' specified with no config.",
