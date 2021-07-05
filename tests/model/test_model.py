@@ -1319,7 +1319,12 @@ class TestModel:
 
     # TODO: Ideally message_fixture would use standardized ids?
     @pytest.mark.parametrize(
-        "user_id, vary_each_msg, stream_setting, types_when_notify_called",
+        [
+            "user_id",
+            "vary_each_msg",
+            "visual_notification_status",
+            "types_when_notify_called",
+        ],
         [
             (
                 5140,
@@ -1347,23 +1352,20 @@ class TestModel:
         message_fixture,
         user_id,
         vary_each_msg,
-        stream_setting,
+        visual_notification_status,
         types_when_notify_called,
     ):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
-        if "stream_id" in message_fixture:
-            model.stream_dict.update(
-                {
-                    message_fixture["stream_id"]: {
-                        "desktop_notifications": stream_setting
-                    }
-                }
-            )
+        mocker.patch(
+            MODEL + ".is_visual_notifications_enabled",
+            return_value=visual_notification_status,
+        )
         notify = mocker.patch(MODULE + ".notify")
 
         model.notify_user(message_fixture)
 
+        target = None
         if message_fixture["type"] in types_when_notify_called:
             who = message_fixture["type"]
             if who == "stream":
@@ -1372,6 +1374,7 @@ class TestModel:
                 target = "you"
                 if len(message_fixture["display_recipient"]) > 2:
                     target += ", Bar Bar"
+        if target is not None:
             title = f"Test Organization Name:\nFoo Foo (to {target})"
             # TODO: Test message content too?
             notify.assert_called_once_with(title, mocker.ANY)

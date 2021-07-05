@@ -1132,11 +1132,12 @@ class Model:
                     if recip["id"] not in (self.user_id, message["sender_id"])
                 ]
                 recipient = ", ".join(extra_targets)
-        elif message["type"] == "stream" and (
-            {"mentioned", "wildcard_mentioned"}.intersection(set(message["flags"]))
-            or self.stream_dict[message["stream_id"]]["desktop_notifications"]
-        ):
-            recipient = "{display_recipient} -> {subject}".format(**message)
+        elif message["type"] == "stream":
+            stream_id = message["stream_id"]
+            if {"mentioned", "wildcard_mentioned"}.intersection(
+                set(message["flags"])
+            ) or self.is_visual_notifications_enabled(stream_id):
+                recipient = "{display_recipient} -> {subject}".format(**message)
 
         if recipient:
             return notify(
