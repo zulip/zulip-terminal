@@ -52,6 +52,7 @@ class TestWriteBox:
         assert write_box.model == self.view.model
         assert write_box.view == self.view
         assert write_box.msg_edit_state is None
+        assert not write_box.sent_start_typing_status
 
     def test_not_calling_typing_method_without_recipients(self, mocker, write_box):
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
