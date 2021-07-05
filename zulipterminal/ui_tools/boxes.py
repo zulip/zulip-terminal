@@ -89,6 +89,7 @@ class WriteBox(urwid.Pile):
         self.send_next_typing_update = datetime.now()
         self.last_key_update = datetime.now()
         self.idle_status_tracking = False
+        self.sent_start_typing_status = False
 
         # Constant indices into self.contents
         # (CONTAINER=vertical, HEADER/MESSAGE=horizontal)
@@ -114,13 +115,19 @@ class WriteBox(urwid.Pile):
         self.view.controller.enter_editor_mode_with(self)
 
     def send_stop_typing_status(self) -> None:
-        # Send 'stop' updates only for PM narrows.
-        if self.to_write_box and self.recipient_user_ids:
+        # Send 'stop' updates only for PM narrows, when there are recipients
+        # to send to and a prior 'start' status has already been sent.
+        if (
+            self.to_write_box
+            and self.recipient_user_ids
+            and self.sent_start_typing_status
+        ):
             self.model.send_typing_status_by_user_ids(
                 self.recipient_user_ids, status="stop"
             )
             self.send_next_typing_update = datetime.now()
             self.idle_status_tracking = False
+            self.sent_start_typing_status = False
 
     def private_box_view(
         self,
@@ -202,6 +209,7 @@ class WriteBox(urwid.Pile):
                         self.recipient_user_ids, status="start"
                     )
                     self.send_next_typing_update += start_period_delta
+                    self.sent_start_typing_status = True
                     # Initiate tracker function only if it isn't already
                     # initiated.
                     if not self.idle_status_tracking:
