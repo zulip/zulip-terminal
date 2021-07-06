@@ -36,9 +36,12 @@ class TopButton(urwid.Button):
         else:
             prefix = prefix_character
         assert len(prefix) in (0, 1)
+        self.controller = controller
         self._caption = caption
+        self.show_function = show_function
         self.prefix_character = prefix_character
         self.post_prefix_spacing = " " if prefix else ""
+        self.original_color = text_color
         self.count = count
         self.count_style = count_style
 
@@ -46,11 +49,8 @@ class TopButton(urwid.Button):
         # Space either side, at least one space between
         self.width_for_text_and_count = width - 3 - prefix_length
 
-        self.original_color = text_color
-        self.show_function = show_function
         super().__init__("")
         self.update_count(count, text_color)
-        self.controller = controller
         urwid.connect_signal(self, "click", self.activate)
 
     def update_count(self, count: int, text_color: Optional[str] = None) -> None:
