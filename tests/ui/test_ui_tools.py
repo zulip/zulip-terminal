@@ -2337,40 +2337,40 @@ class TestMessageBox:
                 {"sender_id": 2, "timestamp": 45},
                 True,
                 60,
-                True,
-                False,
+                {"stream": False, "private": False},
+                {"stream": False, "private": False},
                 id="msg_sent_by_other_user",
             ),
             case(
                 {"sender_id": 1, "timestamp": 1},
                 True,
                 60,
-                False,
-                True,
+                {"stream": False, "private": False},
+                {"stream": True, "private": False},
                 id="topic_edit_only_after_time_limit",
             ),
             case(
                 {"sender_id": 1, "timestamp": 45},
                 False,
                 60,
-                True,
-                False,
+                {"stream": False, "private": False},
+                {"stream": False, "private": False},
                 id="editing_not_allowed",
             ),
             case(
                 {"sender_id": 1, "timestamp": 45},
                 True,
                 60,
-                True,
-                True,
+                {"stream": True, "private": True},
+                {"stream": True, "private": True},
                 id="all_conditions_met",
             ),
             case(
                 {"sender_id": 1, "timestamp": 1},
                 True,
                 0,
-                True,
-                True,
+                {"stream": True, "private": True},
+                {"stream": True, "private": True},
                 id="no_msg_body_edit_limit",
             ),
         ],
@@ -2388,6 +2388,7 @@ class TestMessageBox:
         key,
     ):
         varied_message = dict(message_fixture, **to_vary_in_each_message)
+        message_type = varied_message["type"]
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         size = widget_size(msg_box)
         msg_box.model.user_id = 1
@@ -2400,23 +2401,19 @@ class TestMessageBox:
         write_box.msg_edit_state = None
         write_box.msg_body_edit_enabled = None
         mocker.patch(BOXES + ".time", return_value=100)
-        # private messages cannot be edited after time-limit, if there is one.
-        if (
-            varied_message["type"] == "private"
-            and varied_message["timestamp"] == 1
-            and msg_body_edit_limit > 0
-        ):
-            expect_editing_to_succeed = False
 
         msg_box.keypress(size, key)
 
-        if expect_editing_to_succeed:
+        if expect_editing_to_succeed[message_type]:
             assert write_box.msg_edit_state.message_id == varied_message["id"]
             assert write_box.msg_edit_state.old_topic == varied_message["subject"]
             write_box.msg_write_box.set_edit_text.assert_called_once_with(
                 "Edit this message"
             )
-            assert write_box.msg_body_edit_enabled == expect_msg_body_edit_enabled
+            assert (
+                write_box.msg_body_edit_enabled
+                == expect_msg_body_edit_enabled[message_type]
+            )
         else:
             assert write_box.msg_edit_state is None
             write_box.msg_write_box.set_edit_text.assert_not_called()
