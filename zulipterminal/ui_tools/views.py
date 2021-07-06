@@ -462,7 +462,6 @@ class TopicsView(urwid.Frame):
             topic_name,
             self.view.controller,
             self.view,
-            self.view.LEFT_WIDTH,
             0,
         )
         self.log.insert(0, new_topic_button)
@@ -651,8 +650,7 @@ class RightColumnView(urwid.Frame):
     Displays the users list on the right side of the app.
     """
 
-    def __init__(self, width: int, view: Any) -> None:
-        self.width = width
+    def __init__(self, view: Any) -> None:
         self.view = view
         self.user_search = PanelSearchBox(self, "SEARCH_PEOPLE", self.update_user_list)
         self.view.user_search = self.user_search
@@ -743,7 +741,6 @@ class RightColumnView(urwid.Frame):
                     user,
                     controller=self.view.controller,
                     view=self.view,
-                    width=self.width,
                     state_marker=STATE_ICON[status],
                     color=f"user_{status}",
                     count=unread_count,
@@ -780,11 +777,10 @@ class LeftColumnView(urwid.Pile):
     Displays the buttons at the left column of the app.
     """
 
-    def __init__(self, width: int, view: Any) -> None:
+    def __init__(self, view: Any) -> None:
         self.model = view.model
         self.view = view
         self.controller = view.controller
-        self.width = width
         self.menu_v = self.menu_view()
         self.stream_v = self.streams_view()
 
@@ -794,24 +790,19 @@ class LeftColumnView(urwid.Pile):
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get("all_msg", 0)
-        self.view.home_button = HomeButton(
-            self.controller, count=count, width=self.width
-        )
+        self.view.home_button = HomeButton(self.controller, count=count)
 
         count = self.model.unread_counts.get("all_pms", 0)
-        self.view.pm_button = PMButton(self.controller, count=count, width=self.width)
+        self.view.pm_button = PMButton(self.controller, count=count)
 
         self.view.mentioned_button = MentionedButton(
             self.controller,
-            width=self.width,
             count=self.model.unread_counts["all_mentions"],
         )
 
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
-        self.view.starred_button = StarredButton(
-            self.controller, width=self.width, count=count
-        )
+        self.view.starred_button = StarredButton(self.controller, count=count)
         menu_btn_list = [
             self.view.home_button,
             self.view.pm_button,
@@ -827,7 +818,6 @@ class LeftColumnView(urwid.Pile):
                 stream,
                 controller=self.controller,
                 view=self.view,
-                width=self.width,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
             )
             for stream in self.view.pinned_streams
@@ -841,7 +831,6 @@ class LeftColumnView(urwid.Pile):
                 stream,
                 controller=self.controller,
                 view=self.view,
-                width=self.width,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
             )
             for stream in self.view.unpinned_streams
@@ -878,7 +867,6 @@ class LeftColumnView(urwid.Pile):
                 topic=topic,
                 controller=self.controller,
                 view=self.view,
-                width=self.width,
                 count=self.model.unread_counts["unread_topics"].get(
                     (stream_id, topic), 0
                 ),

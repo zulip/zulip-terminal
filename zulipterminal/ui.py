@@ -43,7 +43,7 @@ class View(urwid.WidgetWrap):
         super().__init__(self.main_window())
 
     def left_column_view(self) -> Any:
-        return LeftColumnView(View.LEFT_WIDTH, self)
+        return LeftColumnView(self)
 
     def middle_column_view(self) -> Any:
         self.middle_column = MiddleColumnView(
@@ -60,7 +60,7 @@ class View(urwid.WidgetWrap):
         )
 
     def right_column_view(self) -> Any:
-        self.users_view = RightColumnView(View.RIGHT_WIDTH, self)
+        self.users_view = RightColumnView(self)
         return urwid.LineBox(
             self.users_view,
             title="Users",

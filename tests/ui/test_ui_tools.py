@@ -1020,9 +1020,9 @@ class TestRightColumnView:
         }
 
     @pytest.fixture
-    def right_col_view(self, mocker, width=50):
+    def right_col_view(self, mocker):
         mocker.patch(VIEWS + ".RightColumnView.users_view")
-        return RightColumnView(width, self.view)
+        return RightColumnView(self.view)
 
     def test_init(self, right_col_view):
         assert right_col_view.view == self.view
@@ -1092,21 +1092,18 @@ class TestRightColumnView:
             (None, 0, False, "inactive"),
         ],
     )
-    def test_users_view(
-        self, users, users_btn_len, editor_mode, status, mocker, width=40
-    ):
+    def test_users_view(self, users, users_btn_len, editor_mode, status, mocker):
         self.view.users = [{"user_id": 1, "status": status}]
         self.view.controller.is_in_editor_mode = lambda: editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
-        right_col_view = RightColumnView(width, self.view)
+        right_col_view = RightColumnView(self.view)
         if status != "inactive":
             unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
                 self.view.users[0],
                 controller=self.view.controller,
                 view=self.view,
-                width=width,
                 color="user_" + self.view.users[0]["status"],
                 state_marker=STATUS_ACTIVE,
                 count=1,
@@ -1168,7 +1165,7 @@ class TestLeftColumnView:
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
 
-    def test_menu_view(self, mocker, width=40):
+    def test_menu_view(self, mocker):
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
@@ -1176,19 +1173,13 @@ class TestLeftColumnView:
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".StreamButton.mark_muted")
-        left_col_view = LeftColumnView(width, self.view)
-        home_button.assert_called_once_with(
-            left_col_view.controller, count=2, width=width
-        )
-        pm_button.assert_called_once_with(
-            left_col_view.controller, count=0, width=width
-        )
-        starred_button.assert_called_once_with(
-            left_col_view.controller, count=3, width=width
-        )
+        left_col_view = LeftColumnView(self.view)
+        home_button.assert_called_once_with(left_col_view.controller, count=2)
+        pm_button.assert_called_once_with(left_col_view.controller, count=0)
+        starred_button.assert_called_once_with(left_col_view.controller, count=3)
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 1000]))
-    def test_streams_view(self, mocker, streams, pinned, width=40):
+    def test_streams_view(self, mocker, streams, pinned):
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
         stream_button = mocker.patch(VIEWS + ".StreamButton")
@@ -1196,7 +1187,7 @@ class TestLeftColumnView:
         line_box = mocker.patch(VIEWS + ".urwid.LineBox")
         divider = mocker.patch(VIEWS + ".StreamsViewDivider")
 
-        left_col_view = LeftColumnView(width, self.view)
+        left_col_view = LeftColumnView(self.view)
 
         if pinned:
             assert divider.called
@@ -1208,7 +1199,6 @@ class TestLeftColumnView:
                 mocker.call(
                     stream,
                     controller=self.view.controller,
-                    width=width,
                     view=self.view,
                     count=1,
                 )
@@ -1216,7 +1206,7 @@ class TestLeftColumnView:
             ]
         )
 
-    def test_topics_view(self, mocker, stream_button, width=40):
+    def test_topics_view(self, mocker, stream_button):
         mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         mocker.patch(VIEWS + ".LeftColumnView.menu_view")
         topic_button = mocker.patch(VIEWS + ".TopicButton")
@@ -1225,7 +1215,7 @@ class TestLeftColumnView:
         topic_list = ["TOPIC1", "TOPIC2", "TOPIC3"]
         unread_count_list = [34, 100, 0]
         self.view.model.topics_in_stream = mocker.Mock(return_value=topic_list)
-        left_col_view = LeftColumnView(width, self.view)
+        left_col_view = LeftColumnView(self.view)
 
         left_col_view.topics_view(stream_button)
 
@@ -1237,7 +1227,6 @@ class TestLeftColumnView:
                     topic=topic,
                     controller=self.view.controller,
                     view=self.view,
-                    width=40,
                     count=count,
                 )
                 for topic, count in zip(topic_list, unread_count_list)

@@ -35,7 +35,6 @@ class TestTopButton:
             caption="caption",
             show_function=self.show_function,
             prefix_character="-",
-            width=0,
             count=0,
         )
         return top_button
@@ -121,10 +120,8 @@ class TestTopButton:
 
 
 class TestStarredButton:
-    def test_count_style_init_argument_value(self, mocker, width=12, count=10):
-        starred_button = StarredButton(
-            controller=mocker.Mock(), width=width, count=count
-        )
+    def test_count_style_init_argument_value(self, mocker, count=10):
+        starred_button = StarredButton(controller=mocker.Mock(), count=count)
         assert starred_button.count_style == "starred_count"
 
 
@@ -158,7 +155,6 @@ class TestUserButton:
         enter_key,
         widget_size,
         caption="some user",
-        width=30,
         email="some_email",
         user_id=5,
     ):
@@ -172,7 +168,6 @@ class TestUserButton:
             user,
             controller=mocker.Mock(),
             view=mocker.Mock(),
-            width=width,
             color=mocker.Mock(),
             state_marker="*",
             count=mocker.Mock(),
@@ -195,16 +190,14 @@ class TestUserButton:
 
 class TestTopicButton:
     @pytest.mark.parametrize(
-        "width, count, stream_id, title, stream_name",
+        "count, stream_id, title, stream_name",
         [
-            (8, 2, 86, "topic1", "Django"),
-            (9, 1, 14, "topic2", "GSoC"),
-            (25, 1000, 205, "topic3", "PTEST"),
+            (2, 86, "topic1", "Django"),
+            (1, 14, "topic2", "GSoC"),
+            (1000, 205, "topic3", "PTEST"),
         ],
     )
-    def test_init_calls_top_button(
-        self, mocker, width, count, title, stream_id, stream_name
-    ):
+    def test_init_calls_top_button(self, mocker, count, title, stream_id, stream_name):
         controller = mocker.Mock()
         controller.model.stream_dict = {
             205: {"name": "PTEST"},
@@ -214,7 +207,7 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
-        params = dict(controller=controller, width=width, count=count)
+        params = dict(controller=controller, count=count)
 
         topic_button = TopicButton(
             stream_id=stream_id, topic=title, view=view, **params
@@ -260,7 +253,6 @@ class TestTopicButton:
             topic=title,
             controller=controller,
             view=view,
-            width=40,
             count=0,
         )
         if is_muted_called:

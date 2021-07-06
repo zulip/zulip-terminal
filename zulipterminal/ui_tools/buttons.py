@@ -25,7 +25,6 @@ class TopButton(urwid.Button):
         controller: Any,
         caption: str,
         show_function: Callable[[], Any],
-        width: int,
         prefix_character: Union[str, Tuple[Any, str]] = "\N{BULLET}",
         text_color: Optional[str] = None,
         count: int = 0,
@@ -100,14 +99,13 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+    def __init__(self, controller: Any, count: int = 0) -> None:
         button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_messages,
-            width=width,
             prefix_character="",
             count=count,
             count_style="unread_count",
@@ -115,14 +113,13 @@ class HomeButton(TopButton):
 
 
 class PMButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+    def __init__(self, controller: Any, count: int = 0) -> None:
         button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_pm,
-            width=width,
             prefix_character="",
             count=count,
             count_style="unread_count",
@@ -130,14 +127,13 @@ class PMButton(TopButton):
 
 
 class MentionedButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+    def __init__(self, controller: Any, count: int = 0) -> None:
         button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_mentions,
-            width=width,
             prefix_character="",
             count=count,
             count_style="unread_count",
@@ -145,14 +141,13 @@ class MentionedButton(TopButton):
 
 
 class StarredButton(TopButton):
-    def __init__(self, controller: Any, width: int, count: int = 0) -> None:
+    def __init__(self, controller: Any, count: int = 0) -> None:
         button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
             controller=controller,
             caption=button_text,
             show_function=controller.narrow_to_all_starred,
-            width=width,
             prefix_character="",
             count=count,  # Number of starred messages, not unread count
             count_style="starred_count",
@@ -165,7 +160,6 @@ class StreamButton(TopButton):
         properties: StreamData,
         controller: Any,
         view: Any,
-        width: int,
         count: int = 0,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
@@ -201,7 +195,6 @@ class StreamButton(TopButton):
             controller=controller,
             caption=self.stream_name,
             show_function=narrow_function,
-            width=width,
             prefix_character=(self.color, stream_marker),
             count=count,
             count_style="unread_count",
@@ -235,7 +228,6 @@ class UserButton(TopButton):
         user: Dict[str, Any],
         controller: Any,
         view: Any,
-        width: int,
         state_marker: str,
         color: Optional[str] = None,
         count: int = 0,
@@ -255,7 +247,6 @@ class UserButton(TopButton):
             controller=controller,
             caption=user["full_name"],
             show_function=self._narrow_with_compose,
-            width=width,
             prefix_character=(color, state_marker),
             text_color=color,
             count=count,
@@ -287,7 +278,6 @@ class TopicButton(TopButton):
         topic: str,
         controller: Any,
         view: Any,
-        width: int = 0,
         count: int = 0,
     ) -> None:
         self.stream_name = controller.model.stream_dict[stream_id]["name"]
@@ -305,7 +295,6 @@ class TopicButton(TopButton):
             controller=controller,
             caption=self.topic_name,
             show_function=narrow_function,
-            width=width,
             prefix_character="",
             count=count,
             count_style="unread_count",
