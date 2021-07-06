@@ -118,6 +118,20 @@ class WriteBox(urwid.Pile):
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
+    def _set_regular_and_typing_recipient_user_ids(
+        self, user_id_list: Optional[List[int]]
+    ) -> None:
+        if user_id_list:
+            self.recipient_user_ids = user_id_list
+            self.typing_recipient_user_ids = [
+                user_id
+                for user_id in self.recipient_user_ids
+                if user_id != self.model.user_id
+            ]
+        else:
+            self.recipient_user_ids = list()
+            self.typing_recipient_user_ids = list()
+
     def send_stop_typing_status(self) -> None:
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
@@ -147,7 +161,7 @@ class WriteBox(urwid.Pile):
         self.set_editor_mode()
 
         if recipient_user_ids and emails:
-            self.recipient_user_ids = recipient_user_ids
+            self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
             self.recipient_emails = emails
             recipient_info = ", ".join(
                 [
@@ -155,14 +169,8 @@ class WriteBox(urwid.Pile):
                     for email in emails
                 ]
             )
-            self.typing_recipient_user_ids = [
-                user_id
-                for user_id in self.recipient_user_ids
-                if user_id != self.model.user_id
-            ]
         else:
-            self.recipient_user_ids = []
-            self.typing_recipient_user_ids = []
+            self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
             recipient_info = ""
 
@@ -748,14 +756,9 @@ class WriteBox(urwid.Pile):
                     # invalid ones.
                     self.update_recipient_emails(self.to_write_box)
                     users = self.model.user_dict
-                    self.recipient_user_ids = [
-                        users[email]["user_id"] for email in self.recipient_emails
-                    ]
-                    self.typing_recipient_user_ids = [
-                        user_id
-                        for user_id in self.recipient_user_ids
-                        if user_id is not self.model.user_id
-                    ]
+                    self._set_regular_and_typing_recipient_user_ids(
+                        [users[email]["user_id"] for email in self.recipient_emails]
+                    )
 
             if not self.msg_body_edit_enabled:
                 return key
