@@ -55,7 +55,7 @@ class TestView:
         right_view = mocker.patch(MODULE + ".RightColumnView")
         line_box = mocker.patch(MODULE + ".urwid.LineBox")
         return_value = view.right_column_view()
-        right_view.assert_called_once_with(View.RIGHT_WIDTH, view)
+        right_view.assert_called_once_with(view)
         assert view.users_view == right_view()
         assert return_value == line_box()
 

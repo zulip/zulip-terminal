@@ -49,7 +49,6 @@ def stream_button(mocker):
             "description": "Test stream description",
         },
         controller=mocker.patch("zulipterminal.core.Controller"),
-        width=40,
         view=view_mock,
         count=30,
     )
@@ -68,14 +67,13 @@ def topic_button(mocker):
         topic="PTEST",
         controller=mocker.patch("zulipterminal.core.Controller"),
         view=view_mock,
-        width=40,
         count=30,
     )
     return button
 
 
 @pytest.fixture
-def user_button(mocker, width=38):
+def user_button(mocker):
     """
     Mocked User Button.
     """
@@ -85,7 +83,6 @@ def user_button(mocker, width=38):
             "full_name": "Boo Boo",
             "email": "boo@zulip.com",
         },
-        width=width,
         controller=mocker.patch("zulipterminal.core.Controller"),
         view=mocker.patch("zulipterminal.ui.View"),
         state_marker="*",
