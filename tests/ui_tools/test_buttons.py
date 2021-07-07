@@ -125,14 +125,11 @@ class TestTopButton:
         new_count: int,
         new_count_str: str,
     ) -> None:
-        top_button.label_style = "style"
         top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
         top_button.update_count(new_count)
 
-        top_button_update_widget.assert_called_once_with(
-            top_button._suffix_markup, top_button.label_style
-        )
+        top_button_update_widget.assert_called_once_with()
         assert top_button.suffix_text == new_count_str
 
     @pytest.mark.parametrize(
@@ -170,7 +167,7 @@ class TestTopButton:
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
         set_attr_map = mocker.patch.object(top_button._w, "set_attr_map")
 
-        top_button.update_widget(suffix_markup, label_markup[0])
+        top_button.update_widget()
 
         top_button.button_prefix.set_text.assert_called_once_with(
             expected_prefix_markup
@@ -198,7 +195,10 @@ class TestStreamButton:
 
         stream_button.mark_muted()
 
-        update_widget.assert_called_once_with(("muted", MUTE_MARKER), "muted")
+        assert stream_button.label_style == "muted"
+        assert stream_button.suffix_style == "muted"
+        assert stream_button.suffix_text == MUTE_MARKER
+        update_widget.assert_called_once_with()
 
     def test_mark_unmuted(
         self, mocker: MockerFixture, stream_button: StreamButton
@@ -209,6 +209,8 @@ class TestStreamButton:
 
         stream_button.mark_unmuted(unread_count)
 
+        assert stream_button.label_style is None
+        assert stream_button.suffix_style == "unread_count"
         update_count.assert_called_once_with(unread_count)
 
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
@@ -490,7 +492,10 @@ class TestTopicButton:
 
         topic_button.mark_muted()
 
-        update_widget.assert_called_once_with(("muted", MUTE_MARKER), "muted")
+        assert topic_button.label_style == "muted"
+        assert topic_button.suffix_style == "muted"
+        assert topic_button.suffix_text == MUTE_MARKER
+        update_widget.assert_called_once_with()
 
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_EXIT_TOGGLE_TOPIC(
