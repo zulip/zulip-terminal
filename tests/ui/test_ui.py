@@ -1,6 +1,6 @@
 import pytest
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import STD_NAV_CMDS, keys_for_command
 from zulipterminal.ui import View
 
 
@@ -235,10 +235,10 @@ class TestView:
         else:
             view.body.options.assert_not_called()
 
-    def test_keypress_normal_mode_navigation(
-        self, view, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
+    @pytest.mark.parametrize(
+        "key", [key for cmd in STD_NAV_CMDS for key in keys_for_command(cmd)]
+    )
+    def test_keypress_normal_mode_navigation(self, view, mocker, key, widget_size):
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
@@ -250,7 +250,7 @@ class TestView:
 
         view.keypress(size, key)
 
-        super_keypress.assert_called_once_with(size, expected_key)
+        super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
     def test_keypress_ALL_MENTIONS(self, view, mocker, key, widget_size):
@@ -258,11 +258,37 @@ class TestView:
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
-        view.model.controller.narrow_to_all_mentions = mocker.Mock()
+        view.controller.narrow_to_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
 
-        view.model.controller.narrow_to_all_mentions.assert_called_once_with()
+        view.controller.narrow_to_all_mentions.assert_called_once_with()
+        assert view.body.focus_col == 1
+
+    @pytest.mark.parametrize("key", keys_for_command("ALL_PM"))
+    def test_keypress_ALL_PM(self, view, mocker, key, widget_size):
+        view.body = mocker.Mock()
+        view.body.focus_col = None
+        view.controller.is_in_editor_mode = lambda: False
+        size = widget_size(view)
+        view.controller.narrow_to_all_pm = mocker.Mock()
+
+        view.keypress(size, key)
+
+        view.controller.narrow_to_all_pm.assert_called_once_with()
+        assert view.body.focus_col == 1
+
+    @pytest.mark.parametrize("key", keys_for_command("ALL_STARRED"))
+    def test_keypress_ALL_STARRED(self, view, mocker, key, widget_size):
+        view.body = mocker.Mock()
+        view.body.focus_col = None
+        view.controller.is_in_editor_mode = lambda: False
+        size = widget_size(view)
+        view.controller.narrow_to_all_starred = mocker.Mock()
+
+        view.keypress(size, key)
+
+        view.controller.narrow_to_all_starred.assert_called_once_with()
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))

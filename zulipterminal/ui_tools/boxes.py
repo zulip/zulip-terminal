@@ -574,6 +574,9 @@ class WriteBox(urwid.Pile):
         return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Handle editing keystrokes.
+        key = super().keypress(size, key)
+
         if self.is_in_typeahead_mode:
             if not (
                 is_command_key("AUTOCOMPLETE", key)
@@ -642,6 +645,8 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_state is not None:
                     self.msg_edit_state = None
                     self.keypress(size, "esc")
+            return
+
         elif is_command_key("GO_BACK", key):
             self.msg_edit_state = None
             self.msg_body_edit_enabled = True
@@ -649,6 +654,8 @@ class WriteBox(urwid.Pile):
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
+            return
+
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.to_write_box:
@@ -677,6 +684,8 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
+            return
+
         elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
             if len(self.contents) == 0:
                 return key
@@ -744,8 +753,9 @@ class WriteBox(urwid.Pile):
                 header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+            return
 
-        key = super().keypress(size, key)
+        # key wasn't handled.
         return key
 
 
@@ -1567,6 +1577,8 @@ class MessageBox(urwid.Pile):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # key not passed to super.keypress()
+
         if is_command_key("ENTER", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
@@ -1579,6 +1591,8 @@ class MessageBox(urwid.Pile):
                     title=self.message["subject"],
                     stream_id=self.stream_id,
                 )
+            return
+
         elif is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
@@ -1587,6 +1601,8 @@ class MessageBox(urwid.Pile):
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
+            return
+
         elif is_command_key("STREAM_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1598,6 +1614,8 @@ class MessageBox(urwid.Pile):
                     stream_name=self.stream_name,
                     contextual_message_id=self.message["id"],
                 )
+            return
+
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
@@ -1622,6 +1640,8 @@ class MessageBox(urwid.Pile):
                         topic_name=self.topic_name,
                         contextual_message_id=self.message["id"],
                     )
+            return
+
         elif is_command_key("TOPIC_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1634,16 +1654,22 @@ class MessageBox(urwid.Pile):
                     topic_name=self.topic_name,
                     contextual_message_id=self.message["id"],
                 )
+            return
+
         elif is_command_key("ALL_MESSAGES", key):
             self.model.controller.narrow_to_all_messages(
                 contextual_message_id=self.message["id"]
             )
+            return
+
         elif is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
                 emails=[self.message["sender_email"]],
                 recipient_user_ids=[self.message["sender_id"]],
             )
+            return
+
         elif is_command_key("MENTION_REPLY", key):
             self.keypress(size, "enter")
             mention = f"@**{self.message['sender_full_name']}** "
@@ -1652,6 +1678,8 @@ class MessageBox(urwid.Pile):
                 len(mention)
             )
             self.model.controller.view.middle_column.set_focus("footer")
+            return
+
         elif is_command_key("QUOTE_REPLY", key):
             self.keypress(size, "enter")
 
@@ -1681,6 +1709,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
+            return
+
         elif is_command_key("EDIT_MESSAGE", key):
             if self.message["sender_id"] != self.model.user_id:
                 self.model.controller.report_error(
@@ -1737,10 +1767,15 @@ class MessageBox(urwid.Pile):
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus("footer")
+            return
+
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
+            return
+
+        # key wasn't handled
         return key
 
 
@@ -1778,21 +1813,30 @@ class SearchBox(urwid.Pile):
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Handle editing keystrokes.
+        # print(key, flush=True)
+        key = super().keypress(size, key)
+        # print(key, flush=True)
+
+        # Avoid going to the next widget, if at the edge of `edit_text`
+        if key in ["left", "right"]:
+            return
+
         if (
             is_command_key("ENTER", key) and self.text_box.edit_text == ""
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
-            return key
+            return
 
         elif is_command_key("ENTER", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus("body")
-            return key
+            return
 
-        key = super().keypress(size, key)
+        # key wasn't handled.
         return key
 
 
@@ -1832,17 +1876,26 @@ class PanelSearchBox(urwid.Edit):
             return unicodedata.category(ch) not in ("Cc", "Zs")
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if (
-            is_command_key("ENTER", key) and self.get_edit_text() == ""
-        ) or is_command_key("GO_BACK", key):
+        # Handle editing keystrokes.
+        key = super().keypress(size, key)
+
+        # Avoid going to the next widget, if at the edge of `edit_text`
+        if key in ["left", "right"]:
+            return
+
+        if is_command_key("ENTER", key) and self.get_edit_text() == "":
+            # Convert key to 'esc' and send it on it's way to Panel.keypress()
             self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
-            self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, "esc")
+            key = "esc"
+            return key
+
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", "Search Results"), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
-        return super().keypress(size, key)
+            return
+
+        # key wasn't handled.
+        return key

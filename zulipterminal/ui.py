@@ -20,7 +20,7 @@ from zulipterminal.ui_tools.views import (
 from zulipterminal.urwid_types import urwid_Box
 
 
-class View(urwid.WidgetWrap):
+class View(urwid.Frame):
     """
     A class responsible for providing the application's interface.
     """
@@ -40,7 +40,24 @@ class View(urwid.WidgetWrap):
 
         self.message_view: Any = None
 
-        super().__init__(self.main_window())
+        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
+            full_name=self.model.user_full_name,
+            email=self.model.user_email,
+            server_name=self.model.server_name,
+            url=self.model.server_url,
+        )
+
+        title_bar = urwid.Columns(
+            [
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+                (len(title_text), urwid.Text([title_text])),
+                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+            ]
+        )
+
+        super().__init__(
+            self.main_window(), title_bar, focus_part="body", footer=self.footer_view()
+        )
 
     def left_column_view(self) -> Any:
         return LeftColumnView(View.LEFT_WIDTH, self)
@@ -153,25 +170,7 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
-        )
-
-        title_bar = urwid.Columns(
-            [
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-                (len(title_text), urwid.Text([title_text])),
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-            ]
-        )
-
-        w = urwid.Frame(
-            self.body, title_bar, focus_part="body", footer=self.footer_view()
-        )
-        return w
+        return self.body
 
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
@@ -196,11 +195,15 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 2
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
+        # Pass to focus widget.
+        key = super().keypress(size, key)
+
         self.model.new_user_input = True
-        if self.controller.is_in_editor_mode():
-            return self.controller.current_editor().keypress((size[1],), key)
+        # May not be needed
+        # if self.controller.is_in_editor_mode():
+        #     return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
-        elif (
+        if (
             is_command_key("SEARCH_MESSAGES", key)
             or is_command_key("NEXT_UNREAD_TOPIC", key)
             or is_command_key("NEXT_UNREAD_PM", key)
@@ -208,17 +211,23 @@ class View(urwid.WidgetWrap):
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
             self.body.focus_col = 1
-            self.middle_column.keypress(size, key)
-            return key
+            return self.middle_column.keypress(size, key)
+
         elif is_command_key("ALL_PM", key):
-            self.model.controller.narrow_to_all_pm()
+            self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
+            return
+
         elif is_command_key("ALL_STARRED", key):
-            self.model.controller.narrow_to_all_starred()
+            self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
+            return
+
         elif is_command_key("ALL_MENTIONS", key):
-            self.model.controller.narrow_to_all_mentions()
+            self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
+            return
+
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
@@ -227,7 +236,8 @@ class View(urwid.WidgetWrap):
             self.show_right_panel(visible=True)
             self.user_search.set_edit_text("")
             self.controller.enter_editor_mode_with(self.user_search)
-            return key
+            return
+
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
@@ -242,7 +252,8 @@ class View(urwid.WidgetWrap):
                 search_box = self.stream_w.stream_search_box
             search_box.set_edit_text("")
             self.controller.enter_editor_mode_with(search_box)
-            return key
+            return
+
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
@@ -272,32 +283,18 @@ class View(urwid.WidgetWrap):
                 self.controller.report_error(
                     "No draft message was saved in this session."
                 )
-            return key
+            return
+
         elif is_command_key("ABOUT", key):
             self.controller.show_about()
-            return key
+            return
+
         elif is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()
-            return key
-        # replace alternate keys with arrow/functional keys
-        # This is needed for navigating in widgets
-        # other than message_view.
-        elif is_command_key("GO_UP", key):
-            key = "up"
-        elif is_command_key("GO_DOWN", key):
-            key = "down"
-        elif is_command_key("GO_LEFT", key):
-            key = "left"
-        elif is_command_key("GO_RIGHT", key):
-            key = "right"
-        elif is_command_key("SCROLL_UP", key):
-            key = "page up"
-        elif is_command_key("SCROLL_DOWN", key):
-            key = "page down"
-        elif is_command_key("GO_TO_BOTTOM", key):
-            key = "end"
-        return super().keypress(size, key)
+            return
+
+        return key
 
 
 class Screen(urwid.raw_display.Screen):
