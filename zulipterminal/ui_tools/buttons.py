@@ -86,13 +86,9 @@ class TopButton(urwid.Button):
     def update_count(self, count: int) -> None:
         self.count = count
         self.suffix_text = "" if count == 0 else str(count)
-        self.update_widget(self._suffix_markup, self.label_style)
+        self.update_widget()
 
-    def update_widget(
-        self, count_text: urwid_MarkupTuple, text_color: Optional[str]
-    ) -> Any:
-        self._suffix_markup = count_text  # kept for easier transition
-        self.label_style = text_color  # kept for easier transition
+    def update_widget(self) -> Any:
         if self.prefix_text:
             prefix = [" ", self._prefix_markup, " "]
         else:
@@ -225,10 +221,15 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
+        self.label_style = "muted"
+        self.suffix_style = "muted"
+        self.suffix_text = MUTE_MARKER
+        self.update_widget()
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
     def mark_unmuted(self, unread_count: int) -> None:
+        self.label_style = None
+        self.suffix_style = "unread_count"
         self.update_count(unread_count)
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
@@ -274,7 +275,9 @@ class UserButton(TopButton):
             count=count,
         )
         if is_current_user:
-            self.update_widget(("current_user", "(you)"), color)
+            self.suffix_style = "current_user"
+            self.suffix_text = "(you)"
+            self.update_widget()
 
     def _narrow_with_compose(self) -> None:
         # Switches directly to composing with user
@@ -333,7 +336,10 @@ class TopicButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
+        self.label_style = "muted"
+        self.suffix_style = "muted"
+        self.suffix_text = MUTE_MARKER
+        self.update_widget()
 
     # TODO: Handle event-based approach for topic-muting.
 
@@ -380,7 +386,8 @@ class EmojiButton(TopButton):
     def update_check_mark(self, user_reacted: bool) -> None:
         count_text = str(self.reaction_count) if self.reaction_count > 0 else ""
         reacted_check_mark = CHECK_MARK if user_reacted else ""
-        self.update_widget((None, f" {reacted_check_mark} {count_text} "), None)
+        self.suffix_text = f" {reacted_check_mark} {count_text} "
+        self.update_widget()
 
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
