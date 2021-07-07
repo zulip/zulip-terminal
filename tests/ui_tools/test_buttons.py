@@ -56,8 +56,6 @@ class TestTopButton:
         assert top_button._suffix_markup == (None, "")
         assert top_button.show_function == self.show_function
 
-        assert top_button._caption == "caption"
-
         assert top_button._label.wrap == "ellipsis"
         assert top_button._label.get_cursor_coords("size") is None
 
@@ -117,7 +115,6 @@ class TestTopButton:
         top_button.suffix_text = "suffix-text2"
         assert top_button.suffix_text == "suffix-text2"
 
-    @pytest.mark.parametrize("text_color", ["color", None])
     @pytest.mark.parametrize(
         "new_count, new_count_str", [(11, "11"), (1, "1"), (10, "10"), (0, "")]
     )
@@ -127,25 +124,21 @@ class TestTopButton:
         top_button: TopButton,
         new_count: int,
         new_count_str: str,
-        text_color: Optional[str],
     ) -> None:
-        top_button.label_style = text_color
         top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
         top_button.update_count(new_count)
 
-        top_button_update_widget.assert_called_once_with(
-            top_button._suffix_markup, text_color
-        )
+        top_button_update_widget.assert_called_once_with()
         assert top_button.suffix_text == new_count_str
 
     @pytest.mark.parametrize(
-        "prefix, expected_prefix",
+        "prefix_markup, expected_prefix_markup",
         [((None, "-"), [" ", (None, "-"), " "]), ((None, ""), [" "])],
     )
-    @pytest.mark.parametrize("text_color", ["color", None])
+    @pytest.mark.parametrize("label_markup", [("color", "caption"), (None, "caption")])
     @pytest.mark.parametrize(
-        "count_text, expected_suffix",
+        "suffix_markup, expected_suffix_markup",
         [
             (("color", "3"), [" ", ("color", "3"), " "]),
             (("color", ""), ["  "]),
@@ -157,24 +150,30 @@ class TestTopButton:
         self,
         mocker: MockerFixture,
         top_button: TopButton,
-        prefix: urwidMarkupTuple,
-        expected_prefix: List[Union[str, urwidMarkupTuple]],
-        text_color: Optional[str],
-        count_text: urwidMarkupTuple,
-        expected_suffix: List[Union[str, urwidMarkupTuple]],
+        prefix_markup: urwidMarkupTuple,
+        expected_prefix_markup: List[Union[str, urwidMarkupTuple]],
+        label_markup: urwidMarkupTuple,
+        suffix_markup: urwidMarkupTuple,
+        expected_suffix_markup: List[Union[str, urwidMarkupTuple]],
     ) -> None:
-        top_button.prefix_character = prefix
+        top_button._prefix_markup = prefix_markup
+        top_button._label_markup = label_markup
+        top_button._suffix_markup = suffix_markup
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
         set_attr_map = mocker.patch.object(top_button._w, "set_attr_map")
 
-        top_button.update_widget(count_text, text_color)
+        top_button.update_widget()
 
-        top_button.button_prefix.set_text.assert_called_once_with(expected_prefix)
-        top_button.set_label.assert_called_once_with(top_button._caption)
-        top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
-        set_attr_map.assert_called_once_with({None: text_color})
+        top_button.button_prefix.set_text.assert_called_once_with(
+            expected_prefix_markup
+        )
+        top_button.set_label.assert_called_once_with(top_button._label_markup[1])
+        top_button.button_suffix.set_text.assert_called_once_with(
+            expected_suffix_markup
+        )
+        set_attr_map.assert_called_once_with({None: top_button.label_style})
 
 
 class TestStarredButton:
@@ -296,7 +295,7 @@ class TestEmojiButton:
     ) -> None:
         controller = mocker.Mock()
         controller.model.has_user_reacted_to_message = mocker.Mock(return_value=False)
-        update_widget = mocker.patch(MODULE + ".EmojiButton.update_widget")
+        update_widget = mocker.patch(MODULE + ".EmojiButton.update_widget_suffix")
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
         label = ", ".join([emoji_unit[0], *emoji_unit[2]])
         message_fixture["reactions"] = to_vary_in_message["reactions"]
