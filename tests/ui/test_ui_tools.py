@@ -720,6 +720,16 @@ class TestTopicsView:
         assert topic_view.log == topic_view.topics_btn_list
         assert topic_view.log.get_focus()[1] == topic_view.focus_index_before_search
 
+    def test_mouse_event(self, mocker, topic_view, mouse_scroll_event, widget_size):
+        event, button, key = mouse_scroll_event
+        mocker.patch.object(topic_view, "keypress")
+        size = widget_size(topic_view)
+        col = 1
+        row = 1
+        focus = "WIDGET"
+        topic_view.mouse_event(size, event, button, col, row, focus)
+        topic_view.keypress.assert_called_once_with(size, key)
+
 
 class TestUsersView:
     @pytest.fixture
