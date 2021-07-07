@@ -1108,6 +1108,23 @@ def classified_unread_counts():
 
 @pytest.fixture(
     params=[
+        ("mouse press", 4, "up"),
+        ("mouse press", 5, "down"),
+    ],
+    ids=[
+        "mouse_scroll_up",
+        "mouse_scroll_down",
+    ],
+)
+def mouse_scroll_event(request):
+    """
+    Returns required parameters for mouse_event keypress
+    """
+    return request.param
+
+
+@pytest.fixture(
+    params=[
         (key, expected_key)
         for keys, expected_key in [
             (keys_for_command("GO_UP"), "up"),
