@@ -279,14 +279,8 @@ class TestMessageView:
             num_before=0, num_after=30, anchor=0
         )
 
-    @pytest.mark.parametrize(
-        "event, button, keypress",
-        [
-            ("mouse press", 4, "up"),
-            ("mouse press", 5, "down"),
-        ],
-    )
-    def test_mouse_event(self, mocker, msg_view, event, button, keypress, widget_size):
+    def test_mouse_event(self, mocker, msg_view, mouse_scroll_event, widget_size):
+        event, button, keypress = mouse_scroll_event
         mocker.patch.object(msg_view, "keypress")
         size = widget_size(msg_view)
         msg_view.mouse_event(size, event, button, 0, 0, mocker.Mock())
@@ -550,19 +544,15 @@ class TestStreamsView:
             assert hasattr(stream_view.log[0].original_widget, "text")
         self.view.controller.update_screen.assert_called_once_with()
 
-    def test_mouse_event(self, mocker, stream_view, widget_size):
+    def test_mouse_event(self, mocker, stream_view, mouse_scroll_event, widget_size):
+        event, button, key = mouse_scroll_event
         mocker.patch.object(stream_view, "keypress")
         size = widget_size(stream_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        # Left click
-        stream_view.mouse_event(size, "mouse press", 4, col, row, focus)
-        stream_view.keypress.assert_called_once_with(size, "up")
-
-        # Right click
-        stream_view.mouse_event(size, "mouse press", 5, col, row, focus)
-        stream_view.keypress.assert_called_with(size, "down")
+        stream_view.mouse_event(size, event, button, col, row, focus)
+        stream_view.keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
@@ -738,19 +728,15 @@ class TestUsersView:
         controller = mocker.Mock()
         return UsersView(controller, "USER_BTN_LIST")
 
-    def test_mouse_event(self, mocker, user_view, widget_size):
+    def test_mouse_event(self, mocker, user_view, mouse_scroll_event, widget_size):
+        event, button, key = mouse_scroll_event
         mocker.patch.object(user_view, "keypress")
         size = widget_size(user_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        # Left click
-        user_view.mouse_event(size, "mouse press", 4, col, row, focus)
-        user_view.keypress.assert_called_with(size, "up")
-
-        # Right click
-        user_view.mouse_event(size, "mouse press", 5, col, row, focus)
-        user_view.keypress.assert_called_with(size, "down")
+        user_view.mouse_event(size, event, button, col, row, focus)
+        user_view.keypress.assert_called_with(size, key)
 
     def test_mouse_event_left_click(
         self, mocker, user_view, widget_size, compose_box_is_open
