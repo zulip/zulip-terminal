@@ -151,6 +151,7 @@ class UpdateMessageEvent(TypedDict):
     message_ids: List[int]
     subject: str
     stream_id: int
+    flags: List[MessageFlag]
 
 
 class ReactionEvent(TypedDict):
