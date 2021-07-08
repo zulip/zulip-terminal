@@ -100,12 +100,12 @@ def test_main_help(capsys, options):
 
 
 @pytest.fixture
-def minimal_zuliprc(tmpdir):
-    zuliprc_path = str(tmpdir) + "/zuliprc"
+def minimal_zuliprc(tmp_path):
+    zuliprc_path = tmp_path / "zuliprc"
     with open(zuliprc_path, "w") as f:
         f.write("[api]")  # minimal to avoid Exception
     os.chmod(zuliprc_path, 0o600)
-    return zuliprc_path
+    return str(zuliprc_path)
 
 
 def test_valid_zuliprc_but_no_connection(
@@ -272,14 +272,15 @@ def test_main_multiple_notify_options(capsys, options):
 # NOTE: Fixture is necessary to ensure unreadable dir is garbage-collected
 # See pytest issue #7821
 @pytest.fixture
-def unreadable_dir(tmpdir):
-    unreadable_dir = tmpdir.mkdir("unreadable")
+def unreadable_dir(tmp_path):
+    unreadable_dir = tmp_path / "unreadable"
+    unreadable_dir.mkdir()
     unreadable_dir.chmod(0)
     if os.access(str(unreadable_dir), os.R_OK):
         # Docker container or similar
         pytest.skip("Directory was still readable")
 
-    yield tmpdir, unreadable_dir
+    yield tmp_path, unreadable_dir
 
     unreadable_dir.chmod(0o755)
 
@@ -300,10 +301,10 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     path_to_use,
     expected_exception,
 ):
-    tmpdir, unusable_path = unreadable_dir
+    tmp_path, unusable_path = unreadable_dir
 
     # This is default base path to use
-    zuliprc_path = os.path.join(str(tmpdir), path_to_use)
+    zuliprc_path = os.path.join(str(tmp_path), path_to_use)
     monkeypatch.setenv("HOME", zuliprc_path)
 
     # Give some arbitrary input and fake that it's always valid
@@ -327,16 +328,16 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
 
 @pytest.fixture
-def parameterized_zuliprc(tmpdir):
+def parameterized_zuliprc(tmp_path):
     def func(config):
-        zuliprc_path = str(tmpdir) + "/zuliprc"
+        zuliprc_path = tmp_path / "zuliprc"
         with open(zuliprc_path, "w") as f:
             f.write("[api]\n\n")  # minimal to avoid Exception
             f.write("[zterm]\n")
             for key, value in config.items():
                 f.write(f"{key}={value}\n")
         os.chmod(zuliprc_path, 0o600)
-        return zuliprc_path
+        return str(zuliprc_path)
 
     return func
 
@@ -451,8 +452,8 @@ def test_exit_with_error(error_code, helper_text, capsys, error_message="some te
         assert lines[1] == helper_text
 
 
-def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
-    path = os.path.join(str(tmpdir), "zuliprc")
+def test__write_zuliprc__success(tmp_path, id="id", key="key", url="url"):
+    path = os.path.join(str(tmp_path), "zuliprc")
 
     error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
 
@@ -466,9 +467,9 @@ def test__write_zuliprc__success(tmpdir, id="id", key="key", url="url"):
 
 
 def test__write_zuliprc__fail_file_exists(
-    minimal_zuliprc, tmpdir, id="id", key="key", url="url"
+    minimal_zuliprc, tmp_path, id="id", key="key", url="url"
 ):
-    path = os.path.join(str(tmpdir), "zuliprc")
+    path = os.path.join(str(tmp_path), "zuliprc")
 
     error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
 
