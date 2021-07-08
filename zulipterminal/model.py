@@ -1411,6 +1411,31 @@ class Model:
             self.index["messages"][message_id]["flags"] = event["flags"]
             self._update_rendered_view(message_id)
 
+        # Update the unread_count if message is not indexed. We can't index the message
+        # since we don't get the full message structure from server for this event.
+        elif not indexed_message and "flags" in event:
+            unread_mentions = self.initial_data["unread_msgs"]["mentions"]
+            unread_mentioned_before = message_id in unread_mentions
+            unread_mentioned_after = "read" not in event["flags"] and bool(
+                set(event["flags"]) & mention_flags_set
+            )
+
+            if not unread_mentioned_before and unread_mentioned_after:
+                self.unread_counts["all_mentions"] += 1
+                self.controller.view.mentioned_button.update_count(
+                    self.unread_counts["all_mentions"]
+                )
+                if message_id not in unread_mentions:
+                    unread_mentions.append(message_id)
+            elif unread_mentioned_before and not unread_mentioned_after:
+                self.unread_counts["all_mentions"] -= 1
+                self.controller.view.mentioned_button.update_count(
+                    self.unread_counts["all_mentions"]
+                )
+                unread_mentions.remove(message_id)
+
+            self.controller.update_screen()
+
         # NOTE: This is independent of messages being indexed
         # Previous assertion:
         # * 'subject' is not present in update event if
