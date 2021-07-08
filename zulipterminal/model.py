@@ -1095,25 +1095,32 @@ class Model:
         Handle typing notifications (in private messages)
         """
         assert event["type"] == "typing"
-        if hasattr(self.controller, "view"):
-            # If the user is in pm narrow with the person typing
-            # and the person typing isn't the user themselves
-            narrow = self.narrow
-            if (
-                len(narrow) == 1
-                and narrow[0][0] == "pm_with"
-                and event["sender"]["email"] in narrow[0][1].split(",")
-                and event["sender"]["user_id"] != self.user_id
-            ):
-                if event["op"] == "start":
-                    user = self.user_dict[event["sender"]["email"]]
-                    self.controller.view.set_footer_text(
-                        [" ", ("footer_contrast", user["full_name"]), " is typing..."]
-                    )
-                elif event["op"] == "stop":
-                    self.controller.view.set_footer_text()
-                else:
-                    raise RuntimeError("Unknown typing event operation")
+
+        if not hasattr(self.controller, "view"):
+            return
+
+        narrow = self.narrow
+        controller = self.controller
+        sender_email = event["sender"]["email"]
+        sender_id = event["sender"]["user_id"]
+
+        # If the user is in pm narrow with the person typing
+        # and the person typing isn't the user themselves
+        if (
+            len(narrow) == 1
+            and narrow[0][0] == "pm_with"
+            and sender_email in narrow[0][1].split(",")
+            and sender_id != self.user_id
+        ):
+            if event["op"] == "start":
+                sender_name = self.user_dict[sender_email]["full_name"]
+                controller.view.set_footer_text(
+                    [" ", ("footer_contrast", sender_name), " is typing..."]
+                )
+            elif event["op"] == "stop":
+                controller.view.set_footer_text()
+            else:
+                raise RuntimeError("Unknown typing event operation")
 
     def is_valid_private_recipient(
         self,

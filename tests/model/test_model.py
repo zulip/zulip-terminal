@@ -2157,7 +2157,12 @@ class TestModel:
     @pytest.mark.parametrize(
         "narrow, event, called",
         [
-            case([], {}, False, id="not_in_pm_narrow"),
+            case(
+                [],
+                {"sender": {"user_id": 4, "email": "hamlet@zulip.com"}},
+                False,
+                id="not_in_pm_narrow",
+            ),
             case(
                 [["pm_with", "iago@zulip.com"]],
                 {
