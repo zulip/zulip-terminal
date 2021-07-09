@@ -949,6 +949,76 @@ class TestModel:
         }
         assert user_group_names == ["Group 1", "Group 2", "Group 3", "Group 4"]
 
+    @pytest.mark.parametrize(
+        ["to_vary_in_each_user", "key", "expected_value"],
+        [
+            ({"full_name": "Test User"}, "full_name", "Test User"),
+            ({}, "full_name", "(No name)"),
+            ({"email": "person1@example.com"}, "email", "person1@example.com"),
+            ({}, "email", ""),
+            (
+                {"date_joined": "2021-02-28T19:58:29.035543+00:00"},
+                "date_joined",
+                "2021-02-28T19:58:29.035543+00:00",
+            ),
+            ({}, "date_joined", ""),
+            ({"timezone": "Asia/Kolkata"}, "timezone", "Asia/Kolkata"),
+            ({}, "timezone", ""),
+            ({"bot_type": 1}, "bot_type", 1),
+            ({}, "bot_type", 0),
+            ({"role": 100}, "role", 100),
+            ({"role": 200}, "role", 200),
+            ({"role": 300}, "role", 300),
+            ({"role": 600}, "role", 600),
+            ({}, "role", 400),
+            ({"is_bot": True}, "is_bot", True),
+            ({"bot_owner_id": 12}, "bot_owner_name", "Human 2"),
+            ({}, "bot_owner_name", ""),
+        ],
+        ids=[
+            "user_full_name",
+            "user_empty_full_name",
+            "user_email",
+            "user_empty_email",
+            "user_date_joined",
+            "user_empty_date_joined",
+            "user_timezone",
+            "user_empty_timezone",
+            "user_bot_type",
+            "user_empty_bot_type",
+            "user_is_owner:Zulip_4.0+_ZFL59",
+            "user_is_admin:Zulip_4.0+_ZFL59",
+            "user_is_moderator:Zulip_4.0+_ZFL60",
+            "user_is_guest:Zulip_4.0+_ZFL59",
+            "user_is_member",
+            "user_is_bot",
+            "user_bot_has_owner:Zulip_3.0+_ZFL1",
+            "user_bot_has_no_owner",
+        ],
+    )
+    def test_get_user_info(
+        self,
+        model,
+        mocker,
+        _all_users_by_id,
+        to_vary_in_each_user,
+        key,
+        expected_value,
+    ):
+        _all_users_by_id[11] = dict({"user_id": 11}, **to_vary_in_each_user)
+        model._all_users_by_id = _all_users_by_id
+
+        assert model.get_user_info(11)[key] == expected_value
+
+    def test_get_user_info_USER_NOT_FOUND(self, model):
+        assert model.get_user_info(-1) is None
+
+    def test_get_user_info_sample_response(
+        self, model, _all_users_by_id, tidied_user_info_response
+    ):
+        model._all_users_by_id = _all_users_by_id
+        assert model.get_user_info(12) == tidied_user_info_response
+
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict, user_id):
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register.return_value = initial_data

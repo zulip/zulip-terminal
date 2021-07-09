@@ -141,6 +141,22 @@ def users_fixture(logged_on_user):
 
 
 @pytest.fixture
+def tidied_user_info_response():
+    # FIXME: Refactor this to use a more generic user?
+    return {
+        "full_name": "Human 2",
+        "email": "person2@example.com",
+        "date_joined": "",
+        "timezone": "",
+        "is_bot": False,
+        "role": 400,
+        "bot_type": None,
+        "bot_owner_name": "",
+        "last_active": "",
+    }
+
+
+@pytest.fixture
 def _all_users_by_id(initial_data):
     return {
         user["user_id"]: user
