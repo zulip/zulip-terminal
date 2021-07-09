@@ -17,6 +17,7 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -49,6 +50,20 @@ class EmojiData(TypedDict):
 
 
 NamedEmojiData = Dict[str, EmojiData]
+
+
+class TidiedUserInfo(TypedDict):
+    full_name: str
+    email: str
+    date_joined: str
+    timezone: str
+    role: Optional[int]
+    last_active: str
+
+    is_bot: bool
+    # Below fields are only meaningful if is_bot == True
+    bot_type: int
+    bot_owner_name: str
 
 
 class Index(TypedDict):

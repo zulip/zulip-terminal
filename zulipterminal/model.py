@@ -39,6 +39,7 @@ from zulipterminal.helper import (
     Message,
     NamedEmojiData,
     StreamData,
+    TidiedUserInfo,
     asynch,
     canonicalize_color,
     classify_unread_counts,
@@ -706,6 +707,49 @@ class Model:
                 if stream["name"] == stream_name
                 if sub != self.user_id
             ]
+
+    def get_user_info(self, user_id: int) -> Optional[TidiedUserInfo]:
+        api_user_data: Optional[RealmUser] = self._all_users_by_id.get(user_id, None)
+
+        if not api_user_data:
+            return None
+
+        # TODO: Add custom fields later as an enhancement
+        user_info: TidiedUserInfo = dict(
+            full_name=api_user_data.get("full_name", "(No name)"),
+            email=api_user_data.get("email", ""),
+            date_joined=api_user_data.get("date_joined", ""),
+            timezone=api_user_data.get("timezone", ""),
+            is_bot=api_user_data.get("is_bot", False),
+            # Role `None` for triggering servers < Zulip 4.1 (ZFL 59)
+            role=api_user_data.get("role", None),
+            bot_type=api_user_data.get("bot_type", 0),
+            bot_owner_name="",  # Can be non-empty only if is_bot == True
+            last_active="",
+        )
+
+        if user_info["role"] is None:
+            # Default role is member
+            user_info["role"] = 400
+
+        bot_owner: Optional[RealmUser] = None
+
+        if api_user_data.get("bot_owner_id", None):
+            bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
+
+        user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
+
+        if self.initial_data["presences"].get(user_info["email"], None):
+            timestamp = self.initial_data["presences"][user_info["email"]][
+                "aggregated"
+            ]["timestamp"]
+
+            # Take 24h vs AM/PM format into consideration
+            user_info["last_active"] = self.formatted_local_time(
+                timestamp, show_seconds=True
+            )
+
+        return user_info
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
