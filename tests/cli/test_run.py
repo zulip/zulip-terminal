@@ -1,8 +1,12 @@
 import builtins
 import os
 import stat
+from pathlib import Path
+from typing import Callable, Dict, Generator, List, Optional, Tuple
 
 import pytest
+from pytest import CaptureFixture
+from pytest_mock import MockerFixture
 
 from zulipterminal.cli.run import (
     _write_zuliprc,
@@ -31,7 +35,7 @@ CONTROLLER = MODULE + ".Controller"
         ("cyan", "\x1b[96m"),
     ],
 )
-def test_in_color(color, code, text="some text"):
+def test_in_color(color: str, code: str, text: str = "some text") -> None:
     assert in_color(color, text) == code + text + "\x1b[0m"
 
 
@@ -50,7 +54,7 @@ def test_in_color(color, code, text="some text"):
         (dict(require_email_format_usernames=True, email_auth_enabled=False), "Email"),
     ],
 )
-def test_get_login_id(mocker, json, label):
+def test_get_login_id(mocker: MockerFixture, json: Dict[str, bool], label: str) -> None:
     response = mocker.Mock(json=lambda: json)
     mocked_get = mocker.patch("requests.get", return_value=response)
     mocked_styled_input = mocker.patch(
@@ -65,7 +69,7 @@ def test_get_login_id(mocker, json, label):
 
 
 @pytest.mark.parametrize("options", ["-h", "--help"])
-def test_main_help(capsys, options):
+def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
     with pytest.raises(SystemExit):
         main([options])
 
@@ -100,7 +104,7 @@ def test_main_help(capsys, options):
 
 
 @pytest.fixture
-def minimal_zuliprc(tmp_path):
+def minimal_zuliprc(tmp_path: Path) -> str:
     zuliprc_path = tmp_path / "zuliprc"
     with open(zuliprc_path, "w") as f:
         f.write("[api]")  # minimal to avoid Exception
@@ -109,8 +113,11 @@ def minimal_zuliprc(tmp_path):
 
 
 def test_valid_zuliprc_but_no_connection(
-    capsys, mocker, minimal_zuliprc, server_connection_error="some_error"
-):
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    minimal_zuliprc: str,
+    server_connection_error: str = "some_error",
+) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
@@ -147,14 +154,14 @@ def test_valid_zuliprc_but_no_connection(
     ],
 )
 def test_warning_regarding_incomplete_theme(
-    capsys,
-    mocker,
-    minimal_zuliprc,
-    bad_theme,
-    expected_complete_incomplete_themes,
-    expected_warning,
-    server_connection_error="sce",
-):
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    minimal_zuliprc: str,
+    bad_theme: str,
+    expected_complete_incomplete_themes: Tuple[List[str], List[str]],
+    expected_warning: str,
+    server_connection_error: str = "sce",
+) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
@@ -192,7 +199,7 @@ def test_warning_regarding_incomplete_theme(
 
 
 @pytest.mark.parametrize("options", ["-v", "--version"])
-def test_zt_version(capsys, options):
+def test_zt_version(capsys: CaptureFixture[str], options: str) -> None:
     with pytest.raises(SystemExit) as e:
         main([options])
 
@@ -215,7 +222,7 @@ def test_zt_version(capsys, options):
         ("--debug", None),  # no-autohide by default
     ],
 )
-def test_parse_args_valid_autohide_option(option, autohide):
+def test_parse_args_valid_autohide_option(option: str, autohide: Optional[str]) -> None:
     args = parse_args([option])
     assert args.autohide == autohide
 
@@ -223,7 +230,9 @@ def test_parse_args_valid_autohide_option(option, autohide):
 @pytest.mark.parametrize(
     "options", [["--autohide", "--no-autohide"], ["--no-autohide", "--autohide"]]
 )
-def test_main_multiple_autohide_options(capsys, options):
+def test_main_multiple_autohide_options(
+    capsys: CaptureFixture[str], options: List[str]
+) -> None:
     with pytest.raises(SystemExit) as e:
         main(options)
 
@@ -244,7 +253,9 @@ def test_main_multiple_autohide_options(capsys, options):
         ("--profile", None),  # disabled by default
     ],
 )
-def test__parse_args_valid_notify_option(option, notify_option):
+def test__parse_args_valid_notify_option(
+    option: str, notify_option: Optional[str]
+) -> None:
     args = parse_args([option])
     assert args.notify == notify_option
 
@@ -256,7 +267,9 @@ def test__parse_args_valid_notify_option(option, notify_option):
         ["--no-notify", "--notify"],
     ],
 )
-def test_main_multiple_notify_options(capsys, options):
+def test_main_multiple_notify_options(
+    capsys: CaptureFixture[str], options: List[str]
+) -> None:
     with pytest.raises(SystemExit) as e:
         main(options)
 
@@ -272,7 +285,7 @@ def test_main_multiple_notify_options(capsys, options):
 # NOTE: Fixture is necessary to ensure unreadable dir is garbage-collected
 # See pytest issue #7821
 @pytest.fixture
-def unreadable_dir(tmp_path):
+def unreadable_dir(tmp_path: Path) -> Generator[Tuple[Path, Path], None, None]:
     unreadable_dir = tmp_path / "unreadable"
     unreadable_dir.mkdir()
     unreadable_dir.chmod(0)
@@ -294,13 +307,13 @@ def unreadable_dir(tmp_path):
     ids=["valid_path_but_cannot_be_written_to", "path_does_not_exist"],
 )
 def test_main_cannot_write_zuliprc_given_good_credentials(
-    monkeypatch,
-    capsys,
-    mocker,
-    unreadable_dir,
-    path_to_use,
-    expected_exception,
-):
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    unreadable_dir: Tuple[Path, Path],
+    path_to_use: str,
+    expected_exception: str,
+) -> None:
     tmp_path, unusable_path = unreadable_dir
 
     # This is default base path to use
@@ -328,8 +341,8 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
 
 @pytest.fixture
-def parameterized_zuliprc(tmp_path):
-    def func(config):
+def parameterized_zuliprc(tmp_path: Path) -> Callable[[Dict[str, str]], str]:
+    def func(config: Dict[str, str]) -> str:
         zuliprc_path = tmp_path / "zuliprc"
         with open(zuliprc_path, "w") as f:
             f.write("[api]\n\n")  # minimal to avoid Exception
@@ -358,13 +371,13 @@ def parameterized_zuliprc(tmp_path):
     ],
 )
 def test_successful_main_function_with_config(
-    capsys,
-    mocker,
-    parameterized_zuliprc,
-    config_key,
-    config_value,
-    footlinks_output,
-):
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    config_key: str,
+    config_value: str,
+    footlinks_output: str,
+) -> None:
     config = {
         "theme": "default",
         "autohide": "autohide",
@@ -406,12 +419,12 @@ def test_successful_main_function_with_config(
     ],
 )
 def test_main_error_with_invalid_zuliprc_options(
-    capsys,
-    mocker,
-    parameterized_zuliprc,
-    zulip_config,
-    error_message,
-):
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    zulip_config: Dict[str, str],
+    error_message: str,
+) -> None:
     zuliprc = parameterized_zuliprc(zulip_config)
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
     mocker.patch(CONTROLLER + ".main", return_value=None)
@@ -434,7 +447,12 @@ def test_main_error_with_invalid_zuliprc_options(
         (2, "helper"),
     ],
 )
-def test_exit_with_error(error_code, helper_text, capsys, error_message="some text"):
+def test_exit_with_error(
+    capsys: CaptureFixture[str],
+    error_code: int,
+    helper_text: str,
+    error_message: str = "some text",
+) -> None:
     with pytest.raises(SystemExit) as e:
         exit_with_error(
             error_message=error_message, helper_text=helper_text, error_code=error_code
@@ -452,7 +470,9 @@ def test_exit_with_error(error_code, helper_text, capsys, error_message="some te
         assert lines[1] == helper_text
 
 
-def test__write_zuliprc__success(tmp_path, id="id", key="key", url="url"):
+def test__write_zuliprc__success(
+    tmp_path: Path, id: str = "id", key: str = "key", url: str = "url"
+) -> None:
     path = os.path.join(str(tmp_path), "zuliprc")
 
     error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
@@ -467,8 +487,12 @@ def test__write_zuliprc__success(tmp_path, id="id", key="key", url="url"):
 
 
 def test__write_zuliprc__fail_file_exists(
-    minimal_zuliprc, tmp_path, id="id", key="key", url="url"
-):
+    minimal_zuliprc: str,
+    tmp_path: Path,
+    id: str = "id",
+    key: str = "key",
+    url: str = "url",
+) -> None:
     path = os.path.join(str(tmp_path), "zuliprc")
 
     error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
@@ -492,8 +516,8 @@ def test__write_zuliprc__fail_file_exists(
     ],
 )
 def test_show_error_if_loading_zuliprc_with_open_permissions(
-    capsys, minimal_zuliprc, mode
-):
+    capsys: CaptureFixture[str], minimal_zuliprc: str, mode: int
+) -> None:
     mode += 0o600
     os.chmod(minimal_zuliprc, mode)
     current_mode = stat.filemode(os.stat(minimal_zuliprc).st_mode)
