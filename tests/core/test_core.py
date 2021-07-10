@@ -115,7 +115,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = set()
-        controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
         controller.narrow_to_stream(stream_name="PTEST")
 
@@ -167,7 +167,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = set()
-        controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
         controller.narrow_to_topic(
             stream_name="PTEST",
@@ -232,7 +232,7 @@ class TestController:
             }
         }
         controller.model.muted_streams = set()
-        controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
         controller.narrow_to_all_messages(contextual_message_id=anchor)
 
@@ -269,7 +269,7 @@ class TestController:
         controller.model.muted_streams = set()  # FIXME Expand upon this
         controller.model.user_id = 1
         # FIXME: Expand upon is_muted_topic().
-        controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.stream_dict = {
             205: {
@@ -293,7 +293,7 @@ class TestController:
         controller.model.index = index_all_mentions
         controller.model.muted_streams = set()  # FIXME Expand upon this
         # FIXME: Expand upon is_muted_topic().
-        controller.model.is_muted_topic = mocker.Mock(return_value=False)
+        mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
         controller.model.stream_dict = {
@@ -324,26 +324,26 @@ class TestController:
     def test_open_in_browser_success(self, mocker, controller, url):
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
-        controller.report_success = mocker.Mock()
+        mocked_report_success = mocker.patch(MODULE + ".Controller.report_success")
         mock_get = mocker.patch(MODULE + ".webbrowser.get")
         mock_open = mock_get.return_value.open
 
         controller.open_in_browser(url)
 
         mock_open.assert_called_once_with(url)
-        controller.report_success.assert_called_once_with(
+        mocked_report_success.assert_called_once_with(
             f"The link was successfully opened using {mock_get.return_value.name}"
         )
 
     def test_open_in_browser_fail__no_browser_controller(self, mocker, controller):
         os.environ["DISPLAY"] = ":0"
         error = "No runnable browser found"
-        controller.report_error = mocker.Mock()
+        mocked_report_error = mocker.patch(MODULE + ".Controller.report_error")
         mocker.patch(MODULE + ".webbrowser.get").side_effect = webbrowser.Error(error)
 
         controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
 
-        controller.report_error.assert_called_once_with(f"ERROR: {error}")
+        mocked_report_error.assert_called_once_with(f"ERROR: {error}")
 
     def test_main(self, mocker, controller):
         controller.view.palette = {"default": "theme_properties"}
