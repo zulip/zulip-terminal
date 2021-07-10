@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 
+from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.version import ZT_VERSION
 
@@ -37,7 +38,7 @@ class TestController:
 
         self.config_file = "path/to/zuliprc"
         self.theme_name = "zt_dark"
-        self.theme = "default"
+        self.theme = generate_theme("zt_dark", 256)
         self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
