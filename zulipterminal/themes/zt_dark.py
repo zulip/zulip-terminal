@@ -53,6 +53,7 @@ STYLES = {
     'current_user'    : (Color.WHITE,               Color.BLACK),
     'muted'           : (Color.LIGHT_BLUE,          Color.BLACK),
     'popup_border'    : (Color.WHITE,               Color.BLACK),
+    'widget_disabled' : (Color.DARK_GRAY,           Color.BLACK),
     'area:help'       : (Color.WHITE,               Color.DARK_GREEN),
     'area:msg'        : (Color.WHITE,               Color.BROWN),
     'area:stream'     : (Color.WHITE,               Color.DARK_CYAN),

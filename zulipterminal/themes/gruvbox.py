@@ -79,6 +79,7 @@ STYLES = {
     'current_user'     : (Color.LIGHT2,                Color.DARK0_HARD),
     'muted'            : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
     'popup_border'     : (Color.LIGHT2,                Color.DARK0_HARD),
+    'widget_disabled'  : (Color.GRAY_244,              Color.DARK0_HARD),
     'area:help'        : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
     'area:msg'         : (Color.DARK0_HARD,            Color.BRIGHT_RED),
     'area:stream'      : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),

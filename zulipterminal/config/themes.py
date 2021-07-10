@@ -59,6 +59,7 @@ REQUIRED_STYLES = {
     'current_user'    : '',
     'muted'           : 'bold',
     'popup_border'    : 'bold',
+    'widget_disabled' : 'strikethrough',
     'area:help'       : 'standout',
     'area:msg'        : 'standout',
     'area:stream'     : 'standout',
