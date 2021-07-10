@@ -1311,6 +1311,10 @@ class StreamInfoView(PopUpView):
             footlinks_width,
             len(visual_notification.label) + 4,
         )
+        if not self.controller.notify_enabled:
+            visual_notification = urwid.WidgetDisable(
+                urwid.AttrMap(visual_notification, "widget_disabled")
+            )
         self.widgets = self.make_table_with_categories(
             stream_info_content, column_widths
         )
