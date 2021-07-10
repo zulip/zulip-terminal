@@ -114,7 +114,7 @@ class TestController:
                 "name": "PTEST",
             }
         }
-        controller.model.muted_streams = []
+        controller.model.muted_streams = set()
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
         controller.narrow_to_stream(stream_name="PTEST")
@@ -166,7 +166,7 @@ class TestController:
                 "name": "PTEST",
             }
         }
-        controller.model.muted_streams = []
+        controller.model.muted_streams = set()
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
         controller.narrow_to_topic(
@@ -231,7 +231,7 @@ class TestController:
                 "color": "#ffffff",
             }
         }
-        controller.model.muted_streams = []
+        controller.model.muted_streams = set()
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
 
         controller.narrow_to_all_messages(contextual_message_id=anchor)
