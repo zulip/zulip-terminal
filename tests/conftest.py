@@ -847,6 +847,12 @@ def index_all_mentions(empty_index, mentioned_messages_combination):
     return index
 
 
+@pytest.fixture()
+def index_search_messages(empty_index):
+    """Expected initial index when search contains the message_id 500."""
+    return dict(empty_index, **{"search": {500}})
+
+
 @pytest.fixture
 def user_profile(logged_on_user):
     return {  # FIXME These should all be self-consistent with others?

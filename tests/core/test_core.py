@@ -398,12 +398,18 @@ class TestController:
     )
     @pytest.mark.parametrize("msg_ids", [({200, 300, 400}), (set()), ({100})])
     def test_search_message(
-        self, initial_narrow, final_narrow, controller, mocker, msg_ids
+        self,
+        initial_narrow,
+        final_narrow,
+        controller,
+        mocker,
+        msg_ids,
+        index_search_messages,
     ):
         get_message = mocker.patch(MODEL + ".get_messages")
         create_msg = mocker.patch(MODULE + ".create_msg_box_list")
         mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=msg_ids)
-        controller.model.index = {"search": {500}}  # Any initial search index
+        controller.model.index = index_search_messages  # Any initial search index
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.narrow = initial_narrow
 
@@ -420,7 +426,9 @@ class TestController:
             num_after=0, num_before=30, anchor=10000000000
         )
         create_msg.assert_called_once_with(controller.model, msg_ids)
-        assert controller.model.index == {"search": msg_ids}
+        assert controller.model.index == dict(
+            index_search_messages, **{"search": msg_ids}
+        )
 
     @pytest.mark.parametrize(
         "screen_size, expected_popup_size",
