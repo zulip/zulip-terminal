@@ -1316,6 +1316,10 @@ class StreamInfoView(PopUpView):
 
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
+
+        self.controller.model.register_callback(
+            self, "stream_info_open", self.update_checkboxes_from_events
+        )
         super().__init__(controller, self.widgets, "STREAM_DESC", popup_width, title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
@@ -1323,6 +1327,16 @@ class StreamInfoView(PopUpView):
 
     def toggle_pinned_status(self, button: Any, new_state: bool) -> None:
         self.controller.model.toggle_stream_pinned_status(self.stream_id)
+
+    @asynch
+    def update_checkboxes_from_events(self) -> None:
+        self.widgets[-2].set_state(
+            self.controller.model.is_muted_stream(self.stream_id), False
+        )
+
+        self.widgets[-1].set_state(
+            self.controller.model.is_pinned_stream(self.stream_id), False
+        )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("STREAM_MEMBERS", key):
