@@ -1,12 +1,15 @@
 import os
 import webbrowser
 from platform import platform
-from typing import Any
+from typing import Any, List, Optional, Set, Tuple
 
 import pytest
+from pytest_mock import MockerFixture
 
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
+from zulipterminal.helper import Index
+from zulipterminal.ui_tools.buttons import StreamButton
 from zulipterminal.version import ZT_VERSION
 
 
@@ -18,7 +21,7 @@ SERVER_URL = "https://chat.zulip.zulip"
 
 class TestController:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker: Any) -> None:
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         mocker.patch("zulipterminal.ui_tools.boxes.MessageBox.main_view")
         self.client = mocker.patch("zulip.Client")
         # Patch init only, in general, allowing specific patching elsewhere
@@ -28,7 +31,7 @@ class TestController:
         self.view.focus_col = 1
 
     @pytest.fixture
-    def controller(self, mocker) -> None:
+    def controller(self, mocker: MockerFixture) -> Controller:
         # Patch these unconditionally to avoid calling in __init__
         self.poll_for_events = mocker.patch(MODEL + ".poll_for_events")
         mocker.patch(MODULE + ".Controller.show_loading")
@@ -57,7 +60,9 @@ class TestController:
         result.model.server_url = SERVER_URL
         return result
 
-    def test_initialize_controller(self, controller, mocker) -> None:
+    def test_initialize_controller(
+        self, controller: Controller, mocker: MockerFixture
+    ) -> None:
         self.client.assert_called_once_with(
             config_file=self.config_file,
             client="ZulipTerminal/" + ZT_VERSION + " " + platform(),
@@ -75,14 +80,16 @@ class TestController:
             ]
         )
 
-    def test_initial_editor_mode(self, controller):
+    def test_initial_editor_mode(self, controller: Controller) -> None:
         assert not controller.is_in_editor_mode()
 
-    def test_current_editor_error_if_no_editor(self, controller):
+    def test_current_editor_error_if_no_editor(self, controller: Controller) -> None:
         with pytest.raises(AssertionError):
             controller.current_editor()
 
-    def test_editor_mode_entered_from_initial(self, mocker, controller):
+    def test_editor_mode_entered_from_initial(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
         editor = mocker.Mock()
 
         controller.enter_editor_mode_with(editor)
@@ -90,13 +97,17 @@ class TestController:
         assert controller.is_in_editor_mode()
         assert controller.current_editor() == editor
 
-    def test_editor_mode_error_on_multiple_enter(self, mocker, controller):
+    def test_editor_mode_error_on_multiple_enter(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
         controller.enter_editor_mode_with(mocker.Mock())
 
         with pytest.raises(AssertionError):
             controller.enter_editor_mode_with(mocker.Mock())
 
-    def test_editor_mode_exits_after_entering(self, mocker, controller):
+    def test_editor_mode_exits_after_entering(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
         controller.enter_editor_mode_with(mocker.Mock())
         controller.exit_editor_mode()
 
@@ -104,11 +115,11 @@ class TestController:
 
     def test_narrow_to_stream(
         self,
-        mocker,
-        controller,
-        index_stream,
-        stream_id=205,
-        stream_name="PTEST",
+        mocker: MockerFixture,
+        controller: Controller,
+        index_stream: Index,
+        stream_id: int = 205,
+        stream_name: str = "PTEST",
     ) -> None:
         controller.model.narrow = []
         controller.model.index = index_stream
@@ -147,16 +158,16 @@ class TestController:
     )
     def test_narrow_to_topic(
         self,
-        mocker,
-        controller,
-        index_multiple_topic_msg,
-        initial_narrow,
-        initial_stream_id,
-        anchor,
-        expected_final_focus,
-        stream_name="PTEST",
-        topic_name="Test",
-        stream_id=205,
+        mocker: MockerFixture,
+        controller: Controller,
+        index_multiple_topic_msg: Index,
+        initial_narrow: List[Any],
+        initial_stream_id: Optional[int],
+        anchor: Optional[int],
+        expected_final_focus: int,
+        stream_name: str = "PTEST",
+        topic_name: str = "Test",
+        stream_id: int = 205,
     ) -> None:
         expected_narrow = [
             ["stream", stream_name],
@@ -193,8 +204,13 @@ class TestController:
         assert final_focus_msg_id == expected_final_focus
 
     def test_narrow_to_user(
-        self, mocker, controller, index_user, user_email="boo@zulip.com", user_id=5179
-    ):
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        index_user: Index,
+        user_email: str = "boo@zulip.com",
+        user_id: int = 5179,
+    ) -> None:
         controller.model.narrow = []
         controller.model.index = index_user
         controller.view.message_view = mocker.patch("urwid.ListBox")
@@ -220,12 +236,12 @@ class TestController:
     )
     def test_narrow_to_all_messages(
         self,
-        mocker,
-        controller,
-        index_all_messages,
-        anchor,
-        expected_final_focus_msg_id,
-    ):
+        mocker: MockerFixture,
+        controller: Controller,
+        index_all_messages: Index,
+        anchor: Optional[int],
+        expected_final_focus_msg_id: int,
+    ) -> None:
         controller.model.narrow = [["stream", "PTEST"]]
         controller.model.index = index_all_messages
         controller.view.message_view = mocker.patch("urwid.ListBox")
@@ -251,7 +267,9 @@ class TestController:
         assert msg_ids == id_list
         assert final_focus_msg_id == expected_final_focus_msg_id
 
-    def test_narrow_to_all_pm(self, mocker, controller, index_user):
+    def test_narrow_to_all_pm(
+        self, mocker: MockerFixture, controller: Controller, index_user: Index
+    ) -> None:
         controller.model.narrow = []
         controller.model.index = index_user
         controller.view.message_view = mocker.patch("urwid.ListBox")
@@ -268,7 +286,9 @@ class TestController:
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_narrow_to_all_starred(self, mocker, controller, index_all_starred):
+    def test_narrow_to_all_starred(
+        self, mocker: MockerFixture, controller: Controller, index_all_starred: Index
+    ) -> None:
         controller.model.narrow = []
         controller.model.index = index_all_starred
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -293,7 +313,9 @@ class TestController:
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
 
-    def test_narrow_to_all_mentions(self, mocker, controller, index_all_mentions):
+    def test_narrow_to_all_mentions(
+        self, mocker: MockerFixture, controller: Controller, index_all_mentions: Index
+    ) -> None:
         controller.model.narrow = []
         controller.model.index = index_all_mentions
         controller.model.muted_streams = set()  # FIXME Expand upon this
@@ -326,7 +348,9 @@ class TestController:
             "https://github.com/",
         ],
     )
-    def test_open_in_browser_success(self, mocker, controller, url):
+    def test_open_in_browser_success(
+        self, mocker: MockerFixture, controller: Controller, url: str
+    ) -> None:
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
         mocked_report_success = mocker.patch(MODULE + ".Controller.report_success")
@@ -340,7 +364,9 @@ class TestController:
             f"The link was successfully opened using {mock_get.return_value.name}"
         )
 
-    def test_open_in_browser_fail__no_browser_controller(self, mocker, controller):
+    def test_open_in_browser_fail__no_browser_controller(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
         os.environ["DISPLAY"] = ":0"
         error = "No runnable browser found"
         mocked_report_error = mocker.patch(MODULE + ".Controller.report_error")
@@ -350,7 +376,7 @@ class TestController:
 
         mocked_report_error.assert_called_once_with(f"ERROR: {error}")
 
-    def test_main(self, mocker, controller):
+    def test_main(self, mocker: MockerFixture, controller: Controller) -> None:
         controller.view.palette = {"default": "theme_properties"}
         mock_tsk = mocker.patch(MODULE + ".Screen.tty_signal_keys")
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
@@ -363,8 +389,13 @@ class TestController:
         "muted_streams, action", [({205, 89}, "unmuting"), ({89}, "muting")]
     )
     def test_stream_muting_confirmation_popup(
-        self, mocker, controller, stream_button, muted_streams, action
-    ):
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        stream_button: StreamButton,
+        muted_streams: Set[int],
+        action: str,
+    ) -> None:
         pop_up = mocker.patch(MODULE + ".PopUpConfirmationView")
         text = mocker.patch(MODULE + ".urwid.Text")
         partial = mocker.patch(MODULE + ".partial")
@@ -404,13 +435,13 @@ class TestController:
     @pytest.mark.parametrize("msg_ids", [({200, 300, 400}), (set()), ({100})])
     def test_search_message(
         self,
-        initial_narrow,
-        final_narrow,
-        controller,
-        mocker,
-        msg_ids,
-        index_search_messages,
-    ):
+        initial_narrow: List[Any],
+        final_narrow: List[Any],
+        controller: Controller,
+        mocker: MockerFixture,
+        msg_ids: Set[int],
+        index_search_messages: Index,
+    ) -> None:
         get_message = mocker.patch(MODEL + ".get_messages")
         create_msg = mocker.patch(MODULE + ".create_msg_box_list")
         mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=msg_ids)
@@ -418,7 +449,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.narrow = initial_narrow
 
-        def set_msg_ids(*args, **kwargs):
+        def set_msg_ids(*args: Any, **kwargs: Any) -> None:
             controller.model.index["search"].update(msg_ids)
 
         get_message.side_effect = set_msg_ids
@@ -449,8 +480,12 @@ class TestController:
         ],
     )
     def test_maximum_popup_dimensions(
-        self, mocker, controller, screen_size, expected_popup_size
-    ):
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        screen_size: Tuple[int, int],
+        expected_popup_size: Tuple[int, int],
+    ) -> None:
         controller.loop.screen.get_cols_rows = mocker.Mock(return_value=screen_size)
 
         popup_size = controller.maximum_popup_dimensions()
