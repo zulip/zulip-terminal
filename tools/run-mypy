@@ -74,9 +74,18 @@ python_files = [fpath for fpath in files_dict['py']
 
 repo_python_files = {}
 repo_python_files['zulipterminal'] = []
+repo_python_files['tests'] = []
+
+# Added incrementally as newer test files are type-annotated.
+type_consistent_testfiles = ["test_run.py"]
+
 for file_path in python_files:
     repo = PurePath(file_path).parts[0]
-    if repo in repo_python_files:
+    filename = PurePath(file_path).parts[-1]
+    if (
+        repo == "zulipterminal" or
+        (repo == 'tests' and filename in type_consistent_testfiles)
+    ):
         repo_python_files[repo].append(file_path)
 
 mypy_command = "mypy"
