@@ -46,6 +46,7 @@ class StreamData(TypedDict):
 
 class EmojiData(TypedDict):
     code: str
+    aliases: List[str]
     type: EmojiType
 
 

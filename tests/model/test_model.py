@@ -91,7 +91,15 @@ class TestModel:
             )
         )
         assert model.all_emoji_names == sorted(
-            list({**unicode_emojis, **realm_emojis_data, **zulip_emoji}.keys())
+            [
+                name
+                for emoji in {
+                    **unicode_emojis,
+                    **realm_emojis_data,
+                    **zulip_emoji,
+                }.items()
+                for name in [emoji[0], *emoji[1]["aliases"]]
+            ]
         )
         # Deactivated emoji is removed from active emojis set
         assert "green_tick" not in model.active_emoji_data
@@ -2783,8 +2791,16 @@ class TestModel:
                 key=lambda e: e[0],
             )
         )
-        assert all_emoji_names == sorted(
-            list({**unicode_emojis, **realm_emojis_data, **zulip_emoji}.keys())
+        assert model.all_emoji_names == sorted(
+            [
+                name
+                for emoji in {
+                    **unicode_emojis,
+                    **realm_emojis_data,
+                    **zulip_emoji,
+                }.items()
+                for name in [emoji[0], *emoji[1]["aliases"]]
+            ]
         )
         # custom emoji added to active_emoji_data
         assert all_emoji_data["singing"]["type"] == "realm_emoji"
