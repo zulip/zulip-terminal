@@ -103,28 +103,32 @@ class TestController:
         assert not controller.is_in_editor_mode()
 
     def test_narrow_to_stream(
-        self, mocker, controller, stream_button, index_stream
+        self,
+        mocker,
+        controller,
+        index_stream,
+        stream_id=205,
+        stream_name="PTEST",
     ) -> None:
         controller.model.narrow = []
         controller.model.index = index_stream
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
-            205: {
+            stream_id: {
                 "color": "#ffffff",
-                "name": "PTEST",
+                "name": stream_name,
             }
         }
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
-        controller.narrow_to_stream(stream_name="PTEST")
+        controller.narrow_to_stream(stream_name=stream_name)
 
-        assert controller.model.stream_id == stream_button.stream_id
-        assert controller.model.narrow == [["stream", stream_button.stream_name]]
+        assert controller.model.stream_id == stream_id
+        assert controller.model.narrow == [["stream", stream_name]]
         controller.view.message_view.log.clear.assert_called_once_with()
 
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
-        stream_id = stream_button.stream_id
         id_list = index_stream["stream_msg_ids_by_stream_id"][stream_id]
         assert {widget.original_widget.message["id"]} == id_list
 
