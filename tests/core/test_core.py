@@ -187,23 +187,23 @@ class TestController:
         assert msg_ids == id_list
         assert final_focus_msg_id == expected_final_focus
 
-    def test_narrow_to_user(self, mocker, controller, user_button, index_user):
+    def test_narrow_to_user(
+        self, mocker, controller, index_user, user_email="boo@zulip.com", user_id=5179
+    ):
         controller.model.narrow = []
         controller.model.index = index_user
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_id = 5140
         controller.model.user_email = "some@email"
-        controller.model.user_dict = {
-            user_button.email: {"user_id": user_button.user_id}
-        }
+        controller.model.user_dict = {user_email: {"user_id": user_id}}
 
-        emails = [user_button.email]
+        emails = [user_email]
 
         controller.narrow_to_user(recipient_emails=emails)
 
-        assert controller.model.narrow == [["pm_with", user_button.email]]
+        assert controller.model.narrow == [["pm_with", user_email]]
         controller.view.message_view.log.clear.assert_called_once_with()
-        recipients = frozenset([controller.model.user_id, user_button.user_id])
+        recipients = frozenset([controller.model.user_id, user_id])
         assert controller.model.recipients == recipients
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         id_list = index_user["private_msg_ids_by_user_ids"][recipients]
