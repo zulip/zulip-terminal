@@ -290,9 +290,9 @@ def realm_emojis():
 def realm_emojis_data():
     return OrderedDict(
         [
-            ("joker", {"code": "202020", "type": "realm_emoji"}),
-            ("singing", {"code": "3", "type": "realm_emoji"}),
-            ("zulip", {"code": "4", "type": "realm_emoji"}),
+            ("joker", {"code": "202020", "aliases": [], "type": "realm_emoji"}),
+            ("singing", {"code": "3", "aliases": [], "type": "realm_emoji"}),
+            ("zulip", {"code": "4", "aliases": [], "type": "realm_emoji"}),
         ]
     )
 
@@ -301,20 +301,37 @@ def realm_emojis_data():
 def unicode_emojis():
     return OrderedDict(
         [
-            ("happy", {"code": "1f600", "type": "unicode_emoji"}),
-            ("joker", {"code": "1f0cf", "type": "unicode_emoji"}),
-            ("joy_cat", {"code": "1f639", "type": "unicode_emoji"}),
-            ("rock_on", {"code": "1f918", "type": "unicode_emoji"}),
-            ("smile", {"code": "263a", "type": "unicode_emoji"}),
-            ("smiley", {"code": "1f603", "type": "unicode_emoji"}),
-            ("smirk", {"code": "1f60f", "type": "unicode_emoji"}),
+            (
+                "happy",
+                {"code": "1f600", "aliases": ["grinning"], "type": "unicode_emoji"},
+            ),
+            ("joker", {"code": "1f0cf", "aliases": [], "type": "unicode_emoji"}),
+            ("joy_cat", {"code": "1f639", "aliases": [], "type": "unicode_emoji"}),
+            (
+                "rock_on",
+                {
+                    "code": "1f918",
+                    "aliases": ["sign_of_the_horns"],
+                    "type": "unicode_emoji",
+                },
+            ),
+            ("smile", {"code": "263a", "aliases": [], "type": "unicode_emoji"}),
+            ("smiley", {"code": "1f603", "aliases": [], "type": "unicode_emoji"}),
+            ("smirk", {"code": "1f60f", "aliases": ["smug"], "type": "unicode_emoji"}),
         ]
     )
 
 
 @pytest.fixture
 def zulip_emoji():
-    return OrderedDict([("zulip", {"code": "zulip", "type": "zulip_extra_emoji"})])
+    return OrderedDict(
+        [
+            (
+                "zulip",
+                {"code": "zulip", "aliases": [], "type": "zulip_extra_emoji"},
+            )
+        ]
+    )
 
 
 def display_recipient_factory(recipient_details_list: List[Tuple[int, str]]):

@@ -496,20 +496,25 @@ class Model:
         custom_emoji_data: NamedEmojiData = {
             emoji["name"]: {
                 "code": emoji_code,
+                "aliases": [],
                 "type": "realm_emoji",
             }
             for emoji_code, emoji in custom_emoji.items()
             if not emoji["deactivated"]
         }
         zulip_extra_emoji: NamedEmojiData = {
-            "zulip": {"code": "zulip", "type": "zulip_extra_emoji"}
+            "zulip": {"code": "zulip", "aliases": [], "type": "zulip_extra_emoji"}
         }
         all_emoji_data = {
             **typed_unicode_emoji_data,
             **custom_emoji_data,
             **zulip_extra_emoji,
         }
-        all_emoji_names = sorted(list(all_emoji_data.keys()))
+        all_emoji_names = []
+        for emoji_name, emoji_data in all_emoji_data.items():
+            all_emoji_names.append(emoji_name)
+            all_emoji_names.extend(emoji_data["aliases"])
+        all_emoji_names = sorted(all_emoji_names)
         active_emoji_data = OrderedDict(sorted(all_emoji_data.items()))
         return active_emoji_data, all_emoji_names
 
