@@ -1274,7 +1274,7 @@ class StreamInfoView(PopUpView):
         )
         urwid.connect_signal(pinned_setting, "change", self.toggle_pinned_status)
         visual_notification = urwid.CheckBox(
-            label="Visual desktop notification",
+            label="Visual notifications (Terminal/Web/Desktop)",
             state=controller.model.is_visual_notifications_enabled(stream_id),
             checked_symbol=CHECK_MARK,
         )
