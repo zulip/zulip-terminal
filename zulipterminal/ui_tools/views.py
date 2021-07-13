@@ -1299,10 +1299,18 @@ class StreamInfoView(PopUpView):
             footlinks_width,
             len(visual_notification.label) + 4,
         )
+        visual_notification_setting = [visual_notification]
+        # If notifications is not configured or enabled by the user, then
+        # disable the checkbox and mention it explicitly with a suffix text
         if not self.controller.notify_enabled:
-            visual_notification = urwid.WidgetDisable(
-                urwid.AttrMap(visual_notification, "widget_disabled")
-            )
+            visual_notification_setting = [
+                urwid.WidgetDisable(
+                    urwid.AttrMap(visual_notification, "widget_disabled")
+                ),
+                urwid.Text(
+                    ("popup_important", "    [notifications not configured or enabled]")
+                ),
+            ]
         self.widgets = self.make_table_with_categories(
             stream_info_content, column_widths
         )
@@ -1317,7 +1325,7 @@ class StreamInfoView(PopUpView):
 
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
-        self.widgets.append(visual_notification)
+        self.widgets.extend(visual_notification_setting)
         super().__init__(controller, self.widgets, "STREAM_DESC", popup_width, title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
