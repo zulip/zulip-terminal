@@ -8,7 +8,6 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
     StarredButton,
-    StreamButton,
     TopButton,
     TopicButton,
     UserButton,
@@ -141,83 +140,6 @@ class TestStarredButton:
 
 
 class TestStreamButton:
-    @pytest.mark.parametrize(
-        "is_private, expected_prefix",
-        [
-            (True, "P"),
-            (False, "#"),
-        ],
-        ids=["private", "not_private"],
-    )
-    @pytest.mark.parametrize(
-        "width, count, short_text",
-        [
-            (8, 0, "ca…"),
-            (9, 0, "cap…"),
-            (9, 1, "ca…"),
-            (10, 0, "capt…"),
-            (10, 1, "cap…"),
-            (11, 0, "capti…"),
-            (11, 1, "capt…"),
-            (11, 10, "cap…"),
-            (12, 0, "caption"),
-            (12, 1, "capti…"),
-            (12, 10, "capt…"),
-            (12, 100, "cap…"),
-            (13, 0, "caption"),
-            (13, 10, "capti…"),
-            (13, 100, "capt…"),
-            (13, 1000, "cap…"),
-            (15, 0, "caption"),
-            (15, 1, "caption"),
-            (15, 10, "caption"),
-            (15, 100, "caption"),
-            (15, 1000, "capti…"),
-            (25, 0, "caption"),
-            (25, 1, "caption"),
-            (25, 19, "caption"),
-            (25, 199, "caption"),
-            (25, 1999, "caption"),
-        ],
-    )
-    def test_text_content(
-        self,
-        mocker,
-        is_private,
-        expected_prefix,
-        width,
-        count,
-        short_text,
-        caption="caption",
-    ):
-        controller = mocker.Mock()
-        controller.model.is_muted_stream.return_value = False
-        controller.model.muted_streams = {}
-        properties = {
-            "name": caption,
-            "id": 5,
-            "color": "#ffffff",
-            "invite_only": is_private,
-            "description": "Some Stream Description",
-        }
-
-        view_mock = mocker.Mock()
-        view_mock.palette = [(None, "black", "white")]
-        stream_button = StreamButton(
-            properties, controller=controller, view=view_mock, width=width, count=count
-        )
-
-        text = stream_button._w._original_widget.get_text()
-        count_str = "" if count == 0 else str(count)
-        expected_text = " {} {}{}{}".format(
-            expected_prefix,
-            short_text,
-            (width - 4 - len(short_text) - len(count_str)) * " ",
-            count_str,
-        )
-        assert len(text[0]) == len(expected_text) == (width - 1)
-        assert text[0] == expected_text
-
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button, key, widget_size):
         size = widget_size(stream_button)
