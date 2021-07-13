@@ -149,42 +149,43 @@ class TestController:
         self,
         mocker,
         controller,
-        msg_box,
         index_multiple_topic_msg,
         initial_narrow,
         initial_stream_id,
         anchor,
         expected_final_focus,
-    ):
+        stream_name="PTEST",
+        topic_name="Test",
+        stream_id=205,
+    ) -> None:
         expected_narrow = [
-            ["stream", msg_box.stream_name],
-            ["topic", msg_box.topic_name],
+            ["stream", stream_name],
+            ["topic", topic_name],
         ]
         controller.model.narrow = initial_narrow
         controller.model.index = index_multiple_topic_msg
         controller.model.stream_id = initial_stream_id
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
-            205: {
+            stream_id: {
                 "color": "#ffffff",
-                "name": "PTEST",
+                "name": stream_name,
             }
         }
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
         controller.narrow_to_topic(
-            stream_name="PTEST",
-            topic_name=msg_box.topic_name,
+            stream_name=stream_name,
+            topic_name=topic_name,
             contextual_message_id=anchor,
         )
 
-        assert controller.model.stream_id == msg_box.stream_id
+        assert controller.model.stream_id == stream_id
         assert controller.model.narrow == expected_narrow
         controller.view.message_view.log.clear.assert_called_once_with()
 
         widgets, focus = controller.view.message_view.log.extend.call_args_list[0][0]
-        stream_id, topic_name = msg_box.stream_id, msg_box.topic_name
         id_list = index_multiple_topic_msg["topic_msg_ids"][stream_id][topic_name]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         final_focus_msg_id = widgets[focus].original_widget.message["id"]
