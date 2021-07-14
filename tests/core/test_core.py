@@ -9,7 +9,6 @@ from pytest_mock import MockerFixture
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
-from zulipterminal.ui_tools.buttons import StreamButton
 from zulipterminal.version import ZT_VERSION
 
 
@@ -392,9 +391,10 @@ class TestController:
         self,
         mocker: MockerFixture,
         controller: Controller,
-        stream_button: StreamButton,
         muted_streams: Set[int],
         action: str,
+        stream_id: int = 205,
+        stream_name: str = "PTEST",
     ) -> None:
         pop_up = mocker.patch(MODULE + ".PopUpConfirmationView")
         text = mocker.patch(MODULE + ".urwid.Text")
@@ -402,9 +402,10 @@ class TestController:
         controller.model.muted_streams = muted_streams
         controller.loop = mocker.Mock()
 
-        controller.stream_muting_confirmation_popup(stream_button)
+        controller.stream_muting_confirmation_popup(stream_id, stream_name)
+
         text.assert_called_with(
-            ("bold", f"Confirm {action} of stream '{stream_button.stream_name}' ?"),
+            ("bold", f"Confirm {action} of stream '{stream_name}' ?"),
             "center",
         )
         pop_up.assert_called_once_with(controller, text(), partial())
