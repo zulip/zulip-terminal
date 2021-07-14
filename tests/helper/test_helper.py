@@ -1,8 +1,13 @@
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple
+
 import pytest
 from pytest import param as case
+from pytest_mock import MockerFixture
 
 import zulipterminal.helper
+from zulipterminal.api_types import Composition
 from zulipterminal.helper import (
+    Index,
     canonicalize_color,
     classify_unread_counts,
     display_error_if_present,
@@ -20,7 +25,10 @@ MODEL = "zulipterminal.model.Model"
 
 
 def test_index_messages_narrow_all_messages(
-    mocker, messages_successful_response, index_all_messages, initial_index
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    index_all_messages: Index,
+    initial_index: Index,
 ) -> None:
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
@@ -30,7 +38,10 @@ def test_index_messages_narrow_all_messages(
 
 
 def test_index_messages_narrow_stream(
-    mocker, messages_successful_response, index_stream, initial_index
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    index_stream: Index,
+    initial_index: Index,
 ) -> None:
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
@@ -42,7 +53,10 @@ def test_index_messages_narrow_stream(
 
 
 def test_index_messages_narrow_topic(
-    mocker, messages_successful_response, index_topic, initial_index
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    index_topic: Index,
+    initial_index: Index,
 ) -> None:
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
@@ -54,7 +68,10 @@ def test_index_messages_narrow_topic(
 
 
 def test_index_messages_narrow_user(
-    mocker, messages_successful_response, index_user, initial_index
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    index_user: Index,
+    initial_index: Index,
 ) -> None:
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
@@ -71,7 +88,10 @@ def test_index_messages_narrow_user(
 
 
 def test_index_messages_narrow_user_multiple(
-    mocker, messages_successful_response, index_user_multiple, initial_index
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    index_user_multiple: Index,
+    initial_index: Index,
 ) -> None:
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
@@ -101,8 +121,12 @@ def test_index_messages_narrow_user_multiple(
     ],
 )
 def test_index_edited_message(
-    mocker, messages_successful_response, empty_index, edited_msgs, initial_index
-):
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    empty_index: Index,
+    edited_msgs: Set[int],
+    initial_index: Index,
+) -> None:
     messages = messages_successful_response["messages"]
     for msg in messages:
         if msg["id"] in edited_msgs:
@@ -111,7 +135,7 @@ def test_index_edited_message(
     model.index = initial_index
     model.narrow = []
 
-    expected_index = dict(
+    expected_index: Dict[str, Any] = dict(
         empty_index, edited_messages=edited_msgs, all_msg_ids={537286, 537287, 537288}
     )
     for msg_id, msg in expected_index["messages"].items():
@@ -134,8 +158,12 @@ def test_index_edited_message(
     ],
 )
 def test_index_starred(
-    mocker, messages_successful_response, empty_index, msgs_with_stars, initial_index
-):
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    empty_index: Index,
+    msgs_with_stars: Set[int],
+    initial_index: Index,
+) -> None:
     messages = messages_successful_response["messages"]
     for msg in messages:
         if msg["id"] in msgs_with_stars and "starred" not in msg["flags"]:
@@ -145,7 +173,7 @@ def test_index_starred(
     model.index = initial_index
     model.narrow = [["is", "starred"]]
     model.is_search_narrow.return_value = False
-    expected_index = dict(
+    expected_index: Dict[str, Any] = dict(
         empty_index, private_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
     )
     for msg_id, msg in expected_index["messages"].items():
@@ -156,12 +184,12 @@ def test_index_starred(
 
 
 def test_index_mentioned_messages(
-    mocker,
-    messages_successful_response,
-    empty_index,
-    mentioned_messages_combination,
-    initial_index,
-):
+    mocker: MockerFixture,
+    messages_successful_response: Dict[str, Any],
+    empty_index: Index,
+    mentioned_messages_combination: Tuple[Set[int], Set[int]],
+    initial_index: Index,
+) -> None:
     messages = messages_successful_response["messages"]
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     for msg in messages:
@@ -177,7 +205,7 @@ def test_index_mentioned_messages(
     model.index = initial_index
     model.narrow = [["is", "mentioned"]]
     model.is_search_narrow.return_value = False
-    expected_index = dict(
+    expected_index: Dict[str, Any] = dict(
         empty_index,
         private_msg_ids={537287, 537288},
         mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
@@ -205,7 +233,11 @@ def test_index_mentioned_messages(
         ([1, 2], tuple, [(), (1,), (2,), (1, 2)]),
     ],
 )
-def test_powerset(iterable, map_func, expected_powerset):
+def test_powerset(
+    iterable: Iterable[Any],
+    map_func: Callable[[Any], Any],
+    expected_powerset: List[Any],
+) -> None:
     assert powerset(iterable, map_func) == expected_powerset
 
 
@@ -241,14 +273,14 @@ def test_powerset(iterable, map_func, expected_powerset):
     ],
 )
 def test_classify_unread_counts(
-    mocker,
-    initial_data,
-    stream_dict,
-    classified_unread_counts,
-    muted_topics,
-    muted_streams,
-    vary_in_unreads,
-):
+    mocker: MockerFixture,
+    initial_data: Dict[str, Any],
+    stream_dict: Dict[int, Dict[str, Any]],
+    classified_unread_counts: Dict[str, Any],
+    muted_topics: List[List[str]],
+    muted_streams: Set[int],
+    vary_in_unreads: Dict[str, Any],
+) -> None:
     model = mocker.Mock()
     model.stream_dict = stream_dict
     model.initial_data = initial_data
@@ -267,7 +299,7 @@ def test_classify_unread_counts(
 @pytest.mark.parametrize(
     "color", ["#ffffff", "#f0f0f0", "#f0f1f2", "#fff", "#FFF", "#F3F5FA"]
 )
-def test_color_formats(mocker, color):
+def test_color_formats(mocker: MockerFixture, color: str) -> None:
     canon = canonicalize_color(color)
     assert canon == "#fff"
 
@@ -275,7 +307,7 @@ def test_color_formats(mocker, color):
 @pytest.mark.parametrize(
     "color", ["#", "#f", "#ff", "#ffff", "#fffff", "#fffffff", "#abj", "#398a0s"]
 )
-def test_invalid_color_format(mocker, color):
+def test_invalid_color_format(mocker: MockerFixture, color: str) -> None:
     with pytest.raises(ValueError) as e:
         canon = canonicalize_color(color)
     assert str(e.value) == f'Unknown format for color "{color}"'
@@ -294,7 +326,9 @@ def test_invalid_color_format(mocker, color):
         ([False, False, False], False),  # Unsupported OS
     ],
 )
-def test_notify(mocker, OS, is_notification_sent):
+def test_notify(
+    mocker: MockerFixture, OS: List[bool], is_notification_sent: bool
+) -> None:
     title = "Author"
     text = "Hello!"
     mocker.patch(MODULE + ".WSL", OS[0])
@@ -323,7 +357,14 @@ def test_notify(mocker, OS, is_notification_sent):
         pytest.param("WSL", 2, marks=pytest.mark.xfail(reason="WSL notify disabled")),
     ],
 )
-def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
+def test_notify_quotes(
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+    OS: str,
+    cmd_length: int,
+    title: str,
+    text: str,
+) -> None:
     subprocess = mocker.patch(MODULE + ".subprocess")
 
     for os in ("LINUX", "MACOS", "WSL"):
@@ -348,7 +389,9 @@ def test_notify_quotes(monkeypatch, mocker, OS, cmd_length, title, text):
         ({"result": "success", "msg": "msg content"}, False),
     ],
 )
-def test_display_error_if_present(mocker, response, footer_updated):
+def test_display_error_if_present(
+    mocker: MockerFixture, response: Dict[str, str], footer_updated: bool
+) -> None:
     controller = mocker.Mock()
     report_error = controller.report_error
 
@@ -443,7 +486,12 @@ def test_display_error_if_present(mocker, response, footer_updated):
         ),
     ],
 )
-def test_notify_if_message_sent_outside_narrow(mocker, req, narrow, footer_updated):
+def test_notify_if_message_sent_outside_narrow(
+    mocker: MockerFixture,
+    req: Composition,
+    narrow: List[Any],
+    footer_updated: bool,
+) -> None:
     controller = mocker.Mock()
     report_success = controller.report_success
     controller.model.narrow = narrow
@@ -468,7 +516,7 @@ def test_notify_if_message_sent_outside_narrow(mocker, req, narrow, footer_updat
         (".3Aparty_parrot.3A", ":party_parrot:"),
     ],
 )
-def test_hash_util_decode(quoted_string, expected_unquoted_string):
+def test_hash_util_decode(quoted_string: str, expected_unquoted_string: str) -> None:
     return_value = hash_util_decode(quoted_string)
 
     assert return_value == expected_unquoted_string
@@ -495,7 +543,7 @@ def test_hash_util_decode(quoted_string, expected_unquoted_string):
         "block_spoiler",
     ],
 )
-def test_get_unused_fence(message_content, expected_fence):
+def test_get_unused_fence(message_content: str, expected_fence: str) -> None:
     generated_fence = get_unused_fence(message_content)
 
     assert generated_fence == expected_fence
