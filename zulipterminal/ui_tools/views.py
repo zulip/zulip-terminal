@@ -1749,3 +1749,53 @@ class FullRenderedMsgView(PopUpView):
             )
             return key
         return super().keypress(size, key)
+
+
+class FullRawMsgView(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        message: Message,
+        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+        title: str,
+    ) -> None:
+        self.controller = controller
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+
+        # Get rendered message header and footer
+        msg_box = MessageBox(message, controller.model, None)
+
+        # Get raw message content widget list
+        response = controller.model.fetch_raw_message_content(message["id"])
+
+        if response is None:
+            return
+
+        body_list = [urwid.Text(response)]
+
+        super().__init__(
+            controller,
+            body_list,
+            "MSG_INFO",
+            max_cols,
+            title,
+            urwid.Pile(msg_box.header),
+            urwid.Pile(msg_box.footer),
+        )
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("GO_BACK", key) or is_command_key("FULL_RAW_MESSAGE", key):
+            self.controller.show_msg_info(
+                msg=self.message,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        return super().keypress(size, key)
