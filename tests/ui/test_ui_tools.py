@@ -18,6 +18,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.views import (
+    SIDE_PANELS_MOUSE_SCROLL_LINES,
     LeftColumnView,
     MessageView,
     MiddleColumnView,
@@ -546,13 +547,15 @@ class TestStreamsView:
 
     def test_mouse_event(self, mocker, stream_view, mouse_scroll_event, widget_size):
         event, button, key = mouse_scroll_event
-        mocker.patch.object(stream_view, "keypress")
+        stream_view_keypress = mocker.patch.object(stream_view, "keypress")
         size = widget_size(stream_view)
         col = 1
         row = 1
         focus = "WIDGET"
         stream_view.mouse_event(size, event, button, col, row, focus)
-        stream_view.keypress.assert_called_once_with(size, key)
+        stream_view_keypress.assert_has_calls(
+            [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
@@ -726,13 +729,15 @@ class TestTopicsView:
 
     def test_mouse_event(self, mocker, topic_view, mouse_scroll_event, widget_size):
         event, button, key = mouse_scroll_event
-        mocker.patch.object(topic_view, "keypress")
+        topic_view_keypress = mocker.patch.object(topic_view, "keypress")
         size = widget_size(topic_view)
         col = 1
         row = 1
         focus = "WIDGET"
         topic_view.mouse_event(size, event, button, col, row, focus)
-        topic_view.keypress.assert_called_once_with(size, key)
+        topic_view_keypress.assert_has_calls(
+            [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
+        )
 
 
 class TestUsersView:
@@ -744,13 +749,15 @@ class TestUsersView:
 
     def test_mouse_event(self, mocker, user_view, mouse_scroll_event, widget_size):
         event, button, key = mouse_scroll_event
-        mocker.patch.object(user_view, "keypress")
+        user_view_keypress = mocker.patch.object(user_view, "keypress")
         size = widget_size(user_view)
         col = 1
         row = 1
         focus = "WIDGET"
         user_view.mouse_event(size, event, button, col, row, focus)
-        user_view.keypress.assert_called_with(size, key)
+        user_view_keypress.assert_has_calls(
+            [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
+        )
 
     def test_mouse_event_left_click(
         self, mocker, user_view, widget_size, compose_box_is_open
