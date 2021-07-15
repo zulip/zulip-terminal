@@ -1,10 +1,10 @@
 import re
 from functools import partial
-from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
@@ -327,9 +327,16 @@ class DecodedStream(TypedDict):
     stream_name: Optional[str]
 
 
+class DecodedPM(TypedDict):
+    type: Optional[Literal["pm", "group"]]
+    recipient_ids: List[int]
+    recipient_emails: Optional[List[str]]
+
+
 class ParsedNarrowLink(TypedDict, total=False):
     narrow: str
     stream: DecodedStream
+    pm_with: DecodedPM
     topic_name: str
     message_id: Optional[int]
 
@@ -381,6 +388,16 @@ class MessageLinkButton(urwid.Button):
             return DecodedStream(stream_id=None, stream_name=stream_name)
 
     @staticmethod
+    def _decode_pm_data(encoded_pm_data: str) -> DecodedPM:
+        """
+        Returns a dict with PM type and IDs of PM recipients.
+        """
+        recipient_data, *_ = encoded_pm_data.split("-")
+        recipient_ids = list(map(int, recipient_data.split(",")))
+
+        return DecodedPM(type=None, recipient_ids=recipient_ids, recipient_emails=None)
+
+    @staticmethod
     def _decode_message_id(message_id: str) -> Optional[int]:
         """
         Returns either the compatible near message ID or None.
@@ -405,6 +422,12 @@ class MessageLinkButton(urwid.Button):
         #    {encoded.20topic.20name}
         # d. narrow/stream/[{stream_id}-]{stream-name}/topic/
         #    {encoded.20topic.20name}/near/{message_id}
+        # e. narrow/pm-with/[{recipient_ids},]-{pm-type}
+        # f. narrow/pm-with/[{recipient_ids},]-{pm-type}/near/{message_id}
+        # g. narrow/pm-with/{user_id}-user{user_id}
+        # h. narrow/pm-with/{user_id}-user{user_id}/near/{message_id}
+        # i. narrow/pm-with/{bot_id}-{bot-name}
+        # j. narrow/pm-with/{bot_id}-{bot-name}/near/{message_id}
         fragments = urlparse(link.rstrip("/")).fragment.split("/")
         len_fragments = len(fragments)
         parsed_link = ParsedNarrowLink()
