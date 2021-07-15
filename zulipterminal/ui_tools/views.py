@@ -51,6 +51,10 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
 
 
+MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
+SIDE_PANELS_MOUSE_SCROLL_LINES = 5
+
+
 class ModListWalker(urwid.SimpleFocusListWalker):
     def set_focus(self, position: int) -> None:
         # When setting focus via set_focus method.
@@ -166,10 +170,12 @@ class MessageView(urwid.ListBox):
     ) -> bool:
         if event == "mouse press":
             if button == 4:
-                self.keypress(size, primary_key_for_command("GO_UP"))
+                for _ in range(MIDDLE_COLUMN_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_UP"))
                 return True
             if button == 5:
-                self.keypress(size, primary_key_for_command("GO_DOWN"))
+                for _ in range(MIDDLE_COLUMN_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -366,10 +372,12 @@ class StreamsView(urwid.Frame):
     ) -> bool:
         if event == "mouse press":
             if button == 4:
-                self.keypress(size, primary_key_for_command("GO_UP"))
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
-                self.keypress(size, primary_key_for_command("GO_DOWN"))
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -476,10 +484,12 @@ class TopicsView(urwid.Frame):
     ) -> bool:
         if event == "mouse press":
             if button == 4:
-                self.keypress(size, primary_key_for_command("GO_UP"))
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
-                self.keypress(size, primary_key_for_command("GO_DOWN"))
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
@@ -516,11 +526,11 @@ class UsersView(urwid.ListBox):
                 if self.controller.is_in_editor_mode():
                     return True
             if button == 4:
-                for _ in range(5):
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
                     self.keypress(size, primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
-                for _ in range(5):
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
                     self.keypress(size, primary_key_for_command("GO_DOWN"))
         return super().mouse_event(size, event, button, col, row, focus)
 
