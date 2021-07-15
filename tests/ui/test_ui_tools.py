@@ -558,6 +558,7 @@ class TestStreamsView:
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
+        mocker.patch.object(stream_view.stream_search_box, "set_caption")
         stream_view.log.extend(["FOO", "foo", "fan", "boo", "BOO"])
         stream_view.log.set_focus(3)
 
@@ -565,6 +566,7 @@ class TestStreamsView:
 
         assert stream_view.focus_index_before_search == 3
         stream_view.set_focus.assert_called_once_with("header")
+        stream_view.stream_search_box.set_caption.assert_called_once_with(" ")
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
@@ -686,6 +688,7 @@ class TestTopicsView:
     def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
+        mocker.patch.object(topic_view.topic_search_box, "set_caption")
         topic_view.log.extend(["FOO", "foo", "fan", "boo", "BOO"])
         topic_view.log.set_focus(3)
 
@@ -694,6 +697,7 @@ class TestTopicsView:
         topic_view.set_focus.assert_called_once_with("header")
         topic_view.header_list.set_focus.assert_called_once_with(2)
         assert topic_view.focus_index_before_search == 3
+        topic_view.topic_search_box.set_caption.assert_called_once_with(" ")
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
@@ -1113,8 +1117,10 @@ class TestRightColumnView:
     def test_keypress_SEARCH_PEOPLE(self, right_col_view, mocker, key, widget_size):
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
+        mocker.patch.object(right_col_view.user_search, "set_caption")
         right_col_view.keypress(size, key)
         right_col_view.set_focus.assert_called_once_with("header")
+        right_col_view.user_search.set_caption.assert_called_once_with(" ")
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test_keypress_GO_BACK(self, right_col_view, mocker, key, widget_size):
