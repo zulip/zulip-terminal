@@ -2157,13 +2157,10 @@ class TestModel:
     @pytest.mark.parametrize(
         "narrow, event, called",
         [
-            # Not in PM Narrow
-            ([], {}, False),
-            # Not in PM Narrow with sender
-            (
+            case([], {}, False, id="not_in_pm_narrow"),
+            case(
                 [["pm_with", "iago@zulip.com"]],
                 {
-                    "type": "typing",
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
                     "recipients": [
@@ -2173,9 +2170,9 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                id="not_in_pm_narrow_with_sender",
             ),
-            # In PM narrow with the sender, OP - 'start'
-            (
+            case(
                 [["pm_with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
@@ -2187,9 +2184,9 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                id="in_pm_narrow_with_sender:start",
             ),
-            # OP - 'stop'
-            (
+            case(
                 [["pm_with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
@@ -2201,39 +2198,30 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                id="in_pm_narrow_with_sender:stop",
             ),
-            # In narrow with oneself, OP - 'start'
-            (
+            case(
                 [["pm_with", "iago@zulip.com"]],
                 {
-                    "type": "typing",
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
                     "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
                     "id": 0,
                 },
                 False,
+                id="in_pm_narrow_with_oneself:start",
             ),
-            # In narrow with oneself, OP - 'stop'
-            (
+            case(
                 [["pm_with", "iago@zulip.com"]],
                 {
-                    "type": "typing",
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
                     "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
                     "id": 0,
                 },
                 False,
+                id="in_pm_narrow_with_oneself:stop",
             ),
-        ],
-        ids=[
-            "not_in_pm_narrow",
-            "not_in_pm_narrow_with_sender",
-            "start",
-            "stop",
-            "start_in_narrow_with_oneself",
-            "stop_in_narrow_with_oneself",
         ],
     )
     def test__handle_typing_event(self, mocker, model, narrow, event, called):
