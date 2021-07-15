@@ -2184,7 +2184,7 @@ class TestModel:
                     "id": 0,
                 },
                 True,
-                id="in_pm_narrow_with_sender:start",
+                id="in_pm_narrow_with_sender_typing:start",
             ),
             case(
                 [["pm_with", "hamlet@zulip.com"]],
@@ -2198,7 +2198,35 @@ class TestModel:
                     "id": 0,
                 },
                 True,
-                id="in_pm_narrow_with_sender:stop",
+                id="in_pm_narrow_with_sender_typing:stop",
+            ),
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                id="in_pm_narrow_with_other_myself_typing:start",
+            ),
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                id="in_pm_narrow_with_other_myself_typing:stop",
             ),
             case(
                 [["pm_with", "iago@zulip.com"]],
