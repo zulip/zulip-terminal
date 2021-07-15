@@ -7,6 +7,23 @@ For further details on themefiles look at the theme contribution guide.
 from enum import Enum
 from typing import Any
 
+from pygments.style import Style
+from pygments.token import (
+    Comment,
+    Error,
+    Escape,
+    Generic,
+    Keyword,
+    Literal,
+    Name,
+    Number,
+    Operator,
+    Punctuation,
+    String,
+    Text,
+    Whitespace,
+)
+
 
 # fmt: off
 # NOTE: The 24bit color codes use 256 color which can be
@@ -61,3 +78,39 @@ def color_properties(colors: Any, *prop: str) -> Any:
 
 
 DefaultBoldColor = color_properties(DefaultColor, "BOLD")
+
+
+# fmt: off
+class Term16Style(Style):
+    """
+    This style is a 16 color syntax style made for use in all ZT themes.
+    "var" bypasses pygments style format checking.
+    "_" is used in place of space and changed later below.
+    """
+    background_color = "dark gray"
+
+    styles = {
+        Text:                          "var:light_gray",
+        Escape:                        "var:light_cyan",
+        Error:                         "var:dark_red",
+        Whitespace:                    "var:light_gray",
+        Keyword:                       "var:light_blue,_bold",
+        Name:                          "var:brown",
+        Name.Class:                    "var:yellow",
+        Name.Function:                 "var:light_green",
+        Literal:                       "var:light_green",
+        String:                        "var:dark_green",
+        String.Escape:                 "var:light_gray",
+        String.Doc:                    "var:light_gray",
+        Number:                        "var:light_red",
+        Operator:                      "var:light_cyan",
+        Punctuation:                   "var:light_gray,_bold",
+        Comment:                       "var:light_gray",
+        Generic:                       "var:light_gray",
+    }
+# fmt:on
+
+
+term16 = Term16Style()
+for style, code in term16.styles.items():
+    term16.styles[style] = code[4:].replace("_", " ")

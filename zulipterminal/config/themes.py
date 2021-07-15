@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pygments.token import STANDARD_TYPES
 
+from zulipterminal.config.color import term16
 from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
 
 
@@ -183,6 +184,9 @@ def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> Th
     pygments_bg = pygments["background"]
     pygments_overrides = pygments["overrides"]
 
+    term16_styles = term16.styles
+    term16_bg = term16.background_color
+
     for token, css_class in STANDARD_TYPES.items():
         if css_class in pygments_overrides:
             pygments_styles[token] = pygments_overrides[css_class]
@@ -196,10 +200,17 @@ def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> Th
             except IndexError:
                 pass
 
+        if term16_styles[token] == "":
+            try:
+                t = [k for k, v in STANDARD_TYPES.items() if v == css_class[0]]
+                term16_styles[token] = term16_styles[t[0]]
+            except IndexError:
+                pass
+
         new_style = (
             f"pygments:{css_class}",
-            "white",
-            "black",
+            term16_styles[token],
+            term16_bg,
             "bold",  # Mono style
             pygments_styles[token],
             pygments_bg,

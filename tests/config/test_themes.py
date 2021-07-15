@@ -172,9 +172,23 @@ def test_parse_themefile(
                 },
             },
             [
-                ("pygments:k", "white", "black", "bold", "#abc", "#def"),
-                ("pygments:kr", "white", "black", "bold", "#abc", "#def"),
-                ("pygments:sd", "white", "black", "bold", "#123, bold", "#def"),
+                ("pygments:k", "light blue, bold", "dark gray", "bold", "#abc", "#def"),
+                (
+                    "pygments:kr",
+                    "light blue, bold",
+                    "dark gray",
+                    "bold",
+                    "#abc",
+                    "#def",
+                ),
+                (
+                    "pygments:sd",
+                    "light gray",
+                    "dark gray",
+                    "bold",
+                    "#123, bold",
+                    "#def",
+                ),
             ],
         )
     ],
