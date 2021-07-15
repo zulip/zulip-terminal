@@ -468,6 +468,19 @@ class MessageLinkButton(urwid.Button):
                 message_id=message_id,
             )
 
+        elif (
+            len_fragments == 5 and fragments[1] == "pm-with" and fragments[3] == "near"
+        ):
+            pm_data = cls._decode_pm_data(fragments[2])
+            message_id = cls._decode_message_id(fragments[4])
+            parsed_link = dict(
+                narrow="pm-with:near", pm_with=pm_data, message_id=message_id
+            )
+
+        elif len_fragments == 3 and fragments[1] == "pm-with":
+            pm_data = cls._decode_pm_data(fragments[2])
+            parsed_link = dict(narrow="pm-with", pm_with=pm_data)
+
         return parsed_link
 
     def _validate_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
@@ -541,6 +554,29 @@ class MessageLinkButton(urwid.Button):
                 stream_name = cast(str, model.stream_dict[stream_id]["name"])
                 parsed_link["stream"]["stream_name"] = stream_name
 
+        elif "pm_with" in parsed_link:
+            user_id = model.user_id
+            recipient_ids = parsed_link["pm_with"]["recipient_ids"]
+
+            # Bump recipients to include current user_id if not already
+            # present (refer to URL formats in `_parse_narrow_link`)
+            if user_id not in recipient_ids:
+                recipient_ids.append(user_id)
+
+            recipient_emails: List[str] = []
+            for recipient_id in recipient_ids:
+                user = model._all_users_by_id.get(recipient_id, None)
+                email = user["email"] if user else ""
+                recipient_emails.append(email)
+
+            # Currently webapp uses `pm` and `group` suffix interchangeably.
+            # Treat more-than-2 pms to group pms to avoid confusion.
+            pm_type = "pm" if len(recipient_ids) < 3 else "group"
+
+            # Patch the PM type and recepient emails
+            parsed_link["pm_with"]["type"] = Literal[pm_type]
+            parsed_link["pm_with"]["recipient_emails"] = recipient_emails
+
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
         """
         Switches narrow via narrow_to_* methods.
@@ -565,6 +601,16 @@ class MessageLinkButton(urwid.Button):
                 stream_name=parsed_link["stream"]["stream_name"],
                 topic_name=parsed_link["topic_name"],
                 contextual_message_id=parsed_link["message_id"],
+            )
+        elif "pm-with:near" == narrow:
+            self.controller.narrow_to_user(
+                recipient_emails=parsed_link["pm_with"]["recipient_emails"],
+                contextual_message_id=parsed_link["message_id"],
+            )
+
+        elif "pm-with" == narrow:
+            self.controller.narrow_to_user(
+                recipient_emails=parsed_link["pm_with"]["recipient_emails"]
             )
 
     def handle_narrow_link(self) -> None:

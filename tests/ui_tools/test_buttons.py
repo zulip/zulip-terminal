@@ -3,6 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
+from typing_extensions import Literal
 from urwid import AttrMap, Overlay, Widget
 
 from zulipterminal.config.keys import keys_for_command
@@ -324,10 +325,17 @@ class TestTopicButton:
 
 class TestMessageLinkButton:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker: MockerFixture) -> None:
+    def mock_external_classes(
+        self, mocker: MockerFixture, _all_users_by_id: Dict[str, Any]
+    ) -> None:
         self.controller = mocker.Mock()
         self.super_init = mocker.patch(MODULE + ".urwid.Button.__init__")
         self.connect_signal = mocker.patch(MODULE + ".urwid.connect_signal")
+
+        self.model = mocker.Mock()  # To pass model data on potential calls.
+        self.model._all_users_by_id = _all_users_by_id
+        self.model.user_id = 1001  # User id of current logged in user
+        self.controller.model = self.model
 
     def message_link_button(
         self, caption: str = "", link: str = "", display_attr: Optional[str] = None
@@ -534,6 +542,37 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 id="topic_near_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-pm",
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="pm_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-group",
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="group_pm_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-pm/near/1",
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="common_pm_near_narrow_link",
             ),
             case(
                 SERVER_URL + "/#narrow/foo",
@@ -753,6 +792,86 @@ class TestMessageLinkButton:
                 ),
                 id="stream_data_with_stream_name",
             ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                id="normal_pm",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11, 12], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                id="group_pm",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[11], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[11, 1001],
+                        recipient_emails=["person1@example.com", "FOOBOO@gmail.com"],
+                    ),
+                ),
+                id="pm_with_user_id_not_specified",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[11, 12], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[11, 12, 1001],
+                        recipient_emails=[
+                            "person1@example.com",
+                            "person2@example.com",
+                            "FOOBOO@gmail.com",
+                        ],
+                    ),
+                ),
+                id="group_pm_with_user_id_not_specified",
+            ),
         ],
     )
     def test__patch_narrow_link(
@@ -773,7 +892,12 @@ class TestMessageLinkButton:
         assert parsed_link == expected_parsed_link
 
     @pytest.mark.parametrize(
-        "parsed_link, narrow_to_stream_called, narrow_to_topic_called",
+        [
+            "parsed_link",
+            "narrow_to_stream_called",
+            "narrow_to_topic_called",
+            "narrow_to_user_called",
+        ],
         [
             case(
                 ParsedNarrowLink(
@@ -781,6 +905,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
                 ),
                 True,
+                False,
                 False,
                 id="stream_narrow",
             ),
@@ -792,6 +917,7 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                False,
                 id="topic_narrow",
             ),
             case(
@@ -801,6 +927,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
                 ),
                 True,
+                False,
                 False,
                 id="stream_near_narrow",
             ),
@@ -813,7 +940,74 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                False,
                 id="topic_near_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="pm_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="group_pm_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="pm_near_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="group_pm_near_narrow",
             ),
         ],
     )
@@ -822,6 +1016,7 @@ class TestMessageLinkButton:
         parsed_link: ParsedNarrowLink,
         narrow_to_stream_called: bool,
         narrow_to_topic_called: bool,
+        narrow_to_user_called: bool,
     ) -> None:
         mocked_button = self.message_link_button()
 
@@ -831,6 +1026,7 @@ class TestMessageLinkButton:
             mocked_button.controller.narrow_to_stream.called == narrow_to_stream_called
         )
         assert mocked_button.controller.narrow_to_topic.called == narrow_to_topic_called
+        assert mocked_button.controller.narrow_to_user.called == narrow_to_user_called
 
     @pytest.mark.parametrize(
         "error, report_error_called, _switch_narrow_to_called, exit_popup_called",
