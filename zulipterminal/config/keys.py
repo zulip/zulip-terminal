@@ -349,6 +349,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Show/hide full rendered message (from message information)',
         'key_category': 'msg_actions',
     }),
+    ('FULL_RAW_MESSAGE', {
+        'keys': ['r'],
+        'help_text': 'Show/hide full raw message (from message information)',
+        'key_category': 'msg_actions',
+    }),
 ])
 # fmt: on
 
