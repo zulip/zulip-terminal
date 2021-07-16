@@ -899,6 +899,27 @@ class TestMsgInfoView:
             time_mentions=list(),
         )
 
+    @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
+    def test_keypress_full_raw_message(self, message_fixture, key, widget_size):
+        msg_info_view = MsgInfoView(
+            self.controller,
+            message_fixture,
+            title="Message Information",
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )
+        size = widget_size(msg_info_view)
+
+        msg_info_view.keypress(size, key)
+
+        self.controller.show_full_raw_message.assert_called_once_with(
+            message=message_fixture,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )
+
     @pytest.mark.parametrize(
         "key", {*keys_for_command("GO_BACK"), *keys_for_command("MSG_INFO")}
     )
@@ -918,10 +939,11 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self):
-        expected_height = 5
-        # 5 = 1 (date & time) +1 (sender's name) +1 (sender's email)
+        expected_height = 6
+        # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (view message in browser)
         # +1 (full rendered message)
+        # +1 (full raw message)
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -984,9 +1006,9 @@ class TestMsgInfoView:
             OrderedDict(),
             list(),
         )
-        # 11 = 5 labels + 1 blank line + 1 'Reactions' (category)
+        # 12 = 6 labels + 1 blank line + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 11
+        expected_height = 12
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
