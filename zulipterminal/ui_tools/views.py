@@ -1422,6 +1422,9 @@ class MsgInfoView(PopUpView):
         full_rendered_message_keys = ", ".join(
             map(repr, keys_for_command("FULL_RENDERED_MESSAGE"))
         )
+        full_raw_message_keys = ", ".join(
+            map(repr, keys_for_command("FULL_RAW_MESSAGE"))
+        )
         msg_info = [
             (
                 "",
@@ -1436,6 +1439,10 @@ class MsgInfoView(PopUpView):
                     (
                         "Full rendered message",
                         f"Press {full_rendered_message_keys} to view",
+                    ),
+                    (
+                        "Full raw message",
+                        f"Press {full_raw_message_keys} to view",
                     ),
                 ],
             ),
@@ -1544,6 +1551,14 @@ class MsgInfoView(PopUpView):
             self.controller.open_in_browser(url)
         elif is_command_key("FULL_RENDERED_MESSAGE", key):
             self.controller.show_full_rendered_message(
+                message=self.msg,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        elif is_command_key("FULL_RAW_MESSAGE", key):
+            self.controller.show_full_raw_message(
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
