@@ -23,6 +23,7 @@ from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
+    FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
     MsgInfoView,
@@ -309,6 +310,25 @@ class Controller:
                 message_links,
                 time_mentions,
                 "Full rendered message (up/down scrolls)",
+            ),
+            "area:msg",
+        )
+
+    def show_full_raw_message(
+        self,
+        message: Message,
+        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        self.show_pop_up(
+            FullRawMsgView(
+                self,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                "Full raw message (up/down scrolls)",
             ),
             "area:msg",
         )
