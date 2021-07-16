@@ -344,6 +344,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Clear compose box',
         'key_category': 'msg_compose',
     }),
+    ('FULL_RENDERED_MESSAGE', {
+        'keys': ['f'],
+        'help_text': 'Show/hide full rendered message (from message information)',
+        'key_category': 'msg_actions',
+    }),
 ])
 # fmt: on
 
