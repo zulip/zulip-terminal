@@ -58,6 +58,7 @@
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
 |View current message in browser (from message information)|<kbd>v</kbd>|
 |Show/hide full rendered message (from message information)|<kbd>f</kbd>|
+|Show/hide full raw message (from message information)|<kbd>r</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
