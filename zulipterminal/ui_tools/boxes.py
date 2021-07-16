@@ -779,6 +779,9 @@ class MessageBox(urwid.Pile):
     def __init__(self, message: Message, model: "Model", last_message: Any) -> None:
         self.model = model
         self.message = message
+        self.header: List[Any] = []
+        self.content: urwid.Text = urwid.Text("")
+        self.footer: List[Any] = []
         self.stream_name = ""
         self.stream_id: Optional[int] = None
         self.topic_name = ""
@@ -1403,6 +1406,7 @@ class MessageBox(urwid.Pile):
         content, self.message_links, self.time_mentions = self.transform_content(
             self.message["content"], self.model.server_url
         )
+        self.content.set_text(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7
@@ -1411,7 +1415,7 @@ class MessageBox(urwid.Pile):
             edited_label_size = 0
             left_padding = 8
 
-        content = urwid.Padding(
+        wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
                     (edited_label_size, urwid.Text("EDITED")),
@@ -1419,7 +1423,7 @@ class MessageBox(urwid.Pile):
                         urwid.Columns(
                             [
                                 (1, urwid.Text("")),
-                                urwid.Text(content),
+                                self.content,
                             ]
                         ),
                         tline="",
@@ -1451,10 +1455,14 @@ class MessageBox(urwid.Pile):
         parts = [
             (recipient_header, recipient_header is not None),
             (content_header, any_differences),
-            (content, True),
+            (wrapped_content, True),
             (footlinks, footlinks is not None),
             (reactions, reactions != ""),
         ]
+
+        self.header = [part for part, condition in parts[:2] if condition]
+        self.footer = [part for part, condition in parts[3:] if condition]
+
         return [part for part, condition in parts if condition]
 
     def update_message_author_status(self) -> bool:
@@ -1464,15 +1472,10 @@ class MessageBox(urwid.Pile):
         """
         author_is_present = False
         author_column = 1  # Index of author field in content header
-        author_field = None
 
-        # Get message author field (if present)
-        if self.need_recipient_header():
-            author_field = self[1][author_column]
-        elif isinstance(self[0][author_column], urwid.Text):
-            author_field = self[0][author_column]
-
-        if author_field is not None:
+        if len(self.header) > 0:
+            # -1 represents that content header is the last row of header field
+            author_field = self.header[-1][author_column]
             author_is_present = author_field.text != " "
 
         if author_is_present:
