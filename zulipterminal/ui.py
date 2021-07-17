@@ -151,7 +151,7 @@ class View(urwid.WidgetWrap):
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
         self.right_panel, self.right_tab = self.right_column_view()
-        if self.layout == "autohide":
+        if self.layout.startswith("autohide"):
             body = [
                 (TAB_WIDTH, self.left_tab),
                 ("weight", 10, self.center_panel),
@@ -198,17 +198,16 @@ class View(urwid.WidgetWrap):
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-        if self.layout != "autohide" and self.mode != "small":
+        if not self.layout.startswith("autohide") and self.mode != "small":
             return
 
         if visible:
+            width = LEFT_WIDTH + 1 if self.mode != "wide" else ("relative", 20)
             self.frame.body = urwid.Overlay(
-                urwid.Columns(
-                    [(LEFT_WIDTH, self.left_panel), (1, urwid.SolidFill("▏"))]
-                ),
+                urwid.Columns([self.left_panel, (1, urwid.SolidFill("▏"))]),
                 self.body,
                 align="left",
-                width=LEFT_WIDTH + 1,
+                width=width,
                 valign="top",
                 height=("relative", 100),
             )
@@ -216,17 +215,16 @@ class View(urwid.WidgetWrap):
             self.frame.body = self.body
 
     def show_right_panel(self, *, visible: bool) -> None:
-        if self.layout != "autohide" and self.mode != "small":
+        if not self.layout.startswith("autohide") and self.mode != "small":
             return
 
         if visible:
+            width = RIGHT_WIDTH + 1 if self.mode != "wide" else ("relative", 20)
             self.frame.body = urwid.Overlay(
-                urwid.Columns(
-                    [(1, urwid.SolidFill("▕")), (RIGHT_WIDTH, self.right_panel)]
-                ),
+                urwid.Columns([(1, urwid.SolidFill("▕")), self.right_panel]),
                 self.body,
                 align="right",
-                width=RIGHT_WIDTH + 1,
+                width=width,
                 valign="top",
                 height=("relative", 100),
             )
@@ -398,6 +396,17 @@ class View(urwid.WidgetWrap):
                 self.mode = "wide"
                 self.body.contents[0] = (self.left_panel, ("weight", 20, True))
                 self.body.contents[2] = (self.right_panel, ("weight", 20, True))
+            self.add_padding_and_border_to_frame(maxcols)
+
+        if self.layout == "autohide_fluid":
+            if maxcols < MIN_WIDE_WIDTH and self.mode != "normal":
+                self.mode = "normal"
+                # Set same focus to reopen open panel and hence update panel
+                self.focus_panel = self.focus_panel
+            elif maxcols >= MIN_WIDE_WIDTH and self.mode != "wide":
+                self.mode = "wide"
+                # Set same focus to reopen open panel and hence update panel
+                self.focus_panel = self.focus_panel
             self.add_padding_and_border_to_frame(maxcols)
 
         return super().render(size, focus)

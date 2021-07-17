@@ -160,6 +160,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         const="dynamic",
         help="panels adapt based on available screen space",
     )
+    layout_group.add_argument(
+        "--autohide-fluid",
+        dest="layout",
+        default=None,
+        action="store_const",
+        const="autohide_fluid",
+        help="panels adapt based on available screen space but remains in autohide mode, unlike dynamic",
+    )
 
     parser.add_argument(
         "-d",
@@ -483,7 +491,7 @@ def main(options: Optional[List[str]] = None) -> None:
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
-            "layout": ["autohide", "no_autohide", "dynamic"],
+            "layout": ["autohide", "no_autohide", "dynamic", "autohide_fluid"],
             "notify": ["enabled", "disabled"],
             "color-depth": ["1", "16", "256", "24bit"],
         }

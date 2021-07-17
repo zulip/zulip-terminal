@@ -232,7 +232,9 @@ class TestView:
         assert view.frame == frame()
         show_left_panel.assert_called_once_with(visible=True)
 
-    @pytest.mark.parametrize("layout", ["autohide", "no_autohide", "dynamic"])
+    @pytest.mark.parametrize(
+        "layout", ["autohide", "no_autohide", "dynamic", "autohide_fluid"]
+    )
     @pytest.mark.parametrize("visible", [True, False])
     @pytest.mark.parametrize("test_method", ["left_panel", "right_panel"])
     @pytest.mark.parametrize(
@@ -240,7 +242,7 @@ class TestView:
         [
             ("small", ("given", LEFT_WIDTH)),
             ("normal", ("given", LEFT_WIDTH)),
-            ("wide", ("given", LEFT_WIDTH)),
+            ("wide", ("weight", 20)),
         ],
     )
     def test_show_panel_methods(
@@ -261,19 +263,27 @@ class TestView:
 
         tail = [None, 0, 0, "top", None, "relative", 100, None, 0, 0]
         if test_method == "left_panel":
-            expected_overlay_options = ["left", None, "given", LEFT_WIDTH + 1] + tail
+            if mode == "wide":
+                expected_overlay_options = ["left", None, "relative", 20]
+            else:
+                expected_overlay_options = ["left", None, "given", LEFT_WIDTH + 1]
+            expected_overlay_options += tail
             expected_tab = view.left_tab
             expected_panel = view.left_panel
 
             view.show_left_panel(visible=visible)
         else:
-            expected_overlay_options = ["right", None, "given", RIGHT_WIDTH + 1] + tail
+            if mode == "wide":
+                expected_overlay_options = ["right", None, "relative", 20]
+            else:
+                expected_overlay_options = ["right", None, "given", RIGHT_WIDTH + 1]
+            expected_overlay_options += tail
             expected_tab = view.right_tab
             expected_panel = view.right_panel
 
             view.show_right_panel(visible=visible)
 
-        if layout == "autohide" or mode == "small":
+        if layout.startswith("autohide") or mode == "small":
             if visible:
                 assert (expected_panel, mocker.ANY) in view.frame.body.top_w.contents
                 assert view.frame.body.bottom_w == view.body
@@ -605,3 +615,40 @@ class TestView:
             # No change
             assert new_width_amount == old_width_amount
             assert new_width_type == old_width_type
+
+    @pytest.mark.parametrize("mode", ["small", "normal", "wide"])
+    @pytest.mark.parametrize("focus_pos", [0, 1, 2], ids=["left", "center", "right"])
+    @pytest.mark.parametrize(
+        "size, expected_mode",
+        [
+            ((80, 24), "normal"),
+            ((159, 24), "normal"),
+            ((160, 24), "wide"),
+            ((200, 24), "wide"),
+        ],
+    )
+    def test_render_autohide_fluid_layout(
+        self,
+        mocker: MockerFixture,
+        view: View,
+        mode: Literal["small", "normal", "wide"],
+        focus_pos: int,
+        size: urwid_Box,
+        expected_mode: Literal["small", "normal", "wide"],
+    ) -> None:
+        mocker.patch(MODULE + ".urwid.widget.validate_size", return_value=None)
+        view.layout = "autohide_fluid"
+        view.mode = mode
+        view.body = Columns(
+            [(5, view.left_panel), mocker.Mock(), (5, view.right_panel)]
+        )
+        view.frame.body = view.body
+        view.focus_panel = focus_pos
+        mode_changed = expected_mode != mode
+
+        view.render(size, focus=False)
+
+        # Check focus doesn't change
+        # `show_panel` takes care of width which is already tested
+        assert view.focus_panel == focus_pos
+        assert view.mode == expected_mode
