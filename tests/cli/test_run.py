@@ -141,6 +141,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--autohide",
         "--no-autohide",
         "--dynamic",
+        "--autohide-fluid",
         "-v, --version",
         "-e, --explore",
         "--color-depth",

@@ -61,7 +61,7 @@ requests_logger.setLevel(logging.DEBUG)
 # Valid boolean settings, which map from (str, str) to (True, False)
 # FIXME: revert to a tuple(str, str), possible use similar to colors
 VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, ...]] = {
-    "layout": ("autohide", "no_autohide", "dynamic"),
+    "layout": ("autohide", "no_autohide", "dynamic", "autohide_fluid"),
     "notify": ("enabled", "disabled"),
     "exit_confirmation": ("enabled", "disabled"),
     "transparency": ("enabled", "disabled"),
@@ -219,6 +219,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_const",
         const="dynamic",
         help="panels adapt based on available screen space",
+    )
+    layout_group.add_argument(
+        "--autohide-fluid",
+        dest="layout",
+        default=None,
+        action="store_const",
+        const="autohide_fluid",
+        help="panels adapt based on available screen space but remains in autohide mode, unlike dynamic",
     )
 
     parser.add_argument(
