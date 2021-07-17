@@ -78,7 +78,8 @@ repo_python_files['tests'] = []
 
 # Added incrementally as newer test files are type-annotated.
 type_consistent_testfiles = [
-    "test_run.py", "test_core.py", "test_emoji_data.py", "test_helper.py"
+    "test_run.py", "test_core.py", "test_emoji_data.py", "test_helper.py",
+    "test_server_url.py"
 ]
 
 for file_path in python_files:
