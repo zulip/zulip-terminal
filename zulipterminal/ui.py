@@ -1,6 +1,7 @@
 import random
 import re
 import time
+from sys import platform
 from typing import Any, List, Optional
 
 import urwid
@@ -39,6 +40,7 @@ class View(urwid.WidgetWrap):
         self.search_box = SearchBox(self.controller)
 
         self.message_view: Any = None
+        self.displaying_selection_hint = False
 
         super().__init__(self.main_window())
 
@@ -296,6 +298,26 @@ class View(urwid.WidgetWrap):
         elif is_command_key("GO_TO_BOTTOM", key):
             key = "end"
         return super().keypress(size, key)
+
+    def mouse_event(
+        self, size: urwid_Box, event: str, button: int, col: int, row: int, focus: bool
+    ) -> bool:
+        if event == "mouse drag":
+            selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
+            self.model.controller.view.set_footer_text(
+                [
+                    "Try pressing ",
+                    ("footer_contrast", f" {selection_key} "),
+                    " and dragging to select text.",
+                ],
+                "task:warning",
+            )
+            self.displaying_selection_hint = True
+        elif event == "mouse release" and self.displaying_selection_hint:
+            self.model.controller.view.set_footer_text()
+            self.displaying_selection_hint = False
+
+        return super().mouse_event(size, event, button, col, row, focus)
 
 
 class Screen(urwid.raw_display.Screen):

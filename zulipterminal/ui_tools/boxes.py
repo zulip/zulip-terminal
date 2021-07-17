@@ -3,7 +3,6 @@ import typing
 import unicodedata
 from collections import Counter, OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
-from sys import platform
 from time import sleep, time
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
@@ -837,9 +836,6 @@ class MessageBox(urwid.Pile):
                     if recipient["id"] != self.model.user_id
                 ]
 
-        # mouse_event helper variable
-        self.displaying_selection_hint = False
-
         super().__init__(self.main_view())
 
     def need_recipient_header(self) -> bool:
@@ -1575,20 +1571,6 @@ class MessageBox(urwid.Pile):
                     return True
                 self.keypress(size, primary_key_for_command("ENTER"))
                 return True
-        elif event == "mouse drag":
-            selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
-            self.model.controller.view.set_footer_text(
-                [
-                    "Try pressing ",
-                    ("footer_contrast", f" {selection_key} "),
-                    " and dragging to select text.",
-                ],
-                "task:warning",
-            )
-            self.displaying_selection_hint = True
-        elif event == "mouse release" and self.displaying_selection_hint:
-            self.model.controller.view.set_footer_text()
-            self.displaying_selection_hint = False
 
         return super().mouse_event(size, event, button, col, row, focus)
 
