@@ -6,13 +6,13 @@ from zulipterminal.config.keys import HELP_CATEGORIES, KEY_BINDINGS
 
 categories = {
     category: {
-        item['help_text']: item['keys']
+        item["help_text"]: item["keys"]
         for item in KEY_BINDINGS.values()
-        if item['key_category'] == category
+        if item["key_category"] == category
     }
     for category in HELP_CATEGORIES.keys()
 }
-OUTPUT_FILE = Path(__file__).resolve().parent.parent / 'docs' / 'hotkeys.md'
+OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
 SCRIPT_NAME = PurePath(__file__).name
 
 with open(OUTPUT_FILE, "w") as mdFile:
