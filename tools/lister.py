@@ -16,18 +16,18 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
         # opening a file may throw an OSError
         with open(fpath) as f:
             first_line = f.readline()
-            if re.search(r'^#!.*\bpython3', first_line):
-                return 'py'
-            elif re.search(r'^#!', first_line):
+            if re.search(r"^#!.*\bpython3", first_line):
+                return "py"
+            elif re.search(r"^#!", first_line):
                 print(
-                    'Error: Unknown shebang in file' ' "%s":\n%s' % (fpath, first_line),
+                    "Error: Unknown shebang in file" ' "%s":\n%s' % (fpath, first_line),
                     file=sys.stderr,
                 )
-                return ''
+                return ""
             else:
-                return ''
+                return ""
     else:
-        return ''
+        return ""
 
 
 def list_files(
@@ -57,28 +57,28 @@ def list_files(
         If False, returns a flat list of files.
     extless_only - Only include extensionless files in output.
     """
-    ftypes = [x.strip('.') for x in ftypes]
+    ftypes = [x.strip(".") for x in ftypes]
     ftypes_set = set(ftypes)
 
     # Really this is all bytes -- it's a file path -- but we get paths in
     # sys.argv as str, so that battle is already lost.  Settle for hoping
     # everything is UTF-8.
     repository_root = (
-        subprocess.check_output(['git', 'rev-parse', '--show-toplevel'])
+        subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
         .strip()
-        .decode('utf-8')
+        .decode("utf-8")
     )
     exclude_abspaths = [
         os.path.abspath(os.path.join(repository_root, fpath)) for fpath in exclude
     ]
 
-    cmdline = ['git', 'ls-files'] + targets
+    cmdline = ["git", "ls-files"] + targets
     if modified_only:
-        cmdline.append('-m')
+        cmdline.append("-m")
 
     files_gen = (
         x.strip()
-        for x in subprocess.check_output(cmdline, universal_newlines=True).split('\n')
+        for x in subprocess.check_output(cmdline, universal_newlines=True).split("\n")
     )
     # throw away empty lines and non-files (like symlinks)
     files = list(filter(os.path.isfile, files_gen))
@@ -108,7 +108,7 @@ def list_files(
                     file=sys.stderr,
                 )
                 print(e, file=sys.stderr)
-                filetype = ''
+                filetype = ""
             if ftypes and filetype not in ftypes_set:
                 continue
 
@@ -128,48 +128,48 @@ if __name__ == "__main__":
         description="List files tracked by git" "and optionally filter by type"
     )
     parser.add_argument(
-        'targets',
-        nargs='*',
+        "targets",
+        nargs="*",
         default=[],
-        help='''files and directories to include in the result.
+        help="""files and directories to include in the result.
                         If this is not specified, the current directory is
-                         used''',
+                         used""",
     )
     parser.add_argument(
-        '-m',
-        '--modified',
-        action='store_true',
+        "-m",
+        "--modified",
+        action="store_true",
         default=False,
-        help='list only modified files',
+        help="list only modified files",
     )
     parser.add_argument(
-        '-f',
-        '--ftypes',
-        nargs='+',
+        "-f",
+        "--ftypes",
+        nargs="+",
         default=[],
         help="""list of file types to filter on.
                         All files are included if this option is absent""",
     )
     parser.add_argument(
-        '--ext-only',
-        dest='extonly',
-        action='store_true',
+        "--ext-only",
+        dest="extonly",
+        action="store_true",
         default=False,
-        help='only use extension to determine file type',
+        help="only use extension to determine file type",
     )
     parser.add_argument(
-        '--exclude',
-        nargs='+',
+        "--exclude",
+        nargs="+",
         default=[],
-        help='''list of files and directories to exclude from
-                         results, relative to repo root''',
+        help="""list of files and directories to exclude from
+                         results, relative to repo root""",
     )
     parser.add_argument(
-        '--extless-only',
-        dest='extless_only',
-        action='store_true',
+        "--extless-only",
+        dest="extless_only",
+        action="store_true",
         default=False,
-        help='only include extensionless files in output',
+        help="only include extensionless files in output",
     )
     args = parser.parse_args()
     listing = list_files(

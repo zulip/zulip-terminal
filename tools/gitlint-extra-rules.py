@@ -35,7 +35,7 @@ class AreaFormatting(CommitRule):
         if len(title_components) < 2:
             return [RuleViolation(self.id, error, line_nr=1)]
 
-        exclusions = self.options['exclusions'].value
+        exclusions = self.options["exclusions"].value
         exclusions_text = ", or ".join(exclusions)
         if exclusions_text:
             exclusions_text = " (or {})".format(exclusions_text)
@@ -52,7 +52,7 @@ class AreaFormatting(CommitRule):
             return False
 
         for area in title_components[:-1]:
-            if any(deny_capital_text(word) for word in area.split('/')) or ' ' in area:
+            if any(deny_capital_text(word) for word in area.split("/")) or " " in area:
                 violations += [RuleViolation(self.id, error, line_nr=1)]
 
         error = "Summary of change, after area(s), should be capitalized"
