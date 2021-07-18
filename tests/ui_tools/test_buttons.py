@@ -195,6 +195,7 @@ class TestStreamButton:
 
         stream_button.mark_muted()
 
+        assert stream_button.prefix_style == "muted"
         assert stream_button.label_style == "muted"
         assert stream_button.suffix_style == "muted"
         assert stream_button.suffix_text == MUTE_MARKER
@@ -209,6 +210,7 @@ class TestStreamButton:
 
         stream_button.mark_unmuted(unread_count)
 
+        assert stream_button.prefix_style == stream_button.color
         assert stream_button.label_style is None
         assert stream_button.suffix_style == "unread_count"
         update_count.assert_called_once_with(unread_count)

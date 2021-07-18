@@ -221,6 +221,7 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
+        self.prefix_style = "muted"
         self.label_style = "muted"
         self.suffix_style = "muted"
         self.suffix_text = MUTE_MARKER
@@ -228,6 +229,7 @@ class StreamButton(TopButton):
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
     def mark_unmuted(self, unread_count: int) -> None:
+        self.prefix_style = self.color
         self.label_style = None
         self.suffix_style = "unread_count"
         self.update_count(unread_count)
