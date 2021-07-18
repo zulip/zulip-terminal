@@ -361,17 +361,21 @@ class TestView:
             "foo@zulip.com": {"user_id": 1},
             "bar@gmail.com": {"user_id": 2},
         }
+        mocked_stream_box_view = mocker.patch.object(view.write_box, "stream_box_view")
+        mocked_private_box_view = mocker.patch.object(
+            view.write_box, "private_box_view"
+        )
 
         size = widget_size(view)
         view.keypress(size, key)
 
         if draft:
             if draft["type"] == "stream":
-                view.write_box.stream_box_view.assert_called_once_with(
+                mocked_stream_box_view.assert_called_once_with(
                     caption=draft["to"], title=draft["subject"], stream_id=10
                 )
             else:
-                view.write_box.private_box_view.assert_called_once_with(
+                mocked_private_box_view.assert_called_once_with(
                     emails=draft["to"], recipient_user_ids=[1, 2]
                 )
 
