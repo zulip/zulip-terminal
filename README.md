@@ -8,6 +8,7 @@
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=main)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amain)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/main.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/main)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ![Screenshot](https://user-images.githubusercontent.com/9568999/106061037-b659a580-60a9-11eb-8ff8-ea1c54ac9084.png)
 
