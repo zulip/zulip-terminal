@@ -266,21 +266,21 @@ class TestView:
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
     def test_keypress_STREAM_MESSAGE(self, view, mocker, key, widget_size):
-        view.middle_column = mocker.Mock()
+        mocked_middle_column = mocker.patch.object(view, "middle_column", create=True)
         view.body = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
 
         returned_key = view.keypress(size, key)
 
-        view.middle_column.keypress.assert_called_once_with(size, key)
+        mocked_middle_column.keypress.assert_called_once_with(size, key)
         assert returned_key == key
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_autohide_users(self, view, mocker, autohide, key, widget_size):
-        view.users_view = mocker.Mock()
+        mocked_users_view = mocker.patch.object(view, "users_view", create=True)
         view.body = mocker.Mock()
         view.controller.autohide = autohide
         view.body.contents = ["streams", "messages", mocker.Mock()]
@@ -289,14 +289,13 @@ class TestView:
         view.right_panel = mocker.Mock()
         size = widget_size(view)
 
-        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
         view.controller.is_in_editor_mode = lambda: False
 
         view.body.focus_position = None
 
         view.keypress(size, key)
 
-        view.users_view.keypress.assert_called_once_with(size, key)
+        mocked_users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
         view.controller.enter_editor_mode_with.assert_called_once_with(view.user_search)
 
