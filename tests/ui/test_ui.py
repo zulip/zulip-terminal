@@ -1,7 +1,13 @@
-import pytest
+from typing import Any, Callable, List, Optional, Tuple
 
+import pytest
+from pytest_mock import MockerFixture
+from urwid import Widget
+
+from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui import View
+from zulipterminal.urwid_types import urwid_Box
 
 
 CONTROLLER = "zulipterminal.core.Controller"
@@ -11,20 +17,20 @@ VIEW = MODULE + ".View"
 
 class TestView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.patch(CONTROLLER, return_value=None)
         self.model = mocker.patch(CONTROLLER + ".model")
         self.write_box = mocker.patch(MODULE + ".WriteBox")
         self.search_box = mocker.patch(MODULE + ".SearchBox")
 
     @pytest.fixture
-    def view(self, mocker):
+    def view(self, mocker: MockerFixture) -> View:
         main_window = mocker.patch(VIEW + ".main_window")
         # View is an urwid.Frame instance, a Box widget.
         mocker.patch(VIEW + ".sizing", return_value=frozenset({"box"}))
         return View(self.controller)
 
-    def test_init(self, mocker):
+    def test_init(self, mocker: MockerFixture) -> None:
         main_window = mocker.patch(VIEW + ".main_window")
         view = View(self.controller)
         assert view.controller == self.controller
@@ -36,12 +42,12 @@ class TestView:
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
 
-    def test_left_column_view(self, mocker, view):
+    def test_left_column_view(self, mocker: MockerFixture, view: View) -> None:
         left_view = mocker.patch(MODULE + ".LeftColumnView")
         return_value = view.left_column_view()
         assert return_value == left_view(view)
 
-    def test_middle_column_view(self, view, mocker):
+    def test_middle_column_view(self, view: View, mocker: MockerFixture) -> None:
         middle_view = mocker.patch(MODULE + ".MiddleColumnView")
         line_box = mocker.patch(MODULE + ".urwid.LineBox")
         return_value = view.middle_column_view()
@@ -51,7 +57,7 @@ class TestView:
         assert view.middle_column == middle_view()
         assert return_value == line_box()
 
-    def test_right_column_view(self, view, mocker):
+    def test_right_column_view(self, view: View, mocker: MockerFixture) -> None:
         right_view = mocker.patch(MODULE + ".RightColumnView")
         line_box = mocker.patch(MODULE + ".urwid.LineBox")
         return_value = view.right_column_view()
@@ -59,7 +65,7 @@ class TestView:
         assert view.users_view == right_view()
         assert return_value == line_box()
 
-    def test_set_footer_text_default(self, view, mocker):
+    def test_set_footer_text_default(self, view: View, mocker: MockerFixture) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
 
         view.set_footer_text()
@@ -67,15 +73,21 @@ class TestView:
         view._w.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
 
-    def test_set_footer_text_specific_text(self, view, text="blah"):
+    def test_set_footer_text_specific_text(
+        self, view: View, text: str = "blah"
+    ) -> None:
         view.set_footer_text([text])
 
         view._w.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
 
     def test_set_footer_text_with_duration(
-        self, view, mocker, custom_text="custom", duration=5.3
-    ):
+        self,
+        view: View,
+        mocker: MockerFixture,
+        custom_text: str = "custom",
+        duration: Optional[float] = 5.3,
+    ) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
         mock_sleep = mocker.patch("time.sleep")
 
@@ -122,21 +134,29 @@ class TestView:
         ],
     )
     def test_set_typeahead_footer(
-        self, mocker, view, state, suggestions, truncated, footer_text
-    ):
+        self,
+        mocker: MockerFixture,
+        view: View,
+        state: Optional[int],
+        suggestions: List[str],
+        truncated: bool,
+        footer_text: List[Any],
+    ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
         view.set_typeahead_footer(suggestions, state, truncated)
         set_footer_text.assert_called_once_with(footer_text)
 
-    def test_footer_view(self, mocker, view):
+    def test_footer_view(self, mocker: MockerFixture, view: View) -> None:
         footer = view.footer_view()
         assert isinstance(footer.text, str)
 
-    def test_main_window(self, mocker, monkeypatch):
+    def test_main_window(
+        self, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         left = mocker.patch(VIEW + ".left_column_view")
 
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
-        def just_set_message_view(self):
+        def just_set_message_view(self: Any) -> None:
             self.message_view = mocker.Mock(read_message=lambda: None)
 
         monkeypatch.setattr(View, "middle_column_view", just_set_message_view)
@@ -196,7 +216,14 @@ class TestView:
 
     @pytest.mark.parametrize("autohide", [True, False])
     @pytest.mark.parametrize("visible, width", [(True, View.LEFT_WIDTH), (False, 0)])
-    def test_show_left_panel(self, mocker, view, visible, width, autohide):
+    def test_show_left_panel(
+        self,
+        mocker: MockerFixture,
+        view: View,
+        visible: bool,
+        width: int,
+        autohide: bool,
+    ) -> None:
         view.left_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
@@ -216,7 +243,14 @@ class TestView:
 
     @pytest.mark.parametrize("autohide", [True, False])
     @pytest.mark.parametrize("visible, width", [(True, View.RIGHT_WIDTH), (False, 0)])
-    def test_show_right_panel(self, mocker, view, visible, width, autohide):
+    def test_show_right_panel(
+        self,
+        mocker: MockerFixture,
+        view: View,
+        visible: bool,
+        width: int,
+        autohide: bool,
+    ) -> None:
         view.right_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
@@ -235,8 +269,13 @@ class TestView:
             view.body.options.assert_not_called()
 
     def test_keypress_normal_mode_navigation(
-        self, view, mocker, widget_size, navigation_key_expected_key_pair
-    ):
+        self,
+        view: View,
+        mocker: MockerFixture,
+        # TODO: Improve `widget_size`'s return type, likely via Protocols.
+        widget_size: Callable[[Widget], urwid_Box],
+        navigation_key_expected_key_pair: Tuple[str, str],
+    ) -> None:
         key, expected_key = navigation_key_expected_key_pair
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
@@ -252,7 +291,13 @@ class TestView:
         super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
-    def test_keypress_ALL_MENTIONS(self, view, mocker, key, widget_size):
+    def test_keypress_ALL_MENTIONS(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         view.body = mocker.Mock()
         view.body.focus_col = None
         view.controller.is_in_editor_mode = lambda: False
@@ -265,7 +310,13 @@ class TestView:
         assert view.body.focus_col == 1
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
-    def test_keypress_STREAM_MESSAGE(self, view, mocker, key, widget_size):
+    def test_keypress_STREAM_MESSAGE(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         mocked_middle_column = mocker.patch.object(view, "middle_column", create=True)
         view.body = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
@@ -279,7 +330,14 @@ class TestView:
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
-    def test_keypress_autohide_users(self, view, mocker, autohide, key, widget_size):
+    def test_keypress_autohide_users(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        autohide: bool,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         mocked_users_view = mocker.patch.object(view, "users_view", create=True)
         view.body = mocker.Mock()
         view.controller.autohide = autohide
@@ -301,7 +359,14 @@ class TestView:
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
-    def test_keypress_autohide_streams(self, view, mocker, autohide, key, widget_size):
+    def test_keypress_autohide_streams(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        autohide: bool,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         view.stream_w = mocker.Mock()
         view.left_col_w = mocker.Mock()
         view.stream_w.stream_search_box = mocker.Mock()
@@ -349,7 +414,14 @@ class TestView:
         ],
     )
     @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
-    def test_keypress_OPEN_DRAFT(self, view, mocker, draft, key, widget_size):
+    def test_keypress_OPEN_DRAFT(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        draft: Composition,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         view.body = mocker.Mock()
         view.middle_column = mocker.Mock()
         view.controller.report_error = mocker.Mock()
@@ -388,7 +460,13 @@ class TestView:
             )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
-    def test_keypress_edit_mode(self, view, mocker, key, widget_size):
+    def test_keypress_edit_mode(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
         view.users_view = mocker.Mock()
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
