@@ -8,7 +8,7 @@ tools = {
     'Import order (isort)': './tools/run-isort-check',
     'Type consistency (mypy)': './tools/run-mypy',
     'PEP8 & more (flake8)': 'flake8 zulipterminal/ tests/ setup.py'.split(),
-    'Formatting (black)': 'black --check zulipterminal/ tests/'.split(),
+    'Formatting (black)': 'black --check zulipterminal/ tests/ setup.py tools/'.split(),
 }
 
 for tool_name, command in tools.items():

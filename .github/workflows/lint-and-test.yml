@@ -54,7 +54,7 @@ jobs:
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/
+        run: black --check zulipterminal/ tests/ setup.py tools/
 
   pytest:
     strategy:
