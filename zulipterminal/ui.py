@@ -35,6 +35,7 @@ class View(urwid.WidgetWrap):
         self.palette = controller.theme
         self.model = controller.model
         self.users = self.model.users
+        self.autohide = self.controller.autohide
         self.pinned_streams = self.model.pinned_streams
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
@@ -140,7 +141,7 @@ class View(urwid.WidgetWrap):
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
         self.right_panel, self.right_tab = self.right_column_view()
-        if self.controller.autohide:
+        if self.autohide:
             body = [
                 (TAB_WIDTH, self.left_tab),
                 ("weight", 10, self.center_panel),
@@ -187,7 +188,7 @@ class View(urwid.WidgetWrap):
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if not self.autohide:
             return
 
         if visible:
@@ -205,7 +206,7 @@ class View(urwid.WidgetWrap):
             self.frame.body = self.body
 
     def show_right_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if not self.autohide:
             return
 
         if visible:
