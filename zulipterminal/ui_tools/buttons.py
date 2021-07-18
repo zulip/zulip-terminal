@@ -36,10 +36,7 @@ class TopButton(urwid.Button):
         self._suffix_markup = suffix_markup
         self.show_function = show_function
         self.prefix_character = prefix_markup  # kept for easier transition.
-        self.original_color = label_markup[0]  # kept for easier transition.
         self.count = count
-        self.count_style = suffix_markup[0]  # kept for easier transition.
-        text_color = label_markup[0]  # kept for easier transition.
 
         super().__init__("")
 
@@ -57,7 +54,7 @@ class TopButton(urwid.Button):
         )
         self._w = urwid.AttrMap(cols, None, "selected")
 
-        self.update_count(count, text_color)
+        self.update_count(count)
 
         urwid.connect_signal(self, "click", self.activate)
 
@@ -87,16 +84,10 @@ class TopButton(urwid.Button):
     label_text = property(lambda self: self._label_markup[1], _set_label_text)
     suffix_text = property(lambda self: self._suffix_markup[1], _set_suffix_text)
 
-    def update_count(self, count: int, text_color: Optional[str] = None) -> None:
-        new_color = self.original_color if text_color is None else text_color
-
-        self.count = count
-        if count == 0:
-            count_text = ""
-        else:
-            count_text = str(count)
-
-        self.update_widget((self.count_style, count_text), new_color)
+    def update_count(self, count: int) -> None:
+        count_text = "" if count == 0 else str(count)
+        self.suffix_text = count_text
+        self.update_widget(self._suffix_markup, self.label_style)
 
     def update_widget(
         self, count_text: Tuple[Optional[str], str], text_color: Optional[str]

@@ -57,9 +57,6 @@ class TestTopButton:
         assert top_button.show_function == self.show_function
 
         assert top_button._caption == "caption"
-        assert top_button.original_color is None
-        assert top_button.count == 0
-        assert top_button.count_style is None
 
         assert top_button._label.wrap == "ellipsis"
         assert top_button._label.get_cursor_coords("size") is None
@@ -122,27 +119,25 @@ class TestTopButton:
 
     @pytest.mark.parametrize("text_color", ["color", None])
     @pytest.mark.parametrize(
-        "old_count, new_count, new_count_str",
-        [(10, 11, "11"), (0, 1, "1"), (11, 10, "10"), (1, 0, "")],
+        "new_count, new_count_str", [(11, "11"), (1, "1"), (10, "10"), (0, "")]
     )
     def test_update_count(
         self,
         mocker: MockerFixture,
         top_button: TopButton,
-        old_count: int,
         new_count: int,
         new_count_str: str,
         text_color: Optional[str],
     ) -> None:
-        top_button.count = old_count
+        top_button.label_style = text_color
         top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
-        top_button.update_count(new_count, text_color)
+        top_button.update_count(new_count)
 
         top_button_update_widget.assert_called_once_with(
-            (top_button.count_style, new_count_str),
-            text_color,
+            top_button._suffix_markup, text_color
         )
+        assert top_button.suffix_text == new_count_str
 
     @pytest.mark.parametrize(
         "prefix, expected_prefix",
@@ -187,7 +182,7 @@ class TestStarredButton:
         self, mocker: MockerFixture, count: int = 10
     ) -> None:
         starred_button = StarredButton(controller=mocker.Mock(), count=count)
-        assert starred_button.count_style == "starred_count"
+        assert starred_button.suffix_style == "starred_count"
 
 
 class TestStreamButton:
