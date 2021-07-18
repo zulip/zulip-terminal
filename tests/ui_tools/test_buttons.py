@@ -185,6 +185,33 @@ class TestStarredButton:
 
 
 class TestStreamButton:
+    def test_mark_muted(
+        self, mocker: MockerFixture, stream_button: StreamButton
+    ) -> None:
+        update_widget = mocker.patch(MODULE + ".StreamButton.update_widget")
+
+        stream_button.mark_muted()
+
+        assert stream_button.prefix_style == "muted"
+        assert stream_button.label_style == "muted"
+        assert stream_button.suffix_style == "muted"
+        assert stream_button.suffix_text == "M"
+        update_widget.assert_called_once_with()
+
+    def test_mark_unmuted(
+        self, mocker: MockerFixture, stream_button: StreamButton
+    ) -> None:
+        update_count = mocker.patch(MODULE + ".StreamButton.update_count")
+        mocker.patch(MODULE + ".HomeButton.update_count")
+        unread_count = 100
+
+        stream_button.mark_unmuted(unread_count)
+
+        assert stream_button.prefix_style == stream_button.color
+        assert stream_button.label_style is None
+        assert stream_button.suffix_style == "unread_count"
+        update_count.assert_called_once_with(unread_count)
+
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_ENTER_TOGGLE_TOPIC(
         self,
@@ -458,6 +485,16 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+    def test_mark_muted(self, mocker: MockerFixture, topic_button: TopicButton) -> None:
+        update_widget = mocker.patch(MODULE + ".TopicButton.update_widget")
+
+        topic_button.mark_muted()
+
+        assert topic_button.label_style == "muted"
+        assert topic_button.suffix_style == "muted"
+        assert topic_button.suffix_text == "M"
+        update_widget.assert_called_once_with()
 
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_EXIT_TOGGLE_TOPIC(
