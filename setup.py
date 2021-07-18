@@ -19,6 +19,7 @@ class PyTest(TestCommand):
         import shlex
 
         import pytest
+
         errno = pytest.main(shlex.split(self.pytest_args))
         sys.exit(errno)
 
@@ -68,12 +69,9 @@ setup(
     author_email='zulip-devel@googlegroups.com',
     classifiers=[
         'Development Status :: 4 - Beta',
-
         'Intended Audience :: End Users/Desktop',
         'Topic :: Communications :: Chat',
-
         'License :: OSI Approved :: Apache Software License',
-
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -83,15 +81,10 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     project_urls={
-        'Changelog':
-            'https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md',
-        'FAQs':
-            'https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md',
-        'Issues':
-            'https://github.com/zulip/zulip-terminal/issues',
-        'Hot Keys':
-            'https://github.com/zulip/zulip-terminal/blob/main/'
-            'docs/hotkeys.md',
+        'Changelog': 'https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md',
+        'FAQs': 'https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md',
+        'Issues': 'https://github.com/zulip/zulip-terminal/issues',
+        'Hot Keys': 'https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md',
     },
     python_requires='>=3.6, <3.10',
     keywords='',
@@ -102,8 +95,7 @@ setup(
     entry_points={
         'console_scripts': [
             'zulip-term = zulipterminal.cli.run:main',
-            'zulip-term-check-symbols = '
-            'zulipterminal.scripts.render_symbols:main',
+            'zulip-term-check-symbols = zulipterminal.scripts.render_symbols:main',
         ],
     },
     extras_require={
