@@ -4,6 +4,7 @@ import pytest
 from urwid import Columns, Pile, Text
 
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -555,13 +556,18 @@ class TestEditHistoryView:
 
 
 class TestEditModeView:
-    @pytest.fixture()
-    def edit_mode_view(self, mocker):
+    @pytest.fixture(params=EDIT_MODE_CAPTIONS.keys())
+    def edit_mode_view(self, mocker, request):
+        button_launch_mode = request.param
+        button = mocker.Mock(mode=button_launch_mode)
+
         controller = mocker.Mock()
         controller.maximum_popup_dimensions.return_value = (64, 64)
-        mocker.patch(LISTWALKER, return_value=[])
-        button = mocker.Mock()
+
         return EditModeView(controller, button)
+
+    def test_init(self, edit_mode_view):
+        pass  # Just test init succeeds
 
     @pytest.mark.parametrize(
         "index_in_widgets, mode",
@@ -575,12 +581,15 @@ class TestEditModeView:
     def test_select_edit_mode(
         self, mocker, edit_mode_view, widget_size, index_in_widgets, mode, key
     ):
+        mode_button = edit_mode_view.edit_mode_button
+        if mode_button.mode == mode:
+            pytest.skip("button already selected")
+
         radio_button = edit_mode_view.widgets[index_in_widgets]
         size = widget_size(radio_button)
 
         radio_button.keypress(size, key)
 
-        mode_button = edit_mode_view.edit_mode_button
         mode_button.set_selected_mode.assert_called_once_with(mode)
 
 
