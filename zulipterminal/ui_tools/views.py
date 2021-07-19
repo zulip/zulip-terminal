@@ -1548,7 +1548,7 @@ class EditModeView(PopUpView):
         # Set cursor to marked checkbox.
         for i in range(len(self.widgets)):
             if self.widgets[i].state:
-                self.set_focus(i)
+                self.body.set_focus(i)
 
     def set_selected_mode(self, button: Any, new_state: bool, mode: str) -> None:
         if new_state:
