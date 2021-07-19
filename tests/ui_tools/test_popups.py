@@ -3,7 +3,7 @@ from collections import OrderedDict
 import pytest
 from urwid import Columns, Text
 
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import STD_NAV_CMDS, is_command_key, keys_for_command
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -114,10 +114,10 @@ class TestPopUpView:
         self.pop_up_view.keypress(size, "cmd_key")
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
+    @pytest.mark.parametrize(
+        "key", [key for cmd in STD_NAV_CMDS for key in keys_for_command(cmd)]
+    )
+    def test_keypress_navigation(self, mocker, key, widget_size):
         size = widget_size(self.pop_up_view)
         # Patch `is_command_key` to not raise an 'Invalid Command' exception
         # when its parameters are (self.command, key) as there is no
@@ -131,7 +131,7 @@ class TestPopUpView:
             ),
         )
         self.pop_up_view.keypress(size, key)
-        self.super_keypress.assert_called_once_with(size, expected_key)
+        self.super_keypress.assert_called_once_with(size, key)
 
 
 class TestAboutView:
@@ -170,15 +170,6 @@ class TestAboutView:
         size = widget_size(self.about_view)
         self.about_view.keypress(size, key)
         assert not self.controller.exit_popup.called
-
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.about_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.about_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
 
     def test_feature_level_content(self, mocker, zulip_version):
         self.controller = mocker.Mock()
@@ -320,15 +311,6 @@ class TestUserInfoView:
         self.user_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.user_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.user_info_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
-
 
 class TestEditHistoryView:
     @pytest.fixture(autouse=True)
@@ -393,17 +375,6 @@ class TestEditHistoryView:
             message_links=OrderedDict(),
             time_mentions=list(),
         )
-
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        size = widget_size(self.edit_history_view)
-        key, expected_key = navigation_key_expected_key_pair
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-
-        self.edit_history_view.keypress(size, key)
-
-        super_keypress.assert_called_once_with(size, expected_key)
 
     @pytest.mark.parametrize(
         "snapshot",
@@ -593,15 +564,6 @@ class TestHelpView:
         size = widget_size(self.help_view)
         self.help_view.keypress(size, key)
         assert self.controller.exit_popup.called
-
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.help_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.help_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
 
 
 class TestMsgInfoView:
@@ -828,15 +790,6 @@ class TestMsgInfoView:
         assert link_w._wrapped_widget.attr_map == expected_attr_map
         assert link_width == expected_link_width
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.msg_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.msg_info_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
-
 
 class TestStreamInfoView:
     @pytest.fixture(autouse=True)
@@ -963,15 +916,6 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.stream_info_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.stream_info_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)
-
     @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
     def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
         mute_checkbox = self.stream_info_view.widgets[-3]
@@ -1031,12 +975,3 @@ class TestStreamMembersView:
         self.controller.show_stream_info.assert_called_once_with(
             stream_id=stream_id,
         )
-
-    def test_keypress_navigation(
-        self, mocker, widget_size, navigation_key_expected_key_pair
-    ):
-        key, expected_key = navigation_key_expected_key_pair
-        size = widget_size(self.stream_members_view)
-        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
-        self.stream_members_view.keypress(size, key)
-        super_keypress.assert_called_once_with(size, expected_key)

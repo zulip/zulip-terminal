@@ -213,13 +213,13 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
-            self.model.controller.narrow_to_all_pm()
+            self.controller.narrow_to_all_pm()
             self.body.focus_col = 1
         elif is_command_key("ALL_STARRED", key):
-            self.model.controller.narrow_to_all_starred()
+            self.controller.narrow_to_all_starred()
             self.body.focus_col = 1
         elif is_command_key("ALL_MENTIONS", key):
-            self.model.controller.narrow_to_all_mentions()
+            self.controller.narrow_to_all_mentions()
             self.body.focus_col = 1
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
@@ -280,23 +280,7 @@ class View(urwid.WidgetWrap):
             # Show help menu
             self.controller.show_help()
             return key
-        # replace alternate keys with arrow/functional keys
-        # This is needed for navigating in widgets
-        # other than message_view.
-        elif is_command_key("GO_UP", key):
-            key = "up"
-        elif is_command_key("GO_DOWN", key):
-            key = "down"
-        elif is_command_key("GO_LEFT", key):
-            key = "left"
-        elif is_command_key("GO_RIGHT", key):
-            key = "right"
-        elif is_command_key("SCROLL_UP", key):
-            key = "page up"
-        elif is_command_key("SCROLL_DOWN", key):
-            key = "page down"
-        elif is_command_key("GO_TO_BOTTOM", key):
-            key = "end"
+
         return super().keypress(size, key)
 
     def mouse_event(
