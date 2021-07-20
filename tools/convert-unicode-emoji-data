@@ -26,8 +26,8 @@ emoji_dict = EMOJI_NAME_MAPS
 
 emoji_map = {}
 for emoji_code, emoji_names in emoji_dict.items():
-    emoji_map[emoji_names['canonical_name']] = emoji_code
-    for emoji in emoji_names['aliases']:
+    emoji_map[emoji_names["canonical_name"]] = emoji_code
+    for emoji in emoji_names["aliases"]:
         emoji_map[emoji] = emoji_code
 
 ordered_emojis = OrderedDict(sorted(emoji_map.items()))
