@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import glob
 import subprocess
 import sys
+
+from tools.python_tools import lintable_tools_files
 
 
 python_sources = [
@@ -11,18 +12,6 @@ python_sources = [
     "setup.py",
 ]
 
-tools_exclusions = {
-    f"tools/{name}"
-    for name in {
-        "fetch-pull-request",
-        "fetch-rebase-pull-request",
-        "push-to-pull-request",
-        "release",
-        "__pycache__",
-    }
-}
-
-lintable_tools_files = set(glob.glob("tools/*")).difference(tools_exclusions)
 python_sources += lintable_tools_files
 
 tools = {
