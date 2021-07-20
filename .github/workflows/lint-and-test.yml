@@ -27,7 +27,7 @@ jobs:
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Run flake8
-        run: flake8
+        run: flake8 zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/ setup.py tools/
+        run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   pytest:
     strategy:
