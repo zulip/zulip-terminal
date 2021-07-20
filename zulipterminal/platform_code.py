@@ -22,6 +22,9 @@ else:
 
 
 # PLATFORM DEPENDENT HELPERS
+MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
+
+
 def notify(title: str, html_text: str) -> str:
     document = lxml.html.document_fromstring(html_text)
     text = document.text_content()
