@@ -4,11 +4,18 @@ import subprocess
 import sys
 
 
+python_sources = [
+    "zulipterminal/",
+    "tests/",
+    "setup.py",
+    "tools/",
+]
+
 tools = {
     'Import order (isort)': './tools/run-isort-check',
     'Type consistency (mypy)': './tools/run-mypy',
-    'PEP8 & more (flake8)': 'flake8 zulipterminal/ tests/ setup.py'.split(),
-    'Formatting (black)': 'black --check zulipterminal/ tests/ setup.py tools/'.split(),
+    'PEP8 & more (flake8)': ['flake8'] + python_sources,
+    'Formatting (black)': ['black', '--check'] + python_sources,
 }
 
 for tool_name, command in tools.items():
