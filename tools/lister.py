@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
+from typing import Dict, List
 
 
 def get_ftype(fpath: str, use_shebang: bool) -> str:
@@ -180,5 +181,5 @@ if __name__ == "__main__":
         exclude=args.exclude,
         extless_only=args.extless_only,
     )
-    for l in listing:
-        print(l)
+    for entry in listing:
+        print(entry)

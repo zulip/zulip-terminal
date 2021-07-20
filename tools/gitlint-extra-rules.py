@@ -1,6 +1,5 @@
 from typing import Any, List, Optional
 
-import gitlint
 from gitlint.options import ListOption
 from gitlint.rules import CommitRule, RuleViolation
 
