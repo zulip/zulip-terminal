@@ -1,7 +1,6 @@
 import random
 import re
 import time
-from sys import platform
 from typing import Any, List, Optional
 
 import urwid
@@ -12,7 +11,7 @@ from zulipterminal.config.symbols import (
     COLUMN_TITLE_BAR_LINE,
 )
 from zulipterminal.helper import asynch
-from zulipterminal.platform_code import PLATFORM
+from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView,
@@ -298,11 +297,10 @@ class View(urwid.WidgetWrap):
         self, size: urwid_Box, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse drag":
-            selection_key = "Fn + Alt" if platform == "darwin" else "Shift"
             self.model.controller.view.set_footer_text(
                 [
                     "Try pressing ",
-                    ("footer_contrast", f" {selection_key} "),
+                    ("footer_contrast", f" {MOUSE_SELECTION_KEY} "),
                     " and dragging to select text.",
                 ],
                 "task:warning",
