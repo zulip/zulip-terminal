@@ -227,17 +227,12 @@ class TestView:
         view.left_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
-        view.body.focus_position = None
         view.controller.autohide = autohide
 
         view.show_left_panel(visible=visible)
 
         if autohide:
-            view.body.options.assert_called_once_with(
-                width_type="given", width_amount=width
-            )
-            if visible:
-                assert view.body.focus_position == 0
+            view.body.options.assert_called_once_with("given", width)
         else:
             view.body.options.assert_not_called()
 
@@ -254,17 +249,12 @@ class TestView:
         view.right_panel = mocker.Mock()
         view.body = mocker.Mock()
         view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
-        view.body.focus_position = None
         view.controller.autohide = autohide
 
         view.show_right_panel(visible=visible)
 
         if autohide:
-            view.body.options.assert_called_once_with(
-                width_type="given", width_amount=width
-            )
-            if visible:
-                assert view.body.focus_position == 2
+            view.body.options.assert_called_once_with("given", width)
         else:
             view.body.options.assert_not_called()
 

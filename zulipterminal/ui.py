@@ -179,24 +179,16 @@ class View(urwid.WidgetWrap):
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
+
         width = LEFT_WIDTH if visible else 0
-        self.body.contents[0] = (
-            self.left_panel,
-            self.body.options(width_type="given", width_amount=width),
-        )
-        if visible:
-            self.body.focus_position = 0
+        self.body.contents[0] = (self.left_panel, self.body.options("given", width))
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
+
         width = RIGHT_WIDTH if visible else 0
-        self.body.contents[2] = (
-            self.right_panel,
-            self.body.options(width_type="given", width_amount=width),
-        )
-        if visible:
-            self.body.focus_position = 2
+        self.body.contents[2] = (self.right_panel, self.body.options("given", width))
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
