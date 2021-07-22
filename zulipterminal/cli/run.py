@@ -11,7 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple, cast
 
 import requests
 from urwid import display_common, set_encoding
@@ -27,6 +27,7 @@ from zulipterminal.config.themes import (
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform, detected_python_in_full
+from zulipterminal.ui_tools.views import Layout
 from zulipterminal.version import ZT_VERSION
 
 
@@ -617,8 +618,8 @@ def main(options: Optional[List[str]] = None) -> None:
             transparent_background=transparency_enabled,
         )
 
-        # Controller still expects a boolean autohide setting
-        boolean_settings["autohide"] = boolean_settings.pop("layout")
+        # Layout is not a boolean setting, so pass its value through directly
+        del boolean_settings["layout"]
 
         Controller(
             config_file=zuliprc_path,
@@ -627,6 +628,8 @@ def main(options: Optional[List[str]] = None) -> None:
             theme=theme_data,
             color_depth=color_depth,
             in_explore_mode=args.explore,
+            # Value is validated above, against VALID_BOOLEAN_SETTINGS
+            layout=cast(Layout, zterm["layout"].value),
             **boolean_settings,
             debug_path=debug_path,
             editor_command=editor_command,

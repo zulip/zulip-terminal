@@ -40,6 +40,7 @@ from zulipterminal.ui_tools.views import (
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
+    Layout,
     MarkdownHelpView,
     MsgInfoView,
     NoticeView,
@@ -74,7 +75,7 @@ class Controller:
         editor_command: str,
         in_explore_mode: bool,
         transparency: bool,
-        autohide: bool,
+        layout: Layout,
         notify: bool,
         exit_confirmation: bool,
     ) -> None:
@@ -83,7 +84,7 @@ class Controller:
         self.color_depth = color_depth
         self.in_explore_mode = in_explore_mode
         self.transparency_enabled = transparency
-        self.autohide = autohide
+        self.layout = layout
         self.exit_confirmation = exit_confirmation
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
@@ -320,7 +321,7 @@ class Controller:
                 theme_name=self.theme_name,
                 color_depth=self.color_depth,
                 notify_enabled=self.notify_enabled,
-                autohide_enabled=self.autohide,
+                layout=self.layout,
                 maximum_footlinks=self.maximum_footlinks,
                 exit_confirmation_enabled=self.exit_confirmation,
                 transparency_enabled=self.transparency_enabled,

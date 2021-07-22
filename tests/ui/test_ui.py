@@ -6,7 +6,9 @@ from urwid import Widget
 
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
-from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
+from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
+from zulipterminal.ui import View
+from zulipterminal.ui_tools.views import Layout
 from zulipterminal.urwid_types import urwid_Box
 
 
@@ -195,6 +197,7 @@ class TestView:
         server_name = "Test Organization"
 
         self.controller.model = self.model
+        self.controller.layout = "autohide"
         self.model.user_full_name = full_name
         self.model.user_email = email
         self.model.server_url = server
@@ -237,17 +240,17 @@ class TestView:
         assert view.frame == frame()
         show_left_panel.assert_called_once_with(visible=True)
 
-    @pytest.mark.parametrize("autohide", [True, False])
+    @pytest.mark.parametrize("layout", ["autohide", "no_autohide"])
     @pytest.mark.parametrize("visible", [True, False])
     @pytest.mark.parametrize("test_method", ["left_panel", "right_panel"])
     def test_show_panel_methods(
         self,
         mocker: MockerFixture,
         visible: bool,
-        autohide: bool,
+        layout: Layout,
         test_method: str,
     ) -> None:
-        self.controller.autohide = autohide
+        self.controller.layout = layout
         view = View(self.controller)
         view.frame.body = view.body
 
@@ -265,7 +268,7 @@ class TestView:
 
             view.show_right_panel(visible=visible)
 
-        if autohide:
+        if layout == "autohide":
             if visible:
                 assert (expected_panel, mocker.ANY) in view.frame.body.top_w.contents
                 assert view.frame.body.bottom_w == view.body
