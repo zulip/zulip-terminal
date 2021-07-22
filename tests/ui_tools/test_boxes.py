@@ -31,6 +31,7 @@ class TestWriteBox:
         user_dict,
     ):
         self.view.model.active_emoji_data = unicode_emojis
+        self.view.model.all_emoji_names = list(unicode_emojis.keys())
         write_box = WriteBox(self.view)
         write_box.view.users = users_fixture
         write_box.model.user_dict = user_dict

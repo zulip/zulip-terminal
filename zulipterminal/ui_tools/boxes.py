@@ -592,7 +592,7 @@ class WriteBox(urwid.Pile):
     def autocomplete_emojis(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        emoji_list = list(self.model.active_emoji_data.keys())
+        emoji_list = self.model.all_emoji_names
         emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
         emoji_typeahead = format_string(emojis, ":{}:")
 
