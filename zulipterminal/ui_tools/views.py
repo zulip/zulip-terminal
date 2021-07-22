@@ -944,6 +944,21 @@ class LeftColumnView(urwid.Pile):
         return super().keypress(size, key)
 
 
+class TabView(urwid.WidgetWrap):
+    """
+    Displays a tab that takes up the whole containers height
+    and has a flow width.
+    Currently used as closed tabs in the autohide layout.
+    """
+
+    def __init__(self, text: str) -> None:
+        tab_widget_list = [urwid.Text(char) for char in text]
+        pile = urwid.Pile(tab_widget_list)
+        tab = urwid.Padding(urwid.Filler(pile), left=1, right=1, width=1)
+
+        super().__init__(tab)
+
+
 PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, str]]]]]
 
 
