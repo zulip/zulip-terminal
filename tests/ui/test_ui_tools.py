@@ -26,6 +26,7 @@ from zulipterminal.ui_tools.views import (
     RightColumnView,
     StreamsView,
     StreamsViewDivider,
+    TabView,
     TopicsView,
     UsersView,
 )
@@ -1249,6 +1250,34 @@ class TestLeftColumnView:
                 for topic, count in zip(topic_list, unread_count_list)
             ]
         )
+
+
+class TestTabView:
+    @pytest.fixture
+    def tab_view(self):
+        return TabView("❰ TEST ❱")
+
+    @pytest.mark.parametrize(
+        "expected_output",
+        [
+            [
+                b"   ",
+                b" \xe2\x9d\xb0 ",
+                b"   ",
+                b" T ",
+                b" E ",
+                b" S ",
+                b" T ",
+                b"   ",
+                b" \xe2\x9d\xb1 ",
+                b"   ",
+            ]
+        ],
+    )
+    @pytest.mark.parametrize("TAB_WIDTH, TAB_HEIGHT", [(3, 10)])
+    def test_tab_render(self, tab_view, TAB_WIDTH, TAB_HEIGHT, expected_output):
+        render_output = tab_view._w.render((TAB_WIDTH, TAB_HEIGHT)).text
+        assert render_output == expected_output
 
 
 class TestMessageBox:
