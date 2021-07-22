@@ -12,3 +12,5 @@ MIN_SUPPORTED_POPUP_WIDTH = 80
 # Until this width, popup scales linearly upwards with width
 MAX_LINEAR_SCALING_WIDTH = 100
 # Above that width, popup increases as 3/4 of window width
+
+MAX_APP_WIDTH = 200  # Controls padding
