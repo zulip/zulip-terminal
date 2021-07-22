@@ -4,6 +4,7 @@ import time
 from typing import Any, List, Optional
 
 import urwid
+from typing_extensions import Literal
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.symbols import (
@@ -15,6 +16,8 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_sizes import (
     LEFT_WIDTH,
     MAX_APP_WIDTH,
+    MAX_SMALL_WIDTH,
+    MIN_WIDE_WIDTH,
     RIGHT_WIDTH,
     TAB_WIDTH,
 )
@@ -48,6 +51,7 @@ class View(urwid.WidgetWrap):
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
+        self.mode: Literal["small", "normal", "wide"] = "normal"
         self.has_border = False
 
         super().__init__(self.main_window())
@@ -156,7 +160,7 @@ class View(urwid.WidgetWrap):
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
-                ("weight", 10, self.center_panel),
+                ("weight", 60, self.center_panel),
                 (RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
@@ -194,7 +198,7 @@ class View(urwid.WidgetWrap):
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-        if self.layout != "autohide":
+        if self.layout != "autohide" and self.mode != "small":
             return
 
         if visible:
@@ -212,7 +216,7 @@ class View(urwid.WidgetWrap):
             self.frame.body = self.body
 
     def show_right_panel(self, *, visible: bool) -> None:
-        if self.layout != "autohide":
+        if self.layout != "autohide" and self.mode != "small":
             return
 
         if visible:
@@ -374,6 +378,29 @@ class View(urwid.WidgetWrap):
         elif maxcols <= MAX_APP_WIDTH and self.has_border:
             self._w = self.frame
             self.has_border = False
+
+    def render(self, size: urwid_Box, focus: bool) -> Any:
+        maxcols, maxrows = size
+
+        if self.layout == "dynamic":
+            if maxcols <= MAX_SMALL_WIDTH and self.mode != "small":
+                self.mode = "small"
+                self.body.contents[0] = (self.left_tab, ("given", TAB_WIDTH, True))
+                self.body.contents[2] = (self.right_tab, ("given", TAB_WIDTH, True))
+                # Set same focus to trigger panel open
+                self.focus_panel = self.focus_panel
+            elif MAX_SMALL_WIDTH < maxcols < MIN_WIDE_WIDTH and self.mode != "normal":
+                self.mode = "normal"
+                self.frame.body = self.body
+                self.body.contents[0] = (self.left_panel, ("given", LEFT_WIDTH, True))
+                self.body.contents[2] = (self.right_panel, ("given", RIGHT_WIDTH, True))
+            elif maxcols >= MIN_WIDE_WIDTH and self.mode != "wide":
+                self.mode = "wide"
+                self.body.contents[0] = (self.left_panel, ("weight", 20, True))
+                self.body.contents[2] = (self.right_panel, ("weight", 20, True))
+            self.add_padding_and_border_to_frame(maxcols)
+
+        return super().render(size, focus)
 
 
 class Screen(urwid.raw_display.Screen):

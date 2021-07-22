@@ -43,7 +43,7 @@ requests_logger.setLevel(logging.DEBUG)
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
-    "layout": "no_autohide",
+    "layout": "dynamic",
     "notify": "disabled",
     "footlinks": "enabled",
     "color-depth": "256",
@@ -151,6 +151,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_const",
         const="no_autohide",
         help="don't autohide list of users and streams",
+    )
+    layout_group.add_argument(
+        "--dynamic",
+        dest="layout",
+        default=None,
+        action="store_const",
+        const="dynamic",
+        help="panels adapt based on available screen space",
     )
 
     parser.add_argument(
@@ -475,7 +483,7 @@ def main(options: Optional[List[str]] = None) -> None:
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
-            "layout": ["autohide", "no_autohide"],
+            "layout": ["autohide", "no_autohide", "dynamic"],
             "notify": ["enabled", "disabled"],
             "color-depth": ["1", "16", "256", "24bit"],
         }

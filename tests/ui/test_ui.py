@@ -2,7 +2,8 @@ from typing import Any, Callable, List, Optional, Tuple
 
 import pytest
 from pytest_mock import MockerFixture
-from urwid import Widget
+from typing_extensions import Literal
+from urwid import Columns, Widget
 
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
@@ -47,6 +48,7 @@ class TestView:
         self.write_box.assert_called_once_with(view)
         self.search_box.assert_called_once_with(self.controller)
         main_window.assert_called_once_with()
+        assert view.mode == "normal"
 
     def test_left_column_view(self, mocker: MockerFixture, view: View) -> None:
         left_view = mocker.patch(MODULE + ".LeftColumnView")
@@ -230,19 +232,32 @@ class TestView:
         assert view.frame == frame()
         show_left_panel.assert_called_once_with(visible=True)
 
-    @pytest.mark.parametrize("layout", ["autohide", "no_autohide"])
+    @pytest.mark.parametrize("layout", ["autohide", "no_autohide", "dynamic"])
     @pytest.mark.parametrize("visible", [True, False])
     @pytest.mark.parametrize("test_method", ["left_panel", "right_panel"])
+    @pytest.mark.parametrize(
+        "mode, width_options",
+        [
+            ("small", ("given", LEFT_WIDTH)),
+            ("normal", ("given", LEFT_WIDTH)),
+            ("wide", ("given", LEFT_WIDTH)),
+        ],
+    )
     def test_show_panel_methods(
         self,
         mocker: MockerFixture,
         visible: bool,
+        width_options: Tuple[str, int],
         layout: Layout,
         test_method: str,
+        mode: Literal["small", "normal", "wide"],
     ) -> None:
         self.controller.layout = layout
+        if mode == "small":
+            self.controller.layout = "autohide"
         view = View(self.controller)
         view.frame.body = view.body
+        view.mode = mode
 
         tail = [None, 0, 0, "top", None, "relative", 100, None, 0, 0]
         if test_method == "left_panel":
@@ -258,7 +273,7 @@ class TestView:
 
             view.show_right_panel(visible=visible)
 
-        if layout == "autohide":
+        if layout == "autohide" or mode == "small":
             if visible:
                 assert (expected_panel, mocker.ANY) in view.frame.body.top_w.contents
                 assert view.frame.body.bottom_w == view.body
@@ -530,3 +545,63 @@ class TestView:
         elif maxcols < MAX_APP_WIDTH and has_border:
             assert view._w == view.frame
         assert view.has_border is False if maxcols <= MAX_APP_WIDTH else True
+
+    @pytest.mark.parametrize("mode", ["small", "normal", "wide"])
+    @pytest.mark.parametrize("focus_pos", [0, 1, 2], ids=["left", "center", "right"])
+    @pytest.mark.parametrize(
+        "size, expected_mode, expected_width_type, expected_width_amount",
+        [
+            ((80, 24), "small", ["given", "given"], [TAB_WIDTH, TAB_WIDTH]),
+            ((102, 24), "small", ["given", "given"], [TAB_WIDTH, TAB_WIDTH]),
+            ((103, 24), "normal", ["given", "given"], [LEFT_WIDTH, RIGHT_WIDTH]),
+            ((140, 24), "normal", ["given", "given"], [LEFT_WIDTH, RIGHT_WIDTH]),
+            ((159, 24), "normal", ["given", "given"], [LEFT_WIDTH, RIGHT_WIDTH]),
+            ((160, 24), "wide", ["weight", "weight"], [20, 20]),
+            ((200, 24), "wide", ["weight", "weight"], [20, 20]),
+        ],
+    )
+    def test_render_dynamic_layout(
+        self,
+        mocker: MockerFixture,
+        view: View,
+        mode: Literal["small", "normal", "wide"],
+        focus_pos: int,
+        size: urwid_Box,
+        expected_mode: Literal["small", "normal", "wide"],
+        expected_width_type: List[str],
+        expected_width_amount: List[int],
+    ) -> None:
+        def side_panel_options() -> Tuple[List[str], List[int]]:
+            width_type = [view.body.contents[c][1][0] for c in [0, 2]]
+            width_amount = [view.body.contents[c][1][1] for c in [0, 2]]
+            return width_type, width_amount
+
+        mocker.patch(MODULE + ".urwid.widget.validate_size", return_value=None)
+        mocked_padding_func = mocker.patch(VIEW + ".add_padding_and_border_to_frame")
+        view.layout = "dynamic"
+        view.mode = mode
+        view.body = Columns(
+            [(5, view.left_panel), mocker.Mock(), (5, view.right_panel)]
+        )
+        view.frame.body = view.body
+        view.focus_panel = focus_pos
+        mode_changed = expected_mode != mode
+        old_width_type, old_width_amount = side_panel_options()
+
+        view.render(size, focus=False)
+
+        new_width_type, new_width_amount = side_panel_options()
+        # Check focus doesn't change
+        # in small mode `show_panel` takes care of width which is already tested
+        assert view.focus_panel == focus_pos
+
+        assert view.mode == expected_mode
+        mocked_padding_func.assert_called_once_with(size[0])
+
+        if mode_changed:
+            assert new_width_type == expected_width_type
+            assert new_width_amount == expected_width_amount
+        else:
+            # No change
+            assert new_width_amount == old_width_amount
+            assert new_width_type == old_width_type
