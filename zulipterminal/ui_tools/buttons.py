@@ -81,8 +81,9 @@ class TopButton(urwid.Button):
         else:
             suffix = ["  "]
         self.button_prefix.set_text(prefix)
-        self.set_label((text_color, self._caption))
+        self.set_label(self._caption)
         self.button_suffix.set_text(suffix)
+        self._w.set_attr_map({None: text_color})
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
