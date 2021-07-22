@@ -177,7 +177,7 @@ class Model:
 
         self._store_content_length_restrictions()
 
-        self.active_emoji_data = self.generate_all_emoji_data(
+        self.active_emoji_data, self.all_emoji_names = self.generate_all_emoji_data(
             self.initial_data["realm_emoji"]
         )
 
@@ -488,7 +488,7 @@ class Model:
 
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]
-    ) -> NamedEmojiData:
+    ) -> Tuple[NamedEmojiData, List[str]]:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data["type"] = "unicode_emoji"
@@ -508,9 +508,10 @@ class Model:
             **typed_unicode_emoji_data,
             **custom_emoji_data,
             **zulip_extra_emoji,
-        }.items()
-        active_emoji_data = OrderedDict(sorted(all_emoji_data, key=lambda e: e[0]))
-        return active_emoji_data
+        }
+        all_emoji_names = sorted(list(all_emoji_data.keys()))
+        active_emoji_data = OrderedDict(sorted(all_emoji_data.items()))
+        return active_emoji_data, all_emoji_names
 
     def get_messages(
         self, *, num_after: int, num_before: int, anchor: Optional[int]
@@ -1428,7 +1429,9 @@ class Model:
         # by the users in the organisation along with a boolean value
         # representing the active state of each emoji.
         assert event["type"] == "realm_emoji"
-        self.active_emoji_data = self.generate_all_emoji_data(event["realm_emoji"])
+        self.active_emoji_data, self.all_emoji_names = self.generate_all_emoji_data(
+            event["realm_emoji"]
+        )
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
