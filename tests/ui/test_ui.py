@@ -7,7 +7,7 @@ from urwid import Widget
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.core import Layout
-from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
+from zulipterminal.ui import LEFT_WIDTH, MAX_APP_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
 from zulipterminal.urwid_types import urwid_Box
 
 
@@ -509,3 +509,24 @@ class TestView:
         view.controller.current_editor().keypress.assert_called_once_with(
             (size[1],), key
         )
+
+    @pytest.mark.parametrize("maxcols", [50, MAX_APP_WIDTH, 600])
+    @pytest.mark.parametrize(
+        "has_border", [True, False], ids=["has_border", "has_no_border"]
+    )
+    def test_add_padding_and_border_to_frame(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        maxcols: int,
+        has_border: bool,
+    ) -> None:
+        view.has_border = has_border
+
+        view.add_padding_and_border_to_frame(maxcols)
+
+        if maxcols > MAX_APP_WIDTH and not has_border:
+            assert view._w.align == "center"
+        elif maxcols < MAX_APP_WIDTH and has_border:
+            assert view._w == view.frame
+        assert view.has_border is False if maxcols <= MAX_APP_WIDTH else True

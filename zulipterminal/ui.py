@@ -12,7 +12,12 @@ from zulipterminal.config.symbols import (
     AUTOHIDE_TAB_RIGHT_ARROW,
     COLUMN_TITLE_BAR_LINE,
 )
-from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
+from zulipterminal.config.ui_sizes import (
+    LEFT_WIDTH,
+    MAX_APP_WIDTH,
+    RIGHT_WIDTH,
+    TAB_WIDTH,
+)
 from zulipterminal.helper import asynch
 from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
@@ -43,6 +48,7 @@ class View(urwid.WidgetWrap):
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
+        self.has_border = False
 
         super().__init__(self.main_window())
 
@@ -357,6 +363,17 @@ class View(urwid.WidgetWrap):
             self.displaying_selection_hint = False
 
         return super().mouse_event(size, event, button, col, row, focus)
+
+    def add_padding_and_border_to_frame(self, maxcols: int) -> None:
+        if maxcols > MAX_APP_WIDTH and not self.has_border:
+            frame_line_box = urwid.LineBox(
+                self.frame, tline="", lline="▕", rline="▏", bline=""
+            )
+            self._w = urwid.Padding(frame_line_box, align="center", width=MAX_APP_WIDTH)
+            self.has_border = True
+        elif maxcols <= MAX_APP_WIDTH and self.has_border:
+            self._w = self.frame
+            self.has_border = False
 
 
 class Screen(urwid.raw_display.Screen):

@@ -1,3 +1,4 @@
 TAB_WIDTH = 3
 LEFT_WIDTH = 27
 RIGHT_WIDTH = 23
+MAX_APP_WIDTH = 200  # Controls padding
