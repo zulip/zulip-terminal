@@ -7,7 +7,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.themes import generate_theme
-from zulipterminal.core import Controller
+from zulipterminal.core import Controller, Layout
 from zulipterminal.helper import Index
 from zulipterminal.version import ZT_VERSION
 
@@ -42,7 +42,7 @@ class TestController:
         self.theme_name = "zt_dark"
         self.theme = generate_theme("zt_dark", 256)
         self.in_explore_mode = False
-        self.autohide = True  # FIXME Add tests for no-autohide
+        self.layout: Layout = "autohide"  # FIXME Add tests for other layouts.
         self.notify_enabled = False
         self.maximum_footlinks = 3
         result = Controller(
@@ -52,7 +52,7 @@ class TestController:
             self.theme,
             256,
             self.in_explore_mode,
-            self.autohide,
+            self.layout,
             self.notify_enabled,
         )
         result.view.message_view = mocker.Mock()  # set in View.__init__

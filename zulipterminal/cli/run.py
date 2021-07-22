@@ -497,8 +497,6 @@ def main(options: Optional[List[str]] = None) -> None:
                 continue
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
 
-        boolean_settings["autohide"] = layout == "autohide"
-
         theme_data = generate_theme(theme_to_use[0], color_depth)
 
         Controller(
@@ -508,6 +506,7 @@ def main(options: Optional[List[str]] = None) -> None:
             theme_data,
             color_depth,
             args.explore,
+            layout,
             **boolean_settings,
         ).main()
     except ServerConnectionFailure as e:
