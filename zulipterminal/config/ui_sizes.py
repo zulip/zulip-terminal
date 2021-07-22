@@ -14,3 +14,6 @@ MAX_LINEAR_SCALING_WIDTH = 100
 # Above that width, popup increases as 3/4 of window width
 
 MAX_APP_WIDTH = 200  # Controls padding
+
+MAX_SMALL_WIDTH = 102  # Controls how small is small.
+MIN_WIDE_WIDTH = 160  # Controls how wide is wide.

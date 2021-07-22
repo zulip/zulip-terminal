@@ -140,6 +140,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--config-file CONFIG_FILE, -c CONFIG_FILE",
         "--autohide",
         "--no-autohide",
+        "--dynamic",
         "-v, --version",
         "-e, --explore",
         "--color-depth",
@@ -202,7 +203,7 @@ def test_valid_zuliprc_but_no_connection(
     expected_lines = expected_platform_output + [
         "Loading with:",
         "   theme 'zt_dark' specified from default config.",
-        "   layout setting 'no_autohide' specified with no config.",
+        "   layout setting 'dynamic' specified with no config.",
         "   exit confirmation setting 'enabled' specified from default config.",
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
@@ -263,7 +264,7 @@ def test_warning_regarding_incomplete_theme(
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
         f"      {expected_warning}\x1b[0m",
-        "   layout setting 'no_autohide' specified with no config.",
+        "   layout setting 'dynamic' specified with no config.",
         "   exit confirmation setting 'enabled' specified from default config.",
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
@@ -302,7 +303,7 @@ def test_zt_version(capsys: CaptureFixture[str], options: str) -> None:
     [
         ("--autohide", "autohide"),
         ("--no-autohide", "no_autohide"),
-        ("--debug", None),  # no-autohide by default
+        ("--debug", None),  # dynamic by default
     ],
 )
 def test_parse_args_valid_layout_option(option: str, layout: Optional[str]) -> None:
@@ -562,7 +563,7 @@ def test_layout_overrides_autohide(
         if layout_option is None:
             layout_option = autohide_option
     elif layout_option is None:
-        layout_option = "no_autohide"  # default
+        layout_option = "dynamic"  # default
         layout_source = "with no config."
 
     zuliprc = parameterized_zuliprc(config)

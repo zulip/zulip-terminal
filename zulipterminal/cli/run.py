@@ -59,8 +59,9 @@ requests_logger = logging.getLogger("urllib3")
 requests_logger.setLevel(logging.DEBUG)
 
 # Valid boolean settings, which map from (str, str) to (True, False)
-VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
-    "layout": ("autohide", "no_autohide"),
+# FIXME: revert to a tuple(str, str), possible use similar to colors
+VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, ...]] = {
+    "layout": ("autohide", "no_autohide", "dynamic"),
     "notify": ("enabled", "disabled"),
     "exit_confirmation": ("enabled", "disabled"),
     "transparency": ("enabled", "disabled"),
@@ -76,7 +77,7 @@ COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
-    "layout": "no_autohide",
+    "layout": "dynamic",
     "notify": "disabled",
     "footlinks": "enabled",
     "color-depth": "256",
@@ -210,6 +211,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_const",
         const="no_autohide",
         help="don't autohide list of users and streams",
+    )
+    layout_group.add_argument(
+        "--dynamic",
+        dest="layout",
+        default=None,
+        action="store_const",
+        const="dynamic",
+        help="panels adapt based on available screen space",
     )
 
     parser.add_argument(
