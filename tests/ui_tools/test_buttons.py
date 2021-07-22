@@ -111,12 +111,14 @@ class TestTopButton:
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
+        set_attr_map = mocker.patch.object(top_button._w, "set_attr_map")
 
         top_button.update_widget(count_text, text_color)
 
         top_button.button_prefix.set_text.assert_called_once_with(expected_prefix)
-        top_button.set_label.assert_called_once_with((text_color, top_button._caption))
+        top_button.set_label.assert_called_once_with(top_button._caption)
         top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
+        set_attr_map.assert_called_once_with({None: text_color})
 
 
 class TestStarredButton:
