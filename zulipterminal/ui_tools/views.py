@@ -64,6 +64,8 @@ from zulipterminal.urwid_types import urwid_Size
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
+Layout = Literal["autohide", "no_autohide"]
+
 
 class ModListWalker(urwid.SimpleFocusListWalker):
     def __init__(self, *, contents: List[Any], action: Callable[[], None]) -> None:
@@ -1104,7 +1106,7 @@ class AboutView(PopUpView):
         server_feature_level: int,
         theme_name: str,
         color_depth: int,
-        autohide_enabled: bool,
+        layout: Layout,
         maximum_footlinks: int,
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
@@ -1125,7 +1127,7 @@ class AboutView(PopUpView):
                 "Application Configuration",
                 [
                     ("Theme", theme_name),
-                    ("Autohide", "enabled" if autohide_enabled else "disabled"),
+                    ("Layout", layout),
                     ("Maximum footlinks", str(maximum_footlinks)),
                     ("Color depth", str(color_depth)),
                     ("Notifications", "enabled" if notify_enabled else "disabled"),

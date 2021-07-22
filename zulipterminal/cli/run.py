@@ -622,6 +622,7 @@ def main(options: Optional[List[str]] = None) -> None:
             transparent_background=transparency_enabled,
         )
 
+        # FIXME Not needed?
         boolean_settings["autohide"] = layout == "autohide"
 
         Controller(
