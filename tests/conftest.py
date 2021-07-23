@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pytest
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -367,42 +368,45 @@ def msg_template_factory(
     subject: str = "",
     stream_id: Optional[int] = None,
     recipients: Union[str, List[Dict[str, Any]]] = "PTEST",
-):
+) -> Message:
     """
     Generate message template for all types of messages(stream/PM/group)
     """
+    # TODO: Separate Message into distinct types for stream and private messages.
+    message = Message(
+        id=msg_id,
+        sender_full_name="Foo Foo",
+        timestamp=timestamp,
+        client="website",
+        sender_email="foo@zulip.com",
+        type=msg_type,
+        sender_realm_str="",
+        flags=["read"],
+        sender_id=5140,
+        content_type="text/x-markdown",
+        subject=subject,
+        reactions=[],
+        subject_links=[],
+        avatar_url="dummy_avatar_url",
+        is_me_message=False,
+        content=f"{msg_type} content here.",
+        display_recipient=recipients,
+    )
+
     if msg_type == "stream":
         assert isinstance(stream_id, int)
         assert isinstance(recipients, str)
+        message["stream_id"] = stream_id
     else:
         assert isinstance(recipients, list)
         for _val in recipients:
             assert isinstance(_val, dict)
 
-    return {
-        "id": msg_id,
-        "sender_full_name": "Foo Foo",
-        "timestamp": timestamp,
-        "client": "website",
-        "sender_email": "foo@zulip.com",
-        "type": msg_type,
-        "sender_realm_str": "",
-        "flags": ["read"],
-        "sender_id": 5140,
-        "content_type": "text/x-markdown",
-        "stream_id": stream_id,
-        "subject": subject,
-        "reactions": [],
-        "subject_links": [],
-        "avatar_url": "dummy_avatar_url",
-        "is_me_message": False,
-        "content": f"{msg_type} content here.",
-        "display_recipient": recipients,
-    }
+    return message
 
 
 @pytest.fixture
-def stream_msg_template():
+def stream_msg_template() -> Message:
     msg_template = msg_template_factory(
         537286, "stream", 1520918722, subject="Test", stream_id=205
     )
@@ -410,7 +414,7 @@ def stream_msg_template():
 
 
 @pytest.fixture
-def extra_stream_msg_template():
+def extra_stream_msg_template() -> Message:
     msg_template = msg_template_factory(
         537289, "stream", 1520918740, subject="Test", stream_id=205
     )
@@ -418,13 +422,13 @@ def extra_stream_msg_template():
 
 
 @pytest.fixture
-def pm_template():
+def pm_template() -> Message:
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
     return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
 
 
 @pytest.fixture
-def group_pm_template():
+def group_pm_template() -> Message:
     recipients = display_recipient_factory(
         [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
     )
@@ -435,7 +439,7 @@ def group_pm_template():
     params=["stream_msg_template", "pm_template", "group_pm_template"],
     ids=["stream_message", "pm_message", "group_pm_message"],
 )
-def message_fixture(request):
+def message_fixture(request) -> Message:
     """
     Acts as a parametrize fixture for stream msg, pms and group_pms.
     """
@@ -445,9 +449,9 @@ def message_fixture(request):
 
 @pytest.fixture
 def messages_successful_response(
-    stream_msg_template,
-    pm_template,
-    group_pm_template,
+    stream_msg_template: Message,
+    pm_template: Message,
+    group_pm_template: Message,
 ) -> Dict[str, Any]:
     """
     A successful response from a /messages API query.
@@ -735,7 +739,9 @@ def initial_index():
 
 
 @pytest.fixture
-def empty_index(stream_msg_template, pm_template, group_pm_template):
+def empty_index(
+    stream_msg_template: Message, pm_template: Message, group_pm_template: Message
+):
     return deepcopy(
         {
             "pointer": defaultdict(set, {}),
@@ -792,7 +798,7 @@ def index_topic(empty_index):
 
 
 @pytest.fixture
-def index_multiple_topic_msg(empty_index, extra_stream_msg_template):
+def index_multiple_topic_msg(empty_index, extra_stream_msg_template: Message):
     """
     Index of initial_data with multiple message when model.narrow = [['stream, '7'],
                                                                      ['topic', 'Test']]
