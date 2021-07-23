@@ -6,6 +6,7 @@ import pytest
 
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.helper import Index
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
@@ -741,34 +742,34 @@ def initial_index():
 @pytest.fixture
 def empty_index(
     stream_msg_template: Message, pm_template: Message, group_pm_template: Message
-):
+) -> Index:
     return deepcopy(
-        {
-            "pointer": defaultdict(set, {}),
-            "all_msg_ids": set(),
-            "starred_msg_ids": set(),
-            "mentioned_msg_ids": set(),
-            "private_msg_ids": set(),
-            "private_msg_ids_by_user_ids": defaultdict(set, {}),
-            "stream_msg_ids_by_stream_id": defaultdict(set, {}),
-            "topic_msg_ids": defaultdict(dict, {}),
-            "edited_messages": set(),
-            "topics": defaultdict(list),
-            "search": set(),
-            "messages": defaultdict(
-                dict,
+        Index(
+            pointer=defaultdict(set, {}),
+            all_msg_ids=set(),
+            starred_msg_ids=set(),
+            mentioned_msg_ids=set(),
+            private_msg_ids=set(),
+            private_msg_ids_by_user_ids=defaultdict(set, {}),
+            stream_msg_ids_by_stream_id=defaultdict(set, {}),
+            topic_msg_ids=defaultdict(dict, {}),
+            edited_messages=set(),
+            topics=defaultdict(list),
+            search=set(),
+            messages=defaultdict(
+                lambda: {},
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,
                     group_pm_template["id"]: group_pm_template,
                 },
             ),
-        }
+        )
     )
 
 
 @pytest.fixture
-def index_all_messages(empty_index):
+def index_all_messages(empty_index: Index):
     """
     Expected index of `initial_data` fixture when model.narrow = []
     """
@@ -776,7 +777,7 @@ def index_all_messages(empty_index):
 
 
 @pytest.fixture
-def index_stream(empty_index):
+def index_stream(empty_index: Index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
@@ -788,7 +789,7 @@ def index_stream(empty_index):
 
 
 @pytest.fixture
-def index_topic(empty_index):
+def index_topic(empty_index: Index):
     """
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
@@ -798,7 +799,7 @@ def index_topic(empty_index):
 
 
 @pytest.fixture
-def index_multiple_topic_msg(empty_index, extra_stream_msg_template: Message):
+def index_multiple_topic_msg(empty_index: Index, extra_stream_msg_template: Message):
     """
     Index of initial_data with multiple message when model.narrow = [['stream, '7'],
                                                                      ['topic', 'Test']]
@@ -812,7 +813,7 @@ def index_multiple_topic_msg(empty_index, extra_stream_msg_template: Message):
 
 
 @pytest.fixture
-def index_user(empty_index):
+def index_user(empty_index: Index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                                          'boo@zulip.com'],
@@ -826,7 +827,7 @@ def index_user(empty_index):
 
 
 @pytest.fixture
-def index_user_multiple(empty_index):
+def index_user_multiple(empty_index: Index):
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                             'boo@zulip.com, bar@zulip.com'],
@@ -850,7 +851,7 @@ def index_user_multiple(empty_index):
         {537287, 537288},
     ]
 )
-def index_all_starred(empty_index, request):
+def index_all_starred(empty_index: Index, request):
     msgs_with_stars = request.param
     index = dict(
         empty_index, starred_msg_ids=msgs_with_stars, private_msg_ids={537287, 537288}
@@ -862,7 +863,7 @@ def index_all_starred(empty_index, request):
 
 
 @pytest.fixture()
-def index_all_mentions(empty_index, mentioned_messages_combination):
+def index_all_mentions(empty_index: Index, mentioned_messages_combination):
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     index = dict(
         empty_index,
@@ -881,7 +882,7 @@ def index_all_mentions(empty_index, mentioned_messages_combination):
 
 
 @pytest.fixture()
-def index_search_messages(empty_index):
+def index_search_messages(empty_index: Index):
     """Expected initial index when search contains the message_id 500."""
     return dict(empty_index, **{"search": {500}})
 
