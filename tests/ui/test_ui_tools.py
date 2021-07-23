@@ -2334,9 +2334,7 @@ class TestMessageBox:
             "realm_allow_message_editing": realm_editing_allowed,
             "realm_message_content_edit_limit_seconds": msg_body_edit_limit,
         }
-        msg_box.model.client.get_raw_message.return_value = {
-            "raw_content": "Edit this message"
-        }
+        msg_box.model.fetch_raw_message_content.return_value = "Edit this message"
         write_box = msg_box.model.controller.view.write_box
         write_box.msg_edit_state = None
         write_box.msg_body_edit_enabled = None
