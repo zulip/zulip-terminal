@@ -1669,9 +1669,8 @@ class MessageBox(urwid.Pile):
             # To correctly quote a message that contains quote/code-blocks,
             # we need to fence quoted message containing ``` with ````,
             # ```` with ````` and so on.
-            message_raw_content = self.model.client.get_raw_message(self.message["id"])[
-                "raw_content"
-            ]
+            response = self.model.fetch_raw_message_content(self.message["id"])
+            message_raw_content = response if response is not None else ""
             fence = get_unused_fence(message_raw_content)
 
             absolute_url = near_message_url(self.model.server_url[:-1], self.message)
@@ -1734,7 +1733,8 @@ class MessageBox(urwid.Pile):
                     title=self.message["subject"],
                 )
             msg_id = self.message["id"]
-            msg = self.model.client.get_raw_message(msg_id)["raw_content"]
+            response = self.model.fetch_raw_message_content(msg_id)
+            msg = response if response is not None else ""
             write_box = self.model.controller.view.write_box
             write_box.msg_edit_state = _MessageEditState(
                 message_id=msg_id, old_topic=self.message["subject"]
