@@ -1213,6 +1213,6 @@ def widget_size():
         elif widget_type == "flow":
             return (20,)
         else:
-            None
+            return ()
 
     return _widget_size
