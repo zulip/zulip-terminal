@@ -8,6 +8,8 @@ import urwid
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
+    AUTOHIDE_TAB_LEFT_ARROW,
+    AUTOHIDE_TAB_RIGHT_ARROW,
     COLUMN_TITLE_BAR_LINE,
 )
 from zulipterminal.helper import asynch
@@ -17,10 +19,12 @@ from zulipterminal.ui_tools.views import (
     LeftColumnView,
     MiddleColumnView,
     RightColumnView,
+    TabView,
 )
 from zulipterminal.urwid_types import urwid_Box
 
 
+TAB_WIDTH = 3
 LEFT_WIDTH = 27
 RIGHT_WIDTH = 23
 
@@ -46,7 +50,11 @@ class View(urwid.WidgetWrap):
         super().__init__(self.main_window())
 
     def left_column_view(self) -> Any:
-        return LeftColumnView(self)
+        tab = TabView(
+            f"{AUTOHIDE_TAB_LEFT_ARROW} STREAMS & TOPICS {AUTOHIDE_TAB_LEFT_ARROW}"
+        )
+        panel = LeftColumnView(self)
+        return panel, tab
 
     def middle_column_view(self) -> Any:
         self.middle_column = MiddleColumnView(
@@ -63,8 +71,9 @@ class View(urwid.WidgetWrap):
         )
 
     def right_column_view(self) -> Any:
+        tab = TabView(f"{AUTOHIDE_TAB_RIGHT_ARROW} USERS {AUTOHIDE_TAB_RIGHT_ARROW}")
         self.users_view = RightColumnView(self)
-        return urwid.LineBox(
+        panel = urwid.LineBox(
             self.users_view,
             title="Users",
             title_attr="column_title",
@@ -77,6 +86,7 @@ class View(urwid.WidgetWrap):
             bline="",
             brcorner="",
         )
+        return panel, tab
 
     def get_random_help(self) -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
@@ -131,14 +141,14 @@ class View(urwid.WidgetWrap):
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
 
     def main_window(self) -> Any:
-        self.left_panel = self.left_column_view()
+        self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
-        self.right_panel = self.right_column_view()
+        self.right_panel, self.right_tab = self.right_column_view()
         if self.controller.autohide:
             body = [
                 (LEFT_WIDTH, self.left_panel),
                 ("weight", 10, self.center_panel),
-                (0, self.right_panel),
+                (TAB_WIDTH, self.right_tab),
             ]
         else:
             body = [
@@ -180,15 +190,17 @@ class View(urwid.WidgetWrap):
         if not self.controller.autohide:
             return
 
-        width = LEFT_WIDTH if visible else 0
-        self.body.contents[0] = (self.left_panel, self.body.options("given", width))
+        width = LEFT_WIDTH if visible else TAB_WIDTH
+        widget = self.left_panel if visible else self.left_tab
+        self.body.contents[0] = (widget, self.body.options("given", width))
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
 
-        width = RIGHT_WIDTH if visible else 0
-        self.body.contents[2] = (self.right_panel, self.body.options("given", width))
+        width = RIGHT_WIDTH if visible else TAB_WIDTH
+        widget = self.right_panel if visible else self.right_tab
+        self.body.contents[2] = (widget, self.body.options("given", width))
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
