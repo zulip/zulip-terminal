@@ -127,6 +127,7 @@ type_consistent_testfiles = [
     "test_helper.py",
     "test_server_url.py",
     "test_ui.py",
+    "test_keys.py",
 ]
 
 for file_path in python_files:
