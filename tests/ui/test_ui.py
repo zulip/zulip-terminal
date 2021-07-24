@@ -6,7 +6,7 @@ from urwid import Widget
 
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
-from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, View
+from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
 from zulipterminal.urwid_types import urwid_Box
 
 
@@ -25,9 +25,15 @@ class TestView:
 
     @pytest.fixture
     def view(self, mocker: MockerFixture) -> View:
-        main_window = mocker.patch(VIEW + ".main_window")
+        mocker.patch(MODULE + ".TabView")
+        mocker.patch(MODULE + ".LeftColumnView")
+        mocker.patch("zulipterminal.ui_tools.views.urwid.Frame")
+        mocker.patch("zulipterminal.ui_tools.views.MessageView")
+        mocker.patch(MODULE + ".RightColumnView")
+
         # View is an urwid.Frame instance, a Box widget.
         mocker.patch(VIEW + ".sizing", return_value=frozenset({"box"}))
+
         return View(self.controller)
 
     def test_init(self, mocker: MockerFixture) -> None:
@@ -44,8 +50,11 @@ class TestView:
 
     def test_left_column_view(self, mocker: MockerFixture, view: View) -> None:
         left_view = mocker.patch(MODULE + ".LeftColumnView")
+        left_tab = mocker.patch(MODULE + ".TabView")
+
         return_value = view.left_column_view()
-        assert return_value == left_view(view)
+
+        assert return_value == (left_view(view), left_tab())
 
     def test_middle_column_view(self, view: View, mocker: MockerFixture) -> None:
         middle_view = mocker.patch(MODULE + ".MiddleColumnView")
@@ -59,11 +68,14 @@ class TestView:
 
     def test_right_column_view(self, view: View, mocker: MockerFixture) -> None:
         right_view = mocker.patch(MODULE + ".RightColumnView")
+        right_tab = mocker.patch(MODULE + ".TabView")
         line_box = mocker.patch(MODULE + ".urwid.LineBox")
+
         return_value = view.right_column_view()
+
         right_view.assert_called_once_with(view)
         assert view.users_view == right_view()
-        assert return_value == line_box()
+        assert return_value == (line_box(), right_tab())
 
     def test_set_footer_text_default(self, view: View, mocker: MockerFixture) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
@@ -153,7 +165,7 @@ class TestView:
     def test_main_window(
         self, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        left = mocker.patch(VIEW + ".left_column_view")
+        left = mocker.patch(VIEW + ".left_column_view", return_value=("PANEL", "TAB"))
 
         # NOTE: Use monkeypatch not patch, as view doesn't exist until later
         def just_set_message_view(self: Any) -> None:
@@ -161,7 +173,7 @@ class TestView:
 
         monkeypatch.setattr(View, "middle_column_view", just_set_message_view)
 
-        right = mocker.patch(VIEW + ".right_column_view")
+        right = mocker.patch(VIEW + ".right_column_view", return_value=("PANEL", "TAB"))
         col = mocker.patch(MODULE + ".urwid.Columns")
         frame = mocker.patch(MODULE + ".urwid.Frame")
         title_divider = mocker.patch(MODULE + ".urwid.Divider")
@@ -190,9 +202,9 @@ class TestView:
         expected_column_calls = [
             mocker.call(
                 [
-                    (LEFT_WIDTH, left()),
+                    (LEFT_WIDTH, view.left_panel),
                     ("weight", 10, mocker.ANY),  # ANY is a center
-                    (0, right()),
+                    (TAB_WIDTH, view.right_tab),
                 ],
                 focus_column=0,
             ),
@@ -215,7 +227,7 @@ class TestView:
         )
 
     @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize("visible, width", [(True, LEFT_WIDTH), (False, 0)])
+    @pytest.mark.parametrize("visible, width", [(True, LEFT_WIDTH), (False, TAB_WIDTH)])
     def test_show_left_panel(
         self,
         mocker: MockerFixture,
@@ -224,20 +236,25 @@ class TestView:
         width: int,
         autohide: bool,
     ) -> None:
-        view.left_panel = mocker.Mock()
         view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.body.contents = [view.left_panel, mocker.Mock(), mocker.Mock()]
         view.controller.autohide = autohide
 
         view.show_left_panel(visible=visible)
 
         if autohide:
+            if visible:
+                assert view.body.contents[0][0] == view.left_panel
+            else:
+                assert view.body.contents[0][0] == view.left_tab
             view.body.options.assert_called_once_with("given", width)
         else:
             view.body.options.assert_not_called()
 
     @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize("visible, width", [(True, RIGHT_WIDTH), (False, 0)])
+    @pytest.mark.parametrize(
+        "visible, width", [(True, RIGHT_WIDTH), (False, TAB_WIDTH)]
+    )
     def test_show_right_panel(
         self,
         mocker: MockerFixture,
@@ -246,14 +263,17 @@ class TestView:
         width: int,
         autohide: bool,
     ) -> None:
-        view.right_panel = mocker.Mock()
         view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
+        view.body.contents = [mocker.Mock(), mocker.Mock(), view.right_panel]
         view.controller.autohide = autohide
 
         view.show_right_panel(visible=visible)
 
         if autohide:
+            if visible:
+                assert view.body.contents[2][0] == view.right_panel
+            else:
+                assert view.body.contents[2][0] == view.right_tab
             view.body.options.assert_called_once_with("given", width)
         else:
             view.body.options.assert_not_called()
