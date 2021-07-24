@@ -72,21 +72,21 @@ def test_HELP_is_not_allowed_as_tip():
 def test_commands_for_random_tips(mocker):
     new_key_bindings: Dict[str, keys.KeyBinding] = {
         "ALPHA": {
-            "keys": {"a"},
+            "keys": ["a"],
             "help_text": "alpha",
             "excluded_from_random_tips": True,
         },
         "BETA": {
-            "keys": {"b"},
+            "keys": ["b"],
             "help_text": "beta",
             "excluded_from_random_tips": False,
         },
         "GAMMA": {
-            "keys": {"g"},
+            "keys": ["g"],
             "help_text": "gamma",
         },
         "DELTA": {
-            "keys": {"d"},
+            "keys": ["d"],
             "help_text": "delta",
             "excluded_from_random_tips": True,
         },
