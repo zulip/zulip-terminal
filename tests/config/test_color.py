@@ -7,9 +7,9 @@ def test_color_properties():
     class Color(Enum):
         WHITE = "wh  #256  #24"
 
-    Color = color_properties(Color, "BOLD", "ITALICS")
+    ExpandedColor = color_properties(Color, "BOLD", "ITALICS")
 
-    assert Color.WHITE in Color
-    assert Color.WHITE.value == "wh  #256  #24"
-    assert Color.WHITE__BOLD_ITALICS in Color
-    assert Color.WHITE__BOLD_ITALICS.value == "wh  #256  #24 , bold , italics"
+    assert ExpandedColor.WHITE in ExpandedColor
+    assert ExpandedColor.WHITE.value == "wh  #256  #24"
+    assert ExpandedColor.WHITE__BOLD_ITALICS in ExpandedColor
+    assert ExpandedColor.WHITE__BOLD_ITALICS.value == "wh  #256  #24 , bold , italics"
