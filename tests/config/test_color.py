@@ -3,7 +3,7 @@ from enum import Enum
 from zulipterminal.config.color import color_properties
 
 
-def test_color_properties():
+def test_color_properties() -> None:
     class Color(Enum):
         WHITE = "wh  #256  #24"
 
