@@ -769,37 +769,41 @@ def empty_index(
 
 
 @pytest.fixture
-def index_all_messages(empty_index: Index):
+def index_all_messages(empty_index: Index) -> Index:
     """
     Expected index of `initial_data` fixture when model.narrow = []
     """
-    return dict(empty_index, **{"all_msg_ids": {537286, 537287, 537288}})
+    index = empty_index
+    index["all_msg_ids"] = {537286, 537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_stream(empty_index: Index):
+def index_stream(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
-    diff = {
-        "stream_msg_ids_by_stream_id": defaultdict(set, {205: {537286}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["stream_msg_ids_by_stream_id"] = defaultdict(set, {205: {537286}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_topic(empty_index: Index):
+def index_topic(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
     """
-    diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286}}})}
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["topic_msg_ids"] = defaultdict(dict, {205: {"Test": {537286}}})
+    return index
 
 
 @pytest.fixture
-def index_multiple_topic_msg(empty_index: Index, extra_stream_msg_template: Message):
+def index_multiple_topic_msg(
+    empty_index: Index, extra_stream_msg_template: Message
+) -> Index:
     """
     Index of initial_data with multiple message when model.narrow = [['stream, '7'],
                                                                      ['topic', 'Test']]
@@ -808,36 +812,36 @@ def index_multiple_topic_msg(empty_index: Index, extra_stream_msg_template: Mess
     empty_index_with_multiple_topic_msg["messages"].update(
         {extra_stream_msg_template["id"]: extra_stream_msg_template}
     )
-    diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286, 537289}}})}
-    return dict(empty_index_with_multiple_topic_msg, **diff)
+    empty_index_with_multiple_topic_msg["topic_msg_ids"] = defaultdict(
+        dict, {205: {"Test": {537286, 537289}}}
+    )
+    return empty_index_with_multiple_topic_msg
 
 
 @pytest.fixture
-def index_user(empty_index: Index):
+def index_user(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                                          'boo@zulip.com'],
     """
     user_ids = frozenset({5179, 5140})
-    diff = {
-        "private_msg_ids_by_user_ids": defaultdict(set, {user_ids: {537287}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_user_multiple(empty_index: Index):
+def index_user_multiple(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
     user_ids = frozenset({5179, 5140, 5180})
-    diff = {
-        "private_msg_ids_by_user_ids": defaultdict(set, {user_ids: {537288}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture(
@@ -851,11 +855,11 @@ def index_user_multiple(empty_index: Index):
         {537287, 537288},
     ]
 )
-def index_all_starred(empty_index: Index, request):
+def index_all_starred(empty_index: Index, request) -> Index:
     msgs_with_stars = request.param
-    index = dict(
-        empty_index, starred_msg_ids=msgs_with_stars, private_msg_ids={537287, 537288}
-    )
+    index = empty_index
+    index["starred_msg_ids"] = msgs_with_stars
+    index["private_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
             msg["flags"].append("starred")
@@ -863,13 +867,11 @@ def index_all_starred(empty_index: Index, request):
 
 
 @pytest.fixture()
-def index_all_mentions(empty_index: Index, mentioned_messages_combination):
+def index_all_mentions(empty_index: Index, mentioned_messages_combination) -> Index:
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
-    index = dict(
-        empty_index,
-        mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
-        private_msg_ids={537287, 537288},
-    )
+    index = empty_index
+    index["mentioned_msg_ids"] = mentioned_messages | wildcard_mentioned_messages
+    index["private_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
@@ -882,9 +884,11 @@ def index_all_mentions(empty_index: Index, mentioned_messages_combination):
 
 
 @pytest.fixture()
-def index_search_messages(empty_index: Index):
+def index_search_messages(empty_index: Index) -> Index:
     """Expected initial index when search contains the message_id 500."""
-    return dict(empty_index, **{"search": {500}})
+    index = empty_index
+    index["search"] = {500}
+    return index
 
 
 @pytest.fixture
