@@ -1,11 +1,14 @@
 import re
 from enum import Enum
+from typing import Dict, Optional, Tuple
 
 import pytest
+from pytest_mock import MockerFixture
 
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
     THEMES,
+    ThemeSpec,
     all_themes,
     complete_and_incomplete_themes,
     parse_themefile,
@@ -39,7 +42,7 @@ aliases_16_color = [
 ]
 
 
-def test_all_themes():
+def test_all_themes() -> None:
     assert all_themes() == list(THEMES.keys())
 
 
@@ -53,7 +56,7 @@ def test_all_themes():
         for theme in THEMES
     ],
 )
-def test_builtin_theme_completeness(theme_name):
+def test_builtin_theme_completeness(theme_name: str) -> None:
     theme = THEMES[theme_name]
     theme_styles = theme.STYLES
     theme_colors = theme.Color
@@ -88,7 +91,7 @@ def test_builtin_theme_completeness(theme_name):
         assert fg in theme_colors and bg in theme_colors
 
 
-def test_complete_and_incomplete_themes():
+def test_complete_and_incomplete_themes() -> None:
     # These are sorted to ensure reproducibility
     result = (
         sorted(list(expected_complete_themes)),
@@ -130,13 +133,15 @@ def test_complete_and_incomplete_themes():
         "24-bit-color",
     ],
 )
-def test_parse_themefile(mocker, color_depth, expected_urwid_theme):
+def test_parse_themefile(
+    mocker: MockerFixture, color_depth: int, expected_urwid_theme: ThemeSpec
+) -> None:
     class Color(Enum):
         WHITE__BOLD = "white          #fff   #ffffff , bold"
         WHITE__BOLD_ITALICS = "white  #fff   #ffffff , bold , italics"
         DARK_MAGENTA = "dark_magenta  h90    #870087"
 
-    STYLES = {
+    STYLES: Dict[Optional[str], Tuple[Color, Color]] = {
         "s1": (Color.WHITE__BOLD, Color.DARK_MAGENTA),
         "s2": (Color.WHITE__BOLD_ITALICS, Color.DARK_MAGENTA),
     }
