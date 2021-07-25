@@ -1260,6 +1260,14 @@ class TestWriteBox:
                 expected_focus_col_name
             )
 
+    @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
+    def test_keypress_MARKDOWN_HELP(self, mocker, write_box, key, widget_size):
+        size = widget_size(write_box)
+
+        write_box.keypress(size, key)
+
+        write_box.view.controller.show_markdown_help.assert_called_once_with()
+
     @pytest.mark.parametrize(
         "msg_type, expected_box_size",
         [
