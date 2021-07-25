@@ -61,6 +61,32 @@ class TopButton(urwid.Button):
 
         urwid.connect_signal(self, "click", self.activate)
 
+    def _set_prefix_style(self, style: str) -> None:
+        self._prefix_markup = (style, self._prefix_markup[1])
+
+    def _set_label_style(self, style: str) -> None:
+        self._label_markup = (style, self._label_markup[1])
+
+    def _set_suffix_style(self, style: str) -> None:
+        self._suffix_markup = (style, self._suffix_markup[1])
+
+    prefix_style = property(lambda self: self._prefix_markup[0], _set_prefix_style)
+    label_style = property(lambda self: self._label_markup[0], _set_label_style)
+    suffix_style = property(lambda self: self._suffix_markup[0], _set_suffix_style)
+
+    def _set_prefix_text(self, text: str) -> None:
+        self._prefix_markup = (self._prefix_markup[0], text)
+
+    def _set_label_text(self, text: str) -> None:
+        self._label_markup = (self._label_markup[0], text)
+
+    def _set_suffix_text(self, text: str) -> None:
+        self._suffix_markup = (self._suffix_markup[0], text)
+
+    prefix_text = property(lambda self: self._prefix_markup[1], _set_prefix_text)
+    label_text = property(lambda self: self._label_markup[1], _set_label_text)
+    suffix_text = property(lambda self: self._suffix_markup[1], _set_suffix_text)
+
     def update_count(self, count: int, text_color: Optional[str] = None) -> None:
         new_color = self.original_color if text_color is None else text_color
 
