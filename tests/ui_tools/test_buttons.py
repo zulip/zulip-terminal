@@ -77,6 +77,48 @@ class TestTopButton:
             top_button, "click", top_button.activate
         )
 
+    def test_style_properties(self, top_button: TopButton) -> None:
+        top_button._prefix_markup = ("prefix-style", "prefix-text")
+        top_button._label_markup = ("label-style", "label-text")
+        top_button._suffix_markup = ("suffix-style", "suffix-text")
+
+        # Test getter
+        prefix_style = top_button.prefix_style
+        assert prefix_style == "prefix-style"
+        label_style = top_button.label_style
+        assert label_style == "label-style"
+        suffix_style = top_button.suffix_style
+        assert suffix_style == "suffix-style"
+
+        # Test setter
+        top_button.prefix_style = "prefix-style2"
+        assert top_button.prefix_style == "prefix-style2"
+        top_button.label_style = "label-style2"
+        assert top_button.label_style == "label-style2"
+        top_button.suffix_style = "suffix-style2"
+        assert top_button.suffix_style == "suffix-style2"
+
+    def test_text_properties(self, top_button: TopButton) -> None:
+        top_button._prefix_markup = ("prefix-style", "prefix-text")
+        top_button._label_markup = ("label-style", "label-text")
+        top_button._suffix_markup = ("suffix-style", "suffix-text")
+
+        # Test getter
+        prefix_text = top_button.prefix_text
+        assert prefix_text == "prefix-text"
+        label_text = top_button.label_text
+        assert label_text == "label-text"
+        suffix_text = top_button.suffix_text
+        assert suffix_text == "suffix-text"
+
+        # Test setter
+        top_button.prefix_text = "prefix-text2"
+        assert top_button.prefix_text == "prefix-text2"
+        top_button.label_text = "label-text2"
+        assert top_button.label_text == "label-text2"
+        top_button.suffix_text = "suffix-text2"
+        assert top_button.suffix_text == "suffix-text2"
+
     @pytest.mark.parametrize("text_color", ["color", None])
     @pytest.mark.parametrize(
         "old_count, new_count, new_count_str",
