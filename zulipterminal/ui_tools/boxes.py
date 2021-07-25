@@ -677,6 +677,9 @@ class WriteBox(urwid.Pile):
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
+        elif is_command_key("MARKDOWN_HELP", key):
+            self.view.controller.show_markdown_help()
+            return key
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.to_write_box:
