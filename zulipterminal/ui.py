@@ -190,17 +190,43 @@ class View(urwid.WidgetWrap):
         if not self.controller.autohide:
             return
 
-        width = LEFT_WIDTH if visible else TAB_WIDTH
-        widget = self.left_panel if visible else self.left_tab
-        self.body.contents[0] = (widget, self.body.options("given", width))
+        if visible:
+            self.frame.body = urwid.Overlay(
+                urwid.Columns(
+                    [(LEFT_WIDTH, self.left_panel), (1, urwid.SolidFill("▏"))]
+                ),
+                self.body,
+                align="left",
+                width=LEFT_WIDTH + 1,
+                valign="top",
+                height=("relative", 100),
+            )
+        else:
+            self.frame.body = self.body
+            # FIXME: This can be avoided after fixing the "sacrificing 1st
+            # unread msg" issue and setting focus_column=1 when initializing.
+            self.body.focus_position = 1
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
 
-        width = RIGHT_WIDTH if visible else TAB_WIDTH
-        widget = self.right_panel if visible else self.right_tab
-        self.body.contents[2] = (widget, self.body.options("given", width))
+        if visible:
+            self.frame.body = urwid.Overlay(
+                urwid.Columns(
+                    [(1, urwid.SolidFill("▕")), (RIGHT_WIDTH, self.right_panel)]
+                ),
+                self.body,
+                align="right",
+                width=RIGHT_WIDTH + 1,
+                valign="top",
+                height=("relative", 100),
+            )
+        else:
+            self.frame.body = self.body
+            # FIXME: This can be avoided after fixing the "sacrificing 1st
+            # unread msg" issue and setting focus_column=1 when initializing.
+            self.body.focus_position = 1
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
@@ -227,19 +253,19 @@ class View(urwid.WidgetWrap):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
-            self.body.focus_position = 2
-            self.users_view.keypress(size, key)
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
+            self.body.focus_position = 2
+            self.users_view.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
-            self.body.focus_position = 0
-            self.left_panel.keypress(size, key)
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
+            self.body.focus_position = 0
+            self.left_panel.keypress(size, key)
             return key
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()

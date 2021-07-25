@@ -22,15 +22,14 @@ class TestView:
         self.model = mocker.patch(CONTROLLER + ".model")
         self.write_box = mocker.patch(MODULE + ".WriteBox")
         self.search_box = mocker.patch(MODULE + ".SearchBox")
-
-    @pytest.fixture
-    def view(self, mocker: MockerFixture) -> View:
         mocker.patch(MODULE + ".TabView")
         mocker.patch(MODULE + ".LeftColumnView")
         mocker.patch("zulipterminal.ui_tools.views.urwid.Frame")
         mocker.patch("zulipterminal.ui_tools.views.MessageView")
         mocker.patch(MODULE + ".RightColumnView")
 
+    @pytest.fixture
+    def view(self, mocker: MockerFixture) -> View:
         # View is an urwid.Frame instance, a Box widget.
         mocker.patch(VIEW + ".sizing", return_value=frozenset({"box"}))
 
@@ -235,23 +234,23 @@ class TestView:
     def test_show_panel_methods(
         self,
         mocker: MockerFixture,
-        view: View,
         visible: bool,
         autohide: bool,
         test_method: str,
     ) -> None:
-        view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
-        view.controller.autohide = autohide
+        self.controller.autohide = autohide
+        view = View(self.controller)
+        view.frame.body = view.body
 
+        tail = [None, 0, 0, "top", None, "relative", 100, None, 0, 0]
         if test_method == "left_panel":
-            expected_width = LEFT_WIDTH
+            expected_overlay_options = ["left", None, "given", LEFT_WIDTH + 1] + tail
             expected_tab = view.left_tab
             expected_panel = view.left_panel
 
             view.show_left_panel(visible=visible)
         else:
-            expected_width = RIGHT_WIDTH
+            expected_overlay_options = ["right", None, "given", RIGHT_WIDTH + 1] + tail
             expected_tab = view.right_tab
             expected_panel = view.right_panel
 
@@ -259,13 +258,16 @@ class TestView:
 
         if autohide:
             if visible:
-                assert (expected_panel, mocker.ANY) in view.body.contents
-                view.body.options.assert_called_once_with("given", expected_width)
+                assert (expected_panel, mocker.ANY) in view.frame.body.top_w.contents
+                assert view.frame.body.bottom_w == view.body
+                assert view.frame.body.contents[1][1] == tuple(expected_overlay_options)
             else:
-                assert (expected_tab, mocker.ANY) in view.body.contents
-                view.body.options.assert_called_once_with("given", TAB_WIDTH)
+                assert (expected_tab, mocker.ANY) in view.frame.body.contents
+                assert view.body.focus_position == 1
         else:
-            view.body.options.assert_not_called()
+            # No change
+            assert view.frame.body.contents[0][0] == view.left_panel
+            assert view.frame.body.contents[2][0] == view.right_panel
 
     def test_keypress_normal_mode_navigation(
         self,
