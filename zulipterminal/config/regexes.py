@@ -15,6 +15,8 @@ REGEX_STREAM_FENCED = r"#\*\*{stream}\*\*".format(stream=REGEX_STREAM_NAME)
 REGEX_STREAM_AND_TOPIC_FENCED_HALF = f"{REGEX_STREAM_FENCED_HALF}>{REGEX_TOPIC_NAME}$"
 # (*) Example text: #**stream name**>Topic name
 REGEX_STREAM_AND_TOPIC_FENCED = f"{REGEX_STREAM_FENCED}>{REGEX_TOPIC_NAME}$"
+# (*) Example text: #stream name>Topic name
+REGEX_STREAM_AND_TOPIC_UNFENCED = f"#{REGEX_STREAM_NAME}>{REGEX_TOPIC_NAME}$"
 
 
 # Referred and translated from zulip/static/shared/js/fenced_code.js

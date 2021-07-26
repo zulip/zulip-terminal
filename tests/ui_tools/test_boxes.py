@@ -86,9 +86,13 @@ class TestWriteBox:
             ("#**Stream 1>", -2, True, "#**Stream 1>This is a topic**"),
             # Fenced prefix
             ("#**Stream 1**>T", 0, True, "#**Stream 1>Topic 1**"),
+            # Unfenced prefix
+            ("#Stream 1>T", 0, True, "#**Stream 1>Topic 1**"),
+            ("#Stream 1>T", 1, True, "#**Stream 1>This is a topic**"),
             # Invalid stream
             ("#**invalid stream>", 0, False, None),
             ("#**invalid stream**>", 0, False, None),
+            ("#invalid stream>", 0, False, None),
             # Invalid prefix format
             ("#**Stream 1*>", 0, True, None),
             ("#*Stream 1>", 0, True, None),
