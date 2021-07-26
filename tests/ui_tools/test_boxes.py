@@ -69,6 +69,51 @@ class TestWriteBox:
         assert not write_box.model.send_typing_status_by_user_ids.called
 
     @pytest.mark.parametrize(
+        "text, state, is_valid_stream, required_typeahead",
+        [
+            ("#**Stream 1>T", 0, True, "#**Stream 1>Topic 1**"),
+            ("#**Stream 1>T", 1, True, "#**Stream 1>This is a topic**"),
+            ("#**Stream 1>T", 2, True, None),
+            ("#**Stream 1>T", -1, True, "#**Stream 1>This is a topic**"),
+            ("#**Stream 1>T", -2, True, "#**Stream 1>Topic 1**"),
+            ("#**Stream 1>T", -3, True, None),
+            ("#**Stream 1>To", 0, True, "#**Stream 1>Topic 1**"),
+            ("#**Stream 1>H", 0, True, "#**Stream 1>Hello there!**"),
+            ("#**Stream 1>Hello ", 0, True, "#**Stream 1>Hello there!**"),
+            ("#**Stream 1>", 0, True, "#**Stream 1>Topic 1**"),
+            ("#**Stream 1>", 1, True, "#**Stream 1>This is a topic**"),
+            ("#**Stream 1>", -1, True, "#**Stream 1>Hello there!**"),
+            ("#**Stream 1>", -2, True, "#**Stream 1>This is a topic**"),
+            # Invalid stream
+            ("#**invalid stream>", 0, False, None),
+            # Invalid prefix format
+            ("#*Stream 1>", 0, True, None),
+            # Complex autocomplete prefixes.
+            ("(#**Stream 1>", 0, True, "(#**Stream 1>Topic 1**"),
+            ("&#**Stream 1>", 0, True, "&#**Stream 1>Topic 1**"),
+            ("@#**Stream 1>", 0, True, "@#**Stream 1>Topic 1**"),
+            ("@_#**Stream 1>", 0, True, "@_#**Stream 1>Topic 1**"),
+            (":#**Stream 1>", 0, True, ":#**Stream 1>Topic 1**"),
+        ],
+    )
+    def test_generic_autocomplete_stream_and_topic(
+        self,
+        write_box,
+        text,
+        mocker,
+        state,
+        is_valid_stream,
+        required_typeahead,
+        topics,
+    ):
+        write_box.model.topics_in_stream.return_value = topics
+        write_box.model.is_valid_stream.return_value = is_valid_stream
+
+        typeahead_string = write_box.generic_autocomplete(text, state)
+
+        assert typeahead_string == required_typeahead
+
+    @pytest.mark.parametrize(
         "emails, user_ids, expect_method_called, typing_recipient_user_ids",
         [
             (["FOOBOO@gmail.com"], [1001], False, []),
