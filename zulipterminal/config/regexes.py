@@ -13,3 +13,7 @@ REGEX_COLOR_6_DIGIT = r"^#[0-9A-Fa-f]{6}$"
 REGEX_RECIPIENT_EMAIL = r"[\w\.-]+@[\w\.-]+"
 # Example: Test User <example-user@zulip.com>
 REGEX_CLEANED_RECIPIENT = r"^(.*?)(?:\s*?<?({})>?(.*))?$".format(REGEX_RECIPIENT_EMAIL)
+
+
+# Example: 6-test-stream
+REGEX_INTERNAL_LINK_STREAM_ID = r"^[0-9]+-"

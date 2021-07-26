@@ -8,6 +8,7 @@ from typing_extensions import TypedDict
 
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
     MUTE_MARKER,
     STREAM_MARKER_PRIVATE,
@@ -368,7 +369,7 @@ class MessageLinkButton(urwid.Button):
         Returns a dict with optional stream ID and stream name.
         """
         # Modern links come patched with the stream ID and '-' as delimiters.
-        if re.match("^[0-9]+-", encoded_stream_data):
+        if re.match(REGEX_INTERNAL_LINK_STREAM_ID, encoded_stream_data):
             stream_id, *_ = encoded_stream_data.split("-")
             # Given how encode_stream() in zerver/lib/url_encoding.py
             # replaces ' ' with '-' in the stream name, skip extracting the
