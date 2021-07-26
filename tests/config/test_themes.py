@@ -5,6 +5,7 @@ from typing import Dict, Optional, Tuple
 import pytest
 from pytest_mock import MockerFixture
 
+from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
     THEMES,
@@ -73,11 +74,8 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         assert len(codes) == 3
         # Check if 16-color alias is correct
         assert codes[0].replace("_", " ") in aliases_16_color
-        # Check if 24-bit and 256 color is any of
-        # #000000-#ffffff or #000-#fff or h0-h255 or g0-g100 0r g#00-g#ff
-        pattern = re.compile(
-            "#[\\da-f]{6}|#[\\da-f]{3}|(?:h|g)([\\d]{1,3})|g#[\\da-f]{2}|default$"
-        )
+        # Check if 24-bit and 256 color is any of the valid color codes
+        pattern = re.compile(REGEX_COLOR_VALID_FORMATS)
         for code in [codes[1], codes[2]]:
             code = pattern.match(code)
             assert code
