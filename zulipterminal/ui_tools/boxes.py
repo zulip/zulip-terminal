@@ -778,7 +778,7 @@ class WriteBox(urwid.Pile):
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
-            self.view.middle_column.set_focus("body")
+            self.view.center_panel.set_focus("body")
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
@@ -1796,7 +1796,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(mention)
             )
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("QUOTE_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
@@ -1824,7 +1824,7 @@ class MessageBox(urwid.Pile):
 
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
@@ -1915,7 +1915,7 @@ class MessageBox(urwid.Pile):
                 write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
@@ -1965,13 +1965,13 @@ class SearchBox(urwid.Pile):
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
-            self.controller.view.middle_column.set_focus("body")
+            self.controller.view.center_panel.set_focus("body")
             return key
 
         elif is_command_key("ENTER", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
-            self.controller.view.middle_column.set_focus("body")
+            self.controller.view.center_panel.set_focus("body")
             return key
 
         key = super().keypress(size, key)
@@ -2000,7 +2000,7 @@ class PanelSearchBox(urwid.Pile):
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
 
-        self.search_box = urwid.Edit(caption=" > ", edit_text="")
+        self.search_box = urwid.Edit(caption=" ", edit_text="")
         urwid.connect_signal(self.search_box, "change", update_function)
 
         super().__init__([self.caption_box])
@@ -2009,8 +2009,8 @@ class PanelSearchBox(urwid.Pile):
         if len(self.contents) == 2:
             self.contents.pop()
         self.contents.append((self.search_box, self.options()))
-        self.search_box.set_caption(" ")
         self.focus_position = 1
+        self.search_box.set_caption(" ")
 
     def exit_search_mode(self) -> None:
         self.search_box.set_edit_text("")

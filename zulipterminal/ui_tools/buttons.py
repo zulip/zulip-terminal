@@ -90,7 +90,7 @@ class TopButton(urwid.Button):
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
         self.controller.view.show_right_panel(visible=False)
-        self.controller.view.body.focus_col = 1
+        self.controller.view.body.focus_col = 2
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
