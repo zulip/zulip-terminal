@@ -471,6 +471,11 @@ class WriteBox(urwid.Pile):
         #        anything; this implementation simply chooses the right-most
         #        match of the longest length
         prefix_indices = {prefix: text.rfind(prefix) for prefix in autocomplete_map}
+
+        text = self.validate_and_patch_autocomplete_stream_and_topic(
+            text, autocomplete_map, prefix_indices
+        )
+
         found_prefix_indices = {
             prefix: index for prefix, index in prefix_indices.items() if index > -1
         }
@@ -620,6 +625,25 @@ class WriteBox(urwid.Pile):
         topic_typeaheads = format_string(topic_suggestions, prefix_string + "{}**")
 
         return topic_typeaheads, topic_suggestions
+
+    def validate_and_patch_autocomplete_stream_and_topic(
+        self,
+        text: str,
+        autocomplete_map: "OrderedDict[str, Callable[..., Any]]",
+        prefix_indices: Dict[str, int],
+    ) -> str:
+        """
+        Checks if a prefix string is possible candidate for stream+topic autocomplete.
+        If the prefix matches, we update the autocomplete_map and prefix_indices,
+        and return the (updated) text.
+        """
+        match = re.search(REGEX_STREAM_AND_TOPIC_FENCED_HALF, text)
+        if match:
+            prefix = f"#**{match.group(1)}>"
+            autocomplete_map.update({prefix: self.autocomplete_stream_and_topic})
+            prefix_indices[prefix] = match.start()
+
+        return text
 
     def autocomplete_emojis(
         self, text: str, prefix_string: str
