@@ -20,6 +20,7 @@ from zulipterminal.config.keys import (
     keys_for_command,
     primary_key_for_command,
 )
+from zulipterminal.config.regexes import REGEX_CLEANED_RECIPIENT, REGEX_RECIPIENT_EMAIL
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
     MESSAGE_CONTENT_MARKER,
@@ -250,7 +251,7 @@ class WriteBox(urwid.Pile):
         urwid.connect_signal(self.msg_write_box, "change", on_type_send_status)
 
     def update_recipient_emails(self, write_box: ReadlineEdit) -> None:
-        self.recipient_emails = re.findall(r"[\w\.-]+@[\w\.-]+", write_box.edit_text)
+        self.recipient_emails = re.findall(REGEX_RECIPIENT_EMAIL, write_box.edit_text)
 
     def _tidy_valid_recipients_and_notify_invalid_ones(
         self, write_box: ReadlineEdit
@@ -265,9 +266,7 @@ class WriteBox(urwid.Pile):
         ]
 
         for recipient in recipients:
-            cleaned_recipient_list = re.findall(
-                r"^(.*?)(?:\s*?<?([\w\.-]+@[\w\.-]+)>?(.*))?$", recipient
-            )
+            cleaned_recipient_list = re.findall(REGEX_CLEANED_RECIPIENT, recipient)
             recipient_name, recipient_email, invalid_text = cleaned_recipient_list[0]
             # Discard invalid_text as part of tidying up the recipient.
 
