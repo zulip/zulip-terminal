@@ -1,7 +1,11 @@
 import datetime
+from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Optional
 
 import pytest
 from pytest import param as case
+from pytest_mock import MockerFixture
+from urwid import Widget
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
@@ -9,7 +13,9 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
+from zulipterminal.helper import Index
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
+from zulipterminal.urwid_types import urwid_Size
 
 
 MODULE = "zulipterminal.ui_tools.boxes"
@@ -18,20 +24,22 @@ WRITEBOX = MODULE + ".WriteBox"
 
 class TestWriteBox:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, initial_index):
+    def mock_external_classes(
+        self, mocker: MockerFixture, initial_index: Index
+    ) -> None:
         self.view = mocker.Mock()
         self.view.model = mocker.Mock()
 
     @pytest.fixture()
     def write_box(
         self,
-        mocker,
-        users_fixture,
-        user_groups_fixture,
-        streams_fixture,
-        unicode_emojis,
-        user_dict,
-    ):
+        mocker: MockerFixture,
+        users_fixture: List[Dict[str, Any]],
+        user_groups_fixture: List[Dict[str, Any]],
+        streams_fixture: List[Dict[str, Any]],
+        unicode_emojis: "OrderedDict[str, Dict[str, Any]]",
+        user_dict: Dict[str, Dict[str, Any]],
+    ) -> WriteBox:
         self.view.model.active_emoji_data = unicode_emojis
         self.view.model.all_emoji_names = list(unicode_emojis.keys())
         write_box = WriteBox(self.view)
@@ -52,7 +60,7 @@ class TestWriteBox:
 
         return write_box
 
-    def test_init(self, write_box):
+    def test_init(self, write_box: WriteBox) -> None:
         assert write_box.model == self.view.model
         assert write_box.view == self.view
         assert write_box.compose_box_status == "closed"
@@ -67,7 +75,9 @@ class TestWriteBox:
         assert write_box.idle_status_tracking is False
         assert write_box.sent_start_typing_status is False
 
-    def test_not_calling_typing_method_without_recipients(self, mocker, write_box):
+    def test_not_calling_typing_method_without_recipients(
+        self, mocker: MockerFixture, write_box: WriteBox
+    ) -> None:
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
         write_box.private_box_view(recipient_user_ids=[])
         # Set idle_status_tracking to True to avoid setting off the
@@ -118,13 +128,13 @@ class TestWriteBox:
     )
     def test_generic_autocomplete_stream_and_topic(
         self,
-        write_box,
-        text,
-        state,
-        is_valid_stream,
-        required_typeahead,
-        topics,
-    ):
+        write_box: WriteBox,
+        text: str,
+        state: Optional[int],
+        is_valid_stream: bool,
+        required_typeahead: Optional[str],
+        topics: List[str],
+    ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         write_box.model.is_valid_stream.return_value = is_valid_stream
 
@@ -142,14 +152,14 @@ class TestWriteBox:
     )
     def test_not_calling_typing_method_to_oneself(
         self,
-        mocker,
-        write_box,
-        expect_method_called,
-        logged_on_user,
-        user_ids,
-        typing_recipient_user_ids,
-        user_id_email_dict,
-    ):
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        expect_method_called: bool,
+        logged_on_user: Dict[str, Any],
+        user_ids: List[int],
+        typing_recipient_user_ids: List[int],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.model.user_id = logged_on_user["user_id"]
@@ -177,8 +187,12 @@ class TestWriteBox:
 
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_not_calling_send_private_message_without_recipients(
-        self, key, mocker, write_box, widget_size
-    ):
+        self,
+        key: str,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         write_box.model.send_private_message = mocker.Mock()
         write_box.private_box_view(recipient_user_ids=[])
         write_box.msg_write_box.edit_text = "random text"
@@ -190,8 +204,13 @@ class TestWriteBox:
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test__compose_attributes_reset_for_private_compose(
-        self, key, mocker, write_box, widget_size, user_id_email_dict
-    ):
+        self,
+        key: str,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
         mocker.patch("urwid.connect_signal")
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.private_box_view(recipient_user_ids=[11])
@@ -206,8 +225,12 @@ class TestWriteBox:
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
     def test__compose_attributes_reset_for_stream_compose(
-        self, key, mocker, write_box, widget_size
-    ):
+        self,
+        key: str,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(stream_id=1)
         write_box.msg_write_box.edit_text = "random text"
@@ -270,8 +293,14 @@ class TestWriteBox:
         + keys_for_command("CYCLE_COMPOSE_FOCUS"),
     )
     def test_tidying_recipients_on_keypresses(
-        self, mocker, write_box, widget_size, key, raw_recipients, tidied_recipients
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        key: str,
+        raw_recipients: str,
+        tidied_recipients: str,
+    ) -> None:
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=True)
         write_box.private_box_view()
         assert write_box.to_write_box is not None
@@ -303,13 +332,13 @@ class TestWriteBox:
     )
     def test_footer_notification_on_invalid_recipients(
         self,
-        write_box,
-        key,
-        mocker,
-        widget_size,
-        raw_recipients,
-        invalid_recipients,
-    ):
+        write_box: WriteBox,
+        key: str,
+        mocker: MockerFixture,
+        widget_size: Callable[[Widget], urwid_Size],
+        raw_recipients: str,
+        invalid_recipients: str,
+    ) -> None:
 
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=False)
         write_box.private_box_view()
@@ -357,8 +386,12 @@ class TestWriteBox:
         ],
     )
     def test_update_recipients(
-        self, write_box, header, expected_recipient_emails, expected_recipient_user_ids
-    ):
+        self,
+        write_box: WriteBox,
+        header: str,
+        expected_recipient_emails: List[str],
+        expected_recipient_user_ids: List[int],
+    ) -> None:
         write_box.private_box_view()
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
@@ -375,7 +408,9 @@ class TestWriteBox:
             ("Plain Text", 1),
         ],
     )
-    def test_generic_autocomplete_no_prefix(self, write_box, text, state):
+    def test_generic_autocomplete_no_prefix(
+        self, write_box: WriteBox, text: str, state: Optional[int]
+    ) -> None:
         return_val = write_box.generic_autocomplete(text, state)
         assert return_val == text
         write_box.view.set_typeahead_footer.assert_not_called()
@@ -494,8 +529,13 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_set_footer(
-        self, mocker, write_box, state, footer_text, text
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        state: Optional[int],
+        footer_text: List[Any],
+        text: str,
+    ) -> None:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
         )
@@ -608,8 +648,12 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_mentions(
-        self, write_box, text, required_typeahead, state
-    ):
+        self,
+        write_box: WriteBox,
+        text: str,
+        required_typeahead: Optional[str],
+        state: Optional[int],
+    ) -> None:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
@@ -627,8 +671,13 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_mentions_subscribers(
-        self, write_box, text, required_typeahead, state, recipients
-    ):
+        self,
+        write_box: WriteBox,
+        text: str,
+        required_typeahead: str,
+        state: Optional[int],
+        recipients: List[int],
+    ) -> None:
         write_box.recipient_user_ids = recipients
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
@@ -644,8 +693,13 @@ class TestWriteBox:
         + [("@_" + "Human"[:index], "@_") for index in range(len("Human") + 1)],
     )
     def test_generic_autocomplete_user_mentions(
-        self, write_box, mocker, text, expected_distinct_prefix, state=1
-    ):
+        self,
+        write_box: WriteBox,
+        mocker: MockerFixture,
+        text: str,
+        expected_distinct_prefix: str,
+        state: Optional[int] = 1,
+    ) -> None:
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box.generic_autocomplete(text, state)
@@ -738,8 +792,13 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_streams(
-        self, write_box, text, state, required_typeahead, to_pin
-    ):
+        self,
+        write_box: WriteBox,
+        text: str,
+        state: Optional[int],
+        required_typeahead: Optional[str],
+        to_pin: List[str],
+    ) -> None:
         streams_to_pin = [{"name": stream_name} for stream_name in to_pin]
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
@@ -775,8 +834,12 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_emojis(
-        self, write_box, text, state, required_typeahead
-    ):
+        self,
+        write_box: WriteBox,
+        text: str,
+        state: Optional[int],
+        required_typeahead: Optional[str],
+    ) -> None:
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
@@ -808,8 +871,14 @@ class TestWriteBox:
         ],
     )
     def test__to_box_autocomplete(
-        self, mocker, write_box, text, matching_users, matching_users_info, state=1
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        text: str,
+        matching_users: List[str],
+        matching_users_info: List[str],
+        state: Optional[int] = 1,
+    ) -> None:
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
@@ -827,8 +896,13 @@ class TestWriteBox:
         ],
     )
     def test__to_box_autocomplete_with_spaces(
-        self, write_box, text, expected_text, widget_size, user_id_email_dict
-    ):
+        self,
+        write_box: WriteBox,
+        text: str,
+        expected_text: str,
+        widget_size: Callable[[Widget], urwid_Size],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.private_box_view(recipient_user_ids=[1])
         assert write_box.to_write_box is not None
@@ -915,8 +989,14 @@ class TestWriteBox:
         ],
     )
     def test__to_box_autocomplete_with_multiple_recipients(
-        self, mocker, write_box, text, matching_users, matching_users_info, state=1
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        text: str,
+        matching_users: List[str],
+        matching_users_info: List[str],
+        state: Optional[int] = 1,
+    ) -> None:
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
         write_box._to_box_autocomplete(text, state)
@@ -961,8 +1041,14 @@ class TestWriteBox:
         ],
     )
     def test__stream_box_autocomplete(
-        self, mocker, write_box, text, state, to_pin, matching_streams
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        text: str,
+        state: Optional[int],
+        to_pin: List[str],
+        matching_streams: List[str],
+    ) -> None:
         streams_to_pin = [{"name": stream_name} for stream_name in to_pin]
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
@@ -990,14 +1076,14 @@ class TestWriteBox:
     )
     def test__set_stream_write_box_style_markers(
         self,
-        write_box,
-        stream_id,
-        stream_name,
-        is_valid_stream,
-        expected_marker,
-        stream_dict,
-        expected_color,
-    ):
+        write_box: WriteBox,
+        stream_id: int,
+        stream_name: str,
+        is_valid_stream: bool,
+        expected_marker: str,
+        stream_dict: Dict[int, Any],
+        expected_color: str,
+    ) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
         write_box.model.stream_dict = stream_dict
         write_box.model.is_valid_stream.return_value = is_valid_stream
@@ -1020,8 +1106,13 @@ class TestWriteBox:
         ],
     )
     def test__stream_box_autocomplete_with_spaces(
-        self, mocker, write_box, widget_size, text, expected_text
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        text: str,
+        expected_text: str,
+    ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         stream_focus = write_box.FOCUS_HEADER_BOX_STREAM
@@ -1047,8 +1138,14 @@ class TestWriteBox:
         ],
     )
     def test__topic_box_autocomplete(
-        self, mocker, write_box, text, topics, matching_topics, state=1
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        text: str,
+        topics: List[str],
+        matching_topics: List[str],
+        state: Optional[int] = 1,
+    ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
@@ -1066,8 +1163,14 @@ class TestWriteBox:
         ],
     )
     def test__topic_box_autocomplete_with_spaces(
-        self, mocker, write_box, widget_size, text, expected_text, topics
-    ):
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        text: str,
+        expected_text: str,
+        topics: List[str],
+    ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(1000)
         write_box.model.topics_in_stream.return_value = topics
@@ -1101,14 +1204,14 @@ class TestWriteBox:
     )
     def test__process_typeaheads(
         self,
-        write_box,
-        suggestions,
-        state,
-        expected_state,
-        expected_typeahead,
-        is_truncated,
-        mocker,
-    ):
+        write_box: WriteBox,
+        suggestions: List[str],
+        state: Optional[int],
+        expected_state: Optional[int],
+        expected_typeahead: Optional[str],
+        is_truncated: bool,
+        mocker: MockerFixture,
+    ) -> None:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
         )
@@ -1144,15 +1247,15 @@ class TestWriteBox:
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
     def test_keypress_SEND_MESSAGE_no_topic(
         self,
-        mocker,
-        write_box,
-        msg_edit_state,
-        topic_entered_by_user,
-        topic_sent_to_server,
-        key,
-        widget_size,
-        propagate_mode="change_one",
-    ):
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        msg_edit_state: Optional[_MessageEditState],
+        topic_entered_by_user: str,
+        topic_sent_to_server: str,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+        propagate_mode: str = "change_one",
+    ) -> None:
         write_box.stream_write_box = mocker.Mock()
         write_box.msg_write_box = mocker.Mock(edit_text="")
         write_box.title_write_box = mocker.Mock(edit_text=topic_entered_by_user)
@@ -1193,13 +1296,13 @@ class TestWriteBox:
     )
     def test_keypress_typeahead_mode_autocomplete_key(
         self,
-        write_box,
-        widget_size,
-        current_typeahead_mode,
-        expected_typeahead_mode,
-        expect_footer_was_reset,
-        key,
-    ):
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        current_typeahead_mode: bool,
+        expected_typeahead_mode: bool,
+        expect_footer_was_reset: bool,
+        key: str,
+    ) -> None:
         write_box.is_in_typeahead_mode = current_typeahead_mode
         size = widget_size(write_box)
 
@@ -1337,19 +1440,19 @@ class TestWriteBox:
     @pytest.mark.parametrize("tab_key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
     def test_keypress_CYCLE_COMPOSE_FOCUS(
         self,
-        write_box,
-        tab_key,
-        initial_focus_name,
-        expected_focus_name,
-        initial_focus_col_name,
-        expected_focus_col_name,
-        box_type,
-        msg_body_edit_enabled,
-        message_being_edited,
-        widget_size,
-        mocker,
-        stream_id=10,
-    ):
+        write_box: WriteBox,
+        tab_key: str,
+        initial_focus_name: str,
+        expected_focus_name: str,
+        initial_focus_col_name: str,
+        expected_focus_col_name: str,
+        box_type: str,
+        msg_body_edit_enabled: bool,
+        message_being_edited: bool,
+        widget_size: Callable[[Widget], urwid_Size],
+        mocker: MockerFixture,
+        stream_id: int = 10,
+    ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
 
         if box_type == "stream":
@@ -1389,7 +1492,9 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
-    def test_keypress_MARKDOWN_HELP(self, write_box, key, widget_size):
+    def test_keypress_MARKDOWN_HELP(
+        self, write_box: WriteBox, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
         size = widget_size(write_box)
 
         write_box.keypress(size, key)
@@ -1410,8 +1515,13 @@ class TestWriteBox:
         ],
     )
     def test_write_box_header_contents(
-        self, write_box, expected_box_size, mocker, msg_type, user_id_email_dict
-    ):
+        self,
+        write_box: WriteBox,
+        expected_box_size: int,
+        mocker: MockerFixture,
+        msg_type: str,
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         mocker.patch(WRITEBOX + ".set_editor_mode")
         write_box.model.user_id_email_dict = user_id_email_dict
@@ -1429,19 +1539,19 @@ class TestPanelSearchBox:
     search_caption = " Search Results  "
 
     @pytest.fixture
-    def panel_search_box(self, mocker):
+    def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
         # X is the return from keys_for_command("UNTESTED_TOKEN")
         mocker.patch(MODULE + ".keys_for_command", return_value="X")
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
 
-    def test_init(self, panel_search_box):
+    def test_init(self, panel_search_box: PanelSearchBox) -> None:
         assert panel_search_box.search_text == " Search [X]: "
         assert panel_search_box.caption == panel_search_box.search_text
         assert panel_search_box.edit_text == ""
 
-    def test_reset_search_text(self, panel_search_box):
+    def test_reset_search_text(self, panel_search_box: PanelSearchBox) -> None:
         panel_search_box.set_caption(self.search_caption)
         panel_search_box.edit_text = "key words"
 
@@ -1467,8 +1577,12 @@ class TestPanelSearchBox:
         ],
     )
     def test_valid_char(
-        self, panel_search_box, search_text, entered_string, expected_result
-    ):
+        self,
+        panel_search_box: PanelSearchBox,
+        search_text: str,
+        entered_string: str,
+        expected_result: bool,
+    ) -> None:
         panel_search_box.edit_text = search_text
 
         result = panel_search_box.valid_char(entered_string)
@@ -1480,8 +1594,13 @@ class TestPanelSearchBox:
     )
     @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
     def test_keypress_ENTER(
-        self, panel_search_box, widget_size, enter_key, log, expect_body_focus_set
-    ):
+        self,
+        panel_search_box: PanelSearchBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        enter_key: str,
+        log: List[str],
+        expect_body_focus_set: bool,
+    ) -> None:
         size = widget_size(panel_search_box)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = lambda: True
         panel_search_box.panel_view.log = log
@@ -1513,7 +1632,12 @@ class TestPanelSearchBox:
             panel_view.body.set_focus.assert_not_called()
 
     @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, panel_search_box, back_key, widget_size):
+    def test_keypress_GO_BACK(
+        self,
+        panel_search_box: PanelSearchBox,
+        back_key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         size = widget_size(panel_search_box)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = lambda: True
         panel_search_box.panel_view.view.controller.is_any_popup_open = lambda: False
