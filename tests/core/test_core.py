@@ -571,10 +571,13 @@ class TestController:
         if active_conversation_info:
             set_footer_text.assert_has_calls(
                 [
+                    mocker.call([("footer_contrast", " hamlet "), " is typing"]),
+                    mocker.call([("footer_contrast", " hamlet "), " is typing."]),
+                    mocker.call([("footer_contrast", " hamlet "), " is typing.."]),
                     mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
-                    mocker.call(),
                 ]
             )
+            set_footer_text.assert_called_with()
         else:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False

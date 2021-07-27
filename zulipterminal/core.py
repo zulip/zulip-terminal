@@ -1,3 +1,4 @@
+import itertools
 import os
 import signal
 import sys
@@ -396,6 +397,7 @@ class Controller:
     @asynch
     def show_typing_notification(self) -> None:
         self.is_typing_notification_in_progress = True
+        dots = itertools.cycle(["", ".", "..", "..."])
 
         # Until conversation becomes "inactive" like when a `stop` event is sent
         while self.active_conversation_info:
@@ -403,7 +405,7 @@ class Controller:
             self.view.set_footer_text(
                 [
                     ("footer_contrast", " " + sender_name + " "),
-                    " is typing...",
+                    " is typing" + next(dots),
                 ]
             )
             time.sleep(0.45)
