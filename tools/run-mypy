@@ -134,6 +134,7 @@ type_consistent_testfiles = [
     "test_buttons.py",
     "test_utils.py",
     "conftest.py",
+    "test_boxes.py",
 ]
 
 for file_path in python_files:
