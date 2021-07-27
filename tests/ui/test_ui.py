@@ -6,7 +6,7 @@ from urwid import Widget
 
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
-from zulipterminal.ui import View
+from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, View
 from zulipterminal.urwid_types import urwid_Box
 
 
@@ -190,7 +190,7 @@ class TestView:
         expected_column_calls = [
             mocker.call(
                 [
-                    (View.LEFT_WIDTH, left()),
+                    (LEFT_WIDTH, left()),
                     ("weight", 10, mocker.ANY),  # ANY is a center
                     (0, right()),
                 ],
@@ -215,7 +215,7 @@ class TestView:
         )
 
     @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize("visible, width", [(True, View.LEFT_WIDTH), (False, 0)])
+    @pytest.mark.parametrize("visible, width", [(True, LEFT_WIDTH), (False, 0)])
     def test_show_left_panel(
         self,
         mocker: MockerFixture,
@@ -242,7 +242,7 @@ class TestView:
             view.body.options.assert_not_called()
 
     @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize("visible, width", [(True, View.RIGHT_WIDTH), (False, 0)])
+    @pytest.mark.parametrize("visible, width", [(True, RIGHT_WIDTH), (False, 0)])
     def test_show_right_panel(
         self,
         mocker: MockerFixture,
