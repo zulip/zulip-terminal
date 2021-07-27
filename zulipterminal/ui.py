@@ -21,13 +21,14 @@ from zulipterminal.ui_tools.views import (
 from zulipterminal.urwid_types import urwid_Box
 
 
+LEFT_WIDTH = 27
+RIGHT_WIDTH = 23
+
+
 class View(urwid.WidgetWrap):
     """
     A class responsible for providing the application's interface.
     """
-
-    LEFT_WIDTH = 27
-    RIGHT_WIDTH = 23
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
@@ -135,15 +136,15 @@ class View(urwid.WidgetWrap):
         self.right_panel = self.right_column_view()
         if self.controller.autohide:
             body = [
-                (View.LEFT_WIDTH, self.left_panel),
+                (LEFT_WIDTH, self.left_panel),
                 ("weight", 10, self.center_panel),
                 (0, self.right_panel),
             ]
         else:
             body = [
-                (View.LEFT_WIDTH, self.left_panel),
+                (LEFT_WIDTH, self.left_panel),
                 ("weight", 10, self.center_panel),
-                (View.RIGHT_WIDTH, self.right_panel),
+                (RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
 
@@ -178,7 +179,7 @@ class View(urwid.WidgetWrap):
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-        width = View.LEFT_WIDTH if visible else 0
+        width = LEFT_WIDTH if visible else 0
         self.body.contents[0] = (
             self.left_panel,
             self.body.options(width_type="given", width_amount=width),
@@ -189,7 +190,7 @@ class View(urwid.WidgetWrap):
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-        width = View.RIGHT_WIDTH if visible else 0
+        width = RIGHT_WIDTH if visible else 0
         self.body.contents[2] = (
             self.right_panel,
             self.body.options(width_type="given", width_amount=width),
