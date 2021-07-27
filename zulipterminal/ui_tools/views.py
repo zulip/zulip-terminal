@@ -1,7 +1,7 @@
 import threading
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import pytz
 import urwid
@@ -48,7 +48,7 @@ from zulipterminal.ui_tools.buttons import (
     UserButton,
 )
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.urwid_types import urwid_Size
+from zulipterminal.urwid_types import urwid_Size, urwidTextMarkup
 
 
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
@@ -944,7 +944,7 @@ class LeftColumnView(urwid.Pile):
         return super().keypress(size, key)
 
 
-PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, str]]]]]
+PopUpViewTableContent = Sequence[Tuple[str, urwidTextMarkup]]
 
 
 class PopUpView(urwid.Frame):
@@ -1073,7 +1073,7 @@ class PopUpView(urwid.Frame):
 
 class NoticeView(PopUpView):
     def __init__(
-        self, controller: Any, notice_text: str, width: int, title: str
+        self, controller: Any, notice_text: urwidTextMarkup, width: int, title: str
     ) -> None:
         widgets = [
             urwid.Divider(),
@@ -1638,7 +1638,7 @@ class EditHistoryView(PopUpView):
             widgets.append(self._make_edit_block(snapshot, tag))
 
         if not widgets:
-            feedback = [
+            feedback: urwidTextMarkup = [
                 "Could not find any message history. See ",
                 ("msg_bold", "footer"),
                 " for the error message.",
@@ -1648,7 +1648,7 @@ class EditHistoryView(PopUpView):
         super().__init__(controller, widgets, "MSG_INFO", width, title)
 
     def _make_edit_block(self, snapshot: Dict[str, Any], tag: EditHistoryTag) -> Any:
-        content = snapshot["content"]
+        content: urwidTextMarkup = snapshot["content"]
         topic = snapshot["topic"]
         date_and_time = self.controller.model.formatted_local_time(
             snapshot["timestamp"], show_seconds=True
@@ -1787,7 +1787,9 @@ class FullRawMsgView(PopUpView):
         msg_box = MessageBox(message, controller.model, None)
 
         # Get raw message content widget list
-        response = controller.model.fetch_raw_message_content(message["id"])
+        response = controller.model.fetch_raw_message_content(
+            message["id"]
+        )  # type: Optional[urwidTextMarkup]
 
         if response is None:
             return
