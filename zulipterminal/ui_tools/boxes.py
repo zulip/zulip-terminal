@@ -1931,18 +1931,16 @@ class SearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
-        self.text_box = ReadlineEdit(f"{search_text} ")
-        # Add some text so that when packing,
-        # urwid doesn't hide the widget.
-        self.conversation_focus = urwid.Text(" ")
+        self.text_box = ReadlineEdit(" ")
+        self.search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] "
         self.search_bar = urwid.Columns(
             [
-                ("pack", self.conversation_focus),
-                ("pack", urwid.Text("  ")),
                 self.text_box,
+                urwid.Text(self.search_hint, align="right"),
             ]
         )
+        # Add some text so that when packing,
+        # urwid doesn't hide the widget.
         self.msg_narrow = urwid.Text("DONT HIDE")
         self.recipient_bar = urwid.LineBox(
             self.msg_narrow,
@@ -1957,6 +1955,9 @@ class SearchBox(urwid.Pile):
             brcorner="─",
         )
         return [self.search_bar, self.recipient_bar]
+
+    def set_conversation_focus(self, markup) -> None:
+        self.text_box.set_caption([markup, " "])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (

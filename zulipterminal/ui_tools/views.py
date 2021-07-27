@@ -242,9 +242,7 @@ class MessageView(urwid.ListBox):
         # at the bottom of the view.
         recipient_bar = message_view.top_header_bar(message_view)
         top_header = message_view.top_search_bar()
-        self.model.controller.view.search_box.conversation_focus.set_text(
-            top_header.markup
-        )
+        self.model.controller.view.search_box.set_conversation_focus(top_header.markup)
         self.model.controller.view.search_box.msg_narrow.set_text(recipient_bar.markup)
         self.model.controller.update_screen()
 
