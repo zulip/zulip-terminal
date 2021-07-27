@@ -34,6 +34,7 @@ from zulipterminal.ui_tools.views import (
     StreamMembersView,
     UserInfoView,
 )
+from zulipterminal.urwid_types import urwidTextMarkup
 from zulipterminal.version import ZT_VERSION
 
 
@@ -208,7 +209,7 @@ class Controller:
             bline="▄",
             brcorner="▟",
         )
-        text = urwid.Text(to_show.title, align="center")
+        text: urwidTextMarkup = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
         title_box = urwid.LineBox(
@@ -384,19 +385,19 @@ class Controller:
             # Set a footer text if no runnable browser is located
             self.report_error(f"ERROR: {e}")
 
-    def report_error(self, text: str) -> None:
+    def report_error(self, text: urwidTextMarkup) -> None:
         """
         Helper to show an error message in footer
         """
         self.view.set_footer_text(text, "task:error", 3)
 
-    def report_success(self, text: str) -> None:
+    def report_success(self, text: urwidTextMarkup) -> None:
         """
         Helper to show a success message in footer
         """
         self.view.set_footer_text(text, "task:success", 3)
 
-    def report_warning(self, text: str) -> None:
+    def report_warning(self, text: urwidTextMarkup) -> None:
         """
         Helper to show a warning message in footer
         """
@@ -418,7 +419,7 @@ class Controller:
             self.view.message_view.set_focus(focus_position)
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
-        question = urwid.Text(
+        question: urwidTextMarkup = urwid.Text(
             "Save this message as a draft? (This will overwrite the existing draft.)"
         )
         save_draft = partial(self.model.save_draft, draft)
@@ -429,7 +430,7 @@ class Controller:
     ) -> None:
         currently_muted = self.model.is_muted_stream(stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"
-        question = urwid.Text(
+        question: urwidTextMarkup = urwid.Text(
             ("bold", f"Confirm {type_of_action} of stream '{stream_name}' ?"),
             "center",
         )

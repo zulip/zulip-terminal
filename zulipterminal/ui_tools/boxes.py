@@ -4,7 +4,7 @@ import unicodedata
 from collections import Counter, OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from time import sleep, time
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import dateutil.parser
@@ -46,7 +46,7 @@ from zulipterminal.helper import (
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
-from zulipterminal.urwid_types import urwid_Size
+from zulipterminal.urwid_types import urwid_Size, urwidTextMarkup
 
 
 if typing.TYPE_CHECKING:
@@ -884,7 +884,7 @@ class MessageBox(urwid.Pile):
         assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]["color"]
         bar_color = f"s{color}"
-        stream_title_markup = (
+        stream_title_markup: urwidTextMarkup = (
             "bar",
             [
                 (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
@@ -903,7 +903,7 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
-        title_markup = (
+        title_markup: urwidTextMarkup = (
             "header",
             [("general_narrow", "You and "), ("general_narrow", self.recipients_names)],
         )
@@ -960,6 +960,7 @@ class MessageBox(urwid.Pile):
         else:
             text_to_fill = "Private conversation"
 
+        title_markup: urwidTextMarkup
         if is_search_narrow:
             title_markup = (
                 "header",
@@ -1001,7 +1002,7 @@ class MessageBox(urwid.Pile):
                 for reaction, ids in sorted_stats
             ]
 
-            spaced_reaction_texts = [
+            spaced_reaction_texts: urwidTextMarkup = [
                 entry
                 for pair in zip(reaction_texts, " " * len(reaction_texts))
                 for entry in pair
@@ -1079,11 +1080,13 @@ class MessageBox(urwid.Pile):
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
     ) -> Tuple[
-        List[Any], "OrderedDict[str, Tuple[str, int, bool]]", List[Tuple[str, str]]
+        List[urwidTextMarkup],
+        "OrderedDict[str, Tuple[str, int, bool]]",
+        List[Tuple[str, str]],
     ]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
-        markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
+        markup: List[urwidTextMarkup] = [""]
         if soup is None:  # This is not iterable, so return promptly
             return markup, metadata["message_links"], metadata["time_mentions"]
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
@@ -1355,7 +1358,7 @@ class MessageBox(urwid.Pile):
         any_differences = any(different.values())
 
         if any_differences:  # Construct content_header, if needed
-            TextType = Dict[str, Tuple[Optional[str], str]]
+            TextType = Dict[str, urwidTextMarkup]
             text_keys = ("author", "star", "time", "status")
             text: TextType = {key: (None, " ") for key in text_keys}
 
@@ -1489,7 +1492,7 @@ class MessageBox(urwid.Pile):
     def transform_content(
         cls, content: Any, server_url: str
     ) -> Tuple[
-        Tuple[None, Any],
+        urwidTextMarkup,
         "OrderedDict[str, Tuple[str, int, bool]]",
         List[Tuple[str, str]],
     ]:

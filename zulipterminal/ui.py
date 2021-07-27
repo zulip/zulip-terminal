@@ -18,7 +18,7 @@ from zulipterminal.ui_tools.views import (
     MiddleColumnView,
     RightColumnView,
 )
-from zulipterminal.urwid_types import urwid_Box
+from zulipterminal.urwid_types import urwid_Box, urwidTextMarkup
 
 
 class View(urwid.WidgetWrap):
@@ -77,7 +77,7 @@ class View(urwid.WidgetWrap):
             brcorner="",
         )
 
-    def get_random_help(self) -> List[Any]:
+    def get_random_help(self) -> urwidTextMarkup:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
         allowed_commands = commands_for_random_tips()
         if not allowed_commands:
@@ -92,7 +92,7 @@ class View(urwid.WidgetWrap):
     @asynch
     def set_footer_text(
         self,
-        text_list: Optional[List[Any]] = None,
+        text_list: Optional[urwidTextMarkup] = None,
         style: str = "footer",
         duration: Optional[float] = None,
     ) -> None:
@@ -126,7 +126,7 @@ class View(urwid.WidgetWrap):
         self.set_footer_text(footer_text)
 
     def footer_view(self) -> Any:
-        text_header = self.get_random_help()
+        text_header: urwidTextMarkup = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
 
     def main_window(self) -> Any:
@@ -155,11 +155,13 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
+        title_text: urwidTextMarkup = (
+            " {full_name} ({email}) - {server_name} ({url}) ".format(
+                full_name=self.model.user_full_name,
+                email=self.model.user_email,
+                server_name=self.model.server_name,
+                url=self.model.server_url,
+            )
         )
 
         title_bar = urwid.Columns(
