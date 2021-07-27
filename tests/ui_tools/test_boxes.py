@@ -120,7 +120,6 @@ class TestWriteBox:
         self,
         write_box,
         text,
-        mocker,
         state,
         is_valid_stream,
         required_typeahead,
@@ -373,7 +372,7 @@ class TestWriteBox:
             ("Plain Text", 1),
         ],
     )
-    def test_generic_autocomplete_no_prefix(self, mocker, write_box, text, state):
+    def test_generic_autocomplete_no_prefix(self, write_box, text, state):
         return_val = write_box.generic_autocomplete(text, state)
         assert return_val == text
         write_box.view.set_typeahead_footer.assert_not_called()
@@ -773,7 +772,7 @@ class TestWriteBox:
         ],
     )
     def test_generic_autocomplete_emojis(
-        self, write_box, text, mocker, state, required_typeahead
+        self, write_box, text, state, required_typeahead
     ):
         typeahead_string = write_box.generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
@@ -993,7 +992,6 @@ class TestWriteBox:
         is_valid_stream,
         expected_marker,
         stream_dict,
-        mocker,
         expected_color,
     ):
         # FIXME: Refactor when we have ~ Model.is_private_stream
@@ -1191,7 +1189,6 @@ class TestWriteBox:
     )
     def test_keypress_typeahead_mode_autocomplete_key(
         self,
-        mocker,
         write_box,
         widget_size,
         current_typeahead_mode,
@@ -1388,7 +1385,7 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
-    def test_keypress_MARKDOWN_HELP(self, mocker, write_box, key, widget_size):
+    def test_keypress_MARKDOWN_HELP(self, write_box, key, widget_size):
         size = widget_size(write_box)
 
         write_box.keypress(size, key)
