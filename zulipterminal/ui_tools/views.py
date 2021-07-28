@@ -28,6 +28,7 @@ from zulipterminal.config.ui_mappings import (
     ROLE_BY_ID,
     STATE_ICON,
 )
+from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
     Message,
     TidiedUserInfo,
@@ -1249,7 +1250,7 @@ class PopUpConfirmationView(urwid.Overlay):
             self.controller.view,
             align="left",
             valign="top",
-            width=self.controller.view.LEFT_WIDTH + 1,
+            width=LEFT_WIDTH + 1,
             height=8,
         )
 
