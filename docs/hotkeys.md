@@ -68,6 +68,7 @@
 |Mute/unmute Streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
 |Show/hide stream members (from stream information)|<kbd>m</kbd>|
+|Copy stream email to clipboard (from stream information)|<kbd>c</kbd>|
 
 ## Composing a Message
 |Command|Key Combination|

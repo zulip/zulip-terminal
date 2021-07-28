@@ -259,6 +259,13 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'excluded_from_random_tips': True,
         'key_category': 'stream_list',
     }),
+    ('COPY_STREAM_EMAIL', {
+        'keys': ['c'],
+        'help_text':
+            'Copy stream email to clipboard (from stream information)',
+        'excluded_from_random_tips': True,
+        'key_category': 'stream_list',
+    }),
     ('REDRAW', {
         'keys': ['ctrl l'],
         'help_text': 'Redraw screen',
