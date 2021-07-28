@@ -12,6 +12,7 @@ from zulipterminal.config.symbols import (
     AUTOHIDE_TAB_RIGHT_ARROW,
     COLUMN_TITLE_BAR_LINE,
 )
+from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
 from zulipterminal.helper import asynch
 from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
@@ -22,11 +23,6 @@ from zulipterminal.ui_tools.views import (
     TabView,
 )
 from zulipterminal.urwid_types import urwid_Box
-
-
-TAB_WIDTH = 3
-LEFT_WIDTH = 27
-RIGHT_WIDTH = 23
 
 
 class View(urwid.WidgetWrap):
