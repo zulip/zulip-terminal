@@ -54,6 +54,8 @@ from zulipterminal.urwid_types import urwid_Size
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
+LEFT_WIDTH = 27
+
 
 class ModListWalker(urwid.SimpleFocusListWalker):
     def set_focus(self, position: int) -> None:
@@ -1249,7 +1251,7 @@ class PopUpConfirmationView(urwid.Overlay):
             self.controller.view,
             align="left",
             valign="top",
-            width=self.controller.view.LEFT_WIDTH + 1,
+            width=LEFT_WIDTH + 1,
             height=8,
         )
 
