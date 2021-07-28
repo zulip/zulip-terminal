@@ -77,11 +77,11 @@ class TestTopButton:
         self, mocker, top_button, old_count, new_count, new_count_str, text_color
     ):
         top_button.count = old_count
-        top_button.update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
+        top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
         top_button.update_count(new_count, text_color)
 
-        top_button.update_widget.assert_called_once_with(
+        top_button_update_widget.assert_called_once_with(
             (top_button.count_style, new_count_str),
             text_color,
         )
@@ -779,15 +779,17 @@ class TestMessageLinkButton:
         exit_popup_called,
     ):
         self.controller.loop.widget = mocker.Mock(spec=Overlay)
-        mocker.patch(MSGLINKBUTTON + "._parse_narrow_link")
-        mocker.patch(MSGLINKBUTTON + "._validate_narrow_link", return_value=error)
-        mocker.patch(MSGLINKBUTTON + "._switch_narrow_to")
+        mocked__parse_narrow_link = mocker.patch(MSGLINKBUTTON + "._parse_narrow_link")
+        mocked__validate_narrow_link = mocker.patch(
+            MSGLINKBUTTON + "._validate_narrow_link", return_value=error
+        )
+        mocked__switch_narrow_to = mocker.patch(MSGLINKBUTTON + "._switch_narrow_to")
         mocked_button = self.message_link_button()
 
         mocked_button.handle_narrow_link()
 
-        assert mocked_button._parse_narrow_link.called
-        assert mocked_button._validate_narrow_link.called
+        assert mocked__parse_narrow_link.called
+        assert mocked__validate_narrow_link.called
         assert mocked_button.controller.report_error.called == report_error_called
-        assert mocked_button._switch_narrow_to.called == _switch_narrow_to_called
+        assert mocked__switch_narrow_to.called == _switch_narrow_to_called
         assert mocked_button.controller.exit_popup.called == exit_popup_called
