@@ -1,8 +1,9 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
-from urwid import AttrMap, Overlay
+from pytest_mock import MockerFixture
+from urwid import AttrMap, Overlay, Widget
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.buttons import (
@@ -10,10 +11,12 @@ from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
     ParsedNarrowLink,
     StarredButton,
+    StreamButton,
     TopButton,
     TopicButton,
     UserButton,
 )
+from zulipterminal.urwid_types import urwid_Size
 
 
 MODULE = "zulipterminal.ui_tools.buttons"
@@ -25,13 +28,13 @@ SERVER_URL = "https://chat.zulip.zulip"
 
 class TestTopButton:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.Mock()
         self.show_function = mocker.Mock()
         self.urwid = mocker.patch(MODULE + ".urwid")
 
     @pytest.fixture
-    def top_button(self, mocker):
+    def top_button(self, mocker: MockerFixture) -> TopButton:
         top_button = TopButton(
             controller=self.controller,
             caption="caption",
@@ -41,7 +44,7 @@ class TestTopButton:
         )
         return top_button
 
-    def test_init(self, mocker, top_button):
+    def test_init(self, mocker: MockerFixture, top_button: TopButton) -> None:
 
         assert top_button.controller == self.controller
         assert top_button._caption == "caption"
@@ -74,8 +77,14 @@ class TestTopButton:
         [(10, 11, "11"), (0, 1, "1"), (11, 10, "10"), (1, 0, "")],
     )
     def test_update_count(
-        self, mocker, top_button, old_count, new_count, new_count_str, text_color
-    ):
+        self,
+        mocker: MockerFixture,
+        top_button: TopButton,
+        old_count: int,
+        new_count: int,
+        new_count_str: str,
+        text_color: Optional[str],
+    ) -> None:
         top_button.count = old_count
         top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
@@ -101,14 +110,14 @@ class TestTopButton:
     )
     def test_update_widget(
         self,
-        mocker,
-        top_button,
-        prefix,
-        expected_prefix,
-        text_color,
-        count_text,
-        expected_suffix,
-    ):
+        mocker: MockerFixture,
+        top_button: TopButton,
+        prefix: str,
+        expected_prefix: List[str],
+        text_color: Optional[str],
+        count_text: Tuple[Optional[str], str],
+        expected_suffix: List[Any],
+    ) -> None:
         top_button.prefix_character = prefix
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
@@ -124,14 +133,22 @@ class TestTopButton:
 
 
 class TestStarredButton:
-    def test_count_style_init_argument_value(self, mocker, count=10):
+    def test_count_style_init_argument_value(
+        self, mocker: MockerFixture, count: int = 10
+    ) -> None:
         starred_button = StarredButton(controller=mocker.Mock(), count=count)
         assert starred_button.count_style == "starred_count"
 
 
 class TestStreamButton:
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
-    def test_keypress_ENTER_TOGGLE_TOPIC(self, mocker, stream_button, key, widget_size):
+    def test_keypress_ENTER_TOGGLE_TOPIC(
+        self,
+        mocker: MockerFixture,
+        stream_button: StreamButton,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         size = widget_size(stream_button)
         stream_button.view.left_panel = mocker.Mock()
         stream_button.keypress(size, key)
@@ -143,13 +160,13 @@ class TestStreamButton:
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_MUTE_STREAM"))
     def test_keypress_TOGGLE_MUTE_STREAM(
         self,
-        mocker,
-        key,
-        widget_size,
-        stream_button,
-        stream_id=205,
-        stream_name="PTEST",
-    ):
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+        stream_button: StreamButton,
+        stream_id: int = 205,
+        stream_name: str = "PTEST",
+    ) -> None:
         size = widget_size(stream_button)
         pop_up = mocker.patch(
             "zulipterminal.core.Controller.stream_muting_confirmation_popup"
@@ -163,13 +180,13 @@ class TestUserButton:
     @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
     def test_activate_called_once_on_keypress(
         self,
-        mocker,
-        enter_key,
-        widget_size,
-        caption="some user",
-        email="some_email",
-        user_id=5,
-    ):
+        mocker: MockerFixture,
+        enter_key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+        caption: str = "some user",
+        email: str = "some_email",
+        user_id: int = 5,
+    ) -> None:
         user: Dict[str, Any] = {
             "email": email,
             "user_id": user_id,
@@ -191,7 +208,13 @@ class TestUserButton:
         assert activate.call_count == 1
 
     @pytest.mark.parametrize("key", keys_for_command("USER_INFO"))
-    def test_keypress_USER_INFO(self, mocker, user_button, key, widget_size):
+    def test_keypress_USER_INFO(
+        self,
+        mocker: MockerFixture,
+        user_button: UserButton,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         size = widget_size(user_button)
         pop_up = mocker.patch("zulipterminal.core.Controller.show_user_info")
 
@@ -209,7 +232,14 @@ class TestTopicButton:
             (1000, 205, "topic3", "PTEST"),
         ],
     )
-    def test_init_calls_top_button(self, mocker, count, title, stream_id, stream_name):
+    def test_init_calls_top_button(
+        self,
+        mocker: MockerFixture,
+        count: int,
+        title: str,
+        stream_id: int,
+        stream_name: str,
+    ) -> None:
         controller = mocker.Mock()
         controller.model.stream_dict = {
             205: {"name": "PTEST"},
@@ -251,8 +281,13 @@ class TestTopicButton:
         ],
     )
     def test_init_calls_mark_muted(
-        self, mocker, stream_name, title, is_muted_topic_return_value, is_muted_called
-    ):
+        self,
+        mocker: MockerFixture,
+        stream_name: str,
+        title: str,
+        is_muted_topic_return_value: bool,
+        is_muted_called: bool,
+    ) -> None:
         mark_muted = mocker.patch(MODULE + ".TopicButton.mark_muted")
         controller = mocker.Mock()
         controller.model.is_muted_topic = mocker.Mock(
@@ -273,7 +308,13 @@ class TestTopicButton:
             mark_muted.assert_not_called()
 
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
-    def test_keypress_EXIT_TOGGLE_TOPIC(self, mocker, topic_button, key, widget_size):
+    def test_keypress_EXIT_TOGGLE_TOPIC(
+        self,
+        mocker: MockerFixture,
+        topic_button: TopicButton,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
         size = widget_size(topic_button)
         topic_button.view.left_panel = mocker.Mock()
         topic_button.keypress(size, key)
@@ -282,12 +323,14 @@ class TestTopicButton:
 
 class TestMessageLinkButton:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.Mock()
         self.super_init = mocker.patch(MODULE + ".urwid.Button.__init__")
         self.connect_signal = mocker.patch(MODULE + ".urwid.connect_signal")
 
-    def message_link_button(self, caption="", link="", display_attr=None):
+    def message_link_button(
+        self, caption: str = "", link: str = "", display_attr: Optional[str] = None
+    ) -> MessageLinkButton:
         self.caption = caption
         self.link = link
         self.display_attr = display_attr
@@ -298,7 +341,7 @@ class TestMessageLinkButton:
             display_attr=self.display_attr,
         )
 
-    def test_init(self, mocker):
+    def test_init(self, mocker: MockerFixture) -> None:
         self.update_widget = mocker.patch(MSGLINKBUTTON + ".update_widget")
 
         mocked_button = self.message_link_button()
@@ -319,8 +362,12 @@ class TestMessageLinkButton:
         ],
     )
     def test_update_widget(
-        self, mocker, caption, expected_cursor_position, display_attr=None
-    ):
+        self,
+        mocker: MockerFixture,
+        caption: str,
+        expected_cursor_position: int,
+        display_attr: Optional[str] = None,
+    ) -> None:
         self.selectable_icon = mocker.patch(MODULE + ".urwid.SelectableIcon")
 
         # The method update_widget() is called in MessageLinkButton's init.
@@ -346,7 +393,9 @@ class TestMessageLinkButton:
             "external_link",
         ],
     )
-    def test_handle_link(self, mocker, link, handle_narrow_link_called):
+    def test_handle_link(
+        self, mocker: MockerFixture, link: str, handle_narrow_link_called: bool
+    ) -> None:
         self.controller.model.server_url = SERVER_URL
         self.handle_narrow_link = mocker.patch(MSGLINKBUTTON + ".handle_narrow_link")
         mocked_button = self.message_link_button(link=link)
@@ -366,7 +415,9 @@ class TestMessageLinkButton:
             "stream_data_deprecated_version",
         ],
     )
-    def test__decode_stream_data(self, stream_data, expected_response):
+    def test__decode_stream_data(
+        self, stream_data: str, expected_response: DecodedStream
+    ) -> None:
         return_value = MessageLinkButton._decode_stream_data(stream_data)
 
         assert return_value == expected_response
@@ -378,7 +429,9 @@ class TestMessageLinkButton:
             ("foo", None),
         ],
     )
-    def test__decode_message_id(self, message_id, expected_return_value):
+    def test__decode_message_id(
+        self, message_id: str, expected_return_value: Optional[int]
+    ) -> None:
         return_value = MessageLinkButton._decode_message_id(message_id)
 
         assert return_value == expected_return_value
@@ -446,7 +499,9 @@ class TestMessageLinkButton:
             "invalid_narrow_link_5",
         ],
     )
-    def test__parse_narrow_link(self, link, expected_parsed_link):
+    def test__parse_narrow_link(
+        self, link: str, expected_parsed_link: ParsedNarrowLink
+    ) -> None:
         return_value = MessageLinkButton._parse_narrow_link(link)
 
         assert return_value == expected_parsed_link
@@ -589,13 +644,13 @@ class TestMessageLinkButton:
     )
     def test__validate_narrow_link(
         self,
-        stream_dict,
-        parsed_link,
-        is_user_subscribed_to_stream,
-        is_valid_stream,
-        topics_in_stream,
-        expected_error,
-    ):
+        stream_dict: Dict[int, Any],
+        parsed_link: ParsedNarrowLink,
+        is_user_subscribed_to_stream: Optional[bool],
+        is_valid_stream: Optional[bool],
+        topics_in_stream: Optional[List[str]],
+        expected_error: str,
+    ) -> None:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
@@ -674,14 +729,14 @@ class TestMessageLinkButton:
     )
     def test__validate_and_patch_stream_data(
         self,
-        stream_dict,
-        parsed_link,
-        is_user_subscribed_to_stream,
-        is_valid_stream,
-        stream_id_from_name_return_value,
-        expected_parsed_link,
-        expected_error,
-    ):
+        stream_dict: Dict[int, Any],
+        parsed_link: ParsedNarrowLink,
+        is_user_subscribed_to_stream: Optional[bool],
+        is_valid_stream: Optional[bool],
+        stream_id_from_name_return_value: Optional[int],
+        expected_parsed_link: ParsedNarrowLink,
+        expected_error: str,
+    ) -> None:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
@@ -746,10 +801,10 @@ class TestMessageLinkButton:
     )
     def test__switch_narrow_to(
         self,
-        parsed_link,
-        narrow_to_stream_called,
-        narrow_to_topic_called,
-    ):
+        parsed_link: ParsedNarrowLink,
+        narrow_to_stream_called: bool,
+        narrow_to_topic_called: bool,
+    ) -> None:
         mocked_button = self.message_link_button()
 
         mocked_button._switch_narrow_to(parsed_link)
@@ -772,12 +827,12 @@ class TestMessageLinkButton:
     )
     def test_handle_narrow_link(
         self,
-        mocker,
-        error,
-        report_error_called,
-        _switch_narrow_to_called,
-        exit_popup_called,
-    ):
+        mocker: MockerFixture,
+        error: str,
+        report_error_called: bool,
+        _switch_narrow_to_called: bool,
+        exit_popup_called: bool,
+    ) -> None:
         self.controller.loop.widget = mocker.Mock(spec=Overlay)
         mocked__parse_narrow_link = mocker.patch(MSGLINKBUTTON + "._parse_narrow_link")
         mocked__validate_narrow_link = mocker.patch(
