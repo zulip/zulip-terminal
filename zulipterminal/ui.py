@@ -142,7 +142,7 @@ class View(urwid.WidgetWrap):
         self.right_panel, self.right_tab = self.right_column_view()
         if self.controller.autohide:
             body = [
-                (LEFT_WIDTH, self.left_panel),
+                (TAB_WIDTH, self.left_tab),
                 ("weight", 10, self.center_panel),
                 (TAB_WIDTH, self.right_tab),
             ]
@@ -180,6 +180,10 @@ class View(urwid.WidgetWrap):
         w = urwid.Frame(
             self.body, title_bar, focus_part="body", footer=self.footer_view()
         )
+
+        # Show left panel on startup in autohide mode
+        self.show_left_panel(visible=True)
+
         return w
 
     def show_left_panel(self, *, visible: bool) -> None:
