@@ -179,6 +179,7 @@ class TestView:
         title_divider = mocker.patch(MODULE + ".urwid.Divider")
         text = mocker.patch(MODULE + ".urwid.Text")
         footer_view = mocker.patch(VIEW + ".footer_view")
+        show_left_panel = mocker.patch(VIEW + ".show_left_panel")
 
         full_name = "Bob James"
         email = "Bob@bob.com"
@@ -202,7 +203,7 @@ class TestView:
         expected_column_calls = [
             mocker.call(
                 [
-                    (LEFT_WIDTH, view.left_panel),
+                    (TAB_WIDTH, view.left_tab),
                     ("weight", 10, mocker.ANY),  # ANY is a center
                     (TAB_WIDTH, view.right_tab),
                 ],
@@ -225,6 +226,7 @@ class TestView:
         frame.assert_called_once_with(
             view.body, col(), focus_part="body", footer=footer_view()
         )
+        show_left_panel.assert_called_once_with(visible=True)
 
     @pytest.mark.parametrize("autohide", [True, False])
     @pytest.mark.parametrize("visible, width", [(True, LEFT_WIDTH), (False, TAB_WIDTH)])
