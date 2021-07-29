@@ -82,7 +82,7 @@ class TestView:
 
         view.set_footer_text()
 
-        view._w.footer.set_text.assert_called_once_with(["some help text"])
+        view.frame.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
 
     def test_set_footer_text_specific_text(
@@ -90,7 +90,7 @@ class TestView:
     ) -> None:
         view.set_footer_text([text])
 
-        view._w.footer.set_text.assert_called_once_with([text])
+        view.frame.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
 
     def test_set_footer_text_with_duration(
@@ -105,7 +105,7 @@ class TestView:
 
         view.set_footer_text([custom_text], duration=duration)
 
-        view._w.footer.set_text.assert_has_calls(
+        view.frame.footer.set_text.assert_has_calls(
             [mocker.call([custom_text]), mocker.call(["some help text"])]
         )
         mock_sleep.assert_called_once_with(duration)
@@ -226,6 +226,7 @@ class TestView:
         frame.assert_called_once_with(
             view.body, col(), focus_part="body", footer=footer_view()
         )
+        assert view.frame == frame()
         show_left_panel.assert_called_once_with(visible=True)
 
     @pytest.mark.parametrize("autohide", [True, False])

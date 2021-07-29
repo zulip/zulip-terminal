@@ -107,8 +107,8 @@ class View(urwid.WidgetWrap):
             text = self.get_random_help()
         else:
             text = text_list
-        self._w.footer.set_text(text)
-        self._w.footer.set_attr_map({None: style})
+        self.frame.footer.set_text(text)
+        self.frame.footer.set_attr_map({None: style})
         self.controller.update_screen()
         if duration is not None:
             assert duration > 0
@@ -177,14 +177,14 @@ class View(urwid.WidgetWrap):
             ]
         )
 
-        w = urwid.Frame(
+        self.frame = urwid.Frame(
             self.body, title_bar, focus_part="body", footer=self.footer_view()
         )
 
         # Show left panel on startup in autohide mode
         self.show_left_panel(visible=True)
 
-        return w
+        return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
