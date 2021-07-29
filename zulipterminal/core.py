@@ -5,6 +5,7 @@ import sys
 import time
 import webbrowser
 from collections import OrderedDict
+from datetime import datetime, timedelta
 from functools import partial
 from platform import platform
 from types import TracebackType
@@ -42,6 +43,8 @@ from zulipterminal.version import ZT_VERSION
 
 
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
+
+TYPING_STARTED_EXPIRY_PERIOD = 15
 
 
 class Controller:
@@ -410,12 +413,27 @@ class Controller:
 
     @asynch
     def show_typing_notification(self) -> None:
+        # Restore the footer if there hasn't been a corresponding typing
+        # 'stop' event after a 'start' event for greater than
+        # TYPING_STARTED_EXPIRY_PERIOD. Ref: https://zulip.com/api/set-typing-status.
+        max_duration = timedelta(seconds=TYPING_STARTED_EXPIRY_PERIOD)
+        time_elapsed = timedelta(seconds=0)
+
         self.is_typing_notification_in_progress = True
+        active_conversation_info = self.active_conversation_info
         dots = itertools.cycle(["", ".", "..", "..."])
 
         # Until conversation becomes "inactive" like when a `stop` event is sent
-        while self.active_conversation_info:
-            sender_name = self.active_conversation_info["sender_name"]
+        while active_conversation_info:
+            sender_name = active_conversation_info["sender_name"]
+
+            # If `stop` is not sent for time `max_duration` after most recent update.
+            time_elapsed = (
+                datetime.now() - active_conversation_info["typing_start_time"]
+            )
+            if time_elapsed > max_duration:
+                self.active_conversation_info = {}
+
             self.view.set_footer_text(
                 [
                     ("footer_contrast", " " + sender_name + " "),
@@ -423,6 +441,7 @@ class Controller:
                 ]
             )
             time.sleep(0.45)
+            active_conversation_info = self.active_conversation_info
 
         self.is_typing_notification_in_progress = False
         self.view.set_footer_text()

@@ -1197,6 +1197,7 @@ class Model:
             if event["op"] == "start":
                 sender_name = self.user_dict[sender_email]["full_name"]
                 active_conversation_info["sender_name"] = sender_name
+                active_conversation_info["typing_start_time"] = datetime.now()
 
                 if not controller.is_typing_notification_in_progress:
                     controller.show_typing_notification()

@@ -2535,6 +2535,8 @@ class TestModel:
         model.controller.is_typing_notification_in_progress = (
             is_notification_in_progress
         )
+        mocked_datetime = mocker.patch(MODULE + ".datetime")
+        mocked_datetime.now.return_value = "UNIXTIME"
         show_typing_notification = mocker.patch(
             CONTROLLER + ".show_typing_notification"
         )
@@ -2545,6 +2547,10 @@ class TestModel:
             assert (
                 model.controller.active_conversation_info["sender_name"]
                 == expected_active_conversation_info["sender_name"]
+            )
+            assert (
+                model.controller.active_conversation_info["typing_start_time"]
+                == "UNIXTIME"
             )
         assert show_typing_notification.called == expected_show_typing_notification
 
