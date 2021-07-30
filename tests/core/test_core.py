@@ -1,10 +1,12 @@
 import os
 import webbrowser
 from platform import platform
-from typing import Any, List, Optional, Set, Tuple
+from threading import Thread, Timer
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pyperclip
 import pytest
+from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.themes import generate_theme
@@ -15,6 +17,7 @@ from zulipterminal.version import ZT_VERSION
 
 MODULE = "zulipterminal.core"
 MODEL = MODULE + ".Model"
+VIEW = MODULE + ".View"
 
 SERVER_URL = "https://chat.zulip.zulip"
 
@@ -541,3 +544,38 @@ class TestController:
         popup_size = controller.maximum_popup_dimensions()
 
         assert popup_size == expected_popup_size
+
+    @pytest.mark.parametrize(
+        "active_conversation_info",
+        [
+            case({"sender_name": "hamlet"}, id="in_pm_narrow_with_sender_typing:start"),
+            case({}, id="in_pm_narrow_with_sender_typing:stop"),
+        ],
+    )
+    def test_show_typing_notification(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        active_conversation_info: Dict[str, str],
+    ) -> None:
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        sleep = mocker.patch(MODULE + ".time.sleep")
+        controller.active_conversation_info = active_conversation_info
+
+        def mock_typing() -> None:
+            controller.active_conversation_info = {}
+
+        Timer(0.1, mock_typing).start()
+        Thread(controller.show_typing_notification()).start()
+
+        if active_conversation_info:
+            set_footer_text.assert_has_calls(
+                [
+                    mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
+                    mocker.call(),
+                ]
+            )
+        else:
+            set_footer_text.assert_called_once_with()
+        assert controller.is_typing_notification_in_progress is False
+        assert controller.active_conversation_info == {}

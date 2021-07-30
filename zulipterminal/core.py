@@ -7,7 +7,7 @@ from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pyperclip
 import urwid
@@ -68,6 +68,9 @@ class Controller:
         self.maximum_footlinks = maximum_footlinks
 
         self._editor: Optional[Any] = None
+
+        self.active_conversation_info: Dict[str, Any] = {}
+        self.is_typing_notification_in_progress = False
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
@@ -389,6 +392,24 @@ class Controller:
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
             self.report_error(f"ERROR: {e}")
+
+    @asynch
+    def show_typing_notification(self) -> None:
+        self.is_typing_notification_in_progress = True
+
+        # Until conversation becomes "inactive" like when a `stop` event is sent
+        while self.active_conversation_info:
+            sender_name = self.active_conversation_info["sender_name"]
+            self.view.set_footer_text(
+                [
+                    ("footer_contrast", " " + sender_name + " "),
+                    " is typing...",
+                ]
+            )
+            time.sleep(0.45)
+
+        self.is_typing_notification_in_progress = False
+        self.view.set_footer_text()
 
     def report_error(self, text: str) -> None:
         """
