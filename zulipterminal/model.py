@@ -1182,6 +1182,7 @@ class Model:
 
         narrow = self.narrow
         controller = self.controller
+        active_conversation_info = controller.active_conversation_info
         sender_email = event["sender"]["email"]
         sender_id = event["sender"]["user_id"]
 
@@ -1195,11 +1196,14 @@ class Model:
         ):
             if event["op"] == "start":
                 sender_name = self.user_dict[sender_email]["full_name"]
-                controller.view.set_footer_text(
-                    [" ", ("footer_contrast", sender_name), " is typing..."]
-                )
+                active_conversation_info["sender_name"] = sender_name
+
+                if not controller.is_typing_notification_in_progress:
+                    controller.show_typing_notification()
+
             elif event["op"] == "stop":
-                controller.view.set_footer_text()
+                controller.active_conversation_info = {}
+
             else:
                 raise RuntimeError("Unknown typing event operation")
 

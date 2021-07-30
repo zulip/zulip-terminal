@@ -2375,16 +2375,25 @@ class TestModel:
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
     @pytest.mark.parametrize(
-        "narrow, event, called",
+        (
+            "narrow, event, is_notification_in_progress,"
+            "expected_active_conversation_info, expected_show_typing_notification,"
+        ),
         [
             case(
-                [],
-                {"sender": {"user_id": 4, "email": "hamlet@zulip.com"}},
+                [["stream", "narrow"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "id": 0,
+                },
+                False,
+                {},
                 False,
                 id="not_in_pm_narrow",
             ),
             case(
-                [["pm_with", "iago@zulip.com"]],
+                [["pm_with", "othello@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -2394,6 +2403,8 @@ class TestModel:
                     ],
                     "id": 0,
                 },
+                False,
+                {},
                 False,
                 id="not_in_pm_narrow_with_sender",
             ),
@@ -2408,8 +2419,26 @@ class TestModel:
                     ],
                     "id": 0,
                 },
+                False,
+                {"sender_name": "hamlet"},
                 True,
                 id="in_pm_narrow_with_sender_typing:start",
+            ),
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {"sender_name": "hamlet"},
+                False,
+                id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
             ),
             case(
                 [["pm_with", "hamlet@zulip.com"]],
@@ -2423,6 +2452,8 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                {},
+                False,
                 id="in_pm_narrow_with_sender_typing:stop",
             ),
             case(
@@ -2436,6 +2467,8 @@ class TestModel:
                     ],
                     "id": 0,
                 },
+                False,
+                {},
                 False,
                 id="in_pm_narrow_with_other_myself_typing:start",
             ),
@@ -2451,6 +2484,8 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
+                False,
                 id="in_pm_narrow_with_other_myself_typing:stop",
             ),
             case(
@@ -2461,6 +2496,8 @@ class TestModel:
                     "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
                     "id": 0,
                 },
+                False,
+                {},
                 False,
                 id="in_pm_narrow_with_oneself:start",
             ),
@@ -2473,21 +2510,43 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
+                False,
                 id="in_pm_narrow_with_oneself:stop",
             ),
         ],
     )
-    def test__handle_typing_event(self, mocker, model, narrow, event, called):
+    def test__handle_typing_event(
+        self,
+        mocker,
+        model,
+        narrow,
+        event,
+        is_notification_in_progress,
+        expected_active_conversation_info,
+        expected_show_typing_notification,
+    ):
         event["type"] = "typing"
 
-        mocker.patch("zulipterminal.ui.View.set_footer_text")
         model.narrow = narrow
         model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
         model.user_id = 5  # Iago's user_id
+        model.controller.active_conversation_info = {}
+        model.controller.is_typing_notification_in_progress = (
+            is_notification_in_progress
+        )
+        show_typing_notification = mocker.patch(
+            CONTROLLER + ".show_typing_notification"
+        )
 
         model._handle_typing_event(event)
 
-        assert model.controller.view.set_footer_text.called == called
+        if expected_active_conversation_info:
+            assert (
+                model.controller.active_conversation_info["sender_name"]
+                == expected_active_conversation_info["sender_name"]
+            )
+        assert show_typing_notification.called == expected_show_typing_notification
 
     @pytest.mark.parametrize(
         "event, final_muted_streams, ",
