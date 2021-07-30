@@ -6,7 +6,9 @@ from urwid import AttrMap, Overlay
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui_tools.buttons import (
+    DecodedStream,
     MessageLinkButton,
+    ParsedNarrowLink,
     StarredButton,
     TopButton,
     TopicButton,
@@ -356,8 +358,8 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "stream_data, expected_response",
         [
-            ("206-zulip-terminal", dict(stream_id=206, stream_name=None)),
-            ("Stream.201", dict(stream_id=None, stream_name="Stream 1")),
+            ("206-zulip-terminal", DecodedStream(stream_id=206, stream_name=None)),
+            ("Stream.201", DecodedStream(stream_id=None, stream_name="Stream 1")),
         ],
         ids=[
             "stream_data_current_version",
@@ -386,45 +388,50 @@ class TestMessageLinkButton:
         [
             (
                 SERVER_URL + "/#narrow/stream/1-Stream-1",
-                {"narrow": "stream", "stream": {"stream_id": 1, "stream_name": None}},
+                ParsedNarrowLink(
+                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                ),
             ),
             (
                 SERVER_URL + "/#narrow/stream/Stream.201",
-                {
-                    "narrow": "stream",
-                    "stream": {"stream_id": None, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                ),
             ),
             (
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo.20bar",
-                {
-                    "narrow": "stream:topic",
-                    "topic_name": "foo bar",
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="foo bar",
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
             ),
             (
                 SERVER_URL + "/#narrow/stream/1-Stream-1/near/1",
-                {
-                    "narrow": "stream:near",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:near",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
             ),
             (
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/1",
-                {
-                    "narrow": "stream:topic:near",
-                    "topic_name": "foo",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic:near",
+                    topic_name="foo",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
             ),
-            (SERVER_URL + "/#narrow/foo", {}),
-            (SERVER_URL + "/#narrow/stream/", {}),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/", {}),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1//near/", {}),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/", {}),
+            (SERVER_URL + "/#narrow/foo", ParsedNarrowLink()),
+            (SERVER_URL + "/#narrow/stream/", ParsedNarrowLink()),
+            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/", ParsedNarrowLink()),
+            (SERVER_URL + "/#narrow/stream/1-Stream-1//near/", ParsedNarrowLink()),
+            (
+                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/",
+                ParsedNarrowLink(),
+            ),
         ],
         ids=[
             "modern_stream_narrow_link",
@@ -454,7 +461,9 @@ class TestMessageLinkButton:
         ],
         [
             case(
-                {"narrow": "stream", "stream": {"stream_id": 1, "stream_name": None}},
+                ParsedNarrowLink(
+                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                ),
                 True,
                 None,
                 None,
@@ -462,7 +471,10 @@ class TestMessageLinkButton:
                 id="valid_modern_stream_narrow_parsed_link",
             ),
             case(
-                {"narrow": "stream", "stream": {"stream_id": 462, "stream_name": None}},
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=462, stream_name=None),
+                ),
                 False,
                 None,
                 None,
@@ -470,10 +482,10 @@ class TestMessageLinkButton:
                 id="invalid_modern_stream_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream",
-                    "stream": {"stream_id": None, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                ),
                 None,
                 True,
                 None,
@@ -481,10 +493,10 @@ class TestMessageLinkButton:
                 id="valid_deprecated_stream_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream",
-                    "stream": {"stream_id": None, "stream_name": "foo"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                ),
                 None,
                 False,
                 None,
@@ -492,11 +504,11 @@ class TestMessageLinkButton:
                 id="invalid_deprecated_stream_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:topic",
-                    "topic_name": "Valid",
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="Valid",
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 ["Valid"],
@@ -504,11 +516,11 @@ class TestMessageLinkButton:
                 id="valid_topic_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:topic",
-                    "topic_name": "Invalid",
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="Invalid",
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 [],
@@ -516,11 +528,11 @@ class TestMessageLinkButton:
                 id="invalid_topic_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:near",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:near",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 None,
@@ -528,11 +540,11 @@ class TestMessageLinkButton:
                 id="valid_stream_near_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:near",
-                    "message_id": None,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:near",
+                    message_id=None,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 None,
@@ -540,12 +552,12 @@ class TestMessageLinkButton:
                 id="invalid_stream_near_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:topic:near",
-                    "topic_name": "Valid",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic:near",
+                    topic_name="Valid",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 ["Valid"],
@@ -553,12 +565,12 @@ class TestMessageLinkButton:
                 id="valid_topic_near_narrow_parsed_link",
             ),
             case(
-                {
-                    "narrow": "stream:topic:near",
-                    "topic_name": "Valid",
-                    "message_id": None,
-                    "stream": {"stream_id": 1, "stream_name": None},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic:near",
+                    topic_name="Valid",
+                    message_id=None,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
                 True,
                 None,
                 ["Valid"],
@@ -566,7 +578,7 @@ class TestMessageLinkButton:
                 id="invalid_topic_near_narrow_parsed_link",
             ),
             case(
-                {},
+                ParsedNarrowLink(),
                 None,
                 None,
                 None,
@@ -607,35 +619,49 @@ class TestMessageLinkButton:
         ],
         [
             (
-                {"stream": {"stream_id": 1, "stream_name": None}},  # ...
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=1, stream_name=None)
+                ),  # ...
                 True,
                 None,
                 None,
-                {"stream": {"stream_id": 1, "stream_name": "Stream 1"}},
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                ),
                 "",
             ),
             (
-                {"stream": {"stream_id": 462, "stream_name": None}},  # ...
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=462, stream_name=None)
+                ),  # ...
                 False,
                 None,
                 None,
-                {"stream": {"stream_id": 462, "stream_name": None}},
+                ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
                 "The stream seems to be either unknown or unsubscribed",
             ),
             (
-                {"stream": {"stream_id": None, "stream_name": "Stream 1"}},  # ...
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=None, stream_name="Stream 1")
+                ),  # ...
                 None,
                 True,
                 1,
-                {"stream": {"stream_id": 1, "stream_name": "Stream 1"}},
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                ),
                 "",
             ),
             (
-                {"stream": {"stream_id": None, "stream_name": "foo"}},  # ...
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=None, stream_name="foo")
+                ),  # ...
                 None,
                 False,
                 None,
-                {"stream": {"stream_id": None, "stream_name": "foo"}},
+                ParsedNarrowLink(
+                    stream=DecodedStream(stream_id=None, stream_name="foo")
+                ),
                 "The stream seems to be either unknown or unsubscribed",
             ),
         ],
@@ -675,38 +701,38 @@ class TestMessageLinkButton:
         "parsed_link, narrow_to_stream_called, narrow_to_topic_called",
         [
             (
-                {
-                    "narrow": "stream",
-                    "stream": {"stream_id": 1, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                ),
                 True,
                 False,
             ),
             (
-                {
-                    "narrow": "stream:topic",
-                    "topic_name": "Foo",
-                    "stream": {"stream_id": 1, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="Foo",
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                ),
                 False,
                 True,
             ),
             (
-                {
-                    "narrow": "stream:near",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:near",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                ),
                 True,
                 False,
             ),
             (
-                {
-                    "narrow": "stream:topic:near",
-                    "topic_name": "Foo",
-                    "message_id": 1,
-                    "stream": {"stream_id": 1, "stream_name": "Stream 1"},
-                },
+                ParsedNarrowLink(
+                    narrow="stream:topic:near",
+                    topic_name="Foo",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                ),
                 False,
                 True,
             ),
