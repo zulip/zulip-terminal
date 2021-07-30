@@ -19,6 +19,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        |                     |                                                                                                        |
 | zulipterminal/config   | color.py            | Color definitions or functions common across all themes                                                |
 |                        | keys.py             | Keybindings and their helper functions                                                                 |
+|                        | markdown_examples.py| Examples of input markdown and corresponding html output (rendered in markdown help)                   |
 |                        | symbols.py          | Terminal characters used to mark particular elements of the user interface                             |
 |                        | themes.py           | Styles and their colour mappings in each theme, with helper functions                                  |
 |                        | ui_mappings.py      | Relationships between state/API data and presentation in the UI                                        |
