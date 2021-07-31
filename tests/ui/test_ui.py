@@ -311,27 +311,31 @@ class TestView:
         key: str,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
-        view.body = mocker.Mock()
-        view.body.focus_col = None
+        view.mentioned_button = mocker.Mock()
+        view.mentioned_button.activate = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
-        view.model.controller.narrow_to_all_mentions = mocker.Mock()
 
         view.keypress(size, key)
 
-        view.model.controller.narrow_to_all_mentions.assert_called_once_with()
-        assert view.body.focus_col == 1
+        view.mentioned_button.activate.assert_called_once_with(key)
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
+    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_STREAM_MESSAGE(
         self,
         view: View,
         mocker: MockerFixture,
         key: str,
+        autohide: bool,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         mocked_middle_column = mocker.patch.object(view, "middle_column", create=True)
         view.body = mocker.Mock()
+        view.controller.autohide = autohide
+        view.body.contents = ["streams", "messages", "users"]
+        view.left_panel = mocker.Mock()
+        view.right_panel = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
 
@@ -414,16 +418,22 @@ class TestView:
         ],
     )
     @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
+    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_OPEN_DRAFT(
         self,
         view: View,
         mocker: MockerFixture,
         draft: Composition,
         key: str,
+        autohide: bool,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         view.body = mocker.Mock()
+        view.body.contents = ["streams", "messages", "users"]
+        view.left_panel = mocker.Mock()
         view.middle_column = mocker.Mock()
+        view.right_panel = mocker.Mock()
+        view.controller.autohide = autohide
         view.controller.report_error = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         view.model.stream_id_from_name.return_value = 10
