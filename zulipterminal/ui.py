@@ -214,18 +214,17 @@ class View(urwid.WidgetWrap):
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
+            self.show_left_panel(visible=False)
+            self.show_right_panel(visible=False)
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
-            self.model.controller.narrow_to_all_pm()
-            self.body.focus_col = 1
+            self.pm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
-            self.model.controller.narrow_to_all_starred()
-            self.body.focus_col = 1
+            self.starred_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
-            self.model.controller.narrow_to_all_mentions()
-            self.body.focus_col = 1
+            self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.body.focus_position = 2
@@ -245,6 +244,8 @@ class View(urwid.WidgetWrap):
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
+                self.show_left_panel(visible=False)
+                self.show_right_panel(visible=False)
                 if saved_draft["type"] == "stream":
                     stream_id = self.model.stream_id_from_name(saved_draft["to"])
                     self.write_box.stream_box_view(
