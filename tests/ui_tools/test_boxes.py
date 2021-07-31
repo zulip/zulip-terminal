@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from pytest import param as case
 
@@ -54,7 +56,15 @@ class TestWriteBox:
         assert write_box.model == self.view.model
         assert write_box.view == self.view
         assert write_box.msg_edit_state is None
-        assert not write_box.sent_start_typing_status
+        assert write_box.msg_body_edit_enabled is True
+        assert write_box.stream_id is None
+        assert write_box.recipient_user_ids == []
+        assert write_box.typing_recipient_user_ids == []
+        assert write_box.to_write_box is None
+        assert isinstance(write_box.send_next_typing_update, datetime.datetime)
+        assert isinstance(write_box.last_key_update, datetime.datetime)
+        assert write_box.idle_status_tracking is False
+        assert write_box.sent_start_typing_status is False
 
     def test_not_calling_typing_method_without_recipients(self, mocker, write_box):
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
