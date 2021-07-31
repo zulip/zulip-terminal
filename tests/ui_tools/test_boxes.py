@@ -276,8 +276,7 @@ class TestWriteBox:
         write_box.to_write_box.edit_text = raw_recipients
         write_box.to_write_box.set_edit_pos(len(raw_recipients))
         expected_lines = [
-            "Invalid recipient(s) - " + invalid_recipients,
-            " - Use ",
+            "Invalid recipient(s) - " + invalid_recipients + ". Use ",
             ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
             " or ",
             ("footer_contrast", primary_key_for_command("AUTOCOMPLETE_REVERSE")),
@@ -1147,6 +1146,7 @@ class TestWriteBox:
             "box_type",
             "msg_body_edit_enabled",
             "message_being_edited",
+            "key",
             "expected_focus_name",
             "expected_focus_col_name",
         ],
@@ -1157,9 +1157,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 False,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_TOPIC",
-                id="stream_name_to_topic_box",
+                id="stream_name_to_topic_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1167,9 +1168,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 False,
+                "tab_key",
                 "CONTAINER_MESSAGE",
                 "MESSAGE_BOX_BODY",
-                id="topic_to_message_box",
+                id="topic_to_message_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1177,9 +1179,10 @@ class TestWriteBox:
                 "stream",
                 False,
                 True,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_EDIT",
-                id="topic_edit_only-topic_to_edit_mode_box",
+                id="topic_edit_only-topic_to_edit_mode_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1187,9 +1190,10 @@ class TestWriteBox:
                 "stream",
                 False,
                 True,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_TOPIC",
-                id="topic_edit_only-edit_mode_to_topic_box",
+                id="topic_edit_only-edit_mode_to_topic_box_tab",
             ),
             case(
                 "CONTAINER_MESSAGE",
@@ -1197,9 +1201,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 False,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_STREAM",
-                id="message_to_stream_name_box",
+                id="message_to_stream_name_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1207,9 +1212,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 True,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_TOPIC",
-                id="edit_box-stream_name_to_topic_box",
+                id="edit_box-stream_name_to_topic_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1217,9 +1223,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 True,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_EDIT",
-                id="edit_box-topic_to_edit_mode_box",
+                id="edit_box-topic_to_edit_mode_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1227,9 +1234,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 True,
+                "tab_key",
                 "CONTAINER_MESSAGE",
                 "MESSAGE_BOX_BODY",
-                id="edit_box-edit_mode_to_message_box",
+                id="edit_box-edit_mode_to_message_box_tab",
             ),
             case(
                 "CONTAINER_MESSAGE",
@@ -1237,9 +1245,10 @@ class TestWriteBox:
                 "stream",
                 True,
                 True,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_STREAM",
-                id="edit_box-message_to_stream_name_box",
+                id="edit_box-message_to_stream_name_box_tab",
             ),
             case(
                 "CONTAINER_HEADER",
@@ -1247,9 +1256,10 @@ class TestWriteBox:
                 "private",
                 True,
                 False,
+                "tab_key",
                 "CONTAINER_MESSAGE",
                 "MESSAGE_BOX_BODY",
-                id="recipient_to_message_box",
+                id="recipient_to_message_box_tab",
             ),
             case(
                 "CONTAINER_MESSAGE",
@@ -1257,17 +1267,115 @@ class TestWriteBox:
                 "private",
                 True,
                 False,
+                "tab_key",
                 "CONTAINER_HEADER",
                 "HEADER_BOX_RECIPIENT",
-                id="message_to_recipient_box",
+                id="message_to_recipient_box_tab",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
+                "stream",
+                True,
+                False,
+                "right",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                id="stream_name_to_topic_box_right",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                "stream",
+                True,
+                True,
+                "right",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                id="topic_edit_only-topic_to_edit_mode_box_right",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                "stream",
+                False,
+                True,
+                "up",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                id="topic_edit_only-edit_mode_to_edit_box_up",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
+                "stream",
+                True,
+                True,
+                "left",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_STREAM",
+                id="edit_box-stream_name_to_stream_box_left",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                "stream",
+                True,
+                True,
+                "right",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_EDIT",
+                id="edit_box-topic_to_edit_mode_box_right",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_TOPIC",
+                "stream",
+                True,
+                False,
+                "down",
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="topic_box_to_message_box_down",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_RECIPIENT",
+                "private",
+                True,
+                False,
+                "right",
+                "CONTAINER_HEADER",
+                "HEADER_BOX_RECIPIENT",
+                id="recipient_to_recipient_box_right",
+            ),
+            case(
+                "CONTAINER_HEADER",
+                "HEADER_BOX_RECIPIENT",
+                "private",
+                True,
+                False,
+                "down",
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="recipient_to_message_box_down",
+            ),
+            case(
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                "private",
+                True,
+                False,
+                "right",
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="message_to_message_box_private_right",
             ),
         ],
     )
-    @pytest.mark.parametrize("tab_key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
-    def test_keypress_CYCLE_COMPOSE_FOCUS(
+    def test_keypress_CHANGE_COMPOSE_FOCUS(
         self,
         write_box,
-        tab_key,
         initial_focus_name,
         expected_focus_name,
         initial_focus_col_name,
@@ -1275,12 +1383,15 @@ class TestWriteBox:
         box_type,
         msg_body_edit_enabled,
         message_being_edited,
+        key,
         widget_size,
         mocker,
         stream_id=10,
     ):
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
 
+        if key == "tab_key":
+            key = primary_key_for_command("CYCLE_COMPOSE_FOCUS")
         if box_type == "stream":
             if message_being_edited:
                 mocker.patch(MODULE + ".EditModeButton")
@@ -1292,7 +1403,8 @@ class TestWriteBox:
                 write_box.stream_box_view(stream_id)
         else:
             write_box.private_box_view()
-        size = widget_size(write_box)
+        # FIXME: Use widget_size(), instead of hard-coded size.
+        size = (20,)
 
         def focus_val(x: str) -> int:
             return getattr(write_box, "FOCUS_" + x)
@@ -1304,7 +1416,7 @@ class TestWriteBox:
         write_box.model.get_invalid_recipient_emails.return_value = []
         write_box.model.user_dict = mocker.MagicMock()
 
-        write_box.keypress(size, tab_key)
+        write_box.keypress(size, key)
 
         assert write_box.focus_position == focus_val(expected_focus_name)
         # FIXME: Needs refactoring?
