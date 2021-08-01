@@ -9,6 +9,7 @@ from platform import platform
 from types import TracebackType
 from typing import Any, List, Optional, Tuple, Type
 
+import pyperclip
 import urwid
 import zulip
 from typing_extensions import Literal
@@ -440,6 +441,31 @@ class Controller:
         )
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
         self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+
+    def copy_to_clipboard(self, text: str, text_category: str) -> None:
+        try:
+            pyperclip.copy(text)
+            clipboard_text = pyperclip.paste()
+            if clipboard_text == text:
+                self.report_success(f"{text_category} copied successfully")
+            else:
+                self.report_warning(
+                    f"{text_category} copied, but the clipboard text does not match"
+                )
+        except pyperclip.PyperclipException:
+            body = [
+                "Zulip terminal uses 'pyperclip', for copying texts to your clipboard,"
+                " which could not find a copy/paste mechanism for your system. :("
+                "\nThis error should only appear on Linux. You can fix this by"
+                " installing any ONE of the copy/paste mechanisms below:\n",
+                ("msg_bold", "- xclip\n- xsel"),
+                "\n\nvia something like:\n",
+                ("msg_code", "apt-get install xclip [Recommended]\n"),
+                ("msg_code", "apt-get install xsel"),
+            ]
+            self.show_pop_up(
+                NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"
+            )
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)

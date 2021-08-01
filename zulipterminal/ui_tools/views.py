@@ -1094,7 +1094,7 @@ class PopUpView(urwid.Frame):
 
 class NoticeView(PopUpView):
     def __init__(
-        self, controller: Any, notice_text: str, width: int, title: str
+        self, controller: Any, notice_text: Any, width: int, title: str
     ) -> None:
         widgets = [
             urwid.Divider(),

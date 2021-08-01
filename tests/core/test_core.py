@@ -3,6 +3,7 @@ import webbrowser
 from platform import platform
 from typing import Any, List, Optional, Set, Tuple
 
+import pyperclip
 import pytest
 from pytest_mock import MockerFixture
 
@@ -338,6 +339,54 @@ class TestController:
         widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
+
+    @pytest.mark.parametrize(
+        "text_to_copy, pasted_text, expected_result",
+        [
+            ("copy this", "copy this", "success"),
+            ("copy that", "other text", "failure"),
+        ],
+    )
+    def test_copy_to_clipboard_no_exception(
+        self,
+        text_to_copy: str,
+        pasted_text: str,
+        expected_result: str,
+        mocker: MockerFixture,
+        controller: Controller,
+        text_category: str = "Test",
+    ) -> None:
+        mocker.patch(MODULE + ".pyperclip.copy", return_value=None)
+        mocker.patch(MODULE + ".pyperclip.paste", return_value=pasted_text)
+        mock_success = mocker.patch(MODULE + ".Controller.report_success")
+        mock_warning = mocker.patch(MODULE + ".Controller.report_warning")
+
+        controller.copy_to_clipboard(text_to_copy, text_category)
+
+        if expected_result == "success":
+            mock_success.assert_called_once_with(f"{text_category} copied successfully")
+            mock_warning.assert_not_called()
+        else:
+            mock_success.assert_not_called()
+            mock_warning.assert_called_once_with(
+                f"{text_category} copied, but the clipboard text does not match"
+            )
+
+    def test_copy_to_clipboard_exception(
+        self, mocker: MockerFixture, controller: Controller, text_category: str = "Test"
+    ) -> None:
+        popup = mocker.patch(MODULE + ".Controller.show_pop_up")
+        mocker.patch(
+            MODULE + ".pyperclip.copy", side_effect=pyperclip.PyperclipException()
+        )
+        mocker.patch(
+            MODULE + ".Controller.maximum_popup_dimensions", return_value=(64, 64)
+        )
+
+        controller.copy_to_clipboard("copy text", text_category)
+
+        popup.assert_called_once()
+        assert popup.call_args_list[0][0][1] == "area:error"
 
     @pytest.mark.parametrize(
         "url",
