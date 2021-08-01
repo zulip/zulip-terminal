@@ -676,91 +676,48 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         [
             "parsed_link",
-            "is_user_subscribed_to_stream",
-            "is_valid_stream",
             "stream_id_from_name_return_value",
             "expected_parsed_link",
-            "expected_error",
         ],
         [
-            (
+            case(
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name=None)
                 ),  # ...
-                True,
-                None,
                 None,
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
-                "",
+                id="stream_data_with_stream_id",
             ),
-            (
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=462, stream_name=None)
-                ),  # ...
-                False,
-                None,
-                None,
-                ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
-                "The stream seems to be either unknown or unsubscribed",
-            ),
-            (
+            case(
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1")
                 ),  # ...
-                None,
-                True,
                 1,
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
-                "",
+                id="stream_data_with_stream_name",
             ),
-            (
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
-                ),  # ...
-                None,
-                False,
-                None,
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
-                ),
-                "The stream seems to be either unknown or unsubscribed",
-            ),
-        ],
-        ids=[
-            "valid_stream_data_with_stream_id",
-            "invalid_stream_data_with_stream_id",
-            "valid_stream_data_with_stream_name",
-            "invalid_stream_data_with_stream_name",
         ],
     )
-    def test__validate_and_patch_stream_data(
+    def test__patch_narrow_link(
         self,
         stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
-        is_user_subscribed_to_stream: Optional[bool],
-        is_valid_stream: Optional[bool],
         stream_id_from_name_return_value: Optional[int],
         expected_parsed_link: ParsedNarrowLink,
-        expected_error: str,
     ) -> None:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
         )
-        self.controller.model.is_user_subscribed_to_stream.return_value = (
-            is_user_subscribed_to_stream
-        )
-        self.controller.model.is_valid_stream.return_value = is_valid_stream
         mocked_button = self.message_link_button()
 
-        error = mocked_button._validate_and_patch_stream_data(parsed_link)
+        mocked_button._patch_narrow_link(parsed_link)
 
         assert parsed_link == expected_parsed_link
-        assert error == expected_error
 
     @pytest.mark.parametrize(
         "parsed_link, narrow_to_stream_called, narrow_to_topic_called",

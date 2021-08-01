@@ -447,10 +447,10 @@ class MessageLinkButton(urwid.Button):
 
         return parsed_link
 
-    def _validate_and_patch_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
+    def _validate_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
         """
-        Validates stream data and patches the optional value in the nested
-        DecodedStream dict.
+        Validates stream data and returns either an empty string for a successful
+        validation or an appropriate validation error.
         """
         stream_id = parsed_link["stream"]["stream_id"]
         stream_name = parsed_link["stream"]["stream_name"]
@@ -467,14 +467,6 @@ class MessageLinkButton(urwid.Button):
             # report whether the stream id is invalid instead.
             return "The stream seems to be either unknown or unsubscribed"
 
-        # Patch the optional value.
-        if not stream_id:
-            stream_id = cast(int, model.stream_id_from_name(stream_name))
-            parsed_link["stream"]["stream_id"] = stream_id
-        else:
-            stream_name = cast(str, model.stream_dict[stream_id]["name"])
-            parsed_link["stream"]["stream_name"] = stream_name
-
         return ""
 
     def _validate_narrow_link(self, parsed_link: ParsedNarrowLink) -> str:
@@ -487,7 +479,7 @@ class MessageLinkButton(urwid.Button):
 
         # Validate stream data.
         if "stream" in parsed_link:
-            error = self._validate_and_patch_stream_data(parsed_link)
+            error = self._validate_stream_data(parsed_link)
             if error:
                 return error
 
@@ -507,6 +499,24 @@ class MessageLinkButton(urwid.Button):
                 return "Invalid message ID"
 
         return ""
+
+    def _patch_narrow_link(self, parsed_link: ParsedNarrowLink) -> None:
+        """
+        Patches the validated narrow link data.
+        """
+        model = self.model
+
+        if "stream" in parsed_link:
+            stream_id = parsed_link["stream"]["stream_id"]
+            stream_name = parsed_link["stream"]["stream_name"]
+
+            # Patch the optional value.
+            if not stream_id:
+                stream_id = cast(int, model.stream_id_from_name(stream_name))
+                parsed_link["stream"]["stream_id"] = stream_id
+            else:
+                stream_name = cast(str, model.stream_dict[stream_id]["name"])
+                parsed_link["stream"]["stream_name"] = stream_name
 
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
         """
@@ -545,6 +555,7 @@ class MessageLinkButton(urwid.Button):
         if error:
             self.controller.report_error(f" {error}")
         else:
+            self._patch_narrow_link(parsed_link)
             self._switch_narrow_to(parsed_link)
 
             # Exit pop-up if MessageLinkButton exists in one.
