@@ -192,45 +192,50 @@ def logged_on_user():
     }
 
 
-general_stream = {
-    "name": "Some general stream",
-    "invite_only": False,
-    "color": "#b0a5fd",  # Color in '#xxxxxx' format
-    "pin_to_top": False,
-    "stream_id": 1000,
-    "in_home_view": True,
-    "audible_notifications": False,
-    "description": "General Stream",
-    "is_old_stream": True,
-    "desktop_notifications": False,
-    "stream_weekly_traffic": 0,
-    "push_notifications": False,
-    "email_address": "general@example.comm",
-    "subscribers": [1001, 11, 12],
-}
+@pytest.fixture
+def general_stream():
+    return {
+        "name": "Some general stream",
+        "invite_only": False,
+        "color": "#b0a5fd",  # Color in '#xxxxxx' format
+        "pin_to_top": False,
+        "stream_id": 1000,
+        "in_home_view": True,
+        "audible_notifications": False,
+        "description": "General Stream",
+        "is_old_stream": True,
+        "desktop_notifications": False,
+        "stream_weekly_traffic": 0,
+        "push_notifications": False,
+        "email_address": "general@example.comm",
+        "subscribers": [1001, 11, 12],
+    }
+
 
 # This is a private stream;
 # only description/stream_id/invite_only/name/color vary from above
-secret_stream = {
-    "description": "Some private stream",
-    "stream_id": 99,
-    "pin_to_top": False,
-    "invite_only": True,
-    "name": "Secret stream",
-    "email_address": "secret@example.com",
-    "color": "#ccc",  # Color in '#xxx' format
-    "in_home_view": True,
-    "audible_notifications": False,
-    "is_old_stream": True,
-    "desktop_notifications": False,
-    "stream_weekly_traffic": 0,
-    "push_notifications": False,
-    "subscribers": [1001, 11],
-}
+@pytest.fixture
+def secret_stream():
+    return {
+        "description": "Some private stream",
+        "stream_id": 99,
+        "pin_to_top": False,
+        "invite_only": True,
+        "name": "Secret stream",
+        "email_address": "secret@example.com",
+        "color": "#ccc",  # Color in '#xxx' format
+        "in_home_view": True,
+        "audible_notifications": False,
+        "is_old_stream": True,
+        "desktop_notifications": False,
+        "stream_weekly_traffic": 0,
+        "push_notifications": False,
+        "subscribers": [1001, 11],
+    }
 
 
 @pytest.fixture
-def streams_fixture():
+def streams_fixture(general_stream, secret_stream):
     streams = [general_stream, secret_stream]
     for i in range(1, 3):
         streams.append(
