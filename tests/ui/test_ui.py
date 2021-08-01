@@ -230,54 +230,40 @@ class TestView:
         show_left_panel.assert_called_once_with(visible=True)
 
     @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize("visible, width", [(True, LEFT_WIDTH), (False, TAB_WIDTH)])
-    def test_show_left_panel(
+    @pytest.mark.parametrize("visible", [True, False])
+    @pytest.mark.parametrize("test_method", ["left_panel", "right_panel"])
+    def test_show_panel_methods(
         self,
         mocker: MockerFixture,
         view: View,
         visible: bool,
-        width: int,
         autohide: bool,
+        test_method: str,
     ) -> None:
         view.body = mocker.Mock()
-        view.body.contents = [view.left_panel, mocker.Mock(), mocker.Mock()]
+        view.body.contents = [mocker.Mock(), mocker.Mock(), mocker.Mock()]
         view.controller.autohide = autohide
 
-        view.show_left_panel(visible=visible)
+        if test_method == "left_panel":
+            expected_width = LEFT_WIDTH
+            expected_tab = view.left_tab
+            expected_panel = view.left_panel
 
-        if autohide:
-            if visible:
-                assert view.body.contents[0][0] == view.left_panel
-            else:
-                assert view.body.contents[0][0] == view.left_tab
-            view.body.options.assert_called_once_with("given", width)
+            view.show_left_panel(visible=visible)
         else:
-            view.body.options.assert_not_called()
+            expected_width = RIGHT_WIDTH
+            expected_tab = view.right_tab
+            expected_panel = view.right_panel
 
-    @pytest.mark.parametrize("autohide", [True, False])
-    @pytest.mark.parametrize(
-        "visible, width", [(True, RIGHT_WIDTH), (False, TAB_WIDTH)]
-    )
-    def test_show_right_panel(
-        self,
-        mocker: MockerFixture,
-        view: View,
-        visible: bool,
-        width: int,
-        autohide: bool,
-    ) -> None:
-        view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock(), mocker.Mock(), view.right_panel]
-        view.controller.autohide = autohide
-
-        view.show_right_panel(visible=visible)
+            view.show_right_panel(visible=visible)
 
         if autohide:
             if visible:
-                assert view.body.contents[2][0] == view.right_panel
+                assert (expected_panel, mocker.ANY) in view.body.contents
+                view.body.options.assert_called_once_with("given", expected_width)
             else:
-                assert view.body.contents[2][0] == view.right_tab
-            view.body.options.assert_called_once_with("given", width)
+                assert (expected_tab, mocker.ANY) in view.body.contents
+                view.body.options.assert_called_once_with("given", TAB_WIDTH)
         else:
             view.body.options.assert_not_called()
 
