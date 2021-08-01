@@ -43,7 +43,7 @@ requests_logger.setLevel(logging.DEBUG)
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
-    "autohide": "no_autohide",
+    "layout": "no_autohide",
     "notify": "disabled",
     "footlinks": "enabled",
     "color-depth": "256",
@@ -135,18 +135,18 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="disable desktop notifications",
     )
 
-    autohide_group = parser.add_mutually_exclusive_group()
-    autohide_group.add_argument(
+    layout_group = parser.add_mutually_exclusive_group()
+    layout_group.add_argument(
         "--autohide",
-        dest="autohide",
+        dest="layout",
         default=None,
         action="store_const",
         const="autohide",
         help="autohide list of users and streams",
     )
-    autohide_group.add_argument(
+    layout_group.add_argument(
         "--no-autohide",
-        dest="autohide",
+        dest="layout",
         default=None,
         action="store_const",
         const="no_autohide",
@@ -315,6 +315,10 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         for conf in config:
             settings[conf] = (config[conf], ZULIPRC_CONFIG)
 
+        # For backwards compatibility
+        if "autohide" in config and "layout" not in config:
+            settings["layout"] = (config["autohide"], ZULIPRC_CONFIG)
+
     return settings
 
 
@@ -375,8 +379,10 @@ def main(options: Optional[List[str]] = None) -> None:
     try:
         zterm = parse_zuliprc(zuliprc_path)
 
-        if args.autohide:
-            zterm["autohide"] = (args.autohide, "on command line")
+        if args.layout:
+            zterm["layout"] = (args.layout, "on command line")
+
+        layout = zterm["layout"][0]
 
         if args.theme:
             theme_to_use = (args.theme, "on command line")
@@ -450,7 +456,7 @@ def main(options: Optional[List[str]] = None) -> None:
                     "      (all themes are incomplete)"
                 )
             print(in_color("yellow", incomplete_theme_warning))
-        print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
+        print("   layout setting '{}' specified {}.".format(*zterm["layout"]))
         if zterm["footlinks"][1] == ZULIPRC_CONFIG:
             print(
                 "   maximum footlinks value '{}' specified {} from footlinks.".format(
@@ -469,7 +475,7 @@ def main(options: Optional[List[str]] = None) -> None:
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
-            "autohide": ["autohide", "no_autohide"],
+            "layout": ["autohide", "no_autohide"],
             "notify": ["enabled", "disabled"],
             "color-depth": ["1", "16", "256", "24bit"],
         }
@@ -487,9 +493,11 @@ def main(options: Optional[List[str]] = None) -> None:
                     ),
                     helper_text="\n".join(helper_text),
                 )
-            if setting == "color-depth":
-                break
+            if setting == "color-depth" or setting == "layout":
+                continue
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
+
+        boolean_settings["autohide"] = layout == "autohide"
 
         theme_data = generate_theme(theme_to_use[0], color_depth)
 
