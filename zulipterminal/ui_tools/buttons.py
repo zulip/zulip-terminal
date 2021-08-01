@@ -505,6 +505,23 @@ class MessageLinkButton(urwid.Button):
 
         return ""
 
+    def _validate_pm_data(self, parsed_link: ParsedNarrowLink) -> str:
+        """
+        Validates PM data and returns either an empty string for a successful
+        validation or an appropriate validation error.
+        """
+        recipient_ids = parsed_link["pm_with"]["recipient_ids"]
+
+        for recipient_id in recipient_ids:
+            user = self.model._all_users_by_id.get(recipient_id, None)
+            email = user["email"] if user else ""
+            name = user["full_name"] if user else ""
+
+            if not self.model.is_valid_private_recipient(email, name):
+                return "The PM has one or more invalid recipient(s)"
+
+        return ""
+
     def _validate_narrow_link(self, parsed_link: ParsedNarrowLink) -> str:
         """
         Returns either an empty string for a successful validation or an
@@ -516,6 +533,12 @@ class MessageLinkButton(urwid.Button):
         # Validate stream data.
         if "stream" in parsed_link:
             error = self._validate_stream_data(parsed_link)
+            if error:
+                return error
+
+        # Validate PM data.
+        if "pm_with" in parsed_link:
+            error = self._validate_pm_data(parsed_link)
             if error:
                 return error
 
