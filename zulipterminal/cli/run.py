@@ -60,7 +60,7 @@ requests_logger.setLevel(logging.DEBUG)
 
 # Valid boolean settings, which map from (str, str) to (True, False)
 VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
-    "autohide": ("autohide", "no_autohide"),
+    "layout": ("autohide", "no_autohide"),
     "notify": ("enabled", "disabled"),
     "exit_confirmation": ("enabled", "disabled"),
     "transparency": ("enabled", "disabled"),
@@ -76,7 +76,7 @@ COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
-    "autohide": "no_autohide",
+    "layout": "no_autohide",
     "notify": "disabled",
     "footlinks": "enabled",
     "color-depth": "256",
@@ -85,7 +85,7 @@ DEFAULT_SETTINGS = {
     "transparency": "disabled",
     "editor": "",
 }
-assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
+assert DEFAULT_SETTINGS["layout"] in VALID_BOOLEAN_SETTINGS["layout"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
 assert DEFAULT_SETTINGS["color-depth"] in COLOR_DEPTH_ARGS_TO_DEPTHS
 assert (
@@ -194,18 +194,18 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="disable desktop notifications",
     )
 
-    autohide_group = parser.add_mutually_exclusive_group()
-    autohide_group.add_argument(
+    layout_group = parser.add_mutually_exclusive_group()
+    layout_group.add_argument(
         "--autohide",
-        dest="autohide",
+        dest="layout",
         default=None,
         action="store_const",
         const="autohide",
         help="autohide list of users and streams",
     )
-    autohide_group.add_argument(
+    layout_group.add_argument(
         "--no-autohide",
-        dest="autohide",
+        dest="layout",
         default=None,
         action="store_const",
         const="no_autohide",
@@ -396,6 +396,10 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
         for conf in config:
             settings[conf] = SettingData(config[conf], ConfigSource.ZULIPRC)
 
+        # For backwards compatibility
+        if "autohide" in config and "layout" not in config:
+            settings["layout"] = SettingData(config["autohide"], ConfigSource.ZULIPRC)
+
     return settings
 
 
@@ -522,8 +526,8 @@ def main(options: Optional[List[str]] = None) -> None:
                 args.transparency, ConfigSource.COMMANDLINE
             )
 
-        if args.autohide:
-            zterm["autohide"] = SettingData(args.autohide, ConfigSource.COMMANDLINE)
+        if args.layout:
+            zterm["layout"] = SettingData(args.layout, ConfigSource.COMMANDLINE)
 
         if args.color_depth:
             zterm["color-depth"] = SettingData(
@@ -567,7 +571,7 @@ def main(options: Optional[List[str]] = None) -> None:
             else:
                 incomplete_theme_text += "      (all themes are incomplete)"
             print(in_color("yellow", incomplete_theme_text))
-        print_setting("autohide setting", zterm["autohide"])
+        print_setting("layout setting", zterm["layout"])
         print_setting("exit confirmation setting", zterm["exit_confirmation"])
         if zterm["footlinks"].source == ConfigSource.ZULIPRC:
             print_setting(
@@ -612,6 +616,9 @@ def main(options: Optional[List[str]] = None) -> None:
             color_depth=color_depth,
             transparent_background=transparency_enabled,
         )
+
+        # Controller still expects a boolean autohide setting
+        boolean_settings["autohide"] = boolean_settings.pop("layout")
 
         Controller(
             config_file=zuliprc_path,
