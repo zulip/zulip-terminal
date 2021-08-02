@@ -87,9 +87,7 @@ class TopButton(urwid.Button):
         self._w.set_attr_map({None: text_color})
 
     def activate(self, key: Any) -> None:
-        self.controller.view.show_left_panel(visible=False)
-        self.controller.view.show_right_panel(visible=False)
-        self.controller.view.body.focus_col = 1
+        self.controller.view.focus_panel = 1
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:

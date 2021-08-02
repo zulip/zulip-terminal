@@ -182,7 +182,7 @@ class View(urwid.WidgetWrap):
         )
 
         # Show left panel on startup in autohide mode
-        self.show_left_panel(visible=True)
+        self.focus_panel = 0
 
         return self.frame
 
@@ -203,9 +203,6 @@ class View(urwid.WidgetWrap):
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
@@ -224,9 +221,30 @@ class View(urwid.WidgetWrap):
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
+
+    @property
+    def focus_panel(self) -> int:
+        if hasattr(self.frame.body, "top_w"):
+            if self.left_panel == self.frame.body.top_w.contents[0][0]:
+                return 0
+            else:
+                return 2
+
+        return self.body.focus_position
+
+    @focus_panel.setter
+    def focus_panel(self, column: int) -> None:
+        if column == 0:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=True)
+        elif column == 1:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=False)
+        elif column == 2:
+            self.show_left_panel(visible=False)
+            self.show_right_panel(visible=True)
+
+        self.body.focus_position = column
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
@@ -240,9 +258,7 @@ class View(urwid.WidgetWrap):
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=False)
-            self.body.focus_col = 1
+            self.focus_panel = 1
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
@@ -253,25 +269,19 @@ class View(urwid.WidgetWrap):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=True)
-            self.body.focus_position = 2
+            self.focus_panel = 2
             self.users_view.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
-            self.show_right_panel(visible=False)
-            self.show_left_panel(visible=True)
-            self.body.focus_position = 0
+            self.focus_panel = 0
             self.left_panel.keypress(size, key)
             return key
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
-                self.show_left_panel(visible=False)
-                self.show_right_panel(visible=False)
                 if saved_draft["type"] == "stream":
                     stream_id = self.model.stream_id_from_name(saved_draft["to"])
                     self.write_box.stream_box_view(
@@ -292,7 +302,7 @@ class View(urwid.WidgetWrap):
                 content = saved_draft["content"]
                 self.write_box.msg_write_box.edit_text = content
                 self.write_box.msg_write_box.edit_pos = len(content)
-                self.body.focus_col = 1
+                self.focus_panel = 1
                 self.middle_column.set_focus("footer")
             else:
                 self.controller.report_error(

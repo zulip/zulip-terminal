@@ -263,11 +263,62 @@ class TestView:
                 assert view.frame.body.contents[1][1] == tuple(expected_overlay_options)
             else:
                 assert (expected_tab, mocker.ANY) in view.frame.body.contents
-                assert view.body.focus_position == 1
         else:
             # No change
             assert view.frame.body.contents[0][0] == view.left_panel
             assert view.frame.body.contents[2][0] == view.right_panel
+
+    @pytest.mark.parametrize(
+        "focus_pos, overlay",
+        [
+            (0, True),
+            (2, True),
+            (0, False),
+            (1, False),
+            (2, False),
+        ],
+    )
+    def test_focus_panel_property_getter(
+        self, view: View, focus_pos: int, overlay: bool
+    ) -> None:
+        if overlay:
+            top_w = view.frame.body.top_w
+            default_options = ("weight", 1, True)
+            if focus_pos == 0:
+                top_w.contents[0] = (view.left_panel, default_options)
+            else:
+                top_w.contents[1] = (view.right_panel, default_options)
+        view.frame.body = view.body
+        view.body.focus_position = focus_pos
+
+        focus_panel = view.focus_panel
+
+        assert focus_panel == focus_pos
+
+    @pytest.mark.parametrize(
+        "focus_pos, left_visible, right_visible",
+        [
+            (0, True, False),
+            (1, False, False),
+            (2, False, True),
+        ],
+    )
+    def test_focus_panel_property_setter(
+        self,
+        mocker: MockerFixture,
+        view: View,
+        focus_pos: int,
+        left_visible: bool,
+        right_visible: bool,
+    ) -> None:
+        show_left_panel = mocker.patch(VIEW + ".show_left_panel")
+        show_right_panel = mocker.patch(VIEW + ".show_right_panel")
+
+        view.focus_panel = focus_pos
+
+        assert view.body.focus_position == focus_pos
+        show_left_panel.assert_called_once_with(visible=left_visible)
+        show_right_panel.assert_called_once_with(visible=right_visible)
 
     def test_keypress_normal_mode_navigation(
         self,
@@ -309,79 +360,62 @@ class TestView:
         view.mentioned_button.activate.assert_called_once_with(key)
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
-    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
-    def test_keypress_STREAM_MESSAGE(
+    def test_keypress_STREAM_MESSAGE_from_different_panel(
         self,
         view: View,
         mocker: MockerFixture,
         key: str,
-        autohide: bool,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         mocked_middle_column = mocker.patch.object(view, "middle_column", create=True)
-        view.body = mocker.Mock()
-        view.controller.autohide = autohide
-        view.body.contents = ["streams", "messages", "users"]
-        view.left_panel = mocker.Mock()
-        view.right_panel = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
+        view.frame.body = view.body
+        view.focus_panel = 0
 
         returned_key = view.keypress(size, key)
 
         mocked_middle_column.keypress.assert_called_once_with(size, key)
         assert returned_key == key
-        assert view.body.focus_col == 1
+        assert view.focus_panel == 1
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
-    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
-    def test_keypress_autohide_users(
+    def test_keypress_SEARCH_PEOPLE_from_different_panel(
         self,
         view: View,
         mocker: MockerFixture,
-        autohide: bool,
         key: str,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         mocked_users_view = mocker.patch.object(view, "users_view", create=True)
-        view.body = mocker.Mock()
-        view.controller.autohide = autohide
-        view.body.contents = ["streams", "messages", mocker.Mock()]
-        view.left_panel = mocker.Mock()
-        view.right_panel = mocker.Mock()
         size = widget_size(view)
         view.controller.is_in_editor_mode = lambda: False
-        view.body.focus_position = None
+        view.frame.body = view.body
+        view.focus_panel = 0
 
         view.keypress(size, key)
 
         mocked_users_view.keypress.assert_called_once_with(size, key)
-        assert view.body.focus_position == 2
+        assert view.focus_panel == 2
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
-    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
-    def test_keypress_autohide_streams(
+    def test_keypress_SEARCH_STREAMS_from_different_panel(
         self,
         view: View,
         mocker: MockerFixture,
-        autohide: bool,
         key: str,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
-        view.left_col_w = mocker.Mock()
-        view.controller.autohide = autohide
-        view.body = mocker.Mock()
-        view.body.contents = [mocker.Mock(), "messages", "users"]
         view.left_panel = mocker.Mock()
-        view.right_panel = mocker.Mock()
         size = widget_size(view)
         view.controller.is_in_editor_mode = lambda: False
-        view.body.focus_position = None
+        view.frame.body = view.body
+        view.focus_panel = 1
 
         view.keypress(size, key)
 
         view.left_panel.keypress.assert_called_once_with(size, key)
-        assert view.body.focus_position == 0
+        assert view.focus_panel == 0
 
     @pytest.mark.parametrize(
         "draft",
@@ -406,22 +440,16 @@ class TestView:
         ],
     )
     @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
-    @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_OPEN_DRAFT(
         self,
         view: View,
         mocker: MockerFixture,
         draft: Composition,
         key: str,
-        autohide: bool,
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
-        view.body = mocker.Mock()
-        view.body.contents = ["streams", "messages", "users"]
-        view.left_panel = mocker.Mock()
+        view.frame.body = view.body
         view.middle_column = mocker.Mock()
-        view.right_panel = mocker.Mock()
-        view.controller.autohide = autohide
         view.controller.report_error = mocker.Mock()
         view.controller.is_in_editor_mode = lambda: False
         view.model.stream_id_from_name.return_value = 10
@@ -448,7 +476,7 @@ class TestView:
                     emails=draft["to"], recipient_user_ids=[1, 2]
                 )
 
-            assert view.body.focus_col == 1
+            assert view.focus_panel == 1
             assert view.write_box.msg_write_box.edit_text == draft["content"]
             assert view.write_box.msg_write_box.edit_pos == len(draft["content"])
             view.middle_column.set_focus.assert_called_once_with("footer")

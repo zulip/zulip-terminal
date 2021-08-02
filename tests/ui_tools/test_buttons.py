@@ -131,6 +131,14 @@ class TestTopButton:
         top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
         set_attr_map.assert_called_once_with({None: text_color})
 
+    def test_activate(self, mocker: MockerFixture, top_button: TopButton) -> None:
+        show_function = mocker.patch.object(top_button, "show_function")
+
+        top_button.activate("key")
+
+        assert top_button.controller.view.focus_panel == 1
+        show_function.assert_called_once_with()
+
 
 class TestStarredButton:
     def test_count_style_init_argument_value(
