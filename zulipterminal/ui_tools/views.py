@@ -645,9 +645,9 @@ class MiddleColumnView(urwid.Frame):
             self.footer.focus_position = 0
             return key
         elif is_command_key("GO_LEFT", key):
-            self.view.show_left_panel(visible=True)
+            self.view.focus_panel = 0
         elif is_command_key("GO_RIGHT", key):
-            self.view.show_right_panel(visible=True)
+            self.view.focus_panel = 2
         return super().keypress(size, key)
 
 
@@ -767,7 +767,7 @@ class RightColumnView(urwid.Frame):
             self.view.controller.update_screen()
             return key
         elif is_command_key("GO_LEFT", key):
-            self.view.show_right_panel(visible=False)
+            self.view.focus_panel = 1
         return super().keypress(size, key)
 
 
@@ -924,7 +924,7 @@ class LeftColumnView(urwid.Pile):
                 self.view.stream_w.keypress(size, key)
             return key
         elif is_command_key("GO_RIGHT", key):
-            self.view.show_left_panel(visible=False)
+            self.view.focus_panel = 1
         return super().keypress(size, key)
 
 
