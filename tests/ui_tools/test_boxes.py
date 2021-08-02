@@ -209,7 +209,7 @@ class TestWriteBox:
     def test__compose_attributes_reset_for_stream_compose(
         self, key, mocker, write_box, widget_size
     ):
-        write_box._set_stream_write_box_style = mocker.Mock()
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(stream_id=1)
         write_box.msg_write_box.edit_text = "random text"
 
