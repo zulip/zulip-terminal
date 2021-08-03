@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
-from zulip import ZulipError
+from zulip import Client, ZulipError
 
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
@@ -27,7 +27,7 @@ class TestModel:
     def mock_external_classes(self, mocker: Any) -> None:
         self.urlparse = mocker.patch("urllib.parse.urlparse")
         self.controller = mocker.patch(CONTROLLER, return_value=None)
-        self.client = mocker.patch(CONTROLLER + ".client")
+        self.client = mocker.patch(CONTROLLER + ".client", spec=Client)
         self.client.base_url = "chat.zulip.zulip"
         mocker.patch(MODEL + "._start_presence_updates")
         self.display_error_if_present = mocker.patch(
@@ -482,7 +482,7 @@ class TestModel:
 
         if expected_method == "POST":
             model.client.add_reaction.assert_called_once_with(reaction_spec)
-            model.client.delete_reaction.assert_not_called()
+            model.client.remove_reaction.assert_not_called()
         elif expected_method == "DELETE":
             model.client.remove_reaction.assert_called_once_with(reaction_spec)
             model.client.add_reaction.assert_not_called()
