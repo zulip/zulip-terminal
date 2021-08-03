@@ -37,8 +37,8 @@ Color = color_properties(GruvBoxColor, 'BOLD')
 STYLES = {
     # style_name       :  foreground                   background
     None               : (Color.LIGHT2,                Color.DARK0_HARD),
-    'selected'         : (Color.DARK0_HARD,            Color.LIGHT2),
-    'msg_selected'     : (Color.DARK0_HARD,            Color.LIGHT2),
+    'selected'         : (Color.LIGHT2,                Color.FADED_BLUE),
+    'msg_selected'     : (Color.LIGHT2,                Color.FADED_BLUE),
     'header'           : (Color.NEUTRAL_BLUE,          Color.FADED_BLUE),
     'general_narrow'   : (Color.LIGHT2,                Color.FADED_BLUE),
     'general_bar'      : (Color.LIGHT2,                Color.DARK0_HARD),
