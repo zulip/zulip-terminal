@@ -1,5 +1,9 @@
-import pytest
+from typing import Any, Iterable, List, Optional
 
+import pytest
+from pytest_mock import MockerFixture
+
+from zulipterminal.api_types import Message
 from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
 
@@ -66,8 +70,13 @@ MODULE = "zulipterminal.ui_tools.utils"
     ],
 )
 def test_is_muted(
-    mocker, msg, narrow, muted_streams, is_muted_topic_return_value, muted
-):
+    mocker: MockerFixture,
+    msg: Message,
+    narrow: List[Any],
+    muted_streams: List[int],
+    is_muted_topic_return_value: bool,
+    muted: bool,
+) -> None:
     model = mocker.Mock()
     model.is_muted_stream = mocker.Mock(
         return_value=(msg.get("stream_id", "") in muted_streams)
@@ -129,8 +138,14 @@ def test_is_muted(
     ],
 )
 def test_create_msg_box_list(
-    mocker, narrow, messages, focus_msg_id, muted, unsubscribed, len_w_list
-):
+    mocker: MockerFixture,
+    narrow: List[Any],
+    messages: Optional[Iterable[Any]],
+    focus_msg_id: Optional[int],
+    muted: bool,
+    unsubscribed: bool,
+    len_w_list: int,
+) -> None:
     model = mocker.Mock()
     model.narrow = narrow
     model.index = {
