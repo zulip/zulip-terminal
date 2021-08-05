@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import pytest
 from pygments.styles.perldoc import PerldocStyle
+from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
@@ -16,6 +17,7 @@ from zulipterminal.config.themes import (
     add_pygments_style,
     all_themes,
     complete_and_incomplete_themes,
+    create_focus_map,
     parse_themefile,
     valid_16_color_codes,
     validate_colors,
@@ -271,3 +273,113 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         + "- GRAY_244 = dark_gra\n"
         + "- LIGHT2 = whit"
     )
+
+
+@pytest.mark.parametrize(
+    "palette, selected_style_name, is_mono, expected_additional_palette",
+    [
+        case(
+            [
+                (None, "", "", ""),
+                ("selected", "", "", "standout"),
+                ("msg_selected", "", "", "standout"),
+                ("header", "", "", "bold"),
+                ("general_narrow", "", "", ""),
+            ],
+            "selected",
+            True,
+            [],
+            id="mono-with-focus:selected",
+        ),
+        case(
+            [
+                (None, "white", "black"),
+                ("selected", "white", "dark blue"),
+                ("msg_selected", "white", "dark red"),
+                ("header", "dark cyan", "black"),
+                ("general_narrow", "white", "dark blue"),
+            ],
+            "selected",
+            False,
+            [
+                ("header_selected", "dark cyan", "dark blue"),
+                ("general_narrow_selected", "white", "dark blue"),
+            ],
+            id="16-color-with-focus:selected",
+        ),
+        case(
+            [
+                (None, "", "", "", "#fff", "g19"),
+                ("selected", "", "", "", "#fff", "#24a"),
+                ("msg_selected", "", "", "", "#fff", "#53c"),
+                ("header", "", "", "", "#088", "g19"),
+                ("general_narrow", "", "", "", "#fff", "#34b"),
+            ],
+            "selected",
+            False,
+            [
+                ("header_selected", "", "", "", "#088", "#24a"),
+                ("general_narrow_selected", "", "", "", "#fff", "#34b"),
+            ],
+            id="256-color-with-focus:selected",
+        ),
+        case(
+            [
+                (None, "white", "black"),
+                ("selected", "white", "dark blue"),
+                ("msg_selected", "white", "dark red"),
+                ("header", "dark cyan", "black"),
+                ("general_narrow", "white", "dark blue"),
+            ],
+            "msg_selected",
+            False,
+            [
+                ("header_msg_selected", "dark cyan", "dark red"),
+                ("general_narrow_msg_selected", "white", "dark blue"),
+            ],
+            id="16-color-with-focus:msg_selected",
+        ),
+        case(
+            [
+                (None, "white", "black"),
+                ("selected", "white", "dark blue"),
+                ("msg_selected", "white", "dark red"),
+                ("header", "dark cyan", "black"),
+                ("general_narrow", "white", "dark blue"),
+                ("header_selected", "dark gray", "green"),
+            ],
+            "selected",
+            False,
+            [
+                ("general_narrow_selected", "white", "dark blue"),
+            ],
+            id="16-color-with-focus:selected-override:header",
+        ),
+    ],
+)
+def test_create_focus_map(
+    mocker: MockerFixture,
+    palette: ThemeSpec,
+    selected_style_name: str,
+    is_mono: bool,
+    expected_additional_palette: ThemeSpec,
+) -> None:
+    view = mocker.Mock()
+    view.palette = palette
+    style_names = ["header", "general_narrow"]
+    if is_mono:
+        expected_focus_map = {
+            style: "selected" for style in [None, "header", "general_narrow"]
+        }
+    else:
+        expected_focus_map = {
+            None: selected_style_name,
+            "header": "header_" + selected_style_name,
+            "general_narrow": "general_narrow_" + selected_style_name,
+        }
+
+    focus_map = create_focus_map(view, style_names, selected_style_name)
+
+    assert focus_map == expected_focus_map
+    for style in expected_additional_palette:
+        assert style in view.palette
