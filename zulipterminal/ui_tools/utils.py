@@ -8,6 +8,7 @@ from zulipterminal.ui_tools.boxes import MessageBox
 
 def create_msg_box_list(
     model: Any,
+    view: Any,
     messages: Optional[Iterable[Any]] = None,
     *,
     focus_msg_id: Optional[int] = None,

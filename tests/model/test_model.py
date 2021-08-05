@@ -1421,7 +1421,7 @@ class TestModel:
         assert len(self.controller.view.message_view.log) == 1  # Added "msg_w"
         model.notify_user.assert_called_once_with(event["message"])
         create_msg_box_list.assert_called_once_with(
-            model, [message_fixture["id"]], last_message=None
+            model, self.controller.view, [message_fixture["id"]], last_message=None
         )
 
     def test__handle_message_event_with_valid_log(self, mocker, model, message_fixture):
@@ -1443,7 +1443,10 @@ class TestModel:
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = log[0].original_widget.message
         create_msg_box_list.assert_called_once_with(
-            model, [message_fixture["id"]], last_message=expected_last_msg
+            model,
+            self.controller.view,
+            [message_fixture["id"]],
+            last_message=expected_last_msg,
         )
 
     def test__handle_message_event_with_flags(self, mocker, model, message_fixture):

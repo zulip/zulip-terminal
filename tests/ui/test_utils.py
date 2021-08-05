@@ -147,6 +147,7 @@ def test_create_msg_box_list(
     len_w_list: int,
 ) -> None:
     model = mocker.Mock()
+    view = mocker.Mock()
     model.narrow = narrow
     model.index = {
         "all_msg_ids": {1, 2},
@@ -172,7 +173,7 @@ def test_create_msg_box_list(
         return_value=unsubscribed,
     )
 
-    return_value = create_msg_box_list(model, messages, focus_msg_id=focus_msg_id)
+    return_value = create_msg_box_list(model, view, messages, focus_msg_id=focus_msg_id)
 
     assert len(return_value) == len_w_list
     assert mock_muted.called is not unsubscribed

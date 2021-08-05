@@ -496,7 +496,7 @@ class Controller:
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
-        w_list = create_msg_box_list(self.model, msg_id_list)
+        w_list = create_msg_box_list(self.model, self.view, msg_id_list)
         self.view.message_view.log.clear()
         self.view.message_view.log.extend(w_list)
         focus_position = 0
@@ -562,7 +562,9 @@ class Controller:
             self.model.get_messages(num_before=30, num_after=10, anchor=anchor)
             msg_id_list = self.model.get_message_ids_in_current_narrow()
 
-        w_list = create_msg_box_list(self.model, msg_id_list, focus_msg_id=anchor)
+        w_list = create_msg_box_list(
+            self.model, self.view, msg_id_list, focus_msg_id=anchor
+        )
 
         focus_position = self.model.get_focus_in_current_narrow()
         if focus_position == set():  # No available focus; set to end

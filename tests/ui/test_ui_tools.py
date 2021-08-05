@@ -151,7 +151,9 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
         if messages_fetched:
-            create_msg_box_list.assert_called_once_with(msg_view.model, new_msg_ids)
+            create_msg_box_list.assert_called_once_with(
+                msg_view.model, msg_view.view, new_msg_ids
+            )
             self.model.controller.update_screen.assert_called_once_with()
         else:
             create_msg_box_list.assert_not_called()
@@ -210,7 +212,7 @@ class TestMessageView:
         assert msg_view.log == new_msg_widgets + initial_log
         if messages_fetched:
             create_msg_box_list.assert_called_once_with(
-                msg_view.model, {top_id_in_narrow} | new_msg_ids
+                msg_view.model, msg_view.view, {top_id_in_narrow} | new_msg_ids
             )
             self.model.controller.update_screen.assert_called_once_with()
         else:
@@ -243,7 +245,7 @@ class TestMessageView:
         assert msg_view.new_loading is False
         assert msg_view.log == ["M1", "M2"]
         create_msg_box_list.assert_called_once_with(
-            msg_view.model, set(), last_message=None
+            msg_view.model, msg_view.view, set(), last_message=None
         )
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(
@@ -274,7 +276,7 @@ class TestMessageView:
         assert msg_view.log[-2:] == ["M1", "M2"]
         expected_last_msg = msg_view.log[0].original_widget.message
         create_msg_box_list.assert_called_once_with(
-            msg_view.model, set(), last_message=expected_last_msg
+            msg_view.model, msg_view.view, set(), last_message=expected_last_msg
         )
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(

@@ -112,7 +112,7 @@ class MessageView(urwid.ListBox):
         self.new_loading = False
 
     def main_view(self) -> List[Any]:
-        msg_btn_list = create_msg_box_list(self.model)
+        msg_btn_list = create_msg_box_list(self.model, self.view)
         focus_msg = self.model.get_focus_in_current_narrow()
         if focus_msg == set():
             focus_msg = len(msg_btn_list) - 1
@@ -139,7 +139,7 @@ class MessageView(urwid.ListBox):
             if self.log:
                 self.log.remove(self.log[0])  # avoid duplication when updating
 
-            message_list = create_msg_box_list(self.model, ids_to_process)
+            message_list = create_msg_box_list(self.model, self.view, ids_to_process)
             message_list.reverse()
             for msg_w in message_list:
                 self.log.insert(0, msg_w)
@@ -162,7 +162,7 @@ class MessageView(urwid.ListBox):
             last_message = None
 
         message_list = create_msg_box_list(
-            self.model, new_ids, last_message=last_message
+            self.model, self.view, new_ids, last_message=last_message
         )
         self.log.extend(message_list)
 
