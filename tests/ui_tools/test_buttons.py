@@ -34,6 +34,7 @@ class TestTopButton:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.Mock()
+        self.view = mocker.Mock()
         self.show_function = mocker.Mock()
         self.urwid = mocker.patch(MODULE + ".urwid")
 
@@ -41,6 +42,7 @@ class TestTopButton:
     def top_button(self, mocker: MockerFixture) -> TopButton:
         top_button = TopButton(
             controller=self.controller,
+            view=self.view,
             prefix_markup=("style", "-"),
             label_markup=(None, "caption"),
             show_function=self.show_function,
@@ -51,6 +53,7 @@ class TestTopButton:
     def test_init(self, mocker: MockerFixture, top_button: TopButton) -> None:
 
         assert top_button.controller == self.controller
+        assert top_button.view == self.view
         assert top_button._prefix_markup == ("style", "-")
         assert top_button._label_markup == (None, "caption")
         assert top_button._suffix_markup == (None, "")
@@ -180,7 +183,9 @@ class TestStarredButton:
     def test_count_style_init_argument_value(
         self, mocker: MockerFixture, count: int = 10
     ) -> None:
-        starred_button = StarredButton(controller=mocker.Mock(), count=count)
+        starred_button = StarredButton(
+            controller=mocker.Mock(), view=mocker.Mock(), count=count
+        )
         assert starred_button.suffix_style == "starred_count"
 
 
@@ -466,11 +471,9 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
-        params = dict(controller=controller, count=count)
+        params = dict(controller=controller, view=view, count=count)
 
-        topic_button = TopicButton(
-            stream_id=stream_id, topic=title, view=view, **params
-        )
+        topic_button = TopicButton(stream_id=stream_id, topic=title, **params)
 
         top_button.assert_called_once_with(
             prefix_markup=(None, " ") if not is_resolved else (None, title[:1]),

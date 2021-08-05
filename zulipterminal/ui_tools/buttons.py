@@ -23,6 +23,7 @@ class TopButton(urwid.Button):
         self,
         *,
         controller: Any,
+        view: Any,
         prefix_markup: urwidMarkupTuple = (None, ""),
         label_markup: urwidMarkupTuple,
         suffix_markup: urwidMarkupTuple = (None, ""),
@@ -30,6 +31,7 @@ class TopButton(urwid.Button):
         count: int = 0,
     ) -> None:
         self.controller = controller
+        self.view = view
         self._prefix_markup = prefix_markup
         self._label_markup = label_markup
         self._suffix_markup = suffix_markup
@@ -116,11 +118,12 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
             controller=controller,
+            view=view,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_messages,
@@ -129,11 +132,12 @@ class HomeButton(TopButton):
 
 
 class PMButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
+            view=view,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_pm,
@@ -142,11 +146,12 @@ class PMButton(TopButton):
 
 
 class MentionedButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
             controller=controller,
+            view=view,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_mentions,
@@ -155,11 +160,12 @@ class MentionedButton(TopButton):
 
 
 class StarredButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
             controller=controller,
+            view=view,
             label_markup=(None, button_text),
             suffix_markup=("starred_count", ""),
             show_function=controller.narrow_to_all_starred,
@@ -214,6 +220,7 @@ class StreamButton(TopButton):
         )
         super().__init__(
             controller=controller,
+            view=view,
             prefix_markup=(self.color, stream_marker),
             label_markup=(None, self.stream_name),
             suffix_markup=("unread_count", ""),
@@ -269,13 +276,14 @@ class UserButton(TopButton):
         self.user_id = user["user_id"]
 
         self.controller = controller
-        self._view = view  # Used in _narrow_with_compose
+        self.view = view  # Used in _narrow_with_compose
 
         # FIXME Is this still needed?
         self.recipients = frozenset({self.user_id, view.model.user_id})
 
         super().__init__(
             controller=controller,
+            view=view,
             prefix_markup=(color, state_marker),
             label_markup=(color, user["full_name"]),
             show_function=self._narrow_with_compose,
@@ -292,8 +300,8 @@ class UserButton(TopButton):
         self.controller.narrow_to_user(
             recipient_emails=[self.email],
         )
-        self._view.body.focus.original_widget.set_focus("footer")
-        self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
+        self.view.body.focus.original_widget.set_focus("footer")
+        self.view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("USER_INFO", key):
@@ -332,8 +340,9 @@ class TopicButton(TopButton):
 
         super().__init__(
             controller=controller,
+            view=view,
             prefix_markup=(None, topic_prefix),
-            label_markup=(None, topic_name),
+            label_markup=(None, self.topic_name),
             suffix_markup=("unread_count", ""),
             show_function=narrow_function,
             count=count,

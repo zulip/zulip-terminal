@@ -1173,17 +1173,23 @@ class TestLeftColumnView:
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
+        mentioned_button = mocker.patch(VIEWS + ".MentionedButton")
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".StreamButton.mark_muted")
         left_col_view = LeftColumnView(self.view)
         home_button.assert_called_once_with(
-            controller=left_col_view.controller, count=2
+            controller=left_col_view.controller, view=left_col_view.view, count=2
         )
-        pm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
+        pm_button.assert_called_once_with(
+            controller=left_col_view.controller, view=left_col_view.view, count=0
+        )
+        mentioned_button.assert_called_once_with(
+            controller=left_col_view.controller, view=left_col_view.view, count=1
+        )
         starred_button.assert_called_once_with(
-            controller=left_col_view.controller, count=3
+            controller=left_col_view.controller, view=left_col_view.view, count=3
         )
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))

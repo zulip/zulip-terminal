@@ -806,20 +806,25 @@ class LeftColumnView(urwid.Pile):
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get("all_msg", 0)
-        self.view.home_button = HomeButton(controller=self.controller, count=count)
+        self.view.home_button = HomeButton(
+            controller=self.controller, view=self.view, count=count
+        )
 
         count = self.model.unread_counts.get("all_pms", 0)
-        self.view.pm_button = PMButton(controller=self.controller, count=count)
+        self.view.pm_button = PMButton(
+            controller=self.controller, view=self.view, count=count
+        )
 
         self.view.mentioned_button = MentionedButton(
             controller=self.controller,
+            view=self.view,
             count=self.model.unread_counts["all_mentions"],
         )
 
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
         self.view.starred_button = StarredButton(
-            controller=self.controller, count=count
+            controller=self.controller, view=self.view, count=count
         )
         menu_btn_list = [
             self.view.home_button,
