@@ -37,6 +37,7 @@ class TestTopButton:
         self.view = mocker.Mock()
         self.show_function = mocker.Mock()
         self.urwid = mocker.patch(MODULE + ".urwid")
+        mocker.patch(MODULE + ".create_focus_map")
 
     @pytest.fixture
     def top_button(self, mocker: MockerFixture) -> TopButton:
@@ -165,24 +166,26 @@ class TestTopButton:
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
-        set_attr_map = mocker.patch.object(top_button._w, "set_attr_map")
+        set_focus_map = mocker.patch.object(top_button._w, "set_focus_map")
+        create_focus_map = mocker.patch(MODULE + ".create_focus_map")
 
         top_button.update_widget()
 
         top_button.button_prefix.set_text.assert_called_once_with(
             expected_prefix_markup
         )
-        top_button.set_label.assert_called_once_with(top_button._label_markup[1])
+        top_button.set_label.assert_called_once_with(top_button._label_markup)
         top_button.button_suffix.set_text.assert_called_once_with(
             expected_suffix_markup
         )
-        set_attr_map.assert_called_once_with({None: top_button.label_style})
+        set_focus_map.assert_called_once_with(create_focus_map())
 
 
 class TestStarredButton:
     def test_count_style_init_argument_value(
         self, mocker: MockerFixture, count: int = 10
     ) -> None:
+        mocker.patch(MODULE + ".create_focus_map")
         starred_button = StarredButton(
             controller=mocker.Mock(), view=mocker.Mock(), count=count
         )
@@ -193,6 +196,7 @@ class TestStreamButton:
     @pytest.mark.parametrize("color_depth", [1, 16, 256, 2 ** 24])
     def test_init(self, mocker: MockerFixture, color_depth: int) -> None:
         mocker.patch(MODULE + ".StreamButton.mark_muted")
+        mocker.patch(MODULE + ".TopButton.__init__")
         controller_mock = mocker.Mock()
         controller_mock.color_depth = color_depth
         view_mock = mocker.Mock()
@@ -307,6 +311,7 @@ class TestUserButton:
             "full_name": caption,
         }
         activate = mocker.patch(MODULE + ".UserButton.activate")
+        mocker.patch(MODULE + ".TopButton.__init__")
         user_button = UserButton(
             user=user,
             controller=mocker.Mock(),
@@ -509,6 +514,7 @@ class TestTopicButton:
         is_muted_called: bool,
     ) -> None:
         mark_muted = mocker.patch(MODULE + ".TopicButton.mark_muted")
+        mocker.patch(MODULE + ".TopButton.__init__")
         controller = mocker.Mock()
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value

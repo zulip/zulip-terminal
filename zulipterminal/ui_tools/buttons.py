@@ -10,6 +10,7 @@ from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
+from zulipterminal.config.themes import create_focus_map
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_Size
@@ -99,9 +100,11 @@ class TopButton(urwid.Button):
         else:
             suffix = ["  "]
         self.button_prefix.set_text(prefix)
-        self.set_label(self.label_text)
+        self.set_label(self._label_markup)
         self.button_suffix.set_text(suffix)
-        self._w.set_attr_map({None: self.label_style})
+        styles = [self.prefix_style, self.label_style, self.suffix_style]
+        focus_map = create_focus_map(self.view, styles)
+        self._w.set_focus_map(focus_map)
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
