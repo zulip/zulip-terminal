@@ -59,6 +59,7 @@ STYLES = {
     'edit_time'        : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
     'current_user'     : (Color.LIGHT2,                Color.DARK0_HARD),
     'muted'            : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
+    'muted_selected'   : (Color.LIGHT2,                Color.FADED_BLUE),      # override focus style
     'popup_border'     : (Color.LIGHT2,                Color.DARK0_HARD),
     'popup_category'   : (Color.BRIGHT_BLUE__BOLD,     Color.DARK0_HARD),
     'popup_contrast'   : (Color.DARK0_HARD,            Color.GRAY_244),
