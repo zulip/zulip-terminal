@@ -187,18 +187,24 @@ class StreamButton(TopButton):
         self.model = controller.model
         self.count = count
         self.view = view
+        color_depth = controller.color_depth
 
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
                 inverse_text = background if background else "black"
                 break
-        view.palette.append(
-            (self.color, "", "", "bold", f"{self.color}, bold", background)
-        )
-        view.palette.append(
-            ("s" + self.color, "", "", "standout", inverse_text, self.color)
-        )
+        if color_depth == 1:
+            view.palette.append((self.color, "", "", "bold"))
+            view.palette.append(("s" + self.color, "", "", "standout"))
+        elif color_depth == 16:
+            view.palette.append((self.color, "yellow", background))
+            view.palette.append(("s" + self.color, "black", "yellow"))
+        else:
+            view.palette.append((self.color, "", "", "", self.color, background))
+            view.palette.append(
+                ("s" + self.color, "", "", "", inverse_text, self.color)
+            )
 
         stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
 

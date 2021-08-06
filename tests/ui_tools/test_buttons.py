@@ -185,6 +185,44 @@ class TestStarredButton:
 
 
 class TestStreamButton:
+    @pytest.mark.parametrize("color_depth", [1, 16, 256, 2 ** 24])
+    def test_init(self, mocker: MockerFixture, color_depth: int) -> None:
+        mocker.patch(MODULE + ".StreamButton.mark_muted")
+        controller_mock = mocker.Mock()
+        controller_mock.color_depth = color_depth
+        view_mock = mocker.Mock()
+        view_mock.controller = mocker.Mock()
+        view_mock.palette = [(None, "black", "white")]
+
+        stream_button = StreamButton(
+            properties={
+                "name": "PTEST",
+                "id": 205,
+                "color": "#bfd56f",
+                "invite_only": False,
+                "description": "Test stream description",
+            },
+            controller=controller_mock,
+            view=view_mock,
+            count=30,
+        )
+
+        assert stream_button.stream_name == "PTEST"
+        assert stream_button.stream_id == 205
+        assert stream_button.color == "#bfd56f"
+        assert stream_button.description == "Test stream description"
+        assert stream_button.count == 30
+
+        if color_depth == 1:
+            assert ("#bfd56f", "", "", "bold") in view_mock.palette
+            assert ("s#bfd56f", "", "", "standout") in view_mock.palette
+        elif color_depth == 16:
+            assert ("#bfd56f", "yellow", "white") in view_mock.palette
+            assert ("s#bfd56f", "black", "yellow") in view_mock.palette
+        else:
+            assert ("#bfd56f", "", "", "", "#bfd56f", "white") in view_mock.palette
+            assert ("s#bfd56f", "", "", "", "white", "#bfd56f") in view_mock.palette
+
     def test_mark_muted(
         self, mocker: MockerFixture, stream_button: StreamButton
     ) -> None:
