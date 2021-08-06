@@ -529,6 +529,23 @@ class MessageLinkButton(urwid.Button):
 
         return ""
 
+    def _validate_topic_data(self, parsed_link: ParsedNarrowLink) -> str:
+        """
+        Validates topic data and returns either an empty string for a successful
+        validation or an appropriate validation error.
+        """
+        stream_id = parsed_link["stream"]["stream_id"]
+        stream_name = parsed_link["stream"]["stream_name"]
+        topic_name = parsed_link["topic_name"]
+
+        if not stream_id:  # Primarily for valid deprecated links
+            stream_id = cast(int, self.model.stream_id_from_name(stream_name))
+
+        if topic_name not in self.model.topics_in_stream(stream_id):
+            return "Invalid topic name"
+
+        return ""
+
     def _validate_narrow_link(self, parsed_link: ParsedNarrowLink) -> str:
         """
         Returns either an empty string for a successful validation or an
@@ -545,11 +562,9 @@ class MessageLinkButton(urwid.Button):
 
         # Validate topic name.
         if "topic_name" in parsed_link:
-            topic_name = parsed_link["topic_name"]
-            stream_id = parsed_link["stream"]["stream_id"]
-
-            if topic_name not in self.model.topics_in_stream(stream_id):
-                return "Invalid topic name"
+            error = self._validate_topic_data(parsed_link)
+            if error:
+                return error
 
         # Validate message ID for near.
         if "near" in parsed_link["narrow"]:
