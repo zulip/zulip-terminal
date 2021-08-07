@@ -137,6 +137,7 @@ def test_is_muted(
         ),
     ],
 )
+@pytest.mark.parametrize("loop_started", [True, False])
 def test_create_msg_box_list(
     mocker: MockerFixture,
     narrow: List[Any],
@@ -145,6 +146,7 @@ def test_create_msg_box_list(
     muted: bool,
     unsubscribed: bool,
     len_w_list: int,
+    loop_started: bool,
 ) -> None:
     model = mocker.Mock()
     view = mocker.Mock()
@@ -165,8 +167,14 @@ def test_create_msg_box_list(
         },
         "pointer": {},
     }
+    if loop_started:
+        view.palette = [("PALETTE", "PALETTE", "PALETTE")]
+        controller = mocker.patch.object(view, "controller", create=True)
+        loop = mocker.patch.object(controller, "loop", create=True)
+        screen = mocker.patch.object(loop, "screen", create=True)
+        register_palette = mocker.patch.object(screen, "register_palette", create=True)
     msg_box = mocker.patch(MODULE + ".MessageBox")
-    mocker.patch(MODULE + ".urwid.AttrMap", return_value="MSG")
+    mocker.patch(MODULE + ".create_focus_map")
     mock_muted = mocker.patch(MODULE + ".is_muted", return_value=muted)
     mocker.patch(
         MODULE + ".is_unsubscribed_message",
@@ -177,3 +185,5 @@ def test_create_msg_box_list(
 
     assert len(return_value) == len_w_list
     assert mock_muted.called is not unsubscribed
+    if loop_started and narrow:
+        register_palette.assert_called_once_with(view.palette)

@@ -3,7 +3,23 @@ from typing import Any, Iterable, List, Optional
 import urwid
 
 from zulipterminal.api_types import Message
+from zulipterminal.config.themes import create_focus_map
 from zulipterminal.ui_tools.boxes import MessageBox
+
+
+common_styles = [
+    "name",
+    "user_active",
+    "user_idle",
+    "user_offline",
+    "user_inactive",
+    "time",
+    "starred",
+    "reaction_mine",
+    "reaction",
+    "msg_link",
+    "msg_link_index",
+]
 
 
 def create_msg_box_list(
@@ -44,9 +60,13 @@ def create_msg_box_list(
             focus_msg = message_list.index(msg) - muted_msgs
         if msg["id"] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
-        w_list.append(
-            urwid.AttrMap(MessageBox(msg, model, last_msg), msg_flag, "msg_selected")
-        )
+        msg_box = MessageBox(msg, model, last_msg)
+        styles = [attrib[0] for attrib in msg_box.content.attrib]
+        focus_map = create_focus_map(view, styles + common_styles, "msg_selected")
+        w_list.append(urwid.AttrMap(msg_box, msg_flag, focus_map))
+        if hasattr(view.controller, "loop"):
+            # Update palette as for msgs that are created after startup.
+            view.controller.loop.screen.register_palette(view.palette)
         last_msg = msg
     if focus_msg is not None:
         model.set_focus_in_current_narrow(focus_msg)
