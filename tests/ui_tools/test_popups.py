@@ -1114,7 +1114,7 @@ class TestMsgInfoView:
 
 class TestStreamInfoView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch):
+    def mock_external_classes(self, mocker, general_stream):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -1123,16 +1123,8 @@ class TestStreamInfoView:
         self.controller.model.is_pinned_stream.return_value = False
         self.controller.model.is_visual_notifications_enabled.return_value = False
         mocker.patch(LISTWALKER, return_value=[])
-        self.stream_id = 10
-        self.controller.model.stream_dict = {
-            self.stream_id: {
-                "name": "books",
-                "invite_only": False,
-                "rendered_description": "<p>Hey</p>",
-                "subscribers": [],
-                "stream_weekly_traffic": 123,
-            }
-        }
+        self.stream_id = general_stream["stream_id"]
+        self.controller.model.stream_dict = {self.stream_id: general_stream}
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
     def test_keypress_any_key(self, widget_size):
@@ -1142,7 +1134,7 @@ class TestStreamInfoView:
         assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MEMBERS"))
-    def test_keypress_stream_members(self, mocker, key, widget_size):
+    def test_keypress_stream_members(self, key, widget_size):
         size = widget_size(self.stream_info_view)
         self.stream_info_view.keypress(size, key)
         self.controller.show_stream_members.assert_called_once_with(
@@ -1174,20 +1166,11 @@ class TestStreamInfoView:
             ),
         ],
     )
-    def test_markup_descrption(
-        self, rendered_description, expected_markup, stream_id=10
-    ):
-        self.controller.model.stream_dict = {
-            stream_id: {
-                "name": "ZT",
-                "invite_only": False,
-                "subscribers": [],
-                "stream_weekly_traffic": 123,
-                "rendered_description": rendered_description,
-            }
-        }
+    def test_markup_descrption(self, rendered_description, expected_markup):
+        model = self.controller.model
+        model.stream_dict[self.stream_id]["rendered_description"] = rendered_description
 
-        stream_info_view = StreamInfoView(self.controller, stream_id)
+        stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
         assert stream_info_view.markup_desc == expected_markup
 
