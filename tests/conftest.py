@@ -203,6 +203,7 @@ def general_stream():
         "in_home_view": True,
         "audible_notifications": False,
         "description": "General Stream",
+        "rendered_description": "General Stream",
         "is_old_stream": True,
         "desktop_notifications": False,
         "stream_weekly_traffic": 0,
@@ -223,6 +224,7 @@ def secret_stream():
         "invite_only": True,
         "name": "Secret stream",
         "email_address": "secret@example.com",
+        "rendered_description": "Some private stream",
         "color": "#ccc",  # Color in '#xxx' format
         "in_home_view": True,
         "audible_notifications": False,
@@ -248,6 +250,7 @@ def streams_fixture(general_stream, secret_stream):
                 "in_home_view": True,
                 "audible_notifications": False,
                 "description": f"A description of stream {i}",
+                "rendered_description": f"A description of stream {i}",
                 "is_old_stream": True,
                 "desktop_notifications": False,
                 "stream_weekly_traffic": 0,
