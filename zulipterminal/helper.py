@@ -22,6 +22,7 @@ from typing import (
     Union,
 )
 from urllib.parse import unquote
+import unicodedata
 
 from typing_extensions import TypedDict
 
@@ -524,6 +525,34 @@ def match_emoji(emoji: str, text: str) -> bool:
     False otherwise.
     """
     return emoji.lower().startswith(text.lower())
+
+
+def clean_string(string: str) -> str:
+    """
+    `urwid` thinks these zero width characters are actually single width
+    and allocated space but actually end up not printing which causes
+    rendering to break.
+        Skip Non-spacing-combining-Mark: Mn (zero width), which includes,
+          15 Variation Selector     (Emoji modifier)     <fe0f>
+          16 Variation Selector     (Emoji modifier)     <fe0e>
+        Skip Control Formats: Cf which includes,
+          Zero Width Spaces                              <200b>
+          Zero Width Joiner      (ZWJ)(Combined Emojis)  <200d>
+          Zero Width Non Joiner    (ZWNJ)(Ligatures)     <200c>
+
+        FIXME:
+        * Arabic breaks rendering when next to footlink index. Maybe
+          something to do with right-to-left modifier and numbers.
+        * Flags are combined emojis that use "regional indicators"
+          JP for Japan but they do not use ZWJ.
+          Individual "regional indicators" break rendering because they
+          are not able to combined.
+    """
+    clean_string = ""
+    for char in string:
+        if unicodedata.category(char) not in ["Mn", "Cf"]:
+            clean_string += char
+    return clean_string
 
 
 def match_topics(topic_names: List[str], search_text: str) -> List[str]:

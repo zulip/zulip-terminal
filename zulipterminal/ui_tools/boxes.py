@@ -42,6 +42,7 @@ from zulipterminal.config.ui_mappings import STATE_ICON
 from zulipterminal.helper import (
     Message,
     asynch,
+    clean_string,
     format_string,
     get_unused_fence,
     match_emoji,
@@ -207,6 +208,7 @@ class WriteBox(urwid.Pile):
                     for email in self.recipient_emails
                 ]
             )
+            recipient_info = clean_string(recipient_info)
         else:
             self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
@@ -339,6 +341,10 @@ class WriteBox(urwid.Pile):
     def stream_box_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
+        self.caption = caption
+        self.title = title
+        caption = clean_string(caption)
+        title = clean_string(title)
         self.set_editor_mode()
         self.compose_box_status = "open_with_stream"
         self.stream_id = stream_id
@@ -717,10 +723,10 @@ class WriteBox(urwid.Pile):
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
             if self.compose_box_status == "open_with_stream":
-                if re.fullmatch(r"\s*", self.title_write_box.edit_text):
+                if re.fullmatch(r"\s*", self.title):
                     topic = "(no topic)"
                 else:
-                    topic = self.title_write_box.edit_text
+                    topic = self.title
 
                 if self.msg_edit_state is not None:
                     trimmed_topic = topic.strip()
@@ -741,7 +747,7 @@ class WriteBox(urwid.Pile):
                     success = self.model.update_stream_message(**args)
                 else:
                     success = self.model.send_stream_message(
-                        stream=self.stream_write_box.edit_text,
+                        stream=self.caption,
                         topic=topic,
                         content=self.msg_write_box.edit_text,
                     )
@@ -799,9 +805,9 @@ class WriteBox(urwid.Pile):
                 elif self.compose_box_status == "open_with_stream":
                     this_draft = StreamComposition(
                         type="stream",
-                        to=self.stream_write_box.edit_text,
+                        to=self.caption,
                         content=self.msg_write_box.edit_text,
-                        subject=self.title_write_box.edit_text,
+                        subject=self.title,
                     )
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:
@@ -988,11 +994,13 @@ class MessageBox(urwid.Pile):
         assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]["color"]
         bar_color = f"s{color}"
+        stream_name = clean_string(self.stream_name)
+        topic_name = clean_string(self.topic_name)
         stream_title_markup = (
             "bar",
             [
-                (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
-                ("title", f" {self.topic_name}"),
+                (bar_color, f"{stream_name} {STREAM_TOPIC_SEPARATOR} "),
+                ("title", f" {topic_name}"),
             ],
         )
         stream_title = urwid.Text(stream_title_markup)
@@ -1007,6 +1015,7 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
+        self.recipients_names = clean_string(self.recipients_names)
         title_markup = (
             "header",
             [("general_narrow", "You and "), ("general_narrow", self.recipients_names)],
@@ -1049,16 +1058,17 @@ class MessageBox(urwid.Pile):
             assert self.stream_id is not None
             bar_color = self.model.stream_dict[self.stream_id]["color"]
             bar_color = f"s{bar_color}"
+            stream_name = clean_string(self.stream_name)
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (
                     "bar",  # type: ignore
                     [
-                        (bar_color, self.stream_name),
+                        (bar_color, stream_name),
                         (bar_color, ": topic narrow"),
                     ],
                 )
             else:
-                text_to_fill = ("bar", [(bar_color, self.stream_name)])  # type: ignore
+                text_to_fill = ("bar", [(bar_color, stream_name)])  # type: ignore
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = "Group private conversation"
         else:
@@ -1215,10 +1225,12 @@ class MessageBox(urwid.Pile):
 
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
+                element = clean_string(element)
                 if element == "\n" and metadata.get("bq_len", 0) > 0:
                     metadata["bq_len"] -= 1
                     continue
-                markup.append(element)
+                if element:
+                    markup.append(element)
             elif tag == "div" and (set(tag_classes) & set(unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
                 # NOTE: Though `matches` is generalized for multiple

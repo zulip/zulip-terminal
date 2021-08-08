@@ -16,7 +16,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
-from zulipterminal.helper import Message, StreamData, hash_util_decode
+from zulipterminal.helper import Message, StreamData, clean_string, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -33,7 +33,7 @@ class TopButton(urwid.Button):
         count_style: Optional[str] = None,
     ) -> None:
         self.controller = controller
-        self._caption = caption
+        self._caption = clean_string(caption)
         self.show_function = show_function
         self.prefix_character = prefix_character
         self.original_color = text_color
