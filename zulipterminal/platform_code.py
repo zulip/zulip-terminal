@@ -52,3 +52,17 @@ def notify(title: str, text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
+
+
+def successful_GUI_return_code() -> int:
+    """
+    Returns success retrn code for GUI commands, which are OS specific.
+    """
+    # WSL uses GUI return code as 1. Refer below link to know more:
+    # https://stackoverflow.com/questions/52423031/
+    # why-does-opening-an-explorer-window-and-selecting-a-file-through-pythons-subpro/
+    # 52423798#52423798
+    if PLATFORM == "WSL":
+        return 1
+
+    return 0
