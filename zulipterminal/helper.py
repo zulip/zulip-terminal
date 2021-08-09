@@ -35,6 +35,7 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
+from zulipterminal.platform_code import successful_GUI_return_code
 
 
 class StreamData(TypedDict):
@@ -755,7 +756,7 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
             command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
-        if exit_status != 0:
+        if exit_status != successful_GUI_return_code():
             error = [
                 " The tool ",
                 ("footer_contrast", tool),

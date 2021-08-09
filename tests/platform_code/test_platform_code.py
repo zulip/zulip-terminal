@@ -1,7 +1,12 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.platform_code import AllPlatforms, SupportedPlatforms, notify
+from zulipterminal.platform_code import (
+    AllPlatforms,
+    SupportedPlatforms,
+    notify,
+    successful_GUI_return_code,
+)
 
 
 MODULE = "zulipterminal.platform_code"
@@ -67,3 +72,20 @@ def test_notify_quotes(
     assert len(params[0][0][0]) == cmd_length
 
     # NOTE: If there is a quoting error, we may get a ValueError too
+
+
+@pytest.mark.parametrize(
+    "PLATFORM, expected_return_code",
+    [
+        ("Linux", 0),
+        ("MacOS", 0),
+        ("WSL", 1),
+    ],
+)
+def test_successful_GUI_return_code(
+    mocker: MockerFixture,
+    PLATFORM: SupportedPlatforms,
+    expected_return_code: int,
+) -> None:
+    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    assert successful_GUI_return_code() == expected_return_code
