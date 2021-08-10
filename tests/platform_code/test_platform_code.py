@@ -4,6 +4,7 @@ from pytest_mock import MockerFixture
 from zulipterminal.platform_code import (
     AllPlatforms,
     SupportedPlatforms,
+    normalized_file_path,
     notify,
     successful_GUI_return_code,
 )
@@ -89,3 +90,21 @@ def test_successful_GUI_return_code(
 ) -> None:
     mocker.patch(MODULE + ".PLATFORM", PLATFORM)
     assert successful_GUI_return_code() == expected_return_code
+
+
+@pytest.mark.parametrize(
+    "PLATFORM, expected_path",
+    [
+        ("Linux", "/path/to/file"),
+        ("MacOS", "/path/to/file"),
+        ("WSL", "\\path\\to\\file"),
+    ],
+)
+def test_normalized_file_path(
+    mocker: MockerFixture,
+    PLATFORM: SupportedPlatforms,
+    expected_path: str,
+    path: str = "/path/to/file",
+) -> None:
+    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    assert normalized_file_path(path) == expected_path
