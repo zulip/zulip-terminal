@@ -66,3 +66,14 @@ def successful_GUI_return_code() -> int:
         return 1
 
     return 0
+
+
+def normalized_file_path(path: str) -> str:
+    """
+    Returns file paths which are normalized as per platform.
+    """
+    # Convert Unix path to Windows path for WSL
+    if PLATFORM == "WSL":
+        return path.replace("/", "\\")
+
+    return path

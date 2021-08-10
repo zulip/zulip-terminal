@@ -35,7 +35,7 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
-from zulipterminal.platform_code import successful_GUI_return_code
+from zulipterminal.platform_code import normalized_file_path, successful_GUI_return_code
 
 
 class StreamData(TypedDict):
@@ -740,7 +740,7 @@ def download_media(controller: Any, url: str) -> str:
                 if chunk:  # Filter out keep-alive new chunks.
                     file.write(chunk)
 
-        return local_path
+        return normalized_file_path(local_path)
     return ""
 
 
