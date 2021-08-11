@@ -765,7 +765,7 @@ class Model:
             is_bot=api_user_data.get("is_bot", False),
             # Role `None` for triggering servers < Zulip 4.1 (ZFL 59)
             role=api_user_data.get("role", None),
-            bot_type=api_user_data.get("bot_type", 0),
+            bot_type=api_user_data.get("bot_type", None),
             bot_owner_name="",  # Can be non-empty only if is_bot == True
             last_active="",
         )

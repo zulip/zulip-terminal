@@ -1118,7 +1118,7 @@ class TestModel:
             ({"timezone": "Asia/Kolkata"}, "timezone", "Asia/Kolkata"),
             ({}, "timezone", ""),
             ({"bot_type": 1}, "bot_type", 1),
-            ({}, "bot_type", 0),
+            ({}, "bot_type", None),
             ({"role": 100}, "role", 100),
             ({"role": 200}, "role", 200),
             ({"role": 300}, "role", 300),
