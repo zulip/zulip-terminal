@@ -112,7 +112,7 @@ class RealmUser(TypedDict):
 
     is_bot: bool
     # These are only meaningfully (or literally) present for bots (ie. is_bot==True)
-    bot_type: int
+    bot_type: Optional[int]
     bot_owner_id: int  # NOTE: new in Zulip 3.0 (ZFL 1) - None for old bots
     bot_owner: str  # (before ZFL 1; containing email field of owner instead)
 
