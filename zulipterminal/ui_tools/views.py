@@ -1196,6 +1196,7 @@ class UserInfoView(PopUpView):
             display_data["Local time"] = local_time[11:]
 
         if data["is_bot"]:
+            assert data["bot_type"] is not None
             display_data["Role"] = BOT_TYPE_BY_ID.get(
                 data["bot_type"], "Unknown Bot Type"
             )

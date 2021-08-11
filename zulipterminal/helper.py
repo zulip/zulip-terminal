@@ -60,7 +60,7 @@ class TidiedUserInfo(TypedDict):
 
     is_bot: bool
     # Below fields are only meaningful if is_bot == True
-    bot_type: int
+    bot_type: Optional[int]
     bot_owner_name: str
 
 
