@@ -1,0 +1,1600 @@
+# emoji-test.txt
+# Date: 2020-09-12, 22:19:50 GMT
+# © 2020 Unicode®, Inc.
+# Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
+#
+# Emoji Keyboard/Display Test Data for UTS #51
+# Version: 13.1
+#
+# For documentation and usage, see http://www.unicode.org/reports/tr51
+#
+# This file provides data for testing which emoji forms should be in keyboards and which should also be displayed/processed.
+# Format: code points; status # emoji name
+#     Code points — list of one or more hex code points, separated by spaces
+#     Status
+#       component                — an Emoji_Component,
+#                                  excluding Regional_Indicators, ASCII, and non-Emoji.
+#       fully-qualified (fq)     — a fully-qualified emoji (see ED-18 in UTS #51),
+#                                  excluding Emoji_Component
+#       minimally-qualified (mq) — a minimally-qualified emoji (see ED-18a in UTS #51)
+#       unqualified  (uq)        — a unqualified emoji (See ED-19 in UTS #51)
+# Notes:
+#   • This includes the emoji components that need emoji presentation (skin tone and hair)
+#     when isolated, but omits the components that need not have an emoji
+#     presentation when isolated.
+#   • The RGI set is covered by the listed fully-qualified emoji. 
+#   • The listed minimally-qualified and unqualified cover all cases where an
+#     element of the RGI set is missing one or more emoji presentation selectors.
+#   • The file is in CLDR order, not codepoint order. This is recommended (but not required!) for keyboard palettes.
+#   • The groups and subgroups are illustrative. See the Emoji Order chart for more information.
+# ----------------------------------------------------------------------------------------
+# This file is a shorter version of the original Unicode 13.1 emoji file
+# which contains ~4000 emojis which contains only independent emojis and
+# removies all modified and combined emojis.
+#
+# This was tested for compatibility with urwid 2.1.2 so that it doesn't break rendering.
+#
+# Total Independent Emojis:     1330
+# Urwid Bad Emojis:              208
+# Urwid Good Emojis:            1122
+
+# group: Smileys & Emotion
+
+# subgroup: face-smiling
+1F600                 : fq : 😀 : grinning face
+1F603                 : fq : 😃 : grinning face with big eyes
+1F604                 : fq : 😄 : grinning face with smiling eyes
+1F601                 : fq : 😁 : beaming face with smiling eyes
+1F606                 : fq : 😆 : grinning squinting face
+1F605                 : fq : 😅 : grinning face with sweat
+1F923                 : fq : 🤣 : rolling on the floor laughing
+1F602                 : fq : 😂 : face with tears of joy
+1F642                 : fq : 🙂 : slightly smiling face
+1F643                 : fq : 🙃 : upside-down face
+1F609                 : fq : 😉 : winking face
+1F60A                 : fq : 😊 : smiling face with smiling eyes
+1F607                 : fq : 😇 : smiling face with halo
+
+# subgroup: face-affection
+1F970                 : fq : 🥰 :  smiling face with hearts
+1F60D                 : fq : 😍 : smiling face with heart-eyes
+1F929                 : fq : 🤩 : star-struck
+1F618                 : fq : 😘 : face blowing a kiss
+1F617                 : fq : 😗 : kissing face
+263A                  : uq : ☺ : smiling face
+1F61A                 : fq : 😚 : kissing face with closed eyes
+1F619                 : fq : 😙 : kissing face with smiling eyes
+1F972                 : fq : 🥲 :  smiling face with tear                  : bad
+
+# subgroup: face-tongue
+1F60B                 : fq : 😋 : face savoring food
+1F61B                 : fq : 😛 : face with tongue
+1F61C                 : fq : 😜 : winking face with tongue
+1F92A                 : fq : 🤪 : zany face
+1F61D                 : fq : 😝 : squinting face with tongue
+1F911                 : fq : 🤑 : money-mouth face
+
+# subgroup: face-hand
+1F917                 : fq : 🤗 : hugging face
+1F92D                 : fq : 🤭 : face with hand over mouth
+1F92B                 : fq : 🤫 : shushing face
+1F914                 : fq : 🤔 : thinking face
+
+# subgroup: face-neutral-skeptical
+1F910                 : fq : 🤐 : zipper-mouth face
+1F928                 : fq : 🤨 : face with raised eyebrow
+1F610                 : fq : 😐 : neutral face
+1F611                 : fq : 😑 : expressionless face
+1F636                 : fq : 😶 : face without mouth
+1F60F                 : fq : 😏 : smirking face
+1F612                 : fq : 😒 : unamused face
+1F644                 : fq : 🙄 : face with rolling eyes
+1F62C                 : fq : 😬 : grimacing face
+1F925                 : fq : 🤥 : lying face
+
+# subgroup: face-sleepy
+1F60C                 : fq : 😌 : relieved face
+1F614                 : fq : 😔 : pensive face
+1F62A                 : fq : 😪 : sleepy face
+1F924                 : fq : 🤤 : drooling face
+1F634                 : fq : 😴 : sleeping face
+
+# subgroup: face-unwell
+1F637                 : fq : 😷 : face with medical mask
+1F912                 : fq : 🤒 : face with thermometer
+1F915                 : fq : 🤕 : face with head-bandage
+1F922                 : fq : 🤢 : nauseated face
+1F92E                 : fq : 🤮 : face vomiting
+1F927                 : fq : 🤧 : sneezing face
+1F975                 : fq : 🥵 :  hot face
+1F976                 : fq : 🥶 :  cold face
+1F974                 : fq : 🥴 :  woozy face
+1F635                 : fq : 😵 : knocked-out face
+1F92F                 : fq : 🤯 : exploding head
+
+# subgroup: face-hat
+1F920                 : fq : 🤠 : cowboy hat face
+1F973                 : fq : 🥳 :  partying face
+1F978                 : fq : 🥸 :  disguised face                         : bad
+
+# subgroup: face-glasses
+1F60E                 : fq : 😎 : smiling face with sunglasses
+1F913                 : fq : 🤓 : nerd face
+1F9D0                 : fq : 🧐 : face with monocle
+
+# subgroup: face-concerned
+1F615                 : fq : 😕 : confused face
+1F61F                 : fq : 😟 : worried face
+1F641                 : fq : 🙁 : slightly frowning face
+2639                  : uq : ☹ : frowning face
+1F62E                 : fq : 😮 : face with open mouth
+1F62F                 : fq : 😯 : hushed face
+1F632                 : fq : 😲 : astonished face
+1F633                 : fq : 😳 : flushed face
+1F97A                 : fq : 🥺 :  pleading face
+1F626                 : fq : 😦 : frowning face with open mouth
+1F627                 : fq : 😧 : anguished face
+1F628                 : fq : 😨 : fearful face
+1F630                 : fq : 😰 : anxious face with sweat
+1F625                 : fq : 😥 : sad but relieved face
+1F622                 : fq : 😢 : crying face
+1F62D                 : fq : 😭 : loudly crying face
+1F631                 : fq : 😱 : face screaming in fear
+1F616                 : fq : 😖 : confounded face
+1F623                 : fq : 😣 : persevering face
+1F61E                 : fq : 😞 : disappointed face
+1F613                 : fq : 😓 : downcast face with sweat
+1F629                 : fq : 😩 : weary face
+1F62B                 : fq : 😫 : tired face
+1F971                 : fq : 🥱 :  yawning face
+
+# subgroup: face-negative
+1F624                 : fq : 😤 : face with steam from nose
+1F621                 : fq : 😡 : pouting face
+1F620                 : fq : 😠 : angry face
+1F92C                 : fq : 🤬 : face with symbols on mouth
+1F608                 : fq : 😈 : smiling face with horns
+1F47F                 : fq : 👿 : angry face with horns
+1F480                 : fq : 💀 : skull
+2620                  : uq : ☠ : skull and crossbones
+
+# subgroup: face-costume
+1F4A9                 : fq : 💩 : pile of poo
+1F921                 : fq : 🤡 : clown face
+1F479                 : fq : 👹 : ogre
+1F47A                 : fq : 👺 : goblin
+1F47B                 : fq : 👻 : ghost
+1F47D                 : fq : 👽 : alien
+1F47E                 : fq : 👾 : alien monster
+1F916                 : fq : 🤖 : robot
+
+# subgroup: cat-face
+1F63A                 : fq : 😺 : grinning cat
+1F638                 : fq : 😸 : grinning cat with smiling eyes
+1F639                 : fq : 😹 : cat with tears of joy
+1F63B                 : fq : 😻 : smiling cat with heart-eyes
+1F63C                 : fq : 😼 : cat with wry smile
+1F63D                 : fq : 😽 : kissing cat
+1F640                 : fq : 🙀 : weary cat
+1F63F                 : fq : 😿 : crying cat
+1F63E                 : fq : 😾 : pouting cat
+
+# subgroup: monkey-face
+1F648                 : fq : 🙈 : see-no-evil monkey
+1F649                 : fq : 🙉 : hear-no-evil monkey
+1F64A                 : fq : 🙊 : speak-no-evil monkey
+
+# subgroup: emotion
+1F48B                 : fq : 💋 : kiss mark
+1F48C                 : fq : 💌 : love letter
+1F498                 : fq : 💘 : heart with arrow
+1F49D                 : fq : 💝 : heart with ribbon
+1F496                 : fq : 💖 : sparkling heart
+1F497                 : fq : 💗 : growing heart
+1F493                 : fq : 💓 : beating heart
+1F49E                 : fq : 💞 : revolving hearts
+1F495                 : fq : 💕 : two hearts
+1F49F                 : fq : 💟 : heart decoration
+2763                  : uq : ❣ : heart exclamation
+1F494                 : fq : 💔 : broken heart
+2764                  : uq : ❤ : red heart
+1F9E1                 : fq : 🧡 : orange heart
+1F49B                 : fq : 💛 : yellow heart
+1F49A                 : fq : 💚 : green heart
+1F499                 : fq : 💙 : blue heart
+1F49C                 : fq : 💜 : purple heart
+1F90E                 : fq : 🤎 :  brown heart
+1F5A4                 : fq : 🖤 : black heart
+1F90D                 : fq : 🤍 :  white heart
+1F4AF                 : fq : 💯 : hundred points
+1F4A2                 : fq : 💢 : anger symbol
+1F4A5                 : fq : 💥 : collision
+1F4AB                 : fq : 💫 : dizzy
+1F4A6                 : fq : 💦 : sweat droplets
+1F4A8                 : fq : 💨 : dashing away
+1F573                 : uq : 🕳 : hole                                : bad
+1F4A3                 : fq : 💣 : bomb
+1F4AC                 : fq : 💬 : speech balloon
+1F5E8                 : uq : 🗨 : left speech bubble                         : bad
+1F5EF                 : uq : 🗯 : right anger bubble                         : bad
+1F4AD                 : fq : 💭 : thought balloon
+1F4A4                 : fq : 💤 : zzz
+
+
+# group: People & Body
+
+# subgroup: hand-fingers-open
+1F44B                 : fq : 👋 : waving hand                  
+1F91A                 : fq : 🤚 : raised back of hand
+1F590                 : uq : 🖐 : hand with fingers splayed                                          : bad
+270B                  : fq : ✋ : raised hand                                                        : bad
+1F596                 : fq : 🖖 : vulcan salute
+
+# subgroup: hand-fingers-partial
+1F44C                 : fq : 👌 : OK hand
+1F90C                 : fq : 🤌 :  pinched fingers                                             : bad
+1F90F                 : fq : 🤏 :  pinching hand
+270C                  : uq : ✌ : victory hand
+1F91E                 : fq : 🤞 : crossed fingers
+1F91F                 : fq : 🤟 : love-you gesture
+1F918                 : fq : 🤘 : sign of the horns
+1F919                 : fq : 🤙 : call me hand
+
+# subgroup: hand-single-finger
+1F448                 : fq : 👈 : backhand index pointing left
+1F449                 : fq : 👉 : backhand index pointing right
+1F446                 : fq : 👆 : backhand index pointing up
+1F595                 : fq : 🖕 : middle finger
+1F447                 : fq : 👇 : backhand index pointing down
+261D                  : uq : ☝ : index pointing up
+
+# subgroup: hand-fingers-closed
+1F44D                 : fq : 👍 : thumbs up
+1F44E                 : fq : 👎 : thumbs down
+270A                  : fq : ✊ : raised fist                                         : bad
+1F44A                 : fq : 👊 : oncoming fist
+1F91B                 : fq : 🤛 : left-facing fist
+1F91C                 : fq : 🤜 : right-facing fist
+
+# subgroup: hands
+1F44F                 : fq : 👏 : clapping hands
+1F64C                 : fq : 🙌 : raising hands
+1F450                 : fq : 👐 : open hands
+1F932                 : fq : 🤲 : palms up together
+1F91D                 : fq : 🤝 : handshake
+1F64F                 : fq : 🙏 : folded hands
+
+# subgroup: hand-prop
+270D                  : uq : ✍ : writing hand
+1F485                 : fq : 💅 : nail polish
+1F933                 : fq : 🤳 : selfie
+
+# subgroup: body-parts
+1F4AA                 : fq : 💪 : flexed biceps
+1F9BE                 : fq : 🦾 :  mechanical arm
+1F9BF                 : fq : 🦿 :  mechanical leg
+1F9B5                 : fq : 🦵 :  leg
+1F9B6                 : fq : 🦶 :  foot
+1F442                 : fq : 👂 : ear
+1F9BB                 : fq : 🦻 :  ear with hearing aid
+1F443                 : fq : 👃 : nose
+1F9E0                 : fq : 🧠 : brain
+1FAC0                 : fq : 🫀 :  anatomical heart                             : bad
+1FAC1                 : fq : 🫁 :  lungs                                        : bad
+1F9B7                 : fq : 🦷 :  tooth
+1F9B4                 : fq : 🦴 :  bone
+1F440                 : fq : 👀 : eyes
+1F441                 : uq : 👁 : eye                                            : bad
+1F445                 : fq : 👅 : tongue
+1F444                 : fq : 👄 : mouth
+
+
+# subgroup: person
+1F476                 : fq : 👶 : baby
+1F9D2                 : fq : 🧒 : child
+1F466                 : fq : 👦 : boy
+1F467                 : fq : 👧 : girl
+1F9D1                 : fq : 🧑 : person
+1F471                 : fq : 👱 : person blond hair
+1F468                 : fq : 👨 : man
+1F9D4                 : fq : 🧔 : person beard
+1F469                 : fq : 👩 : woman
+1F9D3                 : fq : 🧓 : older person
+1F474                 : fq : 👴 : old man
+1F475                 : fq : 👵 : old woman
+
+# subgroup: person-gesture
+1F64D                 : fq : 🙍 : person frowning
+1F64E                 : fq : 🙎 : person pouting
+1F645                 : fq : 🙅 : person gesturing NO
+1F646                 : fq : 🙆 : person gesturing OK
+1F481                 : fq : 💁 : person tipping hand
+1F64B                 : fq : 🙋 : person raising hand
+1F9CF                 : fq : 🧏 :  deaf person
+1F647                 : fq : 🙇 : person bowing
+1F926                 : fq : 🤦 : person facepalming
+1F937                 : fq : 🤷 : person shrugging
+
+# subgroup: person-role
+1F46E                 : fq : 👮 : police officer
+1F575                 : uq : 🕵 : detective                                                  : bad
+1F482                 : fq : 💂 : guard
+1F977                 : fq : 🥷 :  ninja                                             : bad
+1F477                 : fq : 👷 : construction worker
+1F934                 : fq : 🤴 : prince
+1F478                 : fq : 👸 : princess
+1F473                 : fq : 👳 : person wearing turban
+1F472                 : fq : 👲 : person with skullcap
+1F9D5                 : fq : 🧕 : woman with headscarf
+1F935                 : fq : 🤵 : person in tuxedo
+1F470                 : fq : 👰 : person with veil
+1F930                 : fq : 🤰 : pregnant woman
+1F931                 : fq : 🤱 : breast-feeding
+
+# subgroup: person-fantasy
+1F47C                 : fq : 👼 : baby angel
+1F385                 : fq : 🎅 : Santa Claus
+1F936                 : fq : 🤶 : Mrs. Claus
+1F9B8                 : fq : 🦸 :  superhero
+1F9B9                 : fq : 🦹 :  supervillain
+1F9D9                 : fq : 🧙 : mage
+1F9DA                 : fq : 🧚 : fairy
+1F9DB                 : fq : 🧛 : vampire
+1F9DC                 : fq : 🧜 : merperson
+1F9DD                 : fq : 🧝 : elf
+1F9DE                 : fq : 🧞 : genie
+1F9DF                 : fq : 🧟 : zombie
+
+# subgroup: person-activity
+1F486                 : fq : 💆 : person getting massage
+1F487                 : fq : 💇 : person getting haircut
+1F6B6                 : fq : 🚶 : person walking
+1F9CD                 : fq : 🧍 :  person standing
+1F9CE                 : fq : 🧎 :  person kneeling
+1F3C3                 : fq : 🏃 : person running
+1F483                 : fq : 💃 : woman dancing
+1F57A                 : fq : 🕺 : man dancing
+1F574                 : uq : 🕴 : person in suit levitating                                           : bad
+1F46F                 : fq : 👯 : people with bunny ears
+1F9D6                 : fq : 🧖 : person in steamy room
+1F9D7                 : fq : 🧗 : person climbing
+
+# subgroup: person-sport
+1F93A                 : fq : 🤺 : person fencing
+1F3C7                 : fq : 🏇 : horse racing
+26F7                  : uq : ⛷ : skier
+1F3C2                 : fq : 🏂 : snowboarder
+1F3CC                 : uq : 🏌 : person golfing                                           : bad
+1F3C4                 : fq : 🏄 : person surfing
+1F6A3                 : fq : 🚣 : person rowing boat
+1F3CA                 : fq : 🏊 : person swimming
+26F9                  : uq : ⛹ : person bouncing ball
+1F3CB                 : uq : 🏋 : person lifting weights                                        : bad
+1F6B4                 : fq : 🚴 : person biking
+1F6B5                 : fq : 🚵 : person mountain biking
+1F938                 : fq : 🤸 : person cartwheeling
+1F93C                 : fq : 🤼 : people wrestling
+1F93D                 : fq : 🤽 : person playing water polo
+1F93E                 : fq : 🤾 : person playing handball
+1F939                 : fq : 🤹 : person juggling
+
+# subgroup: person-resting
+1F9D8                 : fq : 🧘 : person in lotus position
+1F6C0                 : fq : 🛀 : person taking bath
+1F6CC                 : fq : 🛌 : person in bed
+
+# subgroup: family
+1F46D                 : fq : 👭 : women holding hands
+1F46B                 : fq : 👫 : woman and man holding hands
+1F46C                 : fq : 👬 : men holding hands
+1F48F                 : fq : 💏 : kiss
+1F491                 : fq : 💑 : couple with heart
+1F46A                 : fq : 👪 : family
+
+# subgroup: person-symbol
+1F5E3                 : uq : 🗣 : speaking head                        : bad
+1F464                 : fq : 👤 : bust in silhouette
+1F465                 : fq : 👥 : busts in silhouette
+1FAC2                 : fq : 🫂 :  people hugging                       : bad
+1F463                 : fq : 👣 : footprints
+
+
+# group: Component
+
+# subgroup: skin-tone
+1F3FB                 : component       : 🏻 : light skin tone
+1F3FC                 : component       : 🏼 : medium-light skin tone
+1F3FD                 : component       : 🏽 : medium skin tone
+1F3FE                 : component       : 🏾 : medium-dark skin tone
+1F3FF                 : component       : 🏿 : dark skin tone
+
+# subgroup: hair-style
+1F9B0                 : component       : 🦰 :  red hair
+1F9B1                 : component       : 🦱 :  curly hair
+1F9B3                 : component       : 🦳 :  white hair
+1F9B2                 : component       : 🦲 :  bald
+
+
+# group: Animals & Nature
+
+# subgroup: animal-mammal
+1F435                 : fq : 🐵 : monkey face
+1F412                 : fq : 🐒 : monkey
+1F98D                 : fq : 🦍 : gorilla
+1F9A7                 : fq : 🦧 :  orangutan
+1F436                 : fq : 🐶 : dog face
+1F415                 : fq : 🐕 : dog
+1F9AE                 : fq : 🦮 :  guide dog
+1F429                 : fq : 🐩 : poodle
+1F43A                 : fq : 🐺 : wolf
+1F98A                 : fq : 🦊 : fox
+1F99D                 : fq : 🦝 :  raccoon
+1F431                 : fq : 🐱 : cat face
+1F408                 : fq : 🐈 : cat
+1F981                 : fq : 🦁 : lion
+1F42F                 : fq : 🐯 : tiger face
+1F405                 : fq : 🐅 : tiger
+1F406                 : fq : 🐆 : leopard
+1F434                 : fq : 🐴 : horse face
+1F40E                 : fq : 🐎 : horse
+1F984                 : fq : 🦄 : unicorn
+1F993                 : fq : 🦓 : zebra
+1F98C                 : fq : 🦌 : deer
+1F9AC                 : fq : 🦬 :  bison                         : bad
+1F42E                 : fq : 🐮 : cow face
+1F402                 : fq : 🐂 : ox
+1F403                 : fq : 🐃 : water buffalo
+1F404                 : fq : 🐄 : cow
+1F437                 : fq : 🐷 : pig face
+1F416                 : fq : 🐖 : pig
+1F417                 : fq : 🐗 : boar
+1F43D                 : fq : 🐽 : pig nose
+1F40F                 : fq : 🐏 : ram
+1F411                 : fq : 🐑 : ewe
+1F410                 : fq : 🐐 : goat
+1F42A                 : fq : 🐪 : camel
+1F42B                 : fq : 🐫 : two-hump camel
+1F999                 : fq : 🦙 :  llama
+1F992                 : fq : 🦒 : giraffe
+1F418                 : fq : 🐘 : elephant
+1F9A3                 : fq : 🦣 :  mammoth                           : bad
+1F98F                 : fq : 🦏 : rhinoceros
+1F99B                 : fq : 🦛 :  hippopotamus
+1F42D                 : fq : 🐭 : mouse face
+1F401                 : fq : 🐁 : mouse
+1F400                 : fq : 🐀 : rat
+1F439                 : fq : 🐹 : hamster
+1F430                 : fq : 🐰 : rabbit face
+1F407                 : fq : 🐇 : rabbit
+1F43F                 : uq : 🐿 : chipmunk                           : bad
+1F9AB                 : fq : 🦫 :  beaver                            : bad
+1F994                 : fq : 🦔 : hedgehog
+1F987                 : fq : 🦇 : bat
+1F43B                 : fq : 🐻 : bear
+1F428                 : fq : 🐨 : koala
+1F43C                 : fq : 🐼 : panda
+1F9A5                 : fq : 🦥 :  sloth
+1F9A6                 : fq : 🦦 :  otter
+1F9A8                 : fq : 🦨 :  skunk
+1F998                 : fq : 🦘 :  kangaroo
+1F9A1                 : fq : 🦡 :  badger
+1F43E                 : fq : 🐾 : paw prints
+
+# subgroup: animal-bird
+1F983                 : fq : 🦃 : turkey
+1F414                 : fq : 🐔 : chicken
+1F413                 : fq : 🐓 : rooster
+1F423                 : fq : 🐣 : hatching chick
+1F424                 : fq : 🐤 : baby chick
+1F425                 : fq : 🐥 : front-facing baby chick
+1F426                 : fq : 🐦 : bird
+1F427                 : fq : 🐧 : penguin
+1F54A                 : uq : 🕊 : dove                                    : bad
+1F985                 : fq : 🦅 : eagle
+1F986                 : fq : 🦆 : duck
+1F9A2                 : fq : 🦢 :  swan
+1F989                 : fq : 🦉 : owl
+1F9A4                 : fq : 🦤 :  dodo                                         : bad
+1FAB6                 : fq : 🪶 :  feather                                      : bad
+1F9A9                 : fq : 🦩 :  flamingo
+1F99A                 : fq : 🦚 :  peacock
+1F99C                 : fq : 🦜 :  parrot
+
+# subgroup: animal-amphibian
+1F438                 : fq : 🐸 : frog
+
+# subgroup: animal-reptile
+1F40A                 : fq : 🐊 : crocodile
+1F422                 : fq : 🐢 : turtle
+1F98E                 : fq : 🦎 : lizard
+1F40D                 : fq : 🐍 : snake
+1F432                 : fq : 🐲 : dragon face
+1F409                 : fq : 🐉 : dragon
+1F995                 : fq : 🦕 : sauropod
+1F996                 : fq : 🦖 : T-Rex
+
+# subgroup: animal-marine
+1F433                 : fq : 🐳 : spouting whale
+1F40B                 : fq : 🐋 : whale
+1F42C                 : fq : 🐬 : dolphin
+1F9AD                 : fq : 🦭 :  seal                                   : bad
+1F41F                 : fq : 🐟 : fish
+1F420                 : fq : 🐠 : tropical fish
+1F421                 : fq : 🐡 : blowfish
+1F988                 : fq : 🦈 : shark
+1F419                 : fq : 🐙 : octopus
+1F41A                 : fq : 🐚 : spiral shell
+
+# subgroup: animal-bug
+1F40C                 : fq : 🐌 : snail
+1F98B                 : fq : 🦋 : butterfly
+1F41B                 : fq : 🐛 : bug
+1F41C                 : fq : 🐜 : ant
+1F41D                 : fq : 🐝 : honeybee
+1FAB2                 : fq : 🪲 :  beetle                               : bad
+1F41E                 : fq : 🐞 : lady beetle
+1F997                 : fq : 🦗 : cricket
+1FAB3                 : fq : 🪳 :  cockroach                                 : bad
+1F577                 : uq : 🕷 : spider                                     : bad
+1F578                 : uq : 🕸 : spider web                                 : bad
+1F982                 : fq : 🦂 : scorpion
+1F99F                 : fq : 🦟 :  mosquito
+1FAB0                 : fq : 🪰 :  fly                                       : bad
+1FAB1                 : fq : 🪱 :  worm                                      : bad
+1F9A0                 : fq : 🦠 :  microbe
+
+# subgroup: plant-flower
+1F490                 : fq : 💐 : bouquet
+1F338                 : fq : 🌸 : cherry blossom
+1F4AE                 : fq : 💮 : white flower
+1F3F5                 : uq : 🏵 : rosette                                    : bad
+1F339                 : fq : 🌹 : rose
+1F940                 : fq : 🥀 : wilted flower
+1F33A                 : fq : 🌺 : hibiscus
+1F33B                 : fq : 🌻 : sunflower
+1F33C                 : fq : 🌼 : blossom
+1F337                 : fq : 🌷 : tulip
+
+# subgroup: plant-other
+1F331                 : fq : 🌱 : seedling
+1FAB4                 : fq : 🪴 :  potted plant                                  : bad
+1F332                 : fq : 🌲 : evergreen tree
+1F333                 : fq : 🌳 : deciduous tree
+1F334                 : fq : 🌴 : palm tree
+1F335                 : fq : 🌵 : cactus
+1F33E                 : fq : 🌾 : sheaf of rice
+1F33F                 : fq : 🌿 : herb
+2618                  : uq : ☘ : shamrock
+1F340                 : fq : 🍀 : four leaf clover
+1F341                 : fq : 🍁 : maple leaf
+1F342                 : fq : 🍂 : fallen leaf
+1F343                 : fq : 🍃 : leaf fluttering in wind
+
+
+# group: Food & Drink
+
+# subgroup: food-fruit
+1F347                 : fq : 🍇 : grapes
+1F348                 : fq : 🍈 : melon
+1F349                 : fq : 🍉 : watermelon
+1F34A                 : fq : 🍊 : tangerine
+1F34B                 : fq : 🍋 : lemon
+1F34C                 : fq : 🍌 : banana
+1F34D                 : fq : 🍍 : pineapple
+1F96D                 : fq : 🥭 :  mango
+1F34E                 : fq : 🍎 : red apple
+1F34F                 : fq : 🍏 : green apple
+1F350                 : fq : 🍐 : pear
+1F351                 : fq : 🍑 : peach
+1F352                 : fq : 🍒 : cherries
+1F353                 : fq : 🍓 : strawberry
+1FAD0                 : fq : 🫐 :  blueberries                          : bad
+1F95D                 : fq : 🥝 : kiwi fruit
+1F345                 : fq : 🍅 : tomato
+1FAD2                 : fq : 🫒 :  olive                            : bad
+1F965                 : fq : 🥥 : coconut
+
+# subgroup: food-vegetable
+1F951                 : fq : 🥑 : avocado
+1F346                 : fq : 🍆 : eggplant
+1F954                 : fq : 🥔 : potato
+1F955                 : fq : 🥕 : carrot
+1F33D                 : fq : 🌽 : ear of corn
+1F336                 : uq : 🌶 : hot pepper                        : bad
+1FAD1                 : fq : 🫑 :  bell pepper                      : bad
+1F952                 : fq : 🥒 : cucumber
+1F96C                 : fq : 🥬 :  leafy green
+1F966                 : fq : 🥦 : broccoli
+1F9C4                 : fq : 🧄 :  garlic
+1F9C5                 : fq : 🧅 :  onion
+1F344                 : fq : 🍄 : mushroom
+1F95C                 : fq : 🥜 : peanuts
+1F330                 : fq : 🌰 : chestnut
+
+# subgroup: food-prepared
+1F35E                 : fq : 🍞 : bread
+1F950                 : fq : 🥐 : croissant
+1F956                 : fq : 🥖 : baguette bread
+1FAD3                 : fq : 🫓 :  flatbread                                : bad
+1F968                 : fq : 🥨 : pretzel
+1F96F                 : fq : 🥯 :  bagel
+1F95E                 : fq : 🥞 : pancakes
+1F9C7                 : fq : 🧇 :  waffle
+1F9C0                 : fq : 🧀 : cheese wedge
+1F356                 : fq : 🍖 : meat on bone
+1F357                 : fq : 🍗 : poultry leg
+1F969                 : fq : 🥩 : cut of meat
+1F953                 : fq : 🥓 : bacon
+1F354                 : fq : 🍔 : hamburger
+1F35F                 : fq : 🍟 : french fries
+1F355                 : fq : 🍕 : pizza
+1F32D                 : fq : 🌭 : hot dog
+1F96A                 : fq : 🥪 : sandwich
+1F32E                 : fq : 🌮 : taco
+1F32F                 : fq : 🌯 : burrito
+1FAD4                 : fq : 🫔 :  tamale                                    : bad
+1F959                 : fq : 🥙 : stuffed flatbread
+1F9C6                 : fq : 🧆 :  falafel
+1F95A                 : fq : 🥚 : egg
+1F373                 : fq : 🍳 : cooking
+1F958                 : fq : 🥘 : shallow pan of food
+1F372                 : fq : 🍲 : pot of food
+1FAD5                 : fq : 🫕 :  fondue                                      : bad
+1F963                 : fq : 🥣 : bowl with spoon
+1F957                 : fq : 🥗 : green salad
+1F37F                 : fq : 🍿 : popcorn
+1F9C8                 : fq : 🧈 :  butter
+1F9C2                 : fq : 🧂 :  salt
+1F96B                 : fq : 🥫 : canned food
+
+# subgroup: food-asian
+1F371                 : fq : 🍱 : bento box
+1F358                 : fq : 🍘 : rice cracker
+1F359                 : fq : 🍙 : rice ball
+1F35A                 : fq : 🍚 : cooked rice
+1F35B                 : fq : 🍛 : curry rice
+1F35C                 : fq : 🍜 : steaming bowl
+1F35D                 : fq : 🍝 : spaghetti
+1F360                 : fq : 🍠 : roasted sweet potato
+1F362                 : fq : 🍢 : oden
+1F363                 : fq : 🍣 : sushi
+1F364                 : fq : 🍤 : fried shrimp
+1F365                 : fq : 🍥 : fish cake with swirl
+1F96E                 : fq : 🥮 :  moon cake
+1F361                 : fq : 🍡 : dango
+1F95F                 : fq : 🥟 : dumpling
+1F960                 : fq : 🥠 : fortune cookie
+1F961                 : fq : 🥡 : takeout box
+
+# subgroup: food-marine
+1F980                 : fq : 🦀 : crab
+1F99E                 : fq : 🦞 :  lobster
+1F990                 : fq : 🦐 : shrimp
+1F991                 : fq : 🦑 : squid
+1F9AA                 : fq : 🦪 :  oyster
+
+# subgroup: food-sweet
+1F366                 : fq : 🍦 : soft ice cream
+1F367                 : fq : 🍧 : shaved ice
+1F368                 : fq : 🍨 : ice cream
+1F369                 : fq : 🍩 : doughnut
+1F36A                 : fq : 🍪 : cookie
+1F382                 : fq : 🎂 : birthday cake
+1F370                 : fq : 🍰 : shortcake
+1F9C1                 : fq : 🧁 :  cupcake
+1F967                 : fq : 🥧 : pie
+1F36B                 : fq : 🍫 : chocolate bar
+1F36C                 : fq : 🍬 : candy
+1F36D                 : fq : 🍭 : lollipop
+1F36E                 : fq : 🍮 : custard
+1F36F                 : fq : 🍯 : honey pot
+
+# subgroup: drink
+1F37C                 : fq : 🍼 : baby bottle
+1F95B                 : fq : 🥛 : glass of milk
+2615                  : fq : ☕ : hot beverage                                   : bad
+1FAD6                 : fq : 🫖 :  teapot                                       : bad
+1F375                 : fq : 🍵 : teacup without handle
+1F376                 : fq : 🍶 : sake
+1F37E                 : fq : 🍾 : bottle with popping cork
+1F377                 : fq : 🍷 : wine glass
+1F378                 : fq : 🍸 : cocktail glass
+1F379                 : fq : 🍹 : tropical drink
+1F37A                 : fq : 🍺 : beer mug
+1F37B                 : fq : 🍻 : clinking beer mugs
+1F942                 : fq : 🥂 : clinking glasses
+1F943                 : fq : 🥃 : tumbler glass
+1F964                 : fq : 🥤 : cup with straw
+1F9CB                 : fq : 🧋 :  bubble tea                                 : bad
+1F9C3                 : fq : 🧃 :  beverage box
+1F9C9                 : fq : 🧉 :  mate
+1F9CA                 : fq : 🧊 :  ice
+
+# subgroup: dishware
+1F962                 : fq : 🥢 : chopsticks
+1F37D                 : uq : 🍽 : fork and knife with plate                     : bad
+1F374                 : fq : 🍴 : fork and knife
+1F944                 : fq : 🥄 : spoon
+1F52A                 : fq : 🔪 : kitchen knife
+1F3FA                 : fq : 🏺 : amphora
+
+
+# group: Travel & Places
+
+# subgroup: place-map
+1F30D                 : fq : 🌍 : globe showing Europe-Africa
+1F30E                 : fq : 🌎 : globe showing Americas
+1F30F                 : fq : 🌏 : globe showing Asia-Australia
+1F310                 : fq : 🌐 : globe with meridians
+1F5FA                 : uq : 🗺 : world map                             : bad
+1F5FE                 : fq : 🗾 : map of Japan
+1F9ED                 : fq : 🧭 :  compass
+
+# subgroup: place-geographic
+1F3D4                 : uq : 🏔 : snow-capped mountain                    : bad
+26F0                  : uq : ⛰ : mountain
+1F30B                 : fq : 🌋 : volcano
+1F5FB                 : fq : 🗻 : mount fuji
+1F3D5                 : uq : 🏕 : camping                              : bad
+1F3D6                 : uq : 🏖 : beach with umbrella                  : bad
+1F3DC                 : uq : 🏜 : desert                               : bad
+1F3DD                 : uq : 🏝 : desert island                        : bad
+1F3DE                 : uq : 🏞 : national park                        : bad
+
+# subgroup: place-building
+1F3DF                 : uq : 🏟 : stadium                                : bad
+1F3DB                 : uq : 🏛 : classical building                     : bad
+1F3D7                 : uq : 🏗 : building construction                  : bad
+1F9F1                 : fq : 🧱 :  brick
+1FAA8                 : fq : 🪨 :  rock                                  : bad
+1FAB5                 : fq : 🪵 :  wood                                  : bad
+1F6D6                 : fq : 🛖 :  hut                                   : bad
+1F3D8                 : uq : 🏘 : houses                                 : bad
+1F3DA                 : uq : 🏚 : derelict house                         : bad
+1F3E0                 : fq : 🏠 : house
+1F3E1                 : fq : 🏡 : house with garden
+1F3E2                 : fq : 🏢 : office building
+1F3E3                 : fq : 🏣 : Japanese post office
+1F3E4                 : fq : 🏤 : post office
+1F3E5                 : fq : 🏥 : hospital
+1F3E6                 : fq : 🏦 : bank
+1F3E8                 : fq : 🏨 : hotel
+1F3E9                 : fq : 🏩 : love hotel
+1F3EA                 : fq : 🏪 : convenience store
+1F3EB                 : fq : 🏫 : school
+1F3EC                 : fq : 🏬 : department store
+1F3ED                 : fq : 🏭 : factory
+1F3EF                 : fq : 🏯 : Japanese castle
+1F3F0                 : fq : 🏰 : castle
+1F492                 : fq : 💒 : wedding
+1F5FC                 : fq : 🗼 : Tokyo tower
+1F5FD                 : fq : 🗽 : Statue of Liberty
+
+# subgroup: place-religious
+26EA                  : fq : ⛪ : church                           : bad
+1F54C                 : fq : 🕌 : mosque
+1F6D5                 : fq : 🛕 :  hindu temple
+1F54D                 : fq : 🕍 : synagogue
+26E9                  : uq : ⛩ : shinto shrine
+1F54B                 : fq : 🕋 : kaaba
+
+# subgroup: place-other
+26F2                  : fq : ⛲ : fountain                         : bad
+26FA                  : fq : ⛺ : tent                             : bad
+1F301                 : fq : 🌁 : foggy
+1F303                 : fq : 🌃 : night with stars
+1F3D9                 : uq : 🏙 : cityscape                           : bad
+1F304                 : fq : 🌄 : sunrise over mountains
+1F305                 : fq : 🌅 : sunrise
+1F306                 : fq : 🌆 : cityscape at dusk
+1F307                 : fq : 🌇 : sunset
+1F309                 : fq : 🌉 : bridge at night
+2668                  : uq : ♨ : hot springs
+1F3A0                 : fq : 🎠 : carousel horse
+1F3A1                 : fq : 🎡 : ferris wheel
+1F3A2                 : fq : 🎢 : roller coaster
+1F488                 : fq : 💈 : barber pole
+1F3AA                 : fq : 🎪 : circus tent
+
+# subgroup: transport-ground
+1F682                 : fq : 🚂 : locomotive
+1F683                 : fq : 🚃 : railway car
+1F684                 : fq : 🚄 : high-speed train
+1F685                 : fq : 🚅 : bullet train
+1F686                 : fq : 🚆 : train
+1F687                 : fq : 🚇 : metro
+1F688                 : fq : 🚈 : light rail
+1F689                 : fq : 🚉 : station
+1F68A                 : fq : 🚊 : tram
+1F69D                 : fq : 🚝 : monorail
+1F69E                 : fq : 🚞 : mountain railway
+1F68B                 : fq : 🚋 : tram car
+1F68C                 : fq : 🚌 : bus
+1F68D                 : fq : 🚍 : oncoming bus
+1F68E                 : fq : 🚎 : trolleybus
+1F690                 : fq : 🚐 : minibus
+1F691                 : fq : 🚑 : ambulance
+1F692                 : fq : 🚒 : fire engine
+1F693                 : fq : 🚓 : police car
+1F694                 : fq : 🚔 : oncoming police car
+1F695                 : fq : 🚕 : taxi
+1F696                 : fq : 🚖 : oncoming taxi
+1F697                 : fq : 🚗 : automobile
+1F698                 : fq : 🚘 : oncoming automobile
+1F699                 : fq : 🚙 : sport utility vehicle
+1F6FB                 : fq : 🛻 :  pickup truck                       : bad
+1F69A                 : fq : 🚚 : delivery truck
+1F69B                 : fq : 🚛 : articulated lorry
+1F69C                 : fq : 🚜 : tractor
+1F3CE                 : uq : 🏎 : racing car                            : bad
+1F3CD                 : uq : 🏍 : motorcycle                            : bad
+1F6F5                 : fq : 🛵 : motor scooter
+1F9BD                 : fq : 🦽 :  manual wheelchair
+1F9BC                 : fq : 🦼 :  motorized wheelchair
+1F6FA                 : fq : 🛺 :  auto rickshaw
+1F6B2                 : fq : 🚲 : bicycle
+1F6F4                 : fq : 🛴 : kick scooter
+1F6F9                 : fq : 🛹 :  skateboard
+1F6FC                 : fq : 🛼 :  roller skate                         : bad
+1F68F                 : fq : 🚏 : bus stop
+1F6E3                 : uq : 🛣 : motorway                           : bad
+1F6E4                 : uq : 🛤 : railway track                      : bad
+1F6E2                 : uq : 🛢 : oil drum                           : bad
+26FD                  : fq : ⛽ : fuel pump                          : bad
+1F6A8                 : fq : 🚨 : police car light
+1F6A5                 : fq : 🚥 : horizontal traffic light
+1F6A6                 : fq : 🚦 : vertical traffic light
+1F6D1                 : fq : 🛑 : stop sign
+1F6A7                 : fq : 🚧 : construction
+
+# subgroup: transport-water
+2693                  : fq : ⚓ : anchor                       : bad
+26F5                  : fq : ⛵ : sailboat                    : bad
+1F6F6                 : fq : 🛶 : canoe
+1F6A4                 : fq : 🚤 : speedboat
+1F6F3                 : uq : 🛳 : passenger ship                   : bad
+26F4                  : uq : ⛴ : ferry
+1F6E5                 : uq : 🛥 : motor boat                      : bad
+1F6A2                 : fq : 🚢 : ship
+
+# subgroup: transport-air
+2708                  : uq : ✈ : airplane
+1F6E9                 : uq : 🛩 : small airplane                     : bad
+1F6EB                 : fq : 🛫 : airplane departure
+1F6EC                 : fq : 🛬 : airplane arrival
+1FA82                 : fq : 🪂 :  parachute
+1F4BA                 : fq : 💺 : seat
+1F681                 : fq : 🚁 : helicopter
+1F69F                 : fq : 🚟 : suspension railway
+1F6A0                 : fq : 🚠 : mountain cableway
+1F6A1                 : fq : 🚡 : aerial tramway
+1F6F0                 : uq : 🛰 : satellite                        : bad
+1F680                 : fq : 🚀 : rocket
+1F6F8                 : fq : 🛸 : flying saucer
+
+# subgroup: hotel
+1F6CE                 : uq : 🛎 : bellhop bell                         : bad
+1F9F3                 : fq : 🧳 :  luggage
+
+# subgroup: time
+231B                  : fq : ⌛ : hourglass done                     : bad
+23F3                  : fq : ⏳ : hourglass not done                 : bad
+231A                  : fq : ⌚ : watch                              : bad
+23F0                  : fq : ⏰ : alarm clock                        : bad
+23F1                  : uq : ⏱ : stopwatch
+23F2                  : uq : ⏲ : timer clock
+1F570                 : uq : 🕰 : mantelpiece clock                    : bad
+1F55B                 : fq : 🕛 : twelve o’clock
+1F567                 : fq : 🕧 : twelve-thirty
+1F550                 : fq : 🕐 : one o’clock
+1F55C                 : fq : 🕜 : one-thirty
+1F551                 : fq : 🕑 : two o’clock
+1F55D                 : fq : 🕝 : two-thirty
+1F552                 : fq : 🕒 : three o’clock
+1F55E                 : fq : 🕞 : three-thirty
+1F553                 : fq : 🕓 : four o’clock
+1F55F                 : fq : 🕟 : four-thirty
+1F554                 : fq : 🕔 : five o’clock
+1F560                 : fq : 🕠 : five-thirty
+1F555                 : fq : 🕕 : six o’clock
+1F561                 : fq : 🕡 : six-thirty
+1F556                 : fq : 🕖 : seven o’clock
+1F562                 : fq : 🕢 : seven-thirty
+1F557                 : fq : 🕗 : eight o’clock
+1F563                 : fq : 🕣 : eight-thirty
+1F558                 : fq : 🕘 : nine o’clock
+1F564                 : fq : 🕤 : nine-thirty
+1F559                 : fq : 🕙 : ten o’clock
+1F565                 : fq : 🕥 : ten-thirty
+1F55A                 : fq : 🕚 : eleven o’clock
+1F566                 : fq : 🕦 : eleven-thirty
+
+# subgroup: sky & weather
+1F311                 : fq : 🌑 : new moon
+1F312                 : fq : 🌒 : waxing crescent moon
+1F313                 : fq : 🌓 : first quarter moon
+1F314                 : fq : 🌔 : waxing gibbous moon
+1F315                 : fq : 🌕 : full moon
+1F316                 : fq : 🌖 : waning gibbous moon
+1F317                 : fq : 🌗 : last quarter moon
+1F318                 : fq : 🌘 : waning crescent moon
+1F319                 : fq : 🌙 : crescent moon
+1F31A                 : fq : 🌚 : new moon face
+1F31B                 : fq : 🌛 : first quarter moon face
+1F31C                 : fq : 🌜 : last quarter moon face
+1F321                 : uq : 🌡 : thermometer                             : bad
+2600                  : uq : ☀ : sun
+1F31D                 : fq : 🌝 : full moon face
+1F31E                 : fq : 🌞 : sun with face
+1FA90                 : fq : 🪐 :  ringed planet
+2B50                  : fq : ⭐ : star
+1F31F                 : fq : 🌟 : glowing star
+1F320                 : fq : 🌠 : shooting star
+1F30C                 : fq : 🌌 : milky way
+2601                  : uq : ☁ : cloud
+26C5                  : fq : ⛅ : sun behind cloud                      : bad
+26C8                  : uq : ⛈ : cloud with lightning and rain
+1F324                 : uq : 🌤 : sun behind small cloud                   : bad
+1F325                 : uq : 🌥 : sun behind large cloud                   : bad
+1F326                 : uq : 🌦 : sun behind rain cloud                    : bad
+1F327                 : uq : 🌧 : cloud with rain                          : bad
+1F328                 : uq : 🌨 : cloud with snow                          : bad
+1F329                 : uq : 🌩 : cloud with lightning                     : bad
+1F32A                 : uq : 🌪 : tornado                                  : bad
+1F32B                 : uq : 🌫 : fog                                      : bad
+1F32C                 : uq : 🌬 : wind face                                : bad
+1F300                 : fq : 🌀 : cyclone
+1F308                 : fq : 🌈 : rainbow
+1F302                 : fq : 🌂 : closed umbrella
+2602                  : uq : ☂ : umbrella
+2614                  : fq : ☔ : umbrella with rain drops                    : bad
+26F1                  : uq : ⛱ : umbrella on ground
+26A1                  : fq : ⚡ : high voltage                        : bad
+2744                  : uq : ❄ : snowflake
+2603                  : uq : ☃ : snowman
+26C4                  : fq : ⛄ : snowman without snow                        : bad
+2604                  : uq : ☄ : comet
+1F525                 : fq : 🔥 : fire
+1F4A7                 : fq : 💧 : droplet
+1F30A                 : fq : 🌊 : water wave
+
+
+# group: Activities
+
+# subgroup: event
+1F383                 : fq : 🎃 : jack-o-lantern
+1F384                 : fq : 🎄 : Christmas tree
+1F386                 : fq : 🎆 : fireworks
+1F387                 : fq : 🎇 : sparkler
+1F9E8                 : fq : 🧨 :  firecracker
+2728                  : fq : ✨ : sparkles                              : bad
+1F388                 : fq : 🎈 : balloon
+1F389                 : fq : 🎉 : party popper
+1F38A                 : fq : 🎊 : confetti ball
+1F38B                 : fq : 🎋 : tanabata tree
+1F38D                 : fq : 🎍 : pine decoration
+1F38E                 : fq : 🎎 : Japanese dolls
+1F38F                 : fq : 🎏 : carp streamer
+1F390                 : fq : 🎐 : wind chime
+1F391                 : fq : 🎑 : moon viewing ceremony
+1F9E7                 : fq : 🧧 :  red envelope
+1F380                 : fq : 🎀 : ribbon
+1F381                 : fq : 🎁 : wrapped gift
+1F397                 : uq : 🎗 : reminder ribbon                        : bad
+1F39F                 : uq : 🎟 : admission tickets                      : bad
+1F3AB                 : fq : 🎫 : ticket
+
+# subgroup: award-medal
+1F396                 : uq : 🎖 : military medal                      : bad
+1F3C6                 : fq : 🏆 : trophy
+1F3C5                 : fq : 🏅 : sports medal
+1F947                 : fq : 🥇 : 1st place medal
+1F948                 : fq : 🥈 : 2nd place medal
+1F949                 : fq : 🥉 : 3rd place medal
+
+# subgroup: sport
+26BD                  : fq : ⚽ : soccer ball                          : bad
+26BE                  : fq : ⚾ : baseball                             : bad
+1F94E                 : fq : 🥎 :  softball
+1F3C0                 : fq : 🏀 : basketball
+1F3D0                 : fq : 🏐 : volleyball
+1F3C8                 : fq : 🏈 : american football
+1F3C9                 : fq : 🏉 : rugby football
+1F3BE                 : fq : 🎾 : tennis
+1F94F                 : fq : 🥏 :  flying disc
+1F3B3                 : fq : 🎳 : bowling
+1F3CF                 : fq : 🏏 : cricket game
+1F3D1                 : fq : 🏑 : field hockey
+1F3D2                 : fq : 🏒 : ice hockey
+1F94D                 : fq : 🥍 :  lacrosse
+1F3D3                 : fq : 🏓 : ping pong
+1F3F8                 : fq : 🏸 : badminton
+1F94A                 : fq : 🥊 : boxing glove
+1F94B                 : fq : 🥋 : martial arts uniform
+1F945                 : fq : 🥅 : goal net
+26F3                  : fq : ⛳ : flag in hole                             : bad
+26F8                  : uq : ⛸ : ice skate
+1F3A3                 : fq : 🎣 : fishing pole
+1F93F                 : fq : 🤿 :  diving mask
+1F3BD                 : fq : 🎽 : running shirt
+1F3BF                 : fq : 🎿 : skis
+1F6F7                 : fq : 🛷 : sled
+1F94C                 : fq : 🥌 : curling stone
+
+# subgroup: game
+1F3AF                 : fq : 🎯 : bullseye
+1FA80                 : fq : 🪀 :  yo-yo
+1FA81                 : fq : 🪁 :  kite
+1F3B1                 : fq : 🎱 : pool 8 ball
+1F52E                 : fq : 🔮 : crystal ball
+1FA84                 : fq : 🪄 :  magic wand                           : bad
+1F9FF                 : fq : 🧿 :  nazar amulet
+1F3AE                 : fq : 🎮 : video game
+1F579                 : uq : 🕹 : joystick                          : bad
+1F3B0                 : fq : 🎰 : slot machine
+1F3B2                 : fq : 🎲 : game die
+1F9E9                 : fq : 🧩 :  puzzle piece
+1F9F8                 : fq : 🧸 :  teddy bear
+1FA85                 : fq : 🪅 :  piñata                           : bad
+1FA86                 : fq : 🪆 :  nesting dolls                    : bad
+2660                  : uq : ♠ : spade suit
+2665                  : uq : ♥ : heart suit
+2666                  : uq : ♦ : diamond suit
+2663                  : uq : ♣ : club suit
+265F                  : uq : ♟ :  chess pawn
+1F0CF                 : fq : 🃏 : joker
+1F004                 : fq : 🀄 : mahjong red dragon
+1F3B4                 : fq : 🎴 : flower playing cards
+
+# subgroup: arts & crafts
+1F3AD                 : fq : 🎭 : performing arts
+1F5BC                 : uq : 🖼 : framed picture                     : bad
+1F3A8                 : fq : 🎨 : artist palette
+1F9F5                 : fq : 🧵 :  thread
+1FAA1                 : fq : 🪡 :  sewing needle                     : bad
+1F9F6                 : fq : 🧶 :  yarn
+1FAA2                 : fq : 🪢 :  knot                              : bad
+
+
+# group: Objects
+
+# subgroup: clothing
+1F453                 : fq : 👓 : glasses
+1F576                 : uq : 🕶 : sunglasses                           : bad
+1F97D                 : fq : 🥽 :  goggles
+1F97C                 : fq : 🥼 :  lab coat
+1F9BA                 : fq : 🦺 :  safety vest
+1F454                 : fq : 👔 : necktie
+1F455                 : fq : 👕 : t-shirt
+1F456                 : fq : 👖 : jeans
+1F9E3                 : fq : 🧣 : scarf
+1F9E4                 : fq : 🧤 : gloves
+1F9E5                 : fq : 🧥 : coat
+1F9E6                 : fq : 🧦 : socks
+1F457                 : fq : 👗 : dress
+1F458                 : fq : 👘 : kimono
+1F97B                 : fq : 🥻 :  sari
+1FA71                 : fq : 🩱 :  one-piece swimsuit
+1FA72                 : fq : 🩲 :  briefs
+1FA73                 : fq : 🩳 :  shorts
+1F459                 : fq : 👙 : bikini
+1F45A                 : fq : 👚 : woman’s clothes
+1F45B                 : fq : 👛 : purse
+1F45C                 : fq : 👜 : handbag
+1F45D                 : fq : 👝 : clutch bag
+1F6CD                 : uq : 🛍 : shopping bags                              : bad
+1F392                 : fq : 🎒 : backpack
+1FA74                 : fq : 🩴 :  thong sandal                         : bad
+1F45E                 : fq : 👞 : man’s shoe
+1F45F                 : fq : 👟 : running shoe
+1F97E                 : fq : 🥾 :  hiking boot
+1F97F                 : fq : 🥿 :  flat shoe
+1F460                 : fq : 👠 : high-heeled shoe
+1F461                 : fq : 👡 : woman’s sandal
+1FA70                 : fq : 🩰 :  ballet shoes
+1F462                 : fq : 👢 : woman’s boot
+1F451                 : fq : 👑 : crown
+1F452                 : fq : 👒 : woman’s hat
+1F3A9                 : fq : 🎩 : top hat
+1F393                 : fq : 🎓 : graduation cap
+1F9E2                 : fq : 🧢 : billed cap
+1FA96                 : fq : 🪖 :  military helmet                              : bad
+26D1                  : uq : ⛑ : rescue worker’s helmet
+1F4FF                 : fq : 📿 : prayer beads
+1F484                 : fq : 💄 : lipstick
+1F48D                 : fq : 💍 : ring
+1F48E                 : fq : 💎 : gem stone
+
+# subgroup: sound
+1F507                 : fq : 🔇 : muted speaker
+1F508                 : fq : 🔈 : speaker low volume
+1F509                 : fq : 🔉 : speaker medium volume
+1F50A                 : fq : 🔊 : speaker high volume
+1F4E2                 : fq : 📢 : loudspeaker
+1F4E3                 : fq : 📣 : megaphone
+1F4EF                 : fq : 📯 : postal horn
+1F514                 : fq : 🔔 : bell
+1F515                 : fq : 🔕 : bell with slash
+
+# subgroup: music
+1F3BC                 : fq : 🎼 : musical score
+1F3B5                 : fq : 🎵 : musical note
+1F3B6                 : fq : 🎶 : musical notes
+1F399                 : uq : 🎙 : studio microphone                        : bad
+1F39A                 : uq : 🎚 : level slider                             : bad
+1F39B                 : uq : 🎛 : control knobs                            : bad
+1F3A4                 : fq : 🎤 : microphone
+1F3A7                 : fq : 🎧 : headphone
+1F4FB                 : fq : 📻 : radio
+
+# subgroup: musical-instrument
+1F3B7                 : fq : 🎷 : saxophone
+1FA97                 : fq : 🪗 :  accordion                     : bad
+1F3B8                 : fq : 🎸 : guitar
+1F3B9                 : fq : 🎹 : musical keyboard
+1F3BA                 : fq : 🎺 : trumpet
+1F3BB                 : fq : 🎻 : violin
+1FA95                 : fq : 🪕 :  banjo
+1F941                 : fq : 🥁 : drum
+1FA98                 : fq : 🪘 :  long drum                          : bad
+
+# subgroup: phone
+1F4F1                 : fq : 📱 : mobile phone
+1F4F2                 : fq : 📲 : mobile phone with arrow
+260E                  : uq : ☎ : telephone
+1F4DE                 : fq : 📞 : telephone receiver
+1F4DF                 : fq : 📟 : pager
+1F4E0                 : fq : 📠 : fax machine
+
+# subgroup: computer
+1F50B                 : fq : 🔋 : battery
+1F50C                 : fq : 🔌 : electric plug
+1F4BB                 : fq : 💻 : laptop
+1F5A5                 : uq : 🖥 : desktop computer                     : bad
+1F5A8                 : uq : 🖨 : printer                              : bad
+2328                  : uq : ⌨ : keyboard
+1F5B1                 : uq : 🖱 : computer mouse                      : bad
+1F5B2                 : uq : 🖲 : trackball                           : bad
+1F4BD                 : fq : 💽 : computer disk
+1F4BE                 : fq : 💾 : floppy disk
+1F4BF                 : fq : 💿 : optical disk
+1F4C0                 : fq : 📀 : dvd
+1F9EE                 : fq : 🧮 :  abacus
+
+# subgroup: light & video
+1F3A5                 : fq : 🎥 : movie camera
+1F39E                 : uq : 🎞 : film frames                            : bad
+1F4FD                 : uq : 📽 : film projector                         : bad
+1F3AC                 : fq : 🎬 : clapper board
+1F4FA                 : fq : 📺 : television
+1F4F7                 : fq : 📷 : camera
+1F4F8                 : fq : 📸 : camera with flash
+1F4F9                 : fq : 📹 : video camera
+1F4FC                 : fq : 📼 : videocassette
+1F50D                 : fq : 🔍 : magnifying glass tilted left
+1F50E                 : fq : 🔎 : magnifying glass tilted right
+1F56F                 : uq : 🕯 : candle                                : bad
+1F4A1                 : fq : 💡 : light bulb
+1F526                 : fq : 🔦 : flashlight
+1F3EE                 : fq : 🏮 : red paper lantern
+1FA94                 : fq : 🪔 :  diya lamp
+
+# subgroup: book-paper
+1F4D4                 : fq : 📔 : notebook with decorative cover
+1F4D5                 : fq : 📕 : closed book
+1F4D6                 : fq : 📖 : open book
+1F4D7                 : fq : 📗 : green book
+1F4D8                 : fq : 📘 : blue book
+1F4D9                 : fq : 📙 : orange book
+1F4DA                 : fq : 📚 : books
+1F4D3                 : fq : 📓 : notebook
+1F4D2                 : fq : 📒 : ledger
+1F4C3                 : fq : 📃 : page with curl
+1F4DC                 : fq : 📜 : scroll
+1F4C4                 : fq : 📄 : page facing up
+1F4F0                 : fq : 📰 : newspaper
+1F5DE                 : uq : 🗞 : rolled-up newspaper                           : bad
+1F4D1                 : fq : 📑 : bookmark tabs
+1F516                 : fq : 🔖 : bookmark
+1F3F7                 : uq : 🏷 : label                         : bad
+
+# subgroup: money
+1F4B0                 : fq : 💰 : money bag
+1FA99                 : fq : 🪙 :  coin                       : bad
+1F4B4                 : fq : 💴 : yen banknote
+1F4B5                 : fq : 💵 : dollar banknote
+1F4B6                 : fq : 💶 : euro banknote
+1F4B7                 : fq : 💷 : pound banknote
+1F4B8                 : fq : 💸 : money with wings
+1F4B3                 : fq : 💳 : credit card
+1F9FE                 : fq : 🧾 :  receipt
+1F4B9                 : fq : 💹 : chart increasing with yen
+
+# subgroup: mail
+2709                  : uq : ✉ : envelope
+1F4E7                 : fq : 📧 : e-mail
+1F4E8                 : fq : 📨 : incoming envelope
+1F4E9                 : fq : 📩 : envelope with arrow
+1F4E4                 : fq : 📤 : outbox tray
+1F4E5                 : fq : 📥 : inbox tray
+1F4E6                 : fq : 📦 : package
+1F4EB                 : fq : 📫 : closed mailbox with raised flag
+1F4EA                 : fq : 📪 : closed mailbox with lowered flag
+1F4EC                 : fq : 📬 : open mailbox with raised flag
+1F4ED                 : fq : 📭 : open mailbox with lowered flag
+1F4EE                 : fq : 📮 : postbox
+1F5F3                 : uq : 🗳 : ballot box with ballot                            : bad
+
+# subgroup: writing
+270F                  : uq : ✏ : pencil
+2712                  : uq : ✒ : black nib
+1F58B                 : uq : 🖋 : fountain pen                     : bad
+1F58A                 : uq : 🖊 : pen                              : bad
+1F58C                 : uq : 🖌 : paintbrush                       : bad
+1F58D                 : uq : 🖍 : crayon                           : bad
+1F4DD                 : fq : 📝 : memo
+
+# subgroup: office
+1F4BC                 : fq : 💼 : briefcase
+1F4C1                 : fq : 📁 : file folder
+1F4C2                 : fq : 📂 : open file folder
+1F5C2                 : uq : 🗂 : card index dividers                       : bad
+1F4C5                 : fq : 📅 : calendar
+1F4C6                 : fq : 📆 : tear-off calendar
+1F5D2                 : uq : 🗒 : spiral notepad                         : bad
+1F5D3                 : uq : 🗓 : spiral calendar                        : bad
+1F4C7                 : fq : 📇 : card index
+1F4C8                 : fq : 📈 : chart increasing
+1F4C9                 : fq : 📉 : chart decreasing
+1F4CA                 : fq : 📊 : bar chart
+1F4CB                 : fq : 📋 : clipboard
+1F4CC                 : fq : 📌 : pushpin
+1F4CD                 : fq : 📍 : round pushpin
+1F4CE                 : fq : 📎 : paperclip
+1F587                 : uq : 🖇 : linked paperclips                     : bad
+1F4CF                 : fq : 📏 : straight ruler
+1F4D0                 : fq : 📐 : triangular ruler
+2702                  : uq : ✂ : scissors
+1F5C3                 : uq : 🗃 : card file box                          : bad
+1F5C4                 : uq : 🗄 : file cabinet                           : bad
+1F5D1                 : uq : 🗑 : wastebasket                            : bad
+
+# subgroup: lock
+1F512                 : fq : 🔒 : locked
+1F513                 : fq : 🔓 : unlocked
+1F50F                 : fq : 🔏 : locked with pen
+1F510                 : fq : 🔐 : locked with key
+1F511                 : fq : 🔑 : key
+1F5DD                 : uq : 🗝 : old key                        : bad
+
+# subgroup: tool
+1F528                 : fq : 🔨 : hammer
+1FA93                 : fq : 🪓 :  axe
+26CF                  : uq : ⛏ : pick
+2692                  : uq : ⚒ : hammer and pick
+1F6E0                 : uq : 🛠 : hammer and wrench                   : bad
+1F5E1                 : uq : 🗡 : dagger                              : bad
+2694                  : uq : ⚔ : crossed swords
+1F52B                 : fq : 🔫 : water pistol
+1FA83                 : fq : 🪃 :  boomerang                      : bad
+1F3F9                 : fq : 🏹 : bow and arrow
+1F6E1                 : uq : 🛡 : shield                        : bad
+1FA9A                 : fq : 🪚 :  carpentry saw                : bad
+1F527                 : fq : 🔧 : wrench
+1FA9B                 : fq : 🪛 :  screwdriver                   : bad
+1F529                 : fq : 🔩 : nut and bolt
+2699                  : uq : ⚙ : gear
+1F5DC                 : uq : 🗜 : clamp                        : bad
+2696                  : uq : ⚖ : balance scale
+1F9AF                 : fq : 🦯 :  white cane
+1F517                 : fq : 🔗 : link
+26D3                  : uq : ⛓ : chains
+1FA9D                 : fq : 🪝 :  hook                            : bad
+1F9F0                 : fq : 🧰 :  toolbox
+1F9F2                 : fq : 🧲 :  magnet
+1FA9C                 : fq : 🪜 :  ladder                     : bad
+
+# subgroup: science
+2697                  : uq : ⚗ : alembic
+1F9EA                 : fq : 🧪 :  test tube
+1F9EB                 : fq : 🧫 :  petri dish
+1F9EC                 : fq : 🧬 :  dna
+1F52C                 : fq : 🔬 : microscope
+1F52D                 : fq : 🔭 : telescope
+1F4E1                 : fq : 📡 : satellite antenna
+
+# subgroup: medical
+1F489                 : fq : 💉 : syringe
+1FA78                 : fq : 🩸 :  drop of blood
+1F48A                 : fq : 💊 : pill
+1FA79                 : fq : 🩹 :  adhesive bandage
+1FA7A                 : fq : 🩺 :  stethoscope
+
+# subgroup: household
+1F6AA                 : fq : 🚪 : door
+1F6D7                 : fq : 🛗 :  elevator                          : bad
+1FA9E                 : fq : 🪞 :  mirror                            : bad
+1FA9F                 : fq : 🪟 :  window                            : bad
+1F6CF                 : uq : 🛏 : bed                                : bad
+1F6CB                 : uq : 🛋 : couch and lamp                     : bad
+1FA91                 : fq : 🪑 :  chair
+1F6BD                 : fq : 🚽 : toilet
+1FAA0                 : fq : 🪠 :  plunger                     : bad
+1F6BF                 : fq : 🚿 : shower
+1F6C1                 : fq : 🛁 : bathtub
+1FAA4                 : fq : 🪤 :  mouse trap                        : bad
+1FA92                 : fq : 🪒 :  razor
+1F9F4                 : fq : 🧴 :  lotion bottle
+1F9F7                 : fq : 🧷 :  safety pin
+1F9F9                 : fq : 🧹 :  broom
+1F9FA                 : fq : 🧺 :  basket
+1F9FB                 : fq : 🧻 :  roll of paper
+1FAA3                 : fq : 🪣 :  bucket                          : bad
+1F9FC                 : fq : 🧼 :  soap
+1FAA5                 : fq : 🪥 :  toothbrush                       : bad
+1F9FD                 : fq : 🧽 :  sponge
+1F9EF                 : fq : 🧯 :  fire extinguisher
+1F6D2                 : fq : 🛒 : shopping cart
+
+# subgroup: other-object
+1F6AC                 : fq : 🚬 : cigarette
+26B0                  : uq : ⚰ : coffin
+1FAA6                 : fq : 🪦 :  headstone                         : bad
+26B1                  : uq : ⚱ : funeral urn
+1F5FF                 : fq : 🗿 : moai
+1FAA7                 : fq : 🪧 :  placard                       : bad
+
+
+# group: Symbols
+
+# subgroup: transport-sign
+1F3E7                 : fq : 🏧 : ATM sign
+1F6AE                 : fq : 🚮 : litter in bin sign
+1F6B0                 : fq : 🚰 : potable water
+267F                  : fq : ♿ : wheelchair symbol                        : bad
+1F6B9                 : fq : 🚹 : men’s room
+1F6BA                 : fq : 🚺 : women’s room
+1F6BB                 : fq : 🚻 : restroom
+1F6BC                 : fq : 🚼 : baby symbol
+1F6BE                 : fq : 🚾 : water closet
+1F6C2                 : fq : 🛂 : passport control
+1F6C3                 : fq : 🛃 : customs
+1F6C4                 : fq : 🛄 : baggage claim
+1F6C5                 : fq : 🛅 : left luggage
+
+# subgroup: warning
+26A0                  : uq : ⚠ : warning
+1F6B8                 : fq : 🚸 : children crossing
+26D4                  : fq : ⛔ : no entry                               : bad
+1F6AB                 : fq : 🚫 : prohibited
+1F6B3                 : fq : 🚳 : no bicycles
+1F6AD                 : fq : 🚭 : no smoking
+1F6AF                 : fq : 🚯 : no littering
+1F6B1                 : fq : 🚱 : non-potable water
+1F6B7                 : fq : 🚷 : no pedestrians
+1F4F5                 : fq : 📵 : no mobile phones
+1F51E                 : fq : 🔞 : no one under eighteen
+2622                  : uq : ☢ : radioactive
+2623                  : uq : ☣ : biohazard
+
+# subgroup: arrow
+2B06                  : uq : ⬆ : up arrow
+2197                  : uq : ↗ : up-right arrow
+27A1                  : uq : ➡ : right arrow
+2198                  : uq : ↘ : down-right arrow
+2B07                  : uq : ⬇ : down arrow
+2199                  : uq : ↙ : down-left arrow
+2B05                  : uq : ⬅ : left arrow
+2196                  : uq : ↖ : up-left arrow
+2195                  : uq : ↕ : up-down arrow
+2194                  : uq : ↔ : left-right arrow
+21A9                  : uq : ↩ : right arrow curving left
+21AA                  : uq : ↪ : left arrow curving right
+2934                  : uq : ⤴ : right arrow curving up
+2935                  : uq : ⤵ : right arrow curving down
+1F503                 : fq : 🔃 : clockwise vertical arrows
+1F504                 : fq : 🔄 : counterclockwise arrows button
+1F519                 : fq : 🔙 : BACK arrow
+1F51A                 : fq : 🔚 : END arrow
+1F51B                 : fq : 🔛 : ON! arrow
+1F51C                 : fq : 🔜 : SOON arrow
+1F51D                 : fq : 🔝 : TOP arrow
+
+# subgroup: religion
+1F6D0                 : fq : 🛐 : place of worship
+269B                  : uq : ⚛ : atom symbol
+1F549                 : uq : 🕉 : om                           : bad
+2721                  : uq : ✡ : star of David
+2638                  : uq : ☸ : wheel of dharma
+262F                  : uq : ☯ : yin yang
+271D                  : uq : ✝ : latin cross
+2626                  : uq : ☦ : orthodox cross
+262A                  : uq : ☪ : star and crescent
+262E                  : uq : ☮ : peace symbol
+1F54E                 : fq : 🕎 : menorah
+1F52F                 : fq : 🔯 : dotted six-pointed star
+
+# subgroup: zodiac
+2648                  : fq : ♈ : Aries                        : bad
+2649                  : fq : ♉ : Taurus                       : bad
+264A                  : fq : ♊ : Gemini                       : bad
+264B                  : fq : ♋ : Cancer                       : bad
+264C                  : fq : ♌ : Leo                          : bad
+264D                  : fq : ♍ : Virgo                        : bad
+264E                  : fq : ♎ : Libra                        : bad
+264F                  : fq : ♏ : Scorpio                      : bad
+2650                  : fq : ♐ : Sagittarius                  : bad
+2651                  : fq : ♑ : Capricorn                    : bad
+2652                  : fq : ♒ : Aquarius                     : bad
+2653                  : fq : ♓ : Pisces                       : bad
+26CE                  : fq : ⛎ : Ophiuchus                   : bad
+
+# subgroup: av-symbol
+1F500                 : fq : 🔀 : shuffle tracks button
+1F501                 : fq : 🔁 : repeat button
+1F502                 : fq : 🔂 : repeat single button
+25B6                  : uq : ▶ : play button
+23E9                  : fq : ⏩ : fast-forward button                     : bad
+23ED                  : uq : ⏭ : next track button
+23EF                  : uq : ⏯ : play or pause button
+25C0                  : uq : ◀ : reverse button
+23EA                  : fq : ⏪ : fast reverse button                     : bad
+23EE                  : uq : ⏮ : last track button
+1F53C                 : fq : 🔼 : upwards button
+23EB                  : fq : ⏫ : fast up button                         : bad
+1F53D                 : fq : 🔽 : downwards button
+23EC                  : fq : ⏬ : fast down button                         : bad
+23F8                  : uq : ⏸ : pause button
+23F9                  : uq : ⏹ : stop button
+23FA                  : uq : ⏺ : record button
+23CF                  : uq : ⏏ : eject button
+1F3A6                 : fq : 🎦 : cinema
+1F505                 : fq : 🔅 : dim button
+1F506                 : fq : 🔆 : bright button
+1F4F6                 : fq : 📶 : antenna bars
+1F4F3                 : fq : 📳 : vibration mode
+1F4F4                 : fq : 📴 : mobile phone off
+
+# subgroup: gender
+2640                  : uq : ♀ : female sign
+2642                  : uq : ♂ : male sign
+26A7                  : uq : ⚧ :  transgender symbol
+
+# subgroup: math
+2716                  : uq : ✖ : multiply
+2795                  : fq : ➕ : plus                           : bad
+2796                  : fq : ➖ : minus                          : bad
+2797                  : fq : ➗ : divide                         : bad
+267E                  : uq : ♾ :  infinity
+
+# subgroup: punctuation
+203C                  : uq : ‼ : double exclamation mark
+2049                  : uq : ⁉ : exclamation question mark
+2753                  : fq : ❓ : red question mark                         : bad
+2754                  : fq : ❔ : white question mark                       : bad
+2755                  : fq : ❕ : white exclamation mark                    : bad
+2757                  : fq : ❗ : red exclamation mark                      : bad
+3030                  : uq : 〰 : wavy dash
+
+# subgroup: currency
+1F4B1                 : fq : 💱 : currency exchange
+1F4B2                 : fq : 💲 : heavy dollar sign
+
+# subgroup: other-symbol
+2695                  : uq : ⚕ : medical symbol
+267B                  : uq : ♻ : recycling symbol
+269C                  : uq : ⚜ : fleur-de-lis
+1F531                 : fq : 🔱 : trident emblem
+1F4DB                 : fq : 📛 : name badge
+1F530                 : fq : 🔰 : Japanese symbol for beginner
+2B55                  : fq : ⭕ : hollow red circle
+2705                  : fq : ✅ : check mark button                       : bad
+2611                  : uq : ☑ : check box with check
+2714                  : uq : ✔ : check mark
+274C                  : fq : ❌ : cross mark                           : bad
+274E                  : fq : ❎ : cross mark button                    : bad
+27B0                  : fq : ➰ : curly loop                           : bad
+27BF                  : fq : ➿ : double curly loop                    : bad
+303D                  : uq : 〽 : part alternation mark
+2733                  : uq : ✳ : eight-spoked asterisk
+2734                  : uq : ✴ : eight-pointed star
+2747                  : uq : ❇ : sparkle
+00A9                  : uq : © : copyright
+00AE                  : uq : ® : registered
+2122                  : uq : ™ : trade mark
+
+# subgroup: keycap
+# keycap box does not break urwid rendering but also doesn't combine well
+20E3                  : uq :  ⃣ : keycap box                  : bad
+1F51F                 : fq : 🔟 : keycap 10                 : bad
+
+# subgroup: alphanum
+1F520                 : fq : 🔠 : input latin uppercase
+1F521                 : fq : 🔡 : input latin lowercase
+1F522                 : fq : 🔢 : input numbers
+1F523                 : fq : 🔣 : input symbols
+1F524                 : fq : 🔤 : input latin letters
+1F170                 : uq : 🅰 : A button (blood type)                       : bad
+1F18E                 : fq : 🆎 : AB button (blood type)
+1F171                 : uq : 🅱 : B button (blood type)                        : bad
+1F191                 : fq : 🆑 : CL button
+1F192                 : fq : 🆒 : COOL button
+1F193                 : fq : 🆓 : FREE button
+2139                  : uq : ℹ : information
+1F194                 : fq : 🆔 : ID button
+24C2                  : uq : Ⓜ : circled M
+1F195                 : fq : 🆕 : NEW button
+1F196                 : fq : 🆖 : NG button
+1F17E                 : uq : 🅾 : O button (blood type)                   : bad
+1F197                 : fq : 🆗 : OK button
+1F17F                 : uq : 🅿 : P button                                 : bad
+1F198                 : fq : 🆘 : SOS button
+1F199                 : fq : 🆙 : UP! button
+1F19A                 : fq : 🆚 : VS button
+1F201                 : fq : 🈁 : Japanese “here” button
+1F202                 : uq : 🈂 : Japanese “service charge” button
+1F237                 : uq : 🈷 : Japanese “monthly amount” button
+1F236                 : fq : 🈶 : Japanese “not free of charge” button
+1F22F                 : fq : 🈯 : Japanese “reserved” button
+1F250                 : fq : 🉐 : Japanese “bargain” button
+1F239                 : fq : 🈹 : Japanese “discount” button
+1F21A                 : fq : 🈚 : Japanese “free of charge” button
+1F232                 : fq : 🈲 : Japanese “prohibited” button
+1F251                 : fq : 🉑 : Japanese “acceptable” button
+1F238                 : fq : 🈸 : Japanese “application” button
+1F234                 : fq : 🈴 : Japanese “passing grade” button
+1F233                 : fq : 🈳 : Japanese “vacancy” button
+3297                  : uq : ㊗ : Japanese “congratulations” button
+3299                  : uq : ㊙ : Japanese “secret” button
+1F23A                 : fq : 🈺 : Japanese “open for business” button
+1F235                 : fq : 🈵 : Japanese “no vacancy” button
+
+# subgroup: geometric
+1F534                 : fq : 🔴 : red circle
+1F7E0                 : fq : 🟠 :  orange circle
+1F7E1                 : fq : 🟡 :  yellow circle
+1F7E2                 : fq : 🟢 :  green circle
+1F535                 : fq : 🔵 : blue circle
+1F7E3                 : fq : 🟣 :  purple circle
+1F7E4                 : fq : 🟤 :  brown circle
+26AB                  : fq : ⚫ : black circle                      : bad
+26AA                  : fq : ⚪ : white circle                      : bad
+1F7E5                 : fq : 🟥 :  red square
+1F7E7                 : fq : 🟧 :  orange square
+1F7E8                 : fq : 🟨 :  yellow square
+1F7E9                 : fq : 🟩 :  green square
+1F7E6                 : fq : 🟦 :  blue square
+1F7EA                 : fq : 🟪 :  purple square
+1F7EB                 : fq : 🟫 :  brown square
+2B1B                  : fq : ⬛ : black large square
+2B1C                  : fq : ⬜ : white large square
+25FC                  : uq : ◼ : black medium square
+25FB                  : uq : ◻ : white medium square
+25FE                  : fq : ◾ : black medium-small square                   : bad
+25FD                  : fq : ◽ : white medium-small square                   : bad
+25AA                  : uq : ▪ : black small square
+25AB                  : uq : ▫ : white small square
+1F536                 : fq : 🔶 : large orange diamond
+1F537                 : fq : 🔷 : large blue diamond
+1F538                 : fq : 🔸 : small orange diamond
+1F539                 : fq : 🔹 : small blue diamond
+1F53A                 : fq : 🔺 : red triangle pointed up
+1F53B                 : fq : 🔻 : red triangle pointed down
+1F4A0                 : fq : 💠 : diamond with a dot
+1F518                 : fq : 🔘 : radio button
+1F533                 : fq : 🔳 : white square button
+1F532                 : fq : 🔲 : black square button
+
+
+# group: Flags
+
+# subgroup: flag
+1F3C1                 : fq : 🏁 : chequered flag
+1F6A9                 : fq : 🚩 : triangular flag
+1F38C                 : fq : 🎌 : crossed flags
+1F3F4                 : fq : 🏴 : black flag
+1F3F3                 : uq : 🏳 : white flag                             : bad
+
+# subgroup: country-flags
+# Works using combination of 2 Regional Indicators
