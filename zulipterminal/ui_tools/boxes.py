@@ -29,6 +29,7 @@ from zulipterminal.config.regexes import (
     REGEX_STREAM_AND_TOPIC_UNFENCED,
 )
 from zulipterminal.config.symbols import (
+    CHECK_MARK,
     INVALID_MARKER,
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
@@ -75,6 +76,7 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
+        self.emoji_enabled = self.model.controller.emoji_enabled
 
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
@@ -208,7 +210,9 @@ class WriteBox(urwid.Pile):
                     for email in self.recipient_emails
                 ]
             )
-            recipient_info = clean_string(recipient_info)
+            recipient_info = clean_string(
+                recipient_info, display_emoji=self.emoji_enabled
+            )
         else:
             self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
@@ -343,8 +347,12 @@ class WriteBox(urwid.Pile):
     ) -> None:
         self.caption = caption
         self.title = title
-        caption = clean_string(caption)
-        title = clean_string(title)
+        caption = clean_string(caption, display_emoji=self.emoji_enabled)
+        title_prefix = ""
+        if title.startswith(CHECK_MARK + " "):
+            title_prefix = title[:2]
+            title = title[2:]
+        title = clean_string(title, display_emoji=self.emoji_enabled)
         self.set_editor_mode()
         self.compose_box_status = "open_with_stream"
         self.stream_id = stream_id
@@ -372,7 +380,7 @@ class WriteBox(urwid.Pile):
         self.stream_write_box.set_completer_delims("")
 
         self.title_write_box = ReadlineEdit(
-            edit_text=title, max_char=self.model.max_topic_length
+            edit_text=title_prefix + title, max_char=self.model.max_topic_length
         )
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
@@ -900,6 +908,7 @@ class MessageBox(urwid.Pile):
         self.message_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
         self.topic_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
         self.time_mentions: List[Tuple[str, str]] = list()
+        self.emoji_enabled = self.model.controller.emoji_enabled
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -994,13 +1003,18 @@ class MessageBox(urwid.Pile):
         assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]["color"]
         bar_color = f"s{color}"
-        stream_name = clean_string(self.stream_name)
-        topic_name = clean_string(self.topic_name)
+        stream_name = clean_string(self.stream_name, display_emoji=self.emoji_enabled)
+        topic_prefix = ""
+        topic_name = self.topic_name
+        if topic_name.startswith(CHECK_MARK + " "):
+            topic_prefix = topic_name[:2]
+            topic_name = topic_name[2:]
+        topic_name = clean_string(topic_name, display_emoji=self.emoji_enabled)
         stream_title_markup = (
             "bar",
             [
                 (bar_color, f"{stream_name} {STREAM_TOPIC_SEPARATOR} "),
-                ("title", f" {topic_name}"),
+                ("title", f" {topic_prefix+topic_name}"),
             ],
         )
         stream_title = urwid.Text(stream_title_markup)
@@ -1015,7 +1029,9 @@ class MessageBox(urwid.Pile):
         return header
 
     def private_header(self) -> Any:
-        self.recipients_names = clean_string(self.recipients_names)
+        self.recipients_names = clean_string(
+            self.recipients_names, display_emoji=self.emoji_enabled
+        )
         title_markup = (
             "header",
             [("general_narrow", "You and "), ("general_narrow", self.recipients_names)],
@@ -1058,7 +1074,9 @@ class MessageBox(urwid.Pile):
             assert self.stream_id is not None
             bar_color = self.model.stream_dict[self.stream_id]["color"]
             bar_color = f"s{bar_color}"
-            stream_name = clean_string(self.stream_name)
+            stream_name = clean_string(
+                self.stream_name, display_emoji=self.emoji_enabled
+            )
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (
                     "bar",  # type: ignore
@@ -1225,7 +1243,7 @@ class MessageBox(urwid.Pile):
 
             if isinstance(element, NavigableString):
                 # NORMAL STRINGS
-                element = clean_string(element)
+                element = clean_string(element, display_emoji=metadata["emoji_enabled"])
                 if element == "\n" and metadata.get("bq_len", 0) > 0:
                     metadata["bq_len"] -= 1
                     continue
@@ -1253,6 +1271,14 @@ class MessageBox(urwid.Pile):
                 markup.extend(cls.soup2markup(element, metadata)[0])
             elif tag == "span" and "emoji" in tag_classes:
                 # EMOJI
+                # Example emoji class: "emoji-1f38c"
+                # Some have multiple emojis: "emoji-0030-20e3"
+                emoji_enabled = metadata["emoji_enabled"]
+                if emoji_enabled:
+                    code_points = tag_classes[1][6:].split("-")
+                    emoji = lambda c: chr(int(c, 16))
+                    emojis = "".join(map(emoji, code_points))
+                    tag_text = clean_string(emojis, display_emoji=emoji_enabled)
                 markup.append(("msg_emoji", tag_text))
             elif tag == "span" and ({"katex-display", "katex"} & set(tag_classes)):
                 # MATH TEXT
@@ -1552,7 +1578,9 @@ class MessageBox(urwid.Pile):
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
+            self.message["content"],
+            self.model.server_url,
+            self.model.controller.emoji_enabled,
         )
         self.content.set_text(content)
 
@@ -1635,7 +1663,10 @@ class MessageBox(urwid.Pile):
 
     @classmethod
     def transform_content(
-        cls, content: Any, server_url: str
+        cls,
+        content: Any,
+        server_url: str,
+        emoji_enabled: bool,
     ) -> Tuple[
         Tuple[None, Any],
         "OrderedDict[str, Tuple[str, int, bool]]",
@@ -1646,6 +1677,7 @@ class MessageBox(urwid.Pile):
 
         metadata = dict(
             server_url=server_url,
+            emoji_enabled=emoji_enabled,
             message_links=OrderedDict(),
             time_mentions=list(),
         )  # type: Dict[str, Any]

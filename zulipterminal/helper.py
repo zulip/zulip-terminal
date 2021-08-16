@@ -32,6 +32,7 @@ from zulipterminal.config.regexes import (
     REGEX_COLOR_6_DIGIT,
     REGEX_QUOTED_FENCE_LENGTH,
 )
+from zulipterminal.unicode_emojis import EMOJI_DATA
 
 
 class StreamData(TypedDict):
@@ -529,7 +530,12 @@ def match_emoji(emoji: str, text: str) -> bool:
     return emoji.lower().startswith(text.lower())
 
 
-def clean_string(string: str) -> str:
+emoji_by_code = {
+    data["code"]: {**data, "name": name} for name, data in EMOJI_DATA.items()
+}
+
+
+def clean_string(string: str, display_emoji: bool) -> str:
     """
     `urwid` thinks these zero width characters are actually single width
     and allocated space but actually end up not printing which causes
@@ -549,11 +555,53 @@ def clean_string(string: str) -> str:
           JP for Japan but they do not use ZWJ.
           Individual "regional indicators" break rendering because they
           are not able to combined.
+
+    Some Emojis break because of upstream issues in urwid. These are very few
+    compared to the total emojis and are manually removed using our database's
+    "renders_well" key.
+        According to Unicode 13.1:
+            Total independent Emojis: 1330
+            Urwid Bad Emojis:          208
+        Unicode Blocks Reference: https://en.wikipedia.org/wiki/Unicode_block
+        CZO Topic with Good Emojis: https://chat.zulip.org/#narrow/stream/7-test-here/topic/urwid.20compatible.20emojis
+
+    Languages that this function allows (not exhaustive):
+        * Latin/Greek based [English, French, Spanish, etc]
+        * Russian
+        * Indian Languages [Devanagari (Hindi), Tamil, Bengali, etc]
+        * CJK based [Chinese, Japanese, Korean]
+
+    Exceptions:
+        * U+20E3 (keycap_box) does not break anything but
+          doesn't combine well. Hence made to render as a bad emoji.
+        * U+2591 is ignored as it renders well and used in quotes.
+
+    FIXME: If you force an emoji by directly pasting it
+    (ends up as a NavigableString unless the server converts it to a span),
+    this function cannot stylize text emojis, though it does make sure rendering does not break.
     """
     clean_string = ""
     for char in string:
-        if unicodedata.category(char) not in ["Mn", "Cf"]:
-            clean_string += char
+        if unicodedata.category(char) in ["Mn", "Cf"]:
+            continue
+        code_point = hex(ord(char))[2:].lower()
+        code_point_dec = ord(char)
+        # Start from end of Unicode's Math Operators
+        # See exceptions in doc-string for 20E3 check.
+        if code_point_dec > 8959 or code_point == "20e3":
+            if code_point in emoji_by_code:
+                if not emoji_by_code[code_point]["renders_well"] or not display_emoji:
+                    char = ":" + emoji_by_code[code_point]["name"] + ":"
+            elif code_point == "2591" or 11904 <= code_point_dec <= 55215:
+                # Let "░" pass (used in quotes)
+                # Let CJK related blocks pass (U+2E80 - U+D7AF)
+                pass
+            else:
+                # Could potentially break urwid rendering.
+                # Replace with placeholder
+                char = "◻"
+
+        clean_string += char
     return clean_string
 
 

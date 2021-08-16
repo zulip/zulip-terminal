@@ -33,7 +33,7 @@ class TopButton(urwid.Button):
         count_style: Optional[str] = None,
     ) -> None:
         self.controller = controller
-        self._caption = clean_string(caption)
+        self._caption = clean_string(caption, display_emoji=controller.emoji_enabled)
         self.show_function = show_function
         self.prefix_character = prefix_character
         self.original_color = text_color
@@ -297,11 +297,18 @@ class TopicButton(TopButton):
             stream_name=self.stream_name,
             topic_name=self.topic_name,
         )
+
+        topic_prefix = " "
+        topic_name = self.topic_name
+        if self.topic_name.startswith(CHECK_MARK + " "):
+            topic_prefix = self.topic_name[:1]
+            topic_name = self.topic_name[2:]
+
         super().__init__(
             controller=controller,
-            caption=self.topic_name,
+            caption=topic_name,
             show_function=narrow_function,
-            prefix_character="",
+            prefix_character=topic_prefix,
             count=count,
             count_style="unread_count",
         )
