@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import List
+from typing import List, Optional
 
 from typing_extensions import TypedDict
 from urwid.command_map import (
@@ -405,7 +405,7 @@ class InvalidCommand(Exception):
     pass
 
 
-def is_command_key(command: str, key: str) -> bool:
+def is_command_key(command: str, key: Optional[str]) -> bool:
     """
     Returns the mapped binding for a key if mapped
     or the key otherwise.

@@ -705,6 +705,10 @@ class WriteBox(urwid.Pile):
         return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Handle editing keystrokes except `meta-d`
+        if not is_command_key("SEND_MESSAGE", key):
+            key = super().keypress(size, key)
+
         if self.is_in_typeahead_mode:
             if not (
                 is_command_key("AUTOCOMPLETE", key)
@@ -756,7 +760,7 @@ class WriteBox(urwid.Pile):
                         self.to_write_box
                     )
                     if not all_valid:
-                        return key
+                        return None
                     self.update_recipients(self.to_write_box)
                     if self.recipient_user_ids:
                         success = self.model.send_private_message(
@@ -773,15 +777,20 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_state is not None:
                     self.msg_edit_state = None
                     self.keypress(size, primary_key_for_command("GO_BACK"))
+            return None
+
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
+            return None
+
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
-            return key
+            return None
+
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.compose_box_status == "open_with_private":
@@ -810,9 +819,11 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
+            return None
+
         elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
             if len(self.contents) == 0:
-                return key
+                return None
             header = self.header_write_box
             # toggle focus position
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
@@ -828,7 +839,7 @@ class WriteBox(urwid.Pile):
                                 )
                             )
                             self.view.controller.report_error(invalid_stream_error)
-                            return key
+                            return None
                         user_ids = self.model.get_other_subscribers_in_stream(
                             stream_name=stream_name
                         )
@@ -836,20 +847,20 @@ class WriteBox(urwid.Pile):
                         self.stream_id = self.model.stream_id_from_name(stream_name)
 
                         header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
-                        return key
+                        return None
                     elif (
                         header.focus_col == self.FOCUS_HEADER_BOX_TOPIC
                         and self.msg_edit_state is not None
                     ):
                         header.focus_col = self.FOCUS_HEADER_BOX_EDIT
-                        return key
+                        return None
                     elif header.focus_col == self.FOCUS_HEADER_BOX_EDIT:
                         if self.msg_body_edit_enabled:
                             header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                             self.focus_position = self.FOCUS_CONTAINER_MESSAGE
                         else:
                             header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
-                        return key
+                        return None
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
@@ -857,14 +868,14 @@ class WriteBox(urwid.Pile):
                         self.to_write_box
                     )
                     if not all_valid:
-                        return key
+                        return None
                     # We extract recipients' user_ids and emails only once we know
                     # that all the recipients are valid, to avoid including any
                     # invalid ones.
                     self.update_recipients(self.to_write_box)
 
             if not self.msg_body_edit_enabled:
-                return key
+                return None
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 self.focus_position = self.FOCUS_CONTAINER_MESSAGE
             else:
@@ -873,8 +884,9 @@ class WriteBox(urwid.Pile):
                 header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+            return None
 
-        key = super().keypress(size, key)
+        # key wasn't handled.
         return key
 
 
@@ -1714,6 +1726,9 @@ class MessageBox(urwid.Pile):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # key not passed to super.keypress() as this is the innermost
+        # selectable widget. Text widgets don't have a keypress attribute.
+
         if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
@@ -1725,6 +1740,8 @@ class MessageBox(urwid.Pile):
                     title=self.message["subject"],
                     stream_id=self.stream_id,
                 )
+            return None
+
         elif is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
@@ -1733,6 +1750,8 @@ class MessageBox(urwid.Pile):
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
+            return None
+
         elif is_command_key("STREAM_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1744,6 +1763,8 @@ class MessageBox(urwid.Pile):
                     stream_name=self.stream_name,
                     contextual_message_id=self.message["id"],
                 )
+            return None
+
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
@@ -1768,6 +1789,8 @@ class MessageBox(urwid.Pile):
                         topic_name=self.topic_name,
                         contextual_message_id=self.message["id"],
                     )
+            return None
+
         elif is_command_key("TOPIC_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1780,15 +1803,21 @@ class MessageBox(urwid.Pile):
                     topic_name=self.topic_name,
                     contextual_message_id=self.message["id"],
                 )
+            return None
+
         elif is_command_key("ALL_MESSAGES", key):
             self.model.controller.narrow_to_all_messages(
                 contextual_message_id=self.message["id"]
             )
+            return None
+
         elif is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
                 recipient_user_ids=[self.message["sender_id"]],
             )
+            return None
+
         elif is_command_key("MENTION_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             mention = f"@**{self.message['sender_full_name']}** "
@@ -1797,6 +1826,8 @@ class MessageBox(urwid.Pile):
                 len(mention)
             )
             self.model.controller.view.middle_column.set_focus("footer")
+            return None
+
         elif is_command_key("QUOTE_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
@@ -1825,6 +1856,8 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
+            return None
+
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
@@ -1842,11 +1875,11 @@ class MessageBox(urwid.Pile):
                     self.model.controller.report_error(
                         " You can't edit private messages sent by other users."
                     )
-                return key
+                return None
             # Check if editing is allowed in the realm
             elif not self.model.initial_data["realm_allow_message_editing"]:
                 self.model.controller.report_error(" Editing sent message is disabled.")
-                return key
+                return None
             # Check if message is still editable, i.e. within
             # the time limit. A limit of 0 signifies no limit
             # on message body editing.
@@ -1863,7 +1896,7 @@ class MessageBox(urwid.Pile):
                             self.model.controller.report_error(
                                 " Time Limit for editing the message has been exceeded."
                             )
-                            return key
+                            return None
                         elif self.message["type"] == "stream":
                             self.model.controller.report_warning(
                                 " Only topic editing allowed."
@@ -1884,7 +1917,7 @@ class MessageBox(urwid.Pile):
                             " You can't edit messages sent by other users that"
                             " already have a topic."
                         )
-                        return key
+                        return None
                 else:
                     # The remaining case is of a private message not belonging to user.
                     # Which should be already handled by the topmost if block
@@ -1916,10 +1949,15 @@ class MessageBox(urwid.Pile):
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus("footer")
+            return None
+
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
+            return None
+
+        # key wasn't handled
         return key
 
 
@@ -1957,21 +1995,24 @@ class SearchBox(urwid.Pile):
         return [self.search_bar, self.recipient_bar]
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Handle editing keystrokes.
+        key = super().keypress(size, key)
+
         if (
             is_command_key("ENTER", key) and self.text_box.edit_text == ""
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
-            return key
+            return None
 
         elif is_command_key("ENTER", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus("body")
-            return key
+            return None
 
-        key = super().keypress(size, key)
+        # key wasn't handled.
         return key
 
 
@@ -2011,17 +2052,28 @@ class PanelSearchBox(urwid.Edit):
             return unicodedata.category(ch) not in ("Cc", "Zs")
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        # Handle editing keystrokes.
+        key = super().keypress(size, key)
+
+        # NOTE: GO_BACK in conditional would not be needed once
+        # Panel keypress is refactored according to urwid rules.
+        # Convert key to 'esc' and send it on it's way to Panel.keypress()
         if (
             is_command_key("ENTER", key) and self.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
             self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
-            self.panel_view.set_focus("body")
-            self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
+            key = primary_key_for_command("GO_BACK")
+            # NOTE: return key instead of calling panel_view.keypress.
+            # Cannot be done untill Panel is refactored.
+            self.panel_view.keypress(size, key)
+
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
-        return super().keypress(size, key)
+            return None
+
+        # key wasn't handled.
+        return key
