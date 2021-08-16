@@ -60,6 +60,7 @@ class Controller:
         in_explore_mode: bool,
         autohide: bool,
         notify: bool,
+        encoding: bool,
     ) -> None:
         self.theme_name = theme_name
         self.theme = theme
@@ -67,6 +68,7 @@ class Controller:
         self.in_explore_mode = in_explore_mode
         self.autohide = autohide
         self.notify_enabled = notify
+        self.emoji_enabled = encoding
         self.maximum_footlinks = maximum_footlinks
 
         self._editor: Optional[Any] = None
