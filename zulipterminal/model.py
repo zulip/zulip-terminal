@@ -560,6 +560,8 @@ class Model:
         custom_emoji_data: NamedEmojiData = {
             emoji["name"]: {
                 "code": emoji_code,
+                "group": "",
+                "renders_well": False,
                 "aliases": [],
                 "type": "realm_emoji",
             }
@@ -567,7 +569,13 @@ class Model:
             if not emoji["deactivated"]
         }
         zulip_extra_emoji: NamedEmojiData = {
-            "zulip": {"code": "zulip", "aliases": [], "type": "zulip_extra_emoji"}
+            "zulip": {
+                "code": "zulip",
+                "group": "",
+                "renders_well": False,
+                "aliases": [],
+                "type": "zulip_extra_emoji",
+            }
         }
         all_emoji_data = {
             **typed_unicode_emoji_data,
