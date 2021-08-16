@@ -232,6 +232,7 @@ class View(urwid.WidgetWrap):
         self.model.new_user_input = True
         if self.controller.is_in_editor_mode():
             return self.controller.current_editor().keypress((size[1],), key)
+
         # Redirect commands to message_view.
         elif (
             is_command_key("SEARCH_MESSAGES", key)
@@ -245,12 +246,16 @@ class View(urwid.WidgetWrap):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
+
         elif is_command_key("ALL_PM", key):
             self.pm_button.activate(key)
+
         elif is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)
+
         elif is_command_key("ALL_MENTIONS", key):
             self.mentioned_button.activate(key)
+
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.show_left_panel(visible=False)
@@ -258,6 +263,7 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 2
             self.users_view.keypress(size, key)
             return key
+
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
@@ -267,6 +273,7 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 0
             self.left_panel.keypress(size, key)
             return key
+
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
@@ -294,16 +301,20 @@ class View(urwid.WidgetWrap):
                     "No draft message was saved in this session."
                 )
             return key
+
         elif is_command_key("ABOUT", key):
             self.controller.show_about()
             return key
+
         elif is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()
             return key
+
         elif is_command_key("MARKDOWN_HELP", key):
             self.controller.show_markdown_help()
             return key
+
         return super().keypress(size, key)
 
     def mouse_event(

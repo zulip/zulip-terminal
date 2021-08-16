@@ -773,15 +773,18 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_state is not None:
                     self.msg_edit_state = None
                     self.keypress(size, primary_key_for_command("GO_BACK"))
+
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
+
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
+
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.compose_box_status == "open_with_private":
@@ -810,6 +813,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
+
         elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
             if len(self.contents) == 0:
                 return key
@@ -1725,6 +1729,7 @@ class MessageBox(urwid.Pile):
                     title=self.message["subject"],
                     stream_id=self.stream_id,
                 )
+
         elif is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
@@ -1733,6 +1738,7 @@ class MessageBox(urwid.Pile):
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
+
         elif is_command_key("STREAM_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1744,6 +1750,7 @@ class MessageBox(urwid.Pile):
                     stream_name=self.stream_name,
                     contextual_message_id=self.message["id"],
                 )
+
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
@@ -1768,6 +1775,7 @@ class MessageBox(urwid.Pile):
                         topic_name=self.topic_name,
                         contextual_message_id=self.message["id"],
                     )
+
         elif is_command_key("TOPIC_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
@@ -1780,15 +1788,18 @@ class MessageBox(urwid.Pile):
                     topic_name=self.topic_name,
                     contextual_message_id=self.message["id"],
                 )
+
         elif is_command_key("ALL_MESSAGES", key):
             self.model.controller.narrow_to_all_messages(
                 contextual_message_id=self.message["id"]
             )
+
         elif is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
                 recipient_user_ids=[self.message["sender_id"]],
             )
+
         elif is_command_key("MENTION_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             mention = f"@**{self.message['sender_full_name']}** "
@@ -1797,6 +1808,7 @@ class MessageBox(urwid.Pile):
                 len(mention)
             )
             self.model.controller.view.middle_column.set_focus("footer")
+
         elif is_command_key("QUOTE_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
@@ -1825,6 +1837,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
+
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
@@ -1916,10 +1929,12 @@ class MessageBox(urwid.Pile):
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus("footer")
+
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
+
         return key
 
 
@@ -2018,10 +2033,12 @@ class PanelSearchBox(urwid.Edit):
             self.reset_search_text()
             self.panel_view.set_focus("body")
             self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
+
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
+
         return super().keypress(size, key)
