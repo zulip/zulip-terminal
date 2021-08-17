@@ -1015,6 +1015,26 @@ class TestMiddleColumnView:
         assert mid_col_view.footer.focus_position == 0
         assert return_value == key
 
+    @pytest.mark.parametrize("key", keys_for_command("GO_LEFT"))
+    def test_keypress_GO_LEFT(self, mid_col_view, mocker, key, widget_size):
+        size = widget_size(mid_col_view)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(VIEWS + ".urwid.Frame")
+
+        return_value = mid_col_view.keypress(size, key)
+
+        mid_col_view.view.focus_panel == 0
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_RIGHT"))
+    def test_keypress_GO_RIGHT(self, mid_col_view, mocker, key, widget_size):
+        size = widget_size(mid_col_view)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch(VIEWS + ".urwid.Frame")
+
+        return_value = mid_col_view.keypress(size, key)
+
+        mid_col_view.view.focus_panel == 2
+
 
 class TestRightColumnView:
     @pytest.fixture(autouse=True)
@@ -1153,6 +1173,15 @@ class TestRightColumnView:
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with("body")
         assert right_col_view.user_search.reset_search_text.called
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_LEFT"))
+    def test_keypress_GO_LEFT(self, right_col_view, mocker, key, widget_size):
+        size = widget_size(right_col_view)
+        mocker.patch(VIEWS + ".urwid.Frame.keypress")
+
+        right_col_view.keypress(size, key)
+
+        assert right_col_view.view.focus_panel == 1
 
 
 class TestLeftColumnView:

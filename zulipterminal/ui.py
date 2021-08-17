@@ -4,6 +4,7 @@ import time
 from typing import Any, List, Optional
 
 import urwid
+from typing_extensions import Literal
 
 from zulipterminal.config.keys import commands_for_random_tips, is_command_key
 from zulipterminal.config.symbols import (
@@ -12,7 +13,14 @@ from zulipterminal.config.symbols import (
     AUTOHIDE_TAB_RIGHT_ARROW,
     COLUMN_TITLE_BAR_LINE,
 )
-from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
+from zulipterminal.config.ui_sizes import (
+    LEFT_WIDTH,
+    MAX_APP_WIDTH,
+    MAX_SMALL_WIDTH,
+    MIN_WIDE_WIDTH,
+    RIGHT_WIDTH,
+    TAB_WIDTH,
+)
 from zulipterminal.helper import asynch
 from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
 from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
@@ -35,6 +43,7 @@ class View(urwid.WidgetWrap):
         self.palette = controller.theme
         self.model = controller.model
         self.users = self.model.users
+        self.layout = self.controller.layout
         self.pinned_streams = self.model.pinned_streams
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
@@ -42,6 +51,8 @@ class View(urwid.WidgetWrap):
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
+        self.mode: Literal["small", "normal", "wide"] = "normal"
+        self.has_border = False
 
         super().__init__(self.main_window())
 
@@ -140,7 +151,7 @@ class View(urwid.WidgetWrap):
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
         self.right_panel, self.right_tab = self.right_column_view()
-        if self.controller.autohide:
+        if self.layout.startswith("autohide"):
             body = [
                 (TAB_WIDTH, self.left_tab),
                 ("weight", 10, self.center_panel),
@@ -149,7 +160,7 @@ class View(urwid.WidgetWrap):
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
-                ("weight", 10, self.center_panel),
+                ("weight", 60, self.center_panel),
                 (RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
@@ -182,51 +193,67 @@ class View(urwid.WidgetWrap):
         )
 
         # Show left panel on startup in autohide mode
-        self.show_left_panel(visible=True)
+        self.focus_panel = 0
 
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if not self.layout.startswith("autohide") and self.mode != "small":
             return
 
         if visible:
+            width = LEFT_WIDTH + 1 if self.mode != "wide" else ("relative", 20)
             self.frame.body = urwid.Overlay(
-                urwid.Columns(
-                    [(LEFT_WIDTH, self.left_panel), (1, urwid.SolidFill("▏"))]
-                ),
+                urwid.Columns([self.left_panel, (1, urwid.SolidFill("▏"))]),
                 self.body,
                 align="left",
-                width=LEFT_WIDTH + 1,
+                width=width,
                 valign="top",
                 height=("relative", 100),
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
 
     def show_right_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if not self.layout.startswith("autohide") and self.mode != "small":
             return
 
         if visible:
+            width = RIGHT_WIDTH + 1 if self.mode != "wide" else ("relative", 20)
             self.frame.body = urwid.Overlay(
-                urwid.Columns(
-                    [(1, urwid.SolidFill("▕")), (RIGHT_WIDTH, self.right_panel)]
-                ),
+                urwid.Columns([(1, urwid.SolidFill("▕")), self.right_panel]),
                 self.body,
                 align="right",
-                width=RIGHT_WIDTH + 1,
+                width=width,
                 valign="top",
                 height=("relative", 100),
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
+
+    @property
+    def focus_panel(self) -> int:
+        if hasattr(self.frame.body, "top_w"):
+            if self.left_panel == self.frame.body.top_w.contents[0][0]:
+                return 0
+            else:
+                return 2
+
+        return self.body.focus_position
+
+    @focus_panel.setter
+    def focus_panel(self, column: int) -> None:
+        if column == 0:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=True)
+        elif column == 1:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=False)
+        elif column == 2:
+            self.show_left_panel(visible=False)
+            self.show_right_panel(visible=True)
+
+        self.body.focus_position = column
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
@@ -240,9 +267,7 @@ class View(urwid.WidgetWrap):
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=False)
-            self.body.focus_col = 1
+            self.focus_panel = 1
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
@@ -253,25 +278,19 @@ class View(urwid.WidgetWrap):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=True)
-            self.body.focus_position = 2
+            self.focus_panel = 2
             self.users_view.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
-            self.show_right_panel(visible=False)
-            self.show_left_panel(visible=True)
-            self.body.focus_position = 0
+            self.focus_panel = 0
             self.left_panel.keypress(size, key)
             return key
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
-                self.show_left_panel(visible=False)
-                self.show_right_panel(visible=False)
                 if saved_draft["type"] == "stream":
                     stream_id = self.model.stream_id_from_name(saved_draft["to"])
                     self.write_box.stream_box_view(
@@ -287,7 +306,7 @@ class View(urwid.WidgetWrap):
                 content = saved_draft["content"]
                 self.write_box.msg_write_box.edit_text = content
                 self.write_box.msg_write_box.edit_pos = len(content)
-                self.body.focus_col = 1
+                self.focus_panel = 1
                 self.middle_column.set_focus("footer")
             else:
                 self.controller.report_error(
@@ -324,6 +343,51 @@ class View(urwid.WidgetWrap):
             self.displaying_selection_hint = False
 
         return super().mouse_event(size, event, button, col, row, focus)
+
+    def add_padding_and_border_to_frame(self, maxcols: int) -> None:
+        if maxcols > MAX_APP_WIDTH and not self.has_border:
+            frame_line_box = urwid.LineBox(
+                self.frame, tline="", lline="▕", rline="▏", bline=""
+            )
+            self._w = urwid.Padding(frame_line_box, align="center", width=MAX_APP_WIDTH)
+            self.has_border = True
+        elif maxcols <= MAX_APP_WIDTH and self.has_border:
+            self._w = self.frame
+            self.has_border = False
+
+    def render(self, size: urwid_Box, focus: bool) -> Any:
+        maxcols, maxrows = size
+
+        if self.layout == "dynamic":
+            if maxcols <= MAX_SMALL_WIDTH and self.mode != "small":
+                self.mode = "small"
+                self.body.contents[0] = (self.left_tab, ("given", TAB_WIDTH, True))
+                self.body.contents[2] = (self.right_tab, ("given", TAB_WIDTH, True))
+                # Set same focus to trigger panel open
+                self.focus_panel = self.focus_panel
+            elif MAX_SMALL_WIDTH < maxcols < MIN_WIDE_WIDTH and self.mode != "normal":
+                self.mode = "normal"
+                self.frame.body = self.body
+                self.body.contents[0] = (self.left_panel, ("given", LEFT_WIDTH, True))
+                self.body.contents[2] = (self.right_panel, ("given", RIGHT_WIDTH, True))
+            elif maxcols >= MIN_WIDE_WIDTH and self.mode != "wide":
+                self.mode = "wide"
+                self.body.contents[0] = (self.left_panel, ("weight", 20, True))
+                self.body.contents[2] = (self.right_panel, ("weight", 20, True))
+            self.add_padding_and_border_to_frame(maxcols)
+
+        if self.layout == "autohide_fluid":
+            if maxcols < MIN_WIDE_WIDTH and self.mode != "normal":
+                self.mode = "normal"
+                # Set same focus to reopen open panel and hence update panel
+                self.focus_panel = self.focus_panel
+            elif maxcols >= MIN_WIDE_WIDTH and self.mode != "wide":
+                self.mode = "wide"
+                # Set same focus to reopen open panel and hence update panel
+                self.focus_panel = self.focus_panel
+            self.add_padding_and_border_to_frame(maxcols)
+
+        return super().render(size, focus)
 
 
 class Screen(urwid.raw_display.Screen):

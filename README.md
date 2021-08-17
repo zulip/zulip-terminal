@@ -111,18 +111,29 @@ site=https://realm.zulipchat.com
 [zterm]
 # Alternative themes are gruvbox, light and blue
 theme=default
-# Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
-autohide=autohide
+
+# Layout defaults to 'dynamic', in which the panels adapt to variable terminal widths.
+# Other options include:
+#    'autohide_fluid' which hide the panels except when focused and with better wide terminal support.
+#    Backwards compatible 'autohide' and 'no_autohide'.
+layout=dynamic
+
+# Backwards compatible autohide config use *layout* instead.
+#autohide=autohide
+
 # Footlinks default to 'enabled', but can be set to 'disabled' to hide footlinks.
 # disabled won't show any footlinks.
 # enabled will show the first 3 per message.
-footlinks=disabled
+#footlinks=disabled
+
 # If you need more flexibility, use maximum-footlinks.
 # Maximum footlinks to be shown, defaults to 3, but can be set to any value 0 or greater.
 # This option cannot be used with the footlinks option; use one or the other.
 maximum-footlinks=3
+
 # Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
 notify=enabled
+
 # Color depth defaults to 256 colors, but can be set to 1 (for monochrome), 16, or 24bit.
 color-depth=256
 ```

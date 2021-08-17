@@ -171,7 +171,7 @@ class TestAboutView:
             theme_name="zt_dark",
             color_depth=256,
             notify_enabled=False,
-            autohide_enabled=False,
+            layout="no_autohide",
             maximum_footlinks=3,
         )
 
@@ -206,7 +206,7 @@ class TestAboutView:
             theme_name="zt_dark",
             color_depth=256,
             notify_enabled=False,
-            autohide_enabled=False,
+            layout="no_autohide",
             maximum_footlinks=3,
         )
 
