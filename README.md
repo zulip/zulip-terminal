@@ -321,13 +321,13 @@ For additional help with pytest options see `pytest -h`, or check out the [full 
 
 #### Output using `print`
 
-The stdout for zulip-terminal is redirected to `./debug.log` by default.
+The stdout (standard output) for zulip-terminal is redirected to `./debug.log` if debugging is enabled at run-time using `-d` or `--debug`.
 
-If you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply use `print()`, eg.
+This means that if you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply use `print()`, eg.
 ```python3
 print(f"Just about to do something with {variable}")
 ```
-and the string will be printed to `./debug.log`.
+and when running with a debugging option, the string will be printed to `./debug.log`.
 
 With a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
 

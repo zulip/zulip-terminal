@@ -56,6 +56,7 @@ class TestController:
             theme=self.theme,
             color_depth=256,
             in_explore_mode=self.in_explore_mode,
+            debug_path=None,
             **dict(
                 autohide=self.autohide,
                 notify=self.notify_enabled,
