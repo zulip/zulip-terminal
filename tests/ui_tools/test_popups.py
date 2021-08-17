@@ -4,6 +4,7 @@ import pytest
 from pytest import param as case
 from urwid import Columns, Pile, Text
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.ui_tools.boxes import MessageBox
@@ -341,7 +342,7 @@ class TestFullRenderedMsgView:
         # NOTE: Given that the FullRenderedMsgView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
-        self.message = {"id": 1}
+        self.message = Message(id=1)
         self.full_rendered_message = FullRenderedMsgView(
             controller=self.controller,
             message=self.message,
@@ -411,7 +412,7 @@ class TestFullRawMsgView:
         # NOTE: Given that the FullRawMsgView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
-        self.message = {"id": 1}
+        self.message = Message(id=1)
         self.full_raw_message = FullRawMsgView(
             controller=self.controller,
             message=self.message,
@@ -480,7 +481,7 @@ class TestEditHistoryView:
         # NOTE: Given that the EditHistoryView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
-        self.message = {"id": 1}
+        self.message = Message(id=1)
         self.edit_history_view = EditHistoryView(
             controller=self.controller,
             message=self.message,
@@ -924,8 +925,8 @@ class TestMsgInfoView:
     @pytest.mark.parametrize(
         "to_vary_in_each_message",
         [
-            {
-                "reactions": [
+            Message(
+                reactions=[
                     {
                         "emoji_name": "thumbs_up",
                         "emoji_code": "1f44d",
@@ -967,11 +968,12 @@ class TestMsgInfoView:
                         "reaction_type": "unicode_emoji",
                     },
                 ]
-            }
+            )
         ],
     )
     def test_height_reactions(self, message_fixture, to_vary_in_each_message):
-        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        varied_message = message_fixture
+        varied_message.update(to_vary_in_each_message)
         self.msg_info_view = MsgInfoView(
             self.controller,
             varied_message,
