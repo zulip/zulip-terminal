@@ -1113,24 +1113,37 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ""
         try:
-            reaction_stats = defaultdict(set)
+            reaction_stats = defaultdict(lambda: defaultdict(list))
             for reaction in reactions:
                 user_id = int(reaction["user"].get("id", -1))
                 if user_id == -1:
                     user_id = int(reaction["user"]["user_id"])
-                reaction_stats[reaction["emoji_name"]].add(user_id)
+                emoji_name = reaction["emoji_name"]
+                emoji_code = reaction["emoji_code"]
+                # emoji_code is either the actual emoji or a text_emoji
+                if reaction["reaction_type"] == "unicode_emoji":
+                    emoji_code = clean_string(
+                        chr(int(emoji_code, 16)), display_emoji=self.emoji_enabled
+                    )
+                else:
+                    emoji_code = ":" + emoji_name + ":"
+
+                reaction_stats[emoji_code]["emoji_names"].append(emoji_name)
+                reaction_stats[emoji_code]["user_ids"].append(user_id)
 
             sorted_stats = sorted(
-                (reaction, count) for reaction, count in reaction_stats.items()
+                (reaction, meta["emoji_names"], meta["user_ids"])
+                for reaction, meta in reaction_stats.items()
             )
 
             my_user_id = self.model.user_id
             reaction_texts = [
                 (
-                    "reaction_mine" if my_user_id in ids else "reaction",
-                    f":{reaction}: {len(ids)}",
+                    "reaction_mine" if my_user_id in user_ids else "reaction",
+                    (emoji_code if self.emoji_enabled else f":{emoji_names[0]}:")
+                    + f" {len(user_ids)}",
                 )
-                for reaction, ids in sorted_stats
+                for emoji_code, emoji_names, user_ids in sorted_stats
             ]
 
             spaced_reaction_texts = [
@@ -1140,10 +1153,10 @@ class MessageBox(urwid.Pile):
             ]
             return urwid.Padding(
                 urwid.Text(spaced_reaction_texts),
-                align="left",
-                width=("relative", 90),
-                left=25,
-                min_width=50,
+                align="right",
+                width="pack",
+                left=10,
+                right=1,
             )
         except Exception:
             return ""

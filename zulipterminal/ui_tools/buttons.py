@@ -347,6 +347,9 @@ class EmojiButton(TopButton):
         self.emoji_name, self.emoji_code, self.aliases = emoji_unit
         full_button_caption = ", ".join([self.emoji_name, *self.aliases])
 
+        if self.type != "unicode_emoji" or full_button_caption.startswith(":"):
+            full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+
         super().__init__(
             controller=controller,
             caption=full_button_caption,
