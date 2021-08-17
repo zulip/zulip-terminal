@@ -323,15 +323,13 @@ For additional help with pytest options see `pytest -h`, or check out the [full 
 
 The stdout for zulip-terminal is redirected to `./debug.log` by default.
 
-If you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply write
+If you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply use `print()`, eg.
 ```python3
-print(variable, flush=True)
+print(f"Just about to do something with {variable}")
 ```
-and the value of the variable will be printed to `./debug.log`.
+and the string will be printed to `./debug.log`.
 
-We suggest the `flush=True` to ensure it prints straight away.
-
-If you have a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
+With a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
 
 #### Interactive debugging using pudb & telnet
 

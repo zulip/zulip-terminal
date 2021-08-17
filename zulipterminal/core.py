@@ -155,7 +155,8 @@ class Controller:
             return
 
         self._stdout = sys.stdout
-        sys.stdout = open(path, "a")
+        # buffering=1 avoids need for flush=True with print() debugging
+        sys.stdout = open(path, "a", buffering=1)
 
     def restore_stdout(self) -> None:
         if not hasattr(self, "_stdout"):
