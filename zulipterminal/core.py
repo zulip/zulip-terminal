@@ -52,6 +52,7 @@ class Controller:
 
     def __init__(
         self,
+        *,
         config_file: str,
         maximum_footlinks: int,
         theme_name: str,
