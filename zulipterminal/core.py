@@ -280,7 +280,7 @@ class Controller:
 
     def show_emoji_picker(self, message: Message) -> None:
         all_emoji_units = [
-            (emoji_name, emoji["code"], emoji["aliases"])
+            (emoji_name, emoji["code"], emoji["aliases"], emoji["type"])
             for emoji_name, emoji in self.model.active_emoji_data.items()
         ]
         emoji_picker_view = EmojiPickerView(

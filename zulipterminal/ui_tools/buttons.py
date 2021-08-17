@@ -333,19 +333,25 @@ class EmojiButton(TopButton):
         self,
         *,
         controller: Any,
-        emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
+        emoji_unit: Tuple[
+            str, str, List[str], str
+        ],  # (emoji_name, emoji_code, aliases, type)
         message: Message,
         reaction_count: int = 0,
         is_selected: Callable[[str], bool],
         toggle_selection: Callable[[str, str], None],
     ) -> None:
         self.controller = controller
+        self.emoji_enabled = controller.emoji_enabled
         self.message = message
         self.is_selected = is_selected
         self.reaction_count = reaction_count
         self.toggle_selection = toggle_selection
-        self.emoji_name, self.emoji_code, self.aliases = emoji_unit
-        full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+        self.emoji_name, self.emoji_code, self.aliases, self.type = emoji_unit
+        if self.type == "unicode_emoji":
+            full_button_caption = clean_string(
+                chr(int(self.emoji_code, 16)), display_emoji=self.emoji_enabled
+            )
 
         if self.type != "unicode_emoji" or full_button_caption.startswith(":"):
             full_button_caption = ", ".join([self.emoji_name, *self.aliases])

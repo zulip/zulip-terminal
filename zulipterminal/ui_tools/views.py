@@ -1924,9 +1924,10 @@ class EmojiPickerView(PopUpView):
         self.controller = controller
         self.selected_emojis: Dict[str, str] = {}
         self.emoji_buttons = self.generate_emoji_buttons(emoji_units)
+        min_width = 70
         width = max(len(button.label) for button in self.emoji_buttons)
         max_cols, max_rows = controller.maximum_popup_dimensions()
-        popup_width = min(max_cols, width)
+        popup_width = min(max_cols, max(width, min_width))
         self.emoji_search = PanelSearchBox(
             self, "SEARCH_EMOJIS", self.update_emoji_list
         )
