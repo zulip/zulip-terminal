@@ -58,6 +58,7 @@ class Controller:
         theme_name: str,
         theme: ThemeSpec,
         color_depth: int,
+        debug_path: Optional[str],
         in_explore_mode: bool,
         autohide: bool,
         notify: bool,
@@ -69,6 +70,8 @@ class Controller:
         self.autohide = autohide
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
+
+        self.debug_path = debug_path
 
         self._editor: Optional[Any] = None
 
@@ -151,13 +154,18 @@ class Controller:
 
         self.capture_stdout()
 
-    def capture_stdout(self, path: str = "debug.log") -> None:
+    def capture_stdout(self) -> None:
         if hasattr(self, "_stdout"):
             return
 
         self._stdout = sys.stdout
-        # buffering=1 avoids need for flush=True with print() debugging
-        sys.stdout = open(path, "a", buffering=1)
+
+        if self.debug_path is not None:
+            # buffering=1 avoids need for flush=True with print() debugging
+            sys.stdout = open(self.debug_path, "a", buffering=1)
+        else:
+            # Redirect stdout (print does nothing)
+            sys.stdout = open(os.devnull, "a")
 
     def restore_stdout(self) -> None:
         if not hasattr(self, "_stdout"):
