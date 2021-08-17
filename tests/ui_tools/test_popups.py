@@ -37,7 +37,7 @@ LISTWALKER = MODULE + ".urwid.SimpleFocusListWalker"
 
 class TestPopUpConfirmationView:
     @pytest.fixture
-    def popup_view(self, mocker, stream_button):
+    def popup_view(self, mocker):
         self.controller = mocker.Mock()
         self.callback = mocker.Mock()
         self.list_walker = mocker.patch(LISTWALKER, return_value=[])
@@ -69,7 +69,7 @@ class TestPopUpConfirmationView:
         assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_exit_popup_GO_BACK(self, mocker, popup_view, key, widget_size):
+    def test_exit_popup_GO_BACK(self, popup_view, key, widget_size):
         size = widget_size(popup_view)
         popup_view.keypress(size, key)
         self.callback.assert_not_called()
@@ -332,7 +332,7 @@ class TestUserInfoView:
 
 class TestFullRenderedMsgView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, msg_box, initial_index):
+    def mock_external_classes(self, mocker, msg_box):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -351,7 +351,7 @@ class TestFullRenderedMsgView:
             title="Full Rendered Message",
         )
 
-    def test_init(self, mocker, msg_box):
+    def test_init(self, msg_box):
         assert self.full_rendered_message.title == "Full Rendered Message"
         assert self.full_rendered_message.controller == self.controller
         assert self.full_rendered_message.message == self.message
@@ -399,7 +399,7 @@ class TestFullRenderedMsgView:
 
 class TestFullRawMsgView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, msg_box, initial_index):
+    def mock_external_classes(self, mocker, msg_box):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -421,7 +421,7 @@ class TestFullRawMsgView:
             title="Full Raw Message",
         )
 
-    def test_init(self, mocker, msg_box):
+    def test_init(self, msg_box):
         assert self.full_raw_message.title == "Full Raw Message"
         assert self.full_raw_message.controller == self.controller
         assert self.full_raw_message.message == self.message
@@ -690,7 +690,7 @@ class TestEditModeView:
     )
     @pytest.mark.parametrize("key", keys_for_command("ENTER"))
     def test_select_edit_mode(
-        self, mocker, edit_mode_view, widget_size, index_in_widgets, mode, key
+        self, edit_mode_view, widget_size, index_in_widgets, mode, key
     ):
         mode_button = edit_mode_view.edit_mode_button
         if mode_button.mode == mode:
@@ -706,7 +706,7 @@ class TestEditModeView:
 
 class TestMarkdownHelpView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch):
+    def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -739,7 +739,7 @@ class TestMarkdownHelpView:
 
 class TestHelpView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch):
+    def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -764,7 +764,7 @@ class TestHelpView:
 
 class TestMsgInfoView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch, message_fixture):
+    def mock_external_classes(self, mocker, message_fixture):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
@@ -903,7 +903,7 @@ class TestMsgInfoView:
         assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize("key", keys_for_command("VIEW_IN_BROWSER"))
-    def test_keypress_view_in_browser(self, mocker, widget_size, message_fixture, key):
+    def test_keypress_view_in_browser(self, mocker, widget_size, key):
         size = widget_size(self.msg_info_view)
         self.msg_info_view.server_url = "https://chat.zulip.org/"
         mocker.patch(MODULE + ".near_message_url")
@@ -1239,7 +1239,7 @@ class TestStreamInfoView:
         assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
-    def test_checkbox_toggle_mute_stream(self, mocker, key, widget_size):
+    def test_checkbox_toggle_mute_stream(self, key, widget_size):
         mute_checkbox = self.stream_info_view.widgets[-3]
         toggle_mute_status = self.controller.model.toggle_stream_muted_status
         stream_id = self.stream_info_view.stream_id
@@ -1250,7 +1250,7 @@ class TestStreamInfoView:
         toggle_mute_status.assert_called_once_with(stream_id)
 
     @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
-    def test_checkbox_toggle_pin_stream(self, mocker, key, widget_size):
+    def test_checkbox_toggle_pin_stream(self, key, widget_size):
         pin_checkbox = self.stream_info_view.widgets[-2]
         toggle_pin_status = self.controller.model.toggle_stream_pinned_status
         stream_id = self.stream_info_view.stream_id
@@ -1276,7 +1276,7 @@ class TestStreamInfoView:
 
 class TestStreamMembersView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, monkeypatch):
+    def mock_external_classes(self, mocker):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
