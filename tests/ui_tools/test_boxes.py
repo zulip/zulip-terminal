@@ -274,6 +274,7 @@ class TestWriteBox:
     ):
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=True)
         write_box.private_box_view()
+        assert write_box.to_write_box is not None
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
 
@@ -312,6 +313,7 @@ class TestWriteBox:
 
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=False)
         write_box.private_box_view()
+        assert write_box.to_write_box is not None
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
 
@@ -358,6 +360,7 @@ class TestWriteBox:
         self, write_box, header, expected_recipient_emails, expected_recipient_user_ids
     ):
         write_box.private_box_view()
+        assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
         write_box.update_recipients(write_box.to_write_box)
@@ -828,6 +831,7 @@ class TestWriteBox:
     ):
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.private_box_view(recipient_user_ids=[1])
+        assert write_box.to_write_box is not None
         write_box.to_write_box.set_edit_text(text)
         write_box.to_write_box.set_edit_pos(len(text))
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
