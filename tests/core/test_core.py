@@ -50,14 +50,16 @@ class TestController:
         self.notify_enabled = False
         self.maximum_footlinks = 3
         result = Controller(
-            self.config_file,
-            self.maximum_footlinks,
-            self.theme_name,
-            self.theme,
-            256,
-            self.in_explore_mode,
-            self.autohide,
-            self.notify_enabled,
+            config_file=self.config_file,
+            maximum_footlinks=self.maximum_footlinks,
+            theme_name=self.theme_name,
+            theme=self.theme,
+            color_depth=256,
+            in_explore_mode=self.in_explore_mode,
+            **dict(
+                autohide=self.autohide,
+                notify=self.notify_enabled,
+            ),
         )
         result.view.message_view = mocker.Mock()  # set in View.__init__
         result.model.server_url = SERVER_URL

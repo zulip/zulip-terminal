@@ -494,12 +494,12 @@ def main(options: Optional[List[str]] = None) -> None:
         theme_data = generate_theme(theme_to_use[0], color_depth)
 
         Controller(
-            zuliprc_path,
-            maximum_footlinks,
-            theme_to_use[0],
-            theme_data,
-            color_depth,
-            args.explore,
+            config_file=zuliprc_path,
+            maximum_footlinks=maximum_footlinks,
+            theme_name=theme_to_use[0],
+            theme=theme_data,
+            color_depth=color_depth,
+            in_explore_mode=args.explore,
             **boolean_settings,
         ).main()
     except ServerConnectionFailure as e:
