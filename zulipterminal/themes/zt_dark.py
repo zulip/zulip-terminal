@@ -28,6 +28,7 @@ STYLES = {
     'column_title'    : (Color.WHITE__BOLD,         Color.BLACK),
     'time'            : (Color.LIGHT_BLUE,          Color.BLACK),
     'bar'             : (Color.WHITE,               Color.DARK_GRAY),
+    'non_stream_line' : (Color.WHITE,               Color.BLACK),
     'msg_emoji'       : (Color.LIGHT_MAGENTA,       Color.BLACK),
     'reaction'        : (Color.LIGHT_MAGENTA__BOLD, Color.BLACK),
     'reaction_mine'   : (Color.BLACK,               Color.LIGHT_MAGENTA),

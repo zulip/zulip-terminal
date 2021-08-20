@@ -128,9 +128,9 @@ class View(urwid.WidgetWrap):
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
-                (1, urwid.SolidFill("▏")),
+                (1, urwid.SolidFill(" ")),
                 ("weight", 10, self.center_panel),
-                (1, urwid.SolidFill("▕")),
+                (1, urwid.SolidFill(" ")),
                 (RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)

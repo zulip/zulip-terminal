@@ -44,7 +44,11 @@ def create_msg_box_list(
         if msg["id"] == focus_msg_id:
             focus_msg = message_list.index(msg) - muted_msgs
         w_list.append(
-            urwid.AttrMap(MessageBox(msg, model, last_msg), msg_flag, "msg_selected")
+            urwid.AttrMap(
+                MessageBox(msg, model, last_msg),
+                msg_flag,
+                {"non_stream_line": "msg_selected"},
+            )
         )
         last_msg = msg
     if focus_msg is not None:
