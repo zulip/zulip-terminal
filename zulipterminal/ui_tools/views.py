@@ -311,7 +311,7 @@ class StreamsView(urwid.Frame):
         self.focus_index_before_search = 0
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(
-            self, "SEARCH_STREAMS", self.update_streams
+            self, "", "SEARCH_STREAMS", self.update_streams
         )
         super().__init__(
             list_box,
@@ -389,11 +389,11 @@ class StreamsView(urwid.Frame):
         if is_command_key("SEARCH_STREAMS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
-            self.stream_search_box.set_caption(" ")
+            self.stream_search_box.enter_search_mode()
             self.view.controller.enter_editor_mode_with(self.stream_search_box)
             return key
         elif is_command_key("GO_BACK", key):
-            self.stream_search_box.reset_search_text()
+            self.stream_search_box.exit_search_mode()
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus("body")
@@ -414,7 +414,7 @@ class TopicsView(urwid.Frame):
         self.focus_index_before_search = 0
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(
-            self, "SEARCH_TOPICS", self.update_topics
+            self, "", "SEARCH_TOPICS", self.update_topics
         )
         self.header_list = urwid.Pile(
             [self.stream_button, urwid.Divider("─"), self.topic_search_box]
@@ -503,11 +503,11 @@ class TopicsView(urwid.Frame):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
             self.header_list.set_focus(2)
-            self.topic_search_box.set_caption(" ")
+            self.topic_search_box.enter_search_mode()
             self.view.controller.enter_editor_mode_with(self.topic_search_box)
             return key
         elif is_command_key("GO_BACK", key):
-            self.topic_search_box.reset_search_text()
+            self.topic_search_box.exit_search_mode()
             self.log.clear()
             self.log.extend(self.topics_btn_list)
             self.set_focus("body")
@@ -671,7 +671,9 @@ class RightColumnView(urwid.Frame):
 
     def __init__(self, view: Any) -> None:
         self.view = view
-        self.user_search = PanelSearchBox(self, "SEARCH_PEOPLE", self.update_user_list)
+        self.user_search = PanelSearchBox(
+            self, "", "SEARCH_PEOPLE", self.update_user_list
+        )
         self.view.user_search = self.user_search
         search_box = urwid.LineBox(
             self.user_search,
@@ -777,11 +779,11 @@ class RightColumnView(urwid.Frame):
         if is_command_key("SEARCH_PEOPLE", key):
             self.allow_update_user_list = False
             self.set_focus("header")
-            self.user_search.set_caption(" ")
+            self.user_search.enter_search_mode()
             self.view.controller.enter_editor_mode_with(self.user_search)
             return key
         elif is_command_key("GO_BACK", key):
-            self.user_search.reset_search_text()
+            self.user_search.exit_search_mode()
             self.allow_update_user_list = True
             self.body = UsersView(self.view.controller, self.users_btn_list)
             self.set_body(self.body)
@@ -1928,8 +1930,9 @@ class EmojiPickerView(PopUpView):
         max_cols, max_rows = controller.maximum_popup_dimensions()
         popup_width = min(max_cols, width)
         self.emoji_search = PanelSearchBox(
-            self, "SEARCH_EMOJIS", self.update_emoji_list
+            self, "", "SEARCH_EMOJIS", self.update_emoji_list
         )
+        self.emoji_search.enter_search_mode()
         search_box = urwid.LineBox(
             self.emoji_search,
             tlcorner="─",
@@ -1975,7 +1978,7 @@ class EmojiPickerView(PopUpView):
 
         with self.search_lock:
             self.emojis_display = list()
-            if new_text and new_text != self.emoji_search.search_text:
+            if new_text:
                 for button in self.emoji_buttons:
                     if match_emoji(button.emoji_name, new_text):
                         self.emojis_display.append(button)
@@ -2055,13 +2058,13 @@ class EmojiPickerView(PopUpView):
             and not self.controller.is_in_editor_mode()
         ):
             self.set_focus("header")
-            self.emoji_search.set_caption(" ")
+            self.emoji_search.enter_search_mode()
             self.controller.enter_editor_mode_with(self.emoji_search)
             return key
         elif is_command_key("GO_BACK", key) or is_command_key("ADD_REACTION", key):
             for emoji_code, emoji_name in self.selected_emojis.items():
                 self.controller.model.toggle_message_reaction(self.message, emoji_name)
-            self.emoji_search.reset_search_text()
+            self.emoji_search.exit_search_mode()
             self.controller.exit_editor_mode()
             self.controller.exit_popup()
             return key

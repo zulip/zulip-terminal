@@ -1977,26 +1977,43 @@ class SearchBox(urwid.Pile):
         return key
 
 
-class PanelSearchBox(urwid.Edit):
+class PanelSearchBox(urwid.Pile):
     """
     Search Box to search panel views in real-time.
     """
 
     def __init__(
-        self, panel_view: Any, search_command: str, update_function: Callable[..., None]
+        self,
+        panel_view: Any,
+        search_text,
+        search_command: str,
+        update_function: Callable[..., None],
     ) -> None:
         self.panel_view = panel_view
-        self.search_command = search_command
-        self.search_text = f" Search [{', '.join(keys_for_command(search_command))}]: "
+
+        search_hint = f"search [{', '.join(keys_for_command(search_command))}] "
+        self.caption_box = urwid.Columns(
+            [urwid.Text(search_text), urwid.Text(search_hint, align="right")]
+        )
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
-        urwid.connect_signal(self, "change", update_function)
-        super().__init__(caption=self.search_text, edit_text="")
 
-    def reset_search_text(self) -> None:
-        self.set_caption(self.search_text)
-        self.set_edit_text("")
+        self.search_box = urwid.Edit(caption=" > ", edit_text="")
+        urwid.connect_signal(self.search_box, "change", update_function)
+
+        super().__init__([self.caption_box])
+
+    def enter_search_mode(self) -> None:
+        if len(self.contents) == 2:
+            self.contents.pop()
+        self.contents.append((self.search_box, self.options()))
+        self.search_box.set_caption(" ")
+        self.focus_position = 1
+
+    def exit_search_mode(self) -> None:
+        self.search_box.set_edit_text("")
+        self.contents = [(self.caption_box, self.options())]
 
     def valid_char(self, ch: str) -> bool:
         # This method 'strips' leading space *before* entering it in the box
@@ -2014,17 +2031,17 @@ class PanelSearchBox(urwid.Edit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("ENTER", key) and self.get_edit_text() == ""
+            is_command_key("ENTER", key) and self.search_box.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
             self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
+            self.exit_search_mode()
             self.panel_view.set_focus("body")
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
                 self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.set_caption([("filter_results", " Search Results "), " "])
+            self.search_box.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
