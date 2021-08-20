@@ -2010,7 +2010,6 @@ class PanelSearchBox(urwid.Pile):
             self.contents.pop()
         self.contents.append((self.search_box, self.options()))
         self.focus_position = 1
-        self.search_box.set_caption(" > ")
 
     def exit_search_mode(self) -> None:
         self.search_box.set_edit_text("")
@@ -2042,7 +2041,6 @@ class PanelSearchBox(urwid.Pile):
                 self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.search_box.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
