@@ -1000,7 +1000,6 @@ class MessageBox(urwid.Pile):
             [
                 ("pack", stream_title),
                 (1, urwid.Text((color, " "))),
-                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), color),
             ]
         )
         header.markup = stream_title_markup
@@ -1545,27 +1544,21 @@ class MessageBox(urwid.Pile):
         self.content.set_text(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
-            edited_label_size = 7
-            left_padding = 1
+            edited_label_size = 6
+            left_padding = 0
         else:
             edited_label_size = 0
-            left_padding = 8
+            left_padding = 6
 
         wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
                     (edited_label_size, urwid.Text("EDITED")),
-                    urwid.LineBox(
-                        urwid.Columns(
-                            [
-                                (1, urwid.Text("")),
-                                self.content,
-                            ]
-                        ),
-                        tline="",
-                        bline="",
-                        rline="",
-                        lline=MESSAGE_CONTENT_MARKER,
+                    urwid.Columns(
+                        [
+                            (1, urwid.Text("")),
+                            self.content,
+                        ]
                     ),
                 ]
             ),
@@ -1599,7 +1592,20 @@ class MessageBox(urwid.Pile):
         self.header = [part for part, condition in parts[:2] if condition]
         self.footer = [part for part, condition in parts[3:] if condition]
 
-        return [part for part, condition in parts if condition]
+        parts_used = [part for part, condition in parts if condition]
+        if self.stream_id is not None:
+            color = self.model.stream_dict[self.stream_id]["color"]
+        else:
+            color = "selected"
+        parts_needing_line = parts_used[1:] if recipient_header else parts_used
+        pile = urwid.AttrMap(urwid.Pile(parts_needing_line), "non_stream_line")
+        stream_line = urwid.AttrMap(
+            urwid.LineBox(pile, title="", tline="", lline="▎", rline="", bline=""),
+            color,
+        )
+        final_parts = [recipient_header] if recipient_header else []
+        final_parts.append(stream_line)
+        return final_parts
 
     def update_message_author_status(self) -> bool:
         """
