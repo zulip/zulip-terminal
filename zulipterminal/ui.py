@@ -15,7 +15,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
 from zulipterminal.helper import asynch
 from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
-from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
+from zulipterminal.ui_tools.boxes import CurrentMsgHint, SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView,
     MiddleColumnView,
@@ -39,6 +39,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
+        self.current_msg_hint = CurrentMsgHint()
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
@@ -53,7 +54,9 @@ class View(urwid.WidgetWrap):
         return panel, tab
 
     def middle_column_view(self) -> Any:
-        return MiddleColumnView(self, self.model, self.write_box, self.search_box)
+        return MiddleColumnView(
+            self, self.model, self.write_box, self.search_box, self.current_msg_hint
+        )
 
     def right_column_view(self) -> Any:
         tab = TabView(f"{AUTOHIDE_TAB_RIGHT_ARROW} USERS {AUTOHIDE_TAB_RIGHT_ARROW}")

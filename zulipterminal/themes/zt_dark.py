@@ -39,6 +39,7 @@ STYLES = {
     'msg_code'        : (Color.BLACK,               Color.WHITE),
     'msg_bold'        : (Color.WHITE__BOLD,         Color.BLACK),
     'msg_time'        : (Color.BLACK,               Color.WHITE),
+    'header'          : (Color.BLACK__BOLD,         Color.DARK_GRAY),
     'footer'          : (Color.BLACK,               Color.LIGHT_GRAY),
     'footer_contrast' : (Color.WHITE,               Color.BLACK),
     'starred'         : (Color.LIGHT_RED__BOLD,     Color.BLACK),

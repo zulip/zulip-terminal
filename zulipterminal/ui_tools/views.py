@@ -243,7 +243,9 @@ class MessageView(urwid.ListBox):
         recipient_bar = message_view.top_header_bar(message_view)
         top_header = message_view.top_search_bar()
         self.model.controller.view.search_box.set_conversation_focus(top_header.markup)
-        self.model.controller.view.search_box.msg_narrow.set_text(recipient_bar.markup)
+        self.model.controller.view.current_msg_hint.msg_narrow.set_text(
+            recipient_bar.markup
+        )
         self.model.controller.update_screen()
 
     def read_message(self, index: int = -1) -> None:
@@ -530,7 +532,14 @@ class UsersView(urwid.ListBox):
 
 
 class MiddleColumnView(urwid.Frame):
-    def __init__(self, view: Any, model: Any, write_box: Any, search_box: Any) -> None:
+    def __init__(
+        self,
+        view: Any,
+        model: Any,
+        write_box: Any,
+        search_box: Any,
+        current_message_hint: Any,
+    ) -> None:
         message_view = MessageView(model, view)
         self.model = model
         self.controller = model.controller
@@ -538,8 +547,10 @@ class MiddleColumnView(urwid.Frame):
         self.last_unread_topic = None
         self.last_unread_pm = None
         self.search_box = search_box
+        self.current_message_hint = current_message_hint
         view.message_view = message_view
-        super().__init__(message_view, header=search_box, footer=write_box)
+        header = urwid.Pile([search_box, current_message_hint])
+        super().__init__(message_view, header=header, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts["unread_topics"].keys())

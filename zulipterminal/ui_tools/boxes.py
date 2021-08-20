@@ -1925,20 +1925,13 @@ class MessageBox(urwid.Pile):
         return key
 
 
-class SearchBox(urwid.Pile):
-    def __init__(self, controller: Any) -> None:
-        self.controller = controller
-        super().__init__(self.main_view())
+class CurrentMsgHint(urwid.WidgetWrap):
+    """
+    TODO: This class should be converted into a ComposeBoxHint
+    class which goes to the bottom of MessageView.
+    """
 
-    def main_view(self) -> Any:
-        self.text_box = ReadlineEdit(" ")
-        self.search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] "
-        self.search_bar = urwid.Columns(
-            [
-                self.text_box,
-                urwid.Text(self.search_hint, align="right"),
-            ]
-        )
+    def __init__(self):
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.msg_narrow = urwid.Text("DONT HIDE")
@@ -1954,7 +1947,16 @@ class SearchBox(urwid.Pile):
             bline="─",
             brcorner="─",
         )
-        return [self.search_bar, self.recipient_bar]
+        super().__init__(self.recipient_bar)
+
+
+class SearchBox(urwid.Columns):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        self.text_box = ReadlineEdit(" ")
+        search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] "
+        search_bar = [self.text_box, urwid.Text(search_hint, align="right")]
+        super().__init__(search_bar)
 
     def set_conversation_focus(self, markup) -> None:
         self.text_box.set_caption([markup, " "])
