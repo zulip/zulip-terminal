@@ -351,7 +351,7 @@ class EmojiButton(TopButton):
         super().__init__(
             controller=controller,
             caption=full_button_caption,
-            prefix_character="",
+            prefix_character=" ",
             show_function=self.update_emoji_button,
         )
 

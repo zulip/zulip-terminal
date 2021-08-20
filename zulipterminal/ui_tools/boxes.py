@@ -2000,7 +2000,7 @@ class PanelSearchBox(urwid.Pile):
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
 
-        self.search_box = urwid.Edit(caption=" ", edit_text="")
+        self.search_box = urwid.Edit(caption=" > ", edit_text="")
         urwid.connect_signal(self.search_box, "change", update_function)
 
         super().__init__([self.caption_box])
@@ -2010,7 +2010,7 @@ class PanelSearchBox(urwid.Pile):
             self.contents.pop()
         self.contents.append((self.search_box, self.options()))
         self.focus_position = 1
-        self.search_box.set_caption(" ")
+        self.search_box.set_caption(" > ")
 
     def exit_search_mode(self) -> None:
         self.search_box.set_edit_text("")
