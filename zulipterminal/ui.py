@@ -54,9 +54,7 @@ class View(urwid.WidgetWrap):
         return panel, tab
 
     def middle_column_view(self) -> Any:
-        return MiddleColumnView(
-            self, self.model, self.write_box, self.search_box, self.current_msg_hint
-        )
+        return MiddleColumnView(self, self.model, self.write_box, self.current_msg_hint)
 
     def right_column_view(self) -> Any:
         tab = TabView(f"{AUTOHIDE_TAB_RIGHT_ARROW} USERS {AUTOHIDE_TAB_RIGHT_ARROW}")
@@ -145,19 +143,25 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
+        server_name = urwid.Padding(
+            urwid.Text(" " + self.model.server_name.upper()),
+            align=("relative", 20),
+            width="pack",
         )
-
-        title_bar = urwid.Columns(
+        user_name = urwid.Padding(
+            urwid.Text(self.model.user_full_name),
+            align=("relative", 80),
+            width="pack",
+        )
+        title_text = urwid.Columns(
             [
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-                (len(title_text), urwid.Text([title_text])),
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+                ("weight", 25, server_name),
+                ("weight", 55, self.search_box),
+                ("weight", 20, user_name),
             ]
+        )
+        title_bar = urwid.AttrMap(
+            urwid.Pile([title_text, urwid.Divider("▄")]), "header"
         )
 
         self.frame = urwid.Frame(
@@ -217,8 +221,7 @@ class View(urwid.WidgetWrap):
             return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
         elif (
-            is_command_key("SEARCH_MESSAGES", key)
-            or is_command_key("NEXT_UNREAD_TOPIC", key)
+            is_command_key("NEXT_UNREAD_TOPIC", key)
             or is_command_key("NEXT_UNREAD_PM", key)
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
@@ -227,6 +230,10 @@ class View(urwid.WidgetWrap):
             self.show_right_panel(visible=False)
             self.body.focus_col = 2
             self.center_panel.keypress(size, key)
+            return key
+        elif is_command_key("SEARCH_MESSAGES", key):
+            self.controller.enter_editor_mode_with(self.search_box)
+            self.frame.set_focus("header")
             return key
         elif is_command_key("ALL_PM", key):
             self.pm_button.activate(key)

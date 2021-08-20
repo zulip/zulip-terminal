@@ -1038,43 +1038,32 @@ class MessageBox(urwid.Pile):
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
-            text_to_fill = "All messages"
+            text_to_fill = "ALL MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = "All private messages"
+            text_to_fill = "ALL PRIVATE MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
-            text_to_fill = "Starred messages"
+            text_to_fill = "STARRED MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
-            text_to_fill = "Mentions"
+            text_to_fill = "MENTIONS"
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
-            bar_color = self.model.stream_dict[self.stream_id]["color"]
-            bar_color = f"s{bar_color}"
+            stream_color = self.model.stream_dict[self.stream_id]["color"]
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
-                text_to_fill = (
-                    "bar",  # type: ignore
-                    [
-                        (bar_color, self.stream_name),
-                        (bar_color, ": topic narrow"),
-                    ],
-                )
+                text_to_fill = [(stream_color, "#"), self.stream_name + ": topic narrow"]  # type: ignore
             else:
-                text_to_fill = ("bar", [(bar_color, self.stream_name)])  # type: ignore
+                text_to_fill = [(stream_color, "#"), self.stream_name]  # type: ignore
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
-            text_to_fill = "Group private conversation"
+            text_to_fill = "GROUP PRIVATE CONVERSATION"
         else:
-            text_to_fill = "Private conversation"
+            text_to_fill = "PRIVATE CONVERSATION"
 
         if is_search_narrow:
-            title_markup = (
-                "header",
-                [
-                    ("general_narrow", text_to_fill),
-                    (None, " "),
-                    ("filter_results", "Search Results"),
-                ],
-            )
+            title_markup = [
+                text_to_fill + " ",
+                ("filter_results", "Search Results"),
+            ]
         else:
-            title_markup = ("header", [("general_narrow", text_to_fill)])
+            title_markup = text_to_fill
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, "bar")
         header.text_to_fill = text_to_fill
@@ -1954,12 +1943,12 @@ class SearchBox(urwid.Columns):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         self.text_box = ReadlineEdit(" ")
-        search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] "
+        search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] ❫"
         search_bar = [self.text_box, urwid.Text(search_hint, align="right")]
         super().__init__(search_bar)
 
     def set_conversation_focus(self, markup) -> None:
-        self.text_box.set_caption([markup, " "])
+        self.text_box.set_caption(["❪ ", markup, " "])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
@@ -1967,13 +1956,15 @@ class SearchBox(urwid.Columns):
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
-            self.controller.view.center_panel.set_focus("body")
+            self.controller.view.frame.set_focus("body")
+            self.controller.view.body.focus_position = 2
             return key
 
         elif is_command_key("ENTER", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
-            self.controller.view.center_panel.set_focus("body")
+            self.controller.view.frame.set_focus("body")
+            self.controller.view.body.focus_position = 2
             return key
 
         key = super().keypress(size, key)

@@ -537,7 +537,6 @@ class MiddleColumnView(urwid.Frame):
         view: Any,
         model: Any,
         write_box: Any,
-        search_box: Any,
         current_message_hint: Any,
     ) -> None:
         message_view = MessageView(model, view)
@@ -546,11 +545,9 @@ class MiddleColumnView(urwid.Frame):
         self.view = view
         self.last_unread_topic = None
         self.last_unread_pm = None
-        self.search_box = search_box
         self.current_message_hint = current_message_hint
         view.message_view = message_view
-        header = urwid.Pile([search_box, current_message_hint])
-        super().__init__(message_view, header=header, footer=write_box)
+        super().__init__(message_view, header=current_message_hint, footer=write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts["unread_topics"].keys())
@@ -598,11 +595,6 @@ class MiddleColumnView(urwid.Frame):
 
         elif self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
-
-        elif is_command_key("SEARCH_MESSAGES", key):
-            self.controller.enter_editor_mode_with(self.search_box)
-            self.set_focus("header")
-            return key
 
         elif is_command_key("REPLY_MESSAGE", key):
             self.body.keypress(size, key)
