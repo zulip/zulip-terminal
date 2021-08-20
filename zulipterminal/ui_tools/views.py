@@ -547,7 +547,7 @@ class MiddleColumnView(urwid.Frame):
         self.last_unread_pm = None
         self.current_message_hint = current_message_hint
         view.message_view = message_view
-        super().__init__(message_view, header=current_message_hint, footer=write_box)
+        super().__init__(message_view, footer=current_message_hint)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts["unread_topics"].keys())

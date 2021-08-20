@@ -1924,17 +1924,11 @@ class CurrentMsgHint(urwid.WidgetWrap):
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
         self.msg_narrow = urwid.Text("DONT HIDE")
-        self.recipient_bar = urwid.LineBox(
-            self.msg_narrow,
-            title="Current message recipients",
-            tline="─",
-            lline="",
-            trcorner="─",
-            tlcorner="─",
-            blcorner="─",
-            rline="",
-            bline="─",
-            brcorner="─",
+        self.recipient_bar = urwid.Pile(
+            [
+                urwid.Divider("▁"),
+                self.msg_narrow,
+            ],
         )
         super().__init__(self.recipient_bar)
 
