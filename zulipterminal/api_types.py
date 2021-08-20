@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 from typing_extensions import Literal, TypedDict
 
 
+RESOLVED_PREFIX = "✔"
 EditPropagateMode = Literal["change_one", "change_all", "change_later"]
 EmojiType = Literal["realm_emoji", "unicode_emoji", "zulip_extra_emoji"]
 # Limited flags which could be present in update_message_flag events.
