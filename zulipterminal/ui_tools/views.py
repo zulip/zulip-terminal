@@ -1330,6 +1330,19 @@ class StreamInfoView(PopUpView):
         ]
 
         total_members = len(stream["subscribers"])
+        Stream_id = stream["stream_id"]
+        type_of_stream = "Private" if stream["invite_only"] is True else "Public"
+        stream_posting_policy = {
+            1: "Any user can post",
+            2: "Only administrators can post",
+            3: "Only full members can post",
+            4: "Only moderators can post",
+        }
+        posting_policy = stream_posting_policy[stream["stream_post_policy"]]
+        availability_of_history = (
+            "Yes" if stream["history_public_to_subscribers"] else "No"
+        )
+        user_role = "Stream administrator" if stream["role"] == 20 else "Subscriber"
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
         self.stream_email = stream["email_address"]
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
@@ -1365,6 +1378,11 @@ class StreamInfoView(PopUpView):
                         "Stream email",
                         f"Press {email_keys} to copy Stream email address",
                     ),
+                    ("Stream ID", f"{Stream_id}"),
+                    ("Type of Stream", f"{type_of_stream}"),
+                    ("Posting Policy", f"{posting_policy}"),
+                    ("History Available to Subscribers", f"{availability_of_history}"),
+                    ("User Role", f"{user_role}"),
                 ],
             ),
             ("Stream settings", []),
