@@ -223,6 +223,7 @@ def general_stream() -> Dict[str, Any]:
         "email_address": "general@example.comm",
         "message_retention_days": 10,
         "subscribers": [1001, 11, 12],
+        "history_public_to_subscribers": True,
     }
 
 
@@ -248,6 +249,7 @@ def secret_stream() -> Dict[str, Any]:
         "message_retention_days": -1,
         "push_notifications": False,
         "subscribers": [1001, 11],
+        "history_public_to_subscribers": False,
     }
 
 
@@ -276,6 +278,7 @@ def streams_fixture(
                 "message_retention_days": i + 30,
                 "email_address": f"stream{i}@example.com",
                 "subscribers": [1001, 11, 12],
+                "history_public_to_subscribers": True,
             }
         )
     return deepcopy(streams)
@@ -610,6 +613,7 @@ def initial_data(
                 "email_address": "",
                 "color": "#bfd56f",
                 "in_home_view": True,
+                "history_public_to_subscribers": True,
             }
         ],
         "result": "success",

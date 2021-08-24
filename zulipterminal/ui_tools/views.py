@@ -1330,6 +1330,12 @@ class StreamInfoView(PopUpView):
         ]
 
         total_members = len(stream["subscribers"])
+        type_of_stream = "Private" if stream["invite_only"] is True else "Public"
+        availability_of_history = (
+            "Public to Users"
+            if stream["history_public_to_subscribers"]
+            else "Not Public to Users"
+        )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
         self.stream_email = stream["email_address"]
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
@@ -1353,7 +1359,11 @@ class StreamInfoView(PopUpView):
         stream_info_content = [
             (
                 "Stream Details",
-                date_created
+                [
+                    ("Stream ID", f"{self.stream_id}"),
+                    ("Type of Stream", f"{type_of_stream}"),
+                ]
+                + date_created
                 + message_retention_days
                 + [
                     ("Weekly Message Count", str(weekly_msg_count)),
@@ -1365,6 +1375,7 @@ class StreamInfoView(PopUpView):
                         "Stream email",
                         f"Press {email_keys} to copy Stream email address",
                     ),
+                    ("History of Stream", f"{availability_of_history}"),
                 ],
             ),
             ("Stream settings", []),
