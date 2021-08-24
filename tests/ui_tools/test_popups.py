@@ -79,7 +79,7 @@ class TestPopUpConfirmationView:
 
 class TestPopUpView:
     @pytest.fixture(autouse=True)
-    def pop_up_view(self, mocker):
+    def pop_up_view_autouse(self, mocker):
         self.controller = mocker.Mock()
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
