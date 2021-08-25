@@ -50,7 +50,11 @@ linting_deps = [
 ]
 
 typing_deps = [
-    "mypy==0.812",
+    "mypy==0.910",
+    "types-python-dateutil",
+    "types-tzlocal",
+    "types-pytz",
+    "types-requests",
 ]
 
 dev_helper_deps = [
