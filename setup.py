@@ -43,11 +43,14 @@ testing_deps = [
 
 linting_deps = [
     "isort~=5.7.0",
-    "mypy==0.812",
     "flake8~=3.9.0",
     "flake8-quotes~=3.2.0",
     "flake8-continuation~=1.0.5",
     "black>=21.5b1",
+]
+
+typing_deps = [
+    "mypy==0.812",
 ]
 
 dev_helper_deps = [
@@ -99,9 +102,10 @@ setup(
         ],
     },
     extras_require={
-        "dev": testing_deps + linting_deps + dev_helper_deps,
+        "dev": testing_deps + linting_deps + typing_deps + dev_helper_deps,
         "testing": testing_deps,
         "linting": linting_deps,
+        "typing": typing_deps,
     },
     tests_require=testing_deps,
     install_requires=[
