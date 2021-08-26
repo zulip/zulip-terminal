@@ -778,7 +778,7 @@ class WriteBox(urwid.Pile):
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
-            self.view.middle_column.set_focus("body")
+            self.view.center_panel.set_focus("body")
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
@@ -1000,7 +1000,6 @@ class MessageBox(urwid.Pile):
             [
                 ("pack", stream_title),
                 (1, urwid.Text((color, " "))),
-                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), color),
             ]
         )
         header.markup = stream_title_markup
@@ -1038,43 +1037,32 @@ class MessageBox(urwid.Pile):
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
-            text_to_fill = "All messages"
+            text_to_fill = "ALL MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = "All private messages"
+            text_to_fill = "ALL PRIVATE MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
-            text_to_fill = "Starred messages"
+            text_to_fill = "STARRED MESSAGES"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
-            text_to_fill = "Mentions"
+            text_to_fill = "MENTIONS"
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
-            bar_color = self.model.stream_dict[self.stream_id]["color"]
-            bar_color = f"s{bar_color}"
+            stream_color = self.model.stream_dict[self.stream_id]["color"]
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
-                text_to_fill = (
-                    "bar",  # type: ignore
-                    [
-                        (bar_color, self.stream_name),
-                        (bar_color, ": topic narrow"),
-                    ],
-                )
+                text_to_fill = [(stream_color, "#"), self.stream_name + ": topic narrow"]  # type: ignore
             else:
-                text_to_fill = ("bar", [(bar_color, self.stream_name)])  # type: ignore
+                text_to_fill = [(stream_color, "#"), self.stream_name]  # type: ignore
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
-            text_to_fill = "Group private conversation"
+            text_to_fill = "GROUP PRIVATE CONVERSATION"
         else:
-            text_to_fill = "Private conversation"
+            text_to_fill = "PRIVATE CONVERSATION"
 
         if is_search_narrow:
-            title_markup = (
-                "header",
-                [
-                    ("general_narrow", text_to_fill),
-                    (None, " "),
-                    ("filter_results", "Search Results"),
-                ],
-            )
+            title_markup = [
+                text_to_fill + " ",
+                ("filter_results", "Search Results"),
+            ]
         else:
-            title_markup = ("header", [("general_narrow", text_to_fill)])
+            title_markup = text_to_fill
         title = urwid.Text(title_markup)
         header = urwid.AttrWrap(title, "bar")
         header.text_to_fill = text_to_fill
@@ -1545,27 +1533,21 @@ class MessageBox(urwid.Pile):
         self.content.set_text(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
-            edited_label_size = 7
-            left_padding = 1
+            edited_label_size = 6
+            left_padding = 0
         else:
             edited_label_size = 0
-            left_padding = 8
+            left_padding = 6
 
         wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
                     (edited_label_size, urwid.Text("EDITED")),
-                    urwid.LineBox(
-                        urwid.Columns(
-                            [
-                                (1, urwid.Text("")),
-                                self.content,
-                            ]
-                        ),
-                        tline="",
-                        bline="",
-                        rline="",
-                        lline=MESSAGE_CONTENT_MARKER,
+                    urwid.Columns(
+                        [
+                            (1, urwid.Text("")),
+                            self.content,
+                        ]
                     ),
                 ]
             ),
@@ -1599,7 +1581,20 @@ class MessageBox(urwid.Pile):
         self.header = [part for part, condition in parts[:2] if condition]
         self.footer = [part for part, condition in parts[3:] if condition]
 
-        return [part for part, condition in parts if condition]
+        parts_used = [part for part, condition in parts if condition]
+        if self.stream_id is not None:
+            color = self.model.stream_dict[self.stream_id]["color"]
+        else:
+            color = "selected"
+        parts_needing_line = parts_used[1:] if recipient_header else parts_used
+        pile = urwid.AttrMap(urwid.Pile(parts_needing_line), "non_stream_line")
+        stream_line = urwid.AttrMap(
+            urwid.LineBox(pile, title="", tline="", lline="▎", rline="", bline=""),
+            color,
+        )
+        final_parts = [recipient_header] if recipient_header else []
+        final_parts.append(stream_line)
+        return final_parts
 
     def update_message_author_status(self) -> bool:
         """
@@ -1796,7 +1791,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(mention)
             )
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("QUOTE_REPLY", key):
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
@@ -1824,7 +1819,7 @@ class MessageBox(urwid.Pile):
 
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
@@ -1915,7 +1910,7 @@ class MessageBox(urwid.Pile):
                 write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
-            self.model.controller.view.middle_column.set_focus("footer")
+            self.model.controller.view.center_panel.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
@@ -1925,38 +1920,35 @@ class MessageBox(urwid.Pile):
         return key
 
 
-class SearchBox(urwid.Pile):
-    def __init__(self, controller: Any) -> None:
-        self.controller = controller
-        super().__init__(self.main_view())
+class CurrentMsgHint(urwid.WidgetWrap):
+    """
+    TODO: This class should be converted into a ComposeBoxHint
+    class which goes to the bottom of MessageView.
+    """
 
-    def main_view(self) -> Any:
-        search_text = f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
-        self.text_box = ReadlineEdit(f"{search_text} ")
+    def __init__(self):
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
-        self.conversation_focus = urwid.Text(" ")
-        self.search_bar = urwid.Columns(
-            [
-                ("pack", self.conversation_focus),
-                ("pack", urwid.Text("  ")),
-                self.text_box,
-            ]
-        )
         self.msg_narrow = urwid.Text("DONT HIDE")
-        self.recipient_bar = urwid.LineBox(
-            self.msg_narrow,
-            title="Current message recipients",
-            tline="─",
-            lline="",
-            trcorner="─",
-            tlcorner="─",
-            blcorner="─",
-            rline="",
-            bline="─",
-            brcorner="─",
+        self.recipient_bar = urwid.Pile(
+            [
+                urwid.Divider("▁"),
+                self.msg_narrow,
+            ],
         )
-        return [self.search_bar, self.recipient_bar]
+        super().__init__(self.recipient_bar)
+
+
+class SearchBox(urwid.Columns):
+    def __init__(self, controller: Any) -> None:
+        self.controller = controller
+        self.text_box = ReadlineEdit(" ")
+        search_hint = f"search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}] ❫"
+        search_bar = [self.text_box, urwid.Text(search_hint, align="right")]
+        super().__init__(search_bar)
+
+    def set_conversation_focus(self, markup) -> None:
+        self.text_box.set_caption(["❪ ", markup, " "])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
@@ -1964,39 +1956,57 @@ class SearchBox(urwid.Pile):
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
-            self.controller.view.middle_column.set_focus("body")
+            self.controller.view.frame.set_focus("body")
+            self.controller.view.body.focus_position = 2
             return key
 
         elif is_command_key("ENTER", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
-            self.controller.view.middle_column.set_focus("body")
+            self.controller.view.frame.set_focus("body")
+            self.controller.view.body.focus_position = 2
             return key
 
         key = super().keypress(size, key)
         return key
 
 
-class PanelSearchBox(urwid.Edit):
+class PanelSearchBox(urwid.Pile):
     """
     Search Box to search panel views in real-time.
     """
 
     def __init__(
-        self, panel_view: Any, search_command: str, update_function: Callable[..., None]
+        self,
+        panel_view: Any,
+        search_text,
+        search_command: str,
+        update_function: Callable[..., None],
     ) -> None:
         self.panel_view = panel_view
-        self.search_command = search_command
-        self.search_text = f" Search [{', '.join(keys_for_command(search_command))}]: "
+
+        search_hint = f"search [{', '.join(keys_for_command(search_command))}] "
+        self.caption_box = urwid.Columns(
+            [urwid.Text(search_text), urwid.Text(search_hint, align="right")]
+        )
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
-        urwid.connect_signal(self, "change", update_function)
-        super().__init__(caption=self.search_text, edit_text="")
 
-    def reset_search_text(self) -> None:
-        self.set_caption(self.search_text)
-        self.set_edit_text("")
+        self.search_box = urwid.Edit(caption=" > ", edit_text="")
+        urwid.connect_signal(self.search_box, "change", update_function)
+
+        super().__init__([self.caption_box])
+
+    def enter_search_mode(self) -> None:
+        if len(self.contents) == 2:
+            self.contents.pop()
+        self.contents.append((self.search_box, self.options()))
+        self.focus_position = 1
+
+    def exit_search_mode(self) -> None:
+        self.search_box.set_edit_text("")
+        self.contents = [(self.caption_box, self.options())]
 
     def valid_char(self, ch: str) -> bool:
         # This method 'strips' leading space *before* entering it in the box
@@ -2014,17 +2024,16 @@ class PanelSearchBox(urwid.Edit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("ENTER", key) and self.get_edit_text() == ""
+            is_command_key("ENTER", key) and self.search_box.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
             self.panel_view.view.controller.exit_editor_mode()
-            self.reset_search_text()
+            self.exit_search_mode()
             self.panel_view.set_focus("body")
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
                 self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)

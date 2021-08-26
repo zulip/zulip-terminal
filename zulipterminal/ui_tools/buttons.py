@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 import urwid
 from typing_extensions import TypedDict
 
-from zulipterminal.api_types import EditPropagateMode
+from zulipterminal.api_types import RESOLVED_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
@@ -90,7 +90,7 @@ class TopButton(urwid.Button):
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
         self.controller.view.show_right_panel(visible=False)
-        self.controller.view.body.focus_col = 1
+        self.controller.view.body.focus_col = 2
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
@@ -297,11 +297,19 @@ class TopicButton(TopButton):
             stream_name=self.stream_name,
             topic_name=self.topic_name,
         )
+
+        # The space acts as a TopButton prefix and gives an effective 3 spaces for unresolved topics.
+        topic_prefix = " "
+        topic_name = self.topic_name
+        if self.topic_name.startswith(RESOLVED_PREFIX + " "):
+            topic_prefix = self.topic_name[:1]
+            topic_name = self.topic_name[2:]
+
         super().__init__(
             controller=controller,
-            caption=self.topic_name,
+            caption=topic_name,
             show_function=narrow_function,
-            prefix_character="",
+            prefix_character=topic_prefix,
             count=count,
             count_style="unread_count",
         )
@@ -343,7 +351,7 @@ class EmojiButton(TopButton):
         super().__init__(
             controller=controller,
             caption=full_button_caption,
-            prefix_character="",
+            prefix_character=" ",
             show_function=self.update_emoji_button,
         )
 

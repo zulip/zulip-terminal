@@ -15,7 +15,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
 from zulipterminal.helper import asynch
 from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
-from zulipterminal.ui_tools.boxes import SearchBox, WriteBox
+from zulipterminal.ui_tools.boxes import CurrentMsgHint, SearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView,
     MiddleColumnView,
@@ -39,6 +39,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = SearchBox(self.controller)
+        self.current_msg_hint = CurrentMsgHint()
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
@@ -53,35 +54,11 @@ class View(urwid.WidgetWrap):
         return panel, tab
 
     def middle_column_view(self) -> Any:
-        self.middle_column = MiddleColumnView(
-            self, self.model, self.write_box, self.search_box
-        )
-        return urwid.LineBox(
-            self.middle_column,
-            title="Messages",
-            title_attr="column_title",
-            tline=COLUMN_TITLE_BAR_LINE,
-            bline="",
-            trcorner="│",
-            tlcorner="│",
-        )
+        return MiddleColumnView(self, self.model, self.write_box, self.current_msg_hint)
 
     def right_column_view(self) -> Any:
         tab = TabView(f"{AUTOHIDE_TAB_RIGHT_ARROW} USERS {AUTOHIDE_TAB_RIGHT_ARROW}")
-        self.users_view = RightColumnView(self)
-        panel = urwid.LineBox(
-            self.users_view,
-            title="Users",
-            title_attr="column_title",
-            tlcorner=COLUMN_TITLE_BAR_LINE,
-            tline=COLUMN_TITLE_BAR_LINE,
-            trcorner=COLUMN_TITLE_BAR_LINE,
-            lline="",
-            blcorner="─",
-            rline="",
-            bline="",
-            brcorner="",
-        )
+        panel = RightColumnView(self)
         return panel, tab
 
     def get_random_help(self) -> List[Any]:
@@ -143,13 +120,17 @@ class View(urwid.WidgetWrap):
         if self.controller.autohide:
             body = [
                 (TAB_WIDTH, self.left_tab),
+                (1, urwid.SolidFill("▏")),
                 ("weight", 10, self.center_panel),
+                (1, urwid.SolidFill("▕")),
                 (TAB_WIDTH, self.right_tab),
             ]
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
+                (1, urwid.SolidFill(" ")),
                 ("weight", 10, self.center_panel),
+                (1, urwid.SolidFill(" ")),
                 (RIGHT_WIDTH, self.right_panel),
             ]
         self.body = urwid.Columns(body, focus_column=0)
@@ -162,19 +143,25 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
+        server_name = urwid.Padding(
+            urwid.Text(" " + self.model.server_name.upper()),
+            align=("relative", 20),
+            width="pack",
         )
-
-        title_bar = urwid.Columns(
+        user_name = urwid.Padding(
+            urwid.Text(self.model.user_full_name),
+            align=("relative", 80),
+            width="pack",
+        )
+        title_text = urwid.Columns(
             [
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
-                (len(title_text), urwid.Text([title_text])),
-                urwid.Divider(div_char=APPLICATION_TITLE_BAR_LINE),
+                ("weight", 25, server_name),
+                ("weight", 55, self.search_box),
+                ("weight", 20, user_name),
             ]
+        )
+        title_bar = urwid.AttrMap(
+            urwid.Pile([title_text, urwid.Divider("▄")]), "header"
         )
 
         self.frame = urwid.Frame(
@@ -205,7 +192,7 @@ class View(urwid.WidgetWrap):
             self.frame.body = self.body
             # FIXME: This can be avoided after fixing the "sacrificing 1st
             # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
+            self.body.focus_position = 2
 
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
@@ -226,7 +213,7 @@ class View(urwid.WidgetWrap):
             self.frame.body = self.body
             # FIXME: This can be avoided after fixing the "sacrificing 1st
             # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
+            self.body.focus_position = 2
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
@@ -234,16 +221,19 @@ class View(urwid.WidgetWrap):
             return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
         elif (
-            is_command_key("SEARCH_MESSAGES", key)
-            or is_command_key("NEXT_UNREAD_TOPIC", key)
+            is_command_key("NEXT_UNREAD_TOPIC", key)
             or is_command_key("NEXT_UNREAD_PM", key)
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=False)
-            self.body.focus_col = 1
-            self.middle_column.keypress(size, key)
+            self.body.focus_col = 2
+            self.center_panel.keypress(size, key)
+            return key
+        elif is_command_key("SEARCH_MESSAGES", key):
+            self.controller.enter_editor_mode_with(self.search_box)
+            self.frame.set_focus("header")
             return key
         elif is_command_key("ALL_PM", key):
             self.pm_button.activate(key)
@@ -255,8 +245,8 @@ class View(urwid.WidgetWrap):
             # Start User Search if not in editor_mode
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
-            self.body.focus_position = 2
-            self.users_view.keypress(size, key)
+            self.body.focus_position = 4
+            self.right_panel.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
@@ -287,8 +277,8 @@ class View(urwid.WidgetWrap):
                 content = saved_draft["content"]
                 self.write_box.msg_write_box.edit_text = content
                 self.write_box.msg_write_box.edit_pos = len(content)
-                self.body.focus_col = 1
-                self.middle_column.set_focus("footer")
+                self.body.focus_col = 2
+                self.center_panel.set_focus("footer")
             else:
                 self.controller.report_error(
                     "No draft message was saved in this session."

@@ -336,11 +336,11 @@ class TestEmojiButton:
 
 class TestTopicButton:
     @pytest.mark.parametrize(
-        "count, stream_id, title, stream_name",
+        "count, stream_id, title, stream_name, is_resolved",
         [
-            (2, 86, "topic1", "Django"),
-            (1, 14, "topic2", "GSoC"),
-            (1000, 205, "topic3", "PTEST"),
+            (2, 86, "topic1", "Django", False),
+            (1, 14, "✔ topic2", "GSoC", True),
+            (1000, 205, "topic3", "PTEST", False),
         ],
     )
     def test_init_calls_top_button(
@@ -350,6 +350,7 @@ class TestTopicButton:
         title: str,
         stream_id: int,
         stream_name: str,
+        is_resolved: bool,
     ) -> None:
         controller = mocker.Mock()
         controller.model.stream_dict = {
@@ -367,8 +368,8 @@ class TestTopicButton:
         )
 
         top_button.assert_called_once_with(
-            caption=title,
-            prefix_character="",
+            caption=title if not is_resolved else title[2:],
+            prefix_character=" " if not is_resolved else title[:1],
             show_function=mocker.ANY,  # partial
             count_style="unread_count",
             **params,
