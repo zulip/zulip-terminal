@@ -62,6 +62,7 @@ class Controller:
         in_explore_mode: bool,
         autohide: bool,
         notify: bool,
+        encoding: bool,
     ) -> None:
         self.theme_name = theme_name
         self.theme = theme
@@ -69,6 +70,7 @@ class Controller:
         self.in_explore_mode = in_explore_mode
         self.autohide = autohide
         self.notify_enabled = notify
+        self.emoji_enabled = encoding
         self.maximum_footlinks = maximum_footlinks
 
         self.debug_path = debug_path
@@ -288,7 +290,7 @@ class Controller:
 
     def show_emoji_picker(self, message: Message) -> None:
         all_emoji_units = [
-            (emoji_name, emoji["code"], emoji["aliases"])
+            (emoji_name, emoji["code"], emoji["aliases"], emoji["type"])
             for emoji_name, emoji in self.model.active_emoji_data.items()
         ]
         emoji_picker_view = EmojiPickerView(

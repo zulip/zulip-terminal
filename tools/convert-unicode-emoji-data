@@ -17,21 +17,47 @@ except ModuleNotFoundError:
     exit(1)
 
 WORKING_FOLDER = Path(__file__).resolve().parent.parent / "zulipterminal"
-INPUT_FILE = WORKING_FOLDER / "unicode_emoji_dict.py"
+INPUT_FILE_SERVER = WORKING_FOLDER / "unicode_emoji_dict.py"
+INPUT_FILE_URWID = WORKING_FOLDER / "unicode_13.1_urwid_compatible.txt"
 OUTPUT_FILE = WORKING_FOLDER / "unicode_emojis.py"
 
 SCRIPT_NAME = PurePath(__file__).name
 
-emoji_dict = EMOJI_NAME_MAPS
-
 emoji_map = {}
-for emoji_code, emoji_data in emoji_dict.items():
-    emoji_map[emoji_data["canonical_name"]] = {
-        "code": emoji_code,
-        "aliases": emoji_data["aliases"],
-    }
 
-ordered_emojis = OrderedDict(sorted(emoji_map.items()))
+with open(INPUT_FILE_URWID, "r") as f:
+    lines = f.readlines()
+    for line in lines:
+        if line == "\n":
+            continue
+        elif line.startswith("#"):
+            line = line.split(":")
+            if line[0] == "# group":
+                group = line[1].strip()
+        else:
+            urwid_emoji_data = [text.strip() for text in line.split(":")]
+            urwid_emoji_data[3] = (
+                urwid_emoji_data[3].replace(" ", "_").replace("-", "_").lower()
+            )
+            emoji_map[urwid_emoji_data[3]] = {
+                "code": urwid_emoji_data[0].lower(),
+                "group": group,
+                "renders_well": False if len(urwid_emoji_data) == 5 else True,
+            }
+
+server_emoji_dict = EMOJI_NAME_MAPS
+
+for emoji_name, emoji_data in emoji_map.items():
+    code_point = emoji_data["code"]
+    alias_list = []
+    if code_point in server_emoji_dict:
+        alias_list.append(server_emoji_dict[code_point]["canonical_name"])
+        alias_list += server_emoji_dict[code_point]["aliases"]
+        if emoji_name in alias_list:
+            alias_list.remove(emoji_name)
+    emoji_map[emoji_name]["aliases"] = alias_list
+
+ordered_emojis = dict(sorted(emoji_map.items()))
 
 with OUTPUT_FILE.open("w") as f:
     f.write(
@@ -39,17 +65,22 @@ with OUTPUT_FILE.open("w") as f:
         "# fmt: off\n"
         f"# Generated automatically by tools/{SCRIPT_NAME}\n"
         "# Do not modify.\n\n"
-        "EMOJI_DATA = OrderedDict(\n    [\n"
+        "EMOJI_DATA = {\n"
     )
     for emoji_name, emoji in ordered_emojis.items():
-        # {'smile': {'code': '263a', 'aliases': []}}
-        f.write(f'        ("{emoji_name}", {emoji}),\n')
-    f.write("    ]\n)\n# fmt: on\n")
+        # {'smile': {'code': '263a', 'renders_well': True, 'aliases': []}}
+        f.write(f'    "{emoji_name}": ' + "{")
+        f.write(f'\n        "code": "{emoji["code"]}",')
+        f.write(f'\n        "group": "{emoji["group"]}",')
+        f.write(f'\n        "renders_well": {emoji["renders_well"]},')
+        f.write(f'\n        "aliases": {emoji["aliases"]}')
+        f.write("\n    },\n")
+    f.write("}\n# fmt: on\n")
 
 print(f"Emoji list saved in {OUTPUT_FILE}")
 
 try:
-    INPUT_FILE.unlink()
-    print(f"{INPUT_FILE} deleted.")
+    INPUT_FILE_SERVER.unlink()
+    print(f"{INPUT_FILE_SERVER} deleted.")
 except Exception as exc:
     print("Warning: Could not delete file:\n{exc}")

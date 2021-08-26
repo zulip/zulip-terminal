@@ -48,6 +48,7 @@ DEFAULT_SETTINGS = {
     "footlinks": "enabled",
     "color-depth": "256",
     "maximum-footlinks": "3",
+    "encoding": "unicode_emoji",
 }
 
 
@@ -151,6 +152,24 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_const",
         const="no_autohide",
         help="don't autohide list of users and streams",
+    )
+
+    encoding_group = parser.add_mutually_exclusive_group()
+    encoding_group.add_argument(
+        "--unicode-emoji",
+        dest="encoding",
+        default=None,
+        action="store_const",
+        const="unicode_emoji",
+        help="enable rendering of unicode emojis\nNote:ultimately depends on emulator and encoding used",
+    )
+    encoding_group.add_argument(
+        "--unicode-no-emoji",
+        dest="encoding",
+        default=None,
+        action="store_const",
+        const="unicode_no_emoji",
+        help="disable rendering of unicode emojis\nNote:ultimately depends on emulator and encoding used",
     )
 
     parser.add_argument(
@@ -381,6 +400,9 @@ def main(options: Optional[List[str]] = None) -> None:
         if args.autohide:
             zterm["autohide"] = (args.autohide, "on command line")
 
+        if args.encoding:
+            zterm["encoding"] = (args.encoding, "on command line")
+
         if args.theme:
             theme_to_use = (args.theme, "on command line")
         else:
@@ -468,12 +490,14 @@ def main(options: Optional[List[str]] = None) -> None:
             )
         print("   color depth setting '{}' specified {}.".format(*zterm["color-depth"]))
         print("   notify setting '{}' specified {}.".format(*zterm["notify"]))
+        print("   encoding setting '{}' specified {}.".format(*zterm["encoding"]))
 
         # For binary settings
         # Specify setting in order True, False
         valid_settings = {
             "autohide": ["autohide", "no_autohide"],
             "notify": ["enabled", "disabled"],
+            "encoding": ["unicode_emoji", "unicode_no_emoji"],
             "color-depth": ["1", "16", "256", "24bit"],
         }
         boolean_settings: Dict[str, bool] = dict()

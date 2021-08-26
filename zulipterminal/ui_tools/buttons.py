@@ -16,7 +16,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
-from zulipterminal.helper import Message, StreamData, hash_util_decode
+from zulipterminal.helper import Message, StreamData, clean_string, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -33,7 +33,7 @@ class TopButton(urwid.Button):
         count_style: Optional[str] = None,
     ) -> None:
         self.controller = controller
-        self._caption = caption
+        self._caption = clean_string(caption, display_emoji=controller.emoji_enabled)
         self.show_function = show_function
         self.prefix_character = prefix_character
         self.original_color = text_color
@@ -297,11 +297,18 @@ class TopicButton(TopButton):
             stream_name=self.stream_name,
             topic_name=self.topic_name,
         )
+
+        topic_prefix = " "
+        topic_name = self.topic_name
+        if self.topic_name.startswith(CHECK_MARK + " "):
+            topic_prefix = self.topic_name[:1]
+            topic_name = self.topic_name[2:]
+
         super().__init__(
             controller=controller,
-            caption=self.topic_name,
+            caption=topic_name,
             show_function=narrow_function,
-            prefix_character="",
+            prefix_character=topic_prefix,
             count=count,
             count_style="unread_count",
         )
@@ -326,19 +333,28 @@ class EmojiButton(TopButton):
         self,
         *,
         controller: Any,
-        emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
+        emoji_unit: Tuple[
+            str, str, List[str], str
+        ],  # (emoji_name, emoji_code, aliases, type)
         message: Message,
         reaction_count: int = 0,
         is_selected: Callable[[str], bool],
         toggle_selection: Callable[[str, str], None],
     ) -> None:
         self.controller = controller
+        self.emoji_enabled = controller.emoji_enabled
         self.message = message
         self.is_selected = is_selected
         self.reaction_count = reaction_count
         self.toggle_selection = toggle_selection
-        self.emoji_name, self.emoji_code, self.aliases = emoji_unit
-        full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+        self.emoji_name, self.emoji_code, self.aliases, self.type = emoji_unit
+        if self.type == "unicode_emoji":
+            full_button_caption = clean_string(
+                chr(int(self.emoji_code, 16)), display_emoji=self.emoji_enabled
+            )
+
+        if self.type != "unicode_emoji" or full_button_caption.startswith(":"):
+            full_button_caption = ", ".join([self.emoji_name, *self.aliases])
 
         super().__init__(
             controller=controller,
