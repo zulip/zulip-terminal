@@ -6,7 +6,7 @@ from urllib.parse import urljoin, urlparse
 import urwid
 from typing_extensions import TypedDict
 
-from zulipterminal.api_types import RESOLVED_PREFIX, EditPropagateMode
+from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
@@ -301,7 +301,7 @@ class TopicButton(TopButton):
         # The space acts as a TopButton prefix and gives an effective 3 spaces for unresolved topics.
         topic_prefix = " "
         topic_name = self.topic_name
-        if self.topic_name.startswith(RESOLVED_PREFIX + " "):
+        if self.topic_name.startswith(RESOLVED_TOPIC_PREFIX):
             topic_prefix = self.topic_name[:1]
             topic_name = self.topic_name[2:]
 
