@@ -8,7 +8,7 @@ jobs:
     name: Lint - Type consistency (mypy)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install with linting tools
@@ -21,7 +21,7 @@ jobs:
     name: Lint - PEP8 & more (flake8)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install with linting tools
@@ -34,7 +34,7 @@ jobs:
     name: Lint - Import order (isort)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.6
       - name: Install with linting tools
@@ -48,7 +48,7 @@ jobs:
     name: Lint - Code formatting (black)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.6
       - name: Install with linting tools
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Python version ${{ matrix.env.PYTHON }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.env.PYTHON }}
       - name: Output Python version
