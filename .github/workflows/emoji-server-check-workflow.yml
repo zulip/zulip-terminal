@@ -1,0 +1,65 @@
+name: "Emoji sync check from Zulip server"
+
+on:
+  # What if the workflow doesn't run as scheduled?
+  # GitHub actions work on request-response mechanism. So, there may be
+  # tons of scheduled jobs queued, and so there may be a delayed response.
+  #
+  # For more information, checkout a blog post:
+  # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
+  schedule:
+    # The CRON time format is as follows:
+    # ---------------------------------------
+    # minutes | hours |  day  | month | day
+    #                  (month)         (week)
+    # ---------------------------------------
+    # For more information on CRON time formats, see https://crontab.guru/
+    #
+    # The below line suggests that the event would be triggered everyday
+    # at 17:00 UTC times.
+    - cron:  '0 17 * * *'
+
+jobs:
+  check:
+    name: Emoji sync check from Zulip server
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Fetch emojis from server
+        run: ./tools/fetch-unicode-emoji-data
+      - name: Convert emojis dict to list
+        run: ./tools/convert-unicode-emoji-data
+
+      - name: Check if emojis are added/deleted/modified in server
+        run: |
+          git diff --exit-code zulipterminal/unicode_emojis.py >> $GITHUB_ENV
+
+          if [ $? -eq 0 ] ; then
+            echo "Emojis are up-to-date"
+          fi
+
+      - name: Notify in stream if emojis are not up-to-date
+
+        # Ignore this step if emojis are up-to-date.
+        if: '${{ github.GITHUB_ENV != 0 }}'
+
+        uses: zulip/github-actions-zulip@v0.1.0
+        with:
+          username: ${{ secrets.ZT_BOT_EMAIL }}
+          api-key: ${{ secrets.ZT_BOT_API_KEY }}
+          organization-url: 'https://chat.zulip.org'
+          to: 'zulip-terminal'
+          type: 'stream'
+          topic: 'CI action feedback'
+          content: 'Heads up :caution:! Emoji sync with the server failed!
+                    This originated from an update in server emoji.
+                    Kindly re-generate `unicode_emojis.py` in main.'
+
