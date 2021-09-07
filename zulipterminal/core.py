@@ -280,6 +280,7 @@ class Controller:
         msg: Message,
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         msg_info_view = MsgInfoView(
@@ -288,6 +289,7 @@ class Controller:
             "Message Information (up/down scrolls)",
             topic_links,
             message_links,
+            code_snippets,
             time_mentions,
         )
         self.show_pop_up(msg_info_view, "area:msg")
@@ -341,14 +343,17 @@ class Controller:
         message: Message,
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
+        print(1, code_snippets)
         self.show_pop_up(
             FullRenderedMsgView(
                 self,
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 "Full rendered message (up/down scrolls)",
             ),
@@ -360,6 +365,7 @@ class Controller:
         message: Message,
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -368,6 +374,7 @@ class Controller:
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 "Full raw message (up/down scrolls)",
             ),
@@ -379,6 +386,7 @@ class Controller:
         message: Message,
         topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
         message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -387,6 +395,7 @@ class Controller:
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 "Edit History (up/down scrolls)",
             ),

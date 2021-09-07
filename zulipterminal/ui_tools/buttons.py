@@ -647,6 +647,40 @@ class MessageLinkButton(urwid.Button):
                 self.controller.exit_popup()
 
 
+class CodeSnippetButton(urwid.Text):
+    _selectable = True
+
+    signals = ["click"]
+
+    def keypress(self, size: Tuple[int, None], key: str) -> Optional[str]:
+        """
+        Send 'click' signal on 'activate' command.
+        """
+        if self._command_map[key] != urwid.ACTIVATE:
+            return key
+
+        self._emit("click")
+        return None
+
+    def mouse_event(
+        self,
+        size: Tuple[int, None],
+        event: str,
+        button: float,
+        x: int,
+        y: int,
+        focus: bool,
+    ) -> bool:
+        """
+        Send 'click' signal on button 1 press.
+        """
+        if button != 1 or not urwid.util.is_mouse_press(event):
+            return False
+
+        self._emit("click")
+        return True
+
+
 class EditModeButton(urwid.Button):
     def __init__(self, *, controller: Any, width: int) -> None:
         self.controller = controller

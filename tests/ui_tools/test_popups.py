@@ -391,6 +391,7 @@ class TestFullRenderedMsgView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Full Rendered Message",
         )
@@ -467,6 +468,7 @@ class TestFullRawMsgView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Full Raw Message",
         )
@@ -542,6 +544,7 @@ class TestEditHistoryView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Edit History",
         )
@@ -868,6 +871,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture: Message) -> None:
@@ -933,6 +937,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -962,6 +967,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -988,6 +994,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -1097,6 +1104,7 @@ class TestMsgInfoView:
             "Message Information",
             OrderedDict(),
             OrderedDict(),
+            list(),
             list(),
         )
         # 12 = 6 labels + 1 blank line + 1 'Reactions' (category)

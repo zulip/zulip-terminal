@@ -57,6 +57,7 @@ class MessageBox(urwid.Pile):
         self.user_id: Optional[int] = None
         self.message_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
         self.topic_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
+        self.code_snippets: List[Tuple[str, List[Tuple[str, str]]]] = list()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
@@ -358,13 +359,21 @@ class MessageBox(urwid.Pile):
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
     ) -> Tuple[
-        List[Any], "OrderedDict[str, Tuple[str, int, bool]]", List[Tuple[str, str]]
+        List[Any],
+        "OrderedDict[str, Tuple[str, int, bool]]",
+        List[Tuple[str, List[Tuple[str, str]]]],
+        List[Tuple[str, str]],
     ]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
         if soup is None:  # This is not iterable, so return promptly
-            return markup, metadata["message_links"], metadata["time_mentions"]
+            return (
+                markup,
+                metadata["message_links"],
+                metadata["code_snippets"],
+                metadata["time_mentions"],
+            )
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             "br": "",  # No indicator of absence
@@ -533,7 +542,7 @@ class MessageBox(urwid.Pile):
                 # Ref: https://github.com/Python-Markdown/markdown/pull/862
                 if code_soup is None:
                     code_soup = element.pre
-
+                code_snippet = []
                 for code_element in code_soup.contents:
                     code_text = (
                         code_element.text
@@ -546,8 +555,16 @@ class MessageBox(urwid.Pile):
                             continue
                         css_style = code_element.attrs.get("class", ["w"])
                         markup.append((f"pygments:{css_style[0]}", code_text))
+                        code_snippet.append((f"pygments:{css_style[0]}", code_text))
                     else:
                         markup.append(("pygments:w", code_text))
+                        code_snippet.append(("pygments:w", code_text))
+                try:
+                    code_language = element.attrs["data-code-language"]
+                except KeyError:
+                    code_language = None
+                if code_language != "Text only":
+                    metadata["code_snippets"].append((code_language, code_snippet))
             elif tag in ("strong", "em"):
                 # BOLD & ITALIC
                 markup.append(("msg_bold", tag_text))
@@ -616,7 +633,12 @@ class MessageBox(urwid.Pile):
                 metadata["time_mentions"].append((time_string, source_text))
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
-        return markup, metadata["message_links"], metadata["time_mentions"]
+        return (
+            markup,
+            metadata["message_links"],
+            metadata["code_snippets"],
+            metadata["time_mentions"],
+        )
 
     def main_view(self) -> List[Any]:
         # Recipient Header
@@ -715,11 +737,13 @@ class MessageBox(urwid.Pile):
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
-        )
+        (
+            content,
+            self.message_links,
+            self.code_snippets,
+            self.time_mentions,
+        ) = self.transform_content(self.message["content"], self.model.server_url)
         self.content.set_text(content)
-
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7
             left_padding = 1
@@ -803,6 +827,7 @@ class MessageBox(urwid.Pile):
     ) -> Tuple[
         Tuple[None, Any],
         "OrderedDict[str, Tuple[str, int, bool]]",
+        List[Tuple[str, List[Tuple[str, str]]]],
         List[Tuple[str, str]],
     ]:
         soup = BeautifulSoup(content, "lxml")
@@ -811,14 +836,17 @@ class MessageBox(urwid.Pile):
         metadata = dict(
             server_url=server_url,
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )  # type: Dict[str, Any]
 
         if body and body.find(name="blockquote"):
             metadata["bq_len"] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
-        markup, message_links, time_mentions = cls.soup2markup(body, metadata)
-        return (None, markup), message_links, time_mentions
+        markup, message_links, code_snippets, time_mentions = cls.soup2markup(
+            body, metadata
+        )
+        return (None, markup), message_links, code_snippets, time_mentions
 
     @staticmethod
     def indent_quoted_content(soup: Any, padding_char: str) -> int:
@@ -1106,7 +1134,11 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
-                self.message, self.topic_links, self.message_links, self.time_mentions
+                self.message,
+                self.topic_links,
+                self.message_links,
+                self.code_snippets,
+                self.time_mentions,
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
