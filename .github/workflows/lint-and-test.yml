@@ -8,11 +8,11 @@ jobs:
     name: Lint - Type consistency (mypy)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      - name: Install with linting tools
-        run: pip install .[linting]
+      - name: Install with type-checking tools
+        run: pip install .[typing]
       - name: Run mypy
         run: ./tools/run-mypy
 
@@ -21,20 +21,20 @@ jobs:
     name: Lint - PEP8 & more (flake8)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.7
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Run flake8
-        run: flake8
+        run: flake8 zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
     name: Lint - Import order (isort)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.6
       - name: Install with linting tools
@@ -48,13 +48,13 @@ jobs:
     name: Lint - Code formatting (black)
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.6
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/
+        run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   pytest:
     strategy:
@@ -66,6 +66,7 @@ jobs:
           - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)"}
           - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
           - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", CODECOV: true}
+          - {PYTHON: "3.10.0-rc.1", OS: ubuntu-latest, NAME: "CPython 3.10RC1 (ubuntu)"}
           - {PYTHON: 'pypy3', OS: ubuntu-latest, NAME: "PyPy 3 (ubuntu)"}
           - {PYTHON: 3.9, OS: macos-latest, NAME: "CPython 3.9 (macos)"}
     runs-on: ${{ matrix.env.OS }}
@@ -73,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Python version ${{ matrix.env.PYTHON }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.env.PYTHON }}
       - name: Output Python version

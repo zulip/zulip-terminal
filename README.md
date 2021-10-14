@@ -8,6 +8,7 @@
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=main)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amain)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/main.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/main)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ![Screenshot](https://user-images.githubusercontent.com/9568999/106061037-b659a580-60a9-11eb-8ff8-ea1c54ac9084.png)
 
@@ -152,6 +153,26 @@ source ~/.bash_profile
 echo 'export ZT_NOTIFICATION_SOUND=Ping' >> ~/.zshenv
 source ~/.zshenv
 ```
+
+### Copy to clipboard
+
+Zulip Terminal allows users to copy certain texts to the clipboard via a Python module, [`Pyperclip`](https://pypi.org/project/pyperclip/). This module makes use of various system packages which may or may not come with the OS.
+The "Copy to clipboard" feature is currently only available for copying Stream email, from the [Stream information popup](docs/hotkeys.md#stream-list-actions).
+
+#### Linux
+
+On Linux, this module makes use of `xclip` or `xsel` commands, which should already come with the OS. If none of these commands are installed on your system, then install any ONE using:
+```
+sudo apt-get install xclip [Recommended]
+```
+OR
+```
+sudo apt-get install xsel
+```
+
+#### OSX and WSL
+
+No additional package is required to enable copying to clipboard.
 
 ## Contributor Guidelines
 
@@ -300,17 +321,15 @@ For additional help with pytest options see `pytest -h`, or check out the [full 
 
 #### Output using `print`
 
-The stdout for zulip-terminal is redirected to `./debug.log` by default.
+The stdout (standard output) for zulip-terminal is redirected to `./debug.log` if debugging is enabled at run-time using `-d` or `--debug`.
 
-If you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply write
+This means that if you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply use `print()`, eg.
 ```python3
-print(variable, flush=True)
+print(f"Just about to do something with {variable}")
 ```
-and the value of the variable will be printed to `./debug.log`.
+and when running with a debugging option, the string will be printed to `./debug.log`.
 
-We suggest the `flush=True` to ensure it prints straight away.
-
-If you have a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
+With a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
 
 #### Interactive debugging using pudb & telnet
 

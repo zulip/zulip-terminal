@@ -6,11 +6,13 @@
 |Command|Key Combination|
 | :--- | :---: |
 |Show/hide help menu|<kbd>?</kbd>|
+|Show/hide markdown help menu|<kbd>meta</kbd> + <kbd>m</kbd>|
 |Show/hide about menu|<kbd>meta</kbd> + <kbd>?</kbd>|
 |Go Back|<kbd>esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
 |Redraw screen|<kbd>ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>ctrl</kbd> + <kbd>c</kbd>|
+|View user information (From Users list)|<kbd>i</kbd>|
 
 ## Navigation
 |Command|Key Combination|
@@ -37,6 +39,7 @@
 |Search Messages|<kbd>/</kbd>|
 |Search Streams|<kbd>q</kbd>|
 |Search topics in a stream|<kbd>q</kbd>|
+|Search emojis from Emoji-picker popup|<kbd>p</kbd>|
 
 ## Message actions
 |Command|Key Combination|
@@ -48,6 +51,7 @@
 |Edit message's content or topic|<kbd>e</kbd>|
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
+|Show/hide Emoji picker popup for current message|<kbd>:</kbd>|
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
 |Narrow to a topic/private-chat, or stream/all-private-messages|<kbd>z</kbd>|
@@ -56,6 +60,8 @@
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
 |View current message in browser (from message information)|<kbd>v</kbd>|
+|Show/hide full rendered message (from message information)|<kbd>f</kbd>|
+|Show/hide full raw message (from message information)|<kbd>r</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
@@ -64,6 +70,7 @@
 |Mute/unmute Streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
 |Show/hide stream members (from stream information)|<kbd>m</kbd>|
+|Copy stream email to clipboard (from stream information)|<kbd>c</kbd>|
 
 ## Composing a Message
 |Command|Key Combination|

@@ -1,3 +1,4 @@
+import itertools
 import os
 import signal
 import sys
@@ -7,28 +8,35 @@ from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
+import pyperclip
 import urwid
 import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import LINUX, asynch, suppress_output
+from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
+    EmojiPickerView,
+    FullRawMsgView,
+    FullRenderedMsgView,
     HelpView,
+    MarkdownHelpView,
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
     StreamInfoView,
     StreamMembersView,
+    UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -44,11 +52,13 @@ class Controller:
 
     def __init__(
         self,
+        *,
         config_file: str,
         maximum_footlinks: int,
         theme_name: str,
         theme: ThemeSpec,
         color_depth: int,
+        debug_path: Optional[str],
         in_explore_mode: bool,
         autohide: bool,
         notify: bool,
@@ -61,7 +71,12 @@ class Controller:
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
 
+        self.debug_path = debug_path
+
         self._editor: Optional[Any] = None
+
+        self.active_conversation_info: Dict[str, Any] = {}
+        self.is_typing_notification_in_progress = False
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
@@ -139,12 +154,18 @@ class Controller:
 
         self.capture_stdout()
 
-    def capture_stdout(self, path: str = "debug.log") -> None:
+    def capture_stdout(self) -> None:
         if hasattr(self, "_stdout"):
             return
 
         self._stdout = sys.stdout
-        sys.stdout = open(path, "a")
+
+        if self.debug_path is not None:
+            # buffering=1 avoids need for flush=True with print() debugging
+            sys.stdout = open(self.debug_path, "a", buffering=1)
+        else:
+            # Redirect stdout (print does nothing)
+            sys.stdout = open(os.devnull, "a")
 
     def restore_stdout(self) -> None:
         if not hasattr(self, "_stdout"):
@@ -231,12 +252,19 @@ class Controller:
             height=to_show.height + 4,
         )
 
+    def is_any_popup_open(self) -> bool:
+        return isinstance(self.loop.widget, urwid.Overlay)
+
     def exit_popup(self) -> None:
         self.loop.widget = self.view
 
     def show_help(self) -> None:
         help_view = HelpView(self, "Help Menu (up/down scrolls)")
         self.show_pop_up(help_view, "area:help")
+
+    def show_markdown_help(self) -> None:
+        markdown_view = MarkdownHelpView(self, "Markdown Help Menu (up/down scrolls)")
+        self.show_pop_up(markdown_view, "area:help")
 
     def show_topic_edit_mode(self, button: Any) -> None:
         self.show_pop_up(EditModeView(self, button), "area:msg")
@@ -257,6 +285,16 @@ class Controller:
             time_mentions,
         )
         self.show_pop_up(msg_info_view, "area:msg")
+
+    def show_emoji_picker(self, message: Message) -> None:
+        all_emoji_units = [
+            (emoji_name, emoji["code"], emoji["aliases"])
+            for emoji_name, emoji in self.model.active_emoji_data.items()
+        ]
+        emoji_picker_view = EmojiPickerView(
+            self, "Add/Remove Emojis", all_emoji_units, message, self.view
+        )
+        self.show_pop_up(emoji_picker_view, "area:msg")
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
@@ -286,6 +324,50 @@ class Controller:
             "area:help",
         )
 
+    def show_user_info(self, user_id: int) -> None:
+        self.show_pop_up(
+            UserInfoView(self, user_id, "User Information (up/down scrolls)"),
+            "area:user",
+        )
+
+    def show_full_rendered_message(
+        self,
+        message: Message,
+        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        self.show_pop_up(
+            FullRenderedMsgView(
+                self,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                "Full rendered message (up/down scrolls)",
+            ),
+            "area:msg",
+        )
+
+    def show_full_raw_message(
+        self,
+        message: Message,
+        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        self.show_pop_up(
+            FullRawMsgView(
+                self,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                "Full raw message (up/down scrolls)",
+            ),
+            "area:msg",
+        )
+
     def show_edit_history(
         self,
         message: Message,
@@ -312,7 +394,11 @@ class Controller:
         """
         # Don't try to open web browser if running without a GUI
         # TODO: Explore and eventually support opening links in text-browsers.
-        if LINUX and not os.environ.get("DISPLAY") and os.environ.get("TERM"):
+        if (
+            PLATFORM == "Linux"
+            and not os.environ.get("DISPLAY")
+            and os.environ.get("TERM")
+        ):
             self.report_error(
                 "No DISPLAY environment variable specified. This could "
                 "likely mean the ZT host is running without a GUI."
@@ -331,6 +417,25 @@ class Controller:
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
             self.report_error(f"ERROR: {e}")
+
+    @asynch
+    def show_typing_notification(self) -> None:
+        self.is_typing_notification_in_progress = True
+        dots = itertools.cycle(["", ".", "..", "..."])
+
+        # Until conversation becomes "inactive" like when a `stop` event is sent
+        while self.active_conversation_info:
+            sender_name = self.active_conversation_info["sender_name"]
+            self.view.set_footer_text(
+                [
+                    ("footer_contrast", " " + sender_name + " "),
+                    " is typing" + next(dots),
+                ]
+            )
+            time.sleep(0.45)
+
+        self.is_typing_notification_in_progress = False
+        self.view.set_footer_text()
 
     def report_error(self, text: str) -> None:
         """
@@ -372,17 +477,42 @@ class Controller:
         save_draft = partial(self.model.save_draft, draft)
         self.loop.widget = PopUpConfirmationView(self, question, save_draft)
 
-    def stream_muting_confirmation_popup(self, button: Any) -> None:
-        currently_muted = self.model.is_muted_stream(button.stream_id)
+    def stream_muting_confirmation_popup(
+        self, stream_id: int, stream_name: str
+    ) -> None:
+        currently_muted = self.model.is_muted_stream(stream_id)
         type_of_action = "unmuting" if currently_muted else "muting"
         question = urwid.Text(
-            ("bold", f"Confirm {type_of_action} of stream '{button.stream_name}' ?"),
+            ("bold", f"Confirm {type_of_action} of stream '{stream_name}' ?"),
             "center",
         )
-        mute_this_stream = partial(
-            self.model.toggle_stream_muted_status, button.stream_id
-        )
+        mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
         self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+
+    def copy_to_clipboard(self, text: str, text_category: str) -> None:
+        try:
+            pyperclip.copy(text)
+            clipboard_text = pyperclip.paste()
+            if clipboard_text == text:
+                self.report_success(f"{text_category} copied successfully")
+            else:
+                self.report_warning(
+                    f"{text_category} copied, but the clipboard text does not match"
+                )
+        except pyperclip.PyperclipException:
+            body = [
+                "Zulip terminal uses 'pyperclip', for copying texts to your clipboard,"
+                " which could not find a copy/paste mechanism for your system. :("
+                "\nThis error should only appear on Linux. You can fix this by"
+                " installing any ONE of the copy/paste mechanisms below:\n",
+                ("msg_bold", "- xclip\n- xsel"),
+                "\n\nvia something like:\n",
+                ("msg_code", "apt-get install xclip [Recommended]\n"),
+                ("msg_code", "apt-get install xsel"),
+            ]
+            self.show_pop_up(
+                NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"
+            )
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)

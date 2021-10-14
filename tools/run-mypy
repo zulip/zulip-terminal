@@ -10,82 +10,151 @@ from typing import Dict, List, cast
 import lister
 
 
-EXCLUDE_FILES = ['tools/fetch-pull-request', 'tools/fetch-rebase-pull-request']
+EXCLUDE_FILES = ["tools/fetch-pull-request", "tools/fetch-rebase-pull-request"]
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
 
 sys.path.append(os.path.dirname(TOOLS_DIR))
 
-parser = argparse.ArgumentParser(description="Run mypy on files tracked"
-                                             " by git.")
+parser = argparse.ArgumentParser(description="Run mypy on files tracked by git.")
 
-parser.add_argument('targets', nargs='*', default=[],
-                    help="""files and directories to include in the result.
-                    If this is not specified, the current directory is used""")
+parser.add_argument(
+    "targets",
+    nargs="*",
+    default=[],
+    help="""files and directories to include in the result.
+            If this is not specified, the current directory is used""",
+)
 
-parser.add_argument('-m', '--modified', action='store_true', default=False,
-                    help='list only modified files')
+parser.add_argument(
+    "-m",
+    "--modified",
+    action="store_true",
+    default=False,
+    help="list only modified files",
+)
 
-parser.add_argument('-a', '--all', dest='all', action='store_true',
-                    default=False, help="""run mypy on all python files,
-                    ignoring the exclude list. This is useful if you have to 
-                    find out which files fail mypy check.""")
+parser.add_argument(
+    "-a",
+    "--all",
+    dest="all",
+    action="store_true",
+    default=False,
+    help="""run mypy on all python files,
+            ignoring the exclude list. This is useful if you have to
+            find out which files fail mypy check.""",
+)
 
-parser.add_argument('--no-disallow-untyped-defs', dest='disallow_untyped_defs',
-                    action='store_false', default=True,
-                    help="""Don't throw errors when functions are not
-                    annotated""")
+parser.add_argument(
+    "--no-disallow-untyped-defs",
+    dest="disallow_untyped_defs",
+    action="store_false",
+    default=True,
+    help="""Don't throw errors when functions are not annotated""",
+)
 
-parser.add_argument('--scripts-only', dest='scripts_only',
-                    action='store_true', default=False,
-                    help="""Only type check extensionless python scripts""")
+parser.add_argument(
+    "--scripts-only",
+    dest="scripts_only",
+    action="store_true",
+    default=False,
+    help="""Only type check extensionless python scripts""",
+)
 
-parser.add_argument('--no-strict-optional', dest='strict_optional',
-                    action='store_false', default=True,
-                    help="""Don't use the --strict-optional flag with mypy""")
+parser.add_argument(
+    "--no-strict-optional",
+    dest="strict_optional",
+    action="store_false",
+    default=True,
+    help="""Don't use the --strict-optional flag with mypy""",
+)
 
-parser.add_argument('--warn-unused-ignores', dest='warn_unused_ignores',
-                    action='store_true', default=False,
-                    help="""Use the --warn-unused-ignores flag with mypy""")
+parser.add_argument(
+    "--warn-unused-ignores",
+    dest="warn_unused_ignores",
+    action="store_true",
+    default=False,
+    help="""Use the --warn-unused-ignores flag with mypy""",
+)
 
-parser.add_argument('--no-ignore-missing-imports',
-                    dest='ignore_missing_imports', action='store_false',
-                    default=True, help="""Don't use the
-                     --ignore-missing-imports flag with mypy""")
+parser.add_argument(
+    "--no-ignore-missing-imports",
+    dest="ignore_missing_imports",
+    action="store_false",
+    default=True,
+    help="""Don't use the --ignore-missing-imports flag with mypy""",
+)
 
-parser.add_argument('--quick', action='store_true', default=False,
-                    help="""Use the --quick flag with mypy""")
+parser.add_argument(
+    "--quick",
+    action="store_true",
+    default=False,
+    help="""Use the --quick flag with mypy""",
+)
 
 args = parser.parse_args()
 
-files_dict = cast(Dict[str, List[str]],
-                  lister.list_files(targets=args.targets, ftypes=['py'],
-                                    use_shebang=True,
-                                    modified_only=args.modified,
-                                    group_by_ftype=True,
-                                    exclude=EXCLUDE_FILES,
-                                    ))
+files_dict = cast(
+    Dict[str, List[str]],
+    lister.list_files(
+        targets=args.targets,
+        ftypes=["py"],
+        use_shebang=True,
+        modified_only=args.modified,
+        group_by_ftype=True,
+        exclude=EXCLUDE_FILES,
+    ),
+)
 
 
-pyi_files = set(files_dict['pyi'])
-python_files = [fpath for fpath in files_dict['py']
-                if not fpath.endswith('.py') or fpath + 'i' not in pyi_files]
+pyi_files = set(files_dict["pyi"])
+python_files = [
+    fpath
+    for fpath in files_dict["py"]
+    if not fpath.endswith(".py") or fpath + "i" not in pyi_files
+]
 
 repo_python_files = {}
-repo_python_files['zulipterminal'] = []
+repo_python_files["zulipterminal"] = []
+repo_python_files["tests"] = []
+
+# Added incrementally as newer test files are type-annotated.
+type_consistent_testfiles = [
+    "test_run.py",
+    "test_core.py",
+    "test_emoji_data.py",
+    "test_helper.py",
+    "test_server_url.py",
+    "test_ui.py",
+    "test_keys.py",
+    "test_themes.py",
+    "test_color.py",
+    "test_platform_code.py",
+    "test_buttons.py",
+    "test_utils.py",
+    "conftest.py",
+    "test_boxes.py",
+    "test_popups.py",
+]
+
 for file_path in python_files:
     repo = PurePath(file_path).parts[0]
-    if repo in repo_python_files:
+    filename = PurePath(file_path).parts[-1]
+    if repo == "zulipterminal" or (
+        repo == "tests" and filename in type_consistent_testfiles
+    ):
         repo_python_files[repo].append(file_path)
 
 mypy_command = "mypy"
 
-extra_args = ["--check-untyped-defs",
-              "--follow-imports=silent",
-              "--scripts-are-modules",
-              "--disallow-any-generics",
-              "-i"]
+extra_args = [
+    "--check-untyped-defs",
+    "--follow-imports=silent",
+    "--scripts-are-modules",
+    "--disallow-any-generics",
+    "-i",
+]
 if args.disallow_untyped_defs:
     extra_args.append("--disallow-untyped-defs")
 if args.warn_unused_ignores:

@@ -1,5 +1,6 @@
 import pytest
 
+from zulipterminal.api_types import Message
 from zulipterminal.server_url import encode_stream, near_message_url
 
 
@@ -15,7 +16,9 @@ from zulipterminal.server_url import encode_stream, near_message_url
         (374, "/ in a stream name ?", "374-.2F-in-a-stream-name-.3F"),
     ],
 )
-def test_encode_stream(stream_id, stream_name, expected_encoded_string):
+def test_encode_stream(
+    stream_id: int, stream_name: str, expected_encoded_string: str
+) -> None:
     encoded_string = encode_stream(stream_id=stream_id, stream_name=stream_name)
 
     assert encoded_string == expected_encoded_string
@@ -73,7 +76,9 @@ def test_encode_stream(stream_id, stream_name, expected_encoded_string):
         ),
     ],
 )
-def test_near_message_url(server_url, msg, expected_message_url):
+def test_near_message_url(
+    server_url: str, msg: Message, expected_message_url: str
+) -> None:
     message_url = near_message_url(server_url=server_url, message=msg)
 
     assert message_url == expected_message_url

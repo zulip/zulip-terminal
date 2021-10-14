@@ -1,9 +1,9 @@
-import datetime
 import json
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
+from datetime import datetime
 from typing import (
     Any,
     Callable,
@@ -30,24 +30,27 @@ from zulipterminal.api_types import (
     Event,
     PrivateComposition,
     RealmEmojiData,
+    RealmUser,
     StreamComposition,
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.ui_mappings import ROLE_BY_ID
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
     StreamData,
+    TidiedUserInfo,
     asynch,
     canonicalize_color,
     classify_unread_counts,
     display_error_if_present,
     index_messages,
     initial_index,
-    notify,
     notify_if_message_sent_outside_narrow,
     set_count,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
@@ -136,6 +139,9 @@ class Model:
         # lose any updates while messages are being fetched.
         self._fetch_initial_data()
 
+        self._all_users_by_id: Dict[int, RealmUser] = {}
+        self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
+
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
 
@@ -145,8 +151,18 @@ class Model:
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
+        self.visual_notified_streams: Set[int] = set()
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
+
+        # NOTE: The date_created field of stream has been added in feature
+        # level 30, server version 4. For consistency we add this field
+        # on server iterations even before this with value of None.
+        if self.server_feature_level is None or self.server_feature_level < 30:
+            for stream in self.stream_dict.values():
+                stream["date_created"] = None
+
+        self.normalize_and_cache_message_retention_text()
 
         # NOTE: The expected response has been upgraded from
         # [stream_name, topic] to [stream_name, topic, date_muted] in
@@ -170,13 +186,45 @@ class Model:
 
         self._store_content_length_restrictions()
 
-        self.active_emoji_data = self.generate_all_emoji_data(
+        self.active_emoji_data, self.all_emoji_names = self.generate_all_emoji_data(
             self.initial_data["realm_emoji"]
         )
 
         self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
         self.new_user_input = True
         self._start_presence_updates()
+
+    def message_retention_days_response(self, days: int, org_default: bool) -> str:
+        suffix = " [Organization default]" if org_default else ""
+        return ("Indefinite" if (days == -1 or days is None) else str(days)) + suffix
+
+    def normalize_and_cache_message_retention_text(self) -> None:
+        # NOTE: The "message_retention_days" field was added in server v3.0, ZFL 17.
+        # For consistency, we add this field on server iterations even before this
+        # assigning it the value of "realm_message_retention_days" from /register.
+        # The server defines two special values for this field:
+        # • None: Inherits organization-level setting i.e. realm_message_retention_days
+        # • -1: Messages in this stream are stored indefinitely
+        # We store the abstracted message retention text for each stream mapped to its
+        # sream_id in model.cached_retention_text. This will be displayed in the UI.
+        self.cached_retention_text: Dict[int, str] = {}
+        realm_message_retention_days = self.initial_data["realm_message_retention_days"]
+        if self.server_feature_level is None or self.server_feature_level < 17:
+            for stream in self.stream_dict.values():
+                stream["message_retention_days"] = None
+
+        for stream in self.stream_dict.values():
+            message_retention_days = stream["message_retention_days"]
+            is_organization_default = message_retention_days is None
+            final_msg_retention_days = (
+                realm_message_retention_days
+                if is_organization_default
+                else message_retention_days
+            )
+            message_retention_response = self.message_retention_days_response(
+                final_msg_retention_days, is_organization_default
+            )
+            self.cached_retention_text[stream["stream_id"]] = message_retention_response
 
     def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
         """
@@ -344,35 +392,58 @@ class Model:
                 self.initial_data["presences"] = response["presences"]
                 self.users = self.get_all_users()
                 if hasattr(self.controller, "view"):
-                    self.controller.view.users_view.update_user_list(
-                        user_list=self.users
-                    )
+                    view = self.controller.view
+                    view.users_view.update_user_list(user_list=self.users)
+                    view.middle_column.update_message_list_status_markers()
             time.sleep(60)
 
     @asynch
-    def react_to_message(self, message: Message, reaction_to_toggle: str) -> None:
-        # FIXME Only support thumbs_up for now
-        assert reaction_to_toggle == "thumbs_up"
+    def toggle_message_reaction(
+        self, message: Message, reaction_to_toggle: str
+    ) -> None:
+        # Check if reaction_to_toggle is a valid original/alias
+        assert reaction_to_toggle in self.all_emoji_names
+
+        for emoji_name, emoji_data in self.active_emoji_data.items():
+            if (
+                reaction_to_toggle == emoji_name
+                or reaction_to_toggle in emoji_data["aliases"]
+            ):
+                # Found the emoji to toggle. Store its code/type and dont check further
+                emoji_code = emoji_data["code"]
+                emoji_type = emoji_data["type"]
+                break
 
         reaction_to_toggle_spec = dict(
-            emoji_name="thumbs_up",
-            emoji_code="1f44d",
-            reaction_type="unicode_emoji",
+            emoji_name=reaction_to_toggle,
+            emoji_code=emoji_code,
+            reaction_type=emoji_type,
             message_id=str(message["id"]),
         )
-        existing_reactions = [
-            reaction["emoji_code"]
-            for reaction in message["reactions"]
-            if (
-                reaction["user"].get("user_id", None) == self.user_id
-                or reaction["user"].get("id", None) == self.user_id
-            )
-        ]
-        if reaction_to_toggle_spec["emoji_code"] in existing_reactions:
+        has_user_reacted = self.has_user_reacted_to_message(
+            message, emoji_code=emoji_code
+        )
+        if has_user_reacted:
             response = self.client.remove_reaction(reaction_to_toggle_spec)
         else:
             response = self.client.add_reaction(reaction_to_toggle_spec)
         display_error_if_present(response, self.controller)
+
+    def has_user_reacted_to_message(self, message: Message, *, emoji_code: str) -> bool:
+        for reaction in message["reactions"]:
+            if reaction["emoji_code"] != emoji_code:
+                continue
+            # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
+            # check both the reaction.user.{user_id/id} fields too for pre v3 support.
+            user = reaction.get("user", {})
+            has_user_reacted = (
+                user.get("user_id", None) == self.user_id
+                or user.get("id", None) == self.user_id
+                or reaction.get("user_id", None) == self.user_id
+            )
+            if has_user_reacted:
+                return True
+        return False
 
     def session_draft_message(self) -> Optional[Composition]:
         return deepcopy(self._draft)
@@ -415,7 +486,7 @@ class Model:
         else:
             raise RuntimeError("Empty recipient list.")
 
-    def send_private_message(self, recipients: List[str], content: str) -> bool:
+    def send_private_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
             composition = PrivateComposition(
                 type="private",
@@ -481,7 +552,7 @@ class Model:
 
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]
-    ) -> NamedEmojiData:
+    ) -> Tuple[NamedEmojiData, List[str]]:
         unicode_emoji_data = unicode_emojis.EMOJI_DATA
         for name, data in unicode_emoji_data.items():
             data["type"] = "unicode_emoji"
@@ -489,21 +560,27 @@ class Model:
         custom_emoji_data: NamedEmojiData = {
             emoji["name"]: {
                 "code": emoji_code,
+                "aliases": [],
                 "type": "realm_emoji",
             }
             for emoji_code, emoji in custom_emoji.items()
             if not emoji["deactivated"]
         }
         zulip_extra_emoji: NamedEmojiData = {
-            "zulip": {"code": "zulip", "type": "zulip_extra_emoji"}
+            "zulip": {"code": "zulip", "aliases": [], "type": "zulip_extra_emoji"}
         }
         all_emoji_data = {
             **typed_unicode_emoji_data,
             **custom_emoji_data,
             **zulip_extra_emoji,
-        }.items()
-        active_emoji_data = OrderedDict(sorted(all_emoji_data, key=lambda e: e[0]))
-        return active_emoji_data
+        }
+        all_emoji_names = []
+        for emoji_name, emoji_data in all_emoji_data.items():
+            all_emoji_names.append(emoji_name)
+            all_emoji_names.extend(emoji_data["aliases"])
+        all_emoji_names = sorted(all_emoji_names)
+        active_emoji_data = OrderedDict(sorted(all_emoji_data.items()))
+        return active_emoji_data, all_emoji_names
 
     def get_messages(
         self, *, num_after: int, num_before: int, anchor: Optional[int]
@@ -601,6 +678,17 @@ class Model:
             return response["message_history"]
         display_error_if_present(response, self.controller)
         return list()
+
+    def fetch_raw_message_content(self, message_id: int) -> Optional[str]:
+        """
+        Fetches raw message content of a message using its ID.
+        """
+        response = self.client.get_raw_message(message_id)
+        if response["result"] == "success":
+            return response["raw_content"]
+        display_error_if_present(response, self.controller)
+
+        return None
 
     def _fetch_topics_in_streams(self, stream_list: Iterable[int]) -> str:
         """
@@ -703,6 +791,58 @@ class Model:
                 if sub != self.user_id
             ]
 
+    def get_user_info(self, user_id: int) -> Optional[TidiedUserInfo]:
+        api_user_data: Optional[RealmUser] = self._all_users_by_id.get(user_id, None)
+
+        if not api_user_data:
+            return None
+
+        # TODO: Add custom fields later as an enhancement
+        user_info: TidiedUserInfo = dict(
+            full_name=api_user_data.get("full_name", "(No name)"),
+            email=api_user_data.get("email", ""),
+            date_joined=api_user_data.get("date_joined", ""),
+            timezone=api_user_data.get("timezone", ""),
+            is_bot=api_user_data.get("is_bot", False),
+            # Role `None` for triggering servers < Zulip 4.1 (ZFL 59)
+            role=api_user_data.get("role", None),
+            bot_type=api_user_data.get("bot_type", None),
+            bot_owner_name="",  # Can be non-empty only if is_bot == True
+            last_active="",
+        )
+
+        if user_info["role"] is None:
+            # Default role is member
+            user_info["role"] = 400
+
+            # Ensure backwards compatibility for role parameters (e.g., `is_admin`)
+            for role_id, role in ROLE_BY_ID.items():
+                if api_user_data.get(role["bool"], None):
+                    user_info["role"] = role_id
+                    break
+
+        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
+
+        if api_user_data.get("bot_owner_id", None):
+            bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
+        # Ensure backwards compatibility for `bot_owner` (which is email of owner)
+        elif api_user_data.get("bot_owner", None):
+            bot_owner = self.user_dict.get(api_user_data["bot_owner"], None)
+
+        user_info["bot_owner_name"] = bot_owner["full_name"] if bot_owner else ""
+
+        if self.initial_data["presences"].get(user_info["email"], None):
+            timestamp = self.initial_data["presences"][user_info["email"]][
+                "aggregated"
+            ]["timestamp"]
+
+            # Take 24h vs AM/PM format into consideration
+            user_info["last_active"] = self.formatted_local_time(
+                timestamp, show_seconds=True
+            )
+
+        return user_info
+
     def get_all_users(self) -> List[Dict[str, Any]]:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data["presences"]
@@ -713,6 +853,7 @@ class Model:
         self.user_id_email_dict: Dict[int, str] = dict()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
+                self._all_users_by_id[self.user_id] = user
                 current_user = {
                     "full_name": user["full_name"],
                     "email": user["email"],
@@ -775,6 +916,7 @@ class Model:
                 "user_id": user["user_id"],
                 "status": status,
             }
+            self._all_users_by_id[user["user_id"]] = user
             self.user_id_email_dict[user["user_id"]] = email
 
         # Add internal (cross-realm) bots to dicts
@@ -786,6 +928,8 @@ class Model:
                 "user_id": bot["user_id"],
                 "status": "inactive",
             }
+            self._cross_realm_bots_by_id[bot["user_id"]] = bot
+            self._all_users_by_id[bot["user_id"]] = bot
             self.user_id_email_dict[bot["user_id"]] = email
 
         # Generate filtered lists for active & idle users
@@ -849,6 +993,8 @@ class Model:
         new_pinned_streams = []
         new_unpinned_streams = []
         new_muted_streams = set()
+        new_visual_notified_streams = set()
+
         for subscription in subscriptions:
             # Canonicalize color formats, since zulip server versions may use
             # different formats
@@ -862,6 +1008,8 @@ class Model:
                 new_unpinned_streams.append(streamData)
             if not subscription["in_home_view"]:
                 new_muted_streams.add(subscription["stream_id"])
+            if subscription["desktop_notifications"]:
+                new_visual_notified_streams.add(subscription["stream_id"])
 
         if new_pinned_streams:
             self.pinned_streams.extend(new_pinned_streams)
@@ -871,6 +1019,9 @@ class Model:
             sort_streams(self.unpinned_streams)
 
         self.muted_streams = self.muted_streams.union(new_muted_streams)
+        self.visual_notified_streams = self.visual_notified_streams.union(
+            new_visual_notified_streams
+        )
 
     def _group_info_from_realm_user_groups(
         self, groups: List[Dict[str, Any]]
@@ -922,6 +1073,23 @@ class Model:
         ]
         response = self.client.update_subscription_settings(request)
         return response["result"] == "success"
+
+    def is_visual_notifications_enabled(self, stream_id: int) -> bool:
+        """
+        Returns true if the stream had "desktop_notifications" enabled
+        """
+        return stream_id in self.visual_notified_streams
+
+    def toggle_stream_visual_notifications(self, stream_id: int) -> None:
+        request = [
+            {
+                "stream_id": stream_id,
+                "property": "desktop_notifications",
+                "value": not self.is_visual_notifications_enabled(stream_id),
+            }
+        ]
+        response = self.client.update_subscription_settings(request)
+        display_error_if_present(response, self.controller)
 
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
         return stream_id in self.stream_dict
@@ -977,6 +1145,13 @@ class Model:
                     sort_streams(self.pinned_streams)
                     self.controller.view.left_panel.update_stream_view()
                     self.controller.update_screen()
+                elif event.get("property", None) == "desktop_notifications":
+                    stream_id = event["stream_id"]
+
+                    if event["value"]:
+                        self.visual_notified_streams.add(stream_id)
+                    else:
+                        self.visual_notified_streams.discard(stream_id)
         elif event["op"] in ("peer_add", "peer_remove"):
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)
@@ -1001,23 +1176,36 @@ class Model:
         Handle typing notifications (in private messages)
         """
         assert event["type"] == "typing"
-        if hasattr(self.controller, "view"):
-            # If the user is in pm narrow with the person typing
-            narrow = self.narrow
-            if (
-                len(narrow) == 1
-                and narrow[0][0] == "pm_with"
-                and event["sender"]["email"] in narrow[0][1].split(",")
-            ):
-                if event["op"] == "start":
-                    user = self.user_dict[event["sender"]["email"]]
-                    self.controller.view.set_footer_text(
-                        [" ", ("footer_contrast", user["full_name"]), " is typing..."]
-                    )
-                elif event["op"] == "stop":
-                    self.controller.view.set_footer_text()
-                else:
-                    raise RuntimeError("Unknown typing event operation")
+
+        if not hasattr(self.controller, "view"):
+            return
+
+        narrow = self.narrow
+        controller = self.controller
+        active_conversation_info = controller.active_conversation_info
+        sender_email = event["sender"]["email"]
+        sender_id = event["sender"]["user_id"]
+
+        # If the user is in pm narrow with the person typing
+        # and the person typing isn't the user themselves
+        if (
+            len(narrow) == 1
+            and narrow[0][0] == "pm_with"
+            and sender_email in narrow[0][1].split(",")
+            and sender_id != self.user_id
+        ):
+            if event["op"] == "start":
+                sender_name = self.user_dict[sender_email]["full_name"]
+                active_conversation_info["sender_name"] = sender_name
+
+                if not controller.is_typing_notification_in_progress:
+                    controller.show_typing_notification()
+
+            elif event["op"] == "stop":
+                controller.active_conversation_info = {}
+
+            else:
+                raise RuntimeError("Unknown typing event operation")
 
     def is_valid_private_recipient(
         self,
@@ -1056,11 +1244,12 @@ class Model:
                     if recip["id"] not in (self.user_id, message["sender_id"])
                 ]
                 recipient = ", ".join(extra_targets)
-        elif message["type"] == "stream" and (
-            {"mentioned", "wildcard_mentioned"}.intersection(set(message["flags"]))
-            or self.stream_dict[message["stream_id"]]["desktop_notifications"]
-        ):
-            recipient = "{display_recipient} -> {subject}".format(**message)
+        elif message["type"] == "stream":
+            stream_id = message["stream_id"]
+            if {"mentioned", "wildcard_mentioned"}.intersection(
+                set(message["flags"])
+            ) or self.is_visual_notifications_enabled(stream_id):
+                recipient = "{display_recipient} -> {subject}".format(**message)
 
         if recipient:
             return notify(
@@ -1305,7 +1494,7 @@ class Model:
     def formatted_local_time(
         self, timestamp: int, *, show_seconds: bool, show_year: bool = False
     ) -> str:
-        local_time = datetime.datetime.fromtimestamp(timestamp)
+        local_time = datetime.fromtimestamp(timestamp)
         format_codes = (
             "%a %b %d "
             f"{'%Y ' if show_year else ''}"
@@ -1324,7 +1513,9 @@ class Model:
         # by the users in the organisation along with a boolean value
         # representing the active state of each emoji.
         assert event["type"] == "realm_emoji"
-        self.active_emoji_data = self.generate_all_emoji_data(event["realm_emoji"])
+        self.active_emoji_data, self.all_emoji_names = self.generate_all_emoji_data(
+            event["realm_emoji"]
+        )
 
     def _update_rendered_view(self, msg_id: int) -> None:
         """
@@ -1415,6 +1606,8 @@ class Model:
 
         if response["result"] == "success":
             if fetch_data:
+                # FIXME: Improve methods to avoid updating `realm_users` on
+                # every cycle. Add support for `realm_users` events too.
                 self.initial_data.update(response)
             self.max_message_id = response["max_message_id"]
             self.queue_id = response["queue_id"]

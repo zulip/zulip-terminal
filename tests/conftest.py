@@ -1,13 +1,22 @@
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
+from pytest_mock import MockerFixture
+from urwid import Widget
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.api_types import Message
+from zulipterminal.config.keys import (
+    ZT_TO_URWID_CMD_MAPPING,
+    keys_for_command,
+    primary_key_for_command,
+)
+from zulipterminal.helper import Index, TidiedUserInfo
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
+from zulipterminal.urwid_types import urwid_Size
 from zulipterminal.version import (
     MINIMUM_SUPPORTED_SERVER_VERSION,
     SUPPORTED_SERVER_VERSIONS,
@@ -15,7 +24,7 @@ from zulipterminal.version import (
 
 
 @pytest.fixture(autouse=True)
-def no_requests(monkeypatch):
+def no_requests(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     Forces all the tests to work offline.
     """
@@ -23,7 +32,7 @@ def no_requests(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def no_asynch(mocker):
+def no_asynch(mocker: MockerFixture) -> None:
     """
     Make all function calls synchronous.
     """
@@ -34,7 +43,7 @@ def no_asynch(mocker):
 
 
 @pytest.fixture
-def stream_button(mocker):
+def stream_button(mocker: MockerFixture) -> StreamButton:
     """
     Mocked stream button.
     """
@@ -49,7 +58,6 @@ def stream_button(mocker):
             "description": "Test stream description",
         },
         controller=mocker.patch("zulipterminal.core.Controller"),
-        width=40,
         view=view_mock,
         count=30,
     )
@@ -57,7 +65,7 @@ def stream_button(mocker):
 
 
 @pytest.fixture
-def topic_button(mocker):
+def topic_button(mocker: MockerFixture) -> TopicButton:
     """
     Mocked topic button.
     """
@@ -68,14 +76,13 @@ def topic_button(mocker):
         topic="PTEST",
         controller=mocker.patch("zulipterminal.core.Controller"),
         view=view_mock,
-        width=40,
         count=30,
     )
     return button
 
 
 @pytest.fixture
-def user_button(mocker, width=38):
+def user_button(mocker: MockerFixture) -> UserButton:
     """
     Mocked User Button.
     """
@@ -85,15 +92,17 @@ def user_button(mocker, width=38):
             "full_name": "Boo Boo",
             "email": "boo@zulip.com",
         },
-        width=width,
         controller=mocker.patch("zulipterminal.core.Controller"),
         view=mocker.patch("zulipterminal.ui.View"),
         state_marker="*",
+        count=0,
     )
 
 
 @pytest.fixture
-def msg_box(mocker, messages_successful_response):
+def msg_box(
+    mocker: MockerFixture, messages_successful_response: Dict[str, Any]
+) -> MessageBox:
     """
     Mocked MessageBox with stream message
     """
@@ -108,7 +117,7 @@ def msg_box(mocker, messages_successful_response):
 
 
 @pytest.fixture
-def users_fixture(logged_on_user):
+def users_fixture(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
     users = [logged_on_user]
     for i in range(1, 3):
         users.append(
@@ -141,7 +150,36 @@ def users_fixture(logged_on_user):
 
 
 @pytest.fixture
-def user_groups_fixture():
+def tidied_user_info_response() -> TidiedUserInfo:
+    # FIXME: Refactor this to use a more generic user?
+    return {
+        "full_name": "Human 2",
+        "email": "person2@example.com",
+        "date_joined": "",
+        "timezone": "",
+        "is_bot": False,
+        "role": 400,
+        "bot_type": None,
+        "bot_owner_name": "",
+        "last_active": "",
+    }
+
+
+@pytest.fixture
+def _all_users_by_id(initial_data: Dict[str, Any]) -> Dict[int, Any]:
+    return {
+        user["user_id"]: user
+        for user in (initial_data["realm_users"] + initial_data["cross_realm_bots"])
+    }
+
+
+@pytest.fixture
+def _cross_realm_bots_by_id(initial_data: Dict[str, Any]) -> Dict[int, Any]:
+    return {user["user_id"]: user for user in initial_data["cross_realm_bots"]}
+
+
+@pytest.fixture
+def user_groups_fixture() -> List[Dict[str, Any]]:
     user_groups = []
     members = [[1001, 11], [11, 12], [12], []]
     for i in range(1, 5):
@@ -157,7 +195,7 @@ def user_groups_fixture():
 
 
 @pytest.fixture
-def logged_on_user():
+def logged_on_user() -> Dict[str, Any]:
     return {
         "user_id": 1001,
         "full_name": "Human Myself",
@@ -165,50 +203,66 @@ def logged_on_user():
     }
 
 
-general_stream = {
-    "name": "Some general stream",
-    "invite_only": False,
-    "color": "#b0a5fd",  # Color in '#xxxxxx' format
-    "pin_to_top": False,
-    "stream_id": 1000,
-    "in_home_view": True,
-    "audible_notifications": False,
-    "description": "General Stream",
-    "is_old_stream": True,
-    "desktop_notifications": False,
-    "stream_weekly_traffic": 0,
-    "push_notifications": False,
-    "email_address": "general@example.comm",
-    "subscribers": [1001, 11, 12],
-}
+@pytest.fixture
+def general_stream() -> Dict[str, Any]:
+    return {
+        "name": "Some general stream",
+        "date_created": 1472091253,
+        "invite_only": False,
+        "color": "#b0a5fd",  # Color in '#xxxxxx' format
+        "pin_to_top": False,
+        "stream_id": 1000,
+        "in_home_view": True,
+        "audible_notifications": False,
+        "description": "General Stream",
+        "rendered_description": "General Stream",
+        "is_old_stream": True,
+        "desktop_notifications": False,
+        "stream_weekly_traffic": 0,
+        "push_notifications": False,
+        "email_address": "general@example.comm",
+        "message_retention_days": 10,
+        "subscribers": [1001, 11, 12],
+        "history_public_to_subscribers": True,
+    }
+
 
 # This is a private stream;
 # only description/stream_id/invite_only/name/color vary from above
-secret_stream = {
-    "description": "Some private stream",
-    "stream_id": 99,
-    "pin_to_top": False,
-    "invite_only": True,
-    "name": "Secret stream",
-    "email_address": "secret@example.com",
-    "color": "#ccc",  # Color in '#xxx' format
-    "in_home_view": True,
-    "audible_notifications": False,
-    "is_old_stream": True,
-    "desktop_notifications": False,
-    "stream_weekly_traffic": 0,
-    "push_notifications": False,
-    "subscribers": [1001, 11],
-}
+@pytest.fixture
+def secret_stream() -> Dict[str, Any]:
+    return {
+        "description": "Some private stream",
+        "stream_id": 99,
+        "pin_to_top": False,
+        "invite_only": True,
+        "name": "Secret stream",
+        "date_created": 1472047124,
+        "email_address": "secret@example.com",
+        "rendered_description": "Some private stream",
+        "color": "#ccc",  # Color in '#xxx' format
+        "in_home_view": True,
+        "audible_notifications": False,
+        "is_old_stream": True,
+        "desktop_notifications": False,
+        "stream_weekly_traffic": 0,
+        "message_retention_days": -1,
+        "push_notifications": False,
+        "subscribers": [1001, 11],
+        "history_public_to_subscribers": False,
+    }
 
 
 @pytest.fixture
-def streams_fixture():
+def streams_fixture(
+    general_stream: Dict[str, Any], secret_stream: Dict[str, Any]
+) -> List[Dict[str, Any]]:
     streams = [general_stream, secret_stream]
     for i in range(1, 3):
         streams.append(
             {
                 "name": f"Stream {i}",
+                "date_created": 1472047124 + i,
                 "invite_only": False,
                 "color": "#b0a5fd",
                 "pin_to_top": False,
@@ -216,19 +270,22 @@ def streams_fixture():
                 "in_home_view": True,
                 "audible_notifications": False,
                 "description": f"A description of stream {i}",
+                "rendered_description": f"A description of stream {i}",
                 "is_old_stream": True,
                 "desktop_notifications": False,
                 "stream_weekly_traffic": 0,
                 "push_notifications": False,
+                "message_retention_days": i + 30,
                 "email_address": f"stream{i}@example.com",
                 "subscribers": [1001, 11, 12],
+                "history_public_to_subscribers": True,
             }
         )
     return deepcopy(streams)
 
 
 @pytest.fixture
-def realm_emojis():
+def realm_emojis() -> Dict[str, Dict[str, Any]]:
     # Omitting source_url, author_id (server version 3.0),
     # author (server version < 3.0) since they are not used.
     return {
@@ -261,37 +318,57 @@ def realm_emojis():
 
 
 @pytest.fixture
-def realm_emojis_data():
+def realm_emojis_data() -> "OrderedDict[str, Dict[str, Any]]":
     return OrderedDict(
         [
-            ("joker", {"code": "202020", "type": "realm_emoji"}),
-            ("singing", {"code": "3", "type": "realm_emoji"}),
-            ("zulip", {"code": "4", "type": "realm_emoji"}),
+            ("joker", {"code": "202020", "aliases": [], "type": "realm_emoji"}),
+            ("singing", {"code": "3", "aliases": [], "type": "realm_emoji"}),
+            ("zulip", {"code": "4", "aliases": [], "type": "realm_emoji"}),
         ]
     )
 
 
 @pytest.fixture
-def unicode_emojis():
+def unicode_emojis() -> "OrderedDict[str, Dict[str, Any]]":
     return OrderedDict(
         [
-            ("happy", {"code": "1f600", "type": "unicode_emoji"}),
-            ("joker", {"code": "1f0cf", "type": "unicode_emoji"}),
-            ("joy_cat", {"code": "1f639", "type": "unicode_emoji"}),
-            ("rock_on", {"code": "1f918", "type": "unicode_emoji"}),
-            ("smile", {"code": "263a", "type": "unicode_emoji"}),
-            ("smiley", {"code": "1f603", "type": "unicode_emoji"}),
-            ("smirk", {"code": "1f60f", "type": "unicode_emoji"}),
+            (
+                "happy",
+                {"code": "1f600", "aliases": ["grinning"], "type": "unicode_emoji"},
+            ),
+            ("joker", {"code": "1f0cf", "aliases": [], "type": "unicode_emoji"}),
+            ("joy_cat", {"code": "1f639", "aliases": [], "type": "unicode_emoji"}),
+            (
+                "rock_on",
+                {
+                    "code": "1f918",
+                    "aliases": ["sign_of_the_horns"],
+                    "type": "unicode_emoji",
+                },
+            ),
+            ("smile", {"code": "263a", "aliases": [], "type": "unicode_emoji"}),
+            ("smiley", {"code": "1f603", "aliases": [], "type": "unicode_emoji"}),
+            ("smirk", {"code": "1f60f", "aliases": ["smug"], "type": "unicode_emoji"}),
+            ("thumbs_up", {"code": "1f44d", "aliases": [], "type": "unicode_emoji"}),
         ]
     )
 
 
 @pytest.fixture
-def zulip_emoji():
-    return OrderedDict([("zulip", {"code": "zulip", "type": "zulip_extra_emoji"})])
+def zulip_emoji() -> "OrderedDict[str, Dict[str, Any]]":
+    return OrderedDict(
+        [
+            (
+                "zulip",
+                {"code": "zulip", "aliases": [], "type": "zulip_extra_emoji"},
+            )
+        ]
+    )
 
 
-def display_recipient_factory(recipient_details_list: List[Tuple[int, str]]):
+def display_recipient_factory(
+    recipient_details_list: List[Tuple[int, str]]
+) -> List[Dict[str, Any]]:
     """
     Generate display_recipient field for (PM/group) messages
     """
@@ -314,42 +391,45 @@ def msg_template_factory(
     subject: str = "",
     stream_id: Optional[int] = None,
     recipients: Union[str, List[Dict[str, Any]]] = "PTEST",
-):
+) -> Message:
     """
     Generate message template for all types of messages(stream/PM/group)
     """
+    # TODO: Separate Message into distinct types for stream and private messages.
+    message = Message(
+        id=msg_id,
+        sender_full_name="Foo Foo",
+        timestamp=timestamp,
+        client="website",
+        sender_email="foo@zulip.com",
+        type=msg_type,
+        sender_realm_str="",
+        flags=["read"],
+        sender_id=5140,
+        content_type="text/x-markdown",
+        subject=subject,
+        reactions=[],
+        subject_links=[],
+        avatar_url="dummy_avatar_url",
+        is_me_message=False,
+        content=f"{msg_type} content here.",
+        display_recipient=recipients,
+    )
+
     if msg_type == "stream":
         assert isinstance(stream_id, int)
         assert isinstance(recipients, str)
+        message["stream_id"] = stream_id
     else:
         assert isinstance(recipients, list)
         for _val in recipients:
             assert isinstance(_val, dict)
 
-    return {
-        "id": msg_id,
-        "sender_full_name": "Foo Foo",
-        "timestamp": timestamp,
-        "client": "website",
-        "sender_email": "foo@zulip.com",
-        "type": msg_type,
-        "sender_realm_str": "",
-        "flags": ["read"],
-        "sender_id": 5140,
-        "content_type": "text/x-markdown",
-        "stream_id": stream_id,
-        "subject": subject,
-        "reactions": [],
-        "subject_links": [],
-        "avatar_url": "dummy_avatar_url",
-        "is_me_message": False,
-        "content": f"{msg_type} content here.",
-        "display_recipient": recipients,
-    }
+    return message
 
 
 @pytest.fixture
-def stream_msg_template():
+def stream_msg_template() -> Message:
     msg_template = msg_template_factory(
         537286, "stream", 1520918722, subject="Test", stream_id=205
     )
@@ -357,7 +437,7 @@ def stream_msg_template():
 
 
 @pytest.fixture
-def extra_stream_msg_template():
+def extra_stream_msg_template() -> Message:
     msg_template = msg_template_factory(
         537289, "stream", 1520918740, subject="Test", stream_id=205
     )
@@ -365,13 +445,13 @@ def extra_stream_msg_template():
 
 
 @pytest.fixture
-def pm_template():
+def pm_template() -> Message:
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
     return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
 
 
 @pytest.fixture
-def group_pm_template():
+def group_pm_template() -> Message:
     recipients = display_recipient_factory(
         [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
     )
@@ -382,19 +462,21 @@ def group_pm_template():
     params=["stream_msg_template", "pm_template", "group_pm_template"],
     ids=["stream_message", "pm_message", "group_pm_message"],
 )
-def message_fixture(request):
+def message_fixture(request: Any) -> Message:
     """
     Acts as a parametrize fixture for stream msg, pms and group_pms.
     """
+    # `request` currently does not have an exported Pytest type.
+    # TODO: Use the exported type when it's made available.
     template = request.getfixturevalue(request.param)
     return template
 
 
 @pytest.fixture
 def messages_successful_response(
-    stream_msg_template,
-    pm_template,
-    group_pm_template,
+    stream_msg_template: Message,
+    pm_template: Message,
+    group_pm_template: Message,
 ) -> Dict[str, Any]:
     """
     A successful response from a /messages API query.
@@ -417,7 +499,7 @@ def messages_successful_response(
     params=SUPPORTED_SERVER_VERSIONS,
     ids=(lambda param: "server_version:{}-server_feature_level:{}".format(*param)),
 )
-def zulip_version(request):
+def zulip_version(request: Any) -> Tuple[str, Optional[int]]:
     """
     Fixture to test different components based on the server version and the
     feature level.
@@ -460,7 +542,7 @@ def zulip_version(request):
         "edited_message",
     ],
 )
-def message_history(request):
+def message_history(request: Any) -> List[Dict[str, Any]]:
     """
     Returns message edit history for a message.
     """
@@ -468,7 +550,7 @@ def message_history(request):
 
 
 @pytest.fixture
-def topics():
+def topics() -> List[str]:
     return ["Topic 1", "This is a topic", "Hello there!"]
 
 
@@ -494,7 +576,7 @@ def topics():
         "stream+group_mention__wildcard",
     ],
 )
-def mentioned_messages_combination(request):
+def mentioned_messages_combination(request: Any) -> Tuple[Set[int], Set[int]]:
     """
     Returns a combination of mentioned and wildcard_mentioned messages
     """
@@ -502,7 +584,12 @@ def mentioned_messages_combination(request):
 
 
 @pytest.fixture
-def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
+def initial_data(
+    logged_on_user: Dict[str, Any],
+    users_fixture: List[Dict[str, Any]],
+    streams_fixture: List[Dict[str, Any]],
+    realm_emojis: Dict[str, Dict[str, Any]],
+) -> Dict[str, Any]:
     """
     Response from /register API request.
     """
@@ -526,6 +613,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
                 "email_address": "",
                 "color": "#bfd56f",
                 "in_home_view": True,
+                "history_public_to_subscribers": True,
             }
         ],
         "result": "success",
@@ -665,6 +753,7 @@ def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
         },
         "twenty_four_hour_time": True,
         "realm_emoji": realm_emojis,
+        "realm_message_retention_days": 74,
         "last_event_id": -1,
         "muted_topics": [],
         "realm_user_groups": [],
@@ -677,69 +766,75 @@ def initial_data(logged_on_user, users_fixture, streams_fixture, realm_emojis):
 
 
 @pytest.fixture
-def initial_index():
+def initial_index() -> Index:
     return deepcopy(helper_initial_index)
 
 
 @pytest.fixture
-def empty_index(stream_msg_template, pm_template, group_pm_template):
+def empty_index(
+    stream_msg_template: Message, pm_template: Message, group_pm_template: Message
+) -> Index:
     return deepcopy(
-        {
-            "pointer": defaultdict(set, {}),
-            "all_msg_ids": set(),
-            "starred_msg_ids": set(),
-            "mentioned_msg_ids": set(),
-            "private_msg_ids": set(),
-            "private_msg_ids_by_user_ids": defaultdict(set, {}),
-            "stream_msg_ids_by_stream_id": defaultdict(set, {}),
-            "topic_msg_ids": defaultdict(dict, {}),
-            "edited_messages": set(),
-            "topics": defaultdict(list),
-            "search": set(),
-            "messages": defaultdict(
-                dict,
+        Index(
+            pointer=defaultdict(set, {}),
+            all_msg_ids=set(),
+            starred_msg_ids=set(),
+            mentioned_msg_ids=set(),
+            private_msg_ids=set(),
+            private_msg_ids_by_user_ids=defaultdict(set, {}),
+            stream_msg_ids_by_stream_id=defaultdict(set, {}),
+            topic_msg_ids=defaultdict(dict, {}),
+            edited_messages=set(),
+            topics=defaultdict(list),
+            search=set(),
+            messages=defaultdict(
+                lambda: {},
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,
                     group_pm_template["id"]: group_pm_template,
                 },
             ),
-        }
+        )
     )
 
 
 @pytest.fixture
-def index_all_messages(empty_index):
+def index_all_messages(empty_index: Index) -> Index:
     """
     Expected index of `initial_data` fixture when model.narrow = []
     """
-    return dict(empty_index, **{"all_msg_ids": {537286, 537287, 537288}})
+    index = empty_index
+    index["all_msg_ids"] = {537286, 537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_stream(empty_index):
+def index_stream(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['stream', '7']]
     """
-    diff = {
-        "stream_msg_ids_by_stream_id": defaultdict(set, {205: {537286}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["stream_msg_ids_by_stream_id"] = defaultdict(set, {205: {537286}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_topic(empty_index):
+def index_topic(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['stream', '7'],
                                                         ['topic', 'Test']]
     """
-    diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286}}})}
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["topic_msg_ids"] = defaultdict(dict, {205: {"Test": {537286}}})
+    return index
 
 
 @pytest.fixture
-def index_multiple_topic_msg(empty_index, extra_stream_msg_template):
+def index_multiple_topic_msg(
+    empty_index: Index, extra_stream_msg_template: Message
+) -> Index:
     """
     Index of initial_data with multiple message when model.narrow = [['stream, '7'],
                                                                      ['topic', 'Test']]
@@ -748,36 +843,36 @@ def index_multiple_topic_msg(empty_index, extra_stream_msg_template):
     empty_index_with_multiple_topic_msg["messages"].update(
         {extra_stream_msg_template["id"]: extra_stream_msg_template}
     )
-    diff = {"topic_msg_ids": defaultdict(dict, {205: {"Test": {537286, 537289}}})}
-    return dict(empty_index_with_multiple_topic_msg, **diff)
+    empty_index_with_multiple_topic_msg["topic_msg_ids"] = defaultdict(
+        dict, {205: {"Test": {537286, 537289}}}
+    )
+    return empty_index_with_multiple_topic_msg
 
 
 @pytest.fixture
-def index_user(empty_index):
+def index_user(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                                          'boo@zulip.com'],
     """
     user_ids = frozenset({5179, 5140})
-    diff = {
-        "private_msg_ids_by_user_ids": defaultdict(set, {user_ids: {537287}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture
-def index_user_multiple(empty_index):
+def index_user_multiple(empty_index: Index) -> Index:
     """
     Expected index of initial_data when model.narrow = [['pm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
     user_ids = frozenset({5179, 5140, 5180})
-    diff = {
-        "private_msg_ids_by_user_ids": defaultdict(set, {user_ids: {537288}}),
-        "private_msg_ids": {537287, 537288},
-    }
-    return dict(empty_index, **diff)
+    index = empty_index
+    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
+    index["private_msg_ids"] = {537287, 537288}
+    return index
 
 
 @pytest.fixture(
@@ -791,11 +886,11 @@ def index_user_multiple(empty_index):
         {537287, 537288},
     ]
 )
-def index_all_starred(empty_index, request):
+def index_all_starred(empty_index: Index, request: Any) -> Index:
     msgs_with_stars = request.param
-    index = dict(
-        empty_index, starred_msg_ids=msgs_with_stars, private_msg_ids={537287, 537288}
-    )
+    index = empty_index
+    index["starred_msg_ids"] = msgs_with_stars
+    index["private_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
             msg["flags"].append("starred")
@@ -803,13 +898,13 @@ def index_all_starred(empty_index, request):
 
 
 @pytest.fixture()
-def index_all_mentions(empty_index, mentioned_messages_combination):
+def index_all_mentions(
+    empty_index: Index, mentioned_messages_combination: Tuple[Set[int], Set[int]]
+) -> Index:
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
-    index = dict(
-        empty_index,
-        mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
-        private_msg_ids={537287, 537288},
-    )
+    index = empty_index
+    index["mentioned_msg_ids"] = mentioned_messages | wildcard_mentioned_messages
+    index["private_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
@@ -821,8 +916,16 @@ def index_all_mentions(empty_index, mentioned_messages_combination):
     return index
 
 
+@pytest.fixture()
+def index_search_messages(empty_index: Index) -> Index:
+    """Expected initial index when search contains the message_id 500."""
+    index = empty_index
+    index["search"] = {500}
+    return index
+
+
 @pytest.fixture
-def user_profile(logged_on_user):
+def user_profile(logged_on_user: Dict[str, Any]) -> Dict[str, Any]:
     return {  # FIXME These should all be self-consistent with others?
         "max_message_id": 589270,
         "full_name": logged_on_user["full_name"],
@@ -838,12 +941,12 @@ def user_profile(logged_on_user):
 
 
 @pytest.fixture
-def error_response():
+def error_response() -> Dict[str, str]:
     return {"msg": "Invalid API key", "result": "error"}
 
 
 @pytest.fixture
-def user_dict(logged_on_user):
+def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     """
     User_dict created according to `initial_data` fixture.
     """
@@ -906,7 +1009,23 @@ def user_dict(logged_on_user):
 
 
 @pytest.fixture
-def user_list(logged_on_user):
+def user_id_email_dict(logged_on_user: Dict[str, Any]) -> Dict[int, str]:
+    """
+    User_id_email_dict created according to `initial_data` fixture.
+    """
+    return {
+        logged_on_user["user_id"]: logged_on_user["email"],
+        11: "person1@example.com",
+        12: "person2@example.com",
+        6: "emailgateway@zulip.com",
+        1: "feedback@zulip.com",
+        5: "notification-bot@zulip.com",
+        4: "welcome-bot@zulip.com",
+    }
+
+
+@pytest.fixture
+def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     List of users created corresponding to
     `initial_data` fixture.
@@ -971,7 +1090,7 @@ def user_list(logged_on_user):
 
 
 @pytest.fixture
-def streams():
+def streams() -> List[Dict[str, Any]]:
     """
     List of streams created corresponding to
     `initial_data` fixture.
@@ -1009,7 +1128,7 @@ def streams():
 
 
 @pytest.fixture
-def user_id(logged_on_user):
+def user_id(logged_on_user: Dict[str, Any]) -> int:
     """
     Default User id of the current
     user, i.e., Tomás Farías
@@ -1019,7 +1138,7 @@ def user_id(logged_on_user):
 
 
 @pytest.fixture
-def stream_dict(streams_fixture):
+def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
     return {stream["stream_id"]: stream for stream in streams_fixture}
 
 
@@ -1039,7 +1158,7 @@ def stream_dict(streams_fixture):
         "zulip_feature_level:1",
     ],
 )
-def processed_muted_topics(request):
+def processed_muted_topics(request: Any) -> Dict[Tuple[str], Optional[int]]:
     """
     Locally processed muted topics data (see _muted_topics in Model.__init__).
     """
@@ -1047,7 +1166,7 @@ def processed_muted_topics(request):
 
 
 @pytest.fixture
-def classified_unread_counts():
+def classified_unread_counts() -> Dict[str, Any]:
     """
     Unread counts return by
     helper.classify_unread_counts function.
@@ -1076,40 +1195,46 @@ def classified_unread_counts():
 
 @pytest.fixture(
     params=[
-        (key, expected_key)
-        for keys, expected_key in [
-            (keys_for_command("GO_UP"), "up"),
-            (keys_for_command("GO_DOWN"), "down"),
-            (keys_for_command("SCROLL_UP"), "page up"),
-            (keys_for_command("SCROLL_DOWN"), "page down"),
-            (keys_for_command("GO_TO_BOTTOM"), "end"),
-        ]
-        for key in keys
+        ("mouse press", 4, primary_key_for_command("GO_UP")),
+        ("mouse press", 5, primary_key_for_command("GO_DOWN")),
     ],
-    ids=lambda param: "key:{}-expected_key:{}".format(*param),
+    ids=[
+        "mouse_scroll_up",
+        "mouse_scroll_down",
+    ],
 )
-def navigation_key_expected_key_pair(request):
+def mouse_scroll_event(request: Any) -> Tuple[Any]:
     """
-    Fixture to generate pairs of navigation keys with their respective
-    expected key.
-    The expected key is the one which is passed to the super `keypress` calls.
+    Returns required parameters for mouse_event keypress
+    """
+    return request.param
+
+
+@pytest.fixture(
+    params=[key for cmd in ZT_TO_URWID_CMD_MAPPING for key in keys_for_command(cmd)],
+    ids=lambda param: "nav-key:{}".format(*param),
+)
+def navigation_key(request: Any) -> str:
+    """
+    Fixture to generate navigation keys.
+    This key is passed to the super `keypress` calls as is.
     """
     return request.param
 
 
 @pytest.fixture
-def widget_size():
+def widget_size() -> Callable[[Widget], urwid_Size]:
     """
     Returns widget size for any widget.
     """
 
-    def _widget_size(widget):
+    def _widget_size(widget: Widget) -> urwid_Size:
         widget_type, *_ = widget.sizing()
         if widget_type == "box":
             return (200, 20)
         elif widget_type == "flow":
             return (20,)
         else:
-            None
+            return ()
 
     return _widget_size

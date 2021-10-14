@@ -1,6 +1,4 @@
 import os
-import platform
-import subprocess
 import time
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
@@ -17,6 +15,7 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -24,15 +23,14 @@ from typing import (
 )
 from urllib.parse import unquote
 
-import lxml.html
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
-
-
-MACOS = platform.system() == "Darwin"
-LINUX = platform.system() == "Linux"
-WSL = "microsoft" in platform.release().lower()
+from zulipterminal.config.regexes import (
+    REGEX_COLOR_3_DIGIT,
+    REGEX_COLOR_6_DIGIT,
+    REGEX_QUOTED_FENCE_LENGTH,
+)
 
 
 class StreamData(TypedDict):
@@ -45,10 +43,25 @@ class StreamData(TypedDict):
 
 class EmojiData(TypedDict):
     code: str
+    aliases: List[str]
     type: EmojiType
 
 
 NamedEmojiData = Dict[str, EmojiData]
+
+
+class TidiedUserInfo(TypedDict):
+    full_name: str
+    email: str
+    date_joined: str
+    timezone: str
+    role: Optional[int]
+    last_active: str
+
+    is_bot: bool
+    # Below fields are only meaningful if is_bot == True
+    bot_type: Optional[int]
+    bot_owner_name: str
 
 
 class Index(TypedDict):
@@ -612,48 +625,15 @@ def canonicalize_color(color: str) -> str:
     Given a color of the format '#xxxxxx' or '#xxx', produces one of the
     format '#xxx'. Always produces lowercase hex digits.
     """
-    if match("^#[0-9A-Fa-f]{6}$", color, ASCII) is not None:
+    if match(REGEX_COLOR_6_DIGIT, color, ASCII) is not None:
         # '#xxxxxx' color, stored by current zulip server
         return (color[:2] + color[3] + color[5]).lower()
-    elif match("^#[0-9A-Fa-f]{3}$", color, ASCII) is not None:
+    elif match(REGEX_COLOR_3_DIGIT, color, ASCII) is not None:
         # '#xxx' color, which may be stored by the zulip server <= 2.0.0
         # Potentially later versions too
         return color.lower()
     else:
         raise ValueError(f'Unknown format for color "{color}"')
-
-
-def notify(title: str, html_text: str) -> str:
-    document = lxml.html.document_fromstring(html_text)
-    text = document.text_content()
-
-    command_list = None
-    if MACOS:
-        command_list = [
-            "osascript",
-            "-e",
-            "on run(argv)",
-            "-e",
-            "return display notification item 1 of argv with title "
-            'item 2 of argv sound name "ZT_NOTIFICATION_SOUND"',
-            "-e",
-            "end",
-            "--",
-            text,
-            title,
-        ]
-    elif LINUX:
-        command_list = ["notify-send", "--", title, text]
-
-    if command_list is not None:
-        try:
-            subprocess.run(
-                command_list, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-        except FileNotFoundError:
-            # This likely means the notification command could not be found
-            return command_list[0]
-    return ""
 
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
@@ -685,7 +665,10 @@ def notify_if_message_sent_outside_narrow(
         check_narrow_and_notify(stream_narrow, topic_narrow, controller)
     elif message["type"] == "private":
         pm_narrow = [["is", "private"]]
-        pm_with_narrow = [["pm_with", ", ".join(message["to"])]]
+        recipient_emails = [
+            controller.model.user_id_email_dict[user_id] for user_id in message["to"]
+        ]
+        pm_with_narrow = [["pm_with", ", ".join(recipient_emails)]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
 
 
@@ -705,10 +688,9 @@ def get_unused_fence(content: str) -> str:
     of continuous back-ticks. Referred and translated from
     zulip/static/shared/js/fenced_code.js.
     """
-    fence_length_regex = "^ {0,3}(`{3,})"
     max_length_fence = 3
 
-    matches = findall(fence_length_regex, content, flags=MULTILINE)
+    matches = findall(REGEX_QUOTED_FENCE_LENGTH, content, flags=MULTILINE)
     if len(matches) != 0:
         max_length_fence = max(max_length_fence, len(max(matches, key=len)) + 1)
 

@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
-from zulip import ZulipError
+from zulip import Client, ZulipError
 
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
@@ -17,8 +17,9 @@ from zulipterminal.model import (
 )
 
 
+MODULE = "zulipterminal.model"
+MODEL = MODULE + ".Model"
 CONTROLLER = "zulipterminal.core.Controller"
-MODEL = "zulipterminal.model.Model"
 
 
 class TestModel:
@@ -26,14 +27,14 @@ class TestModel:
     def mock_external_classes(self, mocker: Any) -> None:
         self.urlparse = mocker.patch("urllib.parse.urlparse")
         self.controller = mocker.patch(CONTROLLER, return_value=None)
-        self.client = mocker.patch(CONTROLLER + ".client")
+        self.client = mocker.patch(CONTROLLER + ".client", spec=Client)
         self.client.base_url = "chat.zulip.zulip"
         mocker.patch(MODEL + "._start_presence_updates")
         self.display_error_if_present = mocker.patch(
-            "zulipterminal.model.display_error_if_present"
+            MODULE + ".display_error_if_present"
         )
         self.notify_if_message_sent_outside_narrow = mocker.patch(
-            "zulipterminal.model.notify_if_message_sent_outside_narrow"
+            MODULE + ".notify_if_message_sent_outside_narrow"
         )
 
     @pytest.fixture
@@ -43,10 +44,10 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
         self.client.get_profile.return_value = user_profile
-        mocker.patch("zulipterminal.model.unicode_emojis", EMOJI_DATA=unicode_emojis)
+        mocker.patch(MODULE + ".unicode_emojis", EMOJI_DATA=unicode_emojis)
         model = Model(self.controller)
         return model
 
@@ -88,6 +89,17 @@ class TestModel:
                 {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
                 key=lambda e: e[0],
             )
+        )
+        assert model.all_emoji_names == sorted(
+            [
+                name
+                for emoji in {
+                    **unicode_emojis,
+                    **realm_emojis_data,
+                    **zulip_emoji,
+                }.items()
+                for name in [emoji[0], *emoji[1]["aliases"]]
+            ]
         )
         # Deactivated emoji is removed from active emojis set
         assert "green_tick" not in model.active_emoji_data
@@ -143,7 +155,7 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         with pytest.raises(ServerConnectionFailure) as e:
@@ -161,7 +173,7 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         with pytest.raises(ServerConnectionFailure) as e:
@@ -207,6 +219,73 @@ class TestModel:
             client_gravatar=True,
             include_subscribers=True,
         )
+
+    @pytest.mark.parametrize(
+        [
+            "to_vary_in_stream_dict",
+            "realm_msg_retention_days",
+            "feature_level",
+            "expect_msg_retention_text",
+        ],
+        [
+            case(
+                {1: {}},
+                None,
+                10,
+                {1: "Indefinite [Organization default]"},
+                id="ZFL=None_no_stream_retention_realm_retention=None",
+            ),
+            case(
+                {1: {}, 2: {}},
+                -1,
+                16,
+                {
+                    1: "Indefinite [Organization default]",
+                    2: "Indefinite [Organization default]",
+                },
+                id="ZFL=16_no_stream_retention_realm_retention=-1",
+            ),
+            case(
+                {2: {"message_retention_days": 30}},
+                60,
+                17,
+                {2: "30"},
+                id="ZFL=17_stream_retention_days=30",
+            ),
+            case(
+                {
+                    1: {"message_retention_days": None},
+                    2: {"message_retention_days": -1},
+                },
+                72,
+                18,
+                {1: "72 [Organization default]", 2: "Indefinite"},
+                id="ZFL=18_stream_retention_days=[None, -1]",
+            ),
+        ],
+    )
+    def test_normalize_and_cache_message_retention_text(
+        self,
+        model,
+        stream_dict,
+        to_vary_in_stream_dict,
+        realm_msg_retention_days,
+        feature_level,
+        expect_msg_retention_text,
+    ):
+        model.stream_dict = stream_dict
+        model.server_feature_level = feature_level
+        model.initial_data["realm_message_retention_days"] = realm_msg_retention_days
+        for stream_id in to_vary_in_stream_dict:
+            model.stream_dict[stream_id].update(to_vary_in_stream_dict[stream_id])
+
+        model.normalize_and_cache_message_retention_text()
+
+        for stream_id in to_vary_in_stream_dict:
+            assert (
+                model.cached_retention_text[stream_id]
+                == expect_msg_retention_text[stream_id]
+            )
 
     @pytest.mark.parametrize("msg_id", [1, 5, set()])
     @pytest.mark.parametrize(
@@ -429,56 +508,160 @@ class TestModel:
         assert model.index["topics"][stream_id] == return_value
         assert model.index["topics"][stream_id] is not return_value
 
-    @pytest.mark.parametrize("user_key", ["user_id", "id"])
+    # pre server v3 provide user_id or id as a property within user key
+    # post server v3 provide user_id as a property outside the user key
+    @pytest.mark.parametrize("user_key", ["user_id", "id", None])
     @pytest.mark.parametrize(
-        "msg_id, existing_reactions, expected_method",
+        "emoji_unit, existing_reactions, expected_method",
         [
-            (5, [], "POST"),
-            (5, [dict(user="me", emoji_code="1f44d")], "DELETE"),
-            (5, [dict(user="not me", emoji_code="1f44d")], "POST"),
-            (5, [dict(user="me", emoji_code="1f614")], "POST"),
-            (5, [dict(user="not me", emoji_code="1f614")], "POST"),
+            case(
+                ("thumbs_up", "1f44d", "unicode_emoji"),
+                [],
+                "POST",
+                id="add_unicode_original_no_existing_emoji",
+            ),
+            case(
+                ("singing", "3", "realm_emoji"),
+                [],
+                "POST",
+                id="add_realm_original_no_existing_emoji",
+            ),
+            case(
+                ("joy_cat", "1f639", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f44d")],
+                "POST",
+                id="add_unicode_original_mine_existing_different_emoji",
+            ),
+            case(
+                ("zulip", "zulip", "zulip_extra_emoji"),
+                [dict(user="me", emoji_code="1f639")],
+                "POST",
+                id="add_zulip_original_mine_existing_different_emoji",
+            ),
+            case(
+                ("rock_on", "1f918", "unicode_emoji"),
+                [dict(user="not me", emoji_code="1f918")],
+                "POST",
+                id="add_unicode_original_others_existing_same_emoji",
+            ),
+            case(
+                ("grinning", "1f600", "unicode_emoji"),
+                [dict(user="mot me", emoji_code="1f600")],
+                "POST",
+                id="add_unicode_alias_others_existing_same_emoji",
+            ),
+            case(
+                ("smiley", "1f603", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f603")],
+                "DELETE",
+                id="remove_unicode_original_mine_existing_same_emoji",
+            ),
+            case(
+                ("smug", "1f60f", "unicode_emoji"),
+                [dict(user="me", emoji_code="1f60f")],
+                "DELETE",
+                id="remove_unicode_alias_mine_existing_same_emoji",
+            ),
+            case(
+                ("zulip", "zulip", "zulip_extra_emoji"),
+                [dict(user="me", emoji_code="zulip")],
+                "DELETE",
+                id="remove_zulip_original_mine_existing_same_emoji",
+            ),
         ],
     )
-    def test_react_to_message_with_thumbs_up(
-        self, mocker, model, user_key, msg_id, existing_reactions, expected_method
+    def test_toggle_message_reaction_with_valid_emoji(
+        self,
+        mocker,
+        model,
+        user_key,
+        emoji_unit,
+        existing_reactions,
+        expected_method,
+        msg_id=5,
     ):
-        # Map 'user' to running user_id or an arbitrary other (+1)
+        # Map 'id' to running user_id or an arbitrary other (+1)
+        id = (
+            model.user_id
+            if existing_reactions and existing_reactions[0]["user"] == "me"
+            else model.user_id + 1
+        )
         full_existing_reactions = [
-            dict(
-                er,
-                user={
-                    user_key: (
-                        model.user_id if er["user"] == "me" else model.user_id + 1
-                    )
-                },
-            )
+            dict(er, user={user_key: id})
+            if user_key is not None
+            else dict(user_id=id, emoji_code=er["emoji_code"])
             for er in existing_reactions
         ]
         message = dict(id=msg_id, reactions=full_existing_reactions)
+        emoji_name, emoji_code, emoji_type = emoji_unit
         reaction_spec = dict(
-            emoji_name="thumbs_up",
-            reaction_type="unicode_emoji",
-            emoji_code="1f44d",
+            emoji_name=emoji_name,
+            reaction_type=emoji_type,
+            emoji_code=emoji_code,
             message_id=str(msg_id),
         )
         response = mocker.Mock()
         model.client.add_reaction.return_value = response
         model.client.remove_reaction.return_value = response
 
-        model.react_to_message(message, "thumbs_up")
+        model.toggle_message_reaction(message, emoji_name)
 
         if expected_method == "POST":
             model.client.add_reaction.assert_called_once_with(reaction_spec)
-            model.client.delete_reaction.assert_not_called()
+            model.client.remove_reaction.assert_not_called()
         elif expected_method == "DELETE":
             model.client.remove_reaction.assert_called_once_with(reaction_spec)
             model.client.add_reaction.assert_not_called()
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-    def test_react_to_message_for_not_thumbs_up(self, model):
+    def test_toggle_message_reaction_with_invalid_emoji(self, model):
         with pytest.raises(AssertionError):
-            model.react_to_message(dict(), "x")
+            model.toggle_message_reaction(dict(), "x")
+
+    @pytest.mark.parametrize(
+        "emoji_code, reactions, expected_has_user_reacted",
+        [
+            case(
+                "1f600",
+                [{"user": {"id": 2}, "emoji_code": "1f602"}],
+                False,
+                id="id_inside_user_field__user_not_reacted",
+            ),
+            case(
+                "1f44d",
+                [{"user": {"user_id": 1}, "emoji_code": "1f44d"}],
+                True,
+                id="user_id_inside_user_field__user_has_reacted",
+            ),
+            case(
+                "zulip",
+                [{"user_id": 1, "emoji_code": "zulip"}],
+                True,
+                id="no_user_field_with_user_id__user_has_reacted",
+            ),
+            case(
+                "1f639",
+                [{"user_id": 2, "emoji_code": "1f44d"}],
+                False,
+                id="no_user_field_with_user_id__user_not_reacted",
+            ),
+        ],
+    )
+    def test_has_user_reacted_to_message(
+        self,
+        model,
+        emoji_code,
+        reactions,
+        expected_has_user_reacted,
+        user_id=1,
+        message_id=5,
+    ):
+        model.user_id = user_id
+        message = dict(id=message_id, reactions=reactions)
+
+        has_reacted = model.has_user_reacted_to_message(message, emoji_code=emoji_code)
+
+        assert has_reacted == expected_has_user_reacted
 
     @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
     @pytest.mark.parametrize("status", ["start", "stop"])
@@ -512,9 +695,7 @@ class TestModel:
             ({"result": "some_failure"}, False),
         ],
     )
-    @pytest.mark.parametrize(
-        "recipients", [["iago@zulip.com"], ["iago@zulip.com", "hamlet@zulip.com"]]
-    )
+    @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
     def test_send_private_message(
         self, mocker, model, recipients, response, return_value, content="hi!"
     ):
@@ -687,14 +868,12 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         # Setup mocks before calling get_messages
         self.client.get_messages.return_value = messages_successful_response
-        mocker.patch(
-            "zulipterminal.model.index_messages", return_value=index_all_messages
-        )
+        mocker.patch(MODULE + ".index_messages", return_value=index_all_messages)
         model = Model(self.controller)
         request = {
             "anchor": 0,
@@ -813,15 +992,13 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         # Setup mocks before calling get_messages
         messages_successful_response["anchor"] = 0
         self.client.get_messages.return_value = messages_successful_response
-        mocker.patch(
-            "zulipterminal.model.index_messages", return_value=index_all_messages
-        )
+        mocker.patch(MODULE + ".index_messages", return_value=index_all_messages)
 
         model = Model(self.controller)
         model.get_messages(num_before=num_before, num_after=num_after, anchor=0)
@@ -845,7 +1022,7 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         # Setup mock before calling get_messages
@@ -854,6 +1031,46 @@ class TestModel:
 
         with pytest.raises(ServerConnectionFailure):
             model = Model(self.controller)
+
+    @pytest.mark.parametrize(
+        "response, expected_raw_content, display_error_called",
+        [
+            (
+                {
+                    "result": "success",
+                    "msg": "",
+                    "raw_content": "Feels **great** to be back!",
+                },
+                "Feels **great** to be back!",
+                False,
+            ),
+            (
+                {
+                    "result": "error",
+                    "msg": "Invalid message(s)",
+                    "code": "BAD_REQUEST",
+                },
+                None,
+                True,
+            ),
+        ],
+    )
+    def test_fetch_raw_message_content(
+        self,
+        mocker,
+        model,
+        expected_raw_content,
+        response,
+        display_error_called,
+        message_id=1,
+    ):
+        self.client.get_raw_message.return_value = response
+
+        return_value = model.fetch_raw_message_content(message_id)
+
+        self.client.get_raw_message.assert_called_once_with(message_id)
+        assert self.display_error_if_present.called == display_error_called
+        assert return_value == expected_raw_content
 
     @pytest.mark.parametrize(
         "initial_muted_streams, value",
@@ -927,7 +1144,7 @@ class TestModel:
         mocker.patch(MODEL + ".get_all_users", return_value=[])
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
 
         # Setup mocks before calling get_messages
@@ -952,21 +1169,108 @@ class TestModel:
         }
         assert user_group_names == ["Group 1", "Group 2", "Group 3", "Group 4"]
 
+    @pytest.mark.parametrize(
+        ["to_vary_in_each_user", "key", "expected_value"],
+        [
+            ({"full_name": "Test User"}, "full_name", "Test User"),
+            ({}, "full_name", "(No name)"),
+            ({"email": "person1@example.com"}, "email", "person1@example.com"),
+            ({}, "email", ""),
+            (
+                {"date_joined": "2021-02-28T19:58:29.035543+00:00"},
+                "date_joined",
+                "2021-02-28T19:58:29.035543+00:00",
+            ),
+            ({}, "date_joined", ""),
+            ({"timezone": "Asia/Kolkata"}, "timezone", "Asia/Kolkata"),
+            ({}, "timezone", ""),
+            ({"bot_type": 1}, "bot_type", 1),
+            ({}, "bot_type", None),
+            ({"role": 100}, "role", 100),
+            ({"role": 200}, "role", 200),
+            ({"role": 300}, "role", 300),
+            ({"role": 600}, "role", 600),
+            ({}, "role", 400),
+            ({"is_owner": True}, "role", 100),
+            ({"is_admin": True}, "role", 200),
+            ({"is_guest": True}, "role", 600),
+            ({"is_bot": True}, "is_bot", True),
+            ({"bot_owner_id": 12}, "bot_owner_name", "Human 2"),
+            ({"bot_owner": "person2@example.com"}, "bot_owner_name", "Human 2"),
+            ({}, "bot_owner_name", ""),
+        ],
+        ids=[
+            "user_full_name",
+            "user_empty_full_name",
+            "user_email",
+            "user_empty_email",
+            "user_date_joined",
+            "user_empty_date_joined",
+            "user_timezone",
+            "user_empty_timezone",
+            "user_bot_type",
+            "user_empty_bot_type",
+            "user_is_owner:Zulip_4.0+_ZFL59",
+            "user_is_admin:Zulip_4.0+_ZFL59",
+            "user_is_moderator:Zulip_4.0+_ZFL60",
+            "user_is_guest:Zulip_4.0+_ZFL59",
+            "user_is_member",
+            "user_is_owner:Zulip_3.0+",
+            "user_is_admin:preZulip_4.0",
+            "user_is_guest:preZulip_4.0",
+            "user_is_bot",
+            "user_bot_has_owner:Zulip_3.0+_ZFL1",
+            "user_bot_has_owner:preZulip_3.0",
+            "user_bot_has_no_owner",
+        ],
+    )
+    def test_get_user_info(
+        self,
+        model,
+        mocker,
+        _all_users_by_id,
+        user_dict,
+        to_vary_in_each_user,
+        key,
+        expected_value,
+    ):
+        _all_users_by_id[11] = dict({"user_id": 11}, **to_vary_in_each_user)
+        model._all_users_by_id = _all_users_by_id
+        model.user_dict = user_dict
+
+        assert model.get_user_info(11)[key] == expected_value
+
+    def test_get_user_info_USER_NOT_FOUND(self, model):
+        assert model.get_user_info(-1) is None
+
+    def test_get_user_info_sample_response(
+        self, model, _all_users_by_id, tidied_user_info_response
+    ):
+        model._all_users_by_id = _all_users_by_id
+        assert model.get_user_info(12) == tidied_user_info_response
+
     def test_get_all_users(self, mocker, initial_data, user_list, user_dict, user_id):
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register.return_value = initial_data
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
-            "zulipterminal.model.classify_unread_counts", return_value=[]
+            MODULE + ".classify_unread_counts", return_value=[]
         )
         model = Model(self.controller)
         assert model.user_dict == user_dict
         assert model.users == user_list
 
-    @pytest.mark.parametrize("muted", powerset([1, 2, 99, 1000]))
-    def test__subscribe_to_streams(self, initial_data, muted, model):
+    @pytest.mark.parametrize("muted", powerset([99, 1000]))
+    @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
+    def test__subscribe_to_streams(
+        self, initial_data, muted, visual_notification_enabled, model
+    ):
         subs = [
-            dict(entry, in_home_view=entry["stream_id"] not in muted)
+            dict(
+                entry,
+                in_home_view=entry["stream_id"] not in muted,
+                desktop_notifications=entry["stream_id"] in visual_notification_enabled,
+            )
             for entry in initial_data["subscriptions"]
         ]
 
@@ -979,16 +1283,17 @@ class TestModel:
         assert model.muted_streams == muted
         assert model.pinned_streams == []  # FIXME generalize/parametrize
         assert len(model.unpinned_streams)  # FIXME generalize/parametrize
+        assert model.visual_notified_streams == visual_notification_enabled
 
     def test__handle_message_event_with_Falsey_log(
         self, mocker, model, message_fixture
     ):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch("zulipterminal.model.index_messages", return_value={})
+        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=["msg_w"]
+            MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
         model.notify_user = mocker.Mock()
         event = {"type": "message", "message": message_fixture}
@@ -1004,10 +1309,10 @@ class TestModel:
     def test__handle_message_event_with_valid_log(self, mocker, model, message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch("zulipterminal.model.index_messages", return_value={})
+        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=["msg_w"]
+            MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
         model.notify_user = mocker.Mock()
         event = {"type": "message", "message": message_fixture}
@@ -1026,13 +1331,13 @@ class TestModel:
     def test__handle_message_event_with_flags(self, mocker, model, message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch("zulipterminal.model.index_messages", return_value={})
+        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=["msg_w"]
+            MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
         model.notify_user = mocker.Mock()
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
 
         # Test event with flags
         event = {
@@ -1166,11 +1471,11 @@ class TestModel:
     ):
         model._have_last_message[repr(narrow)] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch("zulipterminal.model.index_messages", return_value={})
+        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
         create_msg_box_list = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=["msg_w"]
+            MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
         self.controller.view.message_view = mocker.Mock(log=[])
         (
             self.controller.view.left_panel.is_in_topic_view_with_stream_id.return_value
@@ -1234,7 +1539,12 @@ class TestModel:
 
     # TODO: Ideally message_fixture would use standardized ids?
     @pytest.mark.parametrize(
-        "user_id, vary_each_msg, stream_setting, types_when_notify_called",
+        [
+            "user_id",
+            "vary_each_msg",
+            "visual_notification_status",
+            "types_when_notify_called",
+        ],
         [
             (
                 5140,
@@ -1262,23 +1572,20 @@ class TestModel:
         message_fixture,
         user_id,
         vary_each_msg,
-        stream_setting,
+        visual_notification_status,
         types_when_notify_called,
     ):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
-        if "stream_id" in message_fixture:
-            model.stream_dict.update(
-                {
-                    message_fixture["stream_id"]: {
-                        "desktop_notifications": stream_setting
-                    }
-                }
-            )
-        notify = mocker.patch("zulipterminal.model.notify")
+        mocker.patch(
+            MODEL + ".is_visual_notifications_enabled",
+            return_value=visual_notification_status,
+        )
+        notify = mocker.patch(MODULE + ".notify")
 
         model.notify_user(message_fixture)
 
+        target = None
         if message_fixture["type"] in types_when_notify_called:
             who = message_fixture["type"]
             if who == "stream":
@@ -1287,6 +1594,7 @@ class TestModel:
                 target = "you"
                 if len(message_fixture["display_recipient"]) > 2:
                     target += ", Bar Bar"
+        if target is not None:
             title = f"Test Organization Name:\nFoo Foo (to {target})"
             # TODO: Test message content too?
             notify.assert_called_once_with(title, mocker.ANY)
@@ -1306,7 +1614,7 @@ class TestModel:
         message_fixture.update({"sender_id": 2, "flags": ["mentioned"]})
         model.controller.notify_enabled = notify_enabled
         model.user_id = 1
-        notify = mocker.patch("zulipterminal.model.notify")
+        notify = mocker.patch(MODULE + ".notify")
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
@@ -1623,9 +1931,7 @@ class TestModel:
         self.controller.view.message_view = mocker.Mock(log=[msg_w, other_msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
-        cmbl = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=[new_msg_w]
-        )
+        cmbl = mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
 
         model._update_rendered_view(msg_id)
 
@@ -1662,9 +1968,7 @@ class TestModel:
         # New msg widget generated after updating index.
         original_widget = mocker.Mock(message=dict(id=2))  # FIXME: id matters?
         new_msg_w = mocker.Mock(original_widget=original_widget)
-        cmbl = mocker.patch(
-            "zulipterminal.model.create_msg_box_list", return_value=[new_msg_w]
-        )
+        cmbl = mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
 
         model._update_rendered_view(msg_id)
 
@@ -1819,7 +2123,7 @@ class TestModel:
             operation: "add",
         }
         mocker.patch(MODEL + "._update_rendered_view")
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
 
         model._handle_update_message_flags_event(event)
 
@@ -1845,7 +2149,7 @@ class TestModel:
             "all": False,
         }
         mocker.patch(MODEL + "._update_rendered_view")
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
         with pytest.raises(RuntimeError):
             model._handle_update_message_flags_event(event)
         model._update_rendered_view.assert_not_called()
@@ -1906,7 +2210,7 @@ class TestModel:
         }
         self.controller.view.starred_button.count = 0
         mocker.patch(MODEL + "._update_rendered_view")
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
         update_star_count = self.controller.view.starred_button.update_count
 
         model._handle_update_message_flags_event(event)
@@ -1988,7 +2292,7 @@ class TestModel:
         }
 
         mocker.patch(MODEL + "._update_rendered_view")
-        set_count = mocker.patch("zulipterminal.model.set_count")
+        set_count = mocker.patch(MODULE + ".set_count")
 
         model._handle_update_message_flags_event(event)
 
@@ -2033,15 +2337,64 @@ class TestModel:
         model.client.update_subscription_settings.assert_called_once_with(request)
 
     @pytest.mark.parametrize(
-        "narrow, event, called",
+        "initial_visual_notified_streams, expected_new_value",
         [
-            # Not in PM Narrow
-            ([], {}, False),
-            # Not in PM Narrow with sender
-            (
-                [["pm_with", "iago@zulip.com"]],
+            ({315}, True),
+            ({205, 315}, False),
+            (set(), True),
+            ({205}, False),
+        ],
+        ids=[
+            "visual_notification_enable_205",
+            "visual_notification_disable_205",
+            "first_notification_enable_205",
+            "last_notification_disable_205",
+        ],
+    )
+    def test_toggle_stream_visual_notifications(
+        self,
+        model,
+        initial_visual_notified_streams,
+        expected_new_value,
+        response={"result": "success"},
+        stream_id=205,
+    ):
+        model.visual_notified_streams = initial_visual_notified_streams
+        model.client.update_subscription_settings.return_value = response
+
+        model.toggle_stream_visual_notifications(stream_id)
+
+        request = [
+            {
+                "stream_id": stream_id,
+                "property": "desktop_notifications",
+                "value": expected_new_value,
+            }
+        ]
+        model.client.update_subscription_settings.assert_called_once_with(request)
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    @pytest.mark.parametrize(
+        (
+            "narrow, event, is_notification_in_progress,"
+            "expected_active_conversation_info, expected_show_typing_notification,"
+        ),
+        [
+            case(
+                [["stream", "narrow"]],
                 {
-                    "type": "typing",
+                    "op": "start",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "id": 0,
+                },
+                False,
+                {},
+                False,
+                id="not_in_pm_narrow",
+            ),
+            case(
+                [["pm_with", "othello@zulip.com"]],
+                {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
                     "recipients": [
@@ -2051,9 +2404,27 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
+                False,
+                id="not_in_pm_narrow_with_sender",
             ),
-            # In PM narrow with the sender, OP - 'start'
-            (
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                {"sender_name": "hamlet"},
+                True,
+                id="in_pm_narrow_with_sender_typing:start",
+            ),
+            case(
                 [["pm_with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
@@ -2065,9 +2436,11 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                {"sender_name": "hamlet"},
+                False,
+                id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
             ),
-            # OP - 'stop'
-            (
+            case(
                 [["pm_with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
@@ -2079,20 +2452,101 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                {},
+                False,
+                id="in_pm_narrow_with_sender_typing:stop",
+            ),
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                {},
+                False,
+                id="in_pm_narrow_with_other_myself_typing:start",
+            ),
+            case(
+                [["pm_with", "hamlet@zulip.com"]],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                {},
+                False,
+                id="in_pm_narrow_with_other_myself_typing:stop",
+            ),
+            case(
+                [["pm_with", "iago@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
+                    "id": 0,
+                },
+                False,
+                {},
+                False,
+                id="in_pm_narrow_with_oneself:start",
+            ),
+            case(
+                [["pm_with", "iago@zulip.com"]],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [{"user_id": 5, "email": "iago@zulip.com"}],
+                    "id": 0,
+                },
+                False,
+                {},
+                False,
+                id="in_pm_narrow_with_oneself:stop",
             ),
         ],
-        ids=["not_in_pm_narrow", "not_in_pm_narrow_with_sender", "start", "stop"],
     )
-    def test__handle_typing_event(self, mocker, model, narrow, event, called):
+    def test__handle_typing_event(
+        self,
+        mocker,
+        model,
+        narrow,
+        event,
+        is_notification_in_progress,
+        expected_active_conversation_info,
+        expected_show_typing_notification,
+    ):
         event["type"] = "typing"
 
-        mocker.patch("zulipterminal.ui.View.set_footer_text")
         model.narrow = narrow
         model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
+        model.user_id = 5  # Iago's user_id
+        model.controller.active_conversation_info = {}
+        model.controller.is_typing_notification_in_progress = (
+            is_notification_in_progress
+        )
+        show_typing_notification = mocker.patch(
+            CONTROLLER + ".show_typing_notification"
+        )
 
         model._handle_typing_event(event)
 
-        assert model.controller.view.set_footer_text.called == called
+        if expected_active_conversation_info:
+            assert (
+                model.controller.active_conversation_info["sender_name"]
+                == expected_active_conversation_info["sender_name"]
+            )
+        assert show_typing_notification.called == expected_show_typing_notification
 
     @pytest.mark.parametrize(
         "event, final_muted_streams, ",
@@ -2206,6 +2660,69 @@ class TestModel:
         update_left_panel = model.controller.view.left_panel.update_stream_view
         update_left_panel.assert_called_once_with()
         model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        "initial_visual_notified_streams, event, final_visual_notified_streams",
+        [
+            case(
+                {15, 19},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 15,
+                    "value": False,
+                },
+                {19},
+                id="remove_visual_notified_stream_15:present",
+            ),
+            case(
+                {15, 30},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": True,
+                },
+                {15, 19, 30},
+                id="add_visual_notified_stream_19:not_present",
+            ),
+            case(
+                {19},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 15,
+                    "value": False,
+                },
+                {19},
+                id="remove_visual_notified_stream_15:not_present",
+            ),
+            case(
+                {15, 19, 30},
+                {
+                    "property": "desktop_notifications",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": True,
+                },
+                {15, 19, 30},
+                id="add_visual_notified_stream_19:present",
+            ),
+        ],
+    )
+    def test__handle_subscription_event_visual_notifications(
+        self,
+        model,
+        initial_visual_notified_streams,
+        event,
+        final_visual_notified_streams,
+    ):
+        event["type"] = "subscription"
+        model.visual_notified_streams = initial_visual_notified_streams
+
+        model._handle_subscription_event(event)
+
+        assert model.visual_notified_streams == final_visual_notified_streams
 
     @pytest.mark.parametrize(
         "event, feature_level, stream_id, expected_subscribers",
@@ -2380,7 +2897,7 @@ class TestModel:
         first_msg_w.original_widget.message = {"id": 1}
         second_msg_w.original_widget.message = {"id": 2}
         self.controller.view.message_view = mocker.Mock(log=[first_msg_w, second_msg_w])
-        create_msg_box_list = mocker.patch("zulipterminal.model.create_msg_box_list")
+        create_msg_box_list = mocker.patch(MODULE + ".create_msg_box_list")
         model.twenty_four_hr_format = None  # initial value is not True/False
 
         model._handle_update_display_settings_event(event)
@@ -2406,6 +2923,27 @@ class TestModel:
         model.stream_dict = stream_dict
         model.muted_streams = muted_streams
         assert model.is_muted_stream(stream_id) == is_muted
+
+    @pytest.mark.parametrize(
+        "visual_notified_streams, stream_id, is_enabled",
+        [
+            ({1}, 1, True),
+            ({1, 3, 7}, 2, False),
+            (set(), 1, False),
+        ],
+        ids=[
+            "notifications_enabled",
+            "notifications_disabled",
+            "notifications_disabled_no_streams_to_notify",
+        ],
+    )
+    def test_is_visual_notifications_enabled(
+        self, visual_notified_streams, stream_id, is_enabled, stream_dict, model
+    ):
+        model.stream_dict = stream_dict
+        model.visual_notified_streams = visual_notified_streams
+
+        assert model.is_visual_notifications_enabled(stream_id) == is_enabled
 
     @pytest.mark.parametrize(
         "topic, is_muted",
@@ -2513,13 +3051,24 @@ class TestModel:
         realm_emojis_data,
         realm_emojis,
     ):
-        all_emoji_data = model.generate_all_emoji_data(realm_emojis)
+        all_emoji_data, all_emoji_names = model.generate_all_emoji_data(realm_emojis)
 
         assert all_emoji_data == OrderedDict(
             sorted(
                 {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
                 key=lambda e: e[0],
             )
+        )
+        assert model.all_emoji_names == sorted(
+            [
+                name
+                for emoji in {
+                    **unicode_emojis,
+                    **realm_emojis_data,
+                    **zulip_emoji,
+                }.items()
+                for name in [emoji[0], *emoji[1]["aliases"]]
+            ]
         )
         # custom emoji added to active_emoji_data
         assert all_emoji_data["singing"]["type"] == "realm_emoji"
@@ -2606,7 +3155,7 @@ class TestModel:
 
     def test_poll_for_events__no_disconnect(self, mocker, model, raising_event):
         mocker.patch(MODEL + "._register_desired_events")
-        sleep = mocker.patch("zulipterminal.model.time.sleep")
+        sleep = mocker.patch(MODULE + ".time.sleep")
 
         self.client.get_events.side_effect = [
             {
@@ -2636,7 +3185,7 @@ class TestModel:
         mocker.patch(
             MODEL + "._register_desired_events", side_effect=register_return_value
         )
-        sleep = mocker.patch("zulipterminal.model.time.sleep")
+        sleep = mocker.patch(MODULE + ".time.sleep")
 
         self.client.get_events.side_effect = [
             {

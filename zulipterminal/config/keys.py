@@ -2,6 +2,16 @@ from collections import OrderedDict
 from typing import List
 
 from typing_extensions import TypedDict
+from urwid.command_map import (
+    CURSOR_DOWN,
+    CURSOR_LEFT,
+    CURSOR_MAX_RIGHT,
+    CURSOR_PAGE_DOWN,
+    CURSOR_PAGE_UP,
+    CURSOR_RIGHT,
+    CURSOR_UP,
+    command_map,
+)
 
 
 class KeyBinding(TypedDict, total=False):
@@ -20,6 +30,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'keys': ['?'],
         'help_text': 'Show/hide help menu',
         'excluded_from_random_tips': True,
+        'key_category': 'general',
+    }),
+    ('MARKDOWN_HELP', {
+        'keys': ['meta m'],
+        'help_text': 'Show/hide markdown help menu',
         'key_category': 'general',
     }),
     ('ABOUT', {
@@ -134,6 +149,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Cycle through autocomplete suggestions in reverse',
         'key_category': 'msg_compose',
     }),
+    ('ADD_REACTION', {
+        'keys': [':'],
+        'help_text': 'Show/hide Emoji picker popup for current message',
+        'key_category': 'msg_actions',
+    }),
     ('STREAM_NARROW', {
         'keys': ['s'],
         'help_text': 'Narrow to the stream of the current message',
@@ -205,6 +225,12 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Search topics in a stream',
         'key_category': 'searching',
     }),
+    ('SEARCH_EMOJIS', {
+        'keys': ['p'],
+        'help_text': 'Search emojis from Emoji-picker popup',
+        'excluded_from_random_tips': True,
+        'key_category': 'searching',
+    }),
     ('TOGGLE_MUTE_STREAM', {
         'keys': ['m'],
         'help_text': 'Mute/unmute Streams',
@@ -254,6 +280,13 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'excluded_from_random_tips': True,
         'key_category': 'stream_list',
     }),
+    ('COPY_STREAM_EMAIL', {
+        'keys': ['c'],
+        'help_text':
+            'Copy stream email to clipboard (from stream information)',
+        'excluded_from_random_tips': True,
+        'key_category': 'stream_list',
+    }),
     ('REDRAW', {
         'keys': ['ctrl l'],
         'help_text': 'Redraw screen',
@@ -262,6 +295,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     ('QUIT', {
         'keys': ['ctrl c'],
         'help_text': 'Quit',
+        'key_category': 'general',
+    }),
+    ('USER_INFO', {
+        'keys': ['i'],
+        'help_text': 'View user information (From Users list)',
         'key_category': 'general',
     }),
     ('BEGINNING_OF_LINE', {
@@ -339,6 +377,16 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Clear compose box',
         'key_category': 'msg_compose',
     }),
+    ('FULL_RENDERED_MESSAGE', {
+        'keys': ['f'],
+        'help_text': 'Show/hide full rendered message (from message information)',
+        'key_category': 'msg_actions',
+    }),
+    ('FULL_RAW_MESSAGE', {
+        'keys': ['r'],
+        'help_text': 'Show/hide full raw message (from message information)',
+        'key_category': 'msg_actions',
+    }),
 ])
 # fmt: on
 
@@ -352,6 +400,16 @@ HELP_CATEGORIES = OrderedDict(
         ("msg_compose", "Composing a Message"),
     ]
 )
+
+ZT_TO_URWID_CMD_MAPPING = {
+    "GO_UP": CURSOR_UP,
+    "GO_DOWN": CURSOR_DOWN,
+    "GO_LEFT": CURSOR_LEFT,
+    "GO_RIGHT": CURSOR_RIGHT,
+    "SCROLL_UP": CURSOR_PAGE_UP,
+    "SCROLL_DOWN": CURSOR_PAGE_DOWN,
+    "GO_TO_BOTTOM": CURSOR_MAX_RIGHT,
+}
 
 
 class InvalidCommand(Exception):
@@ -395,3 +453,10 @@ def commands_for_random_tips() -> List[KeyBinding]:
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
     ]
+
+
+# Refer urwid/command_map.py
+# Adds alternate keys for standard urwid navigational commands.
+for zt_cmd, urwid_cmd in ZT_TO_URWID_CMD_MAPPING.items():
+    for key in keys_for_command(zt_cmd):
+        command_map[key] = urwid_cmd

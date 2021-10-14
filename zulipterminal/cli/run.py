@@ -343,14 +343,17 @@ def main(options: Optional[List[str]] = None) -> None:
     set_encoding("utf-8")
 
     if args.debug:
+        debug_path: Optional[str] = "debug.log"
+        assert isinstance(debug_path, str)
         print(
-            "NOTE: Debug mode enabled; API calls being logged to {}.".format(
-                in_color("blue", API_CALL_LOG_FILENAME)
-            )
+            "NOTE: Debug mode enabled:"
+            f"\n  API calls will be logged to {in_color('blue', API_CALL_LOG_FILENAME)}"
+            f"\n  Standard output being logged to {in_color('blue', debug_path)}"
         )
         requests_logfile_handler = logging.FileHandler(API_CALL_LOG_FILENAME)
         requests_logger.addHandler(requests_logfile_handler)
     else:
+        debug_path = None
         requests_logger.addHandler(logging.NullHandler())
 
     if args.profile:
@@ -439,10 +442,16 @@ def main(options: Optional[List[str]] = None) -> None:
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use[0] in incomplete:
-            incomplete_theme_warning = (
-                "   WARNING: Incomplete theme; results may vary!\n"
-                "      (you could try: {})".format(", ".join(complete))
-            )
+            if complete:
+                incomplete_theme_warning = (
+                    "   WARNING: Incomplete theme; results may vary!\n"
+                    "      (you could try: {})".format(", ".join(complete))
+                )
+            else:
+                incomplete_theme_warning = (
+                    "   WARNING: Incomplete theme; results may vary!\n"
+                    "      (all themes are incomplete)"
+                )
             print(in_color("yellow", incomplete_theme_warning))
         print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
         if zterm["footlinks"][1] == ZULIPRC_CONFIG:
@@ -488,13 +497,14 @@ def main(options: Optional[List[str]] = None) -> None:
         theme_data = generate_theme(theme_to_use[0], color_depth)
 
         Controller(
-            zuliprc_path,
-            maximum_footlinks,
-            theme_to_use[0],
-            theme_data,
-            color_depth,
-            args.explore,
+            config_file=zuliprc_path,
+            maximum_footlinks=maximum_footlinks,
+            theme_name=theme_to_use[0],
+            theme=theme_data,
+            color_depth=color_depth,
+            in_explore_mode=args.explore,
             **boolean_settings,
+            debug_path=debug_path,
         ).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs
