@@ -1,7 +1,7 @@
 """
-GRUVBOX
+DRACULA
 -------
-This theme uses the official gruvbox color scheme.
+This theme uses the official dracula color scheme.
 For color reference see:
     https://github.com/dracula/vim/blob/d1864ac0734ce51150affa96a35a1e01ade08b79/colors/dracula.vim
 
