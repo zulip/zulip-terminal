@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
+from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light, dracula
 
 
 StyleSpec = Union[
@@ -74,6 +74,7 @@ THEMES = {
     "zt_dark": zt_dark,
     "zt_light": zt_light,
     "zt_blue": zt_blue,
+    "dracula": dracula,
 }
 
 THEME_ALIASES = {
@@ -81,6 +82,7 @@ THEME_ALIASES = {
     "gruvbox": "gruvbox_dark",
     "light": "zt_light",
     "blue": "zt_blue",
+    "dracula": "dracula",
 }
 
 

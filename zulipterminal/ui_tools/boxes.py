@@ -1058,6 +1058,7 @@ class MessageBox(urwid.Pile):
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
+        print(soup, flush=True)
         if soup is None:  # This is not iterable, so return promptly
             return markup, metadata["message_links"], metadata["time_mentions"]
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
