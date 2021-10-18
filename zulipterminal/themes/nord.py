@@ -10,6 +10,10 @@ from pygments. This could be updated to a nord style when the style
 is released.
 
 For further details on themefiles look at the theme contribution guide
+
+NordColor Enum color names are the same as the Nord theme pallete:
+https://www.nordtheme.com/docs/colors-and-palettes
+
 """
 from enum import Enum
 
@@ -19,22 +23,23 @@ from zulipterminal.config.color import color_properties
 
 
 # fmt: off
+
 class NordColor(Enum):
     DEFAULT          = 'default         default   default'
-    DARK0_HARD       = 'black           h234      #2e3440'
-    GRAY_244         = 'dark_gray       h244      #3b4252'
-    LIGHT2           = 'white           h250      #88c0d0'
-    LIGHT3           = 'light_gray      h250      #8fbcbb'
-    LIGHT4           = 'light_gray      h248      #81a1c1'
-    BRIGHT_BLUE      = 'light_blue      h109      #83a598'
-    BRIGHT_GREEN     = 'light_green     h142      #a3be8c'
-    BRIGHT_RED       = 'light_red       h167      #bf616a'
-    NEUTRAL_PURPLE   = 'light_magenta   h132      #b48ead'
-    WHITE            = 'white           h66       #eceff4'
-    NEUTRAL_YELLOW   = 'yellow          h172      #ebcb8b'
-    FADED_BLUE       = 'dark_blue       h24       #434c5e'
-    FADED_YELLOW     = 'brown           h136      #b57614'
-    FADED_RED        = 'dark_red        h88       #d08770'
+    NORD_0           = 'black           h237      #2e3440'
+    NORD_1           = 'dark_gray       h240      #3b4252'
+    NORD_7           = 'light_blue      h153      #88c0d0'
+    NORD_8           = 'white           h159      #8fbcbb'
+    NORD_9           = 'dark_cyan       h147      #81a1c1'
+    GREENISH         = 'light_green     h152      #83a598'
+    NORD_14          = 'dark_green      h108      #a3be8c'
+    NORD_11          = 'dark_red        h88       #bf616a'
+    NORD_15          = 'light_magenta   h97       #b48ead'
+    NORD_6           = 'white           h255      #eceff4'
+    NORD_13          = 'yellow          h222      #ebcb8b'
+    NORD_2           = 'dark_gray       h238      #434c5e'
+    FADED_YELLOW     = 'brown           h214      #b57614'
+    NORD_12          = 'light_red       h173      #d08770'
 
 
 Color = color_properties(NordColor, 'BOLD')
@@ -42,60 +47,60 @@ Color = color_properties(NordColor, 'BOLD')
 
 STYLES = {
     # style_name       :  foreground                   background
-    None               : (Color.LIGHT2,                Color.DARK0_HARD),
-    'selected'         : (Color.LIGHT2,                Color.FADED_BLUE),
-    'msg_selected'     : (Color.LIGHT2,                Color.FADED_BLUE),
-    'header'           : (Color.WHITE,                 Color.FADED_BLUE),
-    'general_narrow'   : (Color.LIGHT2,                Color.FADED_BLUE),
-    'general_bar'      : (Color.LIGHT2,                Color.DARK0_HARD),
-    'name'             : (Color.WHITE__BOLD,           Color.DARK0_HARD),
-    'unread'           : (Color.LIGHT3,                Color.DARK0_HARD),
-    'user_active'      : (Color.BRIGHT_GREEN,          Color.DARK0_HARD),
-    'user_idle'        : (Color.NEUTRAL_YELLOW,        Color.DARK0_HARD),
-    'user_offline'     : (Color.LIGHT2,                Color.DARK0_HARD),
-    'user_inactive'    : (Color.LIGHT2,                Color.DARK0_HARD),
-    'title'            : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
-    'column_title'     : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
-    'time'             : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
-    'bar'              : (Color.LIGHT2,                Color.GRAY_244),
-    'msg_emoji'        : (Color.NEUTRAL_PURPLE,        Color.DARK0_HARD),
-    'reaction'         : (Color.NEUTRAL_PURPLE__BOLD,  Color.DARK0_HARD),
-    'reaction_mine'    : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
-    'msg_math'         : (Color.DARK0_HARD,            Color.GRAY_244),
-    'msg_mention'      : (Color.NEUTRAL_PURPLE__BOLD,  Color.DARK0_HARD),
-    'msg_link'         : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
-    'msg_link_index'   : (Color.BRIGHT_BLUE__BOLD,     Color.DARK0_HARD),
-    'msg_quote'        : (Color.NEUTRAL_YELLOW,        Color.DARK0_HARD),
-    'msg_code'         : (Color.DARK0_HARD,            Color.LIGHT2),
-    'msg_bold'         : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
-    'msg_time'         : (Color.DARK0_HARD,            Color.LIGHT2),
-    'footer'           : (Color.DARK0_HARD,            Color.LIGHT4),
-    'footer_contrast'  : (Color.LIGHT2,                Color.DARK0_HARD),
-    'starred'          : (Color.BRIGHT_RED__BOLD,      Color.DARK0_HARD),
-    'unread_count'     : (Color.LIGHT4,                Color.DARK0_HARD),
-    'starred_count'    : (Color.LIGHT4,                Color.DARK0_HARD),
-    'table_head'       : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
-    'filter_results'   : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
-    'edit_topic'       : (Color.DARK0_HARD,            Color.GRAY_244),
-    'edit_tag'         : (Color.DARK0_HARD,            Color.GRAY_244),
-    'edit_author'      : (Color.NEUTRAL_YELLOW,        Color.DARK0_HARD),
-    'edit_time'        : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
-    'current_user'     : (Color.LIGHT2,                Color.DARK0_HARD),
-    'muted'            : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
-    'popup_border'     : (Color.LIGHT2,                Color.DARK0_HARD),
-    'popup_category'   : (Color.BRIGHT_BLUE__BOLD,     Color.DARK0_HARD),
-    'popup_contrast'   : (Color.DARK0_HARD,            Color.GRAY_244),
-    'popup_important'  : (Color.BRIGHT_RED__BOLD,      Color.DARK0_HARD),
-    'widget_disabled'  : (Color.GRAY_244,              Color.DARK0_HARD),
-    'area:help'        : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
-    'area:msg'         : (Color.DARK0_HARD,            Color.BRIGHT_RED),
-    'area:stream'      : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
-    'area:error'       : (Color.LIGHT2,                Color.FADED_RED),
-    'area:user'        : (Color.LIGHT2,                Color.FADED_BLUE),
-    'search_error'     : (Color.BRIGHT_RED,            Color.DARK0_HARD),
-    'task:success'     : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
-    'task:error'       : (Color.LIGHT2,                Color.FADED_RED),
-    'task:warning'     : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+    None               : (Color.NORD_7,                Color.NORD_0),
+    'selected'         : (Color.NORD_7,                Color.NORD_2),
+    'msg_selected'     : (Color.NORD_7,                Color.NORD_2),
+    'header'           : (Color.NORD_6,                Color.NORD_2),
+    'general_narrow'   : (Color.NORD_7,                Color.NORD_2),
+    'general_bar'      : (Color.NORD_7,                Color.NORD_0),
+    'name'             : (Color.NORD_6__BOLD,          Color.NORD_0),
+    'unread'           : (Color.NORD_8,                Color.NORD_0),
+    'user_active'      : (Color.NORD_14,               Color.NORD_0),
+    'user_idle'        : (Color.NORD_13,               Color.NORD_0),
+    'user_offline'     : (Color.NORD_7,                Color.NORD_0),
+    'user_inactive'    : (Color.NORD_7,                Color.NORD_0),
+    'title'            : (Color.NORD_7__BOLD,          Color.NORD_0),
+    'column_title'     : (Color.NORD_7__BOLD,          Color.NORD_0),
+    'time'             : (Color.GREENISH,              Color.NORD_0),
+    'bar'              : (Color.NORD_7,                Color.NORD_1),
+    'msg_emoji'        : (Color.NORD_15,               Color.NORD_0),
+    'reaction'         : (Color.NORD_15__BOLD,         Color.NORD_0),
+    'reaction_mine'    : (Color.NORD_0,                Color.NORD_15),
+    'msg_math'         : (Color.NORD_0,                Color.NORD_1),
+    'msg_mention'      : (Color.NORD_15__BOLD,         Color.NORD_0),
+    'msg_link'         : (Color.GREENISH,              Color.NORD_0),
+    'msg_link_index'   : (Color.GREENISH__BOLD,        Color.NORD_0),
+    'msg_quote'        : (Color.NORD_13,               Color.NORD_0),
+    'msg_code'         : (Color.NORD_0,                Color.NORD_7),
+    'msg_bold'         : (Color.NORD_7__BOLD,          Color.NORD_0),
+    'msg_time'         : (Color.NORD_0,                Color.NORD_7),
+    'footer'           : (Color.NORD_0,                Color.NORD_9),
+    'footer_contrast'  : (Color.NORD_7,                Color.NORD_0),
+    'starred'          : (Color.NORD_11__BOLD,         Color.NORD_0),
+    'unread_count'     : (Color.NORD_9,                Color.NORD_0),
+    'starred_count'    : (Color.NORD_9,                Color.NORD_0),
+    'table_head'       : (Color.NORD_7__BOLD,          Color.NORD_0),
+    'filter_results'   : (Color.NORD_0,                Color.NORD_14),
+    'edit_topic'       : (Color.NORD_0,                Color.NORD_1),
+    'edit_tag'         : (Color.NORD_0,                Color.NORD_1),
+    'edit_author'      : (Color.NORD_13,               Color.NORD_0),
+    'edit_time'        : (Color.GREENISH,              Color.NORD_0),
+    'current_user'     : (Color.NORD_7,                Color.NORD_0),
+    'muted'            : (Color.GREENISH,              Color.NORD_0),
+    'popup_border'     : (Color.NORD_7,                Color.NORD_0),
+    'popup_category'   : (Color.GREENISH__BOLD,        Color.NORD_0),
+    'popup_contrast'   : (Color.NORD_0,                Color.NORD_1),
+    'popup_important'  : (Color.NORD_11__BOLD,         Color.NORD_0),
+    'widget_disabled'  : (Color.NORD_1,                Color.NORD_0),
+    'area:help'        : (Color.NORD_0,                Color.NORD_14),
+    'area:msg'         : (Color.NORD_0,                Color.NORD_11),
+    'area:stream'      : (Color.NORD_0,                Color.GREENISH),
+    'area:error'       : (Color.NORD_7,                Color.NORD_12),
+    'area:user'        : (Color.NORD_7,                Color.NORD_2),
+    'search_error'     : (Color.NORD_11,               Color.NORD_0),
+    'task:success'     : (Color.NORD_0,                Color.NORD_14),
+    'task:error'       : (Color.NORD_7,                Color.NORD_12),
+    'task:warning'     : (Color.NORD_0,                Color.NORD_11),
 }
 
 META = {
@@ -112,9 +117,9 @@ META = {
             'gp'  : '#268bd2, bold',       # blue
             'gs'  : '#839496, bold',       # base0
             'err' : '#dc322f',             # red
-            'n'   : '#bdae93',             # gruvbox: light4
-            'p'   : '#bdae93',             # gruvbox: light4
-            'w'   : '#bdae93',             # gruvbox: light4
+            'n'   : '#bdae93',             # gruvbox: NORD_9
+            'p'   : '#bdae93',             # gruvbox: NORD_9
+            'w'   : '#bdae93',             # gruvbox: NORD_9
         }
     }
 }

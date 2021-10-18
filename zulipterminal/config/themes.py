@@ -85,8 +85,8 @@ REQUIRED_META = {
 # fmt: on
 
 THEMES = {
-    "nord": nord,
     "gruvbox_dark": gruvbox,
+    "nord": nord,
     "zt_dark": zt_dark,
     "zt_light": zt_light,
     "zt_blue": zt_blue,
