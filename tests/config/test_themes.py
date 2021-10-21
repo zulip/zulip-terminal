@@ -19,12 +19,7 @@ from zulipterminal.config.themes import (
 )
 
 
-expected_complete_themes = {
-    "zt_dark",
-    "gruvbox_dark",
-    "zt_light",
-    "zt_blue",
-}
+expected_complete_themes = {"zt_dark", "gruvbox_dark", "zt_light", "zt_blue", "dracula"}
 aliases_16_color = [
     "default",
     "black",
