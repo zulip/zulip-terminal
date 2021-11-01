@@ -24,7 +24,7 @@ expected_complete_themes = {
     "gruvbox_dark",
     "zt_light",
     "zt_blue",
-    "nord",
+    "nord_dark",
 }
 aliases_16_color = [
     "default",

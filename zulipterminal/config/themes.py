@@ -86,7 +86,7 @@ REQUIRED_META = {
 
 THEMES = {
     "gruvbox_dark": gruvbox,
-    "nord": nord,
+    "nord_dark": nord,
     "zt_dark": zt_dark,
     "zt_light": zt_light,
     "zt_blue": zt_blue,
@@ -95,6 +95,7 @@ THEMES = {
 THEME_ALIASES = {
     "default": "zt_dark",
     "gruvbox": "gruvbox_dark",
+    "nord": "nord_dark",
     "light": "zt_light",
     "blue": "zt_blue",
 }
