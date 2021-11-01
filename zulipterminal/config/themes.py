@@ -97,7 +97,6 @@ THEME_ALIASES = {
     "gruvbox": "gruvbox_dark",
     "light": "zt_light",
     "blue": "zt_blue",
-    "dracula": "dracula",
 }
 
 
