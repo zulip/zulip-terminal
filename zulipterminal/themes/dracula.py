@@ -30,6 +30,7 @@ class DraculaColor(Enum):
     RED              = 'red             h203      #FF5555'
     YELLOW           = 'yellow          h228      #F1FA8C'
 
+
 Color = color_properties(DraculaColor, 'BOLD')
 
 

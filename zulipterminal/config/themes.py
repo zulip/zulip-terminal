@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pygments.token import STANDARD_TYPES
 
 from zulipterminal.config.color import term16
-from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light, dracula
+from zulipterminal.themes import dracula, gruvbox, zt_blue, zt_dark, zt_light
 
 
 StyleSpec = Union[
