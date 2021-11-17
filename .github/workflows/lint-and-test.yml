@@ -66,7 +66,7 @@ jobs:
           - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)"}
           - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
           - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", CODECOV: true}
-          - {PYTHON: "3.10.0-rc.1", OS: ubuntu-latest, NAME: "CPython 3.10RC1 (ubuntu)"}
+          - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)"}
           - {PYTHON: 'pypy3', OS: ubuntu-latest, NAME: "PyPy 3 (ubuntu)"}
           - {PYTHON: 3.9, OS: macos-latest, NAME: "CPython 3.9 (macos)"}
     runs-on: ${{ matrix.env.OS }}
