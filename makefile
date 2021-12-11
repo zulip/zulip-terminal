@@ -47,4 +47,4 @@ venv: $(ZT_VENV)/bin/activate
 $(ZT_VENV)/bin/activate: setup.py
 	@echo "=== Installing development environment ==="
 	test -d $(ZT_VENV) || $(BASEPYTHON) -m venv $(ZT_VENV)
-	$(PYTHON) -m pip install -U pip && $(PYTHON) -m pip install -e .[dev] && touch $(ZT_VENV)/bin/activate
+	$(PYTHON) -m pip install wheel && $(PYTHON) -m pip install -U pip && $(PYTHON) -m pip install -e .[dev] && touch $(ZT_VENV)/bin/activate
