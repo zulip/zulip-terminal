@@ -84,7 +84,7 @@ REQUIRED_META = {
 }
 # fmt: on
 
-THEMES = {
+THEMES: Dict[str, Any] = {
     "gruvbox_dark": gruvbox,
     "zt_dark": zt_dark,
     "zt_light": zt_light,
