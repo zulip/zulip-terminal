@@ -1,3 +1,4 @@
+import pprint
 import re
 import typing
 import unicodedata
@@ -1194,8 +1195,18 @@ class MessageBox(urwid.Pile):
             # TODO: Some of these could be implemented
             "br": "",  # No indicator of absence
             "hr": "RULER",
-            "img": "IMAGE",
+            "img": "IMAGE"
+            # "h1": "Heading-style-1",
+            # "h2": "Heading-style-2"
         }
+        # print("<!-- ---------------- Printing the variable markup ---------------- --> \n")
+        # pp = pprint.PrettyPrinter(indent=2)
+        # pp.pprint(markup)
+        # i = 0
+        # for temp_var in soup:
+        #     pp.pprint(temp_var)
+        #     pp.pprint(i)
+        #     i = i+1
         unrendered_div_classes = {  # In pairs of 'div_class': 'text'
             # TODO: Support embedded content & twitter preview?
             "message_embed": "EMBEDDED CONTENT",
@@ -1204,6 +1215,7 @@ class MessageBox(urwid.Pile):
             "message_inline_image": "",  # Duplicate of other content
         }
         unrendered_template = "[{} NOT RENDERED]"
+        # TODO: If the tag is h1/h2/h3 then display the text in the corresponding font size
         for element in soup:
             if isinstance(element, Tag):
                 # Caching element variables for use in the
@@ -1373,6 +1385,25 @@ class MessageBox(urwid.Pile):
             elif tag in ("strong", "em"):
                 # BOLD & ITALIC
                 markup.append(("msg_bold", tag_text))
+# -------------------------------------------------------------
+            # Heading should be bold
+            # With/without background colour
+            # BG cannot be white, blue,
+            # Font colour cannot be red, 
+            elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            # elif tag in ("h1"):
+                # HEADING STYLE
+                markup.append(("msg_heading", tag_text))
+            # elif tag in ("h2"):
+            #     # HEADING STYLE
+            #     markup.append(("heading_tag2", tag_text))
+            # elif tag in ("h3"):
+            #     # HEADING STYLE
+            #     markup.append(("heading_tag3", tag_text))
+            # elif tag in ("h4"):
+            #     # HEADING STYLE
+            #     markup.append(("heading_tag4", tag_text))
+
             elif tag in ("ul", "ol"):
                 # LISTS (UL & OL)
                 for part in element.contents:
@@ -1438,6 +1469,17 @@ class MessageBox(urwid.Pile):
                 metadata["time_mentions"].append((time_string, source_text))
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
+    
+        # print("<!-- ---------------- Printing the variable markup ---------------- --> \n")
+        # pp = pprint.PrettyPrinter(indent=2)
+        # # pp.pprint(markup)
+        # i = 0
+        # # print("Printing type of markup: ", type(markup), "\n")
+        # for temp_var in markup:
+        #     pp.pprint(temp_var)
+        #     print(type(temp_var))
+        #     pp.pprint(i)
+        #     i = i+1
         return markup, metadata["message_links"], metadata["time_mentions"]
 
     def main_view(self) -> List[Any]:
@@ -2029,3 +2071,4 @@ class PanelSearchBox(urwid.Edit):
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
         return super().keypress(size, key)
+

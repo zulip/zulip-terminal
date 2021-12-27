@@ -14,3 +14,5 @@ Keyboard shortcuts for bold and italics
 Read receipts
 Draft the message
 Selecting the text to edit it
+Reaching end of messages
+Highlight the words searched in the search results

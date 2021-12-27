@@ -141,6 +141,10 @@ def test_valid_zuliprc_but_no_connection(
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
+
+    print("<!-- ---------------- Printing the variable expected_lines ---------------- --> \n")
+    print("Printing expected lines: ", expected_lines)
+
     assert lines == expected_lines
 
     assert captured.err == ""
@@ -402,6 +406,9 @@ def test_successful_main_function_with_config(
         "   color depth setting '256' specified in zuliprc file.",
         "   notify setting 'enabled' specified in zuliprc file.",
     ]
+    print("<!-- ---------------- Printing the variable expected_lines ---------------- --> \n")
+    print("Printing expected lines: ", expected_lines)
+
     assert lines == expected_lines
 
 

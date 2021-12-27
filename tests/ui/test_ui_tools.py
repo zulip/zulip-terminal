@@ -1353,6 +1353,12 @@ class TestMessageBox:
         [
             case("", [], id="empty"),
             case("<p>hi</p>", ["", "hi"], id="p"),
+            case("<h1>heading1</h1>", [("msg_heading", "heading1")], id="h1"),
+            case("<h2>heading2</h2>", [("msg_heading", "heading2")], id="h2"),
+            case("<h3>heading3</h3>", [("msg_heading", "heading3")], id="h3"),
+            case("<h4>heading4</h4>", [("msg_heading", "heading4")], id="h4"),
+            case("<h5>heading5</h5>", [("msg_heading", "heading5")], id="h5"),
+            case("<h6>heading6</h6>", [("msg_heading", "heading6")], id="h6"),
             case(
                 '<span class="user-mention">@Bob Smith',
                 [("msg_mention", "@Bob Smith")],
@@ -1928,6 +1934,11 @@ class TestMessageBox:
         )
 
         markup, *_ = MessageBox.soup2markup(soup, metadata)
+        print("<!-- ---------------- JUST_markup ---------------- --> \n")
+        print(markup)
+        print("<!-- ---------------- EXPECTED_markup ---------------- --> \n")
+        print(expected_markup)
+
 
         assert markup == [""] + expected_markup
 
