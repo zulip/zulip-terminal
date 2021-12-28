@@ -1358,6 +1358,12 @@ class TestMessageBox:
                 [("msg_mention", "@Bob Smith")],
                 id="user-mention",
             ),
+            case("<h1>heading1</h1>", [("msg_heading", "heading1")], id="h1"),
+            case("<h2>heading2</h2>", [("msg_heading", "heading2")], id="h2"),
+            case("<h3>heading3</h3>", [("msg_heading", "heading3")], id="h3"),
+            case("<h4>heading4</h4>", [("msg_heading", "heading4")], id="h4"),
+            case("<h5>heading5</h5>", [("msg_heading", "heading5")], id="h5"),
+            case("<h6>heading6</h6>", [("msg_heading", "heading6")], id="h6"),
             case(
                 '<span class="user-group-mention">@A Group',
                 [("msg_mention", "@A Group")],

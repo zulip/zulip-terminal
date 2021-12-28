@@ -31,6 +31,7 @@ STYLES = {
     'msg_emoji'       : (Color.LIGHT_MAGENTA,       Color.WHITE),
     'reaction'        : (Color.LIGHT_MAGENTA__BOLD, Color.WHITE),
     'reaction_mine'   : (Color.WHITE,               Color.LIGHT_MAGENTA),
+    'msg_heading'     : (Color.WHITE__BOLD,         Color.DARK_RED),
     'msg_math'        : (Color.DARK_GRAY,           Color.LIGHT_GRAY),
     'msg_mention'     : (Color.LIGHT_RED__BOLD,     Color.WHITE),
     'msg_link'        : (Color.DARK_BLUE,           Color.WHITE),
