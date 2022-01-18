@@ -10,6 +10,8 @@ test manually in #test here on chat.zulip.org :)
 
 Possible Additions:
 Reply to a message
+Searching only within a restricted domain/within the stream(s)/topic
+filter messages as per the sender
 Keyboard shortcuts for bold and italics
 Read receipts
 Draft the message

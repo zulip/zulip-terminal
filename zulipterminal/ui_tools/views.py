@@ -7,6 +7,8 @@ import pytz
 import urwid
 from typing_extensions import Literal
 
+from urwid.container import Frame
+
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
@@ -549,9 +551,12 @@ class MiddleColumnView(urwid.Frame):
         self.view = view
         self.last_unread_topic = None
         self.last_unread_pm = None
+        # print(search_box)
         self.search_box = search_box
         view.message_view = message_view
         super().__init__(message_view, header=search_box, footer=write_box)
+        # print("================Printing search_box================\n")
+        # print(write_box)
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         topics = list(self.model.unread_counts["unread_topics"].keys())

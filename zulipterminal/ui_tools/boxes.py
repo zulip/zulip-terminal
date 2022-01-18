@@ -51,6 +51,7 @@ from zulipterminal.helper import (
     match_topics,
     match_user,
     match_user_name_and_email,
+    # unauthorised_warning,
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
@@ -777,6 +778,8 @@ class WriteBox(urwid.Pile):
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
+            # print("================Printing write_box================\n")
+            # print(self.write_box)
             self.view.controller.exit_editor_mode()
             self.main_view(False)
             self.view.middle_column.set_focus("body")
@@ -830,6 +833,8 @@ class WriteBox(urwid.Pile):
                             )
                             self.view.controller.report_error(invalid_stream_error)
                             return key
+                        # elif unauthorised_warning(self.model, stream_name):
+                        #     return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                             stream_name=stream_name
                         )
@@ -1762,11 +1767,19 @@ class MessageBox(urwid.Pile):
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message["type"] == "stream":
+                # if not unauthorised_warning(self.model,
+                #                             self.message.get('stream_id')):
+                #     self.model.controller.view.write_box.stream_box_view(
+                #         caption=self.message['display_recipient'],
+                #         title=self.message['subject'],
+                #         stream_id=self.stream_id,
+                #     )
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message["display_recipient"],
                     title=self.message["subject"],
                     stream_id=self.stream_id,
                 )
+                
         elif is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(

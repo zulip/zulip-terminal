@@ -535,6 +535,43 @@ def match_topics(topic_names: List[str], search_text: str) -> List[str]:
 DataT = TypeVar("DataT")
 
 
+# def unauthorised_warning(model: Any, stream_identifier: Any) -> bool:
+#     """
+#     Identify target stream based on stream id or stream name
+#     and update footer based on the user rights.
+#     """
+#     stream_id = None
+#     if isinstance(stream_identifier, int):
+#         stream_id = stream_identifier
+#     elif isinstance(stream_identifier, str):
+#         for s_id, stream in model.stream_dict.items():
+#             if stream['name'] == stream_identifier:
+#                 stream_id = s_id
+#                 break
+
+#     if not stream_id:
+#         msg_footer = (
+#             model.controller.view.set_footer_text(
+#                 "Specified stream does not exist.",
+#                 5))
+#         return True
+#     else:
+#         if (model.stream_dict[stream_id].
+#                 get('is_announcement_only', None) == 1
+#                 or (model.initial_data.get('is_admin', None)
+#                     or model.initial_data.get('is_owner', None)
+#                     and model.stream_dict[stream_id].
+#                     get('stream_post_policy', None) == 2)):
+#             msg_footer = (
+#                 model.controller.view.set_footer_text(
+#                     "You are not authorised to send messages "
+#                     "to this stream.",
+#                     5))
+#             return True
+#         else:
+#             return False
+
+
 def match_stream(
     data: List[Tuple[DataT, str]], search_text: str, pinned_streams: List[StreamData]
 ) -> Tuple[List[DataT], List[str]]:
