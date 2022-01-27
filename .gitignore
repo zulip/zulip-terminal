@@ -1,5 +1,5 @@
+## Generated project files
 *.py[cod]
-zuliprc
 .pytest_cache/*
 cov_html/*
 .coverage
@@ -13,5 +13,12 @@ zulip_term.egg-info
 zt_venv/*
 zulip-terminal-venv/*
 
-.vscode/*
+## Config files
+zuliprc
+
+## Files left by editors/IDEs and local environments
 .DS_Store
+# VS Code
+.vscode/*
+# PyCharm
+.idea
