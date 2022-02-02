@@ -1,9 +1,6 @@
 """
-GRUVBOX
--------
-This theme uses the official gruvbox color scheme.
-For color reference see:
-    https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
+GRUVBOX DARK
+------------
 
 For syntax highlighting, this theme uses the solarized dark styles
 from pygments. This could be updated to a gruvbox style when the style
@@ -11,34 +8,13 @@ is released.
 
 For further details on themefiles look at the theme contribution guide
 """
-from enum import Enum
 
 from pygments.styles.solarized import SolarizedDarkStyle
 
-from zulipterminal.config.color import color_properties
+from zulipterminal.themes.colors_gruvbox import DefaultBoldColor as Color
 
 
 # fmt: off
-class GruvBoxColor(Enum):
-    # color          =  16code          256code   24code
-    DEFAULT          = 'default         default   default'
-    DARK0_HARD       = 'black           h234      #1d2021'
-    GRAY_244         = 'dark_gray       h244      #928374'
-    LIGHT2           = 'white           h250      #d5c4a1'
-    LIGHT4           = 'light_gray      h248      #bdae93'
-    BRIGHT_BLUE      = 'light_blue      h109      #83a598'
-    BRIGHT_GREEN     = 'light_green     h142      #b8bb26'
-    BRIGHT_RED       = 'light_red       h167      #fb4934'
-    NEUTRAL_PURPLE   = 'light_magenta   h132      #b16286'
-    NEUTRAL_BLUE     = 'dark_cyan       h66       #458588'
-    NEUTRAL_YELLOW   = 'yellow          h172      #d79921'
-    FADED_BLUE       = 'dark_blue       h24       #076678'
-    FADED_YELLOW     = 'brown           h136      #b57614'
-    FADED_RED        = 'dark_red        h88       #9d0006'
-
-
-Color = color_properties(GruvBoxColor, 'BOLD')
-
 
 STYLES = {
     # style_name       :  foreground                   background

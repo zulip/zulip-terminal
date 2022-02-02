@@ -23,10 +23,10 @@ If BOLD is something that is not needed, just use:
 from zulipterminal.config.color import DefaultColor as Color
 ```
 
-Likewise, to use a color scheme from any other theme like Gruvbox, use:
+Likewise, to use a color scheme from any other theme like Gruvbox (for which the colors are defined in colors_gruvbox.py), use:
 
 ```python
-from zulipterminal.themes.gruvbox import Color
+from zulipterminal.themes.colors_gruvbox import DefaultBoldColor
 ```
 
 ---
