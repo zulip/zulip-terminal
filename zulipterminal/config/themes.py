@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pygments.token import STANDARD_TYPES
 
 from zulipterminal.config.color import term16
-from zulipterminal.themes import gruvbox, zt_blue, zt_dark, zt_light
+from zulipterminal.themes import dracula, gruvbox, zt_blue, zt_dark, zt_light
 
 
 StyleSpec = Union[
@@ -90,6 +90,7 @@ THEMES: Dict[str, Any] = {
     "zt_dark": zt_dark,
     "zt_light": zt_light,
     "zt_blue": zt_blue,
+    "dracula": dracula,
 }
 
 THEME_ALIASES = {
