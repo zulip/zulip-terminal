@@ -431,7 +431,7 @@ def main(options: Optional[List[str]] = None) -> None:
 
         color_depth_str = zterm["color-depth"][0]
         if color_depth_str == "24bit":
-            color_depth = 2 ** 24
+            color_depth = 2**24
         else:
             color_depth = int(color_depth_str)
 

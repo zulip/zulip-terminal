@@ -156,7 +156,7 @@ def parse_themefile(
             bg = " ".join([bg_code256] + bg_props)
             new_style = (style_name, "", "", "", fg, bg)
 
-        elif color_depth == 2 ** 24:
+        elif color_depth == 2**24:
             fg = " ".join([fg_code24] + fg_props)
             bg = " ".join([bg_code24] + bg_props)
             new_style = (style_name, "", "", "", fg, bg)

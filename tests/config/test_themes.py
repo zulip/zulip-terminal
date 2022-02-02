@@ -126,7 +126,7 @@ def test_complete_and_incomplete_themes() -> None:
             ],
         ),
         (
-            2 ** 24,
+            2**24,
             [
                 ("s1", "", "", "", "#ffffff , bold", "#870087"),
                 ("s2", "", "", "", "#ffffff , bold , italics", "#870087"),
