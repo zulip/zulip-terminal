@@ -31,10 +31,18 @@ class GruvBoxColor(Enum):
     BRIGHT_RED       = 'light_red       h167      #fb4934'
     NEUTRAL_PURPLE   = 'light_magenta   h132      #b16286'
     NEUTRAL_BLUE     = 'dark_cyan       h66       #458588'
-    NEUTRAL_YELLOW   = 'yellow          h172      #d79921'
+    NEUTRAL_YELLOW   = 'brown           h172      #d79921'
     FADED_BLUE       = 'dark_blue       h24       #076678'
     FADED_YELLOW     = 'brown           h136      #b57614'
     FADED_RED        = 'dark_red        h88       #9d0006'
+    LIGHT0_HARD      = 'white           h230      #f9f5d7'
+    GRAY_245         = 'dark_gray       h245      #928374'
+    DARK2            = 'black           h239      #504945'
+    DARK4            = 'black           h243      #7c6f64'
+    BRIGHT_YELLOW    = 'brown           h214      #fabd2f'
+    FADED_GREEN      = 'dark_green      h100      #79740e'
+
+
 # fmt: on
 
 
