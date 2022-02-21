@@ -31,7 +31,7 @@ from zulipterminal.themes.colors_gruvbox import DefaultBoldColor
 
 ---
 
-If any of these are not enough for the theme that you want to create, the following format would give an idea of how to create a new color scheme ( Refer: `gruvbox.py` ).
+If any of these are not enough for the theme that you want to create, the following format would give an idea of how to create a new color scheme ( Refer: `colors_gruvbox.py` ).
 
 ```python
 class ThemeColor(Enum):
