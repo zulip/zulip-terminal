@@ -1399,6 +1399,11 @@ class Model:
                             msg_id
                         )
 
+                    # Add the msg_id to the new topic's set, if the set has
+                    # already been initiated.
+                    if new_subject in self.index["topic_msg_ids"][stream_id]:
+                        self.index["topic_msg_ids"][stream_id][new_subject].add(msg_id)
+
                 # Update and re-render indexed messages.
                 indexed_msg = self.index["messages"].get(msg_id)
                 if indexed_msg:

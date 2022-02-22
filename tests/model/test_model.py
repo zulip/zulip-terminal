@@ -1646,7 +1646,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {2}},
+                        10: {"new subject": {1}, "old subject": {2}},
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
@@ -1679,7 +1679,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": set()},
+                        10: {"new subject": {1, 2}, "old subject": set()},
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
@@ -1710,10 +1710,10 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {1, 2}},
+                        10: {"new subject": set(), "old subject": {1, 2}},
                     },
                     "edited_messages": {1},
-                    "topics": {10: ["old subject"]},
+                    "topics": {10: ["new subject", "old subject"]},
                 },
                 False,
                 id="Message content is updated",
@@ -1744,7 +1744,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {2}},
+                        10: {"new subject": {1}, "old subject": {2}},
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
@@ -1774,10 +1774,10 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {1, 2}},
+                        10: {"new subject": set(), "old subject": {1, 2}},
                     },
                     "edited_messages": {1},
-                    "topics": {10: ["old subject"]},
+                    "topics": {10: ["new subject", "old subject"]},
                 },
                 False,
                 id="Some new type of update which we don't handle yet",
@@ -1808,7 +1808,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {1, 2}},
+                        10: {"new subject": {3}, "old subject": {1, 2}},
                     },
                     "edited_messages": set(),
                     "topics": {10: []},  # This resets the cache
@@ -1842,7 +1842,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {1, 2}},
+                        10: {"new subject": {3}, "old subject": {1, 2}},
                     },
                     "edited_messages": set(),
                     "topics": {10: ["new subject", "old subject"]},
@@ -1876,7 +1876,7 @@ class TestModel:
                         },
                     },
                     "topic_msg_ids": {
-                        10: {"old subject": {2}},
+                        10: {"new subject": {1}, "old subject": {2}},
                     },
                     "edited_messages": {1},
                     "topics": {10: ["new subject", "old subject"]},
@@ -1907,11 +1907,11 @@ class TestModel:
                 }
                 for message_id in [1, 2]
             },
-            "topic_msg_ids": {
-                10: {"old subject": {1, 2}},
+            "topic_msg_ids": {  # FIXME? consider test for eg. absence of empty set
+                10: {"new subject": set(), "old subject": {1, 2}},
             },
             "edited_messages": set(),
-            "topics": {10: ["old subject"]},
+            "topics": {10: ["new subject", "old subject"]},
         }
         mocker.patch(MODEL + "._update_rendered_view")
 
