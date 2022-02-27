@@ -102,8 +102,6 @@ As in the example above, a specific prefix is required to indicate which action 
 |Link to stream|`#`, `#**`|`#**stream name**`|
 |Insert emoji|`:`|`:emoji_name:`|
 
-**NOTE:** Currently, the above autocompletes ignore a text containing whitespaces if it is specified as a prefix for autocompletion. (e.g., `#test he` wouldn't lead to `#**test here**`) See also [#925](https://github.com/zulip/zulip-terminal/issues/925).
-
 ### Autocomplete of message recipients
 
 Since each of the stream (1), topic (2) and private message recipients (3) areas are very specific, no prefix must be manually entered and values provided through autocomplete depend upon the context automatically.

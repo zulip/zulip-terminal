@@ -1,5 +1,189 @@
 # Zulip-terminal Changelog
 
+## 0.7.0 - 20 May 2022
+
+This long-awaited release includes contributions from our four 2021
+[GSoC](https://summerofcode.withgoogle.com/) students, though as with recent
+releases we welcomed those from
+[many](https://github.com/zulip/zulip-terminal/graphs/contributors?from=2021-01-29&to=2022-05-20&type=c)
+others - many thanks to you all for making this a great release!
+
+<!-- Highlight summary - increasing feature parity -->
+This release features an extension of the existing autocomplete infrastructure
+to handle viewing, autocompletion and validation of private message recipients,
+dramatically improving the user experience in this area. Another major feature
+is application of arbitrary reactions to messages, which was previously limited
+to :+1:. Those interacting with more visual communities may find the ability to
+download and open attachments particularly useful.
+
+<!-- Highlight summary - terminal-specific -->
+Other than these and other changes for growing parity with existing Zulip
+clients and later Zulip server versions, we continue to explore
+terminal-specific features such as improved layout designs, and ideas such as
+sender presence markers adjacent to each message.
+
+### IMPORTANT NOTES
+
+#### Python versions (CPython 3.6-3.10, PyPy 3.6-3.9)
+
+As noted in the release notes for 0.6.0, this release depends on a minimum of
+python 3.6 (see #838, #567) since 3.5 was dropped upstream some time ago. Testing
+against CPython 3.10 and a wider range of PyPy Python versions was added in CI
+(#1132, #1141, #1159).
+
+This is highly likely to be the last release with support for python 3.6, for
+which support has now ended upstream (see #984).
+
+#### Footlinks settings (#773, #841)
+
+The previous `footlinks` setting for configuring footlinks now has adjusted
+behavior if enabled (the default), to show only the first 3 per message; the
+full set can be found in the Message Information popup (<kbd>i</kbd>).
+
+In future this previous setting is expected to be phased out in favor of the
+new `maximum-footlinks` setting, where `0` corresponds to `footlinks=disabled`
+and `3` represents the new `footlinks=enabled` behavior.
+
+#### Customized installs
+
+If you've customized your install by editing themes or keys, be sure to back
+these up before upgrading and then carefully integrate them. **This is
+particularly important in this release since themes are now structured differently
+in the codebase (see the new `themes/THEME_CONTRIBUTING.md`)**
+
+### HIGHLIGHTS
+
+- Message composition has great new features!
+  - Private message recipients show sender names, may be autocompleted, and are validated
+  - Autocomplete topic links like `#**some stream>exciting topic**`
+  - Check your content markdown by comparing with examples via <kbd>meta(alt)</kbd>-<kbd>m</kbd>
+  - Narrow to conversations you're just starting using <kbd>meta(alt)</kbd>-<kbd>.</kbd>
+- More useful message actions!
+  - Apply arbitrary reactions to messages via <kbd>:</kbd>, like in the web app
+  - Download and open attachments directly from ZT
+  - Open a message in the local web browser, for those features ZT doesn't yet handle
+- More useful information!
+  - Indicate the presence status of the sender of each message in the central list of messages
+  - More information available for streams, messages, and now also for users via <kbd>i</kbd>
+- Improved behavior for smaller terminals!
+  - Popups can be wider on narrower (80-100 character) terminals, showing eg. all of help text
+  - Autohide mode now overlays the side panels, which shrink to mini-panels to indicate their presence
+  - View long messages in scrollable popup windows
+- Theme support improves!
+  - Syntax highlighting of code blocks via pygments
+  - Contributions of new themes should be much simpler - eg. `gruvbox_light` added already
+  - Support for 24-bit colors
+
+### Interactivity improvements
+- Message actions:
+  - Support downloading of media (attachments) and opening in default viewers (#1223, #1058, #740, #359)
+  - Support adding arbitrary reactions to a message using <kbd>:</kbd> (#559, #707, #913)
+  - Support renaming of messages with topic set to "(no topic)" (topicless messages) (#837, #946)
+  - Allow editing messages when there is no time limit on edits (#1034, #1035)
+  - Support opening a selected message in a web-browser (#397, #698, #991)
+  - Give more information text when messages are moved between topics (#1172, #1178, #1196)
+- Message composition:
+  - Private message composition now shows the user name and supports autocompletion (#587, #877)
+  - During private message sender autocomplete, name/email pairs are validated and tidied (#937)
+  - During mention autocomplete, use user id's to distinguish between users with identical names (#151, #928)
+  - Support autocomplete of topics in composing message content (#1004)
+  - Properly handle spaces in autocomplete of mentions (#925, #1004)
+  - Avoid cycling to stream name when editing stream messages (#870, #1161)
+  - Add Markdown formatting help popup, accessed using <kbd>meta(alt)</kbd>-<kbd>m</kbd> (#623, #1025)
+  - Notify the user if a message is sent/edited outside the current narrow (#781, #824)
+  - Support narrowing to the current compose narrow using <kbd>meta(alt)</kbd>-<kbd>.</kbd> (#1182, #1194, #1206)
+  - Use new `urwid-readline` feature and server parameters to limit typing long messages on the client side (#996)
+  - Only send private message typing notifications if the setting is enabled on the server (#1136, #1163)
+- General UI:
+  - Indicate and update the number of starred messages in the top left UI area (#578, #951)
+  - Indicate and update the presence status of the sender of each message in the central list of messages (#896, #987)
+  - Toggle display of new User Information popup from user list using <kbd>i</kbd> (#511, #848)
+- Options/configuration:
+  - Added `--notify` and `--no-notify` command-line options to override the `notify` config file setting (#964)
+  - Support update of per-stream notification setting during session, including from Stream Information popup (#900, #1080)
+- System notifications:
+  - Hide content of private messages if this setting is enabled on the server (#1166)
+  - Hide spoiler content in all message notifications (#1173)
+- Fetch organization custom emoji cleanly at startup and update them during each session (#809, #827)
+
+### Visual improvements
+- Popups continue to show more information:
+  - Links within topic names (eg. linkifiers) are shown in the Message Information popup (#709, #867)
+  - Show year of message posting in Message Information popup (#879, #930)
+  - Stream descriptions in the Stream Information popup now support any markdown included that is rendered in messages (#743, #749)
+  - Stream Information popup has various other fixes and additional information available (#880, #1127, #1119, #1165)
+- Message rendering:
+  - If fewer than 4 users react to a message, their names are shown instead of a count (#1212, #1213)
+  - Improved math text (katex) rendering (#1024)
+  - Improved rendering of nested quotes (#942)
+  - Heading titles in message markdown is now styled differently to main text (#1095, #1146)
+- Improved behavior for smaller terminals:
+  - Automatically scale popup widths better on narrower (80-100 character) terminals (#1018)
+  - Autohide mode now indicates which panels are closed with a few labelled columns (#1097)
+  - Autohide mode now overlays the side panels rather than 'squashing' the window (#1100)
+  - View any (particularly long) messages in scrollable popup windows, showing rendered or raw formatting (#874, #543)
+- Themes have been restructured, making contribution simpler (#1051, #1160, #1167):
+  - Syntax highlighting of code blocks via pygments (#1012)
+  - 24-bit colors may be specified in colors used in themes (#998, #1051)
+  - A new gruvbox_light theme is available (#1144, #1176)
+  - Gruvbox themes are updated to use only colors from the official suggested palettes for dark and light modes (#1176)
+- Indicate web-public streams differently (#712, #1135, #1177)
+- Respect user preference on server regarding 12- or 24-hour time rendering (#917, #770)
+- Emphasize borders and text at top of sections (#952)
+- Add categories of footer notifications, with different styling (#782, #971)
+- Indent topic list appropriately to take into account space for any resolved-topic marker (#1124)
+
+### Important bugfixes
+- Fix errors when both reactions and message read/star status are changed for uncached messages (#920, #1162)
+- Always start a new prefilled composition when using <kbd>x</kbd> or <kbd>c</kbd> (#871, #947, #960)
+- Remove unstarred messages from starred narrow upon leaving narrow (#940, #943)
+- Avoid crash when entering an empty stream or topic search list; show feedback instead (#923, #977)
+- Allow draft to be accessed (focused) when cursor was in the side panels (#1044)
+- Maintain position in stream/topic lists before and after searches (#975, #978)
+- Fix behavior where narrowing to another message within the same narrow failed (#954, #967)
+- Fix failure to support editing only message content on later servers, by tracking original topic (#1056)
+- Improve consistency of mouse scroll speed in side panels (#1082)
+- Display hint in footer on attempting to select text in any area of the screen, not just a message (#1085)
+- Only create `debug.log` file in current directory if in debug mode (#1066, #1122)
+- Avoid sending and showing typing notifications from yourself (#1011)
+- Improve tracking of topic message ids when message topics are edited (#1130)
+- Include wildcard mentions (eg. `@all`, `@everyone`, `@stream`) in mentions narrow (#1037, #1038)
+- Avoid rapid repeated help hints, by updating footer only if it does not have the same text (#647, #748)
+- Correctly indicate stream markers on editing stream messages (eg. private streams) (#1181)
+
+### User documentation updates
+- New documentation:
+  - README section added to indicate where updates are announced (#1031)
+  - New User Tutorial added as `docs/getting-started.md` (#922, #221)
+  - Hot keys documentation is now generated automatically from the source, in `docs/hotkeys.md` (#926, #126, #941)
+  - Clarify intentional design choices where different from webapp (#1224, #547)
+- FAQ-related updates:
+  - New FAQ entry regarding issues running with Windows Terminal (#955)
+  - Indicate that we specifically wish to scale from 80x24 rows**x**columns upwards and add a FAQ entry for how best to work at smaller widths (#1007)
+  - Improved FAQ section regarding rendering symbols, with new `zulip-term-check-symbols` to test each for debugging (#979)
+  - Add section to FAQ regarding how autocomplete works (#1017)
+- Indicate possibility of `-h`/`--help` option in README (#1170)
+
+### Infrastructure improvements
+- Automatically format codebase with `black` (#1039, #1087, #1092)
+- Migrate development branch from `master` to `main` (#891)
+- Various changes enabled by the new minimum python version of 3.6+:
+  - type comments to inline type annotations (#910, #901)
+  - prefer f-strings (eg. #949)
+- Development documentation:
+  - Commit style notes split out into an expanded section of README (#1055)
+  - Add notes on using auto-formatting tools (#1192)
+- GitHub Pull Request template added (#1071)
+- Type annotations added to many tests, few now remain (eg. #1076, #1077, #1083, #1091, #1096, #1099, #1102, #1105, #1125)
+- Use updated mypy with external packages for type stubs (#1131)
+- Finalized migration away from hardcoded keys (#953, #469, #533, #539)
+- Improved platform handling code, particularly appropriate to supporting WSL (#1059)
+- Migrated to send and retain `user_id` for message composition as per updated API (#1006)
+- Improved debug experience by saving all `print()` output to `debug.log` without requiring flush (#1122)
+- Updated user and development dependencies (#1179)
+- Reduce redundancy by redirecting `Pipfile` to `setup.py` and removing `requirements.txt` (#936)
+- Add `check-branch` tool to ensure independence of commits in a branch (#1214)
+
 ## 0.6.0 - 28 January 2021
 
 This release contains the second set of contributions from our two 2020

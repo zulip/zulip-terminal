@@ -6,6 +6,8 @@ Hi, are you new to [Zulip](https://github.com/zulip/zulip)? If so, we recommend 
 
 Now let's help you get started with using Zulip Terminal. First, if you haven't already, go ahead and complete the [installation](https://github.com/zulip/zulip-terminal#installation). If you encountered any issues, we have common issues and their solutions listed [here](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) if you run into trouble. Feel free to ask questions or for help at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or support@zulip.com.
 
+> **Note that the screenshots below may look slightly different in recent versions, but behavior should be very similar.**
+
 ## Overview
 
 This tutorial was designed to be interactive. We highly recommend opening up Zulip Terminal and following along! We'll try out a few keyboard shortcuts and send a couple of messages to help familiarize ourselves with Zulip Terminal. Here's an overview of the features we'll be walking you through:
@@ -140,9 +142,9 @@ Let's try sending a PM to the author of a message. Select the message you sent t
 
 ### Send a Private Message to Someone New
 
-You can send a PM by moving your cursor to the list of "Users" in the left column and selecting the name of the person you'd like to send a message to.
+You can send a PM by moving your cursor to the list of "Users" in the right column and selecting the name of the person you'd like to send a message to.
 
-If you grabbed the latest unreleased version from [GitHub](https://github.com/zulip/zulip-terminal) or are running a version greater than 0.6.0 (use `zulip-term --version` to check), you can try out our new autocomplete feature! 
+From version 0.7.0 you can also use autocomplete to enter people's names from partial information, and easily send one-to-one or group private messages!
 
 To send a PM using the autocomplete feature:
 1. Use the <kbd>x</kbd> hotkey. A message editor will pop open at the bottom of the middle column. 
@@ -155,7 +157,7 @@ To send a PM using the autocomplete feature:
 
 Try following the steps above to send a message to the Welcome Bot!
 
-*You must use <kbd>ctrl</kbd><kbd>f</kbd> to autocomplete the name and Zulip address of the person you want to PM. If you just type in their full name Zulip Terminal will throw an error.*
+> It's generally best to use <kbd>ctrl</kbd><kbd>f</kbd> to autocomplete the name and Zulip address of the person you want to PM; if you just type in their full name Zulip Terminal will not necessarily know who you are trying to send to.
 
 <img src="getting-started-imgs/send-pm-autocomplete1.png" width="85%">
 <img src="getting-started-imgs/send-pm-autocomplete2.png" width="85%">
