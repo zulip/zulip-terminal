@@ -33,9 +33,10 @@ Please let us know if you have feedback on the success or failure in these or an
 
 ## Are there any themes available, other than the default one?
 
-Yes. There are four supported themes:
+Yes. There are five supported themes:
 - `zt_dark` (alias: `default`)
 - `gruvbox_dark` (alias: `gruvbox`)
+- `gruvbox_light`
 - `zt_light` (alias: `light`)
 - `zt_blue` (alias: `blue`)
 

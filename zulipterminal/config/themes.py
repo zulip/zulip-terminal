@@ -85,6 +85,7 @@ REQUIRED_META = {
 }
 # fmt: on
 
+# This is the main list of themes
 THEMES: Dict[str, Any] = {
     "gruvbox_dark": gruvbox_dark,
     "gruvbox_light": gruvbox_light,
@@ -93,6 +94,8 @@ THEMES: Dict[str, Any] = {
     "zt_blue": zt_blue,
 }
 
+# These are older aliases to some of the above, for compatibility
+# NOTE: Do not add to this section, and only modify if a theme name changes
 THEME_ALIASES = {
     "default": "zt_dark",
     "gruvbox": "gruvbox_dark",

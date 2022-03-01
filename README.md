@@ -109,8 +109,8 @@ key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 site=https://realm.zulipchat.com
 
 [zterm]
-# Alternative themes are gruvbox, light and blue
-theme=default
+# Alternative themes are listed in the FAQ
+theme=zt_dark
 # Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
 autohide=autohide
 # Footlinks default to 'enabled', but can be set to 'disabled' to hide footlinks.
