@@ -156,6 +156,11 @@ If you use a width from approximately 100 columns upwards, everything is expecte
 However, since we currently use a fixed width for the left and right side panels, for widths from approximately 80-100 columns the message list can become too narrow.
 In these situations we recommend using the `autohide` option in your configuration file (see [configuration file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the command-line in a particular session via `--autohide`.
 
+If you use a small terminal size (or simply read long messages), you may find
+it useful to read a message which is too long to fit in the window by opening
+the Message Information (<kbd>i</kbd>) for a message and scrolling through the Full
+rendered message (<kbd>f</kbd>).
+
 If you experience problems related to small sizes that are not resolved using the above, please check [#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any unresolved such issues and report them there.
 
 ## Mouse does not support *performing some action/feature*
