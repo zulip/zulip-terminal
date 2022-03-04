@@ -67,9 +67,12 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     theme_colors = theme.Color
     theme_meta = theme.META
 
-    # Check if STYLE and REQUIRED_STYLES use the same styles.
-    assert len(theme_styles) == len(REQUIRED_STYLES)
-    assert all(required_style in theme_styles for required_style in REQUIRED_STYLES)
+    # Explicitly test extra and missing styles to improve debugging
+    extra_styles = theme_styles - REQUIRED_STYLES.keys()
+    missing_styles = REQUIRED_STYLES.keys() - theme_styles
+    assert extra_styles == set()
+    assert missing_styles == set()
+
     # Check if colors are defined with all 3 color codes.
     for color in theme_colors:
         if "__" in color.name:
