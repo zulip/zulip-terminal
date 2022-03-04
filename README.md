@@ -49,6 +49,23 @@ our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up o
 
 The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#id7). It may still work with earlier versions.
 
+### Supported Python Versions
+
+Version 0.6.0 was the last release with support for Python 3.5.
+
+Later releases and the main development branch are currently tested (on Ubuntu) with:
+- CPython 3.6-3.10
+- PyPy 3.6-3.9
+
+Since our automated testing does not cover interactive testing of the UI, there
+may be issues with some Python versions, though generally we have not found
+this to be the case.
+
+Please note that generally we limit each release to between a lower and upper
+Python version, so it is possible that for example if you have a newer version
+of Python installed, then some releases (or `main`) may not install correctly.
+In some cases this can give rise to the symptoms in issue #1145.
+
 ## Installation
 
 We recommend installing in a dedicated python virtual environment (see below) or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
