@@ -156,13 +156,13 @@ def parse_themefile(
             new_style = (style_name, fg, bg)
 
         elif color_depth == 256:
-            fg = " ".join([fg_code256] + fg_props)
-            bg = " ".join([bg_code256] + bg_props)
+            fg = " ".join([fg_code256] + fg_props).lower()
+            bg = " ".join([bg_code256] + bg_props).lower()
             new_style = (style_name, "", "", "", fg, bg)
 
         elif color_depth == 2**24:
-            fg = " ".join([fg_code24] + fg_props)
-            bg = " ".join([bg_code24] + bg_props)
+            fg = " ".join([fg_code24] + fg_props).lower()
+            bg = " ".join([bg_code24] + bg_props).lower()
             new_style = (style_name, "", "", "", fg, bg)
 
         urwid_theme.append(new_style)

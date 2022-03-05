@@ -54,6 +54,9 @@ color codes:
   * Similar to HTML colors.
   * Eg: `#rrggbb`
 
+> Note that `urwid` documentation suggests colors should be lower case, but we
+> explicitly support upper case in color specifications, eg. #FF5
+
 `'default'` is a special alias which uses the default
 foreground or background.
 

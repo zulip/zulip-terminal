@@ -78,7 +78,7 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         if "__" in color.name:
             continue
 
-        codes = color.value.split()
+        codes = color.value.lower().split()
         assert len(codes) == 3
         # Check if 16-color alias is correct
         assert codes[0].replace("_", " ") in aliases_16_color
