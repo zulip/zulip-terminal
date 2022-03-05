@@ -26,23 +26,25 @@ expected_complete_themes = {
     "zt_light",
     "zt_blue",
 }
-aliases_16_color = [
+
+# These are urwid color names with underscores instead of spaces
+valid_16_color_codes = [
     "default",
     "black",
-    "dark red",
-    "dark green",
+    "dark_red",
+    "dark_green",
     "brown",
-    "dark blue",
-    "dark magenta",
-    "dark cyan",
-    "dark gray",
-    "light red",
-    "light green",
+    "dark_blue",
+    "dark_magenta",
+    "dark_cyan",
+    "dark_gray",
+    "light_red",
+    "light_green",
     "yellow",
-    "light blue",
-    "light magenta",
-    "light cyan",
-    "light gray",
+    "light_blue",
+    "light_magenta",
+    "light_cyan",
+    "light_gray",
     "white",
 ]
 
@@ -81,7 +83,7 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         codes = color.value.lower().split()
         assert len(codes) == 3
         # Check if 16-color alias is correct
-        assert codes[0].replace("_", " ") in aliases_16_color
+        assert codes[0] in valid_16_color_codes
         # Check if 24-bit and 256 color is any of the valid color codes
         pattern = re.compile(REGEX_COLOR_VALID_FORMATS)
         for code in [codes[1], codes[2]]:
