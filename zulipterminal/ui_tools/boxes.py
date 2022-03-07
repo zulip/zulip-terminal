@@ -2047,10 +2047,6 @@ class PanelSearchBox(urwid.Edit):
         if (
             is_command_key("ENTER", key) and self.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
-
-            self.in_edit_message_box = False
-            self.edit_caption = None
-
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
