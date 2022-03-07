@@ -336,8 +336,8 @@ class WriteBox(urwid.Pile):
 
         return True
 
-    def stream_box_view(
-        self, stream_id: int, caption: str = "", title: str = ""
+    def _setup_common_stream_compose(
+        self, stream_id: int, caption: str, title: str
     ) -> None:
         self.set_editor_mode()
         self.compose_box_status = "open_with_stream"
@@ -407,6 +407,11 @@ class WriteBox(urwid.Pile):
         ]
         self.contents = write_box
 
+    def stream_box_view(
+        self, stream_id: int, caption: str = "", title: str = ""
+    ) -> None:
+        self._setup_common_stream_compose(stream_id, caption, title)
+
         # Use and set a callback to set the stream marker
         self._set_stream_write_box_style(None, caption)
         urwid.connect_signal(
@@ -416,12 +421,12 @@ class WriteBox(urwid.Pile):
     def stream_box_edit_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
-        self.stream_box_view(stream_id, caption, title)
+        self._setup_common_stream_compose(stream_id, caption, title)
+
         self.edit_mode_button = EditModeButton(
             controller=self.model.controller,
             width=20,
         )
-
         self.header_write_box.widget_list.append(self.edit_mode_button)
 
     def _set_stream_write_box_style(self, widget: ReadlineEdit, new_text: str) -> None:
