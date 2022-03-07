@@ -355,16 +355,6 @@ class WriteBox(urwid.Pile):
         )
         self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
 
-        self.stream_write_box = ReadlineEdit(
-            edit_text=caption, max_char=self.model.max_stream_name_length
-        )
-        self.stream_write_box.enable_autocomplete(
-            func=self._stream_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
-        )
-        self.stream_write_box.set_completer_delims("")
-
         self.title_write_box = ReadlineEdit(
             edit_text=title, max_char=self.model.max_topic_length
         )
@@ -410,6 +400,15 @@ class WriteBox(urwid.Pile):
     def stream_box_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
+        self.stream_write_box = ReadlineEdit(
+            edit_text=caption, max_char=self.model.max_stream_name_length
+        )
+        self.stream_write_box.enable_autocomplete(
+            func=self._stream_box_autocomplete,
+            key=primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+        )
+        self.stream_write_box.set_completer_delims("")
         self._setup_common_stream_compose(stream_id, caption, title)
 
         # Use and set a callback to set the stream marker
@@ -421,6 +420,7 @@ class WriteBox(urwid.Pile):
     def stream_box_edit_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
+        self.stream_write_box = urwid.Text(caption)
         self._setup_common_stream_compose(stream_id, caption, title)
 
         self.edit_mode_button = EditModeButton(
@@ -823,7 +823,10 @@ class WriteBox(urwid.Pile):
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 if self.compose_box_status == "open_with_stream":
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
-                        stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
+                        if self.msg_edit_state is None:
+                            stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
+                        else:
+                            stream_name = header[self.FOCUS_HEADER_BOX_STREAM].text
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 "Invalid stream name."
@@ -875,7 +878,10 @@ class WriteBox(urwid.Pile):
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
             if self.compose_box_status == "open_with_stream":
-                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                if self.msg_edit_state is not None:
+                    header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
+                else:
+                    header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
 

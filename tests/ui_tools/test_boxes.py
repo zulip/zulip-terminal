@@ -1412,7 +1412,7 @@ class TestWriteBox:
                 True,
                 True,
                 "CONTAINER_HEADER",
-                "HEADER_BOX_STREAM",
+                "HEADER_BOX_TOPIC",
                 id="edit_box-message_to_stream_name_box",
             ),
             case(
