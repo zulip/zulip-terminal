@@ -85,6 +85,10 @@ class WriteBox(urwid.Pile):
         # Determines if the message body (content) can be edited
         self.msg_body_edit_enabled: bool
 
+        # New state during message editing to avoid stream editing
+        self.in_edit_message_box = False
+        self.edit_caption: Optional[str] = None
+
         self.is_in_typeahead_mode = False
 
         # Set to int for stream box only
@@ -358,16 +362,6 @@ class WriteBox(urwid.Pile):
         )
         self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
 
-        self.stream_write_box = ReadlineEdit(
-            edit_text=caption, max_char=self.model.max_stream_name_length
-        )
-        self.stream_write_box.enable_autocomplete(
-            func=self._stream_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
-        )
-        self.stream_write_box.set_completer_delims("")
-
         self.title_write_box = ReadlineEdit(
             edit_text=title, max_char=self.model.max_topic_length
         )
@@ -416,6 +410,15 @@ class WriteBox(urwid.Pile):
         caption: str = "",
         title: str = "",
     ) -> None:
+        self.stream_write_box = ReadlineEdit(
+            edit_text=caption, max_char=self.model.max_stream_name_length
+        )
+        self.stream_write_box.enable_autocomplete(
+            func=self._stream_box_autocomplete,
+            key=primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+        )
+        self.stream_write_box.set_completer_delims("")
         self._setup_common_stream_compose(stream_id, caption, title)
 
         # Use and set a callback to set the stream marker
@@ -427,6 +430,10 @@ class WriteBox(urwid.Pile):
     def stream_box_edit_view(
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
+        self.in_edit_message_box = True
+        self.edit_caption = caption
+
+        self.stream_write_box = urwid.Text(caption)
         self._setup_common_stream_compose(stream_id, caption, title)
 
         self.edit_mode_button = EditModeButton(
@@ -785,6 +792,10 @@ class WriteBox(urwid.Pile):
                     self.msg_edit_state = None
                     self.keypress(size, primary_key_for_command("GO_BACK"))
         elif is_command_key("GO_BACK", key):
+
+            self.in_edit_message_box = False
+            self.edit_caption = None
+
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
@@ -829,7 +840,10 @@ class WriteBox(urwid.Pile):
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 if self.compose_box_status == "open_with_stream":
                     if header.focus_col == self.FOCUS_HEADER_BOX_STREAM:
-                        stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
+                        if not self.in_edit_message_box:
+                            stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
+                        else:
+                            stream_name = self.edit_caption
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 "Invalid stream name."
@@ -881,7 +895,10 @@ class WriteBox(urwid.Pile):
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
             if self.compose_box_status == "open_with_stream":
-                header.focus_col = self.FOCUS_HEADER_BOX_STREAM
+                if self.in_edit_message_box:
+                    header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
+                else:
+                    header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
 
@@ -2030,6 +2047,10 @@ class PanelSearchBox(urwid.Edit):
         if (
             is_command_key("ENTER", key) and self.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
+
+            self.in_edit_message_box = False
+            self.edit_caption = None
+
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
