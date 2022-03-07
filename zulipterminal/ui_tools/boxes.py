@@ -87,7 +87,6 @@ class WriteBox(urwid.Pile):
 
         # New state during message editing to avoid stream editing
         self.in_edit_message_box = False
-        self.edit_caption: Optional[str] = None
 
         self.is_in_typeahead_mode = False
 
@@ -431,7 +430,6 @@ class WriteBox(urwid.Pile):
         self, stream_id: int, caption: str = "", title: str = ""
     ) -> None:
         self.in_edit_message_box = True
-        self.edit_caption = caption
 
         self.stream_write_box = urwid.Text(caption)
         self._setup_common_stream_compose(stream_id, caption, title)
@@ -794,7 +792,6 @@ class WriteBox(urwid.Pile):
         elif is_command_key("GO_BACK", key):
 
             self.in_edit_message_box = False
-            self.edit_caption = None
 
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
@@ -843,7 +840,7 @@ class WriteBox(urwid.Pile):
                         if not self.in_edit_message_box:
                             stream_name = header[self.FOCUS_HEADER_BOX_STREAM].edit_text
                         else:
-                            stream_name = self.edit_caption
+                            stream_name = header[self.FOCUS_HEADER_BOX_STREAM].text
                         if not self.model.is_valid_stream(stream_name):
                             invalid_stream_error = (
                                 "Invalid stream name."
