@@ -776,8 +776,8 @@ class WriteBox(urwid.Pile):
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
-                    self.msg_edit_state = None
                     self.keypress(size, primary_key_for_command("GO_BACK"))
+                    assert self.msg_edit_state is None
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
