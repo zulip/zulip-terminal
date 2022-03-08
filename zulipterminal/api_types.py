@@ -151,8 +151,11 @@ class UpdateMessageEvent(TypedDict):
     rendered_content: str
     # B: Subject of these message ids needs updating?
     message_ids: List[int]
+    orig_subject: str
     subject: str
+    propagate_mode: EditPropagateMode
     stream_id: int
+    new_stream_id: int
 
 
 class ReactionEvent(TypedDict):

@@ -1,7 +1,7 @@
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
@@ -1618,6 +1618,32 @@ class TestModel:
         model.notify_user(message_fixture)
         assert notify.called == is_notify_called
 
+    @pytest.fixture
+    def update_message_event_index_factory(self):
+        """
+        Generate index for update message event tests
+        """
+        TopicsDataType = Dict[int, List[str]]  # stream_id, followed by list of topics
+
+        def _factory(
+            msg_stream_id: int, topics: TopicsDataType, message_ids: List[int]
+        ):
+            return {
+                "messages": {
+                    message_id: {
+                        "id": message_id,
+                        "stream_id": msg_stream_id,
+                        "subject": "old subject",
+                        "content": "old content",
+                    }
+                    for message_id in message_ids
+                },
+                "edited_messages": set(),
+                "topics": topics,
+            }
+
+        return _factory
+
     @pytest.mark.parametrize(
         "event, expected_times_messages_rerendered, expected_index, topic_view_enabled",
         [
@@ -1627,6 +1653,7 @@ class TestModel:
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
+                    "propagate_mode": "change_one",
                 },
                 1,
                 {
@@ -1653,9 +1680,11 @@ class TestModel:
             case(
                 {  # Subject of 2 messages is updated
                     "message_id": 1,
+                    "orig_subject": "old subject",
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1, 2],
+                    "propagate_mode": "change_later",
                 },
                 2,
                 {
@@ -1714,6 +1743,7 @@ class TestModel:
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
+                    "propagate_mode": "change_one",
                 },
                 2,
                 {  # 2=update of subject & content
@@ -1771,6 +1801,7 @@ class TestModel:
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [3],
+                    "propagate_mode": "change_one",
                 },
                 0,
                 {
@@ -1801,6 +1832,7 @@ class TestModel:
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [3],
+                    "propagate_mode": "change_one",
                 },
                 0,
                 {
@@ -1831,6 +1863,7 @@ class TestModel:
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
+                    "propagate_mode": "change_one",
                 },
                 2,
                 {
@@ -1849,7 +1882,9 @@ class TestModel:
                         },
                     },
                     "edited_messages": {1},
-                    "topics": {10: ["new subject", "old subject"]},
+                    "topics": {
+                        10: ["new subject", "old subject"],
+                    },
                 },
                 True,
                 id="Message content is updated and topic view is enabled",
@@ -1864,22 +1899,13 @@ class TestModel:
         expected_index,
         expected_times_messages_rerendered,
         topic_view_enabled,
+        update_message_event_index_factory,
     ):
         event["type"] = "update_message"
 
-        model.index = {
-            "messages": {
-                message_id: {
-                    "id": message_id,
-                    "stream_id": 10,
-                    "content": "old content",
-                    "subject": "old subject",
-                }
-                for message_id in [1, 2]
-            },
-            "edited_messages": set(),
-            "topics": {10: ["old subject"]},
-        }
+        model.index = update_message_event_index_factory(
+            msg_stream_id=10, topics={10: ["old subject"]}, message_ids=[1, 2]
+        )
         mocker.patch(MODEL + "._update_rendered_view")
 
         def _set_topics_to_old_and_new(event):
@@ -1906,6 +1932,109 @@ class TestModel:
             stream_button = view.topic_w.stream_button
             view.left_panel.show_topic_view.assert_called_once_with(stream_button)
             model.controller.update_screen.assert_called_once_with()
+
+    @pytest.mark.parametrize("original_compose_topic", ["old subject", "other subject"])
+    @pytest.mark.parametrize("original_compose_stream_id", [1, 2])
+    @pytest.mark.parametrize(
+        "propagate_mode, message_ids",
+        [("change_one", [1]), ("change_later", [1, 2]), ("change_all", [1, 2])],
+    )
+    @pytest.mark.parametrize("compose_box_open", [False, True])
+    def test_update_topic_header_mid_compose(
+        self,
+        mocker,
+        model,
+        propagate_mode,
+        message_ids,
+        compose_box_open,
+        original_compose_topic,
+        original_compose_stream_id,
+        update_message_event_index_factory,
+    ):
+        event = {
+            "type": "update_message",
+            "message_id": 1,
+            "message_ids": message_ids,
+            "orig_subject": "old subject",
+            "subject": "new subject",
+            "propagate_mode": propagate_mode,
+            "stream_id": 1,
+        }
+
+        model.index = update_message_event_index_factory(
+            msg_stream_id=1,
+            topics={1: ["old subject", "other subject"], 2: []},
+            message_ids=[1, 2],
+        )
+
+        view = model.controller.view
+        view.write_box.update_topic_compose_header = mocker.Mock()
+
+        if compose_box_open:
+            view.write_box.stream_id = original_compose_stream_id
+            view.write_box.title_write_box.edit_text = original_compose_topic
+            view.write_box.compose_box_status = "open_with_stream"
+        else:
+            view.write_box.stream_id = None
+            view.write_box.title_write_box.edit_text = ""
+
+        model._handle_update_message_event(event)
+
+        # TODO: Optimize using a `vary_in_` or similar approach.
+        if (
+            compose_box_open
+            and propagate_mode in ["change_later", "change_all"]
+            and original_compose_topic == event["orig_subject"]
+            and original_compose_stream_id == event["stream_id"]
+        ):
+            view.write_box.update_topic_compose_header.assert_called_once_with(
+                event["subject"]
+            )
+        else:
+            assert not view.write_box.update_topic_compose_header.called
+
+    @pytest.mark.parametrize("original_stream_id", [1, 2])
+    @pytest.mark.parametrize("compose_box_open", [False, True])
+    def test_update_stream_header_mid_compose(
+        self,
+        mocker,
+        model,
+        compose_box_open,
+        original_stream_id,
+        update_message_event_index_factory,
+    ):
+        event = {
+            "type": "update_message",
+            "message_id": 1,
+            "message_ids": [1, 2],
+            "orig_subject": "old subject",
+            "stream_id": 1,
+            "new_stream_id": 2,
+        }
+
+        model.index = update_message_event_index_factory(
+            msg_stream_id=1,
+            topics={1: ["old subject", "other subject"], 2: []},
+            message_ids=[1, 2],
+        )
+
+        view = model.controller.view
+        view.write_box.update_stream_compose_header = mocker.Mock()
+
+        if compose_box_open:
+            view.write_box.compose_box_status = "open_with_stream"
+            view.write_box.stream_id = original_stream_id
+
+        model._handle_update_message_event(event)
+
+        # TODO: Optimize using a `vary_in_` or similar approach.
+        if compose_box_open and original_stream_id == event["stream_id"]:
+            view.write_box.update_stream_compose_header.assert_called_once_with(
+                model.stream_dict[event["new_stream_id"]]["name"],
+                event["new_stream_id"],
+            )
+        else:
+            assert not view.write_box.update_stream_compose_header.called
 
     @pytest.mark.parametrize(
         "subject, narrow, new_log_len",

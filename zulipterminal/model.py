@@ -1403,6 +1403,40 @@ class Model:
                     else:
                         self.index["topics"][stream_id] = []
 
+            if event["propagate_mode"] in ["change_later", "change_all"]:
+                old_subject = event["orig_subject"]
+
+                # If the user is composing a message to this topic, update the topic in
+                # the title_write_box header on a 'change_later' or 'change_all' update
+                # in the topic.
+                if hasattr(self.controller, "view"):
+                    write_box = self.controller.view.write_box
+                    if (
+                        write_box.compose_box_status == "open_with_stream"
+                        and write_box.stream_id == stream_id
+                        and write_box.title_write_box.edit_text == old_subject
+                    ):
+                        write_box.update_topic_compose_header(new_subject)
+
+        # Present only when the stream is changed.
+        if "new_stream_id" in event:
+            old_stream_id = event["stream_id"]
+            new_stream_id = event["new_stream_id"]
+            new_stream_name = self.stream_dict[new_stream_id]["name"]
+
+            # If the user is composing a message to the topic/message
+            # being moved across streams, update the stream header
+            # accordingly.
+            if hasattr(self.controller, "view"):
+                write_box = self.controller.view.write_box
+                if (
+                    write_box.compose_box_status == "open_with_stream"
+                    and write_box.stream_id == old_stream_id
+                ):
+                    write_box.update_stream_compose_header(
+                        new_stream_name, new_stream_id
+                    )
+
     def _handle_reaction_event(self, event: Event) -> None:
         """
         Handle change to reactions on a message
