@@ -780,6 +780,7 @@ def empty_index(
             all_msg_ids=set(),
             starred_msg_ids=set(),
             mentioned_msg_ids=set(),
+            unread_mentioned_msg_ids=set(),
             private_msg_ids=set(),
             private_msg_ids_by_user_ids=defaultdict(set, {}),
             stream_msg_ids_by_stream_id=defaultdict(set, {}),

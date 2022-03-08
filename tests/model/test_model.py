@@ -1105,6 +1105,8 @@ class TestModel:
             (["read"], "add"),
             (["read", "starred"], "remove"),
             (["starred", "read"], "remove"),
+            (["read", "mentioned", "wildcard_mentioned"], "add"),
+            (["mentioned", "wildcard_mentioned", "starred"], "remove"),
         ],
     )
     def test_toggle_message_star_status(
@@ -1619,7 +1621,8 @@ class TestModel:
         assert notify.called == is_notify_called
 
     @pytest.mark.parametrize(
-        "event, expected_times_messages_rerendered, expected_index, topic_view_enabled",
+        "event, topic_view_enabled, initial_flags, mentioned_msg_ids,"
+        "expected_times_messages_rerendered, expected_index",
         [
             case(
                 {  # Only subject of 1 message is updated.
@@ -1628,6 +1631,9 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1],
                 },
+                False,
+                ["read"],
+                set(),
                 1,
                 {
                     "messages": {
@@ -1636,18 +1642,20 @@ class TestModel:
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "new subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
+                    "mentioned_msg_ids": set(),
                 },
-                False,
                 id="Only subject of 1 message is updated",
             ),
             case(
@@ -1657,6 +1665,9 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [1, 2],
                 },
+                False,
+                ["read"],
+                set(),
                 2,
                 {
                     "messages": {
@@ -1665,27 +1676,33 @@ class TestModel:
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "new subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "new subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
+                    "mentioned_msg_ids": set(),
                 },
-                False,
                 id="Subject of 2 messages is updated",
             ),
             case(
-                {  # Message content is updated
+                {  # Message content is updated, wildcard-mention added
                     "message_id": 1,
                     "stream_id": 10,
                     "rendered_content": "<p>new content</p>",
+                    "flags": ["read", "wildcard_mentioned"],
                 },
-                1,
+                False,
+                ["read"],
+                set(),
+                2,
                 {
                     "messages": {
                         1: {
@@ -1693,29 +1710,35 @@ class TestModel:
                             "stream_id": 10,
                             "content": "<p>new content</p>",
                             "subject": "old subject",
+                            "flags": ["read", "wildcard_mentioned"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: ["old subject"]},
+                    "mentioned_msg_ids": {1},
                 },
-                False,
-                id="Message content is updated",
+                id="Message content is updated, wildcard-mention added",
             ),
             case(
-                {  # Both message content and subject is updated.
+                {  # Both message content and subject is updated, mention added.
                     "message_id": 1,
                     "rendered_content": "<p>new content</p>",
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
+                    "flags": ["read", "mentioned"],
                 },
-                2,
+                False,
+                ["read"],
+                set(),
+                3,
                 {  # 2=update of subject & content
                     "messages": {
                         1: {
@@ -1723,25 +1746,30 @@ class TestModel:
                             "stream_id": 10,
                             "content": "<p>new content</p>",
                             "subject": "new subject",
+                            "flags": ["read", "mentioned"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: []},
+                    "mentioned_msg_ids": {1},
                 },
-                False,
-                id="Both message content and subject is updated",
+                id="Both message content and subject is updated, mention added",
             ),
             case(
                 {  # Some new type of update which we don't handle yet.
                     "message_id": 1,
                     "foo": "boo",
                 },
+                False,
+                ["read"],
+                set(),
                 0,
                 {
                     "messages": {
@@ -1750,18 +1778,20 @@ class TestModel:
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: ["old subject"]},
+                    "mentioned_msg_ids": set(),
                 },
-                False,
                 id="Some new type of update which we don't handle yet",
             ),
             case(
@@ -1772,6 +1802,9 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
+                False,
+                ["read"],
+                set(),
                 0,
                 {
                     "messages": {
@@ -1780,18 +1813,20 @@ class TestModel:
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": set(),
                     "topics": {10: []},  # This resets the cache
+                    "mentioned_msg_ids": set(),
                 },
-                False,
                 id="message_id not present in index, topic view closed",
             ),
             case(
@@ -1802,6 +1837,9 @@ class TestModel:
                     "stream_id": 10,
                     "message_ids": [3],
                 },
+                True,
+                ["read"],
+                set(),
                 0,
                 {
                     "messages": {
@@ -1810,29 +1848,35 @@ class TestModel:
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": set(),
                     "topics": {10: ["new subject", "old subject"]},
+                    "mentioned_msg_ids": set(),
                 },
-                True,
                 id="message_id not present in index, topic view is enabled",
             ),
             case(
-                {  # Message content is updated and topic view is enabled.
+                {  # Message content updated and topic view is enabled, mention removed.
                     "message_id": 1,
                     "rendered_content": "<p>new content</p>",
                     "subject": "new subject",
                     "stream_id": 10,
                     "message_ids": [1],
+                    "flags": ["read"],
                 },
-                2,
+                True,
+                ["read", "mentioned"],
+                {1},
+                3,
                 {
                     "messages": {
                         1: {
@@ -1840,19 +1884,93 @@ class TestModel:
                             "stream_id": 10,
                             "content": "<p>new content</p>",
                             "subject": "new subject",
+                            "flags": ["read"],
                         },
                         2: {
                             "id": 2,
                             "stream_id": 10,
                             "content": "old content",
                             "subject": "old subject",
+                            "flags": ["read"],
                         },
                     },
                     "edited_messages": {1},
                     "topics": {10: ["new subject", "old subject"]},
+                    "mentioned_msg_ids": set(),
                 },
-                True,
-                id="Message content is updated and topic view is enabled",
+                id="Message content updated and topic view is enabled, mention removed",
+            ),
+            case(
+                {  # wildcard_mentioned flag added with no subject change
+                    "message_id": 1,
+                    "rendered_content": "<p>new content @**stream**</p>",
+                    "subject": "old subject",
+                    "stream_id": 10,
+                    "message_ids": [1],
+                    "flags": ["read", "wildcard_mentioned"],
+                },
+                False,
+                ["read"],
+                set(),
+                3,
+                {
+                    "messages": {
+                        1: {
+                            "id": 1,
+                            "stream_id": 10,
+                            "content": "<p>new content @**stream**</p>",
+                            "subject": "old subject",
+                            "flags": ["read", "wildcard_mentioned"],
+                        },
+                        2: {
+                            "id": 2,
+                            "stream_id": 10,
+                            "content": "old content",
+                            "subject": "old subject",
+                            "flags": ["read"],
+                        },
+                    },
+                    "mentioned_msg_ids": {1},
+                    "edited_messages": {1},
+                    "topics": {10: []},
+                },
+                id="wildcard_mentioned flag added with no subject change",
+            ),
+            case(
+                {  # wildcard_mentioned flag removed with no subject change.
+                    "message_id": 1,
+                    "rendered_content": "<p>new content</p>",
+                    "subject": "old subject",
+                    "stream_id": 10,
+                    "message_ids": [1],
+                    "flags": ["read"],
+                },
+                False,
+                ["read", "wildcard_mentioned"],
+                {1},
+                3,
+                {
+                    "messages": {
+                        1: {
+                            "id": 1,
+                            "stream_id": 10,
+                            "content": "<p>new content</p>",
+                            "subject": "old subject",
+                            "flags": ["read"],
+                        },
+                        2: {
+                            "id": 2,
+                            "stream_id": 10,
+                            "content": "old content",
+                            "subject": "old subject",
+                            "flags": ["read"],
+                        },
+                    },
+                    "mentioned_msg_ids": set(),
+                    "edited_messages": {1},
+                    "topics": {10: []},
+                },
+                id="wildcard_mentioned flag removed with no subject change",
             ),
         ],
     )
@@ -1861,9 +1979,11 @@ class TestModel:
         mocker,
         model,
         event,
-        expected_index,
-        expected_times_messages_rerendered,
         topic_view_enabled,
+        initial_flags,
+        mentioned_msg_ids,
+        expected_times_messages_rerendered,
+        expected_index,
     ):
         event["type"] = "update_message"
 
@@ -1874,12 +1994,15 @@ class TestModel:
                     "stream_id": 10,
                     "content": "old content",
                     "subject": "old subject",
+                    "flags": initial_flags if message_id == 1 else ["read"],
                 }
                 for message_id in [1, 2]
             },
+            "mentioned_msg_ids": mentioned_msg_ids,
             "edited_messages": set(),
             "topics": {10: ["old subject"]},
         }
+        model.narrow = [["is", "mentioned"]]
         mocker.patch(MODEL + "._update_rendered_view")
 
         def _set_topics_to_old_and_new(event):
@@ -2174,11 +2297,18 @@ class TestModel:
             ("add", 1, ["read"], ["read", "starred"]),
             ("add", 1, ["starred"], ["starred"]),
             ("add", 1, ["read", "starred"], ["read", "starred"]),
+            ("add", 1, ["mentioned"], ["mentioned", "starred"]),
+            ("add", 1, ["mentioned", "starred"], ["mentioned", "starred"]),
+            ("add", 1, ["wildcard_mentioned"], ["wildcard_mentioned", "starred"]),
             ("remove", -1, [], []),
             ("remove", -1, ["read"], ["read"]),
             ("remove", -1, ["starred"], []),
             ("remove", -1, ["read", "starred"], ["read"]),
             ("remove", -1, ["starred", "read"], ["read"]),
+            ("remove", -1, ["mentioned"], ["mentioned"]),
+            ("remove", -1, ["wildcard_mentioned"], ["wildcard_mentioned"]),
+            ("remove", -1, ["mentioned", "starred"], ["mentioned"]),
+            ("remove", -1, ["wildcard_mentioned", "starred"], ["wildcard_mentioned"]),
         ],
     )
     def test_update_star_status(
@@ -2197,6 +2327,23 @@ class TestModel:
 
         model.index = dict(
             messages={msg_id: {"flags": flags_before} for msg_id in indexed_ids},
+            mentioned_msg_ids=set(
+                [
+                    msg_id
+                    for msg_id in indexed_ids
+                    if {"mentioned", "wildcard_mentioned"} & set(flags_before)
+                ]
+            ),
+            unread_mentioned_msg_ids=set(
+                [
+                    msg_id
+                    for msg_id in indexed_ids
+                    if (
+                        {"mentioned", "wildcard_mentioned"} & set(flags_before)
+                        and "read" not in flags_before
+                    )
+                ]
+            ),
             starred_msg_ids=set(
                 [msg_id for msg_id in indexed_ids if "starred" in flags_before]
             ),
@@ -2257,11 +2404,19 @@ class TestModel:
             ("add", ["read"], ["read"]),
             ("add", ["starred"], ["starred", "read"]),
             ("add", ["read", "starred"], ["read", "starred"]),
+            ("add", ["mentioned"], ["mentioned", "read"]),
+            ("add", ["read", "mentioned"], ["read", "mentioned"]),
+            ("add", ["mentioned", "starred"], ["mentioned", "starred", "read"]),
+            ("add", ["wildcard_mentioned"], ["wildcard_mentioned", "read"]),
             ("remove", [], []),
             ("remove", ["read"], ["read"]),  # msg cannot be marked 'unread'
             ("remove", ["starred"], ["starred"]),
+            ("remove", ["mentioned"], ["mentioned"]),
             ("remove", ["starred", "read"], ["starred", "read"]),
             ("remove", ["read", "starred"], ["read", "starred"]),
+            ("remove", ["read", "mentioned"], ["read", "mentioned"]),
+            ("remove", ["wildcard_mentioned"], ["wildcard_mentioned"]),
+            ("remove", ["read", "wildcard_mentioned"], ["read", "wildcard_mentioned"]),
         ],
     )
     def test_update_read_status(
@@ -2279,6 +2434,7 @@ class TestModel:
 
         model.index = dict(
             messages={msg_id: {"flags": flags_before} for msg_id in indexed_ids},
+            unread_mentioned_msg_ids=set(),
             starred_msg_ids=set(
                 [msg_id for msg_id in indexed_ids if "starred" in flags_before]
             ),
