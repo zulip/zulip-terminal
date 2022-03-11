@@ -705,6 +705,7 @@ class TestModel:
         mock_api_query = mocker.patch(
             CONTROLLER + ".client.set_typing_status", return_value=response
         )
+        model._user_settings["send_private_typing_notifications"] = True
 
         model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
 
@@ -720,6 +721,20 @@ class TestModel:
     ):
         with pytest.raises(RuntimeError):
             model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
+
+    @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
+    @pytest.mark.parametrize("status", ["start", "stop"])
+    def test_send_typing_status_avoided_due_to_user_setting(
+        self, mocker, model, status, recipient_user_ids
+    ):
+        model._user_settings["send_private_typing_notifications"] = False
+
+        mock_api_query = mocker.patch(CONTROLLER + ".client.set_typing_status")
+
+        model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
+
+        assert not mock_api_query.called
+        assert not self.display_error_if_present.called
 
     @pytest.mark.parametrize(
         "response, return_value",

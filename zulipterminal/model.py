@@ -499,6 +499,8 @@ class Model:
     def send_typing_status_by_user_ids(
         self, recipient_user_ids: List[int], *, status: Literal["start", "stop"]
     ) -> None:
+        if not self.user_settings()["send_private_typing_notifications"]:
+            return
         if recipient_user_ids:
             request = {"to": recipient_user_ids, "op": status}
             response = self.client.set_typing_status(request)
