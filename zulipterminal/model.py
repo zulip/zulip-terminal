@@ -21,7 +21,7 @@ from typing import (
 from urllib.parse import urlparse
 
 import zulip
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
@@ -76,6 +76,10 @@ def sort_streams(streams: List[StreamData]) -> None:
     streams.sort(key=lambda s: s["name"].lower())
 
 
+class UserSettings(TypedDict):
+    send_private_typing_notifications: bool
+
+
 class Model:
     """
     A class responsible for storing the data to be displayed.
@@ -113,6 +117,7 @@ class Model:
             "realm_user",  # Enables cross_realm_bots
             "realm_user_groups",
             "update_display_settings",
+            "user_settings",
             "realm_emoji",
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
@@ -191,8 +196,22 @@ class Model:
         )
 
         self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
+
+        # "user_settings" only present in ZFl 89+ (v5.0)
+        user_settings = self.initial_data.get("user_settings", None)
+        self._user_settings = UserSettings(
+            send_private_typing_notifications=(
+                True
+                if user_settings is None
+                else user_settings["send_private_typing_notifications"]
+            ),  # ZFL 105, Zulip 5.0
+        )
+
         self.new_user_input = True
         self._start_presence_updates()
+
+    def user_settings(self) -> UserSettings:
+        return deepcopy(self._user_settings)
 
     def message_retention_days_response(self, days: int, org_default: bool) -> str:
         suffix = " [Organization default]" if org_default else ""

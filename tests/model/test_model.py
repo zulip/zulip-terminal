@@ -14,6 +14,7 @@ from zulipterminal.model import (
     MAX_TOPIC_NAME_LENGTH,
     Model,
     ServerConnectionFailure,
+    UserSettings,
 )
 
 
@@ -108,6 +109,36 @@ class TestModel:
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert model.active_emoji_data["zulip"]["type"] == "zulip_extra_emoji"
         assert model.twenty_four_hr_format == initial_data["twenty_four_hour_time"]
+
+    @pytest.mark.parametrize(
+        "sptn, expected_sptn_value",
+        [(None, True), (True, True), (False, False)],
+    )
+    def test_init_user_settings(self, mocker, initial_data, sptn, expected_sptn_value):
+        assert "user_settings" not in initial_data  # we add it in tests
+
+        if sptn is not None:
+            initial_data["user_settings"] = {"send_private_typing_notifications": sptn}
+
+        mocker.patch(MODEL + ".get_messages", return_value="")
+        self.client.register = mocker.Mock(return_value=initial_data)
+
+        model = Model(self.controller)
+
+        assert model.user_settings() == UserSettings(
+            send_private_typing_notifications=expected_sptn_value
+        )
+
+    def test_user_settings_expected_contents(self, model):
+        expected_keys = {
+            "send_private_typing_notifications",
+        }
+        settings = model.user_settings()
+        assert set(settings) == expected_keys
+
+        # Ensure original settings are unchanged through accessor
+        settings["foo"] = "bar"
+        assert set(model._user_settings) == expected_keys
 
     @pytest.mark.parametrize(
         "server_response, locally_processed_data, zulip_feature_level",
@@ -209,6 +240,7 @@ class TestModel:
             "realm_user",
             "realm_user_groups",
             "update_display_settings",
+            "user_settings",
             "realm_emoji",
             "zulip_version",
         ]
