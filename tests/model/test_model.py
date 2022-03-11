@@ -2041,9 +2041,7 @@ class TestModel:
         def _factory(msgs: MsgsType):
             return {
                 "messages": {
-                    message_id: {}
-                    if reactions is None
-                    else {
+                    message_id: {
                         "id": message_id,
                         "content": f"message content {message_id}",
                         "reactions": [
@@ -2061,6 +2059,7 @@ class TestModel:
                         ],
                     }
                     for message_id, reactions in msgs
+                    if reactions is not None
                 }
             }
 
@@ -2082,7 +2081,7 @@ class TestModel:
         )
         model.index = reaction_event_index_factory(
             [
-                (unindexed_message_id, None),
+                (unindexed_message_id, None),  # explicitly exclude
                 (2, [(1, "unicode_emoji", "1232", "thumbs_up")]),
                 (3, []),
             ]
