@@ -217,6 +217,17 @@ class UpdateRealmEmojiEvent(TypedDict):
     realm_emoji: Dict[str, RealmEmojiData]
 
 
+# This is specifically only those supported by ZT
+SupportedUserSettings = Literal["send_private_typing_notifications"]
+
+
+class UpdateUserSettingsEvent(TypedDict):
+    type: Literal["user_settings"]
+    op: Literal["update"]
+    property: SupportedUserSettings
+    value: Any
+
+
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
@@ -226,4 +237,5 @@ Event = Union[
     UpdateMessageFlagsEvent,
     UpdateDisplaySettings,
     UpdateRealmEmojiEvent,
+    UpdateUserSettingsEvent,
 ]

@@ -227,6 +227,7 @@ class TestModel:
             "typing",
             "update_message_flags",
             "update_display_settings",
+            "user_settings",
             "realm_emoji",
         ]
         fetch_event_types = [
@@ -2948,6 +2949,18 @@ class TestModel:
         for stream_id in stream_ids:
             new_subscribers = model.stream_dict[stream_id]["subscribers"]
             assert new_subscribers == expected_subscribers
+
+    @pytest.mark.parametrize("value", [True, False])
+    def test__handle_user_settings_event(self, mocker, model, value):
+        setting = "send_private_typing_notifications"
+        event = {
+            "type": "user_settings",
+            "op": "update",
+            "property": setting,
+            "value": value,
+        }
+        model._handle_user_settings_event(event)
+        assert model.user_settings()[setting] == value
 
     @pytest.mark.parametrize("setting", [True, False])
     def test_update_twenty_four_hour_format(self, mocker, model, setting):
