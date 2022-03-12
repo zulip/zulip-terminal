@@ -134,6 +134,7 @@ class Model:
                 ("typing", self._handle_typing_event),
                 ("update_message_flags", self._handle_update_message_flags_event),
                 ("update_display_settings", self._handle_update_display_settings_event),
+                ("user_settings", self._handle_user_settings_event),
                 ("realm_emoji", self._handle_update_emoji_event),
             ]
         )
@@ -1608,6 +1609,18 @@ class Model:
                         view.message_view.log[msg_pos + 1] = msg_w_list[0]
                     self.controller.update_screen()
                     return
+
+    def _handle_user_settings_event(self, event: Event) -> None:
+        """
+        Event when user settings have changed - from ZFL 89, v5.0
+        (previously "update_display_settings" and "update_global_notifications")
+        """
+        assert event["type"] == "user_settings"
+        if event["op"] == "update":  # Should always be the case
+            # Only update settings after initialization
+            if event["property"] in self._user_settings.keys():
+                setting = event["property"]
+                self._user_settings[setting] = event["value"]
 
     def _handle_update_display_settings_event(self, event: Event) -> None:
         """
