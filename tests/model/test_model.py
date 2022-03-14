@@ -231,6 +231,7 @@ class TestModel:
             "subscription",
             "typing",
             "update_message_flags",
+            "update_global_notifications",
             "update_display_settings",
             "user_settings",
             "realm_emoji",
@@ -2982,6 +2983,20 @@ class TestModel:
         }
         model._handle_user_settings_event(event)
         assert model.user_settings()[setting] == value
+
+    @pytest.mark.parametrize("setting", [True, False])
+    def test_update_pm_content_in_desktop_notifications(self, mocker, model, setting):
+        setting_name = "pm_content_in_desktop_notifications"
+        event = {
+            "type": "update_global_notifications",
+            "notification_name": setting_name,
+            "setting": setting,
+        }
+        model._user_settings[setting_name] = not setting
+
+        model._handle_update_global_notifications_event(event)
+
+        assert model.user_settings()[setting_name] == setting
 
     @pytest.mark.parametrize("setting", [True, False])
     def test_update_twenty_four_hour_format(self, mocker, model, setting):

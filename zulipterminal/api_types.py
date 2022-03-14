@@ -228,6 +228,16 @@ class UpdateUserSettingsEvent(TypedDict):
     value: Any
 
 
+# This is specifically only those supported by ZT
+SupportedGlobalNotificationSettings = Literal["pm_content_in_desktop_notifications"]
+
+
+class UpdateGlobalNotificationsEvent(TypedDict):
+    type: Literal["update_global_notifications"]
+    notification_name: SupportedGlobalNotificationSettings
+    setting: Any
+
+
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
@@ -238,4 +248,5 @@ Event = Union[
     UpdateDisplaySettings,
     UpdateRealmEmojiEvent,
     UpdateUserSettingsEvent,
+    UpdateGlobalNotificationsEvent,
 ]
