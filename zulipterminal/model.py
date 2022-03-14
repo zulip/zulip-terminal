@@ -136,6 +136,10 @@ class Model:
                 ("subscription", self._handle_subscription_event),
                 ("typing", self._handle_typing_event),
                 ("update_message_flags", self._handle_update_message_flags_event),
+                (
+                    "update_global_notifications",
+                    self._handle_update_global_notifications_event,
+                ),
                 ("update_display_settings", self._handle_update_display_settings_event),
                 ("user_settings", self._handle_user_settings_event),
                 ("realm_emoji", self._handle_update_emoji_event),
@@ -1630,6 +1634,12 @@ class Model:
             if event["property"] in self._user_settings.keys():
                 setting = event["property"]
                 self._user_settings[setting] = event["value"]
+
+    def _handle_update_global_notifications_event(self, event: Event) -> None:
+        assert event["type"] == "update_global_notifications"
+        to_update = event["notification_name"]
+        if to_update == "pm_content_in_desktop_notifications":
+            self._user_settings[to_update] = event["setting"]
 
     def _handle_update_display_settings_event(self, event: Event) -> None:
         """
