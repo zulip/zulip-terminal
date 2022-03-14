@@ -458,6 +458,11 @@ def group_pm_template() -> Message:
     return msg_template_factory(537288, "private", 1520918737, recipients=recipients)
 
 
+@pytest.fixture(params=["pm_template", "group_pm_template"])
+def private_message_fixture(request: Any) -> Message:
+    return request.getfixturevalue(request.param)
+
+
 @pytest.fixture(
     params=["stream_msg_template", "pm_template", "group_pm_template"],
     ids=["stream_message", "pm_message", "group_pm_message"],
