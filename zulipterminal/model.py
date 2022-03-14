@@ -1267,6 +1267,7 @@ class Model:
             return ""
 
         recipient = ""
+        content = message["content"]
         if message["type"] == "private":
             recipient = "you"
             if len(message["display_recipient"]) > 2:
@@ -1276,6 +1277,8 @@ class Model:
                     if recip["id"] not in (self.user_id, message["sender_id"])
                 ]
                 recipient = ", ".join(extra_targets)
+            if not self.user_settings()["pm_content_in_desktop_notifications"]:
+                content = f"New private message from {message['sender_full_name']}"
         elif message["type"] == "stream":
             stream_id = message["stream_id"]
             if {"mentioned", "wildcard_mentioned"}.intersection(
@@ -1287,7 +1290,7 @@ class Model:
             return notify(
                 f"{self.server_name}:\n"
                 f"{message['sender_full_name']} (to {recipient})",
-                message["content"],
+                content,
             )
         return ""
 

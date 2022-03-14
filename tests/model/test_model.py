@@ -1674,6 +1674,27 @@ class TestModel:
         assert notify.called == is_notify_called
 
     @pytest.mark.parametrize(
+        "hide_content, expected_content",
+        [(True, "New private message from Foo Foo"), (False, "private content here.")],
+    )
+    def test_notify_users_hides_PM_content_based_on_user_setting(
+        self, mocker, model, private_message_fixture, hide_content, expected_content
+    ):
+        notify = mocker.patch(MODULE + ".notify")
+        model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
+
+        message = private_message_fixture
+        message["user_id"] = 5179
+        message["flags"] = []
+
+        model.notify_user(message)
+
+        others = ", Boo Boo, Bar Bar" if len(message["display_recipient"]) > 2 else ""
+        notify.assert_called_once_with(
+            f"Test Organization Name:\nFoo Foo (to you{others})", expected_content
+        )
+
+    @pytest.mark.parametrize(
         "event, expected_times_messages_rerendered, expected_index, topic_view_enabled",
         [
             case(
