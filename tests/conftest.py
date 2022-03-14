@@ -752,6 +752,7 @@ def initial_data(
             },
         },
         "twenty_four_hour_time": True,
+        "pm_content_in_desktop_notifications": True,
         "realm_emoji": realm_emojis,
         "realm_message_retention_days": 74,
         "last_event_id": -1,

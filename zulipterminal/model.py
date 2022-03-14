@@ -79,6 +79,7 @@ def sort_streams(streams: List[StreamData]) -> None:
 class UserSettings(TypedDict):
     send_private_typing_notifications: bool
     twenty_four_hour_time: bool
+    pm_content_in_desktop_notifications: bool
 
 
 class Model:
@@ -117,6 +118,7 @@ class Model:
             "muted_topics",
             "realm_user",  # Enables cross_realm_bots
             "realm_user_groups",
+            "update_global_notifications",
             "update_display_settings",
             "user_settings",
             "realm_emoji",
@@ -207,6 +209,9 @@ class Model:
                 else user_settings["send_private_typing_notifications"]
             ),  # ZFL 105, Zulip 5.0
             twenty_four_hour_time=self.initial_data["twenty_four_hour_time"],
+            pm_content_in_desktop_notifications=self.initial_data[
+                "pm_content_in_desktop_notifications"
+            ],
         )
 
         self.new_user_input = True

@@ -127,12 +127,16 @@ class TestModel:
         assert model.user_settings() == UserSettings(
             send_private_typing_notifications=expected_sptn_value,
             twenty_four_hour_time=initial_data["twenty_four_hour_time"],
+            pm_content_in_desktop_notifications=initial_data[
+                "pm_content_in_desktop_notifications"
+            ],
         )
 
     def test_user_settings_expected_contents(self, model):
         expected_keys = {
             "send_private_typing_notifications",
             "twenty_four_hour_time",
+            "pm_content_in_desktop_notifications",
         }
         settings = model.user_settings()
         assert set(settings) == expected_keys
@@ -241,6 +245,7 @@ class TestModel:
             "muted_topics",
             "realm_user",
             "realm_user_groups",
+            "update_global_notifications",
             "update_display_settings",
             "user_settings",
             "realm_emoji",
