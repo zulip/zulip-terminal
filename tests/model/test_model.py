@@ -108,7 +108,6 @@ class TestModel:
         assert model.active_emoji_data["joker"]["type"] == "realm_emoji"
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert model.active_emoji_data["zulip"]["type"] == "zulip_extra_emoji"
-        assert model.twenty_four_hr_format == initial_data["twenty_four_hour_time"]
 
     @pytest.mark.parametrize(
         "sptn, expected_sptn_value",
@@ -126,12 +125,14 @@ class TestModel:
         model = Model(self.controller)
 
         assert model.user_settings() == UserSettings(
-            send_private_typing_notifications=expected_sptn_value
+            send_private_typing_notifications=expected_sptn_value,
+            twenty_four_hour_time=initial_data["twenty_four_hour_time"],
         )
 
     def test_user_settings_expected_contents(self, model):
         expected_keys = {
             "send_private_typing_notifications",
+            "twenty_four_hour_time",
         }
         settings = model.user_settings()
         assert set(settings) == expected_keys
@@ -2990,11 +2991,11 @@ class TestModel:
         second_msg_w.original_widget.message = {"id": 2}
         self.controller.view.message_view = mocker.Mock(log=[first_msg_w, second_msg_w])
         create_msg_box_list = mocker.patch(MODULE + ".create_msg_box_list")
-        model.twenty_four_hr_format = None  # initial value is not True/False
+        model._user_settings["twenty_four_hour_format"] = not setting
 
         model._handle_update_display_settings_event(event)
 
-        assert model.twenty_four_hr_format == event["setting"]
+        assert model.user_settings()["twenty_four_hour_time"] == event["setting"]
         assert create_msg_box_list.call_count == len(
             self.controller.view.message_view.log
         )
