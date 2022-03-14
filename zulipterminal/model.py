@@ -78,6 +78,7 @@ def sort_streams(streams: List[StreamData]) -> None:
 
 class UserSettings(TypedDict):
     send_private_typing_notifications: bool
+    twenty_four_hour_time: bool
 
 
 class Model:
@@ -196,16 +197,16 @@ class Model:
             self.initial_data["realm_emoji"]
         )
 
-        self.twenty_four_hr_format = self.initial_data["twenty_four_hour_time"]
-
         # "user_settings" only present in ZFl 89+ (v5.0)
         user_settings = self.initial_data.get("user_settings", None)
+        # TODO: Support multiple settings locations via settings migration #1108
         self._user_settings = UserSettings(
             send_private_typing_notifications=(
                 True
                 if user_settings is None
                 else user_settings["send_private_typing_notifications"]
             ),  # ZFL 105, Zulip 5.0
+            twenty_four_hour_time=self.initial_data["twenty_four_hour_time"],
         )
 
         self.new_user_input = True
@@ -1534,13 +1535,14 @@ class Model:
         self, timestamp: int, *, show_seconds: bool, show_year: bool = False
     ) -> str:
         local_time = datetime.fromtimestamp(timestamp)
+        use_24h_format = self.user_settings()["twenty_four_hour_time"]
         format_codes = (
             "%a %b %d "
             f"{'%Y ' if show_year else ''}"
-            f"{'%H:' if self.twenty_four_hr_format else '%I:'}"
+            f"{'%H:' if use_24h_format else '%I:'}"
             "%M"
             f"{':%S' if show_seconds else ''}"
-            f"{'' if self.twenty_four_hr_format else ' %p'}"
+            f"{'' if use_24h_format else ' %p'}"
         )
         return local_time.strftime(format_codes)
 
@@ -1631,7 +1633,7 @@ class Model:
         assert event["type"] == "update_display_settings"
         view = self.controller.view
         if event["setting_name"] == "twenty_four_hour_time":
-            self.twenty_four_hr_format = event["setting"]
+            self._user_settings["twenty_four_hour_time"] = event["setting"]
             for msg_w in view.message_view.log:
                 msg_box = msg_w.original_widget
                 msg_id = msg_box.message["id"]
