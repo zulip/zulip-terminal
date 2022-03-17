@@ -144,6 +144,8 @@ notify=enabled
 color-depth=256
 ```
 
+> **NOTE:** Most of these configuration settings may be specified on the command line when `zulip-term` is started; `zulip-term -h` or `zulip-term --help` will give the full list of options.
+
 ### Notifications
 
 Note that notifications are not currently supported on WSL; see [#767](https://github.com/zulip/zulip-terminal/issues/767).
