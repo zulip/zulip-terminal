@@ -1,7 +1,6 @@
 import platform
 import subprocess
 
-import lxml.html
 from typing_extensions import Literal
 
 
@@ -25,10 +24,7 @@ else:
 MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
-def notify(title: str, html_text: str) -> str:
-    document = lxml.html.document_fromstring(html_text)
-    text = document.text_content()
-
+def notify(title: str, text: str) -> str:
     command_list = None
     if PLATFORM == "MacOS":
         command_list = [
