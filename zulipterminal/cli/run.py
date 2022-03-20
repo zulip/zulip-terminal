@@ -12,6 +12,7 @@ import requests
 from urwid import display_common, set_encoding
 
 from zulipterminal.config.themes import (
+    InvalidThemeColorCode,
     aliased_themes,
     all_themes,
     complete_and_incomplete_themes,
@@ -511,6 +512,11 @@ def main(options: Optional[List[str]] = None) -> None:
         zt_logger.info(f"\n\n{e}\n\n")
         zt_logger.exception(e)
         exit_with_error(f"\nError connecting to Zulip server: {e}.")
+    except InvalidThemeColorCode as e:
+        # Acts as separator between logs
+        zt_logger.info(f"\n\n{e}\n\n")
+        zt_logger.exception(e)
+        exit_with_error(f"\n{e}")
     except (display_common.AttrSpecError, display_common.ScreenError) as e:
         # NOTE: Strictly this is not necessarily just a theme error
         # FIXME: Add test for this - once loading takes place after UI setup
