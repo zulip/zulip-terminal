@@ -16,6 +16,7 @@ from zulipterminal.config.themes import (
     all_themes,
     complete_and_incomplete_themes,
     parse_themefile,
+    valid_16_color_codes,
 )
 
 
@@ -26,27 +27,6 @@ expected_complete_themes = {
     "zt_light",
     "zt_blue",
 }
-
-# These are urwid color names with underscores instead of spaces
-valid_16_color_codes = [
-    "default",
-    "black",
-    "dark_red",
-    "dark_green",
-    "brown",
-    "dark_blue",
-    "dark_magenta",
-    "dark_cyan",
-    "dark_gray",
-    "light_red",
-    "light_green",
-    "yellow",
-    "light_blue",
-    "light_magenta",
-    "light_cyan",
-    "light_gray",
-    "white",
-]
 
 
 def test_all_themes() -> None:
