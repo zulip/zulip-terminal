@@ -1269,6 +1269,7 @@ class Model:
 
         recipient = ""
         content = message["content"]
+        hidden_content = False
         if message["type"] == "private":
             recipient = "you"
             if len(message["display_recipient"]) > 2:
@@ -1280,6 +1281,7 @@ class Model:
                 recipient = ", ".join(extra_targets)
             if not self.user_settings()["pm_content_in_desktop_notifications"]:
                 content = f"New private message from {message['sender_full_name']}"
+                hidden_content = True
         elif message["type"] == "stream":
             stream_id = message["stream_id"]
             if {"mentioned", "wildcard_mentioned"}.intersection(
@@ -1288,8 +1290,11 @@ class Model:
                 recipient = "{display_recipient} -> {subject}".format(**message)
 
         if recipient:
-            document = lxml.html.document_fromstring(content)
-            text = document.text_content()
+            if hidden_content:
+                text = content
+            else:
+                document = lxml.html.document_fromstring(content)
+                text = document.text_content()
 
             return notify(
                 f"{self.server_name}:\n"
