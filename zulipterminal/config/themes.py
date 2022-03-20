@@ -103,6 +103,27 @@ THEME_ALIASES = {
     "blue": "zt_blue",
 }
 
+# These are urwid color names with underscores instead of spaces
+valid_16_color_codes = [
+    "default",
+    "black",
+    "dark_red",
+    "dark_green",
+    "brown",
+    "dark_blue",
+    "dark_magenta",
+    "dark_cyan",
+    "dark_gray",
+    "light_red",
+    "light_green",
+    "yellow",
+    "light_blue",
+    "light_magenta",
+    "light_cyan",
+    "light_gray",
+    "white",
+]
+
 
 def all_themes() -> List[str]:
     return list(THEMES.keys())
