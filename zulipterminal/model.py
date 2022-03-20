@@ -20,8 +20,8 @@ from typing import (
 )
 from urllib.parse import urlparse
 
-import lxml.html
 import zulip
+from bs4 import BeautifulSoup
 from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
@@ -1293,8 +1293,22 @@ class Model:
             if hidden_content:
                 text = content
             else:
-                document = lxml.html.document_fromstring(content)
-                text = document.text_content()
+                soup = BeautifulSoup(content, "lxml")
+                for spoiler_tag in soup.find_all(
+                    "div", attrs={"class": "spoiler-block"}
+                ):
+                    header = spoiler_tag.find("div", attrs={"class": "spoiler-header"})
+                    header.contents = [ele for ele in header.contents if ele != "\n"]
+                    empty_header = len(header.contents) == 0
+                    header.unwrap()
+
+                    to_hide = spoiler_tag.find(
+                        "div", attrs={"class": "spoiler-content"}
+                    )
+                    to_hide.string = "(...)" if empty_header else " (...)"
+
+                    spoiler_tag.unwrap()
+                text = soup.text
 
             return notify(
                 f"{self.server_name}:\n"

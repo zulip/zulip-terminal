@@ -1656,15 +1656,47 @@ class TestModel:
         else:
             notify.assert_not_called
 
-    def test_notify_user_transformed_content(self, mocker, model, message_fixture):
+    @pytest.mark.parametrize(
+        "content, expected_notification_text",
+        [
+            case("<p>hi</p>", "hi", id="simple_text"),
+            case(
+                "\n".join(
+                    [
+                        '<div class="spoiler-block"><div class="spoiler-header">'
+                        "<p>title of spoiler</p>"
+                        '</div><div class="spoiler-content" aria-hidden="true">'
+                        "<p>content of spoiler</p>"
+                        "</div></div>"
+                    ]
+                ),
+                "title of spoiler (...)",
+                id="spoiler_with_title",
+            ),
+            case(
+                "\n".join(
+                    [
+                        '<div class="spoiler-block"><div class="spoiler-header">'
+                        '</div><div class="spoiler-content" aria-hidden="true">'
+                        "<p>content of spoiler</p>"
+                        "</div></div>"
+                    ]
+                ),
+                "(...)",
+                id="spoiler_no_title",
+            ),
+        ],
+    )
+    def test_notify_user_transformed_content(
+        self, mocker, model, message_fixture, content, expected_notification_text
+    ):
         mocker.patch(MODEL + ".is_visual_notifications_enabled", lambda s, id: True)
         notify = mocker.patch(MODULE + ".notify")
-        message_fixture["content"] = "<p>hi</p>"
-        expected = "hi"
+        message_fixture["content"] = content
 
         model.notify_user(message_fixture)
 
-        notify.assert_called_once_with(mocker.ANY, expected)
+        notify.assert_called_once_with(mocker.ANY, expected_notification_text)
 
     @pytest.mark.parametrize(
         "notify_enabled, is_notify_called",
