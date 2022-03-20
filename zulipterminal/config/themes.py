@@ -125,6 +125,10 @@ valid_16_color_codes = [
 ]
 
 
+class InvalidThemeColorCode(Exception):
+    pass
+
+
 def all_themes() -> List[str]:
     return list(THEMES.keys())
 
@@ -148,6 +152,7 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
 
 def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
     theme_styles = THEMES[theme_name].STYLES
+    validate_colors(theme_name, color_depth)
     urwid_theme = parse_themefile(theme_styles, color_depth)
 
     try:
@@ -157,6 +162,30 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         pass
 
     return urwid_theme
+
+
+def validate_colors(theme_name: str, color_depth: int) -> None:
+    """
+    This function validates color-codes for a given theme, given colors are in `Color`.
+
+    If any color is not in accordance with urwid default 16-color codes then the
+    function raises InvalidThemeColorCode with the invalid colors.
+    """
+    theme_colors = THEMES[theme_name].Color
+    failure_text = []
+    if color_depth == 16:
+        for color in theme_colors:
+            color_16code = color.value.split()[0]
+            if color_16code not in valid_16_color_codes:
+                invalid_16_color_code = str(color.name)
+                invalid_16_color_code_name = str(color.value).split()[0]
+                failure_text.append(
+                    f"Check 16-color-code for {invalid_16_color_code} = ({invalid_16_color_code_name}) in theme - {theme_name}\n"
+                )
+        if failure_text == []:
+            return
+        else:
+            raise InvalidThemeColorCode("".join(failure_text))
 
 
 def parse_themefile(

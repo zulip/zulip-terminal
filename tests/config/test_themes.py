@@ -11,12 +11,14 @@ from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
     THEMES,
+    InvalidThemeColorCode,
     ThemeSpec,
     add_pygments_style,
     all_themes,
     complete_and_incomplete_themes,
     parse_themefile,
     valid_16_color_codes,
+    validate_colors,
 )
 
 
@@ -193,3 +195,81 @@ def test_add_pygments_style(
     # Check for overrides(k,sd) and inheriting styles (kr)
     for style in expected_styles:
         assert style in urwid_theme
+
+
+# Validate 16-color-codes
+@pytest.mark.parametrize(
+    "color_depth, theme_name",
+    [
+        (16, "zt_dark"),
+        (16, "gruvbox_dark"),
+        (16, "gruvbox_light"),
+        (16, "zt_light"),
+        (16, "zt_blue"),
+    ],
+)
+def test_validate_colors(theme_name: str, color_depth: int) -> None:
+    theme = THEMES[theme_name]
+
+    # No invalid colors
+    class Color(Enum):
+        # color          =  16code          256code   24code
+        DEFAULT = "default         default   default"
+        DARK0_HARD = "black           h234      #1d2021"
+        GRAY_244 = "dark_gray       h244      #928374"
+        LIGHT2 = "white           h250      #d5c4a1"
+
+    theme.Color = Color
+    validate_colors(theme_name, 16)
+
+    # One invalid color
+    class Color1(Enum):
+        # color          =  16code          256code   24code
+        DEFAULT = "default         default   default"
+        DARK0_HARD = "blac           h234      #1d2021"
+        GRAY_244 = "dark_gray       h244      #928374"
+        LIGHT2 = "white           h250      #d5c4a1"
+
+    theme.Color = Color1
+    with pytest.raises(InvalidThemeColorCode) as e:
+        validate_colors(theme_name, 16)
+    assert (
+        str(e.value)
+        == f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
+    )
+
+    # Two invalid colors
+    class Color2(Enum):
+        # color          =  16code          256code   24code
+        DEFAULT = "default         default   default"
+        DARK0_HARD = "blac           h234      #1d2021"
+        GRAY_244 = "dark_gra       h244      #928374"
+        LIGHT2 = "white           h250      #d5c4a1"
+
+    theme.Color = Color2
+    with pytest.raises(InvalidThemeColorCode) as e:
+        validate_colors(theme_name, 16)
+    assert (
+        str(e.value)
+        == f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
+        + f"Check 16-color-code for GRAY_244 = (dark_gra) in theme - {theme_name}\n"
+    )
+
+    # Multiple invalid colors
+    class Color3(Enum):
+        # color          =  16code          256code   24code
+        DEFAULT = "defaul         default   default"
+        DARK0_HARD = "blac           h234      #1d2021"
+        GRAY_244 = "dark_gra       h244      #928374"
+        LIGHT2 = "whit           h250      #d5c4a1"
+
+    theme.Color = Color3
+    with pytest.raises(InvalidThemeColorCode) as e:
+        validate_colors(theme_name, 16)
+    assert (
+        str(e.value)
+        == f"Check 16-color-code for DEFAULT = (defaul) in theme - {theme_name}\n"
+        + f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
+        + f"Check 16-color-code for GRAY_244 = (dark_gra) in theme - {theme_name}\n"
+        + f"Check 16-color-code for LIGHT2 = (whit) in theme - {theme_name}\n"
+    )
