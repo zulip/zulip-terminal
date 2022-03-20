@@ -178,14 +178,14 @@ def validate_colors(theme_name: str, color_depth: int) -> None:
             color_16code = color.value.split()[0]
             if color_16code not in valid_16_color_codes:
                 invalid_16_color_code = str(color.name)
-                invalid_16_color_code_name = str(color.value).split()[0]
-                failure_text.append(
-                    f"Check 16-color-code for {invalid_16_color_code} = ({invalid_16_color_code_name}) in theme - {theme_name}\n"
-                )
+                failure_text.append(f"- {invalid_16_color_code} = {color_16code}")
         if failure_text == []:
             return
         else:
-            raise InvalidThemeColorCode("".join(failure_text))
+            text = "\n".join(
+                [f"Invalid 16-color codes in theme '{theme_name}':"] + failure_text
+            )
+            raise InvalidThemeColorCode(text)
 
 
 def parse_themefile(

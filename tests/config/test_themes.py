@@ -211,6 +211,8 @@ def test_add_pygments_style(
 def test_validate_colors(theme_name: str, color_depth: int) -> None:
     theme = THEMES[theme_name]
 
+    header_text = f"Invalid 16-color codes in theme '{theme_name}':\n"
+
     # No invalid colors
     class Color(Enum):
         # color          =  16code          256code   24code
@@ -233,10 +235,7 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
     theme.Color = Color1
     with pytest.raises(InvalidThemeColorCode) as e:
         validate_colors(theme_name, 16)
-    assert (
-        str(e.value)
-        == f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
-    )
+    assert str(e.value) == header_text + "- DARK0_HARD = blac"
 
     # Two invalid colors
     class Color2(Enum):
@@ -250,9 +249,7 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
     with pytest.raises(InvalidThemeColorCode) as e:
         validate_colors(theme_name, 16)
     assert (
-        str(e.value)
-        == f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
-        + f"Check 16-color-code for GRAY_244 = (dark_gra) in theme - {theme_name}\n"
+        str(e.value) == header_text + "- DARK0_HARD = blac\n" + "- GRAY_244 = dark_gra"
     )
 
     # Multiple invalid colors
@@ -268,8 +265,9 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         validate_colors(theme_name, 16)
     assert (
         str(e.value)
-        == f"Check 16-color-code for DEFAULT = (defaul) in theme - {theme_name}\n"
-        + f"Check 16-color-code for DARK0_HARD = (blac) in theme - {theme_name}\n"
-        + f"Check 16-color-code for GRAY_244 = (dark_gra) in theme - {theme_name}\n"
-        + f"Check 16-color-code for LIGHT2 = (whit) in theme - {theme_name}\n"
+        == header_text
+        + "- DEFAULT = defaul\n"
+        + "- DARK0_HARD = blac\n"
+        + "- GRAY_244 = dark_gra\n"
+        + "- LIGHT2 = whit"
     )
