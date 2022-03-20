@@ -1656,6 +1656,16 @@ class TestModel:
         else:
             notify.assert_not_called
 
+    def test_notify_user_transformed_content(self, mocker, model, message_fixture):
+        mocker.patch(MODEL + ".is_visual_notifications_enabled", lambda s, id: True)
+        notify = mocker.patch(MODULE + ".notify")
+        message_fixture["content"] = "<p>hi</p>"
+        expected = "hi"
+
+        model.notify_user(message_fixture)
+
+        notify.assert_called_once_with(mocker.ANY, expected)
+
     @pytest.mark.parametrize(
         "notify_enabled, is_notify_called",
         [
