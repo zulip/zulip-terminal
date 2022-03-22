@@ -22,19 +22,32 @@ from zulipterminal.config.color import color_properties
 class GruvBoxColor(Enum):
     # color          =  16code          256code   24code
     DEFAULT          = 'default         default   default'
+
+    # Only or primarily dark mode - grayscales
+    # - generally background
     DARK0_HARD       = 'black           h234      #1d2021'
-    GRAY_244         = 'dark_gray       h244      #928374'
+    # - generally foreground
     LIGHT2           = 'white           h250      #d5c4a1'
+    # - grays
+    GRAY_244         = 'dark_gray       h244      #928374'
     LIGHT4           = 'light_gray      h248      #bdae93'
+
+    # Dark mode only - colors
     BRIGHT_BLUE      = 'light_blue      h109      #83a598'
     BRIGHT_GREEN     = 'light_green     h142      #b8bb26'
     BRIGHT_RED       = 'light_red       h167      #fb4934'
+
+    # May be relevant to both modes
     NEUTRAL_PURPLE   = 'light_magenta   h132      #b16286'
     NEUTRAL_BLUE     = 'dark_cyan       h66       #458588'
     NEUTRAL_YELLOW   = 'brown           h172      #d79921'
+
+    # Light mode only - colors
     FADED_BLUE       = 'dark_blue       h24       #076678'
     FADED_YELLOW     = 'brown           h136      #b57614'
     FADED_RED        = 'dark_red        h88       #9d0006'
+
+    # Added for light mode; suggests light needs adjusting
     LIGHT0_HARD      = 'white           h230      #f9f5d7'
     GRAY_245         = 'dark_gray       h245      #928374'
     DARK2            = 'black           h239      #504945'

@@ -19,10 +19,10 @@ from zulipterminal.themes.colors_gruvbox import DefaultBoldColor as Color
 STYLES = {
     # style_name       :  foreground                   background
     None               : (Color.LIGHT2,                Color.DARK0_HARD),
-    'selected'         : (Color.LIGHT2,                Color.FADED_BLUE),
-    'msg_selected'     : (Color.LIGHT2,                Color.FADED_BLUE),
-    'header'           : (Color.NEUTRAL_BLUE,          Color.FADED_BLUE),
-    'general_narrow'   : (Color.LIGHT2,                Color.FADED_BLUE),
+    'selected'         : (Color.DARK0_HARD,            Color.NEUTRAL_BLUE),
+    'msg_selected'     : (Color.DARK0_HARD,            Color.NEUTRAL_BLUE),
+    'header'           : (Color.NEUTRAL_BLUE,          Color.BRIGHT_BLUE),
+    'general_narrow'   : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
     'general_bar'      : (Color.LIGHT2,                Color.DARK0_HARD),
     'name'             : (Color.NEUTRAL_YELLOW__BOLD,  Color.DARK0_HARD),
     'unread'           : (Color.NEUTRAL_PURPLE,        Color.DARK0_HARD),
@@ -42,7 +42,7 @@ STYLES = {
     'msg_mention'      : (Color.BRIGHT_RED__BOLD,      Color.DARK0_HARD),
     'msg_link'         : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
     'msg_link_index'   : (Color.BRIGHT_BLUE__BOLD,     Color.DARK0_HARD),
-    'msg_quote'        : (Color.FADED_YELLOW,          Color.DARK0_HARD),
+    'msg_quote'        : (Color.NEUTRAL_YELLOW,        Color.DARK0_HARD),
     'msg_code'         : (Color.DARK0_HARD,            Color.LIGHT2),
     'msg_bold'         : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
     'msg_time'         : (Color.DARK0_HARD,            Color.LIGHT2),
@@ -65,14 +65,14 @@ STYLES = {
     'popup_important'  : (Color.BRIGHT_RED__BOLD,      Color.DARK0_HARD),
     'widget_disabled'  : (Color.GRAY_244,              Color.DARK0_HARD),
     'area:help'        : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
-    'area:msg'         : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+    'area:msg'         : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
     'area:stream'      : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
-    'area:error'       : (Color.LIGHT2,                Color.FADED_RED),
-    'area:user'        : (Color.LIGHT2,                Color.FADED_BLUE),
+    'area:error'       : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+    'area:user'        : (Color.DARK0_HARD,            Color.BRIGHT_YELLOW),
     'search_error'     : (Color.BRIGHT_RED,            Color.DARK0_HARD),
     'task:success'     : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
-    'task:error'       : (Color.LIGHT2,                Color.FADED_RED),
-    'task:warning'     : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+    'task:error'       : (Color.DARK0_HARD,            Color.BRIGHT_RED),
+    'task:warning'     : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
 }
 
 META = {
