@@ -14,6 +14,7 @@ from zulipterminal.config.symbols import (
     MUTE_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import Message, StreamData, hash_util_decode
@@ -171,7 +172,7 @@ class StreamButton(TopButton):
         self.stream_name = properties["name"]
         self.stream_id = properties["id"]
         self.color = properties["color"]
-        is_private = properties["invite_only"]
+        stream_access_type = properties["stream_access_type"]
         self.description = properties["description"]
 
         self.model = controller.model
@@ -190,7 +191,13 @@ class StreamButton(TopButton):
             ("s" + self.color, "", "", "standout", inverse_text, self.color)
         )
 
-        stream_marker = STREAM_MARKER_PRIVATE if is_private else STREAM_MARKER_PUBLIC
+        if stream_access_type == "private":
+            stream_marker = STREAM_MARKER_PRIVATE
+        elif stream_access_type == "web-public":
+            stream_marker = STREAM_MARKER_WEB_PUBLIC
+        else:
+            stream_marker = STREAM_MARKER_PUBLIC
+
         narrow_function = partial(
             controller.narrow_to_stream,
             stream_name=self.stream_name,
