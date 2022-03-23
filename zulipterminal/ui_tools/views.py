@@ -28,6 +28,7 @@ from zulipterminal.config.ui_mappings import (
     EDIT_MODE_CAPTIONS,
     ROLE_BY_ID,
     STATE_ICON,
+    STREAM_POST_POLICY,
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
@@ -1329,6 +1330,14 @@ class StreamInfoView(PopUpView):
             )
         ]
 
+        if "stream_post_policy" in stream:
+            stream_policy = STREAM_POST_POLICY[stream["stream_post_policy"]]
+        else:
+            if stream.get("is_announcement_only"):
+                stream_policy = STREAM_POST_POLICY[2]
+            else:
+                stream_policy = STREAM_POST_POLICY[1]
+
         total_members = len(stream["subscribers"])
         type_of_stream = "Private" if stream["invite_only"] else "Public"
         availability_of_history = (
@@ -1376,6 +1385,7 @@ class StreamInfoView(PopUpView):
                         f"Press {email_keys} to copy Stream email address",
                     ),
                     ("History of Stream", f"{availability_of_history}"),
+                    ("Posting Policy", f"{stream_policy}"),
                 ],
             ),
             ("Stream settings", []),
