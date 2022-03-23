@@ -36,7 +36,7 @@ from zulipterminal.api_types import (
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
-from zulipterminal.config.ui_mappings import ROLE_BY_ID
+from zulipterminal.config.ui_mappings import ROLE_BY_ID, StreamAccessType
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
@@ -1092,6 +1092,13 @@ class Model:
             if stream["name"] == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
+
+    def stream_access_type(self, stream_id: int) -> StreamAccessType:
+        if stream_id not in self.stream_dict:
+            raise RuntimeError("Invalid stream id.")
+        if self.stream_dict[stream_id]["invite_only"]:
+            return "private"
+        return "public"
 
     def is_pinned_stream(self, stream_id: int) -> bool:
         return stream_id in [stream["id"] for stream in self.pinned_streams]

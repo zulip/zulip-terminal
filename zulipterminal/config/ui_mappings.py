@@ -1,5 +1,7 @@
 from typing import Dict, Optional
 
+from typing_extensions import Literal
+
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
     STATUS_ACTIVE,
@@ -23,6 +25,9 @@ STATE_ICON = {
     "offline": STATUS_OFFLINE,
     "inactive": STATUS_INACTIVE,
 }
+
+
+StreamAccessType = Literal["public", "private"]
 
 
 BOT_TYPE_BY_ID = {
