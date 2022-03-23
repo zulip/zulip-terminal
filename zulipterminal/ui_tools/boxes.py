@@ -35,6 +35,7 @@ from zulipterminal.config.symbols import (
     QUOTED_TEXT_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
@@ -433,8 +434,11 @@ class WriteBox(urwid.Pile):
         color = "general_bar"
         if self.model.is_valid_stream(new_text):
             stream_id = self.model.stream_id_from_name(new_text)
-            if self.model.stream_access_type(stream_id) == "private":
+            stream_access_type = self.model.stream_access_type(stream_id)
+            if stream_access_type == "private":
                 stream_marker = STREAM_MARKER_PRIVATE
+            elif stream_access_type == "web-public":
+                stream_marker = STREAM_MARKER_WEB_PUBLIC
             else:
                 stream_marker = STREAM_MARKER_PUBLIC
             stream = self.model.stream_dict[stream_id]

@@ -1096,7 +1096,10 @@ class Model:
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
         if stream_id not in self.stream_dict:
             raise RuntimeError("Invalid stream id.")
-        if self.stream_dict[stream_id]["invite_only"]:
+        stream = self.stream_dict[stream_id]
+        if stream.get("is_web_public", False):
+            return "web-public"
+        if stream["invite_only"]:
             return "private"
         return "public"
 

@@ -12,6 +12,7 @@ from zulipterminal.config.symbols import (
     INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index
@@ -1109,11 +1110,20 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "stream_name, stream_id, is_valid_stream, stream_access_type, expected_marker, expected_color",
         [
+            (
+                "Web public stream",
+                999,
+                True,
+                "web-public",
+                STREAM_MARKER_WEB_PUBLIC,
+                "#ddd",
+            ),
             ("Secret stream", 99, True, "private", STREAM_MARKER_PRIVATE, "#ccc"),
             ("Stream 1", 1, True, "public", STREAM_MARKER_PUBLIC, "#b0a5fd"),
             ("Stream 0", 0, False, None, INVALID_MARKER, "general_bar"),
         ],
         ids=[
+            "web_public_stream",
             "private_stream",
             "public_stream",
             "invalid_stream_name",
