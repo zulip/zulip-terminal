@@ -13,6 +13,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
 )
+from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
 from zulipterminal.urwid_types import urwid_Size
@@ -1062,11 +1063,11 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        "stream_name, stream_id, is_valid_stream, expected_marker, expected_color",
+        "stream_name, stream_id, is_valid_stream, stream_access_type, expected_marker, expected_color",
         [
-            ("Secret stream", 99, True, STREAM_MARKER_PRIVATE, "#ccc"),
-            ("Stream 1", 1, True, STREAM_MARKER_PUBLIC, "#b0a5fd"),
-            ("Stream 0", 0, False, INVALID_MARKER, "general_bar"),
+            ("Secret stream", 99, True, "private", STREAM_MARKER_PRIVATE, "#ccc"),
+            ("Stream 1", 1, True, "public", STREAM_MARKER_PUBLIC, "#b0a5fd"),
+            ("Stream 0", 0, False, None, INVALID_MARKER, "general_bar"),
         ],
         ids=[
             "private_stream",
@@ -1080,6 +1081,7 @@ class TestWriteBox:
         stream_id: int,
         stream_name: str,
         is_valid_stream: bool,
+        stream_access_type: StreamAccessType,
         expected_marker: str,
         stream_dict: Dict[int, Any],
         expected_color: str,
@@ -1088,6 +1090,7 @@ class TestWriteBox:
         write_box.model.stream_dict = stream_dict
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
+        write_box.model.stream_access_type.return_value = stream_access_type
 
         write_box.stream_box_view(stream_id)
 
