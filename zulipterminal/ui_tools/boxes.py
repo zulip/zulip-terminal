@@ -432,11 +432,12 @@ class WriteBox(urwid.Pile):
         stream_marker = INVALID_MARKER
         color = "general_bar"
         if self.model.is_valid_stream(new_text):
-            stream = self.model.stream_dict[self.model.stream_id_from_name(new_text)]
-            if stream["invite_only"]:
+            stream_id = self.model.stream_id_from_name(new_text)
+            if self.model.stream_access_type(stream_id) == "private":
                 stream_marker = STREAM_MARKER_PRIVATE
             else:
                 stream_marker = STREAM_MARKER_PUBLIC
+            stream = self.model.stream_dict[stream_id]
             color = stream["color"]
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
             (color, stream_marker)

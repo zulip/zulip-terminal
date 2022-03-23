@@ -1339,7 +1339,15 @@ class StreamInfoView(PopUpView):
                 stream_policy = STREAM_POST_POLICY[1]
 
         total_members = len(stream["subscribers"])
-        type_of_stream = "Private" if stream["invite_only"] else "Public"
+
+        stream_access_type = controller.model.stream_access_type(stream_id)
+        if stream_access_type == "private":
+            type_of_stream = "Private"
+            stream_marker = STREAM_MARKER_PRIVATE
+        else:
+            type_of_stream = "Public"
+            stream_marker = STREAM_MARKER_PUBLIC
+
         availability_of_history = (
             "Public to Users"
             if stream["history_public_to_subscribers"]
@@ -1354,9 +1362,6 @@ class StreamInfoView(PopUpView):
             "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
         )
 
-        stream_marker = (
-            STREAM_MARKER_PRIVATE if stream["invite_only"] else STREAM_MARKER_PUBLIC
-        )
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
         self.markup_desc, message_links, _ = MessageBox.transform_content(
