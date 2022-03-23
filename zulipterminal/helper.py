@@ -31,13 +31,14 @@ from zulipterminal.config.regexes import (
     REGEX_COLOR_6_DIGIT,
     REGEX_QUOTED_FENCE_LENGTH,
 )
+from zulipterminal.config.ui_mappings import StreamAccessType
 
 
 class StreamData(TypedDict):
     name: str
     id: int
     color: str
-    invite_only: bool
+    stream_access_type: StreamAccessType
     description: str
 
 

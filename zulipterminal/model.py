@@ -1018,7 +1018,7 @@ class Model:
                     "name": stream["name"],
                     "id": stream["stream_id"],
                     "color": stream["color"],
-                    "invite_only": stream["invite_only"],
+                    "stream_access_type": self.stream_access_type(stream["stream_id"]),
                     "description": stream["description"],
                 }
             )

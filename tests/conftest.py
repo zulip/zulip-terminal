@@ -54,7 +54,7 @@ def stream_button(mocker: MockerFixture) -> StreamButton:
             "name": "PTEST",
             "id": 205,
             "color": "#bfd56f",
-            "invite_only": False,
+            "stream_access_type": "public",
             "description": "Test stream description",
         },
         controller=mocker.patch("zulipterminal.core.Controller"),
