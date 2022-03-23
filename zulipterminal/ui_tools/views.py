@@ -22,6 +22,7 @@ from zulipterminal.config.symbols import (
     PINNED_STREAMS_DIVIDER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -1344,6 +1345,9 @@ class StreamInfoView(PopUpView):
         if stream_access_type == "private":
             type_of_stream = "Private"
             stream_marker = STREAM_MARKER_PRIVATE
+        elif stream_access_type == "web-public":
+            type_of_stream = "Web-public"
+            stream_marker = STREAM_MARKER_WEB_PUBLIC
         else:
             type_of_stream = "Public"
             stream_marker = STREAM_MARKER_PUBLIC

@@ -27,7 +27,7 @@ STATE_ICON = {
 }
 
 
-StreamAccessType = Literal["public", "private"]
+StreamAccessType = Literal["public", "private", "web-public"]
 
 
 BOT_TYPE_BY_ID = {
