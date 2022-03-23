@@ -1152,6 +1152,10 @@ class TestModel:
         model.client.update_subscription_settings.assert_called_once_with(request)
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
+    def test_stream_access_type(self, model, general_stream, secret_stream):
+        assert model.stream_access_type(general_stream["stream_id"]) == "public"
+        assert model.stream_access_type(secret_stream["stream_id"]) == "private"
+
     @pytest.mark.parametrize(
         "flags_before, expected_operator",
         [
