@@ -29,6 +29,7 @@ from zulipterminal.config.ui_mappings import (
     EDIT_MODE_CAPTIONS,
     ROLE_BY_ID,
     STATE_ICON,
+    STREAM_ACCESS_TYPE,
     STREAM_POST_POLICY,
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
@@ -1342,14 +1343,12 @@ class StreamInfoView(PopUpView):
         total_members = len(stream["subscribers"])
 
         stream_access_type = controller.model.stream_access_type(stream_id)
+        type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
         if stream_access_type == "private":
-            type_of_stream = "Private"
             stream_marker = STREAM_MARKER_PRIVATE
         elif stream_access_type == "web-public":
-            type_of_stream = "Web-public"
             stream_marker = STREAM_MARKER_WEB_PUBLIC
         else:
-            type_of_stream = "Public"
             stream_marker = STREAM_MARKER_PUBLIC
 
         availability_of_history = (
