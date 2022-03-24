@@ -20,9 +20,6 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
-    STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -1344,12 +1341,7 @@ class StreamInfoView(PopUpView):
 
         stream_access_type = controller.model.stream_access_type(stream_id)
         type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
-        if stream_access_type == "private":
-            stream_marker = STREAM_MARKER_PRIVATE
-        elif stream_access_type == "web-public":
-            stream_marker = STREAM_MARKER_WEB_PUBLIC
-        else:
-            stream_marker = STREAM_MARKER_PUBLIC
+        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
 
         availability_of_history = (
             "Public to Users"

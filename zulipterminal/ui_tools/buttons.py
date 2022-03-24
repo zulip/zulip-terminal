@@ -9,14 +9,8 @@ from typing_extensions import TypedDict
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
-from zulipterminal.config.symbols import (
-    CHECK_MARK,
-    MUTE_MARKER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
-    STREAM_MARKER_WEB_PUBLIC,
-)
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
+from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
@@ -191,12 +185,7 @@ class StreamButton(TopButton):
             ("s" + self.color, "", "", "standout", inverse_text, self.color)
         )
 
-        if stream_access_type == "private":
-            stream_marker = STREAM_MARKER_PRIVATE
-        elif stream_access_type == "web-public":
-            stream_marker = STREAM_MARKER_WEB_PUBLIC
-        else:
-            stream_marker = STREAM_MARKER_PUBLIC
+        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
 
         narrow_function = partial(
             controller.narrow_to_stream,
