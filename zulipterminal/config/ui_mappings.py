@@ -8,6 +8,9 @@ from zulipterminal.config.symbols import (
     STATUS_IDLE,
     STATUS_INACTIVE,
     STATUS_OFFLINE,
+    STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
 
 
@@ -30,9 +33,9 @@ STATE_ICON = {
 StreamAccessType = Literal["public", "private", "web-public"]
 
 STREAM_ACCESS_TYPE = {
-    "public": {"description": "Public"},
-    "private": {"description": "Private"},
-    "web-public": {"description": "Web public"},
+    "public": {"description": "Public", "icon": STREAM_MARKER_PUBLIC},
+    "private": {"description": "Private", "icon": STREAM_MARKER_PRIVATE},
+    "web-public": {"description": "Web public", "icon": STREAM_MARKER_WEB_PUBLIC},
 }
 
 

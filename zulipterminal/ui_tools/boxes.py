@@ -33,13 +33,10 @@ from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
     QUOTED_TEXT_MARKER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
-    STREAM_MARKER_WEB_PUBLIC,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
-from zulipterminal.config.ui_mappings import STATE_ICON
+from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
     Message,
     asynch,
@@ -435,12 +432,7 @@ class WriteBox(urwid.Pile):
         if self.model.is_valid_stream(new_text):
             stream_id = self.model.stream_id_from_name(new_text)
             stream_access_type = self.model.stream_access_type(stream_id)
-            if stream_access_type == "private":
-                stream_marker = STREAM_MARKER_PRIVATE
-            elif stream_access_type == "web-public":
-                stream_marker = STREAM_MARKER_WEB_PUBLIC
-            else:
-                stream_marker = STREAM_MARKER_PUBLIC
+            stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
             stream = self.model.stream_dict[stream_id]
             color = stream["color"]
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
