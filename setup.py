@@ -42,7 +42,7 @@ testing_deps = [
 ]
 
 linting_deps = [
-    "isort~=5.7.0",
+    "isort~=5.10.1",
     "flake8~=4.0.1",
     "flake8-quotes~=3.2.0",
     "flake8-continuation~=1.0.5",
