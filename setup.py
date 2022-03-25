@@ -59,7 +59,7 @@ typing_deps = [
 
 dev_helper_deps = [
     "pudb==2022.1.1",
-    "snakeviz==0.4.2",
+    "snakeviz>=2.1.1",
     "gitlint>=0.10",
     "autopep8~=1.5.4",
     "autoflake~=1.3.1",
