@@ -43,7 +43,7 @@ testing_deps = [
 
 linting_deps = [
     "isort~=5.7.0",
-    "flake8~=3.9.0",
+    "flake8~=4.0.1",
     "flake8-quotes~=3.2.0",
     "flake8-continuation~=1.0.5",
     "black>=22.1.0",
@@ -61,7 +61,7 @@ dev_helper_deps = [
     "pudb==2022.1.1",
     "snakeviz>=2.1.1",
     "gitlint>=0.17",
-    "autopep8~=1.5.4",
+    "autopep8~=1.6.0",
     "autoflake~=1.3.1",
 ]
 
