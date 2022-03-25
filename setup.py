@@ -119,7 +119,7 @@ setup(
         "urwid~=2.1.2",
         "zulip>=0.7.0",
         "urwid_readline>=0.13",
-        "beautifulsoup4>=4.9.0",
+        "beautifulsoup4>=4.10.0",
         "lxml>=4.7.1",
         "pygments>=2.11.2",
         "typing_extensions>=3.7",
