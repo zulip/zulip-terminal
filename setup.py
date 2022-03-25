@@ -62,7 +62,7 @@ dev_helper_deps = [
     "snakeviz>=2.1.1",
     "gitlint>=0.17",
     "autopep8~=1.6.0",
-    "autoflake~=1.3.1",
+    "autoflake~=1.4.0",
 ]
 
 setup(
