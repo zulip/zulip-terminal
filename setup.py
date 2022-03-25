@@ -124,7 +124,7 @@ setup(
         "pygments>=2.8.1",
         "typing_extensions>=3.7",
         "python-dateutil>=2.8.1",
-        "pytz>=2021.1",
+        "pytz>=2022.1",
         "tzlocal>=2.1",
         "pyperclip>=1.8.1",
     ],
