@@ -2300,21 +2300,38 @@ class TestMessageBox:
     @pytest.mark.parametrize(
         "to_vary_in_each_message",
         [
+            {"flags": ["starred"]},
+        ],
+        ids=[
+            "no_stars",
+        ],
+    )
+    def test_main_view_compact_output_no_star(
+        self, mocker, message_fixture, to_vary_in_each_message
+    ):
+        message_fixture.update({"id": 0})
+        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        msg_box = MessageBox(varied_message, self.model, varied_message)
+        view_components = msg_box.main_view()
+        assert len(view_components) == 2
+        assert isinstance(view_components[0], Columns)
+
+    @pytest.mark.parametrize(
+        "to_vary_in_each_message",
+        [
             {"sender_full_name": "bob"},
             {"timestamp": 1532103779},
             {"timestamp": 0},
             {},
-            {"flags": ["starred"]},
         ],
         ids=[
             "common_author",
             "common_timestamp",
             "common_early_timestamp",
             "common_unchanged_message",
-            "both_starred",
         ],
     )
-    def test_main_view_compact_output(
+    def test_main_view_compact_output_common_parameters(
         self, mocker, message_fixture, to_vary_in_each_message
     ):
         message_fixture.update({"id": 4})
