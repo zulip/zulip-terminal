@@ -302,6 +302,10 @@ class View(urwid.WidgetWrap):
         elif is_command_key("ABOUT", key):
             self.controller.show_about()
             return key
+        elif is_command_key("CAPTURE_SCREEN", key):
+            self.controller.capture_screen()
+            self.set_footer_text("Screenshot saved successfully!", 3)
+            return key
         elif is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()

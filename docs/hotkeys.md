@@ -13,6 +13,7 @@
 |Redraw screen|<kbd>ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>ctrl</kbd> + <kbd>c</kbd>|
 |View user information (From Users list)|<kbd>i</kbd>|
+|Capture screenshot of the window|<kbd>meta</kbd> + <kbd>c</kbd>|
 
 ## Navigation
 |Command|Key Combination|

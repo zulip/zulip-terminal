@@ -387,6 +387,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Show/hide full raw message (from message information)',
         'key_category': 'msg_actions',
     }),
+    ('CAPTURE_SCREEN', {
+        'keys': ['meta c'],
+        'help_text': 'Capture screenshot of the window',
+        'key_category': 'general',
+    }),
 ])
 # fmt: on
 

@@ -15,6 +15,7 @@ import urwid
 import zulip
 from typing_extensions import Literal
 
+from tools.capture_screenshot import capture_curr_screen
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.helper import asynch, suppress_output
@@ -153,6 +154,9 @@ class Controller:
             sys.stdout.write("\b" * len(next_spinner))
 
         self.capture_stdout()
+
+    def capture_screen(self) -> None:
+        capture_curr_screen()
 
     def capture_stdout(self) -> None:
         if hasattr(self, "_stdout"):
