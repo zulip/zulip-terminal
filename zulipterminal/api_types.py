@@ -2,20 +2,14 @@ from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import Literal, TypedDict
 
+# These are documented in the zulip package (python-zulip-api repo)
+from zulip import EditPropagateMode  # one/all/later
+from zulip import EmojiType  # [unicode/realm/zulip_extra + _emoji]
+from zulip import MessageFlag  # superset of below, may only be changed indirectly
+from zulip import ModifiableMessageFlag  # directly modifiable read/starred/collapsed
+
 
 RESOLVED_TOPIC_PREFIX = "✔ "
-
-EditPropagateMode = Literal["change_one", "change_all", "change_later"]
-EmojiType = Literal["realm_emoji", "unicode_emoji", "zulip_extra_emoji"]
-# Limited flags which could be present in update_message_flag events.
-ModifiableMessageFlag = Literal["read", "starred", "collapsed"]
-MessageFlag = Literal[
-    ModifiableMessageFlag,
-    "mentioned",
-    "wildcard_mentioned",
-    "has_alert_word",
-    "historical",
-]
 
 
 class PrivateComposition(TypedDict):
