@@ -36,24 +36,27 @@ class GruvBoxColor(Enum):
     BRIGHT_BLUE      = 'light_blue      h109      #83a598'
     BRIGHT_GREEN     = 'light_green     h142      #b8bb26'
     BRIGHT_RED       = 'light_red       h167      #fb4934'
+    BRIGHT_YELLOW    = 'brown           h214      #fabd2f'
 
     # May be relevant to both modes
-    NEUTRAL_PURPLE   = 'light_magenta   h132      #b16286'
     NEUTRAL_BLUE     = 'dark_cyan       h66       #458588'
+    NEUTRAL_PURPLE   = 'light_magenta   h132      #b16286'
     NEUTRAL_YELLOW   = 'brown           h172      #d79921'
 
     # Light mode only - colors
     FADED_BLUE       = 'dark_blue       h24       #076678'
-    FADED_YELLOW     = 'brown           h136      #b57614'
-    FADED_RED        = 'dark_red        h88       #9d0006'
-
-    # Added for light mode; suggests light needs adjusting
-    LIGHT0_HARD      = 'white           h230      #f9f5d7'
-    GRAY_245         = 'dark_gray       h245      #928374'
-    DARK2            = 'black           h239      #504945'
-    DARK4            = 'black           h243      #7c6f64'
-    BRIGHT_YELLOW    = 'brown           h214      #fabd2f'
     FADED_GREEN      = 'dark_green      h100      #79740e'
+    FADED_RED        = 'dark_red        h88       #9d0006'
+    FADED_YELLOW     = 'brown           h136      #b57614'
+
+    # Only or primarily light version - grayscales
+    # - generally background
+    LIGHT0_HARD      = 'white           h230      #f9f5d7'
+    # - generally foreground
+    DARK2            = 'black           h239      #504945'
+    # - grays
+    GRAY_245         = 'dark_gray       h245      #928374'
+    DARK4            = 'black           h243      #7c6f64'
 
 
 # fmt: on
