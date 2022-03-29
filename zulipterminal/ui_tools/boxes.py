@@ -365,15 +365,10 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.set_completer_delims("")
 
-        stream_marker = STREAM_MARKER_PUBLIC
-        color = None
-        if caption:
-            color = self.model.stream_dict[self.stream_id]["color"]
-            if self.model.stream_dict[self.stream_id]["invite_only"]:
-                stream_marker = STREAM_MARKER_PRIVATE
+        # NOTE: stream marker should be set during initialization
         self.header_write_box = urwid.Columns(
             [
-                ("pack", urwid.Text((color, STREAM_MARKER_PUBLIC))),
+                ("pack", urwid.Text(("default", "?"))),
                 self.stream_write_box,
                 ("pack", urwid.Text(STREAM_TOPIC_SEPARATOR)),
                 self.title_write_box,
