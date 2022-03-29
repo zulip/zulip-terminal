@@ -429,6 +429,9 @@ class WriteBox(urwid.Pile):
         )
         self.header_write_box.widget_list.append(self.edit_mode_button)
 
+        # Use callback to set stream marker - it shouldn't change, so don't need signal
+        self._set_stream_write_box_style(None, caption)
+
     def _set_stream_write_box_style(self, widget: ReadlineEdit, new_text: str) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
         stream_marker = INVALID_MARKER
