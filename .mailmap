@@ -1,0 +1,15 @@
+# This file teaches `git log` and friends the canonical names
+# and email addresses to use for our contributors.
+#
+# See https://github.com/zulip/zulip/blob/main/.mailmap for Zulip's
+# documentation on this file.
+
+Aman Agrawal <f2016561@pilani.bits-pilani.ac.in>
+Hari Prashant Bhimaraju <harry.prashantb@gmail.com>
+Ezio-Sarthak <grgsrthk.dev20@gmail.com> <garg.sarthak13@gmail.com>
+Shivam Gera <gera.shivam@gmail.com>
+Sumanth V Rao <sumanthvrao@gmail.com> <sumanthrao@pesu.pes.edu>
+Sumanth V Rao <sumanthvrao@gmail.com>
+Tim Abbott <tabbott@zulipchat.com> <tabbott@zulip.com>
+Zeeshan Equbal <equbalzeeshan@gmail.com> <54993043+zee-bit@users.noreply.github.com>
+Zeeshan Equbal <equbalzeeshan@gmail.com>
