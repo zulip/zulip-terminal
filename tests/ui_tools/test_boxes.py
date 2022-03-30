@@ -509,18 +509,36 @@ class TestWriteBox:
             (
                 "#Stream",
                 0,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             ("#*Stream", None, []),  # NOTE: Optional single star fails
             (
                 "#**Stream",
                 0,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),  # Optional 2-stars
             (
                 "#Stream",
                 None,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             ("#NoMatch", None, []),
             # emojis
@@ -735,11 +753,13 @@ class TestWriteBox:
             ("#S", 1, "#**Some general stream**", []),  # 1st-word startswith.
             ("#S", 2, "#**Stream 1**", []),  # 1st-word startswith match.
             ("#S", 3, "#**Stream 2**", []),  # 1st-word startswith match.
-            ("#S", -1, "#**Stream 2**", []),
-            ("#S", -2, "#**Stream 1**", []),
-            ("#S", -3, "#**Some general stream**", []),
-            ("#S", -4, "#**Secret stream**", []),
-            ("#S", -5, None, []),
+            ("#S", 4, "#**Web public stream**", []),  # 1st-word startswith match.
+            ("#S", -1, "#**Web public stream**", []),
+            ("#S", -2, "#**Stream 2**", []),
+            ("#S", -3, "#**Stream 1**", []),
+            ("#S", -4, "#**Some general stream**", []),
+            ("#S", -5, "#**Secret stream**", []),
+            ("#S", -6, None, []),
             ("#So", 0, "#**Some general stream**", []),
             ("#So", 1, None, []),
             ("#Se", 0, "#**Secret stream**", []),
@@ -1013,25 +1033,49 @@ class TestWriteBox:
                 "",
                 1,
                 [],
-                ["Secret stream", "Some general stream", "Stream 1", "Stream 2"],
+                [
+                    "Secret stream",
+                    "Some general stream",
+                    "Stream 1",
+                    "Stream 2",
+                    "Web public stream",
+                ],
             ),
             (
                 "",
                 1,
                 ["Stream 2"],
-                ["Stream 2", "Secret stream", "Some general stream", "Stream 1"],
+                [
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Stream 1",
+                    "Web public stream",
+                ],
             ),
             (
                 "St",
                 1,
                 [],
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             (
                 "St",
                 1,
                 ["Stream 2"],
-                ["Stream 2", "Stream 1", "Secret stream", "Some general stream"],
+                [
+                    "Stream 2",
+                    "Stream 1",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
         ],
         ids=[
