@@ -1200,7 +1200,7 @@ class TestLeftColumnView:
             controller=left_col_view.controller, count=3
         )
 
-    @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 1000]))
+    @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))
     def test_streams_view(self, mocker, streams, pinned):
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
@@ -1222,7 +1222,7 @@ class TestLeftColumnView:
                     properties=stream,
                     controller=self.view.controller,
                     view=self.view,
-                    count=1,
+                    count=mocker.ANY,
                 )
                 for stream in (self.view.pinned_streams + self.view.unpinned_streams)
             ]

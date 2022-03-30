@@ -253,11 +253,39 @@ def secret_stream() -> Dict[str, Any]:
     }
 
 
+# Like public stream but with is_web_public=True
+@pytest.fixture
+def web_public_stream() -> Dict[str, Any]:
+    return {
+        "description": "Some web public stream",
+        "stream_id": 999,
+        "pin_to_top": False,
+        "invite_only": False,
+        "name": "Web public stream",
+        "date_created": 1472047124,
+        "email_address": "web_public@example.com",
+        "rendered_description": "Some web public stream",
+        "color": "#ddd",  # Color in '#xxx' format
+        "in_home_view": True,
+        "audible_notifications": False,
+        "is_old_stream": True,
+        "desktop_notifications": False,
+        "stream_weekly_traffic": 0,
+        "message_retention_days": -1,
+        "push_notifications": False,
+        "subscribers": [1001, 11],
+        "history_public_to_subscribers": False,
+        "is_web_public": True,
+    }
+
+
 @pytest.fixture
 def streams_fixture(
-    general_stream: Dict[str, Any], secret_stream: Dict[str, Any]
+    general_stream: Dict[str, Any],
+    secret_stream: Dict[str, Any],
+    web_public_stream: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
-    streams = [general_stream, secret_stream]
+    streams = [general_stream, secret_stream, web_public_stream]
     for i in range(1, 3):
         streams.append(
             {
@@ -1129,6 +1157,13 @@ def streams() -> List[Dict[str, Any]]:
             "color": "#baf",
             "invite_only": False,
             "description": "A description of stream 2",
+        },
+        {
+            "name": "Web public stream",
+            "id": 999,
+            "color": "#ddd",
+            "invite_only": False,
+            "description": "Some web public stream",
         },
     ]
 
