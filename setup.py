@@ -127,5 +127,8 @@ setup(
         "pytz>=2022.1",
         "tzlocal>=2.1",
         "pyperclip>=1.8.1",
+        "feedparser>=6.0.8"
+        "chardet>=4.0.0"
+        "regex>=2022.3.15"
     ],
 )

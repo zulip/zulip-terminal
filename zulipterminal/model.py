@@ -4,6 +4,7 @@ from collections import OrderedDict, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from datetime import datetime
+import re
 from typing import (
     Any,
     Callable,
@@ -24,6 +25,7 @@ import zulip
 from bs4 import BeautifulSoup
 from typing_extensions import Literal, TypedDict
 
+from zulipterminal.scripts.html2text import html2text
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
     Composition,
@@ -1289,6 +1291,7 @@ class Model:
             ) or self.is_visual_notifications_enabled(stream_id):
                 recipient = "{display_recipient} -> {subject}".format(**message)
         row_text = " "
+        table_found = False
         if recipient:
             if hidden_content:
                 text = content
@@ -1303,18 +1306,20 @@ class Model:
                             table_header_text = table_header_text[:max_length_table]
                         elif (len(table_header_text) < max_length_table):
                             table_header_text = table_header_text + ((' ')*(max_length_table-len(table_header_text)))
-                        row_text = row_text+ "  |  "+(table_header_text)
+                        row_text = row_text+ "    "+(table_header_text)
                     for table_element in table_row.find_all("td"):
                         table_element_text = table_element.text
                         if (len(table_element_text) > max_length_table):
-                            table_element_text = table_element_text[:6]
+                            table_element_text = table_element_text[:max_length_table]
                         elif (len(table_element_text) < max_length_table):
                             table_element_text = table_element_text + ((' ')*(max_length_table-len(table_element_text)))
-                        row_text = row_text+ "  |  "+(table_element_text)
-                    row_text = row_text+"\n"
+                        row_text = row_text+ "    "+(table_element_text)
+                    row_text = row_text+"\n,"
+                    table_found = True
                 
-                parsed_table = BeautifulSoup(f"<p>{row_text}</p>")
-                soup.find('table').replaceWith(parsed_table.p)
+                if(table_found):
+                    parsed_table = BeautifulSoup(f"<p>{row_text}</p>", "lxml")
+                    soup.find('table').replaceWith(parsed_table.p)
 
                 for spoiler_tag in soup.find_all(
                     "div", attrs={"class": "spoiler-block"}
@@ -1330,7 +1335,10 @@ class Model:
                     to_hide.string = "(...)" if empty_header else " (...)"
 
                     spoiler_tag.unwrap()
-                text = soup.text
+                text = html2text(str(soup))
+                
+                text = text.replace("(/static", " ")
+                text = re.sub(r'[^ ]*/generated/emoji[^ ]*', '', text)
 
             return notify(
                 f"{self.server_name}:\n"
