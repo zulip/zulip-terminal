@@ -1288,12 +1288,34 @@ class Model:
                 set(message["flags"])
             ) or self.is_visual_notifications_enabled(stream_id):
                 recipient = "{display_recipient} -> {subject}".format(**message)
-
+        row_text = " "
         if recipient:
             if hidden_content:
                 text = content
             else:
                 soup = BeautifulSoup(content, "lxml")
+
+                for table_row in soup.find_all("tr"):
+                    for table_header in table_row.find_all("th"):
+                        table_header_text = table_header.text
+                        max_length_table = 6
+                        if (len(table_header_text) > max_length_table):
+                            table_header_text = table_header_text[:max_length_table]
+                        elif (len(table_header_text) < max_length_table):
+                            table_header_text = table_header_text + ((' ')*(max_length_table-len(table_header_text)))
+                        row_text = row_text+ "  |  "+(table_header_text)
+                    for table_element in table_row.find_all("td"):
+                        table_element_text = table_element.text
+                        if (len(table_element_text) > max_length_table):
+                            table_element_text = table_element_text[:6]
+                        elif (len(table_element_text) < max_length_table):
+                            table_element_text = table_element_text + ((' ')*(max_length_table-len(table_element_text)))
+                        row_text = row_text+ "  |  "+(table_element_text)
+                    row_text = row_text+"\n"
+                
+                parsed_table = BeautifulSoup(f"<p>{row_text}</p>")
+                soup.find('table').replaceWith(parsed_table.p)
+
                 for spoiler_tag in soup.find_all(
                     "div", attrs={"class": "spoiler-block"}
                 ):
