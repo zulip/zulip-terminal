@@ -1341,7 +1341,7 @@ class Model:
                 text = ""
                 for element in soup.descendants:
                     if isinstance(element, str):
-                        text += element.strip()
+                        text += element
                     elif element.name in ["br", "p", "h1", "h2", "h3", "h4"]:
                         text += "\n"
                     elif element.name == "li":
