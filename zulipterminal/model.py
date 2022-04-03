@@ -1351,7 +1351,8 @@ class Model:
 
                 text = text.replace("(/static", " ")
                 text = re.sub(r"[^ ]*/generated/emoji[^ ]*", "", text)
-
+            if(text[0:1]=="\n"):
+                text = text[1:]
             return notify(
                 f"{self.server_name}:\n"
                 f"{message['sender_full_name']} (to {recipient})",
