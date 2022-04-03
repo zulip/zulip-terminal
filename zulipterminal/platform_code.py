@@ -52,4 +52,3 @@ def notify(title: str, text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
-    
