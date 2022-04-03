@@ -41,6 +41,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_mappings import STATE_ICON
 from zulipterminal.helper import (
     Message,
+    TidiedUserInfo,
     asynch,
     format_string,
     get_unused_fence,
@@ -55,8 +56,6 @@ from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
-
-
 if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
 
@@ -213,7 +212,10 @@ class WriteBox(urwid.Pile):
             recipient_info = ""
 
         self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
+        recipient_ID = int(recipient_info[recipient_info.find("user")+4:recipient_info.find("@")])
+        data: TidiedUserInfo = self.model.get_user_info(recipient_ID)
+        last_active = data["last_active"]
+        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info+", last active on "+last_active)
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
@@ -273,6 +275,8 @@ class WriteBox(urwid.Pile):
                     if not self.idle_status_tracking:
                         self.idle_status_tracking = True
                         track_idleness_and_update_status()
+
+                        
 
         @asynch
         def track_idleness_and_update_status() -> None:
