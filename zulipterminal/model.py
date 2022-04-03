@@ -1301,23 +1301,27 @@ class Model:
                     for table_header in table_row.find_all("th"):
                         table_header_text = table_header.text
                         max_length_table = 6
-                        if (len(table_header_text) > max_length_table):
+                        if len(table_header_text) > max_length_table:
                             table_header_text = table_header_text[:max_length_table]
-                        elif (len(table_header_text) < max_length_table):
-                            table_header_text = table_header_text + ((' ') * (max_length_table - len(table_header_text)))
+                        elif len(table_header_text) < max_length_table:
+                            table_header_text = table_header_text + (
+                                (" ") * (max_length_table - len(table_header_text))
+                            )
                         row_text = row_text + "    " + (table_header_text)
                     for table_element in table_row.find_all("td"):
                         table_element_text = table_element.text
-                        if (len(table_element_text) > max_length_table):
+                        if len(table_element_text) > max_length_table:
                             table_element_text = table_element_text[:max_length_table]
-                        elif (len(table_element_text) < max_length_table):
-                            table_element_text = table_element_text + ((' ') * (max_length_table - len(table_element_text)))
-                        row_text = row_text+ "    " + (table_element_text)
-                    row_text = row_text+"\n"
+                        elif len(table_element_text) < max_length_table:
+                            table_element_text = table_element_text + (
+                                (" ") * (max_length_table - len(table_element_text))
+                            )
+                        row_text = row_text + "    " + (table_element_text)
+                    row_text = row_text + "\n"
                     table_found = True
-                if(table_found):
+                if table_found:
                     parsed_table = BeautifulSoup(f"<p>{row_text}</p>", "lxml")
-                    soup.find('table').replaceWith(parsed_table.p)
+                    soup.find("table").replaceWith(parsed_table.p)
 
                 for spoiler_tag in soup.find_all(
                     "div", attrs={"class": "spoiler-block"}
@@ -1334,19 +1338,19 @@ class Model:
 
                     spoiler_tag.unwrap()
 
-                text = ''
+                text = ""
                 for element in soup.descendants:
                     if isinstance(element, str):
                         text += element.strip()
-                    elif element.name in ['br',  'p', 'h1', 'h2', 'h3', 'h4']:
-                        text += '\n'
-                    elif element.name == 'li':
-                        text += '\n- '
-                    elif element.name == 'ul':
-                        text += '\t '
+                    elif element.name in ["br", "p", "h1", "h2", "h3", "h4"]:
+                        text += "\n"
+                    elif element.name == "li":
+                        text += "\n- "
+                    elif element.name == "ul":
+                        text += "\t "
 
                 text = text.replace("(/static", " ")
-                text = re.sub(r'[^ ]*/generated/emoji[^ ]*', '', text)
+                text = re.sub(r"[^ ]*/generated/emoji[^ ]*", "", text)
 
             return notify(
                 f"{self.server_name}:\n"
