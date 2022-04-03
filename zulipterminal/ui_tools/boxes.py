@@ -216,12 +216,12 @@ class WriteBox(urwid.Pile):
         self.send_next_typing_update = datetime.now()
         try:
             recipient_ID = int(
-                recipient_info[recipient_info.find("user") + 4 : recipient_info.find("@")]
-            )
+                    recipient_info[recipient_info.find("user") + 4 : recipient_info.find("@")]
+                )
+            data: TidiedUserInfo = self.model.get_user_info(recipient_ID)
+            last_active = data["last_active"]
         except:
-            recipient_ID = 0
-        data: TidiedUserInfo = self.model.get_user_info(recipient_ID)
-        last_active = data["last_active"]
+            last_active = ""
         self.to_write_box = ReadlineEdit(
             "To: ", edit_text=recipient_info + ", last seen on " + last_active
         )
