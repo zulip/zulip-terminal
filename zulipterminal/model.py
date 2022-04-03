@@ -25,7 +25,6 @@ import zulip
 from bs4 import BeautifulSoup
 from typing_extensions import Literal, TypedDict
 
-from zulipterminal.scripts.html2text import html2text
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
     Composition,
@@ -1290,7 +1289,7 @@ class Model:
                 set(message["flags"])
             ) or self.is_visual_notifications_enabled(stream_id):
                 recipient = "{display_recipient} -> {subject}".format(**message)
-        row_text = " "
+        row_text = " "
         table_found = False
         if recipient:
             if hidden_content:
@@ -1314,9 +1313,8 @@ class Model:
                         elif (len(table_element_text) < max_length_table):
                             table_element_text = table_element_text + ((' ')*(max_length_table-len(table_element_text)))
                         row_text = row_text+ "    "+(table_element_text)
-                    row_text = row_text+"\n,"
+                    row_text = row_text+"\n"
                     table_found = True
-                
                 if(table_found):
                     parsed_table = BeautifulSoup(f"<p>{row_text}</p>", "lxml")
                     soup.find('table').replaceWith(parsed_table.p)
@@ -1335,7 +1333,17 @@ class Model:
                     to_hide.string = "(...)" if empty_header else " (...)"
 
                     spoiler_tag.unwrap()
-                text = html2text(str(soup))
+
+                text = ''
+                for element in soup.descendants:
+                    if isinstance(element, str):
+                        text += element.strip()
+                    elif element.name in ['br',  'p', 'h1', 'h2', 'h3', 'h4']:
+                        text += '\n'
+                    elif element.name == 'li':
+                        text += '\n- '
+                    elif element.name == 'ul':
+                        text += '\t '
                 
                 text = text.replace("(/static", " ")
                 text = re.sub(r'[^ ]*/generated/emoji[^ ]*', '', text)
