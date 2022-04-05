@@ -8,6 +8,7 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
+    BOT_MARKER,
     STATUS_ACTIVE,
     STATUS_IDLE,
     STATUS_INACTIVE,
@@ -25,7 +26,7 @@ EDIT_MODE_CAPTIONS: Dict[EditPropagateMode, str] = {
 }
 
 
-UserStatus = Literal["active", "idle", "offline", "inactive"]
+UserStatus = Literal["active", "idle", "offline", "inactive", "bot"]
 
 # Mapping that binds user activity status to corresponding markers.
 # NOTE: Ordering of keys affects display order
@@ -34,6 +35,7 @@ STATE_ICON: Dict[UserStatus, str] = {
     "idle": STATUS_IDLE,
     "offline": STATUS_OFFLINE,
     "inactive": STATUS_INACTIVE,
+    "bot": BOT_MARKER,
 }
 
 
