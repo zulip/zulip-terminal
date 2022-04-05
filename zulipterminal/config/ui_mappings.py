@@ -4,6 +4,7 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
+    BOT_MARKER,
     STATUS_ACTIVE,
     STATUS_IDLE,
     STATUS_INACTIVE,
@@ -27,6 +28,7 @@ STATE_ICON = {
     "idle": STATUS_IDLE,
     "offline": STATUS_OFFLINE,
     "inactive": STATUS_INACTIVE,
+    "bot": BOT_MARKER,
 }
 
 
