@@ -1035,7 +1035,10 @@ class Model:
                 }
                 continue
             email = user["email"]
-            if email in presences:  # presences currently subset of all users
+            if user["is_bot"]:
+                # Bot has no dynamic status, so avoid presence lookup
+                status = "bot"
+            elif email in presences:  # presences currently subset of all users
                 """
                 * Aggregate our information on a user's presence across their
                 * clients.
@@ -1086,6 +1089,7 @@ class Model:
                 "user_id": user["user_id"],
                 "status": status,
             }
+
             self._all_users_by_id[user["user_id"]] = user
             self.user_id_email_dict[user["user_id"]] = email
 
@@ -1096,7 +1100,7 @@ class Model:
                 "full_name": bot["full_name"],
                 "email": email,
                 "user_id": bot["user_id"],
-                "status": "inactive",
+                "status": "bot",
             }
             self._cross_realm_bots_by_id[bot["user_id"]] = bot
             self._all_users_by_id[bot["user_id"]] = bot

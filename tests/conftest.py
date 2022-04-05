@@ -1021,25 +1021,25 @@ def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         "emailgateway@zulip.com": {
             "email": "emailgateway@zulip.com",
             "full_name": "Email Gateway",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 6,
         },
         "feedback@zulip.com": {
             "email": "feedback@zulip.com",
             "full_name": "Zulip Feedback Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 1,
         },
         "notification-bot@zulip.com": {
             "email": "notification-bot@zulip.com",
             "full_name": "Notification Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 5,
         },
         "welcome-bot@zulip.com": {
             "email": "welcome-bot@zulip.com",
             "full_name": "Welcome Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 4,
         },
     }
@@ -1076,12 +1076,6 @@ def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
             "user_id": logged_on_user["user_id"],
         },
         {
-            "email": "emailgateway@zulip.com",
-            "full_name": "Email Gateway",
-            "status": "inactive",
-            "user_id": 6,
-        },
-        {
             "full_name": "Human 1",
             "email": "person1@example.com",
             "user_id": 11,
@@ -1106,21 +1100,27 @@ def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
             "status": "inactive",
         },
         {
+            "email": "emailgateway@zulip.com",
+            "full_name": "Email Gateway",
+            "status": "bot",
+            "user_id": 6,
+        },
+        {
             "email": "notification-bot@zulip.com",
             "full_name": "Notification Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 5,
         },
         {
             "email": "welcome-bot@zulip.com",
             "full_name": "Welcome Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 4,
         },
         {
             "email": "feedback@zulip.com",
             "full_name": "Zulip Feedback Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 1,
         },
     ]
