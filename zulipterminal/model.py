@@ -975,6 +975,15 @@ class Model:
                 "user_id": user["user_id"],
                 "status": status,
             }
+
+            if user["is_bot"]:
+                self.user_dict[user["email"]] = {
+                    "full_name": user["full_name"],
+                    "email": email,
+                    "user_id": user["user_id"],
+                    "status": "bot",
+                }
+
             self._all_users_by_id[user["user_id"]] = user
             self.user_id_email_dict[user["user_id"]] = email
 
@@ -985,7 +994,7 @@ class Model:
                 "full_name": bot["full_name"],
                 "email": email,
                 "user_id": bot["user_id"],
-                "status": "inactive",
+                "status": "bot",
             }
             self._cross_realm_bots_by_id[bot["user_id"]] = bot
             self._all_users_by_id[bot["user_id"]] = bot
