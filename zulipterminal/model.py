@@ -576,10 +576,24 @@ class Model:
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
         if response["result"] == "success":
-            old_topic = self.index["messages"][message_id].get("subject", None)
+            message = self.index["messages"][message_id]
+            stream_name = message.get("display_recipient", None)
+            old_topic = message.get("subject", None)
             new_topic = request["topic"]
+
+            recent_moved_msgs = ""
             if old_topic != new_topic:
-                self.controller.report_success("You changed a message's topic.")
+                if propagate_mode == "change_one":
+                    recent_moved_msgs = "one"
+                    one_message = f"You changed {recent_moved_msgs} message's topic from #{stream_name} > {old_topic} to #{stream_name} > {new_topic}."
+                    self.controller.report_success(one_message)
+                else:
+                    if propagate_mode == "change_all":
+                        recent_moved_msgs = "all"
+                    if propagate_mode == "change_later":
+                        recent_moved_msgs = "some"
+                    some_all_messages = f"You changed {recent_moved_msgs} messages' topic from #{stream_name} > {old_topic} to #{stream_name} > {new_topic}."
+                    self.controller.report_success(some_all_messages)
 
         return response["result"] == "success"
 
