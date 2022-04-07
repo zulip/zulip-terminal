@@ -215,9 +215,12 @@ class WriteBox(urwid.Pile):
             self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
             recipient_info = ""
+            recipient_markers = ""
 
         self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit("To: "+recipient_markers+" ", edit_text= recipient_info)
+        self.to_write_box = ReadlineEdit(
+            "To: " + recipient_markers + " ", edit_text=recipient_info
+        )
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
