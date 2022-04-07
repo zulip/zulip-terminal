@@ -834,9 +834,9 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize(
-        "req, old_topic, footer_updated",
+        "req, old_topic, expected_report_success",
         [
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
@@ -844,23 +844,27 @@ class TestModel:
                     "topic": "Some topic",
                 },
                 "Some topic",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
                     "topic": "Topic change",
                 },
                 "Old topic",
-                True,
+                "You changed one message's topic from #stream > Old topic to #stream > Topic change.",
             ),
-            (
-                {"message_id": 1, "propagate_mode": "change_all", "topic": "Old topic"},
+            case(
+                {
+                    "message_id": 1,
+                    "propagate_mode": "change_all",
+                    "topic": "Old topic",
+                },
                 "Old topic",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_later",
@@ -868,9 +872,9 @@ class TestModel:
                     "topic": "terminal",
                 },
                 "terminal",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
@@ -878,9 +882,9 @@ class TestModel:
                     "topic": "grett",
                 },
                 "greet",
-                True,
+                "You changed one message's topic from #stream > greet to #stream > grett.",
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_all",
@@ -888,24 +892,33 @@ class TestModel:
                     "topic": "party",
                 },
                 "lets_party",
-                True,
+                "You changed all messages' topic from #stream > lets_party to #stream > party.",
             ),
         ],
     )
     def test_update_stream_message(
-        self, mocker, model, response, return_value, req, old_topic, footer_updated
+        self,
+        mocker,
+        model,
+        response,
+        return_value,
+        req,
+        old_topic,
+        expected_report_success,
+        old_stream_name="stream",
     ):
         self.client.update_message = mocker.Mock(return_value=response)
         model.index["messages"][req["message_id"]]["subject"] = old_topic
-
+        model.index["messages"][req["message_id"]][
+            "display_recipient"
+        ] = old_stream_name
         result = model.update_stream_message(**req)
-
         self.client.update_message.assert_called_once_with(req)
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
         report_success = model.controller.report_success
-        if result and footer_updated:
-            report_success.assert_called_once_with("You changed a message's topic.")
+        if result and expected_report_success is not None:
+            report_success.assert_called_once_with(expected_report_success)
         else:
             report_success.assert_not_called()
 
