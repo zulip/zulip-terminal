@@ -201,7 +201,13 @@ class WriteBox(urwid.Pile):
             ]
             recipient_info = ", ".join(
                 [
-                    f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]} {self.model.user_dict[email]['full_name']} <{email}>"""
+                    f"""{self.model.user_dict[email]['full_name']} <{email}>"""
+                    for email in self.recipient_emails
+                ]
+            )
+            recipient_markers = ", ".join(
+                [
+                    f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]}"""
                     for email in self.recipient_emails
                 ]
             )
@@ -209,7 +215,9 @@ class WriteBox(urwid.Pile):
             self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
             recipient_info = ""
-        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
+
+        self.send_next_typing_update = datetime.now()
+        self.to_write_box = ReadlineEdit("To: "+recipient_markers+" ", edit_text= recipient_info)
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
