@@ -437,23 +437,23 @@ class Controller:
         self.is_typing_notification_in_progress = False
         self.view.set_footer_text()
 
-    def report_error(self, text: str) -> None:
+    def report_error(self, text: str, duration: int = 3) -> None:
         """
         Helper to show an error message in footer
         """
-        self.view.set_footer_text(text, "task:error", 3)
+        self.view.set_footer_text(text, "task:error", duration)
 
-    def report_success(self, text: str) -> None:
+    def report_success(self, text: str, duration: int = 3) -> None:
         """
         Helper to show a success message in footer
         """
-        self.view.set_footer_text(text, "task:success", 3)
+        self.view.set_footer_text(text, "task:success", duration)
 
-    def report_warning(self, text: str) -> None:
+    def report_warning(self, text: str, duration: int = 3) -> None:
         """
         Helper to show a warning message in footer
         """
-        self.view.set_footer_text(text, "task:warning", 3)
+        self.view.set_footer_text(text, "task:warning", duration)
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
