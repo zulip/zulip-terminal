@@ -581,19 +581,18 @@ class Model:
             old_topic = message.get("subject", None)
             new_topic = request["topic"]
 
-            recent_moved_msgs = ""
             if old_topic != new_topic:
                 if propagate_mode == "change_one":
-                    recent_moved_msgs = "one"
-                    one_message = f"You changed {recent_moved_msgs} message's topic from #{stream_name} > {old_topic} to #{stream_name} > {new_topic}."
-                    self.controller.report_success(one_message)
-                else:
-                    if propagate_mode == "change_all":
-                        recent_moved_msgs = "all"
-                    if propagate_mode == "change_later":
-                        recent_moved_msgs = "some"
-                    some_all_messages = f"You changed {recent_moved_msgs} messages' topic from #{stream_name} > {old_topic} to #{stream_name} > {new_topic}."
-                    self.controller.report_success(some_all_messages)
+                    messages_changed = "one message's"
+                elif propagate_mode == "change_all":
+                    messages_changed = "all messages'"
+                else:  # propagate_mode == "change_later":
+                    messages_changed = "some messages'"
+                self.controller.report_success(
+                    f"You changed {messages_changed} topic"
+                    + f" from #{stream_name} > {old_topic}"
+                    + f" to #{stream_name} > {new_topic}."
+                )
 
         return response["result"] == "success"
 
