@@ -877,6 +877,16 @@ class TestModel:
             case(
                 {
                     "message_id": 1,
+                    "propagate_mode": "change_later",
+                    "content": ":smile:",
+                    "topic": "new_terminal",
+                },
+                "old_terminal",
+                "You changed some messages' topic from #stream > old_terminal to #stream > new_terminal.",
+            ),
+            case(
+                {
+                    "message_id": 1,
                     "propagate_mode": "change_one",
                     "content": "Hey!",
                     "topic": "grett",
