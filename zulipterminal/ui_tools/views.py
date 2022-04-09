@@ -38,6 +38,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -835,6 +836,78 @@ class LeftColumnView(urwid.Pile):
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
+    def streams_view_open(self, stream_id) -> Any:
+        streams_btn_list = []
+        for stream in self.view.pinned_streams:
+            streams_btn_list += [StreamButton(
+                properties=stream,
+                controller = self.controller,
+                view=self.view,
+                count=self.model.unread_counts["streams"].get(stream["id"], 0),
+            )]
+            if stream.get(stream_id) == stream_id:
+                notify("stream ID!", "")
+                topics = self.model.topics_in_stream(stream_id)
+                streams_btn_list += [
+                    TopicButton(
+                stream_id=stream_id,
+                topic=topic,
+                controller=self.controller,
+                view=self.view,
+                count=self.model.unread_counts["unread_topics"].get(
+                    (stream_id, topic), 0
+                ),
+            )
+            for topic in topics
+                ]
+        
+        
+        if len(streams_btn_list):
+            streams_btn_list += [StreamsViewDivider()]
+
+        for stream in self.view.unpinned_streams:
+            streams_btn_list += [StreamButton(
+                properties=stream,
+                controller = self.controller,
+                view=self.view,
+                count=self.model.unread_counts["streams"].get(stream["id"], 0),
+            )]
+            if stream["id"] == stream_id:
+                topics = self.model.topics_in_stream(stream_id)
+                streams_btn_list += [TopicButton(
+                    stream_id = stream_id,
+                    topic = topic,
+                    controller=self.controller,
+                    view=self.view,
+                    count=self.model.unread_counts["unread_topics"].get(
+                        (stream_id, topic), 0),
+            )
+            for topic in topics[:8]
+                ]
+        
+        self.view.stream_id_to_button = {
+            stream.stream_id: stream
+            for stream in streams_btn_list
+            if hasattr(stream, "stream_id")
+        }
+
+        self.view.stream_w = StreamsView(streams_btn_list, self.view)
+        w = urwid.LineBox(
+            self.view.stream_w,
+            title="Streams",
+            title_attr="column_title",
+            tlcorner=COLUMN_TITLE_BAR_LINE,
+            tline=COLUMN_TITLE_BAR_LINE,
+            trcorner=COLUMN_TITLE_BAR_LINE,
+            blcorner="",
+            rline="",
+            lline="",
+            bline="",
+            brcorner="─",
+        )
+        self.model.controller.update_screen()
+        return w
+
     def streams_view(self) -> Any:
         streams_btn_list = [
             StreamButton(
@@ -918,6 +991,11 @@ class LeftColumnView(urwid.Pile):
             self.is_in_topic_view
             and stream_id == self.view.topic_w.stream_button.stream_id
         )
+
+    def update_stream_view_topic(self, stream_id) -> None:
+        self.stream_v = self.streams_view_open(stream_id=stream_id)
+        if not self.is_in_topic_view:
+            self.show_stream_view
 
     def update_stream_view(self) -> None:
         self.stream_v = self.streams_view()
