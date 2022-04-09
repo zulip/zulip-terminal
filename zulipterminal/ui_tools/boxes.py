@@ -199,15 +199,11 @@ class WriteBox(urwid.Pile):
                 self.model.user_id_email_dict[user_id]
                 for user_id in self.recipient_user_ids
             ]
+            # In the format "{state marker} {recipient name} <{recipient email}> for all recipients.
+            # Avoids issue where all state markers appear back-to-back. 
             recipient_info = ", ".join(
                 [
                     f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]}""" + " " + f"""{self.model.user_dict[email]['full_name']} <{email}>"""
-                    for email in self.recipient_emails
-                ]
-            )
-            recipient_markers = ", ".join(
-                [
-                    f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]}"""
                     for email in self.recipient_emails
                 ]
             )
@@ -303,7 +299,7 @@ class WriteBox(urwid.Pile):
     ) -> bool:
         tidied_recipients = list()
         invalid_recipients = list()
-
+    
         recipients = [
             recipient.strip()
             for recipient in write_box.edit_text.split(",")
@@ -311,17 +307,24 @@ class WriteBox(urwid.Pile):
         ]
 
         for recipient in recipients:
+            
             cleaned_recipient_list = re.findall(REGEX_CLEANED_RECIPIENT, recipient)
             recipient_name, recipient_email, invalid_text = cleaned_recipient_list[0]
+            marked_recipient_name = recipient_name
+            # Remove the state marker from the recipient name.
+            for status in STATE_ICON:
+                recipient_name = recipient_name.replace(f"{STATE_ICON[status]} ", "") 
             # Discard invalid_text as part of tidying up the recipient.
 
             if recipient_email and self.model.is_valid_private_recipient(
                 recipient_email, recipient_name
             ):
-                tidied_recipients.append(f"{recipient_name} <{recipient_email}>")
+            # Put state marker back in when rendering on screen after key is pressed.
+                tidied_recipients.append(f"""{STATE_ICON[self.model.user_dict.get(recipient_email, None).get("status","inactive") if self.model.user_dict.get(recipient_email,None) else "inactive"]} {recipient_name} <{recipient_email}>""")
             else:
                 invalid_recipients.append(recipient)
                 tidied_recipients.append(recipient)
+            recipient_name = marked_recipient_name
 
         write_box.edit_text = ", ".join(tidied_recipients)
         write_box.edit_pos = len(write_box.edit_text)
