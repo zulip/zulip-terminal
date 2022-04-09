@@ -200,10 +200,12 @@ class WriteBox(urwid.Pile):
                 for user_id in self.recipient_user_ids
             ]
             # In the format "{state marker} {recipient name} <{recipient email}> for all recipients.
-            # Avoids issue where all state markers appear back-to-back. 
+            # Avoids issue where all state markers appear back-to-back.
             recipient_info = ", ".join(
                 [
-                    f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]}""" + " " + f"""{self.model.user_dict[email]['full_name']} <{email}>"""
+                    f"""{STATE_ICON[self.model.user_dict.get(email, None).get("status","inactive") if self.model.user_dict.get(email,None) else "inactive"]}"""
+                    + " "
+                    + f"""{self.model.user_dict[email]['full_name']} <{email}>"""
                     for email in self.recipient_emails
                 ]
             )
@@ -214,9 +216,7 @@ class WriteBox(urwid.Pile):
             recipient_markers = ""
 
         self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit(
-            "To: ", edit_text=recipient_info
-        )
+        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
@@ -299,7 +299,7 @@ class WriteBox(urwid.Pile):
     ) -> bool:
         tidied_recipients = list()
         invalid_recipients = list()
-    
+
         recipients = [
             recipient.strip()
             for recipient in write_box.edit_text.split(",")
@@ -307,20 +307,22 @@ class WriteBox(urwid.Pile):
         ]
 
         for recipient in recipients:
-            
+
             cleaned_recipient_list = re.findall(REGEX_CLEANED_RECIPIENT, recipient)
             recipient_name, recipient_email, invalid_text = cleaned_recipient_list[0]
             marked_recipient_name = recipient_name
             # Remove the state marker from the recipient name.
             for status in STATE_ICON:
-                recipient_name = recipient_name.replace(f"{STATE_ICON[status]} ", "") 
+                recipient_name = recipient_name.replace(f"{STATE_ICON[status]} ", "")
             # Discard invalid_text as part of tidying up the recipient.
 
             if recipient_email and self.model.is_valid_private_recipient(
                 recipient_email, recipient_name
             ):
-            # Put state marker back in when rendering on screen after key is pressed.
-                tidied_recipients.append(f"""{STATE_ICON[self.model.user_dict.get(recipient_email, None).get("status","inactive") if self.model.user_dict.get(recipient_email,None) else "inactive"]} {recipient_name} <{recipient_email}>""")
+                # Put state marker back in when rendering on screen after key is pressed.
+                tidied_recipients.append(
+                    f"""{STATE_ICON[self.model.user_dict.get(recipient_email, None).get("status","inactive") if self.model.user_dict.get(recipient_email,None) else "inactive"]} {recipient_name} <{recipient_email}>"""
+                )
             else:
                 invalid_recipients.append(recipient)
                 tidied_recipients.append(recipient)
