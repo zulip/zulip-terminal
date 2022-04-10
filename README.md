@@ -285,6 +285,20 @@ If using make with pip, there are corresponding make targets for running linting
 
 NOTE: The lint script runs a number of separate linters to simplify the development workflow, but each individual linter can be run separately if you find this useful.
 
+#### Auto-formatting code
+
+The project uses `black` and `isort` for code-style and import sorting respectively.
+
+These tools can be run as linters locally , but can also *automatically* format your code for you.
+
+If you're using a `make`-based setup, running `make fix` will run both (and a
+few other tools) and reformat the current state of your code - so you'll want
+to commit first just in case, then `--amend` that commit if you're happy with
+the changes.
+
+You can also use the tools individually on a file or directory, eg.
+`black zulipterminal` or `isort tests/model/test_model.py`
+
 #### Commit Style
 
 We aim to follow a standard commit style to keep the `git log` consistent and easy to read.
