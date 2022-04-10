@@ -591,7 +591,8 @@ class Model:
                 self.controller.report_success(
                     f"You changed {messages_changed} topic"
                     + f" from #{stream_name} > {old_topic}"
-                    + f" to #{stream_name} > {new_topic}."
+                    + f" to #{stream_name} > {new_topic}.",
+                    duration=6,
                 )
 
         return response["result"] == "success"

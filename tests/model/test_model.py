@@ -928,7 +928,7 @@ class TestModel:
         self.display_error_if_present.assert_called_once_with(response, self.controller)
         report_success = model.controller.report_success
         if result and expected_report_success is not None:
-            report_success.assert_called_once_with(expected_report_success)
+            report_success.assert_called_once_with(expected_report_success, duration=6)
         else:
             report_success.assert_not_called()
 
