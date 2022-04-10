@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import List
 
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 from urwid.command_map import (
     CURSOR_DOWN,
     CURSOR_LEFT,
@@ -14,10 +14,10 @@ from urwid.command_map import (
 )
 
 
-class KeyBinding(TypedDict, total=False):
+class KeyBinding(TypedDict):
     keys: List[str]
     help_text: str
-    excluded_from_random_tips: bool
+    excluded_from_random_tips: NotRequired[bool]
     key_category: str
 
 
