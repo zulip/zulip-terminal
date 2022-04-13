@@ -39,6 +39,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
     Message,
+    StreamData,
     asynch,
     format_string,
     get_unused_fence,
@@ -53,7 +54,6 @@ from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_Size
-
 
 if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
@@ -1931,6 +1931,8 @@ class MessageBox(urwid.Pile):
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
+        elif is_command_key("TOGGLE_TOPIC", key):
+            self.model.controller.show_topic_list(self.stream_id, self.model.controller)
         return key
 
 
@@ -2019,7 +2021,8 @@ class PanelSearchBox(urwid.Edit):
         else:
             # Skip unicode 'Control characters' and 'space Zeperators'
             # This includes various invalid characters and complex spaces
-            return unicodedata.category(ch) not in ("Cc", "Zs")
+            return unicodedata.category(ch) not in ("Cc", "Zs") 
+
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
@@ -2038,3 +2041,4 @@ class PanelSearchBox(urwid.Edit):
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
         return super().keypress(size, key)
+
