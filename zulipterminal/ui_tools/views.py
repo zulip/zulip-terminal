@@ -1965,7 +1965,6 @@ class TopicSearchView(PopUpView):
         ]
         self.stream_id = stream_id
         self.focus_index_before_search = 0
-        # self.list_box = urwid.ListBox(self.log)
         width = max(len(button.label) for button in self.topics_btn_list)
         width = 64
         max_cols, max_rows = controller.maximum_popup_dimensions()
@@ -2001,8 +2000,6 @@ class TopicSearchView(PopUpView):
     new_text: str) -> None:
         if not self.view.controller.is_in_editor_mode():
             return
-        # wait for any previously started search to finish to avoid
-        # displaying wrong topics list.
         with self.search_lock:
             new_text = new_text.lower()
             topics_to_display = [
@@ -2027,8 +2024,6 @@ class TopicSearchView(PopUpView):
         sender_id: int = None,
         search_box: Any = None,
     ) -> None:
-        # More recent topics are found towards the beginning
-        # of the list.
         for topic_iterator, topic_button in enumerate(self.log):
             if topic_button.topic_name == topic_name:
                 self.log.insert(0, self.log.pop(topic_iterator))
@@ -2036,8 +2031,6 @@ class TopicSearchView(PopUpView):
                 if sender_id == self.view.model.user_id:
                     self.list_box.set_focus(0)
                 return
-        # No previous topics with same topic names are found
-        # hence we create a new topic button for it.
         new_topic_button = TopicButton(
             stream_id=stream_id,
             topic=topic_name,
