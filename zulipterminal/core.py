@@ -316,6 +316,8 @@ class Controller:
         text = urwid.Text(f"""Topics in {self.model.stream_dict[stream_id]["name"]}""", align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), "area:msg")
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
+        
+        # 64 is the width, need to check how to make it dynamic
         topic_list_view = TopicSearchView(
             self, topics_btn_list, "TOGGLE_TOPIC", 64, "TOPICS", header=urwid.LineBox(
                 title_box_adapter,

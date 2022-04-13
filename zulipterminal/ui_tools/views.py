@@ -1963,13 +1963,16 @@ class TopicSearchView(PopUpView):
             )
             for topic in topics
         ]
+
         self.stream_id = stream_id
         self.focus_index_before_search = 0
         width = max(len(button.label) for button in self.topics_btn_list)
         width = 64
+
         max_cols, max_rows = controller.maximum_popup_dimensions()
         popup_width = max(max_cols, width)
         popup_width = 64
+
         self.topic_search_box = PanelSearchBox(
             self, "SEARCH_EMOJIS", self.update_topics_list
         )
@@ -1995,6 +1998,8 @@ class TopicSearchView(PopUpView):
         )
         self.set_focus("header")
 
+
+    # Not sure if both of these functions needs to stay.
     def update_topics(self, 
     search_box: Any, 
     new_text: str) -> None:
@@ -2068,6 +2073,7 @@ class TopicSearchView(PopUpView):
             return key
         elif is_command_key("GO_BACK", key):
             self.controller.exit_popup()
+            # Needs more work to get working with searching
             return key
         return super().keypress(size, key)
         
