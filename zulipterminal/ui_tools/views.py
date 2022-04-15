@@ -592,12 +592,7 @@ class MiddleColumnView(urwid.Frame):
         self.controller.update_screen()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("GO_BACK", key):
-            self.header.keypress(size, key)
-            self.footer.keypress(size, key)
-            self.set_focus("body")
-
-        elif self.focus_position in ["footer", "header"]:
+        if self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
