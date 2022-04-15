@@ -870,20 +870,6 @@ class TestMiddleColumnView:
         assert return_value is None
         assert mid_col_view.last_unread_pm is None
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, mid_col_view, mocker, key, widget_size):
-        size = widget_size(mid_col_view)
-        mocker.patch(MIDCOLVIEW + ".header")
-        mocker.patch(MIDCOLVIEW + ".footer")
-        mocker.patch(MIDCOLVIEW + ".set_focus")
-
-        mid_col_view.keypress(size, key)
-
-        mid_col_view.header.keypress.assert_called_once_with(size, key)
-        mid_col_view.footer.keypress.assert_called_once_with(size, key)
-        mid_col_view.set_focus.assert_called_once_with("body")
-        self.super_keypress.assert_called_once_with(size, key)
-
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
