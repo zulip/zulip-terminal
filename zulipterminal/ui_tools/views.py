@@ -313,8 +313,8 @@ class StreamsView(urwid.Frame):
         self.stream_search_box = PanelSearchBox(
             self, "SEARCH_STREAMS", self.update_streams
         )
-        text = urwid.Text("Press t.", align="center")
-        title_map = urwid.AttrMap(urwid.Filler(text), "area:msg")
+        text = urwid.Text("Show topics [t]", align="center")
+        title_map = urwid.AttrMap(urwid.Filler(text), "popup_border")  # MARK
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
         super().__init__(
             list_box,
@@ -331,7 +331,7 @@ class StreamsView(urwid.Frame):
             ),
             footer=urwid.LineBox(
                 title_box_adapter,
-                title="Switch to topics view",
+                title="",
                 tlcorner=COLUMN_TITLE_BAR_LINE,
                 tline=COLUMN_TITLE_BAR_LINE,
                 trcorner=COLUMN_TITLE_BAR_LINE,
@@ -433,8 +433,8 @@ class TopicsView(urwid.Frame):
         self.header_list = urwid.Pile(
             [self.stream_button, urwid.Divider("─"), self.topic_search_box]
         )
-        text = urwid.Text("Press t.", align="center")
-        title_map = urwid.AttrMap(urwid.Filler(text), "area:msg")
+        text = urwid.Text("Show streams [t]", align="center")
+        title_map = urwid.AttrMap(urwid.Filler(text), "popup_border")
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
         super().__init__(
             self.list_box,
@@ -451,7 +451,7 @@ class TopicsView(urwid.Frame):
             ),
             footer=urwid.LineBox(
                 title_box_adapter,
-                title="Switch to streams view",
+                title="",
                 tlcorner=COLUMN_TITLE_BAR_LINE,
                 tline=COLUMN_TITLE_BAR_LINE,
                 trcorner=COLUMN_TITLE_BAR_LINE,
