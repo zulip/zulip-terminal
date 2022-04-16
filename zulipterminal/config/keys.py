@@ -164,6 +164,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Narrow to the topic of the current message',
         'key_category': 'msg_actions',
     }),
+    ('NARROW_MESSAGE_RECIPIENT', {
+        'keys': ['meta .'],
+        'help_text': 'Narrow to compose box message recipient',
+        'key_category': 'msg_compose',
+    }),
     ('TOGGLE_NARROW', {
         'keys': ['z'],
         'help_text':

@@ -773,6 +773,27 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_state is not None:
                     self.keypress(size, primary_key_for_command("GO_BACK"))
                     assert self.msg_edit_state is None
+        elif is_command_key("NARROW_MESSAGE_RECIPIENT", key):
+            if self.compose_box_status == "open_with_stream":
+                self.model.controller.narrow_to_topic(
+                    stream_name=self.stream_write_box.edit_text,
+                    topic_name=self.title_write_box.edit_text,
+                    contextual_message_id=None,
+                )
+            elif self.compose_box_status == "open_with_private":
+                self.recipient_emails = [
+                    self.model.user_id_email_dict[user_id]
+                    for user_id in self.recipient_user_ids
+                ]
+                if self.recipient_user_ids:
+                    self.model.controller.narrow_to_user(
+                        recipient_emails=self.recipient_emails,
+                        contextual_message_id=None,
+                    )
+                else:
+                    self.view.controller.report_error(
+                        "Cannot narrow to message without specifying recipients."
+                    )
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
