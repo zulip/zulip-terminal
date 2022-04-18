@@ -558,8 +558,6 @@ class Controller:
         else:
             self.view.message_view.log.extend(w_list)
 
-        self.exit_editor_mode()
-
     def narrow_to_stream(
         self, *, stream_name: str, contextual_message_id: Optional[int] = None
     ) -> None:
