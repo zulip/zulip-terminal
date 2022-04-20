@@ -377,7 +377,7 @@ class TestController:
         else:
             mock_success.assert_not_called()
             mock_warning.assert_called_once_with(
-                f"{text_category} copied, but the clipboard text does not match"
+                [f"{text_category} copied, but the clipboard text does not match"]
             )
 
     def test_copy_to_clipboard_exception(

@@ -1896,17 +1896,21 @@ class MessageBox(urwid.Pile):
                             return key
                         elif self.message["type"] == "stream":
                             self.model.controller.report_warning(
-                                " Only topic editing allowed."
-                                " Time Limit for editing the message body"
-                                " has been exceeded."
+                                [
+                                    " Only topic editing allowed."
+                                    " Time Limit for editing the message body"
+                                    " has been exceeded."
+                                ]
                             )
                             msg_body_edit_enabled = False
                 elif self.message["type"] == "stream":
                     # Allow editing topic if the message has "(no topic)" subject
                     if self.message["subject"] == "(no topic)":
                         self.model.controller.report_warning(
-                            " Only topic editing is allowed."
-                            " This is someone else's message but with (no topic)."
+                            [
+                                " Only topic editing is allowed."
+                                " This is someone else's message but with (no topic)."
+                            ]
                         )
                         msg_body_edit_enabled = False
                     else:
