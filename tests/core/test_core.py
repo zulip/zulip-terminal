@@ -370,7 +370,9 @@ class TestController:
         controller.copy_to_clipboard(text_to_copy, text_category)
 
         if expected_result == "success":
-            mock_success.assert_called_once_with(f"{text_category} copied successfully")
+            mock_success.assert_called_once_with(
+                [f"{text_category} copied successfully"]
+            )
             mock_warning.assert_not_called()
         else:
             mock_success.assert_not_called()
@@ -415,7 +417,7 @@ class TestController:
 
         mock_open.assert_called_once_with(url)
         mocked_report_success.assert_called_once_with(
-            f"The link was successfully opened using {mock_get.return_value.name}"
+            [f"The link was successfully opened using {mock_get.return_value.name}"]
         )
 
     def test_open_in_browser_fail__no_browser_controller(

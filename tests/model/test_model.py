@@ -853,7 +853,9 @@ class TestModel:
                     "topic": "Topic change",
                 },
                 "Old topic",
-                "You changed one message's topic from #stream > Old topic to #stream > Topic change.",
+                [
+                    "You changed one message's topic from #stream > Old topic to #stream > Topic change."
+                ],
             ),
             case(
                 {
@@ -882,7 +884,9 @@ class TestModel:
                     "topic": "new_terminal",
                 },
                 "old_terminal",
-                "You changed some messages' topic from #stream > old_terminal to #stream > new_terminal.",
+                [
+                    "You changed some messages' topic from #stream > old_terminal to #stream > new_terminal."
+                ],
             ),
             case(
                 {
@@ -892,7 +896,9 @@ class TestModel:
                     "topic": "grett",
                 },
                 "greet",
-                "You changed one message's topic from #stream > greet to #stream > grett.",
+                [
+                    "You changed one message's topic from #stream > greet to #stream > grett."
+                ],
             ),
             case(
                 {
@@ -902,7 +908,9 @@ class TestModel:
                     "topic": "party",
                 },
                 "lets_party",
-                "You changed all messages' topic from #stream > lets_party to #stream > party.",
+                [
+                    "You changed all messages' topic from #stream > lets_party to #stream > party."
+                ],
             ),
         ],
     )

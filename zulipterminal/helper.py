@@ -656,7 +656,9 @@ def check_narrow_and_notify(
         key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
 
         controller.report_success(
-            f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation.",
+            [
+                f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation."
+            ],
             duration=6,
         )
 

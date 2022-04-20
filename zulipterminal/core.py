@@ -8,7 +8,7 @@ from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pyperclip
 import urwid
@@ -412,7 +412,9 @@ class Controller:
             with suppress_output():
                 browser_controller.open(url)
                 self.report_success(
-                    f"The link was successfully opened using {browser_controller.name}"
+                    [
+                        f"The link was successfully opened using {browser_controller.name}"
+                    ]
                 )
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
@@ -443,7 +445,11 @@ class Controller:
         """
         self.view.set_footer_text(text, "task:error", duration)
 
-    def report_success(self, text: str, duration: int = 3) -> None:
+    def report_success(
+        self,
+        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
+        duration: int = 3,
+    ) -> None:
         """
         Helper to show a success message in footer
         """
@@ -494,7 +500,7 @@ class Controller:
             pyperclip.copy(text)
             clipboard_text = pyperclip.paste()
             if clipboard_text == text:
-                self.report_success(f"{text_category} copied successfully")
+                self.report_success([f"{text_category} copied successfully"])
             else:
                 self.report_warning(
                     f"{text_category} copied, but the clipboard text does not match"
