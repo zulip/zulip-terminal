@@ -2564,7 +2564,9 @@ class TestMessageBox:
             write_box.msg_write_box.set_edit_text.assert_not_called()
         if expect_footer_text[message_type]:
             if expect_editing_to_succeed[message_type]:
-                report_warning.assert_called_once_with(expect_footer_text[message_type])
+                report_warning.assert_called_once_with(
+                    [expect_footer_text[message_type]]
+                )
             else:
                 report_error.assert_called_once_with(expect_footer_text[message_type])
 

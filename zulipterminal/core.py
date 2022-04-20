@@ -455,7 +455,11 @@ class Controller:
         """
         self.view.set_footer_text(text, "task:success", duration)
 
-    def report_warning(self, text: str, duration: int = 3) -> None:
+    def report_warning(
+        self,
+        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
+        duration: int = 3,
+    ) -> None:
         """
         Helper to show a warning message in footer
         """
@@ -503,7 +507,7 @@ class Controller:
                 self.report_success([f"{text_category} copied successfully"])
             else:
                 self.report_warning(
-                    f"{text_category} copied, but the clipboard text does not match"
+                    [f"{text_category} copied, but the clipboard text does not match"]
                 )
         except pyperclip.PyperclipException:
             body = [
