@@ -481,7 +481,7 @@ class Model:
 
     def save_draft(self, draft: Composition) -> None:
         self._draft = deepcopy(draft)
-        self.controller.report_success("Saved message as draft")
+        self.controller.report_success(["Saved message as draft"])
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:
@@ -589,9 +589,11 @@ class Model:
                 else:  # propagate_mode == "change_later":
                     messages_changed = "some messages'"
                 self.controller.report_success(
-                    f"You changed {messages_changed} topic"
-                    + f" from #{stream_name} > {old_topic}"
-                    + f" to #{stream_name} > {new_topic}.",
+                    [
+                        f"You changed {messages_changed} topic"
+                        + f" from #{stream_name} > {old_topic}"
+                        + f" to #{stream_name} > {new_topic}."
+                    ],
                     duration=6,
                 )
 
