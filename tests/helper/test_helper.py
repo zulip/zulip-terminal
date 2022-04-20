@@ -328,7 +328,7 @@ def test_display_error_if_present(
     display_error_if_present(response, controller)
 
     if footer_updated:
-        report_error.assert_called_once_with(response["msg"])
+        report_error.assert_called_once_with([response["msg"]])
     else:
         report_error.assert_not_called()
 

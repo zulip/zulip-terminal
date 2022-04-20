@@ -640,7 +640,7 @@ def canonicalize_color(color: str) -> str:
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
     if response["result"] == "error" and hasattr(controller, "view"):
-        controller.report_error(response["msg"])
+        controller.report_error([response["msg"]])
 
 
 def check_narrow_and_notify(

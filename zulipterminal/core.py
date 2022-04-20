@@ -400,8 +400,10 @@ class Controller:
             and os.environ.get("TERM")
         ):
             self.report_error(
-                "No DISPLAY environment variable specified. This could "
-                "likely mean the ZT host is running without a GUI."
+                [
+                    "No DISPLAY environment variable specified. This could "
+                    "likely mean the ZT host is running without a GUI."
+                ]
             )
             return
         try:
@@ -418,7 +420,7 @@ class Controller:
                 )
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
-            self.report_error(f"ERROR: {e}")
+            self.report_error([f"ERROR: {e}"])
 
     @asynch
     def show_typing_notification(self) -> None:
@@ -439,7 +441,11 @@ class Controller:
         self.is_typing_notification_in_progress = False
         self.view.set_footer_text()
 
-    def report_error(self, text: str, duration: int = 3) -> None:
+    def report_error(
+        self,
+        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
+        duration: int = 3,
+    ) -> None:
         """
         Helper to show an error message in footer
         """

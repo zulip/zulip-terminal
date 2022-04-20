@@ -430,7 +430,7 @@ class TestController:
 
         controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
 
-        mocked_report_error.assert_called_once_with(f"ERROR: {error}")
+        mocked_report_error.assert_called_once_with([f"ERROR: {error}"])
 
     def test_main(self, mocker: MockerFixture, controller: Controller) -> None:
         controller.view.palette = {"default": "theme_properties"}
