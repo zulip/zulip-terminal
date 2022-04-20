@@ -2568,7 +2568,7 @@ class TestMessageBox:
                     [expect_footer_text[message_type]]
                 )
             else:
-                report_error.assert_called_once_with(expect_footer_text[message_type])
+                report_error.assert_called_once_with([expect_footer_text[message_type]])
 
     @pytest.mark.parametrize(
         "raw_html, expected_content",

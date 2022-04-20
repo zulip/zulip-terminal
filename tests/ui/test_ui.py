@@ -459,7 +459,7 @@ class TestView:
             view.middle_column.set_focus.assert_called_once_with("footer")
         else:
             view.controller.report_error.assert_called_once_with(
-                "No draft message was saved in this session."
+                ["No draft message was saved in this session."]
             )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
