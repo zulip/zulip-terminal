@@ -7,6 +7,7 @@ import pytest
 from pytest import param as case
 from zulip import Client, ZulipError
 
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
@@ -854,7 +855,13 @@ class TestModel:
                 },
                 "Old topic",
                 [
-                    "You changed one message's topic from #stream > Old topic to #stream > Topic change."
+                    "You changed one message's topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " Old topic "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " Topic change "),
+                    " .",
                 ],
             ),
             case(
@@ -885,7 +892,13 @@ class TestModel:
                 },
                 "old_terminal",
                 [
-                    "You changed some messages' topic from #stream > old_terminal to #stream > new_terminal."
+                    "You changed some messages' topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " old_terminal "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " new_terminal "),
+                    " .",
                 ],
             ),
             case(
@@ -897,7 +910,13 @@ class TestModel:
                 },
                 "greet",
                 [
-                    "You changed one message's topic from #stream > greet to #stream > grett."
+                    "You changed one message's topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " greet "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " grett "),
+                    " .",
                 ],
             ),
             case(
@@ -909,7 +928,13 @@ class TestModel:
                 },
                 "lets_party",
                 [
-                    "You changed all messages' topic from #stream > lets_party to #stream > party."
+                    "You changed all messages' topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " lets_party "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " party "),
+                    " .",
                 ],
             ),
         ],
