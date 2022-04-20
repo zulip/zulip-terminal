@@ -36,6 +36,7 @@ from zulipterminal.api_types import (
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import ROLE_BY_ID, StreamAccessType
 from zulipterminal.helper import (
     Message,
@@ -580,7 +581,12 @@ class Model:
             stream_name = message.get("display_recipient", None)
             old_topic = message.get("subject", None)
             new_topic = request["topic"]
-
+            stream_name_markup = (
+                "footer_contrast",
+                f" {stream_name} {STREAM_TOPIC_SEPARATOR} ",
+            )
+            old_topic_markup = ("footer_contrast", f" {old_topic} ")
+            new_topic_markup = ("footer_contrast", f" {new_topic} ")
             if old_topic != new_topic:
                 if propagate_mode == "change_one":
                     messages_changed = "one message's"
@@ -590,9 +596,13 @@ class Model:
                     messages_changed = "some messages'"
                 self.controller.report_success(
                     [
-                        f"You changed {messages_changed} topic"
-                        + f" from #{stream_name} > {old_topic}"
-                        + f" to #{stream_name} > {new_topic}."
+                        f"You changed {messages_changed} topic from ",
+                        stream_name_markup,
+                        old_topic_markup,
+                        " to ",
+                        stream_name_markup,
+                        new_topic_markup,
+                        " .",
                     ],
                     duration=6,
                 )
