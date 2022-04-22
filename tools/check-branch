@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+if ! git diff-index --quiet HEAD; then
+    set +x
+    echo "There are uncommitted changes:"
+    git status --short
+    echo "Doing nothing to avoid losing your work."
+    exit 1
+fi
+
+main_branch=${1:-"upstream/main"}
+
+git rebase $(git merge-base "$main_branch" @) --exec 'git --no-pager log -1 && make check'
