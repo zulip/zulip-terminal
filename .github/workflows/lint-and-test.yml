@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - Type consistency (mypy)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: 3.7
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - PEP8 & more (flake8)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: 3.7
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - Import order (isort)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: 3.6
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - Code formatting (black)
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: 3.6
@@ -75,7 +75,7 @@ jobs:
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Python version ${{ matrix.env.PYTHON }}
         uses: actions/setup-python@v4
         with:
