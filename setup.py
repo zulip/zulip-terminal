@@ -122,7 +122,7 @@ setup(
         "beautifulsoup4>=4.10.0",
         "lxml>=4.7.1",
         "pygments>=2.11.2",
-        "typing_extensions>=3.7",
+        "typing_extensions~=4.0.0",
         "python-dateutil>=2.8.2",
         "pytz>=2022.1",
         "tzlocal>=2.1",
