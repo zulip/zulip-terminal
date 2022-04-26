@@ -26,7 +26,7 @@ from typing import (
 from urllib.parse import unquote
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import ParamSpec, TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
 from zulipterminal.config.keys import primary_key_for_command
@@ -119,13 +119,16 @@ class UnreadCounts(TypedDict):
     streams: Dict[int, int]  # stream_id
 
 
-def asynch(func: Callable[..., None]) -> Callable[..., None]:
+ParamT = ParamSpec("ParamT")
+
+
+def asynch(func: Callable[ParamT, None]) -> Callable[ParamT, None]:
     """
     Decorator for executing a function in a separate :class:`threading.Thread`.
     """
 
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: ParamT.args, **kwargs: ParamT.kwargs) -> None:
         # If calling when pytest is running simply return the function
         # to avoid running in asynch mode.
         if os.environ.get("PYTEST_CURRENT_TEST"):
@@ -133,7 +136,7 @@ def asynch(func: Callable[..., None]) -> Callable[..., None]:
 
         thread = Thread(target=func, args=args, kwargs=kwargs)
         thread.daemon = True
-        return thread.start()
+        thread.start()
 
     return wrapper
 
