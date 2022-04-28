@@ -2793,14 +2793,14 @@ class TestMessageBox:
         reactions_view = msg_box.reactions_view(reactions)
 
         assert reactions_view.original_widget.text == (
-            ":heart: 1 :thumbs_up: 1 :zulip: 2 "
+            " :heart: 1   :thumbs_up: 1   :zulip: 2  "
         )
         assert reactions_view.original_widget.attrib == [
-            ("reaction", 9),
+            ("reaction", 11),
             (None, 1),
-            ("reaction", 13),
+            ("reaction", 15),
             (None, 1),
-            ("reaction_mine", 9),
+            ("reaction_mine", 11),
         ]
 
     @pytest.mark.parametrize(

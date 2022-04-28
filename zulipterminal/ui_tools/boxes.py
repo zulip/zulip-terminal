@@ -1127,7 +1127,7 @@ class MessageBox(urwid.Pile):
             reaction_texts = [
                 (
                     "reaction_mine" if my_user_id in ids else "reaction",
-                    f":{reaction}: {len(ids)}",
+                    f" :{reaction}: {len(ids)} ",
                 )
                 for reaction, ids in sorted_stats
             ]
