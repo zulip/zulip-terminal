@@ -1,11 +1,16 @@
 from typing import Dict, Optional
 
+from typing_extensions import Literal
+
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
     STATUS_ACTIVE,
     STATUS_IDLE,
     STATUS_INACTIVE,
     STATUS_OFFLINE,
+    STREAM_MARKER_PRIVATE,
+    STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
 
 
@@ -22,6 +27,15 @@ STATE_ICON = {
     "idle": STATUS_IDLE,
     "offline": STATUS_OFFLINE,
     "inactive": STATUS_INACTIVE,
+}
+
+
+StreamAccessType = Literal["public", "private", "web-public"]
+
+STREAM_ACCESS_TYPE = {
+    "public": {"description": "Public", "icon": STREAM_MARKER_PUBLIC},
+    "private": {"description": "Private", "icon": STREAM_MARKER_PRIVATE},
+    "web-public": {"description": "Web public", "icon": STREAM_MARKER_WEB_PUBLIC},
 }
 
 

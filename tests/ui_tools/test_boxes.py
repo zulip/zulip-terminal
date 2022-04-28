@@ -12,7 +12,9 @@ from zulipterminal.config.symbols import (
     INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
+    STREAM_MARKER_WEB_PUBLIC,
 )
+from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
 from zulipterminal.urwid_types import urwid_Size
@@ -508,18 +510,36 @@ class TestWriteBox:
             (
                 "#Stream",
                 0,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             ("#*Stream", None, []),  # NOTE: Optional single star fails
             (
                 "#**Stream",
                 0,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),  # Optional 2-stars
             (
                 "#Stream",
                 None,
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             ("#NoMatch", None, []),
             # emojis
@@ -734,11 +754,13 @@ class TestWriteBox:
             ("#S", 1, "#**Some general stream**", []),  # 1st-word startswith.
             ("#S", 2, "#**Stream 1**", []),  # 1st-word startswith match.
             ("#S", 3, "#**Stream 2**", []),  # 1st-word startswith match.
-            ("#S", -1, "#**Stream 2**", []),
-            ("#S", -2, "#**Stream 1**", []),
-            ("#S", -3, "#**Some general stream**", []),
-            ("#S", -4, "#**Secret stream**", []),
-            ("#S", -5, None, []),
+            ("#S", 4, "#**Web public stream**", []),  # 1st-word startswith match.
+            ("#S", -1, "#**Web public stream**", []),
+            ("#S", -2, "#**Stream 2**", []),
+            ("#S", -3, "#**Stream 1**", []),
+            ("#S", -4, "#**Some general stream**", []),
+            ("#S", -5, "#**Secret stream**", []),
+            ("#S", -6, None, []),
             ("#So", 0, "#**Some general stream**", []),
             ("#So", 1, None, []),
             ("#Se", 0, "#**Secret stream**", []),
@@ -1012,25 +1034,49 @@ class TestWriteBox:
                 "",
                 1,
                 [],
-                ["Secret stream", "Some general stream", "Stream 1", "Stream 2"],
+                [
+                    "Secret stream",
+                    "Some general stream",
+                    "Stream 1",
+                    "Stream 2",
+                    "Web public stream",
+                ],
             ),
             (
                 "",
                 1,
                 ["Stream 2"],
-                ["Stream 2", "Secret stream", "Some general stream", "Stream 1"],
+                [
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Stream 1",
+                    "Web public stream",
+                ],
             ),
             (
                 "St",
                 1,
                 [],
-                ["Stream 1", "Stream 2", "Secret stream", "Some general stream"],
+                [
+                    "Stream 1",
+                    "Stream 2",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
             (
                 "St",
                 1,
                 ["Stream 2"],
-                ["Stream 2", "Stream 1", "Secret stream", "Some general stream"],
+                [
+                    "Stream 2",
+                    "Stream 1",
+                    "Secret stream",
+                    "Some general stream",
+                    "Web public stream",
+                ],
             ),
         ],
         ids=[
@@ -1062,13 +1108,22 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        "stream_name, stream_id, is_valid_stream, expected_marker, expected_color",
+        "stream_name, stream_id, is_valid_stream, stream_access_type, expected_marker, expected_color",
         [
-            ("Secret stream", 99, True, STREAM_MARKER_PRIVATE, "#ccc"),
-            ("Stream 1", 1, True, STREAM_MARKER_PUBLIC, "#b0a5fd"),
-            ("Stream 0", 0, False, INVALID_MARKER, "general_bar"),
+            (
+                "Web public stream",
+                999,
+                True,
+                "web-public",
+                STREAM_MARKER_WEB_PUBLIC,
+                "#ddd",
+            ),
+            ("Secret stream", 99, True, "private", STREAM_MARKER_PRIVATE, "#ccc"),
+            ("Stream 1", 1, True, "public", STREAM_MARKER_PUBLIC, "#b0a5fd"),
+            ("Stream 0", 0, False, None, INVALID_MARKER, "general_bar"),
         ],
         ids=[
+            "web_public_stream",
             "private_stream",
             "public_stream",
             "invalid_stream_name",
@@ -1080,6 +1135,7 @@ class TestWriteBox:
         stream_id: int,
         stream_name: str,
         is_valid_stream: bool,
+        stream_access_type: StreamAccessType,
         expected_marker: str,
         stream_dict: Dict[int, Any],
         expected_color: str,
@@ -1088,6 +1144,7 @@ class TestWriteBox:
         write_box.model.stream_dict = stream_dict
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
+        write_box.model.stream_access_type.return_value = stream_access_type
 
         write_box.stream_box_view(stream_id)
 

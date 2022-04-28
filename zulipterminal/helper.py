@@ -26,18 +26,20 @@ from urllib.parse import unquote
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
+from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.regexes import (
     REGEX_COLOR_3_DIGIT,
     REGEX_COLOR_6_DIGIT,
     REGEX_QUOTED_FENCE_LENGTH,
 )
+from zulipterminal.config.ui_mappings import StreamAccessType
 
 
 class StreamData(TypedDict):
     name: str
     id: int
     color: str
-    invite_only: bool
+    stream_access_type: StreamAccessType
     description: str
 
 
@@ -638,7 +640,7 @@ def canonicalize_color(color: str) -> str:
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
     if response["result"] == "error" and hasattr(controller, "view"):
-        controller.report_error(response["msg"])
+        controller.report_error([response["msg"]])
 
 
 def check_narrow_and_notify(
@@ -651,7 +653,14 @@ def check_narrow_and_notify(
         and current_narrow != outer_narrow
         and current_narrow != inner_narrow
     ):
-        controller.report_success("Message is sent outside of current narrow.")
+        key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
+
+        controller.report_success(
+            [
+                f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation."
+            ],
+            duration=6,
+        )
 
 
 def notify_if_message_sent_outside_narrow(

@@ -870,20 +870,6 @@ class TestMiddleColumnView:
         assert return_value is None
         assert mid_col_view.last_unread_pm is None
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, mid_col_view, mocker, key, widget_size):
-        size = widget_size(mid_col_view)
-        mocker.patch(MIDCOLVIEW + ".header")
-        mocker.patch(MIDCOLVIEW + ".footer")
-        mocker.patch(MIDCOLVIEW + ".set_focus")
-
-        mid_col_view.keypress(size, key)
-
-        mid_col_view.header.keypress.assert_called_once_with(size, key)
-        mid_col_view.footer.keypress.assert_called_once_with(size, key)
-        mid_col_view.set_focus.assert_called_once_with("body")
-        self.super_keypress.assert_called_once_with(size, key)
-
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
@@ -1200,7 +1186,7 @@ class TestLeftColumnView:
             controller=left_col_view.controller, count=3
         )
 
-    @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 1000]))
+    @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))
     def test_streams_view(self, mocker, streams, pinned):
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
@@ -1222,7 +1208,7 @@ class TestLeftColumnView:
                     properties=stream,
                     controller=self.view.controller,
                     view=self.view,
-                    count=1,
+                    count=mocker.ANY,
                 )
                 for stream in (self.view.pinned_streams + self.view.unpinned_streams)
             ]
@@ -2578,9 +2564,11 @@ class TestMessageBox:
             write_box.msg_write_box.set_edit_text.assert_not_called()
         if expect_footer_text[message_type]:
             if expect_editing_to_succeed[message_type]:
-                report_warning.assert_called_once_with(expect_footer_text[message_type])
+                report_warning.assert_called_once_with(
+                    [expect_footer_text[message_type]]
+                )
             else:
-                report_error.assert_called_once_with(expect_footer_text[message_type])
+                report_error.assert_called_once_with([expect_footer_text[message_type]])
 
     @pytest.mark.parametrize(
         "raw_html, expected_content",

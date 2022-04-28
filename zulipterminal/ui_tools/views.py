@@ -20,14 +20,13 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
     EDIT_MODE_CAPTIONS,
     ROLE_BY_ID,
     STATE_ICON,
+    STREAM_ACCESS_TYPE,
     STREAM_POST_POLICY,
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
@@ -593,12 +592,7 @@ class MiddleColumnView(urwid.Frame):
         self.controller.update_screen()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("GO_BACK", key):
-            self.header.keypress(size, key)
-            self.footer.keypress(size, key)
-            self.set_focus("body")
-
-        elif self.focus_position in ["footer", "header"]:
+        if self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
@@ -1339,7 +1333,11 @@ class StreamInfoView(PopUpView):
                 stream_policy = STREAM_POST_POLICY[1]
 
         total_members = len(stream["subscribers"])
-        type_of_stream = "Private" if stream["invite_only"] else "Public"
+
+        stream_access_type = controller.model.stream_access_type(stream_id)
+        type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
+        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+
         availability_of_history = (
             "Public to Users"
             if stream["history_public_to_subscribers"]
@@ -1354,9 +1352,6 @@ class StreamInfoView(PopUpView):
             "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
         )
 
-        stream_marker = (
-            STREAM_MARKER_PRIVATE if stream["invite_only"] else STREAM_MARKER_PUBLIC
-        )
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
         self.markup_desc, message_links, _ = MessageBox.transform_content(

@@ -7,6 +7,7 @@ import pytest
 from pytest import param as case
 from zulip import Client, ZulipError
 
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
@@ -834,9 +835,9 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize(
-        "req, old_topic, footer_updated",
+        "req, old_topic, expected_report_success",
         [
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
@@ -844,23 +845,35 @@ class TestModel:
                     "topic": "Some topic",
                 },
                 "Some topic",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
                     "topic": "Topic change",
                 },
                 "Old topic",
-                True,
+                [
+                    "You changed one message's topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " Old topic "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " Topic change "),
+                    " .",
+                ],
             ),
-            (
-                {"message_id": 1, "propagate_mode": "change_all", "topic": "Old topic"},
+            case(
+                {
+                    "message_id": 1,
+                    "propagate_mode": "change_all",
+                    "topic": "Old topic",
+                },
                 "Old topic",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_later",
@@ -868,9 +881,27 @@ class TestModel:
                     "topic": "terminal",
                 },
                 "terminal",
-                False,
+                None,  # None as footer is not updated.
             ),
-            (
+            case(
+                {
+                    "message_id": 1,
+                    "propagate_mode": "change_later",
+                    "content": ":smile:",
+                    "topic": "new_terminal",
+                },
+                "old_terminal",
+                [
+                    "You changed some messages' topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " old_terminal "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " new_terminal "),
+                    " .",
+                ],
+            ),
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_one",
@@ -878,9 +909,17 @@ class TestModel:
                     "topic": "grett",
                 },
                 "greet",
-                True,
+                [
+                    "You changed one message's topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " greet "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " grett "),
+                    " .",
+                ],
             ),
-            (
+            case(
                 {
                     "message_id": 1,
                     "propagate_mode": "change_all",
@@ -888,24 +927,41 @@ class TestModel:
                     "topic": "party",
                 },
                 "lets_party",
-                True,
+                [
+                    "You changed all messages' topic from ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " lets_party "),
+                    " to ",
+                    ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
+                    ("footer_contrast", " party "),
+                    " .",
+                ],
             ),
         ],
     )
     def test_update_stream_message(
-        self, mocker, model, response, return_value, req, old_topic, footer_updated
+        self,
+        mocker,
+        model,
+        response,
+        return_value,
+        req,
+        old_topic,
+        expected_report_success,
+        old_stream_name="stream",
     ):
         self.client.update_message = mocker.Mock(return_value=response)
         model.index["messages"][req["message_id"]]["subject"] = old_topic
-
+        model.index["messages"][req["message_id"]][
+            "display_recipient"
+        ] = old_stream_name
         result = model.update_stream_message(**req)
-
         self.client.update_message.assert_called_once_with(req)
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
         report_success = model.controller.report_success
-        if result and footer_updated:
-            report_success.assert_called_once_with("You changed a message's topic.")
+        if result and expected_report_success is not None:
+            report_success.assert_called_once_with(expected_report_success, duration=6)
         else:
             report_success.assert_not_called()
 
@@ -1151,6 +1207,13 @@ class TestModel:
         request = [{"stream_id": 205, "property": "is_muted", "value": value}]
         model.client.update_subscription_settings.assert_called_once_with(request)
         self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    def test_stream_access_type(
+        self, model, general_stream, secret_stream, web_public_stream
+    ):
+        assert model.stream_access_type(general_stream["stream_id"]) == "public"
+        assert model.stream_access_type(secret_stream["stream_id"]) == "private"
+        assert model.stream_access_type(web_public_stream["stream_id"]) == "web-public"
 
     @pytest.mark.parametrize(
         "flags_before, expected_operator",

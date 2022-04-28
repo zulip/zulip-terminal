@@ -10,7 +10,12 @@ from typing import Dict, List, cast
 import lister
 
 
-EXCLUDE_FILES = ["tools/fetch-pull-request", "tools/fetch-rebase-pull-request"]
+# This could use tools/python_tools.py in future?
+EXCLUDE_FILES = [
+    "tools/fetch-pull-request",
+    "tools/fetch-rebase-pull-request",
+    "tools/check-branch",
+]
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))

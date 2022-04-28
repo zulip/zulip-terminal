@@ -11,6 +11,7 @@ tools_exclusions = {
         "push-to-pull-request",
         "release",
         "__pycache__",
+        "check-branch",
     }
 }
 

@@ -279,11 +279,46 @@ Once you have a development environment set up, you might find the following use
 
 If using make with pip, running `make` will ensure the development environment is up to date with the specified dependencies, useful after fetching from git and rebasing.
 
-NOTE: The linters and pytest are run in CI (GitHub Actions) when you submit a pull request (PR), and we expect them to pass before code is merged. Running them locally can speed your development time, but if you have troubles understanding why the linters or pytest are failing, please do push your code to a branch/PR and we can discuss the problems in the PR or on chat.zulip.org.
+#### Passing linters and automated tests
 
-If using make with pip, there are corresponding make targets for running linting and testing if you wish to use them (`make lint` & `make test`), and before pushing a pull-request (PR) ready for merging you may find it useful to ensure that `make check` runs successfully (which runs both).
+The linters and automated tests (pytest) are run in CI (GitHub Actions) when
+you submit a pull request (PR), and we expect them to pass before code is
+merged.
+> **NOTE:** Mergeable PRs with multiple commits are expected to pass linting
+> and tests at **each commit**, not simply overall
 
-NOTE: The lint script runs a number of separate linters to simplify the development workflow, but each individual linter can be run separately if you find this useful.
+Running these tools locally can speed your development and avoid the need
+to repeatedly push your code to GitHub simply to run these checks.
+> If you have troubles understanding why the linters or pytest are failing,
+> please do push your code to a branch/PR and we can discuss the problems in
+> the PR or on chat.zulip.org.
+
+All linters and tests can be run using the commands in the table above.
+Individual linters may also be run via scripts in `tools/`.
+
+In addition, if using a `make`-based system:
+- `make lint` and `make test` run all of each group of tasks
+- `make check` runs all checks, which is useful before pushing a PR (or an update)
+
+Correcting some linting errors requires manual intervention, such as from
+`mypy` for type-checking.
+However, other linting errors may be fixed automatically, as detailed below -
+**this can save a lot of time manually adjusting your code to pass the
+linters!**
+
+#### Auto-formatting code
+
+The project uses `black` and `isort` for code-style and import sorting respectively.
+
+These tools can be run as linters locally , but can also *automatically* format your code for you.
+
+If you're using a `make`-based setup, running `make fix` will run both (and a
+few other tools) and reformat the current state of your code - so you'll want
+to commit first just in case, then `--amend` that commit if you're happy with
+the changes.
+
+You can also use the tools individually on a file or directory, eg.
+`black zulipterminal` or `isort tests/model/test_model.py`
 
 #### Commit Style
 

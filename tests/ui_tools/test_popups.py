@@ -1155,7 +1155,10 @@ class TestStreamInfoView:
         self.stream_id = general_stream["stream_id"]
         self.controller.model.server_feature_level = 40
         self.controller.model.cached_retention_text = {self.stream_id: "10"}
+
         self.controller.model.stream_dict = {self.stream_id: general_stream}
+        self.controller.model.stream_access_type.return_value = "public"
+
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
     def test_keypress_any_key(

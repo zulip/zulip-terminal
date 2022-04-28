@@ -9,13 +9,8 @@ from typing_extensions import TypedDict
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
-from zulipterminal.config.symbols import (
-    CHECK_MARK,
-    MUTE_MARKER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
-)
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
+from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode
 from zulipterminal.urwid_types import urwid_Size
 
@@ -171,7 +166,7 @@ class StreamButton(TopButton):
         self.stream_name = properties["name"]
         self.stream_id = properties["id"]
         self.color = properties["color"]
-        is_private = properties["invite_only"]
+        stream_access_type = properties["stream_access_type"]
         self.description = properties["description"]
 
         self.model = controller.model
@@ -190,7 +185,8 @@ class StreamButton(TopButton):
             ("s" + self.color, "", "", "standout", inverse_text, self.color)
         )
 
-        stream_marker = STREAM_MARKER_PRIVATE if is_private else STREAM_MARKER_PUBLIC
+        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+
         narrow_function = partial(
             controller.narrow_to_stream,
             stream_name=self.stream_name,
@@ -611,7 +607,7 @@ class MessageLinkButton(urwid.Button):
         error = self._validate_narrow_link(parsed_link)
 
         if error:
-            self.controller.report_error(f" {error}")
+            self.controller.report_error([f" {error}"])
         else:
             self._switch_narrow_to(parsed_link)
 

@@ -33,12 +33,10 @@ from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
     QUOTED_TEXT_MARKER,
-    STREAM_MARKER_PRIVATE,
-    STREAM_MARKER_PUBLIC,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
-from zulipterminal.config.ui_mappings import STATE_ICON
+from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
     Message,
     asynch,
@@ -432,11 +430,10 @@ class WriteBox(urwid.Pile):
         stream_marker = INVALID_MARKER
         color = "general_bar"
         if self.model.is_valid_stream(new_text):
-            stream = self.model.stream_dict[self.model.stream_id_from_name(new_text)]
-            if stream["invite_only"]:
-                stream_marker = STREAM_MARKER_PRIVATE
-            else:
-                stream_marker = STREAM_MARKER_PUBLIC
+            stream_id = self.model.stream_id_from_name(new_text)
+            stream_access_type = self.model.stream_access_type(stream_id)
+            stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+            stream = self.model.stream_dict[stream_id]
             color = stream["color"]
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
             (color, stream_marker)
@@ -768,7 +765,7 @@ class WriteBox(urwid.Pile):
                         )
                     else:
                         self.view.controller.report_error(
-                            "Cannot send message without specifying recipients."
+                            ["Cannot send message without specifying recipients."]
                         )
                         success = None
             if success:
@@ -776,6 +773,27 @@ class WriteBox(urwid.Pile):
                 if self.msg_edit_state is not None:
                     self.keypress(size, primary_key_for_command("GO_BACK"))
                     assert self.msg_edit_state is None
+        elif is_command_key("NARROW_MESSAGE_RECIPIENT", key):
+            if self.compose_box_status == "open_with_stream":
+                self.model.controller.narrow_to_topic(
+                    stream_name=self.stream_write_box.edit_text,
+                    topic_name=self.title_write_box.edit_text,
+                    contextual_message_id=None,
+                )
+            elif self.compose_box_status == "open_with_private":
+                self.recipient_emails = [
+                    self.model.user_id_email_dict[user_id]
+                    for user_id in self.recipient_user_ids
+                ]
+                if self.recipient_user_ids:
+                    self.model.controller.narrow_to_user(
+                        recipient_emails=self.recipient_emails,
+                        contextual_message_id=None,
+                    )
+                else:
+                    self.view.controller.report_error(
+                        "Cannot narrow to message without specifying recipients."
+                    )
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
@@ -833,7 +851,7 @@ class WriteBox(urwid.Pile):
                                     primary_key_for_command("AUTOCOMPLETE_REVERSE"),
                                 )
                             )
-                            self.view.controller.report_error(invalid_stream_error)
+                            self.view.controller.report_error([invalid_stream_error])
                             return key
                         user_ids = self.model.get_other_subscribers_in_stream(
                             stream_name=stream_name
@@ -1847,17 +1865,21 @@ class MessageBox(urwid.Pile):
             ):
                 if self.message["type"] == "stream":
                     self.model.controller.report_error(
-                        " You can't edit messages sent by other users that"
-                        " already have a topic."
+                        [
+                            " You can't edit messages sent by other users that"
+                            " already have a topic."
+                        ]
                     )
                 else:
                     self.model.controller.report_error(
-                        " You can't edit private messages sent by other users."
+                        [" You can't edit private messages sent by other users."]
                     )
                 return key
             # Check if editing is allowed in the realm
             elif not self.model.initial_data["realm_allow_message_editing"]:
-                self.model.controller.report_error(" Editing sent message is disabled.")
+                self.model.controller.report_error(
+                    [" Editing sent message is disabled."]
+                )
                 return key
             # Check if message is still editable, i.e. within
             # the time limit. A limit of 0 signifies no limit
@@ -1873,28 +1895,36 @@ class MessageBox(urwid.Pile):
                     if time_since_msg_sent >= edit_time_limit:
                         if self.message["type"] == "private":
                             self.model.controller.report_error(
-                                " Time Limit for editing the message has been exceeded."
+                                [
+                                    " Time Limit for editing the message has been exceeded."
+                                ]
                             )
                             return key
                         elif self.message["type"] == "stream":
                             self.model.controller.report_warning(
-                                " Only topic editing allowed."
-                                " Time Limit for editing the message body"
-                                " has been exceeded."
+                                [
+                                    " Only topic editing allowed."
+                                    " Time Limit for editing the message body"
+                                    " has been exceeded."
+                                ]
                             )
                             msg_body_edit_enabled = False
                 elif self.message["type"] == "stream":
                     # Allow editing topic if the message has "(no topic)" subject
                     if self.message["subject"] == "(no topic)":
                         self.model.controller.report_warning(
-                            " Only topic editing is allowed."
-                            " This is someone else's message but with (no topic)."
+                            [
+                                " Only topic editing is allowed."
+                                " This is someone else's message but with (no topic)."
+                            ]
                         )
                         msg_body_edit_enabled = False
                     else:
                         self.model.controller.report_error(
-                            " You can't edit messages sent by other users that"
-                            " already have a topic."
+                            [
+                                " You can't edit messages sent by other users that"
+                                " already have a topic."
+                            ]
                         )
                         return key
                 else:

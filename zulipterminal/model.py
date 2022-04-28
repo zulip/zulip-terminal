@@ -37,7 +37,8 @@ from zulipterminal.api_types import (
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
-from zulipterminal.config.ui_mappings import ROLE_BY_ID
+from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
+from zulipterminal.config.ui_mappings import ROLE_BY_ID, StreamAccessType
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
@@ -482,7 +483,7 @@ class Model:
 
     def save_draft(self, draft: Composition) -> None:
         self._draft = deepcopy(draft)
-        self.controller.report_success("Saved message as draft")
+        self.controller.report_success(["Saved message as draft"])
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:
@@ -577,10 +578,35 @@ class Model:
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
         if response["result"] == "success":
-            old_topic = self.index["messages"][message_id].get("subject", None)
+            message = self.index["messages"][message_id]
+            stream_name = message.get("display_recipient", None)
+            old_topic = message.get("subject", None)
             new_topic = request["topic"]
+            stream_name_markup = (
+                "footer_contrast",
+                f" {stream_name} {STREAM_TOPIC_SEPARATOR} ",
+            )
+            old_topic_markup = ("footer_contrast", f" {old_topic} ")
+            new_topic_markup = ("footer_contrast", f" {new_topic} ")
             if old_topic != new_topic:
-                self.controller.report_success("You changed a message's topic.")
+                if propagate_mode == "change_one":
+                    messages_changed = "one message's"
+                elif propagate_mode == "change_all":
+                    messages_changed = "all messages'"
+                else:  # propagate_mode == "change_later":
+                    messages_changed = "some messages'"
+                self.controller.report_success(
+                    [
+                        f"You changed {messages_changed} topic from ",
+                        stream_name_markup,
+                        old_topic_markup,
+                        " to ",
+                        stream_name_markup,
+                        new_topic_markup,
+                        " .",
+                    ],
+                    duration=6,
+                )
 
         return response["result"] == "success"
 
@@ -1019,7 +1045,7 @@ class Model:
                     "name": stream["name"],
                     "id": stream["stream_id"],
                     "color": stream["color"],
-                    "invite_only": stream["invite_only"],
+                    "stream_access_type": self.stream_access_type(stream["stream_id"]),
                     "description": stream["description"],
                 }
             )
@@ -1093,6 +1119,16 @@ class Model:
             if stream["name"] == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
+
+    def stream_access_type(self, stream_id: int) -> StreamAccessType:
+        if stream_id not in self.stream_dict:
+            raise RuntimeError("Invalid stream id.")
+        stream = self.stream_dict[stream_id]
+        if stream.get("is_web_public", False):
+            return "web-public"
+        if stream["invite_only"]:
+            return "private"
+        return "public"
 
     def is_pinned_stream(self, stream_id: int) -> bool:
         return stream_id in [stream["id"] for stream in self.pinned_streams]
