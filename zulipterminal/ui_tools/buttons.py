@@ -607,7 +607,7 @@ class MessageLinkButton(urwid.Button):
         error = self._validate_narrow_link(parsed_link)
 
         if error:
-            self.controller.report_error([f" {error}"])
+            self.controller.report_error(f" {error}")
         else:
             self._switch_narrow_to(parsed_link)
 

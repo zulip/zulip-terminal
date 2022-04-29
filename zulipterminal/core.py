@@ -8,7 +8,7 @@ from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pyperclip
 import urwid
@@ -400,10 +400,8 @@ class Controller:
             and os.environ.get("TERM")
         ):
             self.report_error(
-                [
-                    "No DISPLAY environment variable specified. This could "
-                    "likely mean the ZT host is running without a GUI."
-                ]
+                "No DISPLAY environment variable specified. This could "
+                "likely mean the ZT host is running without a GUI."
             )
             return
         try:
@@ -414,13 +412,11 @@ class Controller:
             with suppress_output():
                 browser_controller.open(url)
                 self.report_success(
-                    [
-                        f"The link was successfully opened using {browser_controller.name}"
-                    ]
+                    f"The link was successfully opened using {browser_controller.name}"
                 )
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
-            self.report_error([f"ERROR: {e}"])
+            self.report_error(f"ERROR: {e}")
 
     @asynch
     def show_typing_notification(self) -> None:
@@ -441,31 +437,19 @@ class Controller:
         self.is_typing_notification_in_progress = False
         self.view.set_footer_text()
 
-    def report_error(
-        self,
-        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
-        duration: int = 3,
-    ) -> None:
+    def report_error(self, text: str, duration: int = 3) -> None:
         """
         Helper to show an error message in footer
         """
         self.view.set_footer_text(text, "task:error", duration)
 
-    def report_success(
-        self,
-        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
-        duration: int = 3,
-    ) -> None:
+    def report_success(self, text: str, duration: int = 3) -> None:
         """
         Helper to show a success message in footer
         """
         self.view.set_footer_text(text, "task:success", duration)
 
-    def report_warning(
-        self,
-        text: List[Union[str, Tuple[Literal["footer_contrast"], str]]],
-        duration: int = 3,
-    ) -> None:
+    def report_warning(self, text: str, duration: int = 3) -> None:
         """
         Helper to show a warning message in footer
         """
@@ -510,10 +494,10 @@ class Controller:
             pyperclip.copy(text)
             clipboard_text = pyperclip.paste()
             if clipboard_text == text:
-                self.report_success([f"{text_category} copied successfully"])
+                self.report_success(f"{text_category} copied successfully")
             else:
                 self.report_warning(
-                    [f"{text_category} copied, but the clipboard text does not match"]
+                    f"{text_category} copied, but the clipboard text does not match"
                 )
         except pyperclip.PyperclipException:
             body = [
@@ -557,6 +541,8 @@ class Controller:
             self.view.message_view.log.extend(w_list, focus_position)
         else:
             self.view.message_view.log.extend(w_list)
+
+        self.exit_editor_mode()
 
     def narrow_to_stream(
         self, *, stream_name: str, contextual_message_id: Optional[int] = None

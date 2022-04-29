@@ -641,7 +641,7 @@ def canonicalize_color(color: str) -> str:
 
 def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
     if response["result"] == "error" and hasattr(controller, "view"):
-        controller.report_error([response["msg"]])
+        controller.report_error(response["msg"])
 
 
 def check_narrow_and_notify(
@@ -657,9 +657,7 @@ def check_narrow_and_notify(
         key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
 
         controller.report_success(
-            [
-                f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation."
-            ],
+            f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation.",
             duration=6,
         )
 

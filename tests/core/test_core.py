@@ -370,14 +370,12 @@ class TestController:
         controller.copy_to_clipboard(text_to_copy, text_category)
 
         if expected_result == "success":
-            mock_success.assert_called_once_with(
-                [f"{text_category} copied successfully"]
-            )
+            mock_success.assert_called_once_with(f"{text_category} copied successfully")
             mock_warning.assert_not_called()
         else:
             mock_success.assert_not_called()
             mock_warning.assert_called_once_with(
-                [f"{text_category} copied, but the clipboard text does not match"]
+                f"{text_category} copied, but the clipboard text does not match"
             )
 
     def test_copy_to_clipboard_exception(
@@ -417,7 +415,7 @@ class TestController:
 
         mock_open.assert_called_once_with(url)
         mocked_report_success.assert_called_once_with(
-            [f"The link was successfully opened using {mock_get.return_value.name}"]
+            f"The link was successfully opened using {mock_get.return_value.name}"
         )
 
     def test_open_in_browser_fail__no_browser_controller(
@@ -430,7 +428,7 @@ class TestController:
 
         controller.open_in_browser("https://chat.zulip.org/#narrow/stream/test")
 
-        mocked_report_error.assert_called_once_with([f"ERROR: {error}"])
+        mocked_report_error.assert_called_once_with(f"ERROR: {error}")
 
     def test_main(self, mocker: MockerFixture, controller: Controller) -> None:
         controller.view.palette = {"default": "theme_properties"}

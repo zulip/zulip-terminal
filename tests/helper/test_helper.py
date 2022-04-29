@@ -328,7 +328,7 @@ def test_display_error_if_present(
     display_error_if_present(response, controller)
 
     if footer_updated:
-        report_error.assert_called_once_with([response["msg"]])
+        report_error.assert_called_once_with(response["msg"])
     else:
         report_error.assert_not_called()
 
@@ -431,9 +431,7 @@ def test_notify_if_message_sent_outside_narrow(
     if footer_updated:
         key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
         report_success.assert_called_once_with(
-            [
-                f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation."
-            ],
+            f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation.",
             duration=6,
         )
     else:
