@@ -37,6 +37,7 @@ from zulipterminal.helper import (
     match_emoji,
     match_stream,
     match_user,
+    user_friendly_time,
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
@@ -1162,6 +1163,10 @@ class UserInfoView(PopUpView):
             }
             return display_data
 
+        try:
+            pretty_date = user_friendly_time(data["last_active"])
+        except TypeError:
+            pretty_date = "Over two weeks ago."
         # Style the data obtained to make it displayable
         display_data = {"Name": data["full_name"]}
 
@@ -1194,7 +1199,9 @@ class UserInfoView(PopUpView):
             display_data["Role"] = ROLE_BY_ID[data["role"]]["name"]
 
             if data["last_active"]:
-                display_data["Last active"] = data["last_active"]
+                display_data[
+                    "Last active"
+                ] = f"""{data["last_active"]} \n({pretty_date})"""
 
         return display_data
 
@@ -1545,11 +1552,12 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = ", ".join(
             map(repr, keys_for_command("FULL_RAW_MESSAGE"))
         )
+        pretty_date = user_friendly_time(date_and_time)
         msg_info = [
             (
                 "",
                 [
-                    ("Date & Time", date_and_time),
+                    ("Date & Time", f"""{date_and_time} \n({pretty_date})"""),
                     ("Sender", msg["sender_full_name"]),
                     ("Sender's Email ID", msg["sender_email"]),
                     (
@@ -1573,7 +1581,10 @@ class MsgInfoView(PopUpView):
             and controller.model.initial_data["realm_allow_edit_history"]
         )
         if self.show_edit_history_label:
-            msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
+            msg_info[0][1][0] = (
+                "Date & Time (Original)",
+                f"""{date_and_time} \n({pretty_date})""",
+            )
 
             keys = ", ".join(map(repr, keys_for_command("EDIT_HISTORY")))
             msg_info[0][1].append(("Edit History", f"Press {keys} to view"))
