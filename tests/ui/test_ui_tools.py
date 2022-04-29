@@ -2736,55 +2736,71 @@ class TestMessageBox:
 
     # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
     @pytest.mark.parametrize(
-        "to_vary_in_each_message",
+        "to_vary_in_each_message, expected_text, expected_attributes",
         [
-            {
-                "reactions": [
-                    {
-                        "emoji_name": "thumbs_up",
-                        "emoji_code": "1f44d",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "thumbs_up",
+                            "emoji_code": "1f44d",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
                         },
-                        "reaction_type": "unicode_emoji",
-                    },
-                    {
-                        "emoji_name": "zulip",
-                        "emoji_code": "zulip",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
                         },
-                        "reaction_type": "zulip_extra_emoji",
-                    },
-                    {
-                        "emoji_name": "zulip",
-                        "emoji_code": "zulip",
-                        "user": {
-                            "email": "AARON@zulip.com",
-                            "full_name": "aaron",
-                            "id": 1,
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "AARON@zulip.com",
+                                "full_name": "aaron",
+                                "id": 1,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
                         },
-                        "reaction_type": "zulip_extra_emoji",
-                    },
-                    {
-                        "emoji_name": "heart",
-                        "emoji_code": "2764",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
+                        {
+                            "emoji_name": "heart",
+                            "emoji_code": "2764",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
                         },
-                        "reaction_type": "unicode_emoji",
-                    },
-                ]
-            }
+                    ],
+                },
+                " :thumbs_up: 1   :zulip: 2   :heart: 1  ",
+                [
+                    ("reaction", 15),
+                    (None, 1),
+                    ("reaction_mine", 11),
+                    (None, 1),
+                    ("reaction", 11),
+                ],
+            ),
         ],
     )
-    def test_reactions_view(self, message_fixture, to_vary_in_each_message):
+    def test_reactions_view(
+        self,
+        message_fixture,
+        to_vary_in_each_message,
+        expected_text,
+        expected_attributes,
+    ):
         self.model.user_id = 1
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, None)
@@ -2792,16 +2808,8 @@ class TestMessageBox:
 
         reactions_view = msg_box.reactions_view(reactions)
 
-        assert reactions_view.original_widget.text == (
-            " :thumbs_up: 1   :zulip: 2   :heart: 1  "
-        )
-        assert reactions_view.original_widget.attrib == [
-            ("reaction", 15),
-            (None, 1),
-            ("reaction_mine", 11),
-            (None, 1),
-            ("reaction", 11),
-        ]
+        assert reactions_view.original_widget.text == expected_text
+        assert reactions_view.original_widget.attrib == expected_attributes
 
     @pytest.mark.parametrize(
         "message_links, expected_text, expected_attrib, expected_footlinks_width",
