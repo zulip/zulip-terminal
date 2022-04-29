@@ -2,6 +2,7 @@ import os
 import time
 from collections import OrderedDict, defaultdict
 from contextlib import contextmanager
+from datetime import datetime
 from functools import wraps
 from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
@@ -721,3 +722,53 @@ def suppress_output() -> Iterator[None]:
     finally:
         os.dup2(stdout, 1)
         os.dup2(stderr, 2)
+
+
+def user_friendly_time(time_stamp: str) -> str:  # message_info has a different format
+
+    now = datetime.now()
+    if len(time_stamp) > 22: # for message_info, year is included
+        datetime_object = datetime.strptime(
+            time_stamp, "%a %b %d %Y %I:%M:%S %p"
+        )  # Fri Apr 29 2022 05:15:12 AM is an example
+    else: # for user_info, year not included
+        datetime_object = datetime.strptime(
+            time_stamp + str(now.year), "%a %b %d %I:%M:%S %p%Y"
+        )  # Fri Apr 29 05:15:12 AM is an example
+
+    time_spent = now - datetime_object
+
+    seconds = time_spent.seconds
+    days = time_spent.days
+
+    if days < 0 or seconds < -30:
+        return ""
+
+    if days == 0:
+        if seconds < 10:
+            return "Just now"
+        if seconds < 60:
+            return str(seconds) + " seconds ago"
+        if seconds < 120:
+            return "A minute ago"
+        if seconds < 3600:
+            return str(seconds // 60) + " minutes ago"
+        if seconds < 7200:
+            return "An hour ago"
+        if seconds < 86400:  # 24 hours
+            return str(seconds // 3600) + " hours ago"
+
+    time_string = ""
+
+    if days == 1:
+        time_string = "Yesterday, "
+    if days < 7:
+        return str(days) + " days ago"
+    if days < 14:
+        return "A week ago"
+    if days < 31:
+        return str(days // 7) + " weeks ago"
+    if now.year == datetime_object.year:
+        return str(now.month - datetime_object.month) + " months ago"
+    else:
+        return str(days // 365) + " years ago"
