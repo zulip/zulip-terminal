@@ -2564,9 +2564,11 @@ class TestMessageBox:
             write_box.msg_write_box.set_edit_text.assert_not_called()
         if expect_footer_text[message_type]:
             if expect_editing_to_succeed[message_type]:
-                report_warning.assert_called_once_with(expect_footer_text[message_type])
+                report_warning.assert_called_once_with(
+                    [expect_footer_text[message_type]]
+                )
             else:
-                report_error.assert_called_once_with(expect_footer_text[message_type])
+                report_error.assert_called_once_with([expect_footer_text[message_type]])
 
     @pytest.mark.parametrize(
         "raw_html, expected_content",
@@ -2791,14 +2793,14 @@ class TestMessageBox:
         reactions_view = msg_box.reactions_view(reactions)
 
         assert reactions_view.original_widget.text == (
-            ":heart: 1 :thumbs_up: 1 :zulip: 2 "
+            " :heart: 1   :thumbs_up: 1   :zulip: 2  "
         )
         assert reactions_view.original_widget.attrib == [
-            ("reaction", 9),
+            ("reaction", 11),
             (None, 1),
-            ("reaction", 13),
+            ("reaction", 15),
             (None, 1),
-            ("reaction_mine", 9),
+            ("reaction_mine", 11),
         ]
 
     @pytest.mark.parametrize(
