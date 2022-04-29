@@ -1119,17 +1119,13 @@ class MessageBox(urwid.Pile):
                     user_id = int(reaction["user"]["user_id"])
                 reaction_stats[reaction["emoji_name"]].append(user_id)
 
-            sorted_stats = sorted(
-                (reaction, count) for reaction, count in reaction_stats.items()
-            )
-
             my_user_id = self.model.user_id
             reaction_texts = [
                 (
                     "reaction_mine" if my_user_id in ids else "reaction",
                     f" :{reaction}: {len(ids)} ",
                 )
-                for reaction, ids in sorted_stats
+                for reaction, ids in reaction_stats.items()
             ]
 
             spaced_reaction_texts = [
