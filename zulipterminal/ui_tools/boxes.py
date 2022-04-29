@@ -1112,12 +1112,12 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ""
         try:
-            reaction_stats = defaultdict(set)
+            reaction_stats = defaultdict(list)
             for reaction in reactions:
                 user_id = int(reaction["user"].get("id", -1))
                 if user_id == -1:
                     user_id = int(reaction["user"]["user_id"])
-                reaction_stats[reaction["emoji_name"]].add(user_id)
+                reaction_stats[reaction["emoji_name"]].append(user_id)
 
             sorted_stats = sorted(
                 (reaction, count) for reaction, count in reaction_stats.items()
