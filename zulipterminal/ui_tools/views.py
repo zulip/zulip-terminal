@@ -37,6 +37,7 @@ from zulipterminal.helper import (
     match_emoji,
     match_stream,
     match_user,
+    user_friendly_time,
 )
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
@@ -1194,7 +1195,9 @@ class UserInfoView(PopUpView):
             display_data["Role"] = ROLE_BY_ID[data["role"]]["name"]
 
             if data["last_active"]:
-                display_data["Last active"] = data["last_active"]
+                display_data[
+                    "Last active"
+                ] = f"""{data["last_active"]} \n({user_friendly_time(data["last_active"])})"""
 
         return display_data
 
@@ -1518,6 +1521,7 @@ class MsgInfoView(PopUpView):
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
         )
+        pretty_date = user_friendly_time(date_and_time)
         view_in_browser_keys = ", ".join(map(repr, keys_for_command("VIEW_IN_BROWSER")))
 
         full_rendered_message_keys = ", ".join(
@@ -1530,7 +1534,7 @@ class MsgInfoView(PopUpView):
             (
                 "",
                 [
-                    ("Date & Time", date_and_time),
+                    ("Date & Time", f"""{date_and_time} \n({pretty_date})"""),
                     ("Sender", msg["sender_full_name"]),
                     ("Sender's Email ID", msg["sender_email"]),
                     (
