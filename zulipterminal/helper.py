@@ -732,9 +732,14 @@ def user_friendly_time(time_stamp: str) -> str:  # message_info has a different 
             time_stamp, "%a %b %d %Y %I:%M:%S %p"
         )  # Fri Apr 29 2022 05:15:12 AM is an example
     else: # for user_info, year not included
-        datetime_object = datetime.strptime(
-            time_stamp + str(now.year), "%a %b %d %I:%M:%S %p%Y"
-        )  # Fri Apr 29 05:15:12 AM is an example
+        if time_stamp[-1] == "M": # AM or PM
+            datetime_object = datetime.strptime(
+                time_stamp + str(now.year), "%a %b %d %I:%M:%S %p%Y"
+            )  # Fri Apr 29 05:15:12 AM is an example
+        else:
+            datetime_object = datetime.strptime(
+                time_stamp + str(now.year), "%a %b %d %H:%M:%S%Y"
+            )  # Fri Apr 29 15:15:12 is an example
 
     time_spent = now - datetime_object
 
