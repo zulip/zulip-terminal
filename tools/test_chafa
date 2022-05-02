@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+
+import re
+from typing import Any, Iterable, List, Optional, Tuple
+from time import sleep
+
+import urwid
+
+# https://stackoverflow.com/a/38662876
+ansi_escape = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+
+# MIT License
+# Copyright (c) 2021 Kim Philipp Jablonski
+# https://github.com/kpj/pdftty/blob/master/pdftty/ansi_widget.py
+class ANSICanvas(urwid.canvas.Canvas):
+    def __init__(self, size: Tuple[int, int], text_lines: List[str]) -> None:
+        super().__init__()
+
+        self.maxcols, self.maxrows = size
+
+        self.text_lines = text_lines
+
+    def cols(self) -> int:
+        return self.maxcols
+
+    def rows(self) -> int:
+        return self.maxrows
+
+    def wrap_ansi_line(self, line, cols):
+        """
+        Pad line, if there are more columns than needed.
+        Clip line, if there are less columns than needed.
+        """
+        text_cols = 0
+        clipped_line_list = []
+
+        texts = ansi_escape.split(line)
+        codes = [""] + ansi_escape.findall(line)
+
+        for code, text in zip(codes, texts):
+            remaining_cols = cols - text_cols
+            text = text[:remaining_cols]
+            clipped_line_list.extend([code, text])
+            text_cols += len(text)
+
+        clipped_line = "".join(clipped_line_list)
+        padding = " " * max(0, cols - text_cols)
+
+        return clipped_line + padding
+
+    def content(
+        self,
+        trim_left: int = 0,
+        trim_top: int = 0,
+        cols: Optional[int] = None,
+        rows: Optional[int] = None,
+        attr_map: Optional[Any] = None,
+    ) -> Iterable[List[Tuple[None, str, bytes]]]:
+        assert cols is not None
+        assert rows is not None
+
+        for i in range(rows):
+            line = self.text_lines[i] if i < len(self.text_lines) else ""
+            wrapped_line = self.wrap_ansi_line(line, cols)
+            yield [(None, "U", wrapped_line.encode())]
+
+
+class ANSIWidget(urwid.Widget):
+    _sizing = frozenset([urwid.widget.BOX])
+
+    def __init__(self, text: str = "") -> None:
+        self.lines = text.splitlines()
+
+    def set_content(self, lines: List[str]) -> None:
+        self.lines = lines
+        self._invalidate()
+
+    def render(self, size: Tuple[int, int], focus: bool = False) -> urwid.canvas.Canvas:
+        return ANSICanvas(size, self.lines)
+
+
+def exit_on_q(key):
+    if key in ("q", "Q"):
+        raise urwid.ExitMainLoop()
+
+
+files = [
+    ("happycat_size100_24color_allsymbols.txt", 100),
+    ("happycat_size20_24color_allsymbols.txt", 20),
+    ("happycat_size100_24color_blocksymbols.txt", 100),
+    ("happycat_size400_24color_blocksymbols.txt", 400),
+    ("happycat_size100_256_blocksymbols.txt", 100),
+    ("happycat_size100_16color_blocksymbols.txt", 100),
+    ("happycat_size400_16color_blocksymbols.txt", 400),
+    ("happycat_size100_2color_blocksymbols.txt", 100),
+    ("zt_user_search_box_size200_blocksymbols.txt", 400),
+]
+
+for img_file, size in files:
+    with open(img_file, "r") as file:
+        lines = file.readlines()
+        img = "".join(lines)
+        img_widget = ANSIWidget(img)
+
+    loop = urwid.MainLoop(
+        urwid.LineBox(
+            urwid.Filler(
+                urwid.Padding(
+                    img_widget,
+                    align="center",
+                    width=size,
+                ),
+                valign="middle",
+                height=int(size / 2),
+            ),
+            title=f"IMAGE TEST {img_file}",
+        ),
+        unhandled_input=exit_on_q,
+    )
+    loop.run()
