@@ -1112,18 +1112,31 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ""
         try:
+            MAXIMUM_USERNAMES_VISIBLE = 3
+            my_user_id = self.model.user_id
             reaction_stats = defaultdict(list)
             for reaction in reactions:
                 user_id = int(reaction["user"].get("id", -1))
                 if user_id == -1:
                     user_id = int(reaction["user"]["user_id"])
-                reaction_stats[reaction["emoji_name"]].append(user_id)
+                user_name = reaction["user"]["full_name"]
+                if user_id == my_user_id:
+                    user_name = "You"
+                reaction_stats[reaction["emoji_name"]].append((user_id, user_name))
 
-            my_user_id = self.model.user_id
+            for reaction, ids in reaction_stats.items():
+                if (my_user_id, "You") in ids:
+                    ids.remove((my_user_id, "You"))
+                    ids.append((my_user_id, "You"))
+
             reaction_texts = [
                 (
-                    "reaction_mine" if my_user_id in ids else "reaction",
-                    f" :{reaction}: {len(ids)} ",
+                    "reaction_mine"
+                    if my_user_id in [id[0] for id in ids]
+                    else "reaction",
+                    f" :{reaction}: {len(ids)} "
+                    if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
+                    else f" :{reaction}: {', '.join([id[1] for id in ids])} ",
                 )
                 for reaction, ids in reaction_stats.items()
             ]
