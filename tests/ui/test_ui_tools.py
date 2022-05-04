@@ -2792,6 +2792,162 @@ class TestMessageBox:
                     ("reaction", 11),
                 ],
             ),
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "thumbs_up",
+                            "emoji_code": "1f44d",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "AARON@zulip.com",
+                                "full_name": "aaron",
+                                "id": 1,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
+                        },
+                        {
+                            "emoji_name": "heart",
+                            "emoji_code": "2764",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                    ],
+                },
+                " :thumbs_up: Iago   :zulip: You   :heart: Iago  ",
+                [
+                    ("reaction", 18),
+                    (None, 1),
+                    ("reaction_mine", 13),
+                    (None, 1),
+                    ("reaction", 14),
+                ],
+            ),
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "AARON@zulip.com",
+                                "full_name": "aaron",
+                                "id": 1,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "shivam@zulip.com",
+                                "full_name": "Shivam",
+                                "id": 6,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                    ],
+                },
+                " :zulip: Iago, Shivam, You  ",
+                [
+                    ("reaction_mine", 27),
+                ],
+            ),
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "heart",
+                            "emoji_code": "2764",
+                            "user": {
+                                "email": "iago@zulip.com",
+                                "full_name": "Iago",
+                                "id": 5,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "AARON@zulip.com",
+                                "full_name": "aaron",
+                                "id": 1,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "shivam@zulip.com",
+                                "full_name": "Shivam",
+                                "id": 6,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                    ],
+                },
+                " :heart: Iago   :zulip: Shivam, You  ",
+                [
+                    ("reaction", 14),
+                    (None, 1),
+                    ("reaction_mine", 21),
+                ],
+            ),
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "AARON@zulip.com",
+                                "full_name": "aaron",
+                                "id": 1,
+                            },
+                            "reaction_type": "zulip_extra_emoji",
+                        },
+                        {
+                            "emoji_name": "zulip",
+                            "emoji_code": "zulip",
+                            "user": {
+                                "email": "shivam@zulip.com",
+                                "full_name": "Shivam",
+                                "id": 6,
+                            },
+                            "reaction_type": "unicode_emoji",
+                        },
+                    ],
+                },
+                " :zulip: Shivam, You  ",
+                [
+                    ("reaction_mine", 21),
+                ],
+            ),
         ],
     )
     def test_reactions_view(
