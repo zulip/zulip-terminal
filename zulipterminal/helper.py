@@ -648,11 +648,7 @@ def check_narrow_and_notify(
 ) -> None:
     current_narrow = controller.model.narrow
 
-    if (
-        current_narrow != []
-        and current_narrow != outer_narrow
-        and current_narrow != inner_narrow
-    ):
+    if current_narrow != inner_narrow:
         key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
 
         controller.report_success(
@@ -666,7 +662,6 @@ def check_narrow_and_notify(
 def notify_if_message_sent_outside_narrow(
     message: Composition, controller: Any
 ) -> None:
-    current_narrow = controller.model.narrow
 
     if message["type"] == "stream":
         stream_narrow = [["stream", message["to"]]]
