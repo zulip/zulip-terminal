@@ -17,6 +17,7 @@ from zulipterminal.cli.run import (
     parse_args,
 )
 from zulipterminal.model import ServerConnectionFailure
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.version import ZT_VERSION
 
 
@@ -132,6 +133,7 @@ def test_valid_zuliprc_but_no_connection(
 
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        "Detected Platform: " + PLATFORM,
         "Loading with:",
         "   theme 'zt_dark' specified with no config.",
         "   autohide setting 'no_autohide' specified with no config.",
@@ -182,6 +184,7 @@ def test_warning_regarding_incomplete_theme(
 
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        "Detected Platform: " + PLATFORM,
         "Loading with:",
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
@@ -395,6 +398,7 @@ def test_successful_main_function_with_config(
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        f"Detected Platform: {PLATFORM}",
         "Loading with:",
         "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
         "   autohide setting 'autohide' specified in zuliprc file.",
