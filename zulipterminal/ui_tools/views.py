@@ -38,6 +38,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1113,7 +1114,13 @@ class AboutView(PopUpView):
             else []
         )
         contents = [
-            ("Application", [("Zulip Terminal", zt_version)]),
+            (
+                "Application",
+                [
+                    ("Zulip Terminal", zt_version),
+                    ("Platform detected", PLATFORM if PLATFORM else "Invalid platform"),
+                ],
+            ),
             ("Server", [("Version", server_version)] + self.feature_level_content),
             (
                 "Application Configuration",
