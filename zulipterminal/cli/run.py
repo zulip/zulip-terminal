@@ -20,6 +20,7 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
+from zulipterminal.platform_code import PLATFORM
 from zulipterminal.version import ZT_VERSION
 
 
@@ -439,6 +440,10 @@ def main(options: Optional[List[str]] = None) -> None:
         if args.notify:
             zterm["notify"] = (args.notify, "on command line")
 
+        if PLATFORM:
+            print("Detected Platform: " + PLATFORM)
+        else:
+            print("Running on undetected platform.")
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
