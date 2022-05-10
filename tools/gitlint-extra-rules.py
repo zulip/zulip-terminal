@@ -12,6 +12,7 @@ class EndsWithDot(CommitRule):
         error = "Title does not end with a '.' character"
         if not commit.message.title.endswith("."):
             return [RuleViolation(self.id, error, line_nr=1)]
+        return None
 
 
 class AreaFormatting(CommitRule):
