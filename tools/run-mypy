@@ -21,6 +21,8 @@ EXCLUDE_FILES = [
     "tests/ui/test_ui_tools.py",
 ]
 
+python_project_folders = ["zulipterminal", "tests", "tools"]
+
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
 
@@ -125,13 +127,13 @@ python_files = [
 ]
 
 repo_python_files: Dict[str, List[str]] = {
-    folder: [] for folder in ["zulipterminal", "tests", "tools"]
+    folder: [] for folder in python_project_folders
 }
 
 for file_path in python_files:
     repo = PurePath(file_path).parts[0]
     filename = PurePath(file_path).parts[-1]
-    if repo == "zulipterminal" or repo == "tools" or repo == "tests":
+    if repo in repo_python_files:
         repo_python_files[repo].append(file_path)
 
 mypy_command = "mypy"
