@@ -15,6 +15,7 @@ EXCLUDE_FILES = [
     "tools/fetch-pull-request",
     "tools/fetch-rebase-pull-request",
     "tools/check-branch",
+    "tools/lister.py",  # Came from zulip/zulip, now in zulint?
 ]
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -120,9 +121,9 @@ python_files = [
     if not fpath.endswith(".py") or fpath + "i" not in pyi_files
 ]
 
-repo_python_files = {}
-repo_python_files["zulipterminal"] = []
-repo_python_files["tests"] = []
+repo_python_files: Dict[str, List[str]] = {
+    folder: [] for folder in ["zulipterminal", "tests", "tools"]
+}
 
 # Added incrementally as newer test files are type-annotated.
 type_consistent_testfiles = [
@@ -146,8 +147,10 @@ type_consistent_testfiles = [
 for file_path in python_files:
     repo = PurePath(file_path).parts[0]
     filename = PurePath(file_path).parts[-1]
-    if repo == "zulipterminal" or (
-        repo == "tests" and filename in type_consistent_testfiles
+    if (
+        repo == "zulipterminal"
+        or repo == "tools"
+        or (repo == "tests" and filename in type_consistent_testfiles)
     ):
         repo_python_files[repo].append(file_path)
 
