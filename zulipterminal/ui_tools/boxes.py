@@ -108,6 +108,9 @@ class WriteBox(urwid.Pile):
         self.idle_status_tracking: bool
         self.sent_start_typing_status: bool
 
+        # To display narrow to conversation message.
+        self.check_stream_topic_edit_txt_flag: bool = True
+
         self._set_compose_attributes_to_defaults()
 
         # Constant indices into self.contents
@@ -257,6 +260,8 @@ class WriteBox(urwid.Pile):
         start_period_delta = timedelta(seconds=TYPING_STARTED_WAIT_PERIOD)
         stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
 
+        self.check_stream_topic_edit_txt(self.check_stream_topic_edit_txt_flag)
+
         def on_type_send_status(edit: object, new_edit_text: str) -> None:
             if new_edit_text and self.typing_recipient_user_ids:
                 self.last_key_update = datetime.now()
@@ -403,12 +408,51 @@ class WriteBox(urwid.Pile):
         )
         self.stream_write_box.set_completer_delims("")
         self._setup_common_stream_compose(stream_id, caption, title)
-
         # Use and set a callback to set the stream marker
         self._set_stream_write_box_style(None, caption)
         urwid.connect_signal(
             self.stream_write_box, "change", self._set_stream_write_box_style
         )
+        self.check_stream_topic_edit_txt(self.check_stream_topic_edit_txt_flag)
+
+    @asynch
+    def check_stream_topic_edit_txt(
+        self, check_stream_topic_edit_txt_flag: bool
+    ) -> None:
+        narrow_key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
+        narrow_markup = [
+            ("footer", "Help(?): "),
+            ("footer_contrast", f" {narrow_key} "),
+            ("footer", " Narrow to conversation."),
+        ]
+        send_key = primary_key_for_command("SEND_MESSAGE")
+        send_markup = [
+            ("footer", "Help(?): "),
+            ("footer_contrast", f" {send_key} "),
+            ("footer", " Send a message."),
+        ]
+        while check_stream_topic_edit_txt_flag:
+            if self.compose_box_status == "open_with_stream":
+                if (
+                    self.stream_write_box.edit_pos != 0
+                    and self.title_write_box.edit_pos != 0
+                ):
+                    self.model.controller.view.set_footer_text(narrow_markup)
+                if (
+                    self.stream_write_box.edit_pos == 0
+                    or self.title_write_box.edit_pos == 0
+                ):
+                    self.model.controller.view.set_footer_text(send_markup)
+            elif self.compose_box_status == "open_with_private":
+                if self.to_write_box is not None:
+                    if self.to_write_box.edit_pos != 0:
+                        self.model.controller.view.set_footer_text(narrow_markup)
+                if self.to_write_box is not None:
+                    if self.to_write_box.edit_pos == 0:
+                        self.model.controller.view.set_footer_text(send_markup)
+            else:
+                check_stream_topic_edit_txt_flag = False
+                self.model.controller.view.set_footer_text()
 
     def stream_box_edit_view(
         self, stream_id: int, caption: str = "", title: str = ""

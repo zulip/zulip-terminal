@@ -59,6 +59,7 @@ class TestWriteBox:
             [{"name": stream["name"]} for stream in streams_fixture],
             key=lambda stream: stream["name"].lower(),
         )
+        write_box.check_stream_topic_edit_txt_flag = False
 
         return write_box
 
@@ -76,6 +77,7 @@ class TestWriteBox:
         assert isinstance(write_box.last_key_update, datetime.datetime)
         assert write_box.idle_status_tracking is False
         assert write_box.sent_start_typing_status is False
+        assert write_box.check_stream_topic_edit_txt_flag is False
 
     def test_not_calling_typing_method_without_recipients(
         self, mocker: MockerFixture, write_box: WriteBox
