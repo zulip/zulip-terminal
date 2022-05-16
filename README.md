@@ -29,6 +29,17 @@ Learn how to use Zulip Terminal with our [Tutorial](https://github.com/zulip/zul
 
 We consider the client to already provide a fairly stable moderately-featureful everyday-user experience.
 
+The terminal client currently has a number of intentional differences to the Zulip web client:
+- Additional and occasionally *different* [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md) to better support keyboard-only navigation; other than directional movement these also include:
+  - <kbd>z</kbd> - zoom in/out, between streams & topics, or all private messages & specific conversations
+  - <kbd>t</kbd> - toggle view of topics for a stream in left panel (**later adopted for recent topics in web client**)
+  - <kbd>#</kbd> - narrow to messages in which you're mentioned (<kbd>@</kbd> is already used)
+  - <kbd>f</kbd> - narrow to messages you've starred (are **f**ollowing)
+- Not marking additional messages read when the end of a conversation is visible ([FAQ entry](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#when-are-messages-marked-as-having-been-read))
+- Emoji and reactions are rendered as text only, for maximum terminal/font compatibility
+- Footlinks - footnotes for links (URLs) - make messages readable, while retaining a list of links to cross-reference
+- Content previewable in the web client, such as images, are also stored as footlinks
+
 The current development focus is on improving aspects of everyday usage which are more commonly used - to reduce the need for users to temporarily switch to another client for a particular feature.
 
 Current limitations which we expect to only resolve over the long term include support for:
