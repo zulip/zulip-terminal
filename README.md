@@ -10,7 +10,7 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-![Screenshot](https://user-images.githubusercontent.com/9568999/106061037-b659a580-60a9-11eb-8ff8-ea1c54ac9084.png)
+![Screenshot](https://user-images.githubusercontent.com/9568999/169362381-3c2b19e2-2176-4ad0-bd41-604946432512.png)
 
 ## About
 
