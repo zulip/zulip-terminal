@@ -58,7 +58,7 @@ our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up o
 
 ### Supported Server Versions
 
-The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#id7). It may still work with earlier versions.
+The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#zulip-2-1-x-series). It may still work with earlier versions.
 
 ### Supported Python Versions
 
