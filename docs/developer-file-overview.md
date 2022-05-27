@@ -4,7 +4,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 
 | Folder                 | File                | Description                                                                                            |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| zulipterminal/         | api_types.py        | Preliminary Zulip API types defined in python, to allow type checking                                  |
+| zulipterminal          | api_types.py        | Preliminary Zulip API types defined in python, to allow type checking                                  |
 |                        | core.py             | Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application           |
 |                        | helper.py           | Helper functions used in multiple places                                                               |
 |                        | model.py            | Defines the `Model`, fetching and storing data retrieved from the Zulip server                         |

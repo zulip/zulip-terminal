@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+
+import argparse
+import glob
+import importlib
+import sys
+from pathlib import Path
+from typing import Dict, List
+
+
+TABLE_OFFSET = 7
+COLUMN_WIDTHS = (23, 20, 103)
+SPACEBAR = " "
+
+# leaving blank rows after exhausting files from each folder
+BLANK_ROW = f"| {SPACEBAR:{COLUMN_WIDTHS[0]}}| {SPACEBAR:{COLUMN_WIDTHS[1]}}| {SPACEBAR:{COLUMN_WIDTHS[2]}}|\n"
+
+# absolute path to zulip-terminal
+ROOT_DIRECTORY = Path(__file__).resolve().parent.parent
+
+# absolute path to zulip-terminal/zulipterminal to be passed as parameter
+ZULIPTERMINAL = ROOT_DIRECTORY / "zulipterminal"
+
+# new doc file has been created for the time being to compare it with the original
+DEVELOPER_DOC_NAME = "developer-file-overview.md"
+DEVELOPER_DOC_PATH = ROOT_DIRECTORY / "docs" / DEVELOPER_DOC_NAME
+
+# Documentation for these folders is incomplete or excluded, so is specified here instead
+DESC_FOR_NO_FILE_FOLDERS = {
+    "zulipterminal/themes": "Themes bundled with the application",
+    "zulipterminal/scripts": "Scripts bundled with the application",
+}
+
+# Top-level folder names to exclude, unrelated to the source
+FOLDERS_TO_EXCLUDE = ["__pycache__"]
+
+
+def main() -> None:
+    create_file_overview_doc()
+    print(f"Generated {DEVELOPER_DOC_NAME} successfully.")
+
+
+def create_file_overview_doc() -> None:
+    """
+    Recreates the document by retaining the lines 1 to TABLE_OFFSET,
+    and the rest is written using the docstrings in the files
+    """
+    folder_file_docstring = generate_folder_file_docstrings_dict()
+
+    table_markdown = []
+    for folder in folder_file_docstring:
+        dictionary_of_files = folder_file_docstring[folder]
+
+        folder_text = folder
+        for file in sorted(dictionary_of_files):
+            new_row = f"| {folder_text:{COLUMN_WIDTHS[0]}}| {file:{COLUMN_WIDTHS[1]}}| {folder_file_docstring[folder][file]:{COLUMN_WIDTHS[2]}}|\n"
+            table_markdown.append(new_row)
+            folder_text = " "
+
+        # adding blank row at the end of every folder
+        table_markdown.append(BLANK_ROW)
+
+    # Folders that do not contain any files with docstrings are added separately to the file-overview
+    for folder_name in sorted(DESC_FOR_NO_FILE_FOLDERS):
+        new_row = f"| {folder_name:{COLUMN_WIDTHS[0]}}| {SPACEBAR:{COLUMN_WIDTHS[1]}}| {DESC_FOR_NO_FILE_FOLDERS[folder_name]:{COLUMN_WIDTHS[2]}}|\n"
+        table_markdown.extend([new_row, BLANK_ROW])
+
+    with open(DEVELOPER_DOC_PATH, "r") as dev_file:
+        doc_data = dev_file.readlines()
+
+    doc_data[TABLE_OFFSET - 1 :] = table_markdown[:-1]
+    updated_data = "".join(doc_data)
+
+    with open(DEVELOPER_DOC_PATH, "w") as dev_file:
+        dev_file.write(updated_data)
+
+
+def generate_folder_file_docstrings_dict() -> Dict[str, Dict[str, str]]:
+    """
+    Returns a dictionary containing folder name which in turn
+    is a dictionary containing files and their respective descriptions
+    """
+    total_files = extract_folder_file_structure()
+
+    folder_file_docstring: Dict[str, Dict[str, str]] = {}
+    for folder, files in sorted(total_files.items()):
+        folder_file_docstring[str(folder)] = {}
+        for file in files:
+            imported_file = importlib.import_module(
+                f'{folder.replace("/",".")}.{file[:-3]}'
+            )
+            extracted_docstring = str(imported_file.__doc__)
+            docstring = extracted_docstring.strip().replace("\n", " ")
+            if len(docstring) > COLUMN_WIDTHS[2]:
+                print(
+                    f"ERROR: {file} has docstring longer than maximum {COLUMN_WIDTHS[2]}"
+                )
+                sys.exit(1)
+            folder_file_docstring[str(folder)][file] = docstring
+    return folder_file_docstring
+
+
+def extract_folder_file_structure() -> Dict[str, List[str]]:
+    """
+    Returns dictionary containing folders and respective python files within them
+    """
+    folders_and_files = {}
+    for path_to_folder in glob.glob(f"{ZULIPTERMINAL}/**/", recursive=True):
+        complete_directory_path = Path(path_to_folder)
+        if complete_directory_path.name in FOLDERS_TO_EXCLUDE:
+            continue
+        relative_directory_path = complete_directory_path.relative_to(ROOT_DIRECTORY)
+        if str(relative_directory_path) not in DESC_FOR_NO_FILE_FOLDERS:
+            files_in_directory = [
+                file.name
+                for file in complete_directory_path.glob("*.py")
+                if file.name != "__init__.py"
+            ]
+            folders_and_files[str(relative_directory_path)] = files_in_directory
+    return folders_and_files
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description=f"Regenerate the {DEVELOPER_DOC_NAME} file according to the docstrings"
+    )
+    args = parser.parse_args()
+    main()
