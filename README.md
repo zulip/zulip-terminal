@@ -225,16 +225,26 @@ You can of course browse the source on GitHub & in the source tree you download,
 
 Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
 
+### Getting Zulip Terminal code and connecting it to upstream
+
+First, fork the `zulip/zulip-terminal` repository ([see how](https://docs.github.com/en/get-started/quickstart/fork-a-repo)) and then clone your forked repository locally (the following will place the repository in the current directory):
+```
+$ git clone --config pull.rebase git@github.com:YOUR_USERNAME/zulip-terminal.git
+```
+
+Next, enter the repository directory with `cd zulip-terminal` and configure an upstream remote repository for your cloned fork of Zulip Terminal:
+```
+$ git remote add -f upstream https://github.com/zulip/zulip-terminal.git
+```
+
+For detailed explanation on the commands used for cloning and setting upstream, refer to the [Get Zulip Code](https://zulip.readthedocs.io/en/latest/git/cloning.html) section of Zulip's Documentation -> Git guide.
+
 ### Setting up a development environment
 
 Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
 
 Note that the tools used in each case are typically the same, but are called in different ways.
 
-With any option, you first need to clone the zulip/zulip-terminal repository locally (the following will place the repository in the current directory):
-```
-$ git clone git@github.com:zulip/zulip-terminal.git
-```
 The following commands should be run in the repository directory, which can be achieved with `cd zulip-terminal`.
 
 #### Pipenv
