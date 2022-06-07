@@ -83,6 +83,23 @@ jobs:
       - name: Check code & tests meet black standards
         run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
+  hotkeys:
+    runs-on: ubuntu-latest
+    name: Lint - Hotkeys linting & docs sync check
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.6
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
+      - name: Minimal install
+        run: pip install .
+      - name: Run generate_hotkeys
+        run: ./tools/generate_hotkeys.py --check-only
+
   pytest:
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
