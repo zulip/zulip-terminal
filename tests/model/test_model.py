@@ -808,6 +808,263 @@ class TestModel:
             )
 
     @pytest.mark.parametrize(
+        "user_role, stream_properties",
+        [
+            case(
+                {"is_admin": True},
+                {"is_announcement_only": True},
+                id="is_admin:announcement_only:Zulip2.1",
+            ),
+            case(
+                {"is_admin": True},
+                {"is_announcement_only": False},
+                id="is_admin:not_announcement_only:Zulip2.1",
+            ),
+            case(
+                {"is_admin": False},
+                {"is_announcement_only": False},
+                id="is_not_admin:not_announcement_only:Zulip2.1",
+            ),
+            case(
+                {"is_owner": True, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_owner:anyone_can_post:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": True, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": True, "stream_post_policy": 2},
+                id="is_owner:admins_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": True, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_owner:members_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": True, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                id="is_owner:moderators_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_admin:anyone_can_post:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": True, "stream_post_policy": 2},
+                id="is_admin:admins_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_admin:members_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": True, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                id="is_admin:moderators_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_member:anyone_can_post:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_member:members_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": True},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_guest:anyone_can_post:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_admin": True, "is_owner": True, "is_guest": False, "role": 100},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_owner:anyone_can_post:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": True, "is_guest": False, "role": 100},
+                {"is_announcement_only": True, "stream_post_policy": 2},
+                id="is_owner:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": True, "is_guest": False, "role": 100},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_owner:members_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": True, "is_guest": False, "role": 100},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                id="is_owner:moderators_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": False, "is_guest": False, "role": 200},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_admin:anyone_can_post:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": False, "is_guest": False, "role": 200},
+                {"is_announcement_only": True, "stream_post_policy": 2},
+                id="is_admin:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": False, "is_guest": False, "role": 200},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_admin:members_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": True, "is_owner": False, "is_guest": False, "role": 200},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                id="is_admin:moderators_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 300},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_moderator:anyone_can_post:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 300},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_moderator:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 300},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                id="is_moderator:moderators_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 400},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_member:anyone_can_post:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 400},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                id="is_member:members_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": True, "role": 600},
+                {"is_announcement_only": False, "stream_post_policy": 1},
+                id="is_guest:anyone_can_post:Zulip4.0+:ZFL59",
+            ),
+        ],
+    )
+    def test_is_unauthorised_to_post_in_stream_can_post(
+        self,
+        model,
+        user_dict,
+        stream_dict,
+        _all_users_by_id,
+        user_role,
+        stream_properties,
+    ):
+        _all_users_by_id[11].update(user_role)
+        model._all_users_by_id = _all_users_by_id
+        model.user_dict = user_dict
+        stream_dict[99].update(stream_properties)
+        model.user_id = 11
+        assert model.is_unauthorised_to_post_in_stream(stream_id=99) is None
+
+    @pytest.mark.parametrize(
+        "user_role, stream_properties, expected_response",
+        [
+            case(
+                {"is_admin": False},
+                {"is_announcement_only": True},
+                "Only organization administrators can send to this stream",
+                id="is_not_admin:announcement_only:Zulip2.1",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 2},
+                "Only organization administrators can send to this stream",
+                id="is_member:admins_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": False},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                "Only organization administrators and moderators can send to this stream",
+                id="is_member:moderators_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": True},
+                {"is_announcement_only": False, "stream_post_policy": 2},
+                "Only organization administrators can send to this stream",
+                id="is_guest:admins_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": True},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                "Only organization administrators, moderators and full members can send to this stream",
+                id="is_guest:members_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_owner": False, "is_admin": False, "is_guest": True},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                "Only organization administrators and moderators can send to this stream",
+                id="is_guest:moderators_only:Zulip3.0+:ZFL8",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 300},
+                {"is_announcement_only": False, "stream_post_policy": 2},
+                "Only organization administrators can send to this stream",
+                id="is_moderator:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 400},
+                {"is_announcement_only": False, "stream_post_policy": 2},
+                "Only organization administrators can send to this stream",
+                id="is_member:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": False, "role": 400},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                "Only organization administrators and moderators can send to this stream",
+                id="is_member:moderators_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": True, "role": 600},
+                {"is_announcement_only": False, "stream_post_policy": 2},
+                "Only organization administrators can send to this stream",
+                id="is_guest:admins_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": True, "role": 600},
+                {"is_announcement_only": False, "stream_post_policy": 3},
+                "Only organization administrators, moderators and full members can send to this stream",
+                id="is_guest:members_only:Zulip4.0+:ZFL59",
+            ),
+            case(
+                {"is_admin": False, "is_owner": False, "is_guest": True, "role": 600},
+                {"is_announcement_only": False, "stream_post_policy": 4},
+                "Only organization administrators and moderators can send to this stream",
+                id="is_guest:moderators_only:Zulip4.0+:ZFL59",
+            ),
+        ],
+    )
+    def test_is_unauthorised_to_post_in_stream_cannot_post(
+        self,
+        model,
+        user_dict,
+        stream_dict,
+        _all_users_by_id,
+        user_role,
+        stream_properties,
+        expected_response,
+    ):
+        _all_users_by_id[11].update(user_role)
+        model._all_users_by_id = _all_users_by_id
+        model.user_dict = user_dict
+        stream_dict[99].update(stream_properties)
+        model.user_id = 11
+        assert (
+            model.is_unauthorised_to_post_in_stream(stream_id=99) == expected_response
+        )
+
+    @pytest.mark.parametrize(
         "response, return_value",
         [
             ({"result": "success"}, True),
