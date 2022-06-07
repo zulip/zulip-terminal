@@ -19,6 +19,10 @@ tools = {
     "Type consistency (mypy)": "./tools/run-mypy",
     "PEP8 & more (flake8)": ["flake8"] + python_sources,
     "Formatting (black)": ["black", "--check"] + python_sources,
+    "Hotkey linting & docs sync check": [
+        "./tools/generate_hotkeys.py",
+        "--check-only",
+    ],
 }
 
 for tool_name, command in tools.items():
