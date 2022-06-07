@@ -474,7 +474,11 @@ class WriteBox(urwid.Pile):
         self, text: str, state: Optional[int]
     ) -> Optional[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream["name"] for stream in streams_list]
+        streams = [
+            stream["name"]
+            for stream in streams_list
+            if self.model.is_unauthorised_to_post_in_stream(stream.get("id")) is None
+        ]
 
         # match_streams takes stream names and typeaheads,
         # but we don't have typeaheads here.
