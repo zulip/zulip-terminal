@@ -1,3 +1,7 @@
+"""
+Relationships between state/API data and presentation in the UI
+"""
+
 from typing import Dict, Optional
 
 from typing_extensions import Literal

@@ -1,3 +1,7 @@
+"""
+Marks the entry point into the application
+"""
+
 import argparse
 import configparser
 import logging

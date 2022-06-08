@@ -1,3 +1,7 @@
+"""
+Keybindings and their helper functions
+"""
+
 from collections import OrderedDict
 from typing import List
 

@@ -1,9 +1,8 @@
 """
-COLOR
------
-Contains color definitions or functions common across all themes.
-For further details on themefiles look at the theme contribution guide.
+Color definitions or functions common across all themes
 """
+
+# For further details on themefiles look at the theme contribution guide.
 from enum import Enum
 from typing import Any
 

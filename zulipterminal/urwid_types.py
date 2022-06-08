@@ -1,3 +1,7 @@
+"""
+Preliminary urwid types to improve type analysis
+"""
+
 from typing import Tuple, Union
 
 

@@ -1,3 +1,7 @@
+"""
+Defines the `View`, and controls where each component is displayed
+"""
+
 import random
 import re
 import time

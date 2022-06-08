@@ -1,3 +1,7 @@
+"""
+Defines the `Model`, fetching and storing data retrieved from the Zulip server
+"""
+
 import json
 import time
 from collections import OrderedDict, defaultdict

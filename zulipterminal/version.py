@@ -1,3 +1,7 @@
+"""
+Keeps track of the version of the current code
+"""
+
 ZT_VERSION = "0.7.0+git"
 
 SUPPORTED_SERVER_VERSIONS = [

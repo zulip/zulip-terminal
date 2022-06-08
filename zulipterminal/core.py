@@ -1,3 +1,7 @@
+"""
+Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application
+"""
+
 import itertools
 import os
 import signal

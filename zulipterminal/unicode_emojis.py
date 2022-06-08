@@ -1,3 +1,7 @@
+"""
+Stores valid unicode emoji data
+"""
+
 from collections import OrderedDict
 
 

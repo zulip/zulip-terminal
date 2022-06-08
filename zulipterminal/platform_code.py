@@ -1,3 +1,7 @@
+"""
+Detection of supported platforms & platform-specific functions
+"""
+
 import platform
 import subprocess
 
