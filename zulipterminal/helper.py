@@ -26,6 +26,8 @@ from typing import (
 from urllib.parse import unquote
 
 import requests
+from bs4 import BeautifulSoup
+from bs4.element import Tag
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
@@ -41,6 +43,7 @@ from zulipterminal.platform_code import (
     normalized_file_path,
     successful_GUI_return_code,
 )
+from zulipterminal.ui_tools.tables import parse_html_table
 
 
 class StreamData(TypedDict):
@@ -816,3 +819,56 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
 
     if error:
         controller.report_error(error)
+
+
+def notification_formatter_spoiler(soup: Any) -> Any:
+    """
+    Explicitly formats only the spoiler for notification.
+    Takes and returns soup object.
+    """
+    for spoiler_tag in soup.find_all("div", attrs={"class": "spoiler-block"}):
+        header = spoiler_tag.find("div", attrs={"class": "spoiler-header"})
+        header.contents = [ele for ele in header.contents if ele != "\n"]
+        empty_header = len(header.contents) == 0
+        header.unwrap()
+
+        to_hide = spoiler_tag.find("div", attrs={"class": "spoiler-content"})
+        to_hide.string = "(...)" if empty_header else " (...)"
+
+        spoiler_tag.unwrap()
+    return soup
+
+
+def notification_formatter_table(soup: Any) -> Any:
+    """
+    Explicitly formats only the table for notification.
+    Tables are formatted as "[MxN table attached]"
+    Takes and returns soup object.
+    """
+    conversion_parameter = False
+    for element in soup:
+        if isinstance(element, Tag):
+            tag = element.name
+        if conversion_parameter:
+            conversion_parameter = False
+            continue
+        if tag == "table":
+            column_alignment, cells = parse_html_table(element)
+            table_dimensions = [len(cells[0]), len(cells)]
+            soup.find("table").replaceWith(
+                BeautifulSoup(
+                    f"<p>[{table_dimensions[0]}×{table_dimensions[1]} table attached]</p",
+                    "lxml",
+                ).p
+            )
+            conversion_parameter = True
+    return soup
+
+
+def notification_formatter(soup: Any) -> Any:
+    """
+    Formatter for message notifications. Takes soup, returns soup.
+    """
+    soup = notification_formatter_table(soup)
+    soup = notification_formatter_spoiler(soup)
+    return soup
