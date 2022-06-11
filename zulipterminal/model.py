@@ -49,6 +49,7 @@ from zulipterminal.helper import (
     display_error_if_present,
     index_messages,
     initial_index,
+    notification_formatter,
     notify_if_message_sent_outside_narrow,
     set_count,
 )
@@ -1330,20 +1331,7 @@ class Model:
                 text = content
             else:
                 soup = BeautifulSoup(content, "lxml")
-                for spoiler_tag in soup.find_all(
-                    "div", attrs={"class": "spoiler-block"}
-                ):
-                    header = spoiler_tag.find("div", attrs={"class": "spoiler-header"})
-                    header.contents = [ele for ele in header.contents if ele != "\n"]
-                    empty_header = len(header.contents) == 0
-                    header.unwrap()
-
-                    to_hide = spoiler_tag.find(
-                        "div", attrs={"class": "spoiler-content"}
-                    )
-                    to_hide.string = "(...)" if empty_header else " (...)"
-
-                    spoiler_tag.unwrap()
+                soup = notification_formatter(soup.find(name="body"))
                 text = soup.text
 
             return notify(
