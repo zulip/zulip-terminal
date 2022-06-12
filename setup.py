@@ -51,7 +51,7 @@ linting_deps = [
 
 typing_deps = [
     "lxml-stubs",
-    "mypy==0.942",
+    "mypy==0.961",
     "types-pygments",
     "types-python-dateutil",
     "types-tzlocal",
