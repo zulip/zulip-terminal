@@ -750,11 +750,12 @@ class TestWriteBox:
             ("#Stream", 1, "#**Stream 2**", []),  # 1st-word startswith match.
             ("#Stream", 2, "#**Secret stream**", []),  # 2nd-word startswith match.
             ("#Stream", 3, "#**Some general stream**", []),  # 3rd-word startswith.
+            ("#Stream", 4, "#**Web public stream**", []),  # 3rd-word startswith.
             ("#S", 0, "#**Secret stream**", []),  # 1st-word startswith match.
             ("#S", 1, "#**Some general stream**", []),  # 1st-word startswith.
             ("#S", 2, "#**Stream 1**", []),  # 1st-word startswith match.
             ("#S", 3, "#**Stream 2**", []),  # 1st-word startswith match.
-            ("#S", 4, "#**Web public stream**", []),  # 1st-word startswith match.
+            ("#S", 4, "#**Web public stream**", []),  # 3rd-word startswith.
             ("#S", -1, "#**Web public stream**", []),
             ("#S", -2, "#**Stream 2**", []),
             ("#S", -3, "#**Stream 1**", []),
@@ -782,35 +783,17 @@ class TestWriteBox:
             ("##*Stream", 0, None, []),  # NOTE: Optional single star fails
             ("##**Stream", 0, "##**Stream 1**", []),  # Optional 2-stars
             # With 'Secret stream' pinned.
-            (
-                "#Stream",
-                0,
-                "#**Secret stream**",
-                ["Secret stream"],
-            ),  # 2nd-word startswith match (pinned).
-            (
-                "#Stream",
-                1,
-                "#**Stream 1**",
-                ["Secret stream"],
-            ),  # 1st-word startswith match (unpinned).
-            (
-                "#Stream",
-                2,
-                "#**Stream 2**",
-                ["Secret stream"],
-            ),  # 1st-word startswith match (unpinned).
-            (
-                "#Stream",
-                3,
-                "#**Some general stream**",
-                ["Secret stream"],
-            ),  # 3rd-word starstwith match (unpinned).
+            ("#Stream", 0, "#**Secret stream**", ["Secret stream"]),
+            ("#Stream", 1, "#**Stream 1**", ["Secret stream"]),
+            ("#Stream", 2, "#**Stream 2**", ["Secret stream"]),
+            ("#Stream", 3, "#**Some general stream**", ["Secret stream"]),
+            ("#Stream", 4, "#**Web public stream**", ["Secret stream"]),
             # With 'Stream 1' and 'Secret stream' pinned.
             ("#Stream", 0, "#**Stream 1**", ["Secret stream", "Stream 1"]),
             ("#Stream", 1, "#**Secret stream**", ["Secret stream", "Stream 1"]),
             ("#Stream", 2, "#**Stream 2**", ["Secret stream", "Stream 1"]),
             ("#Stream", 3, "#**Some general stream**", ["Secret stream", "Stream 1"]),
+            ("#Stream", 4, "#**Web public stream**", ["Secret stream", "Stream 1"]),
         ],
     )
     def test_generic_autocomplete_streams(
