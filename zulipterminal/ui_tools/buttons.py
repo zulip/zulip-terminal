@@ -13,8 +13,6 @@ from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_Size
-from zulipterminal.platform_code import notify
-
 
 class TopButton(urwid.Button):
     def __init__(

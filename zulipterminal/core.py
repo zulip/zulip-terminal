@@ -39,8 +39,6 @@ from zulipterminal.ui_tools.views import (
     UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
-from zulipterminal.platform_code import notify
-
 
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
