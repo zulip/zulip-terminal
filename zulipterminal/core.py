@@ -39,6 +39,7 @@ from zulipterminal.ui_tools.views import (
     UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
+from zulipterminal.platform_code import notify
 
 
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
@@ -548,13 +549,14 @@ class Controller:
             )
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
+        
         already_narrowed = self.model.set_narrow(**narrow)
 
         if already_narrowed and anchor is None:
             return
 
         msg_id_list = self.model.get_message_ids_in_current_narrow()
-
+        
         # If no messages are found in the current narrow
         # OR, given anchor is not present in msg_id_list
         # then, get more messages.
@@ -578,6 +580,11 @@ class Controller:
     def narrow_to_stream(
         self, *, stream_name: str, contextual_message_id: Optional[int] = None
     ) -> None:
+        # self.view.left_panel.update_stream_view_topic(stream_id)
+        # self.view.left_panel.show_stream_view()
+        notify(stream_name, stream_name)
+        stream_id = self.model.stream_id_from_name(stream_name)
+        self.model.update_stream_on_narrow(stream_id)
         self._narrow_to(anchor=contextual_message_id, stream=stream_name)
 
     def narrow_to_topic(

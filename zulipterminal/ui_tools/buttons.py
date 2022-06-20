@@ -1,3 +1,4 @@
+from cgitb import text
 import re
 from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
@@ -13,6 +14,7 @@ from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_Size
+from zulipterminal.platform_code import notify
 
 
 class TopButton(urwid.Button):
@@ -160,6 +162,7 @@ class StreamButton(TopButton):
         controller: Any,
         view: Any,
         count: int,
+        selected: bool,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
@@ -168,6 +171,7 @@ class StreamButton(TopButton):
         self.color = properties["color"]
         stream_access_type = properties["stream_access_type"]
         self.description = properties["description"]
+        self.selected = selected
 
         self.model = controller.model
         self.count = count
@@ -186,6 +190,12 @@ class StreamButton(TopButton):
         )
 
         stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+        # text_color = ["white", "black"]
+          
+        if selected:
+            notify("MIL GAYA KUCH!", self.stream_name)
+            self.stream_name = self.stream_name + " ▶▶"
+            # text_color = ["white", "dark blue"]
 
         narrow_function = partial(
             controller.narrow_to_stream,
@@ -198,6 +208,7 @@ class StreamButton(TopButton):
             prefix_character=(self.color, stream_marker),
             count=count,
             count_style="unread_count",
+            # text_color= text_color
         )
 
         # Mark muted streams 'M' during button creation.

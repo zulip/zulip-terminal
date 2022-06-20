@@ -1212,7 +1212,7 @@ class Model:
                             self.unpinned_streams.append(stream)
                     sort_streams(self.unpinned_streams)
                     sort_streams(self.pinned_streams)
-                    self.controller.view.left_panel.update_stream_view()
+                    self.controller.view.left_panel.update_stream_view(stream_id)
                     self.controller.update_screen()
                 elif event.get("property", None) == "desktop_notifications":
                     stream_id = event["stream_id"]
@@ -1239,6 +1239,9 @@ class Model:
                     else:
                         for user_id in user_ids:
                             subscribers.remove(user_id)
+
+    def update_stream_on_narrow(self, stream_id: int):
+        self.controller.view.left_panel.update_stream_view(stream_id)
 
     def _handle_typing_event(self, event: Event) -> None:
         """

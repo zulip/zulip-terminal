@@ -830,13 +830,14 @@ class LeftColumnView(urwid.Pile):
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
-    def streams_view(self) -> Any:
+    def streams_view(self, selected_stream_id = -1) -> Any:
         streams_btn_list = [
             StreamButton(
                 properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                selected = (selected_stream_id == stream["id"])
             )
             for stream in self.view.pinned_streams
         ]
@@ -850,6 +851,7 @@ class LeftColumnView(urwid.Pile):
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                selected = (selected_stream_id == stream["id"]),
             )
             for stream in self.view.unpinned_streams
         ]
@@ -914,8 +916,8 @@ class LeftColumnView(urwid.Pile):
             and stream_id == self.view.topic_w.stream_button.stream_id
         )
 
-    def update_stream_view(self) -> None:
-        self.stream_v = self.streams_view()
+    def update_stream_view(self, selected_stream_id = -1) -> None:
+        self.stream_v = self.streams_view(selected_stream_id)
         if not self.is_in_topic_view:
             self.show_stream_view()
 
