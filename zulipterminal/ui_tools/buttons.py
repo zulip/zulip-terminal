@@ -192,7 +192,6 @@ class StreamButton(TopButton):
         text_color = None
           
         if selected:
-            notify("stream_name", self.stream_name)
             self.stream_name = self.stream_name + " ▶▶"
             text_color = 'stream_selected'
 

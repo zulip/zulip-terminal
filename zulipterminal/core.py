@@ -580,9 +580,6 @@ class Controller:
     def narrow_to_stream(
         self, *, stream_name: str, contextual_message_id: Optional[int] = None
     ) -> None:
-        # self.view.left_panel.update_stream_view_topic(stream_id)
-        # self.view.left_panel.show_stream_view()
-        notify(stream_name, stream_name)
         stream_id = self.model.stream_id_from_name(stream_name)
         self.model.update_stream_on_narrow(stream_id)
         self._narrow_to(anchor=contextual_message_id, stream=stream_name)
