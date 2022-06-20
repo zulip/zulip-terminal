@@ -193,7 +193,7 @@ class StreamButton(TopButton):
         # text_color = ["white", "black"]
           
         if selected:
-            notify("MIL GAYA KUCH!", self.stream_name)
+            notify("stream_name", self.stream_name)
             self.stream_name = self.stream_name + " ▶▶"
             # text_color = ["white", "dark blue"]
 
