@@ -70,6 +70,7 @@ STYLES = {
     'area:user'        : (Color.LIGHT0_HARD,            Color.FADED_YELLOW),
     'search_error'     : (Color.FADED_RED,              Color.LIGHT0_HARD),
     'task:success'     : (Color.LIGHT0_HARD,            Color.FADED_GREEN),
+    'stream_selected'  : (Color.LIGHT0_HARD,            Color.FADED_RED),
     'task:error'       : (Color.LIGHT0_HARD,            Color.FADED_RED),
     'task:warning'     : (Color.LIGHT0_HARD,            Color.NEUTRAL_PURPLE),
 }

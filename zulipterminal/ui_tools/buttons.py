@@ -189,12 +189,12 @@ class StreamButton(TopButton):
         )
 
         stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
-        # text_color = ["white", "black"]
+        text_color = None
           
         if selected:
             notify("stream_name", self.stream_name)
             self.stream_name = self.stream_name + " ▶▶"
-            # text_color = ["white", "dark blue"]
+            text_color = 'stream_selected'
 
         narrow_function = partial(
             controller.narrow_to_stream,
@@ -207,7 +207,7 @@ class StreamButton(TopButton):
             prefix_character=(self.color, stream_marker),
             count=count,
             count_style="unread_count",
-            # text_color= text_color
+            text_color= text_color
         )
 
         # Mark muted streams 'M' during button creation.
