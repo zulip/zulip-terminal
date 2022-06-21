@@ -191,7 +191,7 @@ class StreamButton(TopButton):
           
         if selected:
             self.stream_name = self.stream_name + " ▶▶"
-            text_color = 'stream_selected'
+            text_color = 'stream_active'
 
         narrow_function = partial(
             controller.narrow_to_stream,
@@ -288,6 +288,7 @@ class TopicButton(TopButton):
         controller: Any,
         view: Any,
         count: int,
+        in_stream_view = False,
     ) -> None:
         self.stream_name = controller.model.stream_dict[stream_id]["name"]
         self.topic_name = topic
@@ -304,6 +305,10 @@ class TopicButton(TopButton):
         # The space acts as a TopButton prefix and gives an effective 3 spaces for unresolved topics.
         topic_prefix = " "
         topic_name = self.topic_name
+
+        if in_stream_view:
+            topic_name = " ▶ " + topic_name
+
         if self.topic_name.startswith(RESOLVED_TOPIC_PREFIX):
             topic_prefix = self.topic_name[:1]
             topic_name = self.topic_name[2:]

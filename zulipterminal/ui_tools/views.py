@@ -831,30 +831,60 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def streams_view(self, selected_stream_id = -1) -> Any:
-        streams_btn_list = [
-            StreamButton(
-                properties=stream,
-                controller=self.controller,
-                view=self.view,
-                count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                selected = (selected_stream_id == stream["id"])
-            )
-            for stream in self.view.pinned_streams
-        ]
+        
+        streams_btn_list = []
+        for stream in self.view.pinned_streams:
+            streams_btn_list += [
+                StreamButton(
+                    properties=stream,
+                    controller=self.controller,
+                    view=self.view,
+                    count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                    selected = (selected_stream_id == stream["id"])
+                )
+            ]
+
+            if selected_stream_id == stream["id"]:
+                 topics = self.model.topics_in_stream(stream["id"])
+                 streams_btn_list += [TopicButton(
+                     stream_id = stream["id"],
+                     topic = topic,
+                     controller=self.controller,
+                     view=self.view,
+                     count=self.model.unread_counts["unread_topics"].get(
+                         (stream["id"], topic), 0),
+                     in_stream_view=True,
+                     )
+                     for topic in topics[:3] #FIXME add constant
+                     ] 
 
         if len(streams_btn_list):
             streams_btn_list += [StreamsViewDivider()]
 
-        streams_btn_list += [
-            StreamButton(
-                properties=stream,
-                controller=self.controller,
-                view=self.view,
-                count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                selected = (selected_stream_id == stream["id"]),
-            )
-            for stream in self.view.unpinned_streams
-        ]
+        for stream in self.view.unpinned_streams:
+            streams_btn_list += [
+                StreamButton(
+                    properties=stream,
+                    controller=self.controller,
+                    view=self.view,
+                    count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                    selected = (selected_stream_id == stream["id"])
+                )
+            ]
+
+            if selected_stream_id == stream["id"]:
+                 topics = self.model.topics_in_stream(stream["id"])
+                 streams_btn_list += [TopicButton(
+                     stream_id = stream["id"],
+                     topic = topic,
+                     controller=self.controller,
+                     view=self.view,
+                     count=self.model.unread_counts["unread_topics"].get(
+                         (stream["id"], topic), 0),
+                     in_stream_view=True,
+                     )
+                     for topic in topics[:3] #FIXME add constant
+                     ] 
 
         self.view.stream_id_to_button = {
             stream.stream_id: stream
