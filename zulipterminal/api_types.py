@@ -79,8 +79,7 @@ class Subscription(TypedDict):
     pin_to_top: bool
     email_address: str
 
-    is_muted: bool  # NOTE: new in Zulip 2.1 (in_home_view still present)
-    in_home_view: bool  # TODO: Migrate to is_muted (note inversion)
+    is_muted: bool
 
     is_announcement_only: bool  # Deprecated in Zulip 3.0 -> stream_post_policy
     stream_post_policy: int  # NOTE: new in Zulip 3.0 / ZFL 1
@@ -92,6 +91,9 @@ class Subscription(TypedDict):
     history_public_to_subscribers: bool
     first_message_id: Optional[int]
     stream_weekly_traffic: Optional[int]
+
+    # Deprecated fields
+    # in_home_view: bool  # Replaced by is_muted in Zulip 2.1; still present in updates
 
 
 class RealmUser(TypedDict):

@@ -1386,7 +1386,7 @@ class TestModel:
         subs = [
             dict(
                 entry,
-                in_home_view=entry["stream_id"] not in muted,
+                is_muted=entry["stream_id"] in muted,
                 desktop_notifications=entry["stream_id"] in visual_notification_enabled,
             )
             for entry in initial_data["subscriptions"]

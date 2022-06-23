@@ -212,7 +212,7 @@ def general_stream() -> Dict[str, Any]:
         "color": "#b0a5fd",  # Color in '#xxxxxx' format
         "pin_to_top": False,
         "stream_id": 1000,
-        "in_home_view": True,
+        "is_muted": False,
         "audible_notifications": False,
         "description": "General Stream",
         "rendered_description": "General Stream",
@@ -241,7 +241,7 @@ def secret_stream() -> Dict[str, Any]:
         "email_address": "secret@example.com",
         "rendered_description": "Some private stream",
         "color": "#ccc",  # Color in '#xxx' format
-        "in_home_view": True,
+        "is_muted": False,
         "audible_notifications": False,
         "is_old_stream": True,
         "desktop_notifications": False,
@@ -266,7 +266,7 @@ def web_public_stream() -> Dict[str, Any]:
         "email_address": "web_public@example.com",
         "rendered_description": "Some web public stream",
         "color": "#ddd",  # Color in '#xxx' format
-        "in_home_view": True,
+        "is_muted": False,
         "audible_notifications": False,
         "is_old_stream": True,
         "desktop_notifications": False,
@@ -295,7 +295,7 @@ def streams_fixture(
                 "color": "#b0a5fd",
                 "pin_to_top": False,
                 "stream_id": i,
-                "in_home_view": True,
+                "is_muted": False,
                 "audible_notifications": False,
                 "description": f"A description of stream {i}",
                 "rendered_description": f"A description of stream {i}",
@@ -645,7 +645,7 @@ def initial_data(
                 "push_notifications": False,
                 "email_address": "",
                 "color": "#bfd56f",
-                "in_home_view": True,
+                "is_muted": False,
                 "history_public_to_subscribers": True,
             }
         ],
