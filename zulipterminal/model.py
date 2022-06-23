@@ -1065,7 +1065,7 @@ class Model:
                 new_pinned_streams.append(streamData)
             else:
                 new_unpinned_streams.append(streamData)
-            if not subscription["in_home_view"]:
+            if subscription["is_muted"]:
                 new_muted_streams.add(subscription["stream_id"])
             if subscription["desktop_notifications"]:
                 new_visual_notified_streams.add(subscription["stream_id"])
@@ -1178,6 +1178,8 @@ class Model:
 
         if event["op"] == "update":
             if hasattr(self.controller, "view"):
+                # NOTE: Currently, the response from the API still contains in_home_view
+                # and not is_muted, hence, the conditional is left unaltered, for now.
                 if event.get("property", None) == "in_home_view":
                     stream_id = event["stream_id"]
 
