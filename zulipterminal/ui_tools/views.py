@@ -564,6 +564,7 @@ class MiddleColumnView(urwid.Frame):
         for topic in topics * 2:
             if (
                 not self.model.is_muted_topic(stream_id=topic[0], topic=topic[1])
+                and not self.model.is_muted_stream(stream_id=topic[0])
                 and next_topic
             ):
                 self.last_unread_topic = topic
