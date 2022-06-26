@@ -4,7 +4,7 @@ UI buttons for 'narrowing' and showing unread counts, such as Stream, PM, Topic,
 
 import re
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
@@ -24,20 +24,22 @@ class TopButton(urwid.Button):
         self,
         *,
         controller: Any,
-        caption: str,
+        prefix_markup: urwid_MarkupTuple = (None, ""),
+        label_markup: urwid_MarkupTuple,
+        suffix_markup: urwid_MarkupTuple = (None, ""),
         show_function: Callable[[], Any],
-        prefix_character: Union[str, Tuple[Any, str]] = "\N{BULLET}",
-        text_color: Optional[str] = None,
         count: int = 0,
-        count_style: Optional[str] = None,
     ) -> None:
         self.controller = controller
-        self._caption = caption
+        self._caption = label_markup[1]  # kept for easier transition.
+        self._prefix_markup = prefix_markup
+        self._label_markup = label_markup
+        self._suffix_markup = suffix_markup
         self.show_function = show_function
-        self.prefix_character = prefix_character
-        self.original_color = text_color
+        self.prefix_character = prefix_markup  # kept for easier transition.
+        self.original_color = label_markup[0]  # kept for easier transition.
         self.count = count
-        self.count_style = count_style
+        self.count_style = suffix_markup[0]  # kept for easier transition.
 
         super().__init__("")
 
@@ -55,7 +57,7 @@ class TopButton(urwid.Button):
         )
         self._w = urwid.AttrMap(cols, None, "selected")
 
-        self.update_count(count, text_color)
+        self.update_count(count, label_markup[0])
 
         urwid.connect_signal(self, "click", self.activate)
 
@@ -73,7 +75,7 @@ class TopButton(urwid.Button):
     def update_widget(
         self, count_text: urwid_MarkupTuple, text_color: Optional[str]
     ) -> Any:
-        if self.prefix_character:
+        if self.prefix_character[1]:
             prefix = [" ", self.prefix_character, " "]
         else:
             prefix = [" "]
@@ -106,11 +108,10 @@ class HomeButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_messages,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
@@ -120,11 +121,10 @@ class PMButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_pm,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
@@ -134,11 +134,10 @@ class MentionedButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_mentions,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
@@ -148,11 +147,10 @@ class StarredButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            label_markup=(None, button_text),
+            suffix_markup=("starred_count", ""),
             show_function=controller.narrow_to_all_starred,
-            prefix_character="",
             count=count,  # Number of starred messages, not unread count
-            count_style="starred_count",
         )
 
 
@@ -197,11 +195,11 @@ class StreamButton(TopButton):
         )
         super().__init__(
             controller=controller,
-            caption=self.stream_name,
+            prefix_markup=(self.color, stream_marker),
+            label_markup=(None, self.stream_name),
+            suffix_markup=("unread_count", ""),
             show_function=narrow_function,
-            prefix_character=(self.color, stream_marker),
             count=count,
-            count_style="unread_count",
         )
 
         # Mark muted streams 'M' during button creation.
@@ -252,10 +250,9 @@ class UserButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=user["full_name"],
+            prefix_markup=(color, state_marker),
+            label_markup=(color, user["full_name"]),
             show_function=self._narrow_with_compose,
-            prefix_character=(color, state_marker),
-            text_color=color,
             count=count,
         )
         if is_current_user:
@@ -307,11 +304,11 @@ class TopicButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=topic_name,
+            prefix_markup=(None, topic_prefix),
+            label_markup=(None, topic_name),
+            suffix_markup=("unread_count", ""),
             show_function=narrow_function,
-            prefix_character=topic_prefix,
             count=count,
-            count_style="unread_count",
         )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
@@ -346,12 +343,11 @@ class EmojiButton(TopButton):
         self.reaction_count = reaction_count
         self.toggle_selection = toggle_selection
         self.emoji_name, self.emoji_code, self.aliases = emoji_unit
-        full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+        full_button_label = ", ".join([self.emoji_name, *self.aliases])
 
         super().__init__(
             controller=controller,
-            caption=full_button_caption,
-            prefix_character="",
+            label_markup=(None, full_button_label),
             show_function=self.update_emoji_button,
         )
 
