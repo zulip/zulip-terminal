@@ -370,17 +370,17 @@ class EmojiButton(TopButton):
         )
 
         has_check_mark = self._has_user_reacted_to_msg() or is_selected(self.emoji_name)
-        self.update_widget((None, self.get_update_widget_text(has_check_mark)), None)
+        self.update_check_mark(has_check_mark)
 
     def _has_user_reacted_to_msg(self) -> bool:
         return self.controller.model.has_user_reacted_to_message(
             self.message, emoji_code=self.emoji_code
         )
 
-    def get_update_widget_text(self, user_reacted: bool) -> str:
+    def update_check_mark(self, user_reacted: bool) -> None:
         count_text = str(self.reaction_count) if self.reaction_count > 0 else ""
         reacted_check_mark = CHECK_MARK if user_reacted else ""
-        return f" {reacted_check_mark} {count_text} "
+        self.update_widget((None, f" {reacted_check_mark} {count_text} "), None)
 
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
@@ -401,7 +401,7 @@ class EmojiButton(TopButton):
             if is_reaction_added
             else (self.reaction_count - 1)
         )
-        self.update_widget((None, self.get_update_widget_text(is_reaction_added)), None)
+        self.update_check_mark(is_reaction_added)
 
 
 class DecodedStream(TypedDict):

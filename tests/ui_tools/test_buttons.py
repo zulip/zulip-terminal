@@ -317,7 +317,7 @@ class TestEmojiButton:
     ) -> None:
         controller = mocker.Mock()
         controller.model.has_user_reacted_to_message = mocker.Mock(return_value=False)
-        update_widget = mocker.patch(MODULE + ".EmojiButton.update_widget")
+        update_widget = mocker.patch(MODULE + ".EmojiButton.update_check_mark")
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
         label = ", ".join([emoji_unit[0], *emoji_unit[2]])
         message_fixture["reactions"] = to_vary_in_message["reactions"]
