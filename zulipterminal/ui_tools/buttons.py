@@ -31,12 +31,10 @@ class TopButton(urwid.Button):
         count: int = 0,
     ) -> None:
         self.controller = controller
-        self._caption = label_markup[1]  # kept for easier transition.
         self._prefix_markup = prefix_markup
         self._label_markup = label_markup
         self._suffix_markup = suffix_markup
         self.show_function = show_function
-        self.prefix_character = prefix_markup  # kept for easier transition.
         self.count = count
 
         super().__init__("")
@@ -93,18 +91,20 @@ class TopButton(urwid.Button):
     def update_widget(
         self, count_text: urwid_MarkupTuple, text_color: Optional[str]
     ) -> Any:
-        if self.prefix_character[1]:
-            prefix = [" ", self.prefix_character, " "]
+        self._suffix_markup = count_text  # kept for easier transition
+        self.label_style = text_color  # kept for easier transition
+        if self.prefix_text:
+            prefix = [" ", self._prefix_markup, " "]
         else:
             prefix = [" "]
-        if count_text[1]:
-            suffix = [" ", count_text, " "]
+        if self.suffix_text:
+            suffix = [" ", self._suffix_markup, " "]
         else:
             suffix = ["  "]
         self.button_prefix.set_text(prefix)
-        self.set_label(self._caption)
+        self.set_label(self.label_text)
         self.button_suffix.set_text(suffix)
-        self._w.set_attr_map({None: text_color})
+        self._w.set_attr_map({None: self.label_style})
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
