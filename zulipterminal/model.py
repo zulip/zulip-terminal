@@ -1,3 +1,4 @@
+import imp
 import json
 import time
 from collections import OrderedDict, defaultdict
@@ -54,6 +55,7 @@ from zulipterminal.helper import (
 )
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.platform_code import notify #FIXME
 
 
 OFFLINE_THRESHOLD_SECS = 140
@@ -303,7 +305,12 @@ class Model:
             raise RuntimeError("Model.set_narrow parameters used incorrectly.")
 
         if new_narrow != self.narrow:
+            if self.stream_id:
+                last_active_button = self.controller.view.stream_id_to_button[self.stream_id]
+                last_active_button.mark_inactive()
             self.narrow = new_narrow
+            stream_button = self.controller.view.stream_id_to_button[self.stream_id_from_name(stream)]
+            stream_button.mark_active()
 
             if pm_with is not None and new_narrow[0][0] == "pm_with":
                 users = pm_with.split(", ")

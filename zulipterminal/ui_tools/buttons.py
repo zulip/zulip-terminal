@@ -82,6 +82,11 @@ class TopButton(urwid.Button):
         self.button_suffix.set_text(suffix)
         self._w.set_attr_map({None: text_color})
 
+    def update_widget_highlight(
+        self, highlight_style: str
+    ) -> None:
+        self.original_color = highlight_style
+
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
         self.controller.view.show_right_panel(visible=False)
@@ -223,6 +228,11 @@ class StreamButton(TopButton):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
 
+    def mark_active(self) -> None:
+        self.update_widget_highlight("stream_active")
+    
+    def mark_inactive(self) -> None:
+        self.update_widget_highlight("header")
 
 class UserButton(TopButton):
     def __init__(
@@ -418,6 +428,14 @@ class MessageLinkButton(urwid.Button):
         # Set cursor position next to len(caption) to avoid the cursor.
         icon = urwid.SelectableIcon(caption, cursor_position=len(caption) + 1)
         self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+    
+    def update_widget_highlight(
+        self, highlight: str 
+        ) -> None:
+        """
+        Highlight the active stream/topic button
+        """
+        self.original_color = highlight
 
     def handle_link(self, *_: Any) -> None:
         """
