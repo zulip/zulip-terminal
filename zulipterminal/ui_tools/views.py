@@ -1602,7 +1602,7 @@ class MsgInfoView(PopUpView):
 
         # To keep track of buttons (e.g., button links) and to facilitate
         # computing their slice indexes
-        button_widgets = []  # type: List[Any]
+        self.button_widgets = []  # type: List[Any]
 
         if topic_links:
             topic_link_widgets, topic_link_width = self.create_link_buttons(
@@ -1612,8 +1612,8 @@ class MsgInfoView(PopUpView):
             # slice_index = Number of labels before topic links + 1 newline
             #               + 1 'Topic Links' category label.
             slice_index = len(msg_info[0][1]) + 2
-            slice_index += sum([len(w) + 2 for w in button_widgets])
-            button_widgets.append(topic_links)
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(topic_links)
 
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)
@@ -1626,8 +1626,8 @@ class MsgInfoView(PopUpView):
             # slice_index = Number of labels before message links + 1 newline
             #               + 1 'Message Links' category label.
             slice_index = len(msg_info[0][1]) + 2
-            slice_index += sum([len(w) + 2 for w in button_widgets])
-            button_widgets.append(message_links)
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(message_links)
 
             widgets = (
                 widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
