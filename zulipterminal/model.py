@@ -100,6 +100,7 @@ class Model:
         self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
+        self.active_button: Any = None
 
         self.user_id = -1
         self.user_email = ""
@@ -286,6 +287,7 @@ class Model:
         pm_with: Optional[str] = None,
         starred: bool = False,
         mentioned: bool = False,
+        active_button: Any = None,
     ) -> bool:
         selected_params = {k for k, v in locals().items() if k != "self" and v}
         valid_narrows: Dict[FrozenSet[str], List[Any]] = {
@@ -304,13 +306,21 @@ class Model:
         else:
             raise RuntimeError("Model.set_narrow parameters used incorrectly.")
 
+        if self.stream_id:
+                self.active_button = self.controller.view.stream_id_to_button[self.stream_id]
+
         if new_narrow != self.narrow:
-            if self.stream_id:
-                last_active_button = self.controller.view.stream_id_to_button[self.stream_id]
-                last_active_button.mark_inactive()
+            if self.stream_id and new_narrow:
+                self.active_button.mark_inactive()
+            
+            if not self.narrow and self.active_button:
+                self.active_button.mark_inactive()
+
             self.narrow = new_narrow
-            stream_button = self.controller.view.stream_id_to_button[self.stream_id_from_name(stream)]
-            stream_button.mark_active()
+
+            if stream:
+                stream_button = self.controller.view.stream_id_to_button[self.stream_id_from_name(stream)]
+                self.active_button = stream_button.mark_active()
 
             if pm_with is not None and new_narrow[0][0] == "pm_with":
                 users = pm_with.split(", ")

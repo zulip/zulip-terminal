@@ -12,6 +12,7 @@ from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
+from zulipterminal.platform_code import notify
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -232,7 +233,8 @@ class StreamButton(TopButton):
         self.update_widget_highlight("stream_active")
     
     def mark_inactive(self) -> None:
-        self.update_widget_highlight("header")
+        self.original_color = None
+        self.update_count(self.count)
 
 class UserButton(TopButton):
     def __init__(
