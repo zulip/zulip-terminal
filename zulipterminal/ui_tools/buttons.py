@@ -428,14 +428,6 @@ class MessageLinkButton(urwid.Button):
         # Set cursor position next to len(caption) to avoid the cursor.
         icon = urwid.SelectableIcon(caption, cursor_position=len(caption) + 1)
         self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
-    
-    def update_widget_highlight(
-        self, highlight: str 
-        ) -> None:
-        """
-        Highlight the active stream/topic button
-        """
-        self.original_color = highlight
 
     def handle_link(self, *_: Any) -> None:
         """
