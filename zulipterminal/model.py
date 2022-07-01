@@ -53,10 +53,7 @@ from zulipterminal.helper import (
     notify_if_message_sent_outside_narrow,
     set_count,
 )
-from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
-from zulipterminal.platform_code import notify #FIXME
-
 
 OFFLINE_THRESHOLD_SECS = 140
 

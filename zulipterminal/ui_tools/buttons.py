@@ -83,9 +83,7 @@ class TopButton(urwid.Button):
         self.button_suffix.set_text(suffix)
         self._w.set_attr_map({None: text_color})
 
-    def update_widget_highlight(
-        self, highlight_style: str
-    ) -> None:
+    def update_widget_highlight(self, highlight_style: str) -> None:
         self.original_color = highlight_style
 
     def activate(self, key: Any) -> None:
@@ -231,10 +229,11 @@ class StreamButton(TopButton):
 
     def mark_active(self) -> None:
         self.update_widget_highlight("stream_active")
-    
+
     def mark_inactive(self) -> None:
         self.original_color = None
         self.update_count(self.count)
+
 
 class UserButton(TopButton):
     def __init__(
