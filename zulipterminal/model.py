@@ -282,6 +282,7 @@ class Model:
         topic: Optional[str] = None,
         pms: bool = False,
         pm_with: Optional[str] = None,
+        stream_messages: bool = False,
         starred: bool = False,
         mentioned: bool = False,
         active_button: Any = None,
@@ -292,6 +293,7 @@ class Model:
             frozenset(["stream"]): [["stream", stream]],
             frozenset(["stream", "topic"]): [["stream", stream], ["topic", topic]],
             frozenset(["pms"]): [["is", "private"]],
+            frozenset(["stream_messages"]): [["is", "stream_messages"]],
             frozenset(["pm_with"]): [["pm_with", pm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
@@ -365,13 +367,18 @@ class Model:
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
         elif narrow[0][1] == "private":
             ids = index["private_msg_ids"]
+        elif narrow[0][1] == "stream_messages":
+            stream_ids = [ids for ids in index["all_msg_ids"] if ids not in index["private_msg_ids"]]
+            index["stream_msg_ids"] = stream_ids
+            ids = stream_ids
         elif narrow[0][0] == "pm_with":
             recipients = self.recipients
             ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
-        elif narrow[0][1] == "starred":
+        elif narrow[0][1] == "starred": 
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":
             ids = index["mentioned_msg_ids"]
+
         return ids.copy()
 
     def current_narrow_contains_message(self, message: Message) -> bool:

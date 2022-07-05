@@ -141,6 +141,18 @@ class MentionedButton(TopButton):
             count_style="unread_count",
         )
 
+class StreamMessagesButton(TopButton):
+    def __init__(self, *, controller:Any, count: int) -> None:
+        button_text =  f"Streams          [{primary_key_for_command('STREAM_NARROW')}]"
+
+        super().__init__(
+            controller = controller,
+            caption = button_text,
+            show_function=controller.narrow_to_all_streams,
+            prefix_character="",
+            count = count,
+            count_style = "unread_count",
+        )
 
 class StarredButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:

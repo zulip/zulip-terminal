@@ -58,6 +58,8 @@ from zulipterminal.urwid_types import urwid_Size
 if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
 
+from zulipterminal.platform_code import notify
+
 
 class _MessageEditState(NamedTuple):
     message_id: int
@@ -1064,6 +1066,7 @@ class MessageBox(urwid.Pile):
             ]
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
+        notify(str(curr_narrow), "Helo")
         if curr_narrow == []:
             text_to_fill = "All messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
@@ -1072,6 +1075,8 @@ class MessageBox(urwid.Pile):
             text_to_fill = "Starred messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
             text_to_fill = "Mentions"
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "stream_messages":
+            text_to_fill = "All Stream messages"
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
             bar_color = self.model.stream_dict[self.stream_id]["color"]

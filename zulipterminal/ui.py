@@ -256,6 +256,8 @@ class View(urwid.WidgetWrap):
             self.starred_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
             self.mentioned_button.activate(key)
+        elif is_command_key("STREAM_NARROW", key):
+            self.all_streams_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.show_left_panel(visible=False)

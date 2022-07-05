@@ -415,6 +415,11 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             if narrow[0][1] == "mentioned":
                 if {"mentioned", "wildcard_mentioned"} & set(msg["flags"]):
                     index["mentioned_msg_ids"].add(msg["id"])
+            
+            if narrow[0][1] == "stream_messages":
+                index["stream_msg_ids"].add(msg["id"])
+                if msg["type"] == "stream":
+                    index["stream_msg_ids"].add(msg["id"])
 
             if msg["type"] == "private":
                 index["private_msg_ids"].add(msg["id"])
@@ -690,6 +695,9 @@ def notify_if_message_sent_outside_narrow(
         ]
         pm_with_narrow = [["pm_with", ", ".join(recipient_emails)]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
+    elif message["type"] == "stream_messages":
+        stream_narrow = [["is", "stream_messages"]]
+
 
 
 def hash_util_decode(string: str) -> str:

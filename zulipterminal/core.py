@@ -612,6 +612,9 @@ class Controller:
     def narrow_to_all_pm(self, *, contextual_message_id: Optional[int] = None) -> None:
         self._narrow_to(anchor=contextual_message_id, pms=True)
 
+    def narrow_to_all_streams(self, *, contextual_message_id: Optional[int] = None) -> None:
+        self._narrow_to(anchor=contextual_message_id, stream_messages = True)
+
     def narrow_to_all_starred(self) -> None:
         # NOTE: Should we allow maintaining anchor focus here?
         # (nothing currently requires narrowing around a message id)

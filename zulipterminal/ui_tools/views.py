@@ -47,6 +47,7 @@ from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
     PMButton,
     StarredButton,
+    StreamMessagesButton,
     StreamButton,
     TopicButton,
     UserButton,
@@ -801,7 +802,7 @@ class LeftColumnView(urwid.Pile):
         self.stream_v = self.streams_view()
 
         self.is_in_topic_view = False
-        contents = [(4, self.menu_v), self.stream_v]
+        contents = [(5, self.menu_v), self.stream_v]
         super().__init__(contents)
 
     def menu_view(self) -> Any:
@@ -815,7 +816,11 @@ class LeftColumnView(urwid.Pile):
             controller=self.controller,
             count=self.model.unread_counts["all_mentions"],
         )
-
+        
+        count = self.model.unread_counts.get("all_msg", 0) - self.model.unread_counts.get("all_pms", 0)
+        self.view.all_streams_button = StreamMessagesButton(
+            controller = self.controller, count = count
+        )
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
         self.view.starred_button = StarredButton(
@@ -825,6 +830,7 @@ class LeftColumnView(urwid.Pile):
             self.view.home_button,
             self.view.pm_button,
             self.view.mentioned_button,
+            self.view.all_streams_button,
             self.view.starred_button,
         ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
