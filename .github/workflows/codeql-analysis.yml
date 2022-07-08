@@ -1,6 +1,12 @@
 name: "GitHub CodeQL"
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   analyse:
