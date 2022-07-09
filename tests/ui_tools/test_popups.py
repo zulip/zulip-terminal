@@ -888,7 +888,7 @@ class TestMsgInfoView:
             time_mentions=list(),
         )
         msg_links = msg_info_view.button_widgets
-        assert msg_links == [topic_links, message_links]
+        assert msg_links == [message_links, topic_links]
 
     def test_keypress_any_key(
         self, widget_size: Callable[[Widget], urwid_Size]
