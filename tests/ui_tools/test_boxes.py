@@ -743,70 +743,75 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        "text, state, required_typeahead, stream_categories",
+        "text, state_and_required_typeahead, stream_categories",
         [
-            # With no streams in stream_categories.
-            ("#Stream", 0, "#**Stream 1**", {}),  # 1st-word startswith match.
-            ("#Stream", 1, "#**Stream 2**", {}),  # 1st-word startswith match.
-            ("#Stream", 2, "#**Secret stream**", {}),  # 2nd-word startswith match.
-            ("#Stream", 3, "#**Some general stream**", {}),  # 3rd-word startswith.
-            ("#Stream", 4, "#**Web public stream**", {}),  # 3rd-word startswith.
-            ("#S", 0, "#**Secret stream**", {}),  # 1st-word startswith match.
-            ("#S", 1, "#**Some general stream**", {}),  # 1st-word startswith.
-            ("#S", 2, "#**Stream 1**", {}),  # 1st-word startswith match.
-            ("#S", 3, "#**Stream 2**", {}),  # 1st-word startswith match.
-            ("#S", 4, "#**Web public stream**", {}),  # 3rd-word startswith.
-            ("#S", -1, "#**Web public stream**", {}),
-            ("#S", -2, "#**Stream 2**", {}),
-            ("#S", -3, "#**Stream 1**", {}),
-            ("#S", -4, "#**Some general stream**", {}),
-            ("#S", -5, "#**Secret stream**", {}),
-            ("#S", -6, None, {}),
-            ("#So", 0, "#**Some general stream**", {}),
-            ("#So", 1, None, {}),
-            ("#Se", 0, "#**Secret stream**", {}),
-            ("#Se", 1, None, {}),
-            ("#St", 0, "#**Stream 1**", {}),
-            ("#St", 1, "#**Stream 2**", {}),
-            ("#g", 0, "#**Some general stream**", {}),
-            ("#g", 1, None, {}),
-            ("#Stream 1", 0, "#**Stream 1**", {}),  # Complete match.
-            ("#nomatch", 0, None, {}),
-            ("#ene", 0, None, {}),
+            (
+                # With no streams in stream_categories.
+                "#Stream",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Stream 2**",
+                    2: "#**Secret stream**",
+                    3: "#**Some general stream**",
+                    4: "#**Web public stream**",
+                },
+                {},
+            ),
+            (
+                "#S",
+                {
+                    0: "#**Secret stream**",
+                    1: "#**Some general stream**",
+                    2: "#**Stream 1**",
+                    3: "#**Stream 2**",
+                    4: "#**Web public stream**",
+                    -1: "#**Web public stream**",
+                    -2: "#**Stream 2**",
+                    -3: "#**Stream 1**",
+                    -4: "#**Some general stream**",
+                    -5: "#**Secret stream**",
+                    -6: None,
+                },
+                {},
+            ),
+            ("#So", {0: "#**Some general stream**", 1: None}, {}),
+            ("#Se", {0: "#**Secret stream**", 1: None}, {}),
+            ("#St", {0: "#**Stream 1**", 1: "#**Stream 2**"}, {}),
+            ("#g", {0: "#**Some general stream**", 1: None}, {}),
+            ("#Stream 1", {0: "#**Stream 1**"}, {}),  # Complete match.
+            ("#nomatch", {0: None}, {}),
+            ("#ene", {0: None}, {}),
             # Complex autocomplete prefixes.
-            ("[#Stream", 0, "[#**Stream 1**", {}),
-            ("(#Stream", 1, "(#**Stream 2**", {}),
-            ("@#Stream", 0, "@#**Stream 1**", {}),
-            ("@_#Stream", 0, "@_#**Stream 1**", {}),
-            (":#Stream", 0, ":#**Stream 1**", {}),
-            ("##Stream", 0, "##**Stream 1**", {}),
-            ("##*Stream", 0, None, {}),  # NOTE: Optional single star fails
-            ("##**Stream", 0, "##**Stream 1**", {}),  # Optional 2-stars
+            ("[#Stream", {0: "[#**Stream 1**"}, {}),
+            ("(#Stream", {1: "(#**Stream 2**"}, {}),
+            ("@#Stream", {0: "@#**Stream 1**"}, {}),
+            ("@_#Stream", {0: "@_#**Stream 1**"}, {}),
+            (":#Stream", {0: ":#**Stream 1**"}, {}),
+            ("##Stream", {0: "##**Stream 1**"}, {}),
+            ("##*Stream", {0: None}, {}),  # NOTE: Optional single star fails
+            ("##**Stream", {0: "##**Stream 1**"}, {}),  # Optional 2-stars
             # With 'Secret stream' pinned.
-            ("#Stream", 0, "#**Secret stream**", {"pinned": ["Secret stream"]}),
-            ("#Stream", 1, "#**Stream 1**", {"pinned": ["Secret stream"]}),
-            ("#Stream", 2, "#**Stream 2**", {"pinned": ["Secret stream"]}),
-            ("#Stream", 3, "#**Some general stream**", {"pinned": ["Secret stream"]}),
-            ("#Stream", 4, "#**Web public stream**", {"pinned": ["Secret stream"]}),
+            (
+                "#Stream",
+                {
+                    0: "#**Secret stream**",
+                    1: "#**Stream 1**",
+                    2: "#**Stream 2**",
+                    3: "#**Some general stream**",
+                    4: "#**Web public stream**",
+                },
+                {"pinned": ["Secret stream"]},
+            ),
             # With 'Stream 1' and 'Secret stream' pinned.
-            ("#Stream", 0, "#**Stream 1**", {"pinned": ["Secret stream", "Stream 1"]}),
             (
                 "#Stream",
-                1,
-                "#**Secret stream**",
-                {"pinned": ["Secret stream", "Stream 1"]},
-            ),
-            ("#Stream", 2, "#**Stream 2**", {"pinned": ["Secret stream", "Stream 1"]}),
-            (
-                "#Stream",
-                3,
-                "#**Some general stream**",
-                {"pinned": ["Secret stream", "Stream 1"]},
-            ),
-            (
-                "#Stream",
-                4,
-                "#**Web public stream**",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Secret stream**",
+                    2: "#**Stream 2**",
+                    3: "#**Some general stream**",
+                    4: "#**Web public stream**",
+                },
                 {"pinned": ["Secret stream", "Stream 1"]},
             ),
         ],
@@ -815,8 +820,7 @@ class TestWriteBox:
         self,
         write_box: WriteBox,
         text: str,
-        state: Optional[int],
-        required_typeahead: Optional[str],
+        state_and_required_typeahead: Dict[int, Optional[str]],
         stream_categories: Dict[str, Any],
     ) -> None:
         streams_to_pin = (
@@ -827,8 +831,9 @@ class TestWriteBox:
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
-        typeahead_string = write_box.generic_autocomplete(text, state)
-        assert typeahead_string == required_typeahead
+        for state, required_typeahead in state_and_required_typeahead.items():
+            typeahead_string = write_box.generic_autocomplete(text, state)
+            assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
         "text, state, required_typeahead",
