@@ -876,7 +876,7 @@ class TestMsgInfoView:
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
 
-    def test_pop_up_info(self, message_fixture: Message) -> None:
+    def test_pop_up_info_order(self, message_fixture: Message) -> None:
         msg_test = MsgInfoView(
             self.controller,
             message_fixture,
