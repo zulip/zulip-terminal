@@ -1290,7 +1290,7 @@ class TestMessageBox:
                 {"id": 7, "email": "boo@zulip.com", "full_name": "Boo is awesome"}
             ],
             stream_id=5,
-            subject="hi",
+            topic="hi",
             sender_email="foo@zulip.com",
             sender_id=4209,
             type=message_type,
@@ -1933,7 +1933,7 @@ class TestMessageBox:
                     "sender_full_name": "aaron",
                     "submessages": [],
                     "stream_id": 5,
-                    "subject": "Verona2",
+                    "topic": "Verona2",
                     "id": 37,
                     "subject_links": [],
                     "content": (
@@ -1971,7 +1971,7 @@ class TestMessageBox:
                     ],
                     "sender_full_name": "Iago",
                     "submessages": [],
-                    "subject": "",
+                    "topic": "",
                     "id": 107,
                     "subject_links": [],
                     "content": "<p>what are you planning to do this week</p>",
@@ -2005,7 +2005,7 @@ class TestMessageBox:
                 "type": "stream",
                 "display_recipient": "Verona",
                 "stream_id": 5,
-                "subject": "Test topic",
+                "topic": "Test topic",
                 "is_me_message": True,  # will be overridden by test function.
                 "flags": [],
                 "content": "",  # will be overridden by test function.
@@ -2043,7 +2043,7 @@ class TestMessageBox:
                 "type": "stream",
                 "display_recipient": "Verona",
                 "stream_id": 5,
-                "subject": "Test topic",
+                "topic": "Test topic",
                 "flags": [],
                 "is_me_message": False,
                 "content": "<p>what are you planning to do this week</p>",
@@ -2057,7 +2057,7 @@ class TestMessageBox:
         "to_vary_in_last_message",
         [
             {"display_recipient": "Verona offtopic"},
-            {"subject": "Test topic (previous)"},
+            {"topic": "Test topic (previous)"},
             {"type": "private"},
         ],
         ids=[
@@ -2218,7 +2218,7 @@ class TestMessageBox:
                 "type": "stream",
                 "display_recipient": "Verona",
                 "stream_id": 5,
-                "subject": "Test topic",
+                "topic": "Test topic",
                 "flags": [],
                 "is_me_message": False,
                 "content": "<p>what are you planning to do this week</p>",
@@ -2412,7 +2412,7 @@ class TestMessageBox:
         ],
         [
             case(
-                {"sender_id": 2, "timestamp": 45, "subject": "test"},
+                {"sender_id": 2, "timestamp": 45, "topic": "test"},
                 True,
                 60,
                 {"stream": False, "private": False},
@@ -2424,7 +2424,7 @@ class TestMessageBox:
                 id="msg_sent_by_other_user_with_topic",
             ),
             case(
-                {"sender_id": 1, "timestamp": 1, "subject": "test"},
+                {"sender_id": 1, "timestamp": 1, "topic": "test"},
                 True,
                 60,
                 {"stream": False, "private": False},
@@ -2437,7 +2437,7 @@ class TestMessageBox:
                 id="topic_edit_only_after_time_limit",
             ),
             case(
-                {"sender_id": 1, "timestamp": 45, "subject": "test"},
+                {"sender_id": 1, "timestamp": 45, "topic": "test"},
                 False,
                 60,
                 {"stream": False, "private": False},
@@ -2449,7 +2449,7 @@ class TestMessageBox:
                 id="realm_editing_not_allowed",
             ),
             case(
-                {"sender_id": 1, "timestamp": 45, "subject": "test"},
+                {"sender_id": 1, "timestamp": 45, "topic": "test"},
                 True,
                 60,
                 {"stream": True, "private": True},
@@ -2458,7 +2458,7 @@ class TestMessageBox:
                 id="realm_editing_allowed_and_within_time_limit",
             ),
             case(
-                {"sender_id": 1, "timestamp": 1, "subject": "test"},
+                {"sender_id": 1, "timestamp": 1, "topic": "test"},
                 True,
                 0,
                 {"stream": True, "private": True},
@@ -2467,7 +2467,7 @@ class TestMessageBox:
                 id="no_msg_body_edit_limit",
             ),
             case(
-                {"sender_id": 1, "timestamp": 1, "subject": "(no topic)"},
+                {"sender_id": 1, "timestamp": 1, "topic": "(no topic)"},
                 True,
                 60,
                 {"stream": False, "private": False},
@@ -2480,7 +2480,7 @@ class TestMessageBox:
                 id="msg_sent_by_me_with_no_topic",
             ),
             case(
-                {"sender_id": 2, "timestamp": 1, "subject": "(no topic)"},
+                {"sender_id": 2, "timestamp": 1, "topic": "(no topic)"},
                 True,
                 60,
                 {"stream": False, "private": False},
@@ -2493,7 +2493,7 @@ class TestMessageBox:
                 id="msg_sent_by_other_with_no_topic",
             ),
             case(
-                {"sender_id": 1, "timestamp": 1, "subject": "(no topic)"},
+                {"sender_id": 1, "timestamp": 1, "topic": "(no topic)"},
                 False,
                 60,
                 {"stream": False, "private": False},
@@ -2505,7 +2505,7 @@ class TestMessageBox:
                 id="realm_editing_not_allowed_for_no_topic",
             ),
             case(
-                {"sender_id": 1, "timestamp": 45, "subject": "(no topic)"},
+                {"sender_id": 1, "timestamp": 45, "topic": "(no topic)"},
                 True,
                 0,
                 {"stream": True, "private": True},
@@ -2529,7 +2529,7 @@ class TestMessageBox:
         key,
     ):
         if message_fixture["type"] == "private":
-            to_vary_in_each_message["subject"] = ""
+            to_vary_in_each_message["topic"] = ""
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         message_type = varied_message["type"]
         msg_box = MessageBox(varied_message, self.model, message_fixture)
@@ -2551,7 +2551,7 @@ class TestMessageBox:
 
         if expect_editing_to_succeed[message_type]:
             assert write_box.msg_edit_state.message_id == varied_message["id"]
-            assert write_box.msg_edit_state.old_topic == varied_message["subject"]
+            assert write_box.msg_edit_state.old_topic == varied_message["topic"]
             write_box.msg_write_box.set_edit_text.assert_called_once_with(
                 "Edit this message"
             )

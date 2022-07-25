@@ -59,7 +59,7 @@ MODULE = "zulipterminal.ui_tools.utils"
             {
                 "type": "stream",
                 "stream_id": 3,
-                "subject": "foo koo",
+                "topic": "foo koo",
                 # ...
             },
             [],

@@ -34,7 +34,7 @@ def test_encode_stream(
                 "type": "stream",
                 "stream_id": 23,
                 "display_recipient": "zulip terminal",
-                "subject": "#test-here #T1 #T2 #T3",
+                "topic": "#test-here #T1 #T2 #T3",
             },
             (
                 "https://chat.zulip.org/#narrow/stream/23-zulip-terminal"
@@ -48,7 +48,7 @@ def test_encode_stream(
                 "type": "stream",
                 "stream_id": 425,
                 "display_recipient": "/ in a stream name ?",
-                "subject": "abc + de = abcde",
+                "topic": "abc + de = abcde",
             },
             (
                 "https://foo-bar.co.in/#narrow/stream/425-.2F-in-a-stream-name-.3F"

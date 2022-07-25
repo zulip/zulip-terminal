@@ -31,7 +31,7 @@ def near_stream_message_url(server_url: str, message: Message) -> str:
     message_id = str(message["id"])
     stream_id = message["stream_id"]
     stream_name = message["display_recipient"]
-    topic_name = message["subject"]
+    topic_name = message["topic"]
     encoded_stream = encode_stream(stream_id, stream_name)
     encoded_topic = hash_util_encode(topic_name)
 

@@ -165,7 +165,7 @@ def _set_count_in_model(
         if message["type"] == "stream":
             stream_id = message["stream_id"]
             update_unreads(
-                unread_counts["unread_topics"], (stream_id, message["subject"])
+                unread_counts["unread_topics"], (stream_id, message["topic"])
             )
             update_unreads(unread_counts["streams"], stream_id)
         # self-pm has only one display_recipient
@@ -217,7 +217,7 @@ def _set_count_in_view(
 
         if msg_type == "stream":
             stream_id = message["stream_id"]
-            msg_topic = message["subject"]
+            msg_topic = message["topic"]
             if controller.model.is_muted_stream(stream_id):
                 add_to_counts = False  # if muted, don't add to eg. all_msg
             else:
@@ -350,7 +350,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'sender_full_name': 'Iago',
                 'flags': [],
                 'sender_email': 'iago@zulip.com',
-                'subject': '',
+                'topic': '',
                 'subject_links': [],
                 'sender_id': 73,
                 'type': 'private',
@@ -386,7 +386,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'display_recipient': 'Verona',
                 'flags': [],
                 'reactions': [],
-                'subject': 'Verona2',
+                'topic': 'Verona2',
                 'stream_id': 32,
             },
         },
@@ -436,12 +436,12 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
         if (
             msg["type"] == "stream"
             and len(narrow) == 2
-            and narrow[1][1] == msg["subject"]
+            and narrow[1][1] == msg["topic"]
         ):
             topics_in_stream = index["topic_msg_ids"][msg["stream_id"]]
-            if not topics_in_stream.get(msg["subject"]):
-                topics_in_stream[msg["subject"]] = set()
-            topics_in_stream[msg["subject"]].add(msg["id"])
+            if not topics_in_stream.get(msg["topic"]):
+                topics_in_stream[msg["topic"]] = set()
+            topics_in_stream[msg["topic"]].add(msg["id"])
 
     return index
 

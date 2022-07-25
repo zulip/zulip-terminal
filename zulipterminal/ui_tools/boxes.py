@@ -938,7 +938,7 @@ class MessageBox(urwid.Pile):
 
             self.stream_name = self.message["display_recipient"]
             self.stream_id = self.message["stream_id"]
-            self.topic_name = self.message["subject"]
+            self.topic_name = self.message["topic"]
         elif self.message["type"] == "private":
             self.email = self.message["sender_email"]
             self.user_id = self.message["sender_id"]
@@ -983,7 +983,7 @@ class MessageBox(urwid.Pile):
         if self.message["type"] == "stream":
             return not (
                 last_msg["type"] == "stream"
-                and self.topic_name == last_msg["subject"]
+                and self.topic_name == last_msg["topic"]
                 and self.stream_name == last_msg["display_recipient"]
             )
         elif self.message["type"] == "private":
@@ -1761,7 +1761,7 @@ class MessageBox(urwid.Pile):
             elif self.message["type"] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message["display_recipient"],
-                    title=self.message["subject"],
+                    title=self.message["topic"],
                     stream_id=self.stream_id,
                 )
         elif is_command_key("STREAM_MESSAGE", key):
@@ -1865,12 +1865,12 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
-            # User can't edit messages of others that already have a subject
-            # For private messages, subject = "" (empty string)
+            # User can't edit messages of others that already have a topic
+            # For private messages, topic = "" (empty string)
             # This also handles the realm_message_content_edit_limit_seconds == 0 case
             if (
                 self.message["sender_id"] != self.model.user_id
-                and self.message["subject"] != "(no topic)"
+                and self.message["topic"] != "(no topic)"
             ):
                 if self.message["type"] == "stream":
                     self.model.controller.report_error(
@@ -1919,8 +1919,8 @@ class MessageBox(urwid.Pile):
                             )
                             msg_body_edit_enabled = False
                 elif self.message["type"] == "stream":
-                    # Allow editing topic if the message has "(no topic)" subject
-                    if self.message["subject"] == "(no topic)":
+                    # Allow editing topic if the message has "(no topic)" topic
+                    if self.message["topic"] == "(no topic)":
                         self.model.controller.report_warning(
                             [
                                 " Only topic editing is allowed."
@@ -1949,14 +1949,14 @@ class MessageBox(urwid.Pile):
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
                     caption=self.message["display_recipient"],
-                    title=self.message["subject"],
+                    title=self.message["topic"],
                 )
             msg_id = self.message["id"]
             response = self.model.fetch_raw_message_content(msg_id)
             msg = response if response is not None else ""
             write_box = self.model.controller.view.write_box
             write_box.msg_edit_state = _MessageEditState(
-                message_id=msg_id, old_topic=self.message["subject"]
+                message_id=msg_id, old_topic=self.message["topic"]
             )
             write_box.msg_write_box.set_edit_text(msg)
             write_box.msg_write_box.set_edit_pos(len(msg))
