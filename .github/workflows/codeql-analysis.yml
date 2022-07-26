@@ -1,6 +1,18 @@
 name: "GitHub CodeQL"
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel previous runs within same workflow and if within a PR (all branch runs complete)
+# (head_ref [branch name] is unique to and only for PRs, otherwise use always-unique run_id)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   analyse:
@@ -9,9 +21,11 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: false
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
     - name: Install dependencies
@@ -24,7 +38,7 @@ jobs:
         echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: python
         # Override the default behavior so that the action doesn't attempt
@@ -35,4 +49,4 @@ jobs:
       # with:
       #   languages: go, javascript, csharp, python, cpp, java
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2

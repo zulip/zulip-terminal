@@ -1,16 +1,31 @@
 name: Linting & tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel previous runs within same workflow and if within a PR (all branch runs complete)
+# (head_ref [branch name] is unique to and only for PRs, otherwise use always-unique run_id)
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   mypy:
     runs-on: ubuntu-latest
     name: Lint - Type consistency (mypy)
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
       - name: Install with type-checking tools
         run: pip install .[typing]
       - name: Run mypy
@@ -20,10 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - PEP8 & more (flake8)
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.7
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Run flake8
@@ -33,10 +52,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - Import order (isort)
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.6
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
       - name: Install with linting tools
         # NOTE: Install pytest so that isort recognizes it as a known library
         run: pip install .[linting] && pip install pytest
@@ -47,10 +70,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint - Code formatting (black)
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.6
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check code & tests meet black standards
@@ -75,11 +102,15 @@ jobs:
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
       - name: Install Python version ${{ matrix.env.PYTHON }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.env.PYTHON }}
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
       - name: Output Python version
         run: python --version
       - name: Upgrade pip
