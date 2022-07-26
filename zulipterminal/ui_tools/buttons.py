@@ -37,6 +37,8 @@ class TopButton(urwid.Button):
         self.show_function = show_function
         self.count = count
 
+        self._is_active = False
+
         super().__init__("")
 
         self.button_prefix = urwid.Text("")
@@ -56,6 +58,18 @@ class TopButton(urwid.Button):
         self.update_count(count)
 
         urwid.connect_signal(self, "click", self.activate)
+
+    @property
+    def is_active(self) -> bool:
+        return self._is_active
+
+    @is_active.setter
+    def is_active(self, new_value: bool) -> None:
+        self._is_active = new_value
+        if self._is_active:
+            self._w.set_attr_map({None: "active_narrow"})
+        else:
+            self._w.set_attr_map({None: self.label_style})
 
     def _set_prefix_style(self, style: str) -> None:
         self._prefix_markup = (style, self._prefix_markup[1])
@@ -100,7 +114,6 @@ class TopButton(urwid.Button):
         self.button_prefix.set_text(prefix)
         self.set_label(self.label_text)
         self.button_suffix.set_text(suffix)
-        self._w.set_attr_map({None: self.label_style})
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
