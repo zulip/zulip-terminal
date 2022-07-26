@@ -26,14 +26,17 @@ class TopButton(urwid.Button):
         text_color: Optional[str] = None,
         count: int = 0,
         count_style: Optional[str] = None,
+        is_active: bool = False,
     ) -> None:
         self.controller = controller
+        self.model = controller.model
         self._caption = caption
         self.show_function = show_function
         self.prefix_character = prefix_character
         self.original_color = text_color
         self.count = count
         self.count_style = count_style
+        self.is_active = is_active
 
         super().__init__("")
 
@@ -80,7 +83,8 @@ class TopButton(urwid.Button):
         self.button_prefix.set_text(prefix)
         self.set_label(self._caption)
         self.button_suffix.set_text(suffix)
-        self._w.set_attr_map({None: text_color})
+        if not self.is_active:
+            self._w.set_attr_map({None: text_color})
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -160,6 +164,7 @@ class StreamButton(TopButton):
         controller: Any,
         view: Any,
         count: int,
+        is_active: bool = False,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
@@ -172,6 +177,7 @@ class StreamButton(TopButton):
         self.model = controller.model
         self.count = count
         self.view = view
+        self.is_active = is_active
 
         for entry in view.palette:
             if entry[0] is None:
