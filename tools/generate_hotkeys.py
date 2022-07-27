@@ -18,6 +18,9 @@ OUTPUT_FILE_NAME = OUTPUT_FILE.name
 SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
+# Exclude keys from duplicate keys checking
+KEYS_TO_EXCLUDE = ["q", "e", "m", "r"]
+
 
 def main(check_only: bool) -> None:
     if check_only:
@@ -36,7 +39,9 @@ def lint_hotkeys_file() -> None:
     error_flag = 0
     categories = read_help_categories()
     for action in HELP_CATEGORIES.keys():
+        check_duplicate_keys_list: List[str] = []
         for help_text, key_combinations_list in categories[action]:
+            check_duplicate_keys_list.extend(key_combinations_list)
             various_key_combinations = " / ".join(key_combinations_list)
             # Check description style
             if not re.match(HELP_TEXT_STYLE, help_text):
@@ -45,6 +50,20 @@ def lint_hotkeys_file() -> None:
                     "It should contain only alphabets, spaces and special characters except ."
                 )
                 error_flag = 1
+        # Check key combination duplication
+        check_duplicate_keys_list = [
+            key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
+        ]
+        duplicate_keys = [
+            key
+            for key in check_duplicate_keys_list
+            if check_duplicate_keys_list.count(key) > 1
+        ]
+        if len(duplicate_keys) != 0:
+            print(
+                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[action]}) detected"
+            )
+            error_flag = 1
     if error_flag == 1:
         print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
     else:
