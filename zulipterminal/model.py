@@ -98,6 +98,7 @@ class Model:
         self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
+        self.active_button: Any = None
 
         self.user_id = -1
         self.user_email = ""
@@ -302,8 +303,36 @@ class Model:
         else:
             raise RuntimeError("Model.set_narrow parameters used incorrectly.")
 
+        try:
+            if self.stream_id:
+                self.active_button = self.controller.view.stream_id_to_button[
+                    self.stream_id
+                ]
+        except AttributeError:
+            pass
+
         if new_narrow != self.narrow:
+
+            try:
+                if self.stream_id and new_narrow:
+                    self.active_button.is_active = False
+                    self.active_button._w.set_attr_map({None: None})
+                if not self.narrow and self.active_button:
+                    self.active_button.is_active = False
+                    self.active_button._w.set_attr_map({None: None})
+
+            except AttributeError:
+                pass
+
             self.narrow = new_narrow
+
+            if stream and hasattr(Model, "controller"):
+                stream_button = self.controller.view.stream_id_to_button[
+                    self.stream_id_from_name(stream)
+                ]
+                self.active_button = stream_button
+                self.active_button.is_active = True
+                self.active_button._w.set_attr_map({None: "active_narrow"})
 
             if pm_with is not None and new_narrow[0][0] == "pm_with":
                 users = pm_with.split(", ")
