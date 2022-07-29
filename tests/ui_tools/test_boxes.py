@@ -829,7 +829,7 @@ class TestWriteBox:
                     3: "#**Web public stream**",
                     4: "#**Secret stream**",
                 },
-                {"muted": {99}},
+                {"muted": ["Secret stream"]},
             ),
             # With 'Stream 1' and 'Secret stream' muted.
             (
@@ -841,7 +841,7 @@ class TestWriteBox:
                     3: "#**Stream 1**",
                     4: "#**Secret stream**",
                 },
-                {"muted": {99, 1}},
+                {"muted": ["Secret stream", "Stream 1"]},
             ),
             # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' muted.
             (
@@ -853,7 +853,7 @@ class TestWriteBox:
                     3: "#**Some general stream**",
                     4: "#**Web public stream**",
                 },
-                {"pinned": ["Secret stream", "Stream 1"], "muted": {99}},
+                {"pinned": ["Secret stream", "Stream 1"], "muted": ["Secret stream"]},
             ),
             # With 'Stream 1' and 'Secret stream' pinned, 'Some general stream' and 'Stream 2' muted.
             (
@@ -865,7 +865,10 @@ class TestWriteBox:
                     3: "#**Stream 2**",
                     4: "#**Some general stream**",
                 },
-                {"pinned": ["Secret stream", "Stream 1"], "muted": {1000, 2}},
+                {
+                    "pinned": ["Secret stream", "Stream 1"],
+                    "muted": ["Some general stream", "Stream 2"],
+                },
             ),
             # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' and 'Stream 2' muted.
             (
@@ -877,7 +880,10 @@ class TestWriteBox:
                     3: "#**Web public stream**",
                     4: "#**Stream 2**",
                 },
-                {"pinned": ["Secret stream", "Stream 1"], "muted": {99, 2}},
+                {
+                    "pinned": ["Secret stream", "Stream 1"],
+                    "muted": ["Secret stream", "Stream 2"],
+                },
             ),
             # With 'Stream 1' as current stream.
             (
@@ -903,7 +909,7 @@ class TestWriteBox:
                 },
                 {
                     "pinned": ["Secret stream", "Stream 1"],
-                    "muted": {99, 2},
+                    "muted": ["Secret stream", "Stream 2"],
                     "current_stream": 2,
                 },
             ),
@@ -927,7 +933,11 @@ class TestWriteBox:
         write_box.view.pinned_streams = streams_to_pin
         write_box.stream_id = stream_categories.get("current_stream", None)
         write_box.model.stream_dict = stream_dict
-        write_box.model.muted_streams = stream_categories.get("muted", set())
+        write_box.model.muted_streams = set(
+            stream["stream_id"]
+            for stream in stream_dict.values()
+            if stream["name"] in stream_categories.get("muted", set())
+        )
         for state, required_typeahead in state_and_required_typeahead.items():
             typeahead_string = write_box.generic_autocomplete(text, state)
             assert typeahead_string == required_typeahead
