@@ -139,7 +139,7 @@ class TestWriteBox:
     ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         write_box.model.is_valid_stream.return_value = is_valid_stream
-
+        write_box.model.muted_streams = set()
         typeahead_string = write_box.generic_autocomplete(text, state)
 
         assert typeahead_string == required_typeahead
@@ -559,6 +559,7 @@ class TestWriteBox:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
         )
+        write_box.model.muted_streams = set()
         write_box.generic_autocomplete(text, state)
 
         write_box.view.set_typeahead_footer.assert_called_once_with(
@@ -814,6 +815,66 @@ class TestWriteBox:
                 },
                 {"pinned": ["Secret stream", "Stream 1"]},
             ),
+            # With 'Secret stream' muted.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Stream 2**",
+                    2: "#**Some general stream**",
+                    3: "#**Web public stream**",
+                    4: "#**Secret stream**",
+                },
+                {"muted": {99}},
+            ),
+            # With 'Stream 1' and 'Secret stream' muted.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 2**",
+                    1: "#**Some general stream**",
+                    2: "#**Web public stream**",
+                    3: "#**Stream 1**",
+                    4: "#**Secret stream**",
+                },
+                {"muted": {99, 1}},
+            ),
+            # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' muted.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Secret stream**",
+                    2: "#**Stream 2**",
+                    3: "#**Some general stream**",
+                    4: "#**Web public stream**",
+                },
+                {"pinned": ["Secret stream", "Stream 1"], "muted": {99}},
+            ),
+            # With 'Stream 1' and 'Secret stream' pinned, 'Some general stream' and 'Stream 2' muted.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Secret stream**",
+                    2: "#**Web public stream**",
+                    3: "#**Stream 2**",
+                    4: "#**Some general stream**",
+                },
+                {"pinned": ["Secret stream", "Stream 1"], "muted": {1000, 2}},
+            ),
+            # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' and 'Stream 2' muted.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Secret stream**",
+                    2: "#**Some general stream**",
+                    3: "#**Web public stream**",
+                    4: "#**Stream 2**",
+                },
+                {"pinned": ["Secret stream", "Stream 1"], "muted": {99, 2}},
+            ),
         ],
     )
     def test_generic_autocomplete_streams(
@@ -822,6 +883,7 @@ class TestWriteBox:
         text: str,
         state_and_required_typeahead: Dict[int, Optional[str]],
         stream_categories: Dict[str, Any],
+        stream_dict: Dict[int, Dict[str, Any]],
     ) -> None:
         streams_to_pin = (
             [{"name": stream_name} for stream_name in stream_categories["pinned"]]
@@ -831,6 +893,8 @@ class TestWriteBox:
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
+        write_box.model.stream_dict = stream_dict
+        write_box.model.muted_streams = stream_categories.get("muted", set())
         for state, required_typeahead in state_and_required_typeahead.items():
             typeahead_string = write_box.generic_autocomplete(text, state)
             assert typeahead_string == required_typeahead
