@@ -938,9 +938,12 @@ class TestWriteBox:
             for stream in stream_dict.values()
             if stream["name"] in stream_categories.get("muted", set())
         )
-        for state, required_typeahead in state_and_required_typeahead.items():
-            typeahead_string = write_box.generic_autocomplete(text, state)
-            assert typeahead_string == required_typeahead
+        states = state_and_required_typeahead.keys()
+        required_typeaheads = list(state_and_required_typeahead.values())
+        typeahead_strings = [
+            write_box.generic_autocomplete(text, state) for state in states
+        ]
+        assert typeahead_strings == required_typeaheads
 
     @pytest.mark.parametrize(
         "text, state, required_typeahead",
