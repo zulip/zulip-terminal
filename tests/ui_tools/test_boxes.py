@@ -136,9 +136,11 @@ class TestWriteBox:
         is_valid_stream: bool,
         required_typeahead: Optional[str],
         topics: List[str],
+        stream_dict: Dict[int, Dict[str, Any]],
     ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         write_box.model.is_valid_stream.return_value = is_valid_stream
+        write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = set()
         typeahead_string = write_box.generic_autocomplete(text, state)
 
@@ -555,10 +557,12 @@ class TestWriteBox:
         state: Optional[int],
         footer_text: List[Any],
         text: str,
+        stream_dict: Dict[int, Dict[str, Any]],
     ) -> None:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
         )
+        write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = set()
         write_box.generic_autocomplete(text, state)
 
@@ -875,6 +879,34 @@ class TestWriteBox:
                 },
                 {"pinned": ["Secret stream", "Stream 1"], "muted": {99, 2}},
             ),
+            # With 'Stream 1' as current stream.
+            (
+                "#S",
+                {
+                    0: "#**Stream 1**",
+                    1: "#**Secret stream**",
+                    2: "#**Some general stream**",
+                    3: "#**Stream 2**",
+                    4: "#**Web public stream**",
+                },
+                {"current_stream": 1},
+            ),
+            # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' and 'Stream 2' muted, 'Stream 2' as current stream.
+            (
+                "#Stream",
+                {
+                    0: "#**Stream 2**",
+                    1: "#**Stream 1**",
+                    2: "#**Secret stream**",
+                    3: "#**Some general stream**",
+                    4: "#**Web public stream**",
+                },
+                {
+                    "pinned": ["Secret stream", "Stream 1"],
+                    "muted": {99, 2},
+                    "current_stream": 2,
+                },
+            ),
         ],
     )
     def test_generic_autocomplete_streams(
@@ -893,6 +925,7 @@ class TestWriteBox:
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
+        write_box.stream_id = stream_categories.get("current_stream", None)
         write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = stream_categories.get("muted", set())
         for state, required_typeahead in state_and_required_typeahead.items():
