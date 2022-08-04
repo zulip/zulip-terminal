@@ -1461,7 +1461,7 @@ class StreamInfoView(PopUpView):
         self.widgets.append(muted_setting)
         self.widgets.append(pinned_setting)
         self.widgets.extend(visual_notification_setting)
-        super().__init__(controller, self.widgets, "STREAM_DESC", popup_width, title)
+        super().__init__(controller, self.widgets, "STREAM_INFO", popup_width, title)
 
     def toggle_mute_status(self, button: Any, new_state: bool) -> None:
         self.controller.model.toggle_stream_muted_status(self.stream_id)
@@ -1498,7 +1498,7 @@ class StreamMembersView(PopUpView):
         )
         widgets = self.make_table_with_categories(stream_users_content, column_width)
 
-        super().__init__(controller, widgets, "STREAM_DESC", popup_width, title)
+        super().__init__(controller, widgets, "STREAM_INFO", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("GO_BACK", key) or is_command_key("STREAM_MEMBERS", key):

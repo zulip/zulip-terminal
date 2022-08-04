@@ -242,7 +242,7 @@ class StreamButton(TopButton):
             self.controller.stream_muting_confirmation_popup(
                 self.stream_id, self.stream_name
             )
-        elif is_command_key("STREAM_DESC", key):
+        elif is_command_key("STREAM_INFO", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
 

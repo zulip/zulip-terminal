@@ -1377,7 +1377,7 @@ class TestStreamInfoView:
         assert footlinks_width == expected_footlinks_width
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("GO_BACK"), *keys_for_command("STREAM_DESC")}
+        "key", {*keys_for_command("GO_BACK"), *keys_for_command("STREAM_INFO")}
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
