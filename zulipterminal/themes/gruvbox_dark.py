@@ -30,6 +30,7 @@ STYLES = {
     'user_idle'        : (Color.NEUTRAL_YELLOW,        Color.DARK0_HARD),
     'user_offline'     : (Color.LIGHT2,                Color.DARK0_HARD),
     'user_inactive'    : (Color.LIGHT2,                Color.DARK0_HARD),
+    'user_bot'         : (Color.LIGHT2,                Color.DARK0_HARD),
     'title'            : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
     'column_title'     : (Color.LIGHT2__BOLD,          Color.DARK0_HARD),
     'time'             : (Color.BRIGHT_BLUE,           Color.DARK0_HARD),
