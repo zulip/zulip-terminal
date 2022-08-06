@@ -695,8 +695,8 @@ def notify_if_message_sent_outside_narrow(
         ]
         pm_with_narrow = [["pm_with", ", ".join(recipient_emails)]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
-    elif message["type"] == "stream_messages":
-        stream_narrow = [["is", "stream_messages"]]
+    # elif message["type"] == "stream_messages":
+    #     stream_narrow = [["is", "stream_messages"]]
 
 
 
