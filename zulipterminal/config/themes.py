@@ -31,6 +31,7 @@ REQUIRED_STYLES = {
     'user_idle'       : '',
     'user_offline'    : '',
     'user_inactive'   : '',
+    'user_bot'        : '',
     'title'           : 'bold',
     'column_title'    : 'bold',
     'time'            : '',

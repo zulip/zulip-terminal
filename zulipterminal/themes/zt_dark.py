@@ -24,6 +24,7 @@ STYLES = {
     'user_idle'       : (Color.YELLOW,              Color.BLACK),
     'user_offline'    : (Color.WHITE,               Color.BLACK),
     'user_inactive'   : (Color.WHITE,               Color.BLACK),
+    'user_bot'        : (Color.WHITE,               Color.BLACK),
     'title'           : (Color.WHITE__BOLD,         Color.BLACK),
     'column_title'    : (Color.WHITE__BOLD,         Color.BLACK),
     'time'            : (Color.LIGHT_BLUE,          Color.BLACK),
