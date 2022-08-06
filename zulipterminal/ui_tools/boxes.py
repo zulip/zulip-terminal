@@ -1070,7 +1070,10 @@ class MessageBox(urwid.Pile):
         if curr_narrow == []:
             text_to_fill = "All messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = "All private messages"
+            if curr_narrow[0][0] == "is":
+                text_to_fill = "All private messages"
+            else:
+                text_to_fill = "All stream messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
             text_to_fill = "Starred messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":

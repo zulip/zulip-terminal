@@ -38,6 +38,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -154,9 +155,10 @@ class MessageView(urwid.ListBox):
     @asynch
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
-        current_ids = self.model.get_message_ids_in_current_narrow()
+        current_ids = set(self.model.get_message_ids_in_current_narrow())
         self.model.get_messages(num_before=0, num_after=30, anchor=anchor)
-        new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
+        new_ids = set(self.model.get_message_ids_in_current_narrow()) - current_ids
+        notify(str(type(current_ids)), "")
         if self.log:
             last_message = self.log[-1].original_widget.message
         else:

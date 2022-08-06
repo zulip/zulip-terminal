@@ -293,7 +293,7 @@ class Model:
             frozenset(["stream"]): [["stream", stream]],
             frozenset(["stream", "topic"]): [["stream", stream], ["topic", topic]],
             frozenset(["pms"]): [["is", "private"]],
-            frozenset(["stream_messages"]): [["is", "stream_messages"]],
+            frozenset(["stream_messages"]): [["-is", "private"]],
             frozenset(["pm_with"]): [["pm_with", pm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
@@ -366,7 +366,12 @@ class Model:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
         elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
+            if narrow[0][0] == "-is":
+                stream_ids = [ids for ids in index["all_msg_ids"] if ids not in index["private_msg_ids"]]
+                index["stream_msg_ids"] = stream_ids
+                ids = stream_ids
+            if narrow[0][0] == "is":
+                ids = index["private_msg_ids"]
         elif narrow[0][1] == "stream_messages":
             stream_ids = [ids for ids in index["all_msg_ids"] if ids not in index["private_msg_ids"]]
             index["stream_msg_ids"] = stream_ids

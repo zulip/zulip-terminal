@@ -427,6 +427,11 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     {recipient["id"] for recipient in msg["display_recipient"]}
                 )
 
+                if narrow[0][0] == "-is":
+                    index["stream_msg_ids"].add(msg["id"])
+                    if msg["type"] == "stream":
+                        index["stream_msg_ids"].add(msg["id"])
+
                 if narrow[0][0] == "pm_with":
                     narrow_emails = [
                         model.user_dict[email]["user_id"]
