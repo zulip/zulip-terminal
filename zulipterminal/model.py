@@ -1021,12 +1021,18 @@ class Model:
             for properties in self.user_dict.values()
             if properties["status"] == "inactive"
         ]
+        bot = [
+            properties
+            for properties in self.user_dict.values()
+            if properties["status"] == "bot"
+        ]
 
         # Construct user_list from sorted components of each list
         user_list = sorted(active, key=lambda u: u["full_name"].casefold())
         user_list += sorted(idle, key=lambda u: u["full_name"].casefold())
         user_list += sorted(offline, key=lambda u: u["full_name"].casefold())
         user_list += sorted(inactive, key=lambda u: u["full_name"].casefold())
+        user_list += sorted(bot, key=lambda u: u["full_name"].casefold())
         # Add current user to the top of the list
         user_list.insert(0, current_user)
         self.user_dict[current_user["email"]] = current_user
