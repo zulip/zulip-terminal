@@ -1018,7 +1018,7 @@ def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         "emailgateway@zulip.com": {
             "email": "emailgateway@zulip.com",
             "full_name": "Email Gateway",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 6,
         },
         "feedback@zulip.com": {
@@ -1030,13 +1030,13 @@ def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         "notification-bot@zulip.com": {
             "email": "notification-bot@zulip.com",
             "full_name": "Notification Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 5,
         },
         "welcome-bot@zulip.com": {
             "email": "welcome-bot@zulip.com",
             "full_name": "Welcome Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 4,
         },
     }
@@ -1105,13 +1105,13 @@ def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
         {
             "email": "notification-bot@zulip.com",
             "full_name": "Notification Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 5,
         },
         {
             "email": "welcome-bot@zulip.com",
             "full_name": "Welcome Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 4,
         },
         {
