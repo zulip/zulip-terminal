@@ -1024,7 +1024,7 @@ def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
         "feedback@zulip.com": {
             "email": "feedback@zulip.com",
             "full_name": "Zulip Feedback Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 1,
         },
         "notification-bot@zulip.com": {
@@ -1117,7 +1117,7 @@ def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
         {
             "email": "feedback@zulip.com",
             "full_name": "Zulip Feedback Bot",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 1,
         },
     ]
