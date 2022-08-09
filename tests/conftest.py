@@ -1075,7 +1075,7 @@ def user_list(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
         {
             "email": "emailgateway@zulip.com",
             "full_name": "Email Gateway",
-            "status": "inactive",
+            "status": "bot",
             "user_id": 6,
         },
         {
