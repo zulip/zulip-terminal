@@ -71,7 +71,7 @@ class TestModel:
         assert model.stream_dict == stream_dict
         assert model.recipients == frozenset()
         assert model.index == initial_index
-        assert model.last_unread_topic is None
+        assert model._last_unread_topic is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
         )
@@ -3247,7 +3247,7 @@ class TestModel:
         model.unread_counts = {
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
-        model.last_unread_topic = last_unread_topic
+        model._last_unread_topic = last_unread_topic
 
         unread_topic = model.get_next_unread_topic()
 
