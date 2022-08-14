@@ -71,6 +71,7 @@ class TestModel:
         assert model.stream_dict == stream_dict
         assert model.recipients == frozenset()
         assert model.index == initial_index
+        assert model.last_unread_topic is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
         )
@@ -3202,6 +3203,37 @@ class TestModel:
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
 
         assert return_value == is_muted
+
+    @pytest.mark.parametrize(
+        "unread_topics, last_unread_topic, next_unread_topic",
+        [
+            case(
+                {(1, "topic"), (2, "topic2")},
+                None,
+                (1, "topic"),
+                id="unread_present_after_no_state",
+            ),
+            case(
+                {(1, "topic"), (2, "topic2")},
+                (1, "topic"),
+                (2, "topic2"),
+                id="unread_present_after_previous_topic",
+            ),
+            case({}, None, None, id="no_unreads"),
+        ],
+    )
+    def test_get_next_unread_topic(
+        self, model, unread_topics, last_unread_topic, next_unread_topic
+    ):
+        # NOTE Not important how many unreads per topic, so just use '1'
+        model.unread_counts = {
+            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
+        }
+        model.last_unread_topic = last_unread_topic
+
+        unread_topic = model.get_next_unread_topic()
+
+        assert unread_topic == next_unread_topic
 
     @pytest.mark.parametrize(
         "stream_id, expected_response",
