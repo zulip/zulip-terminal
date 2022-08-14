@@ -551,26 +551,10 @@ class MiddleColumnView(urwid.Frame):
         self.model = model
         self.controller = model.controller
         self.view = view
-        self.last_unread_topic = None
         self.last_unread_pm = None
         self.search_box = search_box
         view.message_view = message_view
         super().__init__(message_view, header=search_box, footer=write_box)
-
-    def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
-        topics = list(self.model.unread_counts["unread_topics"].keys())
-        next_topic = False
-        for topic in topics:
-            if next_topic is True:
-                self.last_unread_topic = topic
-                return topic
-            if topic == self.last_unread_topic:
-                next_topic = True
-        if len(topics) > 0:
-            topic = topics[0]
-            self.last_unread_topic = topic
-            return topic
-        return None
 
     def get_next_unread_pm(self) -> Optional[int]:
         pms = list(self.model.unread_counts["unread_pms"].keys())
@@ -631,7 +615,7 @@ class MiddleColumnView(urwid.Frame):
 
         elif is_command_key("NEXT_UNREAD_TOPIC", key):
             # narrow to next unread topic
-            stream_topic = self.get_next_unread_topic()
+            stream_topic = self.model.get_next_unread_topic()
             if stream_topic is None:
                 return key
             stream_id, topic = stream_topic

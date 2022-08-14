@@ -102,6 +102,7 @@ class Model:
         self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
+        self.last_unread_topic = None
 
         self.user_id = -1
         self.user_email = ""
@@ -796,6 +797,21 @@ class Model:
         stream_name = self.stream_dict[stream_id]["name"]
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics.keys()
+
+    def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
+        topics = sorted(self.unread_counts["unread_topics"].keys())
+        next_topic = False
+        for topic in topics:
+            if next_topic is True:
+                self.last_unread_topic = topic
+                return topic
+            if topic == self.last_unread_topic:
+                next_topic = True
+        if len(topics) > 0:
+            topic = topics[0]
+            self.last_unread_topic = topic
+            return topic
+        return None
 
     def _fetch_initial_data(self) -> None:
         # Thread Processes to reduce start time.

@@ -824,32 +824,12 @@ class TestMiddleColumnView:
     def test_init(self, mid_col_view):
         assert mid_col_view.model == self.model
         assert mid_col_view.controller == self.model.controller
-        assert mid_col_view.last_unread_topic is None
         assert mid_col_view.last_unread_pm is None
         assert mid_col_view.search_box == self.search_box
         assert self.view.message_view == "MSG_LIST"
         self.super.assert_called_once_with(
             "MSG_LIST", header=self.search_box, footer=self.write_box
         )
-
-    def test_get_next_unread_topic(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {1: 1, 2: 1}}
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value == 1
-        assert mid_col_view.last_unread_topic == 1
-
-    def test_get_next_unread_topic_again(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {1: 1, 2: 1}}
-        mid_col_view.last_unread_topic = 1
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value == 2
-        assert mid_col_view.last_unread_topic == 2
-
-    def test_get_next_unread_topic_no_unread(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_topics": {}}
-        return_value = mid_col_view.get_next_unread_topic()
-        assert return_value is None
-        assert mid_col_view.last_unread_topic is None
 
     def test_get_next_unread_pm(self, mid_col_view):
         mid_col_view.model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
@@ -940,17 +920,16 @@ class TestMiddleColumnView:
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mocker.patch(
-            MIDCOLVIEW + ".get_next_unread_topic",
-            return_value=("1", "topic"),
-        )
-        mid_col_view.model.stream_dict = {"1": {"name": "stream"}}
-        mid_col_view.keypress(size, key)
 
-        mid_col_view.get_next_unread_topic.assert_called_once_with()
+        mid_col_view.model.stream_dict = {1: {"name": "stream"}}
+        mid_col_view.model.get_next_unread_topic.return_value = (1, "topic")
+
+        return_value = mid_col_view.keypress(size, key)
+
         mid_col_view.controller.narrow_to_topic.assert_called_once_with(
             stream_name="stream", topic_name="topic"
         )
+        assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
     def test_keypress_NEXT_UNREAD_TOPIC_no_stream(
@@ -958,9 +937,11 @@ class TestMiddleColumnView:
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mocker.patch(MIDCOLVIEW + ".get_next_unread_topic", return_value=None)
+        mid_col_view.model.get_next_unread_topic.return_value = None
 
         return_value = mid_col_view.keypress(size, key)
+
+        assert mid_col_view.controller.narrow_to_topic.called is False
         assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
