@@ -3219,7 +3219,25 @@ class TestModel:
                 (2, "topic2"),
                 id="unread_present_after_previous_topic",
             ),
-            case({}, None, None, id="no_unreads"),
+            case(
+                {(1, "topic"), (2, "topic2")},
+                (2, "topic2"),
+                (1, "topic"),
+                id="unread_present_before_previous_topic",
+            ),
+            case(
+                {(1, "topic")},
+                (1, "topic"),
+                (1, "topic"),
+                id="unread_still_present_in_topic",  # TODO Should this be None?
+            ),
+            case(
+                {},
+                (1, "topic"),
+                None,
+                id="no_unreads_with_previous_topic_state",
+            ),
+            case({}, None, None, id="no_unreads_with_no_previous_topic_state"),
         ],
     )
     def test_get_next_unread_topic(
