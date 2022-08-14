@@ -102,7 +102,7 @@ class Model:
         self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
-        self.last_unread_topic = None
+        self._last_unread_topic = None
 
         self.user_id = -1
         self.user_email = ""
@@ -803,13 +803,13 @@ class Model:
         next_topic = False
         for topic in topics:
             if next_topic is True:
-                self.last_unread_topic = topic
+                self._last_unread_topic = topic
                 return topic
-            if topic == self.last_unread_topic:
+            if topic == self._last_unread_topic:
                 next_topic = True
         if len(topics) > 0:
             topic = topics[0]
-            self.last_unread_topic = topic
+            self._last_unread_topic = topic
             return topic
         return None
 
