@@ -3229,7 +3229,7 @@ class TestModel:
                 {(1, "topic")},
                 (1, "topic"),
                 (1, "topic"),
-                id="unread_still_present_in_topic",  # TODO Should this be None?
+                id="unread_still_present_in_topic",  # TODO Should be None? (2 other cases)
             ),
             case(
                 {},
@@ -3238,6 +3238,66 @@ class TestModel:
                 id="no_unreads_with_previous_topic_state",
             ),
             case({}, None, None, id="no_unreads_with_no_previous_topic_state"),
+            case(
+                {(1, "topic"), (2, "topic2"), (3, "topic3")},
+                (2, "topic2"),
+                (1, "topic"),
+                id="unread_present_before_previous_topic_skipping_muted_stream",
+            ),
+            case(
+                {(1, "topic"), (2, "topic2"), (3, "topic3"), (4, "topic4")},
+                (2, "topic2"),
+                (4, "topic4"),
+                id="unread_present_after_previous_topic_skipping_muted_stream",
+            ),
+            case(
+                {(3, "topic3")},
+                (2, "topic2"),
+                None,
+                id="unread_present_only_in_muted_stream",
+            ),
+            case(
+                {(3, "topic3")},
+                (3, "topic3"),
+                None,
+                id="unread_present_starting_in_muted_stream",  # TODO See other 2 cases
+            ),
+            case(
+                {(3, "topic3"), (4, "topic4")},
+                None,
+                (4, "topic4"),
+                id="unread_present_skipping_first_muted_stream_unread",
+            ),
+            case(
+                {(2, "topic2 muted")},
+                None,
+                None,
+                id="unread_present_only_in_muted_topic",
+            ),
+            case(
+                {(2, "topic2 muted")},
+                (2, "topic2 muted"),
+                None,
+                id="unread_present_starting_in_muted_topic",  # TODO See other 2 cases
+            ),
+            case(
+                {(3, "topic3 muted")},
+                None,
+                None,
+                id="unread_present_only_in_muted_topic_in_muted_stream",
+            ),
+            case(
+                {(2, "topic2"), (2, "topic2 muted"), (4, "topic4")},
+                (2, "topic2"),
+                (4, "topic4"),
+                id="unread_present_after_previous_topic_skipping_muted_topic",
+            ),
+            case(
+                {(2, "topic2"), (2, "muted topic2")},
+                (2, "muted topic2"),
+                (2, "topic2"),
+                id="unread_present_after_previous_topic_muted",
+            ),
         ],
     )
     def test_get_next_unread_topic(
@@ -3248,6 +3308,22 @@ class TestModel:
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
         model._last_unread_topic = last_unread_topic
+
+        # Minimal extra streams for muted stream testing (should not exist otherwise)
+        assert {3, 4} & set(model.stream_dict) == set()
+        model.stream_dict[3] = {"name": "Stream 3"}
+        model.stream_dict[4] = {"name": "Stream 4"}
+        model.muted_streams = {3}
+
+        # date data unimportant (if present)
+        model._muted_topics = {
+            stream_topic: None
+            for stream_topic in [
+                ("Stream 2", "muted topic2"),
+                ("Stream 2", "topic2 muted"),
+                ("Stream 3", "topic3 muted"),
+            ]
+        }
 
         unread_topic = model.get_next_unread_topic()
 
