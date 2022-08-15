@@ -38,6 +38,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -47,6 +48,7 @@ from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
     PMButton,
     StarredButton,
+    StreamMessagesButton,
     StreamButton,
     TopicButton,
     UserButton,
@@ -153,9 +155,10 @@ class MessageView(urwid.ListBox):
     @asynch
     def load_new_messages(self, anchor: int) -> None:
         self.new_loading = True
-        current_ids = self.model.get_message_ids_in_current_narrow()
+        current_ids = set(self.model.get_message_ids_in_current_narrow())
         self.model.get_messages(num_before=0, num_after=30, anchor=anchor)
-        new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
+        new_ids = set(self.model.get_message_ids_in_current_narrow()) - current_ids
+        notify(str(type(current_ids)), "")
         if self.log:
             last_message = self.log[-1].original_widget.message
         else:
@@ -801,7 +804,7 @@ class LeftColumnView(urwid.Pile):
         self.stream_v = self.streams_view()
 
         self.is_in_topic_view = False
-        contents = [(4, self.menu_v), self.stream_v]
+        contents = [(5, self.menu_v), self.stream_v]
         super().__init__(contents)
 
     def menu_view(self) -> Any:
@@ -815,7 +818,11 @@ class LeftColumnView(urwid.Pile):
             controller=self.controller,
             count=self.model.unread_counts["all_mentions"],
         )
-
+        
+        count = self.model.unread_counts.get("all_msg", 0) - self.model.unread_counts.get("all_pms", 0)
+        self.view.all_streams_button = StreamMessagesButton(
+            controller = self.controller, count = count
+        )
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
         self.view.starred_button = StarredButton(
@@ -825,6 +832,7 @@ class LeftColumnView(urwid.Pile):
             self.view.home_button,
             self.view.pm_button,
             self.view.mentioned_button,
+            self.view.all_streams_button,
             self.view.starred_button,
         ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))

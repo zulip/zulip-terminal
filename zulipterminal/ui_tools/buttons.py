@@ -12,6 +12,7 @@ from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
+from zulipterminal.platform_code import notify
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -82,6 +83,9 @@ class TopButton(urwid.Button):
         self.button_suffix.set_text(suffix)
         self._w.set_attr_map({None: text_color})
 
+    def update_widget_highlight(self, highlight_style: str) -> None:
+        self.original_color = highlight_style
+
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
         self.controller.view.show_right_panel(visible=False)
@@ -137,6 +141,18 @@ class MentionedButton(TopButton):
             count_style="unread_count",
         )
 
+class StreamMessagesButton(TopButton):
+    def __init__(self, *, controller:Any, count: int) -> None:
+        button_text =  f"Streams          [{primary_key_for_command('STREAM_NARROW')}]"
+
+        super().__init__(
+            controller = controller,
+            caption = button_text,
+            show_function=controller.narrow_to_all_streams,
+            prefix_character="",
+            count = count,
+            count_style = "unread_count",
+        )
 
 class StarredButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
@@ -222,6 +238,13 @@ class StreamButton(TopButton):
         elif is_command_key("STREAM_DESC", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
+
+    def mark_active(self) -> None:
+        self.update_widget_highlight("stream_active")
+
+    def mark_inactive(self) -> None:
+        self.original_color = None
+        self.update_count(self.count)
 
 
 class UserButton(TopButton):
