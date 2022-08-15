@@ -3,7 +3,7 @@
 import subprocess
 import sys
 
-from tools.python_tools import lintable_tools_files
+from python_tools import lintable_tools_files
 
 
 python_sources = [
