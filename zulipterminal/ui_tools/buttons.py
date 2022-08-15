@@ -12,6 +12,7 @@ from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
+from zulipterminal.platform_code import notify
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -81,6 +82,9 @@ class TopButton(urwid.Button):
         self.set_label(self._caption)
         self.button_suffix.set_text(suffix)
         self._w.set_attr_map({None: text_color})
+
+    def update_widget_highlight(self, highlight_style: str) -> None:
+        self.original_color = highlight_style
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -222,6 +226,13 @@ class StreamButton(TopButton):
         elif is_command_key("STREAM_DESC", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
+
+    def mark_active(self) -> None:
+        self.update_widget_highlight("stream_active")
+
+    def mark_inactive(self) -> None:
+        self.original_color = None
+        self.update_count(self.count)
 
 
 class UserButton(TopButton):
