@@ -4,6 +4,8 @@ Helper functions which render tables in the UI
 
 from typing import Any, List, Optional, Tuple, Union, cast
 
+from zulipterminal.urwid_types import urwid_MarkupTuple
+
 
 def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
     """
@@ -33,7 +35,7 @@ def parse_html_table(table_element: Any) -> Tuple[List[str], List[List[str]]]:
     return (column_alignments, cells)
 
 
-StyledTableData = List[Union[str, Tuple[Optional[str], str]]]
+StyledTableData = List[Union[str, urwid_MarkupTuple]]
 
 
 def pad_row_strip(

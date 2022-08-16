@@ -56,7 +56,7 @@ from zulipterminal.helper import (
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.ui_tools.tables import render_table
-from zulipterminal.urwid_types import urwid_Size
+from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 
 if typing.TYPE_CHECKING:
@@ -1563,7 +1563,7 @@ class MessageBox(urwid.Pile):
         any_differences = any(different.values())
 
         if any_differences:  # Construct content_header, if needed
-            TextType = Dict[str, Tuple[Optional[str], str]]
+            TextType = Dict[str, urwid_MarkupTuple]
             text_keys = ("author", "star", "time", "status")
             text: TextType = {key: (None, " ") for key in text_keys}
 

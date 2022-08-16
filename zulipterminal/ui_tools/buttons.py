@@ -16,7 +16,7 @@ from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
-from zulipterminal.urwid_types import urwid_Size
+from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 
 class TopButton(urwid.Button):
@@ -71,7 +71,7 @@ class TopButton(urwid.Button):
         self.update_widget((self.count_style, count_text), new_color)
 
     def update_widget(
-        self, count_text: Tuple[Optional[str], str], text_color: Optional[str]
+        self, count_text: urwid_MarkupTuple, text_color: Optional[str]
     ) -> Any:
         if self.prefix_character:
             prefix = [" ", self.prefix_character, " "]
