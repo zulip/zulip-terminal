@@ -64,6 +64,7 @@ REQUIRED_STYLES = {
     'edit_time'       : 'bold',
     'current_user'    : '',
     'muted'           : 'bold',
+    'muted_selected'  : 'bold',
     'popup_border'    : 'bold',
     'popup_category'  : 'bold',
     'popup_contrast'  : 'standout',
@@ -275,3 +276,53 @@ def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> No
             pygments_bg,
         )
         urwid_theme.append(new_style)
+
+
+def _create_focus_style(style: StyleSpec, view: Any, selected_style: StyleSpec) -> str:
+    """
+    Create a copy of the original style and edit its
+    background  to be that of "selected".
+    """
+    default_style = view.palette[0]
+    assert default_style[0] is None
+    selected_style_name = selected_style[0]
+    assert selected_style_name is not None
+
+    # Append "_selected_style_name" to name
+    focus_style = list(style)
+    assert focus_style[0] is not None
+    focus_style[0] += "_" + selected_style_name
+    focus_style_name = focus_style[0]
+
+    # Return focus_style_name if already exists
+    # This can also be used to override styles to make custom focus styles
+    if focus_style_name in [style[0] for style in view.palette]:
+        return focus_style_name
+
+    # Use the given selected style in mono theme
+    if len(focus_style) == 4:
+        return selected_style_name
+
+    # Change background only if style has default background
+    for n in [3, 6]:
+        if len(focus_style) == n:
+            default_bg = default_style[n - 1]
+            selected_bg = selected_style[n - 1]
+            if focus_style[n - 1] == default_bg:
+                focus_style[n - 1] = selected_bg
+
+    view.palette.append(tuple(focus_style))
+    return focus_style_name
+
+
+def create_focus_map(
+    view: Any, style_names: List[str], selected_style_name: str = "selected"
+) -> Dict[Optional[str], str]:
+    focus_map: Dict[Optional[str], str] = {None: selected_style_name}
+    for style in view.palette:
+        if style[0] == selected_style_name:
+            selected_style = style
+    for style in view.palette:
+        if style[0] in style_names and style[0] is not None:
+            focus_map[style[0]] = _create_focus_style(style, view, selected_style)
+    return focus_map

@@ -116,7 +116,7 @@ class MessageView(urwid.ListBox):
         self.new_loading = False
 
     def main_view(self) -> List[Any]:
-        msg_btn_list = create_msg_box_list(self.model)
+        msg_btn_list = create_msg_box_list(self.model, self.view)
         focus_msg = self.model.get_focus_in_current_narrow()
         if focus_msg == set():
             focus_msg = len(msg_btn_list) - 1
@@ -143,7 +143,7 @@ class MessageView(urwid.ListBox):
             if self.log:
                 self.log.remove(self.log[0])  # avoid duplication when updating
 
-            message_list = create_msg_box_list(self.model, ids_to_process)
+            message_list = create_msg_box_list(self.model, self.view, ids_to_process)
             message_list.reverse()
             for msg_w in message_list:
                 self.log.insert(0, msg_w)
@@ -166,7 +166,7 @@ class MessageView(urwid.ListBox):
             last_message = None
 
         message_list = create_msg_box_list(
-            self.model, new_ids, last_message=last_message
+            self.model, self.view, new_ids, last_message=last_message
         )
         self.log.extend(message_list)
 
@@ -794,20 +794,25 @@ class LeftColumnView(urwid.Pile):
 
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get("all_msg", 0)
-        self.view.home_button = HomeButton(controller=self.controller, count=count)
+        self.view.home_button = HomeButton(
+            controller=self.controller, view=self.view, count=count
+        )
 
         count = self.model.unread_counts.get("all_pms", 0)
-        self.view.pm_button = PMButton(controller=self.controller, count=count)
+        self.view.pm_button = PMButton(
+            controller=self.controller, view=self.view, count=count
+        )
 
         self.view.mentioned_button = MentionedButton(
             controller=self.controller,
+            view=self.view,
             count=self.model.unread_counts["all_mentions"],
         )
 
         # Starred messages are by definition read already
         count = len(self.model.initial_data["starred_messages"])
         self.view.starred_button = StarredButton(
-            controller=self.controller, count=count
+            controller=self.controller, view=self.view, count=count
         )
         menu_btn_list = [
             self.view.home_button,

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import pytest
 from pytest import param as case
@@ -18,6 +18,7 @@ from zulipterminal.ui_tools.buttons import (
     TopButton,
     TopicButton,
     UserButton,
+    urwidMarkupTuple,
 )
 from zulipterminal.urwid_types import urwid_Size
 
@@ -33,16 +34,19 @@ class TestTopButton:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.controller = mocker.Mock()
+        self.view = mocker.Mock()
         self.show_function = mocker.Mock()
         self.urwid = mocker.patch(MODULE + ".urwid")
+        mocker.patch(MODULE + ".create_focus_map")
 
     @pytest.fixture
     def top_button(self, mocker: MockerFixture) -> TopButton:
         top_button = TopButton(
             controller=self.controller,
-            caption="caption",
+            view=self.view,
+            prefix_markup=("style", "-"),
+            label_markup=(None, "caption"),
             show_function=self.show_function,
-            prefix_character="-",
             count=0,
         )
         return top_button
@@ -50,12 +54,11 @@ class TestTopButton:
     def test_init(self, mocker: MockerFixture, top_button: TopButton) -> None:
 
         assert top_button.controller == self.controller
-        assert top_button._caption == "caption"
+        assert top_button.view == self.view
+        assert top_button._prefix_markup == ("style", "-")
+        assert top_button._label_markup == (None, "caption")
+        assert top_button._suffix_markup == (None, "")
         assert top_button.show_function == self.show_function
-        assert top_button.prefix_character == "-"
-        assert top_button.original_color is None
-        assert top_button.count == 0
-        assert top_button.count_style is None
 
         assert top_button._label.wrap == "ellipsis"
         assert top_button._label.get_cursor_coords("size") is None
@@ -74,36 +77,72 @@ class TestTopButton:
             top_button, "click", top_button.activate
         )
 
-    @pytest.mark.parametrize("text_color", ["color", None])
+    def test_style_properties(self, top_button: TopButton) -> None:
+        top_button._prefix_markup = ("prefix-style", "prefix-text")
+        top_button._label_markup = ("label-style", "label-text")
+        top_button._suffix_markup = ("suffix-style", "suffix-text")
+
+        # Test getter
+        prefix_style = top_button.prefix_style
+        assert prefix_style == "prefix-style"
+        label_style = top_button.label_style
+        assert label_style == "label-style"
+        suffix_style = top_button.suffix_style
+        assert suffix_style == "suffix-style"
+
+        # Test setter
+        top_button.prefix_style = "prefix-style2"
+        assert top_button.prefix_style == "prefix-style2"
+        top_button.label_style = "label-style2"
+        assert top_button.label_style == "label-style2"
+        top_button.suffix_style = "suffix-style2"
+        assert top_button.suffix_style == "suffix-style2"
+
+    def test_text_properties(self, top_button: TopButton) -> None:
+        top_button._prefix_markup = ("prefix-style", "prefix-text")
+        top_button._label_markup = ("label-style", "label-text")
+        top_button._suffix_markup = ("suffix-style", "suffix-text")
+
+        # Test getter
+        prefix_text = top_button.prefix_text
+        assert prefix_text == "prefix-text"
+        label_text = top_button.label_text
+        assert label_text == "label-text"
+        suffix_text = top_button.suffix_text
+        assert suffix_text == "suffix-text"
+
+        # Test setter
+        top_button.prefix_text = "prefix-text2"
+        assert top_button.prefix_text == "prefix-text2"
+        top_button.label_text = "label-text2"
+        assert top_button.label_text == "label-text2"
+        top_button.suffix_text = "suffix-text2"
+        assert top_button.suffix_text == "suffix-text2"
+
     @pytest.mark.parametrize(
-        "old_count, new_count, new_count_str",
-        [(10, 11, "11"), (0, 1, "1"), (11, 10, "10"), (1, 0, "")],
+        "new_count, new_count_str", [(11, "11"), (1, "1"), (10, "10"), (0, "")]
     )
     def test_update_count(
         self,
         mocker: MockerFixture,
         top_button: TopButton,
-        old_count: int,
         new_count: int,
         new_count_str: str,
-        text_color: Optional[str],
     ) -> None:
-        top_button.count = old_count
         top_button_update_widget = mocker.patch(MODULE + ".TopButton.update_widget")
 
-        top_button.update_count(new_count, text_color)
+        top_button.update_count(new_count)
 
-        top_button_update_widget.assert_called_once_with(
-            (top_button.count_style, new_count_str),
-            text_color,
-        )
+        top_button_update_widget.assert_called_once_with()
+        assert top_button.suffix_text == new_count_str
 
     @pytest.mark.parametrize(
-        "prefix, expected_prefix", [("-", [" ", "-", " "]), ("", [" "])]
+        "prefix_markup, expected_prefix_markup",
+        [((None, "-"), [" ", (None, "-"), " "]), ((None, ""), [" "])],
     )
-    @pytest.mark.parametrize("text_color", ["color", None])
+    @pytest.mark.parametrize("label_markup", [("color", "caption"), (None, "caption")])
     @pytest.mark.parametrize(
-        "count_text, expected_suffix",
+        "suffix_markup, expected_suffix_markup",
         [
             (("color", "3"), [" ", ("color", "3"), " "]),
             (("color", ""), ["  "]),
@@ -115,35 +154,111 @@ class TestTopButton:
         self,
         mocker: MockerFixture,
         top_button: TopButton,
-        prefix: str,
-        expected_prefix: List[str],
-        text_color: Optional[str],
-        count_text: Tuple[Optional[str], str],
-        expected_suffix: List[Any],
+        prefix_markup: urwidMarkupTuple,
+        expected_prefix_markup: List[Union[str, urwidMarkupTuple]],
+        label_markup: urwidMarkupTuple,
+        suffix_markup: urwidMarkupTuple,
+        expected_suffix_markup: List[Union[str, urwidMarkupTuple]],
     ) -> None:
-        top_button.prefix_character = prefix
+        top_button._prefix_markup = prefix_markup
+        top_button._label_markup = label_markup
+        top_button._suffix_markup = suffix_markup
         top_button.button_prefix = mocker.patch(MODULE + ".urwid.Text")
         top_button.set_label = mocker.patch(MODULE + ".urwid.Button.set_label")
         top_button.button_suffix = mocker.patch(MODULE + ".urwid.Text")
-        set_attr_map = mocker.patch.object(top_button._w, "set_attr_map")
+        set_focus_map = mocker.patch.object(top_button._w, "set_focus_map")
+        create_focus_map = mocker.patch(MODULE + ".create_focus_map")
 
-        top_button.update_widget(count_text, text_color)
+        top_button.update_widget()
 
-        top_button.button_prefix.set_text.assert_called_once_with(expected_prefix)
-        top_button.set_label.assert_called_once_with(top_button._caption)
-        top_button.button_suffix.set_text.assert_called_once_with(expected_suffix)
-        set_attr_map.assert_called_once_with({None: text_color})
+        top_button.button_prefix.set_text.assert_called_once_with(
+            expected_prefix_markup
+        )
+        top_button.set_label.assert_called_once_with(top_button._label_markup)
+        top_button.button_suffix.set_text.assert_called_once_with(
+            expected_suffix_markup
+        )
+        set_focus_map.assert_called_once_with(create_focus_map())
 
 
 class TestStarredButton:
     def test_count_style_init_argument_value(
         self, mocker: MockerFixture, count: int = 10
     ) -> None:
-        starred_button = StarredButton(controller=mocker.Mock(), count=count)
-        assert starred_button.count_style == "starred_count"
+        mocker.patch(MODULE + ".create_focus_map")
+        starred_button = StarredButton(
+            controller=mocker.Mock(), view=mocker.Mock(), count=count
+        )
+        assert starred_button.suffix_style == "starred_count"
 
 
 class TestStreamButton:
+    @pytest.mark.parametrize("color_depth", [1, 16, 256, 2 ** 24])
+    def test_init(self, mocker: MockerFixture, color_depth: int) -> None:
+        mocker.patch(MODULE + ".StreamButton.mark_muted")
+        mocker.patch(MODULE + ".TopButton.__init__")
+        controller_mock = mocker.Mock()
+        controller_mock.color_depth = color_depth
+        view_mock = mocker.Mock()
+        view_mock.controller = mocker.Mock()
+        view_mock.palette = [(None, "black", "white")]
+
+        stream_button = StreamButton(
+            properties={
+                "name": "PTEST",
+                "id": 205,
+                "color": "#bfd56f",
+                "invite_only": False,
+                "description": "Test stream description",
+            },
+            controller=controller_mock,
+            view=view_mock,
+            count=30,
+        )
+
+        assert stream_button.stream_name == "PTEST"
+        assert stream_button.stream_id == 205
+        assert stream_button.color == "#bfd56f"
+        assert stream_button.description == "Test stream description"
+        assert stream_button.count == 30
+
+        if color_depth == 1:
+            assert ("#bfd56f", "", "", "bold") in view_mock.palette
+            assert ("s#bfd56f", "", "", "standout") in view_mock.palette
+        elif color_depth == 16:
+            assert ("#bfd56f", "yellow", "white") in view_mock.palette
+            assert ("s#bfd56f", "black", "yellow") in view_mock.palette
+        else:
+            assert ("#bfd56f", "", "", "", "#bfd56f", "white") in view_mock.palette
+            assert ("s#bfd56f", "", "", "", "white", "#bfd56f") in view_mock.palette
+
+    def test_mark_muted(
+        self, mocker: MockerFixture, stream_button: StreamButton
+    ) -> None:
+        update_widget = mocker.patch(MODULE + ".StreamButton.update_widget")
+
+        stream_button.mark_muted()
+
+        assert stream_button.prefix_style == "muted"
+        assert stream_button.label_style == "muted"
+        assert stream_button.suffix_style == "muted"
+        assert stream_button.suffix_text == "M"
+        update_widget.assert_called_once_with()
+
+    def test_mark_unmuted(
+        self, mocker: MockerFixture, stream_button: StreamButton
+    ) -> None:
+        update_count = mocker.patch(MODULE + ".StreamButton.update_count")
+        mocker.patch(MODULE + ".HomeButton.update_count")
+        unread_count = 100
+
+        stream_button.mark_unmuted(unread_count)
+
+        assert stream_button.prefix_style == stream_button.color
+        assert stream_button.label_style is None
+        assert stream_button.suffix_style == "unread_count"
+        update_count.assert_called_once_with(unread_count)
+
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_ENTER_TOGGLE_TOPIC(
         self,
@@ -196,6 +311,7 @@ class TestUserButton:
             "full_name": caption,
         }
         activate = mocker.patch(MODULE + ".UserButton.activate")
+        mocker.patch(MODULE + ".TopButton.__init__")
         user_button = UserButton(
             user=user,
             controller=mocker.Mock(),
@@ -254,9 +370,9 @@ class TestEmojiButton:
     ) -> None:
         controller = mocker.Mock()
         controller.model.has_user_reacted_to_message = mocker.Mock(return_value=False)
-        update_widget = mocker.patch(MODULE + ".EmojiButton.update_widget")
+        update_widget = mocker.patch(MODULE + ".EmojiButton.update_widget_suffix")
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
-        caption = ", ".join([emoji_unit[0], *emoji_unit[2]])
+        label = ", ".join([emoji_unit[0], *emoji_unit[2]])
         message_fixture["reactions"] = to_vary_in_message["reactions"]
 
         emoji_button = EmojiButton(
@@ -270,8 +386,7 @@ class TestEmojiButton:
 
         top_button.assert_called_once_with(
             controller=controller,
-            caption=caption,
-            prefix_character="",
+            label_markup=(None, label),
             show_function=emoji_button.update_emoji_button,
         )
         assert emoji_button.emoji_name == emoji_unit[0]
@@ -361,17 +476,15 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
-        params = dict(controller=controller, count=count)
+        params = dict(controller=controller, view=view, count=count)
 
-        topic_button = TopicButton(
-            stream_id=stream_id, topic=title, view=view, **params
-        )
+        topic_button = TopicButton(stream_id=stream_id, topic=title, **params)
 
         top_button.assert_called_once_with(
-            caption=title if not is_resolved else title[2:],
-            prefix_character=" " if not is_resolved else title[:1],
+            prefix_markup=(None, " ") if not is_resolved else (None, title[:1]),
+            label_markup=(None, title) if not is_resolved else (None, title[2:]),
+            suffix_markup=("unread_count", ""),
             show_function=mocker.ANY,  # partial
-            count_style="unread_count",
             **params,
         )
         assert topic_button.stream_name == stream_name
@@ -401,6 +514,7 @@ class TestTopicButton:
         is_muted_called: bool,
     ) -> None:
         mark_muted = mocker.patch(MODULE + ".TopicButton.mark_muted")
+        mocker.patch(MODULE + ".TopButton.__init__")
         controller = mocker.Mock()
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value
@@ -418,6 +532,16 @@ class TestTopicButton:
             mark_muted.assert_called_once_with()
         else:
             mark_muted.assert_not_called()
+
+    def test_mark_muted(self, mocker: MockerFixture, topic_button: TopicButton) -> None:
+        update_widget = mocker.patch(MODULE + ".TopicButton.update_widget")
+
+        topic_button.mark_muted()
+
+        assert topic_button.label_style == "muted"
+        assert topic_button.suffix_style == "muted"
+        assert topic_button.suffix_text == "M"
+        update_widget.assert_called_once_with()
 
     @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_EXIT_TOGGLE_TOPIC(

@@ -13,13 +13,13 @@ from zulipterminal.config.color import DefaultBoldColor as Color
 STYLES = {
     # style_name      :  foreground                 background
     None              : (Color.WHITE,               Color.BLACK),
-    'selected'        : (Color.WHITE,               Color.DARK_BLUE),
-    'msg_selected'    : (Color.WHITE,               Color.DARK_BLUE),
+    'selected'        : (Color.WHITE,               Color.DARK_GRAY_2),
+    'msg_selected'    : (Color.WHITE,               Color.DARK_GRAY_2),
     'header'          : (Color.DARK_CYAN,           Color.DARK_BLUE),
     'general_narrow'  : (Color.WHITE,               Color.DARK_BLUE),
     'general_bar'     : (Color.WHITE,               Color.BLACK),
     'name'            : (Color.YELLOW__BOLD,        Color.BLACK),
-    'unread'          : (Color.DARK_BLUE,           Color.BLACK),
+    'unread'          : (Color.DARK_GRAY,           Color.BLACK),
     'user_active'     : (Color.LIGHT_GREEN,         Color.BLACK),
     'user_idle'       : (Color.YELLOW,              Color.BLACK),
     'user_offline'    : (Color.WHITE,               Color.BLACK),
@@ -52,7 +52,8 @@ STYLES = {
     'edit_author'     : (Color.YELLOW,              Color.BLACK),
     'edit_time'       : (Color.LIGHT_BLUE,          Color.BLACK),
     'current_user'    : (Color.WHITE,               Color.BLACK),
-    'muted'           : (Color.LIGHT_BLUE,          Color.BLACK),
+    'muted'           : (Color.LIGHT_GRAY_2,        Color.BLACK),
+    'muted_selected'  : (Color.WHITE_2,             Color.DARK_GRAY_2),  # override focus style
     'popup_border'    : (Color.WHITE,               Color.BLACK),
     'popup_category'  : (Color.LIGHT_BLUE__BOLD,    Color.BLACK),
     'popup_contrast'  : (Color.WHITE,               Color.DARK_GRAY),

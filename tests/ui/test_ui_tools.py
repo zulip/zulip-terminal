@@ -151,7 +151,9 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.log == list(messages_fetched.values())  # code vs orig
         if messages_fetched:
-            create_msg_box_list.assert_called_once_with(msg_view.model, new_msg_ids)
+            create_msg_box_list.assert_called_once_with(
+                msg_view.model, msg_view.view, new_msg_ids
+            )
             self.model.controller.update_screen.assert_called_once_with()
         else:
             create_msg_box_list.assert_not_called()
@@ -210,7 +212,7 @@ class TestMessageView:
         assert msg_view.log == new_msg_widgets + initial_log
         if messages_fetched:
             create_msg_box_list.assert_called_once_with(
-                msg_view.model, {top_id_in_narrow} | new_msg_ids
+                msg_view.model, msg_view.view, {top_id_in_narrow} | new_msg_ids
             )
             self.model.controller.update_screen.assert_called_once_with()
         else:
@@ -243,7 +245,7 @@ class TestMessageView:
         assert msg_view.new_loading is False
         assert msg_view.log == ["M1", "M2"]
         create_msg_box_list.assert_called_once_with(
-            msg_view.model, set(), last_message=None
+            msg_view.model, msg_view.view, set(), last_message=None
         )
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(
@@ -274,7 +276,7 @@ class TestMessageView:
         assert msg_view.log[-2:] == ["M1", "M2"]
         expected_last_msg = msg_view.log[0].original_widget.message
         create_msg_box_list.assert_called_once_with(
-            msg_view.model, set(), last_message=expected_last_msg
+            msg_view.model, msg_view.view, set(), last_message=expected_last_msg
         )
         self.model.controller.update_screen.assert_called_once_with()
         self.model.get_messages.assert_called_once_with(
@@ -1125,6 +1127,7 @@ class TestRightColumnView:
 class TestLeftColumnView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker):
+        mocker.patch(SUBDIR + ".buttons.create_focus_map")
         self.view = mocker.Mock()
         self.view.model = mocker.Mock()
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
@@ -1154,17 +1157,23 @@ class TestLeftColumnView:
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
+        mentioned_button = mocker.patch(VIEWS + ".MentionedButton")
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         mocker.patch(VIEWS + ".StreamButton.mark_muted")
         left_col_view = LeftColumnView(self.view)
         home_button.assert_called_once_with(
-            controller=left_col_view.controller, count=2
+            controller=left_col_view.controller, view=left_col_view.view, count=2
         )
-        pm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
+        pm_button.assert_called_once_with(
+            controller=left_col_view.controller, view=left_col_view.view, count=0
+        )
+        mentioned_button.assert_called_once_with(
+            controller=left_col_view.controller, view=left_col_view.view, count=1
+        )
         starred_button.assert_called_once_with(
-            controller=left_col_view.controller, count=3
+            controller=left_col_view.controller, view=left_col_view.view, count=3
         )
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))

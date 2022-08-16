@@ -40,6 +40,7 @@ class DefaultColor(Enum):
     DARK_MAGENTA  = 'dark_magenta    h90        h90'      # #870087
     DARK_CYAN     = 'dark_cyan       #088       #088'
     DARK_GRAY     = 'dark_gray       #666       #666'
+    DARK_GRAY_2   = 'dark_gray       h239       h238'     # darker
     LIGHT_RED     = 'light_red       #f00       #f00'
     LIGHT_GREEN   = 'light_green     #0f0       #0f0'
     YELLOW        = 'yellow          #ff0       #ff0'
@@ -47,7 +48,9 @@ class DefaultColor(Enum):
     LIGHT_MAGENTA = 'light_magenta   #c8f       #c8f'
     LIGHT_CYAN    = 'light_cyan      h152       h152'     # #afd7d7
     LIGHT_GRAY    = 'light_gray      #ccc       #ccc'
+    LIGHT_GRAY_2  = 'light_gray      h246       h246'     # darker
     WHITE         = 'white           #fff       #fff'
+    WHITE_2       = 'white           h252       h249'     # darker
 # fmt: on
 
 

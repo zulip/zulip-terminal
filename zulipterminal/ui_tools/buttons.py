@@ -4,7 +4,7 @@ UI buttons for 'narrowing' and showing unread counts, such as Stream, PM, Topic,
 
 import re
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
@@ -14,9 +14,13 @@ from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
+from zulipterminal.config.themes import create_focus_map
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_Size
+
+
+urwidMarkupTuple = Tuple[Optional[str], str]
 
 
 class TopButton(urwid.Button):
@@ -24,20 +28,20 @@ class TopButton(urwid.Button):
         self,
         *,
         controller: Any,
-        caption: str,
+        view: Any,
+        prefix_markup: urwidMarkupTuple = (None, ""),
+        label_markup: urwidMarkupTuple,
+        suffix_markup: urwidMarkupTuple = (None, ""),
         show_function: Callable[[], Any],
-        prefix_character: Union[str, Tuple[Any, str]] = "\N{BULLET}",
-        text_color: Optional[str] = None,
         count: int = 0,
-        count_style: Optional[str] = None,
     ) -> None:
         self.controller = controller
-        self._caption = caption
+        self.view = view
+        self._prefix_markup = prefix_markup
+        self._label_markup = label_markup
+        self._suffix_markup = suffix_markup
         self.show_function = show_function
-        self.prefix_character = prefix_character
-        self.original_color = text_color
         self.count = count
-        self.count_style = count_style
 
         super().__init__("")
 
@@ -55,36 +59,56 @@ class TopButton(urwid.Button):
         )
         self._w = urwid.AttrMap(cols, None, "selected")
 
-        self.update_count(count, text_color)
+        self.update_count(count)
 
         urwid.connect_signal(self, "click", self.activate)
 
-    def update_count(self, count: int, text_color: Optional[str] = None) -> None:
-        new_color = self.original_color if text_color is None else text_color
+    def _set_prefix_style(self, style: str) -> None:
+        self._prefix_markup = (style, self._prefix_markup[1])
 
-        self.count = count
-        if count == 0:
-            count_text = ""
-        else:
-            count_text = str(count)
+    def _set_label_style(self, style: str) -> None:
+        self._label_markup = (style, self._label_markup[1])
 
-        self.update_widget((self.count_style, count_text), new_color)
+    def _set_suffix_style(self, style: str) -> None:
+        self._suffix_markup = (style, self._suffix_markup[1])
 
-    def update_widget(
-        self, count_text: Tuple[Optional[str], str], text_color: Optional[str]
-    ) -> Any:
-        if self.prefix_character:
-            prefix = [" ", self.prefix_character, " "]
+    prefix_style = property(lambda self: self._prefix_markup[0], _set_prefix_style)
+    label_style = property(lambda self: self._label_markup[0], _set_label_style)
+    suffix_style = property(lambda self: self._suffix_markup[0], _set_suffix_style)
+
+    def _set_prefix_text(self, text: str) -> None:
+        self._prefix_markup = (self._prefix_markup[0], text)
+
+    def _set_label_text(self, text: str) -> None:
+        self._label_markup = (self._label_markup[0], text)
+
+    def _set_suffix_text(self, text: str) -> None:
+        self._suffix_markup = (self._suffix_markup[0], text)
+
+    prefix_text = property(lambda self: self._prefix_markup[1], _set_prefix_text)
+    label_text = property(lambda self: self._label_markup[1], _set_label_text)
+    suffix_text = property(lambda self: self._suffix_markup[1], _set_suffix_text)
+
+    def update_count(self, count: int) -> None:
+        count_text = "" if count == 0 else str(count)
+        self.suffix_text = count_text
+        self.update_widget()
+
+    def update_widget(self) -> Any:
+        if self.prefix_text:
+            prefix = [" ", self._prefix_markup, " "]
         else:
             prefix = [" "]
-        if count_text[1]:
-            suffix = [" ", count_text, " "]
+        if self.suffix_text:
+            suffix = [" ", self._suffix_markup, " "]
         else:
             suffix = ["  "]
         self.button_prefix.set_text(prefix)
-        self.set_label(self._caption)
+        self.set_label(self._label_markup)
         self.button_suffix.set_text(suffix)
-        self._w.set_attr_map({None: text_color})
+        styles = [self.prefix_style, self.label_style, self.suffix_style]
+        focus_map = create_focus_map(self.view, styles)
+        self._w.set_focus_map(focus_map)
 
     def activate(self, key: Any) -> None:
         self.controller.view.show_left_panel(visible=False)
@@ -101,58 +125,58 @@ class TopButton(urwid.Button):
 
 
 class HomeButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            view=view,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_messages,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
 class PMButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            view=view,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_pm,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
 class MentionedButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            view=view,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_mentions,
-            prefix_character="",
             count=count,
-            count_style="unread_count",
         )
 
 
 class StarredButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(self, *, controller: Any, view: Any, count: int) -> None:
         button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
             controller=controller,
-            caption=button_text,
+            view=view,
+            label_markup=(None, button_text),
+            suffix_markup=("starred_count", ""),
             show_function=controller.narrow_to_all_starred,
-            prefix_character="",
             count=count,  # Number of starred messages, not unread count
-            count_style="starred_count",
         )
 
 
@@ -176,18 +200,24 @@ class StreamButton(TopButton):
         self.model = controller.model
         self.count = count
         self.view = view
+        color_depth = controller.color_depth
 
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
                 inverse_text = background if background else "black"
                 break
-        view.palette.append(
-            (self.color, "", "", "bold", f"{self.color}, bold", background)
-        )
-        view.palette.append(
-            ("s" + self.color, "", "", "standout", inverse_text, self.color)
-        )
+        if color_depth == 1:
+            view.palette.append((self.color, "", "", "bold"))
+            view.palette.append(("s" + self.color, "", "", "standout"))
+        elif color_depth == 16:
+            view.palette.append((self.color, "yellow", background))
+            view.palette.append(("s" + self.color, "black", "yellow"))
+        else:
+            view.palette.append((self.color, "", "", "", self.color, background))
+            view.palette.append(
+                ("s" + self.color, "", "", "", inverse_text, self.color)
+            )
 
         stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
 
@@ -197,11 +227,12 @@ class StreamButton(TopButton):
         )
         super().__init__(
             controller=controller,
-            caption=self.stream_name,
+            view=view,
+            prefix_markup=(self.color, stream_marker),
+            label_markup=(None, self.stream_name),
+            suffix_markup=("unread_count", ""),
             show_function=narrow_function,
-            prefix_character=(self.color, stream_marker),
             count=count,
-            count_style="unread_count",
         )
 
         # Mark muted streams 'M' during button creation.
@@ -209,10 +240,17 @@ class StreamButton(TopButton):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
+        self.prefix_style = "muted"
+        self.label_style = "muted"
+        self.suffix_style = "muted"
+        self.suffix_text = MUTE_MARKER
+        self.update_widget()
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
     def mark_unmuted(self, unread_count: int) -> None:
+        self.prefix_style = self.color
+        self.label_style = None
+        self.suffix_style = "unread_count"
         self.update_count(unread_count)
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
@@ -245,21 +283,23 @@ class UserButton(TopButton):
         self.user_id = user["user_id"]
 
         self.controller = controller
-        self._view = view  # Used in _narrow_with_compose
+        self.view = view  # Used in _narrow_with_compose
 
         # FIXME Is this still needed?
         self.recipients = frozenset({self.user_id, view.model.user_id})
 
         super().__init__(
             controller=controller,
-            caption=user["full_name"],
+            view=view,
+            prefix_markup=(color, state_marker),
+            label_markup=(color, user["full_name"]),
             show_function=self._narrow_with_compose,
-            prefix_character=(color, state_marker),
-            text_color=color,
             count=count,
         )
         if is_current_user:
-            self.update_widget(("current_user", "(you)"), color)
+            self.suffix_style = "current_user"
+            self.suffix_text = "(you)"
+            self.update_widget()
 
     def _narrow_with_compose(self) -> None:
         # Switches directly to composing with user
@@ -267,8 +307,8 @@ class UserButton(TopButton):
         self.controller.narrow_to_user(
             recipient_emails=[self.email],
         )
-        self._view.body.focus.original_widget.set_focus("footer")
-        self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
+        self.view.body.focus.original_widget.set_focus("footer")
+        self.view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("USER_INFO", key):
@@ -307,18 +347,22 @@ class TopicButton(TopButton):
 
         super().__init__(
             controller=controller,
-            caption=topic_name,
+            view=view,
+            prefix_markup=(None, topic_prefix),
+            label_markup=(None, self.topic_name),
+            suffix_markup=("unread_count", ""),
             show_function=narrow_function,
-            prefix_character=topic_prefix,
             count=count,
-            count_style="unread_count",
         )
 
         if controller.model.is_muted_topic(self.stream_id, self.topic_name):
             self.mark_muted()
 
     def mark_muted(self) -> None:
-        self.update_widget(("muted", MUTE_MARKER), "muted")
+        self.label_style = "muted"
+        self.suffix_style = "muted"
+        self.suffix_text = MUTE_MARKER
+        self.update_widget()
 
     # TODO: Handle event-based approach for topic-muting.
 
@@ -346,27 +390,27 @@ class EmojiButton(TopButton):
         self.reaction_count = reaction_count
         self.toggle_selection = toggle_selection
         self.emoji_name, self.emoji_code, self.aliases = emoji_unit
-        full_button_caption = ", ".join([self.emoji_name, *self.aliases])
+        full_button_label = ", ".join([self.emoji_name, *self.aliases])
 
         super().__init__(
             controller=controller,
-            caption=full_button_caption,
-            prefix_character="",
+            label_markup=(None, full_button_label),
             show_function=self.update_emoji_button,
         )
 
         has_check_mark = self._has_user_reacted_to_msg() or is_selected(self.emoji_name)
-        self.update_widget((None, self.get_update_widget_text(has_check_mark)), None)
+        self.update_widget_suffix(has_check_mark)
 
     def _has_user_reacted_to_msg(self) -> bool:
         return self.controller.model.has_user_reacted_to_message(
             self.message, emoji_code=self.emoji_code
         )
 
-    def get_update_widget_text(self, user_reacted: bool) -> str:
+    def update_widget_suffix(self, user_reacted: bool) -> None:
         count_text = str(self.reaction_count) if self.reaction_count > 0 else ""
         reacted_check_mark = CHECK_MARK if user_reacted else ""
-        return f" {reacted_check_mark} {count_text} "
+        self.suffix_text = f" {reacted_check_mark} {count_text} "
+        self.update_widget()
 
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
@@ -387,7 +431,7 @@ class EmojiButton(TopButton):
             if is_reaction_added
             else (self.reaction_count - 1)
         )
-        self.update_widget((None, self.get_update_widget_text(is_reaction_added)), None)
+        self.update_widget_suffix(is_reaction_added)
 
 
 class DecodedStream(TypedDict):

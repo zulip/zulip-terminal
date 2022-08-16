@@ -49,6 +49,7 @@ def stream_button(mocker: MockerFixture) -> StreamButton:
     """
     view_mock = mocker.Mock()
     view_mock.palette = [(None, "black", "white")]
+    mocker.patch("zulipterminal.ui_tools.buttons.create_focus_map")
     button = StreamButton(
         properties={
             "name": "PTEST",
@@ -71,6 +72,7 @@ def topic_button(mocker: MockerFixture) -> TopicButton:
     """
     view_mock = mocker.Mock()
     view_mock.palette = [(None, "black", "white")]
+    mocker.patch("zulipterminal.ui_tools.buttons.create_focus_map")
     button = TopicButton(
         stream_id=100,
         topic="PTEST",
@@ -86,6 +88,7 @@ def user_button(mocker: MockerFixture) -> UserButton:
     """
     Mocked User Button.
     """
+    top_button = mocker.patch("zulipterminal.ui_tools.buttons.create_focus_map")
     return UserButton(
         user={
             "user_id": 5179,
