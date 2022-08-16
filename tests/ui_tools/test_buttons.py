@@ -3,12 +3,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
+from typing_extensions import Literal
 from urwid import AttrMap, Overlay, Widget
 
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK
 from zulipterminal.ui_tools.buttons import (
+    DecodedPM,
     DecodedStream,
     EmojiButton,
     MessageLinkButton,
@@ -435,10 +437,17 @@ class TestTopicButton:
 
 class TestMessageLinkButton:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker: MockerFixture) -> None:
+    def mock_external_classes(
+        self, mocker: MockerFixture, _all_users_by_id: Dict[str, Any]
+    ) -> None:
         self.controller = mocker.Mock()
         self.super_init = mocker.patch(MODULE + ".urwid.Button.__init__")
         self.connect_signal = mocker.patch(MODULE + ".urwid.connect_signal")
+
+        self.model = mocker.Mock()  # To pass model data on potential calls.
+        self.model._all_users_by_id = _all_users_by_id
+        self.model.user_id = 1001  # User id of current logged in user
+        self.controller.model = self.model
 
     def message_link_button(
         self, caption: str = "", link: str = "", display_attr: Optional[str] = None
@@ -546,6 +555,58 @@ class TestMessageLinkButton:
         assert return_value == expected_response
 
     @pytest.mark.parametrize(
+        "pm_data, expected_response",
+        [
+            case(
+                "1001,12-pm",
+                dict(type=None, recipient_ids=[1001, 12], recipient_emails=None),
+                id="pm_with_two_recipients",
+            ),
+            case(
+                "1001,12-group",
+                dict(type=None, recipient_ids=[1001, 12], recipient_emails=None),
+                id="group_pm_with_two_recipients",
+            ),
+            case(
+                "1001,11,12-pm",
+                dict(type=None, recipient_ids=[1001, 11, 12], recipient_emails=None),
+                id="pm_with_more_than_two_recipients",
+            ),
+            case(
+                "1001,11,12-group",
+                dict(type=None, recipient_ids=[1001, 11, 12], recipient_emails=None),
+                id="group_pm_with_more_than_two_recipients",
+            ),
+            case(
+                "11-user11",
+                dict(type=None, recipient_ids=[11], recipient_emails=None),
+                id="pm_exposed_format_1_ordinary",
+            ),
+            case(
+                "11-user2",
+                dict(type=None, recipient_ids=[11], recipient_emails=None),
+                id="pm_exposed_format_1_ambigous",
+            ),
+            case(
+                "5-bot-name",
+                dict(type=None, recipient_ids=[5], recipient_emails=None),
+                id="pm_with_bot_exposed_format_1_ordinary",
+            ),
+            case(
+                "5-bot;name",
+                dict(type=None, recipient_ids=[5], recipient_emails=None),
+                id="pm_with_bot_exposed_format_1_ambigous",
+            ),
+        ],
+    )
+    def test__decode_pm_data(
+        self, mocker: MockerFixture, pm_data: str, expected_response: DecodedPM
+    ) -> None:
+        return_value = MessageLinkButton._decode_pm_data(pm_data)
+
+        assert return_value == expected_response
+
+    @pytest.mark.parametrize(
         "message_id, expected_return_value",
         [
             ("1", 1),
@@ -562,36 +623,40 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "link, expected_parsed_link",
         [
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1",
                 ParsedNarrowLink(
                     narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
                 ),
+                id="modern_stream_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/Stream.201",
                 ParsedNarrowLink(
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
                 ),
+                id="deprecated_stream_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo.20bar",
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="foo bar",
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="topic_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/near/1",
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="stream_near_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/1",
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
@@ -599,27 +664,64 @@ class TestMessageLinkButton:
                     message_id=1,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="topic_near_narrow_link",
             ),
-            (SERVER_URL + "/#narrow/foo", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1//near/", ParsedNarrowLink()),
-            (
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-pm",
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="pm_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-group",
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="group_pm_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/pm-with/1001,12-pm/near/1",
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 12], recipient_emails=None
+                    ),
+                ),
+                id="common_pm_near_narrow_link",
+            ),
+            case(
+                SERVER_URL + "/#narrow/foo",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_1",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_2",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_3",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/1-Stream-1//near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_4",
+            ),
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/",
                 ParsedNarrowLink(),
+                id="invalid_narrow_link_5",
             ),
-        ],
-        ids=[
-            "modern_stream_narrow_link",
-            "deprecated_stream_narrow_link",
-            "topic_narrow_link",
-            "stream_near_narrow_link",
-            "topic_near_narrow_link",
-            "invalid_narrow_link_1",
-            "invalid_narrow_link_2",
-            "invalid_narrow_link_3",
-            "invalid_narrow_link_4",
-            "invalid_narrow_link_5",
         ],
     )
     def test__parse_narrow_link(
@@ -633,6 +735,7 @@ class TestMessageLinkButton:
         [
             "parsed_link",
             "is_user_subscribed_to_stream",
+            "is_valid_private_recipient",
             "is_valid_stream",
             "topics_in_stream",
             "expected_error",
@@ -643,6 +746,7 @@ class TestMessageLinkButton:
                     narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
                 ),
                 True,
+                None,
                 None,
                 None,
                 "",
@@ -656,6 +760,7 @@ class TestMessageLinkButton:
                 False,
                 None,
                 None,
+                None,
                 "The stream seems to be either unknown or unsubscribed",
                 id="invalid_modern_stream_narrow_parsed_link",
             ),
@@ -664,6 +769,7 @@ class TestMessageLinkButton:
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
                 ),
+                None,
                 None,
                 True,
                 None,
@@ -675,6 +781,7 @@ class TestMessageLinkButton:
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="foo"),
                 ),
+                None,
                 None,
                 False,
                 None,
@@ -689,6 +796,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "",
                 id="valid_topic_narrow_parsed_link",
@@ -700,6 +808,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 True,
+                None,
                 None,
                 [],
                 "Invalid topic name",
@@ -714,6 +823,7 @@ class TestMessageLinkButton:
                 True,
                 None,
                 None,
+                None,
                 "",
                 id="valid_stream_near_narrow_parsed_link",
             ),
@@ -724,6 +834,7 @@ class TestMessageLinkButton:
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 True,
+                None,
                 None,
                 None,
                 "Invalid message ID",
@@ -738,6 +849,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "",
                 id="valid_topic_near_narrow_parsed_link",
@@ -751,6 +863,7 @@ class TestMessageLinkButton:
                 ),
                 True,
                 None,
+                None,
                 ["Valid"],
                 "Invalid message ID",
                 id="invalid_topic_near_narrow_parsed_link",
@@ -760,8 +873,98 @@ class TestMessageLinkButton:
                 None,
                 None,
                 None,
+                None,
                 "The narrow link seems to be either broken or unsupported",
                 id="invalid_narrow_link",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                ),  # ...
+                True,
+                None,
+                None,
+                None,
+                "",
+                id="valid_stream_data_with_stream_id",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=462, stream_name=None),
+                ),  # ...
+                False,
+                None,
+                None,
+                None,
+                "The stream seems to be either unknown or unsubscribed",
+                id="invalid_stream_data_with_stream_id",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                ),  # ...
+                None,
+                None,
+                True,
+                None,
+                "",
+                id="valid_stream_data_with_stream_name",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream",
+                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                ),  # ...
+                None,
+                None,
+                False,
+                None,
+                "The stream seems to be either unknown or unsubscribed",
+                id="invalid_stream_data_with_stream_name",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                True,
+                None,
+                None,
+                "",
+                id="valid_pm_data",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11, 12], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                True,
+                None,
+                None,
+                "",
+                id="valid_group_pm_data",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm_with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, -1], recipient_emails=None
+                    ),
+                ),  # ...
+                None,
+                False,
+                None,
+                None,
+                "The PM has one or more invalid recipient(s)",
+                id="invalid_recipient",
             ),
         ],
     )
@@ -770,6 +973,7 @@ class TestMessageLinkButton:
         stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
+        is_valid_private_recipient: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
         expected_error: str,
@@ -777,6 +981,9 @@ class TestMessageLinkButton:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
+        )
+        self.controller.model.is_valid_private_recipient.return_value = (
+            is_valid_private_recipient
         )
         self.controller.model.is_valid_stream.return_value = is_valid_stream
         self.controller.model.topics_in_stream.return_value = topics_in_stream
@@ -789,104 +996,148 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         [
             "parsed_link",
-            "is_user_subscribed_to_stream",
-            "is_valid_stream",
             "stream_id_from_name_return_value",
             "expected_parsed_link",
-            "expected_error",
         ],
         [
-            (
+            case(
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name=None)
                 ),  # ...
-                True,
-                None,
                 None,
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
-                "",
+                id="stream_data_with_stream_id",
             ),
-            (
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=462, stream_name=None)
-                ),  # ...
-                False,
-                None,
-                None,
-                ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
-                "The stream seems to be either unknown or unsubscribed",
-            ),
-            (
+            case(
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1")
                 ),  # ...
-                None,
-                True,
                 1,
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
-                "",
+                id="stream_data_with_stream_name",
             ),
-            (
+            case(
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
-                ),  # ...
-                None,
-                False,
-                None,
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11], recipient_emails=None
+                    ),
                 ),
-                "The stream seems to be either unknown or unsubscribed",
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                id="normal_pm",
             ),
-        ],
-        ids=[
-            "valid_stream_data_with_stream_id",
-            "invalid_stream_data_with_stream_id",
-            "valid_stream_data_with_stream_name",
-            "invalid_stream_data_with_stream_name",
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[1001, 11, 12], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                id="group_pm",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[11], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[11, 1001],
+                        recipient_emails=["person1@example.com", "FOOBOO@gmail.com"],
+                    ),
+                ),
+                id="pm_with_user_id_not_specified",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=None, recipient_ids=[11, 12], recipient_emails=None
+                    ),
+                ),
+                None,
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[11, 12, 1001],
+                        recipient_emails=[
+                            "person1@example.com",
+                            "person2@example.com",
+                            "FOOBOO@gmail.com",
+                        ],
+                    ),
+                ),
+                id="group_pm_with_user_id_not_specified",
+            ),
         ],
     )
-    def test__validate_and_patch_stream_data(
+    def test__patch_narrow_link(
         self,
         stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
-        is_user_subscribed_to_stream: Optional[bool],
-        is_valid_stream: Optional[bool],
         stream_id_from_name_return_value: Optional[int],
         expected_parsed_link: ParsedNarrowLink,
-        expected_error: str,
     ) -> None:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
         )
-        self.controller.model.is_user_subscribed_to_stream.return_value = (
-            is_user_subscribed_to_stream
-        )
-        self.controller.model.is_valid_stream.return_value = is_valid_stream
         mocked_button = self.message_link_button()
 
-        error = mocked_button._validate_and_patch_stream_data(parsed_link)
+        mocked_button._patch_narrow_link(parsed_link)
 
         assert parsed_link == expected_parsed_link
-        assert error == expected_error
 
     @pytest.mark.parametrize(
-        "parsed_link, narrow_to_stream_called, narrow_to_topic_called",
         [
-            (
+            "parsed_link",
+            "narrow_to_stream_called",
+            "narrow_to_topic_called",
+            "narrow_to_user_called",
+        ],
+        [
+            case(
                 ParsedNarrowLink(
                     narrow="stream",
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
                 ),
                 True,
                 False,
+                False,
+                id="stream_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Foo",
@@ -894,8 +1145,10 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                False,
+                id="topic_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
@@ -903,8 +1156,10 @@ class TestMessageLinkButton:
                 ),
                 True,
                 False,
+                False,
+                id="stream_near_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="Foo",
@@ -913,13 +1168,75 @@ class TestMessageLinkButton:
                 ),
                 False,
                 True,
+                False,
+                id="topic_near_narrow",
             ),
-        ],
-        ids=[
-            "stream_narrow",
-            "topic_narrow",
-            "stream_near_narrow",
-            "topic_near_narrow",
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="pm_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with",
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="group_pm_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=Literal["pm"],
+                        recipient_ids=[1001, 11],
+                        recipient_emails=["FOOBOO@gmail.com", "person1@example.com"],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="pm_near_narrow",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="pm-with:near",
+                    message_id=1,
+                    pm_with=DecodedPM(
+                        type=Literal["group"],
+                        recipient_ids=[1001, 11, 12],
+                        recipient_emails=[
+                            "FOOBOO@gmail.com",
+                            "person1@example.com",
+                            "person2@example.com",
+                        ],
+                    ),
+                ),
+                False,
+                False,
+                True,
+                id="group_pm_near_narrow",
+            ),
         ],
     )
     def test__switch_narrow_to(
@@ -927,6 +1244,7 @@ class TestMessageLinkButton:
         parsed_link: ParsedNarrowLink,
         narrow_to_stream_called: bool,
         narrow_to_topic_called: bool,
+        narrow_to_user_called: bool,
     ) -> None:
         mocked_button = self.message_link_button()
 
@@ -936,6 +1254,7 @@ class TestMessageLinkButton:
             mocked_button.controller.narrow_to_stream.called == narrow_to_stream_called
         )
         assert mocked_button.controller.narrow_to_topic.called == narrow_to_topic_called
+        assert mocked_button.controller.narrow_to_user.called == narrow_to_user_called
 
     @pytest.mark.parametrize(
         "error, report_error_called, _switch_narrow_to_called, exit_popup_called",

@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
@@ -395,9 +395,16 @@ class DecodedStream(TypedDict):
     stream_name: Optional[str]
 
 
+class DecodedPM(TypedDict):
+    type: Optional[Literal["pm", "group"]]
+    recipient_ids: List[int]
+    recipient_emails: Optional[List[str]]
+
+
 class ParsedNarrowLink(TypedDict, total=False):
     narrow: str
     stream: DecodedStream
+    pm_with: DecodedPM
     topic_name: str
     message_id: Optional[int]
 
@@ -454,6 +461,16 @@ class MessageLinkButton(urwid.Button):
             return DecodedStream(stream_id=None, stream_name=stream_name)
 
     @staticmethod
+    def _decode_pm_data(encoded_pm_data: str) -> DecodedPM:
+        """
+        Returns a dict with PM type and IDs of PM recipients.
+        """
+        recipient_data, *_ = encoded_pm_data.split("-")
+        recipient_ids = list(map(int, recipient_data.split(",")))
+
+        return DecodedPM(type=None, recipient_ids=recipient_ids, recipient_emails=None)
+
+    @staticmethod
     def _decode_message_id(message_id: str) -> Optional[int]:
         """
         Returns either the compatible near message ID or None.
@@ -478,6 +495,12 @@ class MessageLinkButton(urwid.Button):
         #    {encoded.20topic.20name}
         # d. narrow/stream/[{stream_id}-]{stream-name}/topic/
         #    {encoded.20topic.20name}/near/{message_id}
+        # e. narrow/pm-with/[{recipient_ids},]-{pm-type}
+        # f. narrow/pm-with/[{recipient_ids},]-{pm-type}/near/{message_id}
+        # g. narrow/pm-with/{user_id}-user{user_id}
+        # h. narrow/pm-with/{user_id}-user{user_id}/near/{message_id}
+        # i. narrow/pm-with/{bot_id}-{bot-name}
+        # j. narrow/pm-with/{bot_id}-{bot-name}/near/{message_id}
         fragments = urlparse(link.rstrip("/")).fragment.split("/")
         len_fragments = len(fragments)
         parsed_link = ParsedNarrowLink()
@@ -518,12 +541,25 @@ class MessageLinkButton(urwid.Button):
                 message_id=message_id,
             )
 
+        elif (
+            len_fragments == 5 and fragments[1] == "pm-with" and fragments[3] == "near"
+        ):
+            pm_data = cls._decode_pm_data(fragments[2])
+            message_id = cls._decode_message_id(fragments[4])
+            parsed_link = dict(
+                narrow="pm-with:near", pm_with=pm_data, message_id=message_id
+            )
+
+        elif len_fragments == 3 and fragments[1] == "pm-with":
+            pm_data = cls._decode_pm_data(fragments[2])
+            parsed_link = dict(narrow="pm-with", pm_with=pm_data)
+
         return parsed_link
 
-    def _validate_and_patch_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
+    def _validate_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
         """
-        Validates stream data and patches the optional value in the nested
-        DecodedStream dict.
+        Validates stream data and returns either an empty string for a successful
+        validation or an appropriate validation error.
         """
         stream_id = parsed_link["stream"]["stream_id"]
         stream_name = parsed_link["stream"]["stream_name"]
@@ -540,13 +576,22 @@ class MessageLinkButton(urwid.Button):
             # report whether the stream id is invalid instead.
             return "The stream seems to be either unknown or unsubscribed"
 
-        # Patch the optional value.
-        if not stream_id:
-            stream_id = cast(int, model.stream_id_from_name(stream_name))
-            parsed_link["stream"]["stream_id"] = stream_id
-        else:
-            stream_name = cast(str, model.stream_dict[stream_id]["name"])
-            parsed_link["stream"]["stream_name"] = stream_name
+        return ""
+
+    def _validate_pm_data(self, parsed_link: ParsedNarrowLink) -> str:
+        """
+        Validates PM data and returns either an empty string for a successful
+        validation or an appropriate validation error.
+        """
+        recipient_ids = parsed_link["pm_with"]["recipient_ids"]
+
+        for recipient_id in recipient_ids:
+            user = self.model._all_users_by_id.get(recipient_id, None)
+            email = user["email"] if user else ""
+            name = user["full_name"] if user else ""
+
+            if not self.model.is_valid_private_recipient(email, name):
+                return "The PM has one or more invalid recipient(s)"
 
         return ""
 
@@ -560,7 +605,13 @@ class MessageLinkButton(urwid.Button):
 
         # Validate stream data.
         if "stream" in parsed_link:
-            error = self._validate_and_patch_stream_data(parsed_link)
+            error = self._validate_stream_data(parsed_link)
+            if error:
+                return error
+
+        # Validate PM data.
+        if "pm_with" in parsed_link:
+            error = self._validate_pm_data(parsed_link)
             if error:
                 return error
 
@@ -580,6 +631,47 @@ class MessageLinkButton(urwid.Button):
                 return "Invalid message ID"
 
         return ""
+
+    def _patch_narrow_link(self, parsed_link: ParsedNarrowLink) -> None:
+        """
+        Patches the validated narrow link data.
+        """
+        model = self.model
+
+        if "stream" in parsed_link:
+            stream_id = parsed_link["stream"]["stream_id"]
+            stream_name = parsed_link["stream"]["stream_name"]
+
+            # Patch the optional value.
+            if not stream_id:
+                stream_id = cast(int, model.stream_id_from_name(stream_name))
+                parsed_link["stream"]["stream_id"] = stream_id
+            else:
+                stream_name = cast(str, model.stream_dict[stream_id]["name"])
+                parsed_link["stream"]["stream_name"] = stream_name
+
+        elif "pm_with" in parsed_link:
+            user_id = model.user_id
+            recipient_ids = parsed_link["pm_with"]["recipient_ids"]
+
+            # Bump recipients to include current user_id if not already
+            # present (refer to URL formats in `_parse_narrow_link`)
+            if user_id not in recipient_ids:
+                recipient_ids.append(user_id)
+
+            recipient_emails: List[str] = []
+            for recipient_id in recipient_ids:
+                user = model._all_users_by_id.get(recipient_id, None)
+                email = user["email"] if user else ""
+                recipient_emails.append(email)
+
+            # Currently webapp uses `pm` and `group` suffix interchangeably.
+            # Treat more-than-2 pms to group pms to avoid confusion.
+            pm_type = "pm" if len(recipient_ids) < 3 else "group"
+
+            # Patch the PM type and recepient emails
+            parsed_link["pm_with"]["type"] = Literal[pm_type]
+            parsed_link["pm_with"]["recipient_emails"] = recipient_emails
 
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
         """
@@ -606,6 +698,16 @@ class MessageLinkButton(urwid.Button):
                 topic_name=parsed_link["topic_name"],
                 contextual_message_id=parsed_link["message_id"],
             )
+        elif "pm-with:near" == narrow:
+            self.controller.narrow_to_user(
+                recipient_emails=parsed_link["pm_with"]["recipient_emails"],
+                contextual_message_id=parsed_link["message_id"],
+            )
+
+        elif "pm-with" == narrow:
+            self.controller.narrow_to_user(
+                recipient_emails=parsed_link["pm_with"]["recipient_emails"]
+            )
 
     def handle_narrow_link(self) -> None:
         """
@@ -618,6 +720,7 @@ class MessageLinkButton(urwid.Button):
         if error:
             self.controller.report_error([f" {error}"])
         else:
+            self._patch_narrow_link(parsed_link)
             self._switch_narrow_to(parsed_link)
 
             # Exit pop-up if MessageLinkButton exists in one.
