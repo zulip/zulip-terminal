@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import re
 import sys
 from collections import defaultdict
@@ -18,8 +19,11 @@ SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
 
-def main() -> None:
-    generate_hotkeys_file()
+def main(check_only: bool) -> None:
+    if check_only:
+        lint_hotkeys_file()
+    else:
+        generate_hotkeys_file()
 
 
 def lint_hotkeys_file() -> None:
@@ -118,4 +122,15 @@ def write_hotkeys_file(hotkeys_file_string: str) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description=f"Generate {OUTPUT_FILE_NAME} file by extracting key description and key "
+        f"combination from config/{KEYS_FILE_NAME} file"
+    )
+    parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help=f"Lint hotkeys by checking extracted key description style and key "
+        f"duplication from config/{KEYS_FILE_NAME} file",
+    )
+    args = parser.parse_args()
+    main(args.check_only)
