@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import re
+import sys
 from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple
@@ -13,10 +15,40 @@ KEYS_FILE_NAME = KEYS_FILE.name
 OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
 OUTPUT_FILE_NAME = OUTPUT_FILE.name
 SCRIPT_NAME = PurePath(__file__).name
+HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
 
 def main() -> None:
     generate_hotkeys_file()
+
+
+def lint_hotkeys_file() -> None:
+    """
+    Lint KEYS_FILE for key description, then compare if in sync with
+    existing OUTPUT_FILE
+    """
+    hotkeys_file_string = get_hotkeys_file_string()
+    # To lint keys description
+    error_flag = 0
+    categories = read_help_categories()
+    for action in HELP_CATEGORIES.keys():
+        for help_text, key_combinations_list in categories[action]:
+            various_key_combinations = " / ".join(key_combinations_list)
+            # Check description style
+            if not re.match(HELP_TEXT_STYLE, help_text):
+                print(
+                    f"Description - ({help_text}) for key combination - [{various_key_combinations}]\n"
+                    "It should contain only alphabets, spaces and special characters except ."
+                )
+                error_flag = 1
+    if error_flag == 1:
+        print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
+    else:
+        print("No hotkeys linting errors")
+        if not output_file_matches_string(hotkeys_file_string):
+            print(f"Run './tools/{SCRIPT_NAME}' to update {OUTPUT_FILE_NAME} file")
+            error_flag = 1
+    sys.exit(error_flag)
 
 
 def generate_hotkeys_file() -> None:
