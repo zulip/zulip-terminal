@@ -6,18 +6,12 @@ from typing import Dict, List, Tuple
 from zulipterminal.config.keys import HELP_CATEGORIES, KEY_BINDINGS
 
 
-def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
-    """
-    Get all help categories from keys.py
-    """
-    categories = defaultdict(list)
-    for item in KEY_BINDINGS.values():
-        categories[item["key_category"]].append((item["help_text"], item["keys"]))
-    return categories
-
-
 OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
 SCRIPT_NAME = PurePath(__file__).name
+
+
+def main() -> None:
+    generate_hotkeys_file()
 
 
 def generate_hotkeys_file() -> None:
@@ -58,16 +52,22 @@ def get_hotkeys_file_string() -> str:
     return hotkeys_file_string
 
 
+def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
+    """
+    Get all help categories from keys.py
+    """
+    categories = defaultdict(list)
+    for item in KEY_BINDINGS.values():
+        categories[item["key_category"]].append((item["help_text"], item["keys"]))
+    return categories
+
+
 def write_hotkeys_file(hotkeys_file_string: str) -> None:
     """
     Write hotkeys_file_string variable once to hotkeys.md file
     """
     with open(OUTPUT_FILE, "w") as mdFile:
         mdFile.write(hotkeys_file_string)
-
-
-def main() -> None:
-    generate_hotkeys_file()
 
 
 if __name__ == "__main__":
