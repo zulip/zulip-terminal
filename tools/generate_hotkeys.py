@@ -6,7 +6,12 @@ from typing import Dict, List, Tuple
 from zulipterminal.config.keys import HELP_CATEGORIES, KEY_BINDINGS
 
 
+KEYS_FILE = (
+    Path(__file__).resolve().parent.parent / "zulipterminal" / "config" / "keys.py"
+)
+KEYS_FILE_NAME = KEYS_FILE.name
 OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
+OUTPUT_FILE_NAME = OUTPUT_FILE.name
 SCRIPT_NAME = PurePath(__file__).name
 
 
@@ -20,6 +25,7 @@ def generate_hotkeys_file() -> None:
     shortcut key combinations in config/keys.py file
     """
     hotkeys_file_string = get_hotkeys_file_string()
+    output_file_matches_string(hotkeys_file_string)
     write_hotkeys_file(hotkeys_file_string)
     print(f"Hot Keys list saved in {OUTPUT_FILE}")
 
@@ -50,6 +56,15 @@ def get_hotkeys_file_string() -> str:
             hotkeys_file_string += f"|{help_text}|{various_key_combinations}|\n"
         hotkeys_file_string += "\n"
     return hotkeys_file_string
+
+
+def output_file_matches_string(hotkeys_file_string: str) -> bool:
+    if hotkeys_file_string == open(OUTPUT_FILE).read():
+        print(f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}")
+        return True
+    else:
+        print(f"{OUTPUT_FILE_NAME} file not in sync with config/{KEYS_FILE_NAME}")
+        return False
 
 
 def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
