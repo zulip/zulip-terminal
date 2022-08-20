@@ -21,8 +21,8 @@ def main() -> None:
 
 def generate_hotkeys_file() -> None:
     """
-    Generate hotkeys.md in docs folder based on help text description and
-    shortcut key combinations in config/keys.py file
+    Generate OUTPUT_FILE based on help text description and
+    shortcut key combinations in KEYS_FILE
     """
     hotkeys_file_string = get_hotkeys_file_string()
     output_file_matches_string(hotkeys_file_string)
@@ -32,8 +32,8 @@ def generate_hotkeys_file() -> None:
 
 def get_hotkeys_file_string() -> str:
     """
-    Construct string in form for output to hotkeys.md in docs folder based on help text
-    description and shortcut key combinations in config/keys.py file
+    Construct string in form for output to OUTPUT_FILE based on help text
+    description and shortcut key combinations in KEYS_FILE
     """
     categories = read_help_categories()
     hotkeys_file_string = (
@@ -69,7 +69,7 @@ def output_file_matches_string(hotkeys_file_string: str) -> bool:
 
 def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     """
-    Get all help categories from keys.py
+    Get all help categories from KEYS_FILE
     """
     categories = defaultdict(list)
     for item in KEY_BINDINGS.values():
@@ -79,7 +79,7 @@ def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
 
 def write_hotkeys_file(hotkeys_file_string: str) -> None:
     """
-    Write hotkeys_file_string variable once to hotkeys.md file
+    Write hotkeys_file_string variable once to OUTPUT_FILE
     """
     with open(OUTPUT_FILE, "w") as mdFile:
         mdFile.write(hotkeys_file_string)
