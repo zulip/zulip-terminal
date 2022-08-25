@@ -722,12 +722,11 @@ class RightColumnView(urwid.Frame):
             self.set_body(self.body)
             self.view.controller.update_screen()
 
-    def users_view(self, users: Any = None) -> Any:
-        reset_default_view_users = False
+    def build_user_view(self, users: Any = None) -> List[Any]:
+        self.reset_default_view_users = False
         if users is None:
             users = self.view.users.copy()
-            reset_default_view_users = True
-
+            self.reset_default_view_users = True
         users_btn_list = list()
         for user in users:
             status = user["status"]
@@ -749,9 +748,13 @@ class RightColumnView(urwid.Frame):
                     is_current_user=is_current_user,
                 )
             )
+        return users_btn_list
+
+    def users_view(self, users: Any = None) -> Any:
+        users_btn_list = self.build_user_view(users)
         user_w = UsersView(self.view.controller, users_btn_list)
         # Donot reset them while searching.
-        if reset_default_view_users:
+        if self.reset_default_view_users:
             self.users_btn_list = users_btn_list
             self.view.user_w = user_w
         return user_w
