@@ -763,6 +763,7 @@ class RightColumnView(urwid.Pile):
 
     def __init__(self, view: Any) -> None:
         self.view = view
+        self.is_in_recipients_view = False
         self.user_v = self.users_view()
         contents = [self.user_v]
         super().__init__(contents)
@@ -784,6 +785,41 @@ class RightColumnView(urwid.Pile):
             brcorner="─",
         )
         return w
+
+    def recipients_view(self) -> Any:
+        current_narrow = self.view.model.narrow
+        recipients_list = self.view.model.get_recipients_of_current_narrow(
+            current_narrow
+        )
+        user_w = UsersView(self.view, recipients_list)
+        self.view.user_w = user_w
+        w = urwid.LineBox(
+            self.view.user_w,
+            title="Recipients",
+            title_attr="column_title",
+            tlcorner=COLUMN_TITLE_BAR_LINE,
+            tline=COLUMN_TITLE_BAR_LINE,
+            trcorner=COLUMN_TITLE_BAR_LINE,
+            blcorner="",
+            rline="",
+            lline="",
+            bline="",
+            brcorner="─",
+        )
+        return w
+
+    def update_recipients_view(self) -> None:
+        self.user_v = self.recipients_view()
+        if not self.is_in_recipients_view:
+            self.show_user_view()
+
+    def show_user_view(self) -> None:
+        self.is_in_recipients_view = False
+        self.contents[0] = (self.user_v, self.options(height_type="weight"))
+
+    def show_recipients_view(self) -> None:
+        self.is_in_recipients_view = True
+        self.contents[0] = (self.recipients_view(), self.options(height_type="weight"))
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("SEARCH_PEOPLE", key):
