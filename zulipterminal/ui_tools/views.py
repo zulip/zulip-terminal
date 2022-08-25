@@ -521,12 +521,104 @@ class TopicsView(urwid.Frame):
         return super().keypress(size, key)
 
 
-class UsersView(urwid.ListBox):
-    def __init__(self, controller: Any, users_btn_list: List[Any]) -> None:
+class UsersView(urwid.Frame):
+    def __init__(self, view: Any, users_btn_list: Any = None) -> None:
+        self.view = view
+        self.user_search = PanelSearchBox(self, "SEARCH_PEOPLE", self.update_user_list)
+        self.view.user_search = self.user_search
+        search_box = urwid.LineBox(
+            self.user_search,
+            tlcorner="─",
+            tline="",
+            lline="",
+            trcorner="─",
+            blcorner="─",
+            rline="",
+            bline="─",
+            brcorner="─",
+        )
         self.users_btn_list = users_btn_list
-        self.log = urwid.SimpleFocusListWalker(users_btn_list)
-        self.controller = controller
-        super().__init__(self.log)
+        list_box = urwid.ListBox(self.build_user_view(users_btn_list))
+        self.allow_update_user_list = True
+        self.search_lock = threading.Lock()
+        self.empty_search = False
+        super().__init__(list_box, header=search_box)
+
+    @asynch
+    def update_user_list(
+        self,
+        search_box: Any = None,
+        new_text: Optional[str] = None,
+        user_list: Any = None,
+    ) -> None:
+        """
+        Updates user list via PanelSearchBox and _start_presence_updates.
+        """
+        assert (user_list is None and search_box is not None) or (  # PanelSearchBox.
+            user_list is not None and search_box is None and new_text is None
+        )  # _start_presence_updates.
+
+        # Return if the method is called by PanelSearchBox (urwid.Edit) while
+        # the search is inactive and user_list is None.
+        # NOTE: The additional not user_list check is to not false trap
+        # _start_presence_updates but allow it to update the user list.
+        if not self.view.controller.is_in_editor_mode() and not user_list:
+            return
+
+        # Return if the method is called from _start_presence_updates while the
+        # search, via PanelSearchBox, is active.
+        if not self.allow_update_user_list and new_text is None:
+            return
+
+        # wait for any previously started search to finish to avoid
+        # displaying wrong user list.
+        with self.search_lock:
+            if user_list:
+                self.view.users = user_list
+
+            users = self.view.users.copy()
+            if new_text:
+                users_display = [user for user in users if match_user(user, new_text)]
+            else:
+                users_display = users
+
+            self.empty_search = len(users_display) == 0
+
+            # FIXME Update log directly?
+            if not self.empty_search:
+                self.body = urwid.ListBox(self.build_user_view(users_display))
+            else:
+                self.body = UsersView(self.view, [self.user_search.search_error])
+            self.set_body(self.body)
+            self.view.controller.update_screen()
+
+    def build_user_view(self, users: Any = None) -> List[Any]:
+        self.reset_default_view_users = False
+        if users is None:
+            users = self.view.users.copy()
+            self.reset_default_view_users = True
+        users_btn_list = list()
+        for user in users:
+            status = user["status"]
+            # Only include `inactive` users in search result.
+            # if status == "inactive" and not self.view.controller.is_in_editor_mode():
+            #     continue
+            unread_count = self.view.model.unread_counts["unread_pms"].get(
+                user["user_id"], 0
+            )
+            is_current_user = user["user_id"] == self.view.model.user_id
+            users_btn_list.append(
+                UserButton(
+                    user=user,
+                    controller=self.view.controller,
+                    view=self.view,
+                    state_marker=STATE_ICON[status],
+                    color=f"user_{status}",
+                    count=unread_count,
+                    is_current_user=is_current_user,
+                )
+            )
+        return users_btn_list
 
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
@@ -543,6 +635,23 @@ class UsersView(urwid.ListBox):
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
                     self.keypress(size, primary_key_for_command("GO_DOWN"))
         return super().mouse_event(size, event, button, col, row, focus)
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key("SEARCH_PEOPLE", key):
+            self.allow_update_user_list = False
+            self.set_focus("header")
+            self.user_search.set_caption(" ")
+            self.view.controller.enter_editor_mode_with(self.user_search)
+            return key
+        elif is_command_key("GO_BACK", key):
+            self.user_search.reset_search_text()
+            self.allow_update_user_list = True
+            self.body = urwid.ListBox(self.build_user_view(self.users_btn_list))
+            self.set_body(self.body)
+            self.set_focus("body")
+            self.view.controller.update_screen()
+            return key
+        return super().keypress(size, key)
 
 
 class MiddleColumnView(urwid.Frame):
@@ -647,132 +756,25 @@ class MiddleColumnView(urwid.Frame):
         return super().keypress(size, key)
 
 
-class RightColumnView(urwid.Frame):
+class RightColumnView(urwid.Pile):
     """
     Displays the users list on the right side of the app.
     """
 
     def __init__(self, view: Any) -> None:
         self.view = view
-        self.user_search = PanelSearchBox(self, "SEARCH_PEOPLE", self.update_user_list)
-        self.view.user_search = self.user_search
-        search_box = urwid.LineBox(
-            self.user_search,
-            tlcorner="─",
-            tline="",
-            lline="",
-            trcorner="─",
-            blcorner="─",
-            rline="",
-            bline="─",
-            brcorner="─",
-        )
-        self.allow_update_user_list = True
-        self.search_lock = threading.Lock()
-        self.empty_search = False
-        super().__init__(self.users_view(), header=search_box)
+        self.user_v = self.users_view()
+        contents = [self.user_v]
+        super().__init__(contents)
 
-    @asynch
-    def update_user_list(
-        self,
-        search_box: Any = None,
-        new_text: Optional[str] = None,
-        user_list: Any = None,
-    ) -> None:
-        """
-        Updates user list via PanelSearchBox and _start_presence_updates.
-        """
-        assert (user_list is None and search_box is not None) or (  # PanelSearchBox.
-            user_list is not None and search_box is None and new_text is None
-        )  # _start_presence_updates.
-
-        # Return if the method is called by PanelSearchBox (urwid.Edit) while
-        # the search is inactive and user_list is None.
-        # NOTE: The additional not user_list check is to not false trap
-        # _start_presence_updates but allow it to update the user list.
-        if not self.view.controller.is_in_editor_mode() and not user_list:
-            return
-
-        # Return if the method is called from _start_presence_updates while the
-        # search, via PanelSearchBox, is active.
-        if not self.allow_update_user_list and new_text is None:
-            return
-
-        # wait for any previously started search to finish to avoid
-        # displaying wrong user list.
-        with self.search_lock:
-            if user_list:
-                self.view.users = user_list
-
-            users = self.view.users.copy()
-            if new_text:
-                users_display = [user for user in users if match_user(user, new_text)]
-            else:
-                users_display = users
-
-            self.empty_search = len(users_display) == 0
-
-            # FIXME Update log directly?
-            if not self.empty_search:
-                self.body = self.users_view(users_display)
-            else:
-                self.body = UsersView(
-                    self.view.controller, [self.user_search.search_error]
-                )
-            self.set_body(self.body)
-            self.view.controller.update_screen()
-
-    def build_user_view(self, users: Any = None) -> List[Any]:
-        self.reset_default_view_users = False
-        if users is None:
-            users = self.view.users.copy()
-            self.reset_default_view_users = True
-        users_btn_list = list()
-        for user in users:
-            status = user["status"]
-            # Only include `inactive` users in search result.
-            if status == "inactive" and not self.view.controller.is_in_editor_mode():
-                continue
-            unread_count = self.view.model.unread_counts["unread_pms"].get(
-                user["user_id"], 0
-            )
-            is_current_user = user["user_id"] == self.view.model.user_id
-            users_btn_list.append(
-                UserButton(
-                    user=user,
-                    controller=self.view.controller,
-                    view=self.view,
-                    state_marker=STATE_ICON[status],
-                    color=f"user_{status}",
-                    count=unread_count,
-                    is_current_user=is_current_user,
-                )
-            )
-        return users_btn_list
-
-    def users_view(self, users: Any = None) -> Any:
-        users_btn_list = self.build_user_view(users)
-        user_w = UsersView(self.view.controller, users_btn_list)
-        # Donot reset them while searching.
-        if self.reset_default_view_users:
-            self.users_btn_list = users_btn_list
-            self.view.user_w = user_w
+    def users_view(self) -> Any:
+        user_w = UsersView(self.view)
+        self.view.user_w = user_w
         return user_w
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("SEARCH_PEOPLE", key):
-            self.allow_update_user_list = False
-            self.set_focus("header")
-            self.user_search.set_caption(" ")
-            self.view.controller.enter_editor_mode_with(self.user_search)
-            return key
-        elif is_command_key("GO_BACK", key):
-            self.user_search.reset_search_text()
-            self.allow_update_user_list = True
-            self.body = UsersView(self.view.controller, self.users_btn_list)
-            self.set_body(self.body)
-            self.set_focus("body")
-            self.view.controller.update_screen()
+            self.view.user_w.keypress(size, key)
             return key
         elif is_command_key("GO_LEFT", key):
             self.view.show_right_panel(visible=False)
