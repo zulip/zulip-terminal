@@ -72,20 +72,7 @@ class View(urwid.WidgetWrap):
 
     def right_column_view(self) -> Any:
         tab = TabView(f"{AUTOHIDE_TAB_RIGHT_ARROW} USERS {AUTOHIDE_TAB_RIGHT_ARROW}")
-        self.users_view = RightColumnView(self)
-        panel = urwid.LineBox(
-            self.users_view,
-            title="Users",
-            title_attr="column_title",
-            tlcorner=COLUMN_TITLE_BAR_LINE,
-            tline=COLUMN_TITLE_BAR_LINE,
-            trcorner=COLUMN_TITLE_BAR_LINE,
-            lline="",
-            blcorner="─",
-            rline="",
-            bline="",
-            brcorner="",
-        )
+        panel = RightColumnView(self)
         return panel, tab
 
     def get_random_help(self) -> List[Any]:
@@ -265,7 +252,7 @@ class View(urwid.WidgetWrap):
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
             self.body.focus_position = 2
-            self.users_view.keypress(size, key)
+            self.right_panel.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key

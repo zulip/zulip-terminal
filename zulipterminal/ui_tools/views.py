@@ -770,7 +770,20 @@ class RightColumnView(urwid.Pile):
     def users_view(self) -> Any:
         user_w = UsersView(self.view)
         self.view.user_w = user_w
-        return user_w
+        w = urwid.LineBox(
+            self.view.user_w,
+            title="Users",
+            title_attr="column_title",
+            tlcorner=COLUMN_TITLE_BAR_LINE,
+            tline=COLUMN_TITLE_BAR_LINE,
+            trcorner=COLUMN_TITLE_BAR_LINE,
+            blcorner="",
+            rline="",
+            lline="",
+            bline="",
+            brcorner="─",
+        )
+        return w
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("SEARCH_PEOPLE", key):
