@@ -291,7 +291,9 @@ class UserButton(TopButton):
         self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("USER_INFO", key):
+        if is_command_key("TOGGLE_RECIPIENTS_VIEW", key):
+            self._view.right_panel.show_recipients_view()
+        elif is_command_key("USER_INFO", key):
             self.controller.show_user_info(self.user_id)
         return super().keypress(size, key)
 
