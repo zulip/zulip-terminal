@@ -853,6 +853,29 @@ class Model:
             ]
             raise ServerConnectionFailure(", ".join(failure_text))
 
+    def get_recipients_of_current_narrow(
+        self, current_narrow: List[Any]
+    ) -> Optional[List[Any]]:
+        recipients_list = []
+        if current_narrow == []:
+            return None
+        elif current_narrow[0][0] == "stream":
+            subscribers_list = self.get_other_subscribers_in_stream(
+                stream_name=current_narrow[0][1]
+            )
+            recipients_list = [
+                recipient
+                for recipient in self.get_all_users()
+                for recipient_id in subscribers_list
+                if recipient["user_id"] == recipient_id
+            ]
+            print("recipients_list -", recipients_list)
+        # elif current_narrow[0][0] == "pm_with":
+        #     recipients_list =
+        else:
+            self.controller.report_error("Recipients not found")
+        return recipients_list
+
     def get_other_subscribers_in_stream(
         self, stream_id: Optional[int] = None, stream_name: Optional[str] = None
     ) -> List[int]:
