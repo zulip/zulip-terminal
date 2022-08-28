@@ -25,15 +25,14 @@ tools = {
     ],
 }
 
+HEADER = 80 * "="
+SUBHEADER = 80 * "-"
+
 for tool_name, command in tools.items():
-    print(80 * "=")
-    print(tool_name)
-    print(80 * "-")
-    result = subprocess.call(command)
+    print(f"{HEADER}\n{tool_name}\n{SUBHEADER}", flush=True)
+    result = subprocess.call(command, stderr=subprocess.STDOUT)
     if result != 0:
-        print(80 * "=")
-        print("LINTING FAILED")
+        print(f"{HEADER}\nLINTING FAILED")
         sys.exit(1)
 
-print(80 * "=")
-print("LINTING SUCCESSFUL")
+print(f"{HEADER}\nLINTING SUCCESSFUL")
