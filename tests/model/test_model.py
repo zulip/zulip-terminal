@@ -237,6 +237,7 @@ class TestModel:
             "update_display_settings",
             "user_settings",
             "realm_emoji",
+            "realm_user",
         ]
         fetch_event_types = [
             "realm",
@@ -3345,6 +3346,57 @@ class TestModel:
         for stream_id in stream_ids:
             new_subscribers = model.stream_dict[stream_id]["subscribers"]
             assert new_subscribers == expected_subscribers
+
+    @pytest.mark.parametrize(
+        "person, event_field, updated_field_if_different",
+        [
+            (
+                {"full_name": "New Full Name"},
+                "full_name",
+                None,
+            ),
+            ({"timezone": "New Timezone"}, "timezone", None),
+            ({"is_billing_admin": False}, "is_billing_admin", None),
+            ({"role": 10}, "role", None),
+            (
+                {"avatar_url": "new_avatar_url", "avatar_version": 21},
+                "avatar_url",
+                None,
+            ),
+            ({"new_email": "new_display@email.com"}, "new_email", "email"),
+            (
+                {"delivery_email": "new_delivery@email.com"},
+                "delivery_email",
+                None,
+            ),
+        ],
+        ids=[
+            "full_name",
+            "timezone",
+            "billing_admin_role",
+            "role",
+            "avatar",
+            "display_email",
+            "delivery_email",
+        ],
+    )
+    def test__handle_realm_user_event(
+        self, person, event_field, updated_field_if_different, model, initial_data
+    ):
+        # id 11 matches initial_data["realm_users"][1] in the initial_data fixture
+        person["user_id"] = 11
+        event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
+
+        model._handle_realm_user_event(event)
+
+        if updated_field_if_different is not None:
+            new_data_field = updated_field_if_different
+        else:
+            new_data_field = event_field
+        assert (
+            initial_data["realm_users"][1][new_data_field]
+            == event["person"][event_field]
+        )
 
     @pytest.mark.parametrize("value", [True, False])
     def test__handle_user_settings_event(self, mocker, model, value):

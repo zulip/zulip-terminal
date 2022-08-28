@@ -154,6 +154,7 @@ class Model:
                 ("update_display_settings", self._handle_update_display_settings_event),
                 ("user_settings", self._handle_user_settings_event),
                 ("realm_emoji", self._handle_update_emoji_event),
+                ("realm_user", self._handle_realm_user_event),
             ]
         )
 
@@ -1829,6 +1830,22 @@ class Model:
                 msg_w_list = create_msg_box_list(self, [msg_id], last_message=last_msg)
                 view.message_view.log[msg_pos] = msg_w_list[0]
         self.controller.update_screen()
+
+    def _handle_realm_user_event(self, event: Event) -> None:
+        """
+        Handle change to user(s) metadata (Eg: full_name, timezone, etc.)
+        """
+        assert event["type"] == "realm_user"
+        if event["op"] == "update":
+            updated_details = event["person"]
+            for realm_user in self.initial_data["realm_users"]:
+                if realm_user["user_id"] == updated_details["user_id"]:
+                    # realm_users has 'email' attribute and not 'new_email'
+                    if "new_email" in updated_details:
+                        realm_user["email"] = updated_details["new_email"]
+                    else:
+                        realm_user.update(updated_details)
+                    break
 
     def _register_desired_events(self, *, fetch_data: bool = False) -> str:
         fetch_types = None if not fetch_data else self.initial_data_to_fetch
