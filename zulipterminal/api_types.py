@@ -167,6 +167,39 @@ class ReactionEvent(TypedDict):
     message_id: int
 
 
+class RealmUserEventPerson(TypedDict):
+    user_id: int
+
+    full_name: str
+
+    avatar_url: str
+    avatar_source: str
+    avatar_url_medium: str
+    avatar_version: int
+
+    # NOTE: This field will be removed in future as it is redundant with the user_id
+    # email: str
+    timezone: str
+
+    bot_owner_id: int
+
+    role: int
+
+    is_billing_admin: bool  # New in ZFL 73 (Zulip 5.0)
+
+    delivery_email: str  # NOTE: Only sent to admins
+
+    # custom_profile_field: Dict  # TODO: Requires checking before implementation
+
+    new_email: str
+
+
+class RealmUserEvent(TypedDict):
+    type: Literal["realm_user"]
+    op: Literal["update"]
+    person: RealmUserEventPerson
+
+
 class SubscriptionEvent(TypedDict):
     type: Literal["subscription"]
     op: str
@@ -249,4 +282,5 @@ Event = Union[
     UpdateRealmEmojiEvent,
     UpdateUserSettingsEvent,
     UpdateGlobalNotificationsEvent,
+    RealmUserEvent,
 ]
