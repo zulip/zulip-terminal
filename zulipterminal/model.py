@@ -1841,6 +1841,12 @@ class Model:
             if "new_email" in event["person"]:
                 event["person"]["email"] = event["person"].pop("new_email")
             updated_details = event["person"]
+            # Role is not present under self.initial_data,
+            # but exists only under self.initial_data["realm_users"]
+            if "role" not in event["person"]:
+                # check if the event contains details of current user or some other user in the org
+                if updated_details["user_id"] == self.user_id:
+                    self.initial_data.update(updated_details)
             for realm_user in self.initial_data["realm_users"]:
                 if realm_user["user_id"] == updated_details["user_id"]:
                     realm_user.update(updated_details)
