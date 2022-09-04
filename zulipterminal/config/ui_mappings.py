@@ -2,7 +2,7 @@
 Relationships between state/API data and presentation in the UI
 """
 
-from typing import Dict, Optional
+from typing import Dict
 
 from typing_extensions import Literal
 
@@ -51,7 +51,7 @@ BOT_TYPE_BY_ID = {
 }
 
 
-ROLE_BY_ID: Dict[Optional[int], Dict[str, str]] = {
+ROLE_BY_ID: Dict[int, Dict[str, str]] = {
     100: {"bool": "is_owner", "name": "Owner"},
     200: {"bool": "is_admin", "name": "Administrator"},
     300: {"bool": "is_moderator", "name": "Moderator"},

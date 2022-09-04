@@ -881,6 +881,19 @@ class Model:
         if not api_user_data:
             return None
 
+        # Role `None` for triggering servers < Zulip 4.1 (ZFL 59)
+        raw_user_role = api_user_data.get("role", None)
+        if raw_user_role is None:
+            user_role = 400  # Default role is member
+
+            # Ensure backwards compatibility for role parameters (e.g., `is_admin`)
+            for role_id, role in ROLE_BY_ID.items():
+                if api_user_data.get(role["bool"], None):
+                    user_role = role_id
+                    break
+        else:
+            user_role = raw_user_role
+
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo = dict(
             full_name=api_user_data.get("full_name", "(No name)"),
@@ -888,22 +901,11 @@ class Model:
             date_joined=api_user_data.get("date_joined", ""),
             timezone=api_user_data.get("timezone", ""),
             is_bot=api_user_data.get("is_bot", False),
-            # Role `None` for triggering servers < Zulip 4.1 (ZFL 59)
-            role=api_user_data.get("role", None),
+            role=user_role,
             bot_type=api_user_data.get("bot_type", None),
             bot_owner_name="",  # Can be non-empty only if is_bot == True
             last_active="",
         )
-
-        if user_info["role"] is None:
-            # Default role is member
-            user_info["role"] = 400
-
-            # Ensure backwards compatibility for role parameters (e.g., `is_admin`)
-            for role_id, role in ROLE_BY_ID.items():
-                if api_user_data.get(role["bool"], None):
-                    user_info["role"] = role_id
-                    break
 
         bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
 
