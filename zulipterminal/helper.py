@@ -69,7 +69,7 @@ class TidiedUserInfo(TypedDict):
     email: str
     date_joined: str
     timezone: str
-    role: Optional[int]
+    role: int
     last_active: str
 
     is_bot: bool
