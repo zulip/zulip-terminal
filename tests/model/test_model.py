@@ -1291,9 +1291,17 @@ class TestModel:
     @pytest.mark.parametrize(
         ["to_vary_in_each_user", "key", "expected_value"],
         [
-            case({"full_name": "Test User"}, "full_name", "Test User"),
+            case(
+                {"full_name": "Test User"},
+                "full_name",
+                "Test User",
+            ),
             case({}, "full_name", "(No name)"),
-            case({"email": "person1@example.com"}, "email", "person1@example.com"),
+            case(
+                {"email": "person1@example.com"},
+                "email",
+                "person1@example.com",
+            ),
             case({}, "email", ""),
             case(
                 {"date_joined": "2021-02-28T19:58:29.035543+00:00"},
@@ -1301,7 +1309,11 @@ class TestModel:
                 "2021-02-28T19:58:29.035543+00:00",
             ),
             case({}, "date_joined", ""),
-            case({"timezone": "Asia/Kolkata"}, "timezone", "Asia/Kolkata"),
+            case(
+                {"timezone": "Asia/Kolkata"},
+                "timezone",
+                "Asia/Kolkata",
+            ),
             case({}, "timezone", ""),
             case({"bot_type": 1}, "bot_type", 1),
             case({}, "bot_type", None),
@@ -1314,8 +1326,16 @@ class TestModel:
             case({"is_admin": True}, "role", 200),
             case({"is_guest": True}, "role", 600),
             case({"is_bot": True}, "is_bot", True),
-            case({"bot_owner_id": 12}, "bot_owner_name", "Human 2"),
-            case({"bot_owner": "person2@example.com"}, "bot_owner_name", "Human 2"),
+            case(
+                {"bot_owner_id": 12},
+                "bot_owner_name",
+                "Human 2",
+            ),
+            case(
+                {"bot_owner": "person2@example.com"},
+                "bot_owner_name",
+                "Human 2",
+            ),
             case({}, "bot_owner_name", ""),
         ],
         ids=[
