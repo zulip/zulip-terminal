@@ -614,6 +614,28 @@ class Model:
 
         return response["result"] == "success"
 
+    def get_latest_message_in_topic(
+        self, stream_id: int, topic_name: str
+    ) -> Optional[Message]:
+        request: Dict[str, Any] = {
+            "anchor": 10000000000000000,
+            "num_before": 1,
+            "num_after": 0,
+            "narrow": [
+                {
+                    "operator": "stream",
+                    "operand": stream_id,
+                },
+                {"operator": "topic", "operand": topic_name},
+            ],
+        }
+        response = self.client.get_messages(request)
+        display_error_if_present(response, self.controller)
+        if response["messages"] != [] and len(response["messages"]) == 1:
+            return response["messages"][0]
+        else:
+            return None
+
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]
     ) -> Tuple[NamedEmojiData, List[str]]:

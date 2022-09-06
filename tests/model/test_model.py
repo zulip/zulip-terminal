@@ -966,6 +966,60 @@ class TestModel:
         else:
             report_success.assert_not_called()
 
+    @pytest.mark.parametrize(
+        "response, return_value",
+        [
+            (
+                {
+                    "result": "success",
+                    "messages": [
+                        {
+                            "subject": "hi!",
+                            "stream_id": 1,
+                        }
+                    ],
+                },
+                {
+                    "subject": "hi!",
+                    "stream_id": 1,
+                },
+            ),
+            (
+                {
+                    "result": "success",
+                    "messages": [
+                        {
+                            "subject": "hi!",
+                            "stream_id": 1,
+                        },
+                        {
+                            "subject": "hi!",
+                            "stream_id": 1,
+                        },
+                    ],
+                },
+                None,
+            ),
+            ({"result": "some_failure", "messages": []}, None),
+            ({"result": "success", "messages": []}, None),
+        ],
+    )
+    def test_get_latest_message_in_topic(
+        self,
+        mocker,
+        model,
+        response,
+        return_value,
+        topic_name="hi!",
+        stream_id=1,
+    ):
+        self.client.get_messages = mocker.Mock(return_value=response)
+
+        result = model.get_latest_message_in_topic(stream_id, topic_name)
+
+        assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(
         self,
