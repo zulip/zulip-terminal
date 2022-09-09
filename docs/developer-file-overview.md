@@ -1,3 +1,6 @@
+<!--- Generated automatically by tools/lint-docstring.py -->
+<!--- Do not modify -->
+
 ## Overview
 
 Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve all the information it displays. It has an [MVC structure](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) overall. Here is a description of some of its files:

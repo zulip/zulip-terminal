@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, List
 
 
-TABLE_OFFSET = 7
+TABLE_OFFSET = 10
 COLUMN_WIDTHS = (23, 20, 103)
 SPACEBAR = " "
 
@@ -200,7 +200,7 @@ def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
 
     existing_doc_dict: Dict[str, Dict[str, str]] = {}
 
-    # table is present from line 6 to (length - 1)
+    # table is present from line TABLE_OFFSET to (length - 1)
     for doc_row in doc_data[TABLE_OFFSET - 1 :]:
         _, folder, filename, docstring, _ = doc_row.split("|")
         folder, filename = folder.strip(), filename.strip()
