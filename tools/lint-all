@@ -23,6 +23,7 @@ tools = {
         "./tools/generate_hotkeys.py",
         "--check-only",
     ],
+    "Docstring linting & docs sync check (lint-docstring)": "./tools/lint-docstring",
 }
 
 HEADER = 80 * "="

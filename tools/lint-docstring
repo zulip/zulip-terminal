@@ -35,9 +35,78 @@ DESC_FOR_NO_FILE_FOLDERS = {
 FOLDERS_TO_EXCLUDE = ["__pycache__"]
 
 
-def main() -> None:
-    create_file_overview_doc()
-    print(f"Generated {DEVELOPER_DOC_NAME} successfully.")
+def main(fix_file: bool) -> None:
+    if fix_file:
+        create_file_overview_doc()
+        print(f"Generated {DEVELOPER_DOC_NAME} successfully.")
+    else:
+        error_messages = lint_file_overview()
+        if error_messages:
+            for file_name, error in error_messages.items():
+                print(f"{file_name}: {error} ")
+            print(
+                f"\nRun './tools/lint-docstring --fix' to add the docstring to {DEVELOPER_DOC_NAME}"
+            )
+            sys.exit(1)
+        else:
+            print(f"{DEVELOPER_DOC_NAME} has been linted successfully.")
+
+
+def lint_file_overview() -> Dict[str, str]:
+    """
+    Used for linting of the developer-file-overview.md document
+    """
+    folder_file_docstring = generate_folder_file_docstrings_dict()
+    existing_doc_dict = extract_docstrings_from_file_overview()
+    # folders and files which return error while linting are stored under
+    # error_message_dict with their respective error messages
+    error_message_dict = {}
+    for folder in folder_file_docstring:
+        # check if the folder for the docstring is present or not
+        if folder in existing_doc_dict:
+            for file in folder_file_docstring[folder]:
+                # check if the file under the folder is present or not
+                if file in existing_doc_dict[folder]:
+                    # check if docstrings match or not
+                    if (
+                        folder_file_docstring[folder][file]
+                        != existing_doc_dict[folder][file]
+                    ):
+                        error_message_dict[
+                            f"{folder}/{file}"
+                        ] = f"Docstrings do not match those listed in {DEVELOPER_DOC_NAME}"
+                    del existing_doc_dict[folder][file]
+                else:
+                    error_message_dict[
+                        f"{folder}/{file}"
+                    ] = f"File does not exist in {DEVELOPER_DOC_NAME}"
+            # if the folder dictionary is empty, delete it from the existing_doc_dict
+            if not existing_doc_dict[folder]:
+                del existing_doc_dict[folder]
+        else:
+            error_message_dict[folder] = f"Folder not present in {DEVELOPER_DOC_NAME}"
+
+    # for docstrings in DESC_FOR_NO_FILE_FOLDERS
+    for folder_name in DESC_FOR_NO_FILE_FOLDERS:
+        if (
+            DESC_FOR_NO_FILE_FOLDERS[folder_name]
+            != existing_doc_dict[folder_name]["no_file_present"]
+        ):
+            error_message_dict[
+                folder_name
+            ] = f"Docstrings do not match those listed in {DEVELOPER_DOC_NAME}"
+        del existing_doc_dict[folder_name]
+
+    # check if there are any docstrings in the overview file
+    # for which folder/file has been removed
+    if existing_doc_dict:
+        for folder_name in existing_doc_dict:
+            if existing_doc_dict[folder_name]:
+                for file_name in existing_doc_dict[folder_name]:
+                    error_message_dict[
+                        f"{folder_name}/{file_name}"
+                    ] = "Folder/File for this docstring has been removed"
+    return error_message_dict
 
 
 def create_file_overview_doc() -> None:
@@ -120,9 +189,41 @@ def extract_folder_file_structure() -> Dict[str, List[str]]:
     return folders_and_files
 
 
+def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
+    """
+    Reads the developer-file-overview.md document and creates
+    a dictionary containing folder name which in turn is a dictionary
+    containing files and their respective descriptons
+    """
+    with open(DEVELOPER_DOC_PATH, "r") as file:
+        doc_data = file.readlines()
+
+    existing_doc_dict: Dict[str, Dict[str, str]] = {}
+
+    # table is present from line 6 to (length - 1)
+    for doc_row in doc_data[TABLE_OFFSET - 1 :]:
+        _, folder, filename, docstring, _ = doc_row.split("|")
+        folder, filename = folder.strip(), filename.strip()
+        if folder:
+            # For files under a folder but no folder value in overview file (eg. core.py)
+            folder_name = folder
+            existing_doc_dict[str(folder_name)] = {}
+        if docstring.strip():
+            if filename:
+                existing_doc_dict[folder_name][filename] = docstring.strip()
+            else:
+                existing_doc_dict[folder_name]["no_file_present"] = docstring.strip()
+    return existing_doc_dict
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description=f"Regenerate the {DEVELOPER_DOC_NAME} file according to the docstrings"
+        description=f"Lint {DEVELOPER_DOC_NAME} as per docstrings across all files in zulipterminal"
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help=f"Regenerate {DEVELOPER_DOC_NAME} according to the docstrings",
     )
     args = parser.parse_args()
-    main()
+    main(args.fix)
