@@ -65,3 +65,11 @@ STREAM_POST_POLICY = {
     3: "Only organization administrators, moderators and full members can send to this stream",
     4: "Only organization administrators and moderators can send to this stream",
 }
+
+EDIT_TOPIC_POLICY = {
+    1: "Only organization administrators, moderators, full members and members can edit topic",
+    2: "Only organization administrators can edit topic",
+    3: "Only organization administrators, moderators and full members can edit topic",
+    4: "Only organization administrators and moderators can edit topic",
+    5: "Any user can edit topic",
+}
