@@ -41,7 +41,11 @@ from zulipterminal.api_types import (
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
-from zulipterminal.config.ui_mappings import ROLE_BY_ID, StreamAccessType
+from zulipterminal.config.ui_mappings import (
+    EDIT_TOPIC_POLICY,
+    ROLE_BY_ID,
+    StreamAccessType,
+)
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
@@ -635,6 +639,61 @@ class Model:
             return response["messages"][0]
         else:
             return None
+
+    def can_user_edit_topic(self) -> bool:
+        user_info = self.get_user_info(self.user_id)
+        if user_info is not None:
+            if not self.initial_data.get("realm_allow_message_editing"):
+                self.controller.report_error("Editing messages is disabled")
+                return False
+            role = user_info["role"]
+            if role <= 200:
+                return True
+            # ZFL >= 75, realm/ allow_community_topic_editing was replaced with
+            # edit_topic_policy
+            allow_community_topic_editing = self.initial_data.get(
+                "realm_allow_community_topic_editing", None
+            )
+            if allow_community_topic_editing is True:
+                return True
+            elif allow_community_topic_editing is False:
+                self.controller.report_error("Editing topic is disabled")
+                return False
+            else:
+                edit_topic_policy = self.initial_data.get("realm_edit_topic_policy")
+                if edit_topic_policy == 2:
+                    # For admins and owners only (not using user role)
+                    if role <= 200:
+                        return True
+                    else:
+                        self.controller.report_error(EDIT_TOPIC_POLICY[2])
+                        return False
+                elif edit_topic_policy == 4:
+                    # Check for moderators
+                    if role <= 300:
+                        return True
+                    else:
+                        self.controller.report_error(EDIT_TOPIC_POLICY[4])
+                        return False
+                elif edit_topic_policy == 3:
+                    # Check for 'full members'
+                    if role <= 400:
+                        return True
+                    else:
+                        self.controller.report_error(EDIT_TOPIC_POLICY[3])
+                        return False
+                elif edit_topic_policy == 1:
+                    # Check for members
+                    if role <= 400:
+                        return True
+                    else:
+                        self.controller.report_error(EDIT_TOPIC_POLICY[1])
+                        return False
+                else:  # edit_topic_policy == 5 (or None)
+                    # All users including guests
+                    return True
+        self.controller.report_error("User not found")
+        return False
 
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]

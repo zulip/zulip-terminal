@@ -1020,6 +1020,197 @@ class TestModel:
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
+    @pytest.mark.parametrize(
+        "user_role, user_type",
+        [
+            (None, "_"),
+            ({"role": 100}, "_owner"),
+            ({"role": 200}, "_admin"),
+            ({"role": 300}, "_moderator"),
+            ({"role": 400}, "_member"),
+            ({"role": 600}, "_guest"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "realm_editing_settings, expected_response",
+        [
+            case(
+                {
+                    "allow_message_editing": False,
+                    "allow_community_topic_editing": True,
+                },
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["Editing messages is disabled", False],
+                    "_admin": ["Editing messages is disabled", False],
+                    "_moderator": ["Editing messages is disabled", False],
+                    "_member": ["Editing messages is disabled", False],
+                    "_guest": ["Editing messages is disabled", False],
+                },
+                id="editing_msg_disabled:PreZulip4.0",
+            ),
+            case(
+                {
+                    "allow_message_editing": True,
+                    "allow_community_topic_editing": False,
+                },
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["Editing topic is disabled", False],
+                    "_member": ["Editing topic is disabled", False],
+                    "_guest": ["Editing topic is disabled", False],
+                },
+                id="editing_topic_disabled:PreZulip4.0",
+            ),
+            case(
+                {
+                    "allow_message_editing": True,
+                    "allow_community_topic_editing": True,
+                },
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["", True],
+                    "_member": ["", True],
+                    "_guest": ["", True],
+                },
+                id="editing_topic_and_msg_enabled:PreZulip4.0",
+            ),
+            case(
+                {"allow_message_editing": False, "edit_topic_policy": 1},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["Editing messages is disabled", False],
+                    "_admin": ["Editing messages is disabled", False],
+                    "_moderator": ["Editing messages is disabled", False],
+                    "_member": ["Editing messages is disabled", False],
+                    "_guest": ["Editing messages is disabled", False],
+                },
+                id="all_but_no_editing:Zulip4.0+:ZFL75",
+            ),
+            case(
+                {"allow_message_editing": True, "edit_topic_policy": 1},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["", True],
+                    "_member": ["", True],
+                    "_guest": [
+                        "Only organization administrators, moderators, full members and members can edit topic",
+                        False,
+                    ],
+                },
+                id="members:Zulip4.0+:ZFL75",
+            ),
+            case(
+                {"allow_message_editing": True, "edit_topic_policy": 2},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": [
+                        "Only organization administrators can edit topic",
+                        False,
+                    ],
+                    "_member": [
+                        "Only organization administrators can edit topic",
+                        False,
+                    ],
+                    "_guest": [
+                        "Only organization administrators can edit topic",
+                        False,
+                    ],
+                },
+                id="admins:Zulip4.0+:ZFL75",
+            ),
+            case(
+                {"allow_message_editing": True, "edit_topic_policy": 3},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["", True],
+                    "_member": ["", True],
+                    "_guest": [
+                        "Only organization administrators, moderators and full members can edit topic",
+                        False,
+                    ],
+                },
+                id="full_members:Zulip4.0+:ZFL75",
+            ),
+            case(
+                {"allow_message_editing": True, "edit_topic_policy": 4},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["", True],
+                    "_member": [
+                        "Only organization administrators and moderators can edit topic",
+                        False,
+                    ],
+                    "_guest": [
+                        "Only organization administrators and moderators can edit topic",
+                        False,
+                    ],
+                },
+                id="moderators:Zulip4.0+:ZFL75",
+            ),
+            case(
+                {"allow_message_editing": True, "edit_topic_policy": 5},
+                {
+                    "_": ["User not found", False],
+                    "_owner": ["", True],
+                    "_admin": ["", True],
+                    "_moderator": ["", True],
+                    "_member": ["", True],
+                    "_guest": ["", True],
+                },
+                id="guests:Zulip4.0+:ZFL75",
+            ),
+        ],
+    )
+    def test_can_user_edit_topic(
+        self,
+        mocker,
+        model,
+        initial_data,
+        user_role,
+        user_type,
+        realm_editing_settings,
+        expected_response,
+    ):
+        model.get_user_info = mocker.Mock(return_value=user_role)
+        model.initial_data = initial_data
+        initial_data["realm_allow_message_editing"] = realm_editing_settings[
+            "allow_message_editing"
+        ]
+        allow_community_topic_editing = realm_editing_settings.get(
+            "allow_community_topic_editing", None
+        )
+        edit_topic_policy = realm_editing_settings.get("edit_topic_policy", None)
+        if allow_community_topic_editing is None:
+            assert edit_topic_policy is not None
+            initial_data["realm_edit_topic_policy"] = edit_topic_policy
+        else:
+            assert edit_topic_policy is None
+            initial_data[
+                "realm_allow_community_topic_editing"
+            ] = allow_community_topic_editing
+        report_error = model.controller.report_error
+
+        result = model.can_user_edit_topic()
+
+        assert result == expected_response[user_type][1]
+        if result:
+            report_error.assert_not_called()
+        else:
+            report_error.assert_called_once_with(expected_response[user_type][0])
+
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(
         self,
