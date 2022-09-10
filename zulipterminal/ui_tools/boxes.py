@@ -478,7 +478,11 @@ class WriteBox(urwid.Pile):
         self, text: str, state: Optional[int]
     ) -> Optional[str]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
-        streams = [stream["name"] for stream in streams_list]
+        streams = [
+            stream["name"]
+            for stream in streams_list
+            if self.model.is_unauthorised_to_post_in_stream(stream.get("id")) is None
+        ]
 
         # match_streams takes stream names and typeaheads,
         # but we don't have typeaheads here.
@@ -1792,11 +1796,18 @@ class MessageBox(urwid.Pile):
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message["type"] == "stream":
-                self.model.controller.view.write_box.stream_box_view(
-                    caption=self.message["display_recipient"],
-                    title=self.message["subject"],
-                    stream_id=self.stream_id,
+                is_unauthorised_warning = self.model.is_unauthorised_to_post_in_stream(
+                    self.message["stream_id"]
                 )
+                if is_unauthorised_warning is not None:
+                    self.model.controller.view.set_footer_text(is_unauthorised_warning, "task:warning", 8)
+                    return key
+                else:
+                    self.model.controller.view.write_box.stream_box_view(
+                        caption=self.message["display_recipient"],
+                        title=self.message["subject"],
+                        stream_id=self.stream_id,
+                    )
         elif is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
@@ -1862,7 +1873,22 @@ class MessageBox(urwid.Pile):
                 recipient_user_ids=[self.message["sender_id"]],
             )
         elif is_command_key("MENTION_REPLY", key):
-            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+            is_unauthorised_warning = self.model.is_unauthorised_to_post_in_stream(
+                self.message["stream_id"]
+            )
+            if is_unauthorised_warning is not None:
+                self.model.controller.view.set_footer_text(is_unauthorised_warning, "task:warning", 8)
+                self.model.controller.view.write_box.stream_box_view(
+                    caption="",
+                    title="",
+                    stream_id="",
+                )
+            else:
+                self.model.controller.view.write_box.stream_box_view(
+                        caption=self.message["display_recipient"],
+                        title=self.message["subject"],
+                        stream_id=self.stream_id,
+                    )
             mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(mention)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
@@ -1870,7 +1896,22 @@ class MessageBox(urwid.Pile):
             )
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("QUOTE_REPLY", key):
-            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+            is_unauthorised_warning = self.model.is_unauthorised_to_post_in_stream(
+                self.message["stream_id"]
+            )
+            if is_unauthorised_warning is not None:
+                self.model.controller.view.set_footer_text(is_unauthorised_warning, "task:warning", 8)
+                self.model.controller.view.write_box.stream_box_view(
+                    caption="",
+                    title="",
+                    stream_id="",
+                )
+            else:
+                self.model.controller.view.write_box.stream_box_view(
+                        caption=self.message["display_recipient"],
+                        title=self.message["subject"],
+                        stream_id=self.stream_id,
+                    )
 
             # To correctly quote a message that contains quote/code-blocks,
             # we need to fence quoted message containing ``` with ````,

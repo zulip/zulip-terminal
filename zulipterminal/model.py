@@ -41,7 +41,11 @@ from zulipterminal.api_types import (
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
-from zulipterminal.config.ui_mappings import ROLE_BY_ID, StreamAccessType
+from zulipterminal.config.ui_mappings import (
+    ROLE_BY_ID,
+    STREAM_POST_POLICY,
+    StreamAccessType,
+)
 from zulipterminal.helper import (
     Message,
     NamedEmojiData,
@@ -554,6 +558,60 @@ class Model:
         if message_was_sent:
             notify_if_message_sent_outside_narrow(composition, self.controller)
         return message_was_sent
+
+    def is_unauthorised_to_post_in_stream(self, stream_id: int) -> Optional[str]:
+        """
+        Identify whether a user is authorised to send message to the given
+        stream or not using stream_post_policy and/or is_announcement_policy
+        and accordingly update the footer
+        """
+        if stream_id in self.stream_dict:
+            stream = self.stream_dict[stream_id]
+        else:
+            return "Stream ID is invalid"
+        user_info = self._all_users_by_id.get(self.user_id, None)
+        if user_info is None:
+            # Check whether the given user id is valid or not
+            return "User does not exist"
+
+        if "role" in user_info:
+            role = user_info["role"]
+        else:
+            if user_info.get("is_owner"):
+                role = 100
+            elif user_info.get("is_admin"):
+                role = 200
+            elif user_info.get("is_guest"):
+                role = 600
+            else:
+                role = 400
+
+        if stream.get("is_announcement_only") or stream.get("stream_post_policy") == 2:
+            # For admins and owners only (not using user role)
+            if role <= 200:
+                return None
+            else:
+                return STREAM_POST_POLICY[2]
+        elif stream.get("stream_post_policy") is not None:
+            # is_announcement_only is deprecated in Zulip 3.0+ -> stream_post_policy (ZFL 1)
+            if stream.get("stream_post_policy") == 4:
+                # Check for moderators only stream
+                if role <= 300:
+                    return None
+                else:
+                    return STREAM_POST_POLICY[4]
+            elif stream.get("stream_post_policy") == 3:
+                # Check for 'members' in the stream
+                if role <= 400:
+                    return None
+                else:
+                    return STREAM_POST_POLICY[3]
+            else:
+                # Anyone can post
+                return None
+        else:
+            # Zulip version < 3.0 and is_announcement_only == False, ie, anyone can post
+            return None
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
         request = {
