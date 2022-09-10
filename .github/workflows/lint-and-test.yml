@@ -100,6 +100,23 @@ jobs:
       - name: Run generate_hotkeys
         run: ./tools/generate_hotkeys.py --check-only
 
+  docstrings:
+    runs-on: ubuntu-latest
+    name: Lint - Docstrings linting & docs sync check
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.6
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
+      - name: Minimal install
+        run: pip install .
+      - name: Run lint-docstring
+        run: ./tools/lint-docstring
+
   pytest:
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
