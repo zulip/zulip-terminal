@@ -1550,7 +1550,8 @@ class MessageBox(urwid.Pile):
         }
         different = {  # How this message differs from the previous one
             "recipients": recipient_header is not None,
-            "author": message["this"]["author_id"] != message["last"]["author_id"],
+            "author": message["this"]["author"] != message["last"]["author"],
+            "author_id": message["this"]["author_id"] != message["last"]["author_id"],
             "24h": (
                 message["last"]["datetime"] is not None
                 and ((message["this"]["datetime"] - message["last"]["datetime"]).days)
@@ -1567,11 +1568,14 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             TextType = Dict[str, urwid_MarkupTuple]
-            text_keys = ("author", "star", "time", "status")
+            text_keys = ("author", "star", "time", "status","author_id")
             text: TextType = {key: (None, " ") for key in text_keys}
 
-            if any(different[key] for key in ("recipients", "author", "24h")):
-                text["author"] = ("name", message["this"]["author"])
+            if any(different[key] for key in ("recipients", "author", "24h","author_id")):
+                if(different["author_id"] and not different["author"]):
+                    text["author"] = ("name", message["this"]["author"]+" ("+str(message["this"]["author_id"])+")")
+                else:
+                    text["author"] = ("name", message["this"]["author"])    
 
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
