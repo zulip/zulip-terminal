@@ -120,7 +120,7 @@ If it doesn't find this file, you have two options:
 
 2. Each time you run `zulip-term`, you can specify the path to an alternative `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c /path/to/zuliprc`
 
-   Your personal zuliprc file can be obtained from Zulip servers in your account settings in the web application, which gives you all the permissions you have there. Bot zuliprc files can be downloaded from a similar area for each bot, and will have more limited permissions.
+   A `.zuliprc` file corresponding to your account on a particular Zulip server can be downloaded via Web or Desktop applications connected to that server. In recent versions this can be found in your **Personal settings** in the **Account & privacy** section, under **API key** as 'Show/change your API key'. If this is your only Zulip account, you may want to move and rename this file to the default file location above, or rename it to something more memorable that you can pass to the `---config-file` option. This `.zuliprc` file gives you all the permissions you have as that user. Similar `.zuliprc files` can be downloaded from the **Bots** section for any bots you have set up, though with correspondingly limited permissions.
 
 **NOTE:** If your server uses self-signed certificates or an insecure connection, you will need to add extra options to the `zuliprc` file manually - see the documentation for the [Zulip python module](https://pypi.org/project/zulip/).
 
