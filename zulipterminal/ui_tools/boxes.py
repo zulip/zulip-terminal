@@ -579,9 +579,9 @@ class WriteBox(urwid.Pile):
         return combined_typeahead, combined_names
 
     def autocomplete_users(
-        #users_list=self.view.users
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
+        #users_list=self.view.users
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
