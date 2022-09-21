@@ -76,7 +76,8 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
-
+        global users_list
+        users_list=self.view.users
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
             "open_with_private", "open_with_stream", "closed"
@@ -444,7 +445,7 @@ class WriteBox(urwid.Pile):
         )
 
     def _to_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
-        users_list = self.view.users
+        #users_list = self.view.users
         recipients = text.rsplit(",", 1)
 
         # Use the most recent recipient for autocomplete.
@@ -577,7 +578,8 @@ class WriteBox(urwid.Pile):
     def autocomplete_users(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        users_list = self.view.users
+        #users_list = self.view.users
+        #print(users_list)
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
@@ -1572,6 +1574,7 @@ class MessageBox(urwid.Pile):
             if any(
                 different[key] for key in ("recipients", "author", "24h", "author_id")
             ):
+                
                 if different["author_id"] and not different["author"]:
                     text["author"] = (
                         "name",
