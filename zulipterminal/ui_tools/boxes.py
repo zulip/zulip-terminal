@@ -158,6 +158,7 @@ class WriteBox(urwid.Pile):
 
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
+            
 
     def _set_regular_and_typing_recipient_user_ids(
         self, user_id_list: Optional[List[int]]
@@ -583,6 +584,7 @@ class WriteBox(urwid.Pile):
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
+        #print(matching_users)
         matching_ids = set([user["user_id"] for user in matching_users])
         matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
         # Display subscribed users/recipients first.
@@ -1514,6 +1516,25 @@ class MessageBox(urwid.Pile):
                 markup.extend(cls.soup2markup(element, metadata)[0])
         return markup, metadata["message_links"], metadata["time_mentions"]
 
+    #Function to count same number of users
+    def _count_same_users(author:str) -> Counter:
+        # users_list = self.view.users
+        matching_users = [
+            user for user in users_list if match_user(user, author)
+        ]
+        matching_ids = set([user["user_id"] for user in matching_users])
+        matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
+        # Display subscribed users/recipients first.
+        sorted_matching_users = sorted(
+            matching_users,
+            key=lambda user: user["user_id"] in matching_recipient_ids,
+            reverse=True,
+        )
+
+        user_names = [user["full_name"] for user in sorted_matching_users]
+        user_names_counter = Counter(user_names)
+        return user_names_counter
+
     def main_view(self) -> List[Any]:
 
         # Recipient Header
@@ -1570,12 +1591,35 @@ class MessageBox(urwid.Pile):
             TextType = Dict[str, urwid_MarkupTuple]
             text_keys = ("author", "star", "time", "status", "author_id")
             text: TextType = {key: (None, " ") for key in text_keys}
-
             if any(
                 different[key] for key in ("recipients", "author", "24h", "author_id")
             ):
-                
-                if different["author_id"] and not different["author"]:
+                # users_list = self.view.users
+                matching_users = [
+                    user["full_name"] for user in users_list if match_user(user, message["this"]["author"])
+                ]
+                # matching_ids = set([user["user_id"] for user in matching_users])
+                # matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
+                # # Display subscribed users/recipients first.
+                # sorted_matching_users = sorted(
+                #     matching_users,
+                #     key=lambda user: user["user_id"] in matching_recipient_ids,
+                #     reverse=True,
+                # )
+
+                # user_names = [user["full_name"] for user in sorted_matching_users]
+                user_names_counter = Counter(matching_users)
+                # matching_users = [
+                #     user for user in users_list if match_user(user,message["this"]["author"])
+                # ]
+                #print(len(matching_users)>1 and different["author_id"] in matching_users)
+                # matching_users = [
+                #         user for user in users_list if match_user(user,message["this"]["author"])
+                #     ]
+                #print(matching_users)
+                print(user_names_counter)
+                if user_names_counter[message["this"]["author"]]>1:
+                    # print(user_names_counter)
                     text["author"] = (
                         "name",
                         message["this"]["author"]
