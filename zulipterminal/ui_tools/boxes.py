@@ -76,10 +76,12 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
-        global users_list #Making it global so it can be accessed in the MessageBox class
-        users_list=self.view.users
-        global user_names_counter #Making it global so it needs to be calculated only once
-        user_names_counter = Counter(user["full_name"] for user in users_list) #Counting number of users having same name
+        global users_list  # Making it global so it can be accessed in the MessageBox class
+        users_list = self.view.users
+        global user_names_counter  # Making it global so it needs to be calculated only once
+        user_names_counter = Counter(
+            user["full_name"] for user in users_list
+        )  # Counting number of users having same name
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
             "open_with_private", "open_with_stream", "closed"
@@ -160,7 +162,6 @@ class WriteBox(urwid.Pile):
 
     def set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
-            
 
     def _set_regular_and_typing_recipient_user_ids(
         self, user_id_list: Optional[List[int]]
@@ -448,7 +449,7 @@ class WriteBox(urwid.Pile):
         )
 
     def _to_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
-        #users_list = self.view.users
+        # users_list = self.view.users
         recipients = text.rsplit(",", 1)
 
         # Use the most recent recipient for autocomplete.
@@ -581,7 +582,7 @@ class WriteBox(urwid.Pile):
     def autocomplete_users(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        #users_list=self.view.users
+        # users_list=self.view.users
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
@@ -1575,7 +1576,7 @@ class MessageBox(urwid.Pile):
             if any(
                 different[key] for key in ("recipients", "author", "24h", "author_id")
             ):
-                if user_names_counter[message["this"]["author"]]>1:
+                if user_names_counter[message["this"]["author"]] > 1:
                     text["author"] = (
                         "name",
                         message["this"]["author"]
