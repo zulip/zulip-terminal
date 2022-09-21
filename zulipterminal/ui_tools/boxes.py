@@ -76,8 +76,10 @@ class WriteBox(urwid.Pile):
         super().__init__(self.main_view(True))
         self.model = view.model
         self.view = view
-        global users_list
+        global users_list #Making it global so it can be accessed in the MessageBox class
         users_list=self.view.users
+        global user_names_counter #Making it global so it needs to be calculated only once
+        user_names_counter = Counter(user["full_name"] for user in users_list) #Counting number of users having same name
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
             "open_with_private", "open_with_stream", "closed"
@@ -577,14 +579,12 @@ class WriteBox(urwid.Pile):
         return combined_typeahead, combined_names
 
     def autocomplete_users(
+        #users_list=self.view.users
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        #users_list = self.view.users
-        #print(users_list)
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
-        #print(matching_users)
         matching_ids = set([user["user_id"] for user in matching_users])
         matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
         # Display subscribed users/recipients first.
@@ -1516,25 +1516,6 @@ class MessageBox(urwid.Pile):
                 markup.extend(cls.soup2markup(element, metadata)[0])
         return markup, metadata["message_links"], metadata["time_mentions"]
 
-    #Function to count same number of users
-    def _count_same_users(author:str) -> Counter:
-        # users_list = self.view.users
-        matching_users = [
-            user for user in users_list if match_user(user, author)
-        ]
-        matching_ids = set([user["user_id"] for user in matching_users])
-        matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
-        # Display subscribed users/recipients first.
-        sorted_matching_users = sorted(
-            matching_users,
-            key=lambda user: user["user_id"] in matching_recipient_ids,
-            reverse=True,
-        )
-
-        user_names = [user["full_name"] for user in sorted_matching_users]
-        user_names_counter = Counter(user_names)
-        return user_names_counter
-
     def main_view(self) -> List[Any]:
 
         # Recipient Header
@@ -1594,32 +1575,7 @@ class MessageBox(urwid.Pile):
             if any(
                 different[key] for key in ("recipients", "author", "24h", "author_id")
             ):
-                # users_list = self.view.users
-                matching_users = [
-                    user["full_name"] for user in users_list if match_user(user, message["this"]["author"])
-                ]
-                # matching_ids = set([user["user_id"] for user in matching_users])
-                # matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
-                # # Display subscribed users/recipients first.
-                # sorted_matching_users = sorted(
-                #     matching_users,
-                #     key=lambda user: user["user_id"] in matching_recipient_ids,
-                #     reverse=True,
-                # )
-
-                # user_names = [user["full_name"] for user in sorted_matching_users]
-                user_names_counter = Counter(matching_users)
-                # matching_users = [
-                #     user for user in users_list if match_user(user,message["this"]["author"])
-                # ]
-                #print(len(matching_users)>1 and different["author_id"] in matching_users)
-                # matching_users = [
-                #         user for user in users_list if match_user(user,message["this"]["author"])
-                #     ]
-                #print(matching_users)
-                print(user_names_counter)
                 if user_names_counter[message["this"]["author"]]>1:
-                    # print(user_names_counter)
                     text["author"] = (
                         "name",
                         message["this"]["author"]
