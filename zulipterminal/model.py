@@ -4,7 +4,7 @@ Defines the `Model`, fetching and storing data retrieved from the Zulip server
 
 import json
 import time
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, Counter
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from datetime import datetime
@@ -170,7 +170,7 @@ class Model:
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
 
         self.users = self.get_all_users()
-
+        
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
@@ -1018,6 +1018,7 @@ class Model:
         # and a user-id to email mapping
         self.user_dict: Dict[str, Dict[str, Any]] = dict()
         self.user_id_email_dict: Dict[int, str] = dict()
+        self.user_name_dict_count: Dict[str,int] = dict()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
                 self._all_users_by_id[self.user_id] = user
@@ -1130,7 +1131,9 @@ class Model:
         user_list.insert(0, current_user)
         self.user_dict[current_user["email"]] = current_user
         self.user_id_email_dict[self.user_id] = current_user["email"]
-
+        self.user_name_dict_count = Counter(
+            user["full_name"] for user in user_list
+        )  # Counting number of users having same name
         return user_list
 
     def user_name_from_id(self, user_id: int) -> str:
@@ -1143,6 +1146,14 @@ class Model:
             raise RuntimeError("Invalid user ID.")
 
         return self.user_dict[user_email]["full_name"]
+
+    def user_name_count(self, user_name: str) -> int:
+        """
+        Returns the count of the users with the same name as the given name.
+        """
+        if(not self.user_name_dict_count[user_name]):
+            return -1
+        return self.user_name_dict_count[user_name]        
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
