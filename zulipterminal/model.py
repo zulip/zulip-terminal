@@ -170,7 +170,7 @@ class Model:
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
 
         self.users = self.get_all_users()
-        
+
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
@@ -1018,7 +1018,7 @@ class Model:
         # and a user-id to email mapping
         self.user_dict: Dict[str, Dict[str, Any]] = dict()
         self.user_id_email_dict: Dict[int, str] = dict()
-        self.user_name_dict_count: Dict[str,int] = dict()
+        self.user_name_dict_count: Dict[str, int] = dict()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
                 self._all_users_by_id[self.user_id] = user
@@ -1151,9 +1151,9 @@ class Model:
         """
         Returns the count of the users with the same name as the given name.
         """
-        if(not self.user_name_dict_count[user_name]):
+        if not self.user_name_dict_count[user_name]:
             return -1
-        return self.user_name_dict_count[user_name]        
+        return self.user_name_dict_count[user_name]
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:

@@ -582,7 +582,7 @@ class WriteBox(urwid.Pile):
     def autocomplete_users(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        users_list=self.view.users
+        users_list = self.view.users
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
