@@ -167,6 +167,37 @@ class ReactionEvent(TypedDict):
     message_id: int
 
 
+class RealmUserEventPerson(TypedDict, total=False):
+    user_id: int
+
+    full_name: str
+
+    avatar_url: str
+    avatar_source: str
+    avatar_url_medium: str
+    avatar_version: int
+
+    # NOTE: This field will be removed in future as it is redundant with the user_id
+    # email: str
+    timezone: str
+
+    role: int
+
+    email: str
+
+    new_email: str
+
+    delivery_email: str
+
+    is_billing_admin: bool
+
+
+class RealmUserEvent(TypedDict):
+    type: Literal["realm_user"]
+    op: Literal["update"]
+    person: RealmUserEventPerson
+
+
 class SubscriptionEvent(TypedDict):
     type: Literal["subscription"]
     op: str
@@ -249,4 +280,5 @@ Event = Union[
     UpdateRealmEmojiEvent,
     UpdateUserSettingsEvent,
     UpdateGlobalNotificationsEvent,
+    RealmUserEvent,
 ]
