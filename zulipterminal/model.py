@@ -1287,23 +1287,35 @@ class Model:
 
         if event["op"] == "update":
             if hasattr(self.controller, "view"):
-                # NOTE: Currently, the response from the API still contains in_home_view
-                # and not is_muted, hence, the conditional is left unaltered, for now.
-                if event.get("property", None) == "in_home_view":
+                # NOTE: As per ZFL 139, is_muted is supported now, but the server
+                # also sends event with in_home_view to support older versions
+                if (
+                    event.get("property", None) == "in_home_view"
+                    or event.get("property", None) == "is_muted"
+                ):
+                    # Account for in_home_view and is_muted having opposite boolean values
+                    event_stream_muted_value: bool
+                    if event.get("property", None) == "in_home_view":
+                        event_stream_muted_value = not event["value"]
+                    else:
+                        event_stream_muted_value = event["value"]
+
                     stream_id = event["stream_id"]
 
                     # FIXME: Does this always contain the stream_id?
                     stream_button = self.controller.view.stream_id_to_button[stream_id]
 
                     unread_count = self.unread_counts["streams"][stream_id]
-                    if event["value"]:  # Unmuting streams
-                        self.muted_streams.remove(stream_id)
-                        self.unread_counts["all_msg"] += unread_count
-                        stream_button.mark_unmuted(unread_count)
+                    if not event_stream_muted_value:  # Unmuting streams
+                        if stream_id in self.muted_streams:
+                            self.muted_streams.remove(stream_id)
+                            self.unread_counts["all_msg"] += unread_count
+                            stream_button.mark_unmuted(unread_count)
                     else:  # Muting streams
-                        self.muted_streams.add(stream_id)
-                        self.unread_counts["all_msg"] -= unread_count
-                        stream_button.mark_muted()
+                        if stream_id not in self.muted_streams:
+                            self.muted_streams.add(stream_id)
+                            self.unread_counts["all_msg"] -= unread_count
+                            stream_button.mark_muted()
                     self.controller.update_screen()
                 elif event.get("property", None) == "pin_to_top":
                     stream_id = event["stream_id"]
