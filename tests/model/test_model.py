@@ -3031,8 +3031,31 @@ class TestModel:
                 },
                 {15, 19, 30},
             ),
+            (
+                {
+                    "property": "is_muted",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": False,
+                },
+                {15},
+            ),
+            (
+                {
+                    "property": "is_muted",
+                    "op": "update",
+                    "stream_id": 30,
+                    "value": True,
+                },
+                {15, 19, 30},
+            ),
         ],
-        ids=["remove_19", "add_30"],
+        ids=[
+            "remove_19_in_home_view:ZFLNone",
+            "add_30_in_home_view:ZFLNone",
+            "remove_19_is_muted:ZFL139",
+            "add_30_is_muted:ZFL139",
+        ],
     )
     def test__handle_subscription_event_mute_streams(
         self, model, mocker, stream_button, event, final_muted_streams
@@ -3054,7 +3077,10 @@ class TestModel:
         model._handle_subscription_event(event)
 
         assert model.muted_streams == final_muted_streams
-        if event["value"]:
+        # This condition is to check if the stream is unmuted or not
+        if (event["value"] and event["property"] == "in_home_view") or (
+            not event["value"] and event["property"] == "is_muted"
+        ):
             mark_unmuted.assert_called_once_with(99)
             assert model.unread_counts["all_msg"] == 399
         else:
