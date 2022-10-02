@@ -3017,10 +3017,28 @@ class TestModel:
                 {
                     "property": "in_home_view",
                     "op": "update",
+                    "stream_id": 18,
+                    "value": True,
+                },
+                {15, 19},
+            ),
+            (
+                {
+                    "property": "in_home_view",
+                    "op": "update",
                     "stream_id": 19,
                     "value": True,
                 },
                 {15},
+            ),
+            (
+                {
+                    "property": "in_home_view",
+                    "op": "update",
+                    "stream_id": 19,
+                    "value": False,
+                },
+                {15, 19},
             ),
             (
                 {
@@ -3035,10 +3053,28 @@ class TestModel:
                 {
                     "property": "is_muted",
                     "op": "update",
+                    "stream_id": 30,
+                    "value": False,
+                },
+                {15, 19},
+            ),
+            (
+                {
+                    "property": "is_muted",
+                    "op": "update",
                     "stream_id": 19,
                     "value": False,
                 },
                 {15},
+            ),
+            (
+                {
+                    "property": "is_muted",
+                    "op": "update",
+                    "stream_id": 15,
+                    "value": True,
+                },
+                {15, 19},
             ),
             (
                 {
@@ -3051,10 +3087,14 @@ class TestModel:
             ),
         ],
         ids=[
-            "remove_19_in_home_view:ZFLNone",
-            "add_30_in_home_view:ZFLNone",
-            "remove_19_is_muted:ZFL139",
-            "add_30_is_muted:ZFL139",
+            "remove_18_in_home_view:already_unmuted:ZFLNone",
+            "remove_19_in_home_view:muted:ZFLNone",
+            "add_19_in_home_view:already_muted:ZFLNone",
+            "add_30_in_home_view:unmuted:ZFLNone",
+            "remove_30_is_muted:already_unmutedZFL139",
+            "remove_19_is_muted:muted:ZFL139",
+            "add_15_is_muted:already_muted:ZFL139",
+            "add_30_is_muted:unmuted:ZFL139",
         ],
     )
     def test__handle_subscription_event_mute_streams(
@@ -3077,16 +3117,18 @@ class TestModel:
         model._handle_subscription_event(event)
 
         assert model.muted_streams == final_muted_streams
-        # This condition is to check if the stream is unmuted or not
-        if (event["value"] and event["property"] == "in_home_view") or (
-            not event["value"] and event["property"] == "is_muted"
-        ):
-            mark_unmuted.assert_called_once_with(99)
-            assert model.unread_counts["all_msg"] == 399
-        else:
-            mark_muted.assert_called_once_with()
-            assert model.unread_counts["all_msg"] == 201
-        model.controller.update_screen.assert_called_once_with()
+
+        if model.muted_streams != {15, 19}:
+            # This condition is to check if the stream is unmuted or not
+            if (event["value"] and event["property"] == "in_home_view") or (
+                not event["value"] and event["property"] == "is_muted"
+            ):
+                mark_unmuted.assert_called_once_with(99)
+                assert model.unread_counts["all_msg"] == 399
+            else:
+                mark_muted.assert_called_once_with()
+                assert model.unread_counts["all_msg"] == 201
+            model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "event, expected_pinned_streams, expected_unpinned_streams",
