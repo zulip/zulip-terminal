@@ -370,6 +370,48 @@ class TestModel:
         assert model.index["pointer"][str(narrow)] == msg_id
 
     @pytest.mark.parametrize(
+        "narrow, expected_additional_text",
+        (
+            case([], "", id="all_messages"),
+            case([["stream", "PTEST"]], "stream:PTEST", id="stream_without_spaces"),
+            case(
+                [["stream", "PTEST1 PTEST2+PTEST3"]],
+                "stream:PTEST1+PTEST2%2BPTEST3",
+                id="stream_with_spaces_and_plus_symbol",
+            ),
+            case(
+                [["stream", "PTEST"], ["topic", "Test"]],
+                "stream:PTEST topic:Test",
+                id="stream_and_topic_no_spaces",
+            ),
+            case(
+                [["stream", "PTEST1 PTEST2+PTEST3"], ["topic", "Test1 Test2+Test3"]],
+                "stream:PTEST1+PTEST2%2BPTEST3 topic:Test1+Test2%2BTest3",
+                id="stream_and_topic_with_space_and_plus",
+            ),
+            case([["is", "private"]], "is:private", id="is_private"),
+            case([["is", "mentioned"]], "is:mentioned", id="is_mentioned"),
+            case([["is", "starred"]], "is:starred", id="is_starred"),
+            case(
+                [["pm_with", "some1@email.com, some2@email.com"]],
+                "pm_with:some1@email.com,some2@email.com",
+                id="group_pms",
+            ),
+        ),
+    )
+    def test_additional_search_text_for_current_narrow(
+        self,
+        model,
+        narrow: List[List[str]],
+        expected_additional_text: str,
+    ) -> None:
+        model.narrow = narrow
+        assert (
+            model.additional_search_text_for_current_narrow()
+            == expected_additional_text
+        )
+
+    @pytest.mark.parametrize(
         "narrow, is_search_narrow",
         [
             ([], False),
