@@ -495,8 +495,11 @@ class Controller:
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
         self.model.index["search"].clear()
-        self.model.set_search_narrow(text)
-
+        additional_text = self.model.additional_search_text_for_current_narrow()
+        if additional_text:
+            text = additional_text + " " + text
+        text_without_keyword = self.model.extract_keywords_and_set_narrow(text)
+        self.model.set_search_narrow(text_without_keyword)
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
