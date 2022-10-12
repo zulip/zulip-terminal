@@ -23,7 +23,7 @@ STYLES = {
     'header'           : (Color.NEUTRAL_BLUE,           Color.FADED_BLUE),
     'general_narrow'   : (Color.LIGHT0_HARD,            Color.FADED_BLUE),
     'general_bar'      : (Color.DARK2,                  Color.LIGHT0_HARD),
-    'name'             : (Color.NEUTRAL_YELLOW,         Color.LIGHT0_HARD),
+    'msg_sender'       : (Color.NEUTRAL_YELLOW,         Color.LIGHT0_HARD),
     'unread'           : (Color.NEUTRAL_PURPLE,         Color.LIGHT0_HARD),
     'user_active'      : (Color.FADED_GREEN,            Color.LIGHT0_HARD),
     'user_idle'        : (Color.NEUTRAL_YELLOW,         Color.LIGHT0_HARD),

@@ -29,7 +29,7 @@ REQUIRED_STYLES = {
     'header'          : 'bold',
     'general_narrow'  : 'standout',
     'general_bar'     : '',
-    'name'            : '',
+    'msg_sender'      : '',
     'unread'          : 'strikethrough',
     'user_active'     : 'bold',
     'user_idle'       : '',

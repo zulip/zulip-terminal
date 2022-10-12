@@ -18,7 +18,7 @@ STYLES = {
     'header'          : (Color.WHITE,               Color.DARK_BLUE),
     'general_narrow'  : (Color.WHITE,               Color.DARK_BLUE),
     'general_bar'     : (Color.DARK_BLUE,           Color.WHITE),
-    'name'            : (Color.DARK_GREEN,          Color.WHITE),
+    'msg_sender'      : (Color.DARK_GREEN,          Color.WHITE),
     'unread'          : (Color.DARK_GRAY,           Color.LIGHT_GRAY),
     'user_active'     : (Color.DARK_GREEN,          Color.WHITE),
     'user_idle'       : (Color.DARK_BLUE,           Color.WHITE),

@@ -1568,7 +1568,7 @@ class MessageBox(urwid.Pile):
             text: TextType = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
-                text["author"] = ("name", message["this"]["author"])
+                text["author"] = ("msg_sender", message["this"]["author"])
 
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
