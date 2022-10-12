@@ -884,6 +884,32 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
+    @pytest.mark.parametrize(
+        "topic_links, message_links",
+        [
+            (
+                OrderedDict([("image", ("image", 1, True))]),
+                OrderedDict([("https://bar.com", ("topic", 1, True))]),
+            ),
+        ],
+    )
+    def test_pop_up_info_order(
+        self,
+        message_fixture: Message,
+        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+    ) -> None:
+        msg_info_view = MsgInfoView(
+            self.controller,
+            message_fixture,
+            title="Message Information",
+            topic_links=topic_links,
+            message_links=message_links,
+            time_mentions=list(),
+        )
+        msg_links = msg_info_view.button_widgets
+        assert msg_links == [message_links, topic_links]
+
     @pytest.mark.parametrize("key", keys_for_command("EDIT_HISTORY"))
     @pytest.mark.parametrize("realm_allow_edit_history", [True, False])
     @pytest.mark.parametrize(

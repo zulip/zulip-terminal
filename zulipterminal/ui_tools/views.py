@@ -1566,10 +1566,10 @@ class MsgInfoView(PopUpView):
             keys = ", ".join(map(repr, keys_for_command("EDIT_HISTORY")))
             msg_info[0][1].append(("Edit History", f"Press {keys} to view"))
         # Render the category using the existing table methods if links exist.
-        if topic_links:
-            msg_info.append(("Topic Links", []))
         if message_links:
             msg_info.append(("Message Links", []))
+        if topic_links:
+            msg_info.append(("Topic Links", []))
         if time_mentions:
             msg_info.append(("Time mentions", time_mentions))
         if msg["reactions"]:
@@ -1590,21 +1590,7 @@ class MsgInfoView(PopUpView):
 
         # To keep track of buttons (e.g., button links) and to facilitate
         # computing their slice indexes
-        button_widgets = []  # type: List[Any]
-
-        if topic_links:
-            topic_link_widgets, topic_link_width = self.create_link_buttons(
-                controller, topic_links
-            )
-
-            # slice_index = Number of labels before topic links + 1 newline
-            #               + 1 'Topic Links' category label.
-            slice_index = len(msg_info[0][1]) + 2
-            slice_index += sum([len(w) + 2 for w in button_widgets])
-            button_widgets.append(topic_links)
-
-            widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
-            popup_width = max(popup_width, topic_link_width)
+        self.button_widgets = []  # type: List[Any]
 
         if message_links:
             message_link_widgets, message_link_width = self.create_link_buttons(
@@ -1614,13 +1600,27 @@ class MsgInfoView(PopUpView):
             # slice_index = Number of labels before message links + 1 newline
             #               + 1 'Message Links' category label.
             slice_index = len(msg_info[0][1]) + 2
-            slice_index += sum([len(w) + 2 for w in button_widgets])
-            button_widgets.append(message_links)
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(message_links)
 
             widgets = (
                 widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
             )
             popup_width = max(popup_width, message_link_width)
+
+        if topic_links:
+            topic_link_widgets, topic_link_width = self.create_link_buttons(
+                controller, topic_links
+            )
+
+            # slice_index = Number of labels before topic links + 1 newline
+            #               + 1 'Topic Links' category label.
+            slice_index = len(msg_info[0][1]) + 2
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(topic_links)
+
+            widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
+            popup_width = max(popup_width, topic_link_width)
 
         super().__init__(controller, widgets, "MSG_INFO", popup_width, title)
 
