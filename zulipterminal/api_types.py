@@ -214,6 +214,8 @@ class SubscriptionEvent(TypedDict):
     value: bool
     message_ids: List[int]  # Present when subject of msg(s) is updated
 
+    subscriptions: List[Dict[str, int]]
+
 
 class TypingEvent(TypedDict):
     type: Literal["typing"]

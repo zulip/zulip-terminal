@@ -244,8 +244,11 @@ class StreamButton(TopButton):
             )
         elif is_command_key("STREAM_INFO", key):
             self.model.controller.show_stream_info(self.stream_id)
-        return super().keypress(size, key)
 
+        elif is_command_key("STREAM_SUBSCRIBE", key):
+            self.model.controller.show_subscription_popup(self.stream_id)
+
+        return super().keypress(size, key)
 
 class UserButton(TopButton):
     def __init__(
