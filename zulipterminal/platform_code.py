@@ -25,7 +25,7 @@ else:
 
 
 # PLATFORM DEPENDENT HELPERS
-MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
+MOUSE_SELECTION_KEY = "Fn + cmd" if PLATFORM == "MacOS" else "Shift"
 
 
 def notify(title: str, text: str) -> str:
