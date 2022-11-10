@@ -84,8 +84,8 @@ def list_files(
     # throw away empty lines and non-files (like symlinks)
     files = list(filter(os.path.isfile, files_gen))
 
-    result_dict = defaultdict(list)  # type: Dict[str, List[str]]
-    result_list = []  # type: List[str]
+    result_dict: Dict[str, List[str]] = defaultdict(list)
+    result_list: List[str] = []
 
     for fpath in files:
         # this will take a long time if exclude is very large
