@@ -318,7 +318,7 @@ class TopicButton(TopButton):
             topic_name=self.topic_name,
         )
 
-        # The space acts as a TopButton prefix and gives an effective 3 spaces for unresolved topics.
+        # The space gives an effective 3 spaces for unresolved topics
         topic_prefix = " "
         topic_name = self.topic_name
         if self.topic_name.startswith(RESOLVED_TOPIC_PREFIX):

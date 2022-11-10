@@ -1293,7 +1293,7 @@ class Model:
                     event.get("property", None) == "in_home_view"
                     or event.get("property", None) == "is_muted"
                 ):
-                    # Account for in_home_view and is_muted having opposite boolean values
+                    # in_home_view and is_muted have opposite boolean values
                     event_stream_muted_value: bool
                     if event.get("property", None) == "in_home_view":
                         event_stream_muted_value = not event["value"]

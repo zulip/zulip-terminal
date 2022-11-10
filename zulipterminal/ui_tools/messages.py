@@ -1038,7 +1038,8 @@ class MessageBox(urwid.Pile):
                         if self.message["type"] == "private":
                             self.model.controller.report_error(
                                 [
-                                    " Time Limit for editing the message has been exceeded."
+                                    " Time Limit for editing the message"
+                                    " has been exceeded."
                                 ]
                             )
                             return key

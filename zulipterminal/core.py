@@ -419,7 +419,8 @@ class Controller:
                 browser_controller.open(url)
                 self.report_success(
                     [
-                        f"The link was successfully opened using {browser_controller.name}"
+                        "The link was successfully opened using "
+                        f"{browser_controller.name}"
                     ]
                 )
         except webbrowser.Error as e:
