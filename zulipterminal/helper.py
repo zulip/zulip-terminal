@@ -680,8 +680,6 @@ def check_narrow_and_notify(
 def notify_if_message_sent_outside_narrow(
     message: Composition, controller: Any
 ) -> None:
-    current_narrow = controller.model.narrow
-
     if message["type"] == "stream":
         stream_narrow = [["stream", message["to"]]]
         topic_narrow = stream_narrow + [["topic", message["subject"]]]

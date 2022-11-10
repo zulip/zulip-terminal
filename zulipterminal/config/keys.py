@@ -433,7 +433,7 @@ def is_command_key(command: str, key: str) -> bool:
     try:
         return key in KEY_BINDINGS[command]["keys"]
     except KeyError as exception:
-        raise InvalidCommand(command)
+        raise InvalidCommand(command) from exception
 
 
 def keys_for_command(command: str) -> List[str]:
@@ -443,7 +443,7 @@ def keys_for_command(command: str) -> List[str]:
     try:
         return list(KEY_BINDINGS[command]["keys"])
     except KeyError as exception:
-        raise InvalidCommand(command)
+        raise InvalidCommand(command) from exception
 
 
 def primary_key_for_command(command: str) -> str:

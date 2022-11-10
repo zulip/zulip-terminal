@@ -262,7 +262,7 @@ def _write_zuliprc(
         ) as f:
             f.write(f"[api]\nemail={login_id}\nkey={api_key}\nsite={server_url}")
         return ""
-    except FileExistsError as ex:
+    except FileExistsError:
         return f"zuliprc already exists at {to_path}"
     except OSError as ex:
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
