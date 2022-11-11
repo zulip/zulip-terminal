@@ -686,13 +686,23 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             text_keys = ("author", "star", "time", "status")
-            text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
+            text: Dict[str, List[urwid_MarkupTuple]] = {
+                key: [(None, " ")] for key in text_keys
+            }
 
             if any(
                 different[key] for key in ("recipients", "author", "author_id", "24h")
             ):
-                text["author"] = ("msg_sender", message["this"]["author"])
-
+                if self.model.is_user_name_duplicate(message["this"]["author"]):
+                    text["author"] = [
+                        ("msg_sender", message["this"]["author"]),
+                        (
+                            "msg_mention",
+                            f" ({message['this']['author_id']})",
+                        ),
+                    ]
+                else:
+                    text["author"] = [("msg_sender", message["this"]["author"])]
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
                 user = self.model.user_dict.get(email, None)
@@ -702,17 +712,17 @@ class MessageBox(urwid.Pile):
 
                 # The default text['status'] value is (None, ' ')
                 if status in STATE_ICON:
-                    text["status"] = (f"user_{status}", STATE_ICON[status])
+                    text["status"] = [(f"user_{status}", STATE_ICON[status])]
 
             if message["this"]["is_starred"]:
-                text["star"] = ("starred", "*")
+                text["star"] = [("starred", "*")]
             if any(different[key] for key in ("recipients", "author", "timestamp")):
                 this_year = date.today().year
                 msg_year = message["this"]["datetime"].year
                 if this_year != msg_year:
-                    text["time"] = ("time", f"{msg_year} - {message['this']['time']}")
+                    text["time"] = [("time", f"{msg_year} - {message['this']['time']}")]
                 else:
-                    text["time"] = ("time", message["this"]["time"])
+                    text["time"] = [("time", message["this"]["time"])]
 
             content_header = urwid.Columns(
                 [
