@@ -1903,7 +1903,7 @@ class Model:
             )
 
             if "error" in response["result"]:
-                if response["msg"].startswith("Bad event queue id:"):
+                if response["code"] == "BAD_EVENT_QUEUE_ID":
                     # Our event queue went away, probably because
                     # we were asleep or the server restarted
                     # abnormally.  We may have missed some
