@@ -58,7 +58,6 @@ from zulipterminal.ui_tools.buttons import (
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
 
-
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
@@ -174,7 +173,7 @@ class MessageView(urwid.ListBox):
         self.new_loading = False
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
             if button == 4:
@@ -364,7 +363,7 @@ class StreamsView(urwid.Frame):
                 # Do not add a divider when it is already present. This can
                 # happen when new_text=''.
                 if not isinstance(
-                    streams_display[first_unpinned_index], StreamsViewDivider
+                        streams_display[first_unpinned_index], StreamsViewDivider
                 ):
                     streams_display.insert(first_unpinned_index, StreamsViewDivider())
 
@@ -376,7 +375,7 @@ class StreamsView(urwid.Frame):
             self.view.controller.update_screen()
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
             if button == 4:
@@ -409,7 +408,7 @@ class StreamsView(urwid.Frame):
 
 class TopicsView(urwid.Frame):
     def __init__(
-        self, topics_btn_list: List[Any], view: Any, stream_button: Any
+            self, topics_btn_list: List[Any], view: Any, stream_button: Any, curr_topic_name=None
     ) -> None:
         self.view = view
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
@@ -423,6 +422,11 @@ class TopicsView(urwid.Frame):
         self.header_list = urwid.Pile(
             [self.stream_button, urwid.Divider("─"), self.topic_search_box]
         )
+        if curr_topic_name is not None:
+            for i, topic in enumerate(log):
+                if topic.topic_name == curr_topic_name:
+                    log.set_focus(i)
+
         super().__init__(
             self.list_box,
             header=urwid.LineBox(
@@ -463,7 +467,7 @@ class TopicsView(urwid.Frame):
             self.view.controller.update_screen()
 
     def update_topics_list(
-        self, stream_id: int, topic_name: str, sender_id: int
+            self, stream_id: int, topic_name: str, sender_id: int
     ) -> None:
         # More recent topics are found towards the beginning
         # of the list.
@@ -489,7 +493,7 @@ class TopicsView(urwid.Frame):
             self.list_box.set_focus(0)
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
             if button == 4:
@@ -529,7 +533,7 @@ class UsersView(urwid.ListBox):
         super().__init__(self.log)
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
             if button == 1:
@@ -674,16 +678,16 @@ class RightColumnView(urwid.Frame):
 
     @asynch
     def update_user_list(
-        self,
-        search_box: Any = None,
-        new_text: Optional[str] = None,
-        user_list: Any = None,
+            self,
+            search_box: Any = None,
+            new_text: Optional[str] = None,
+            user_list: Any = None,
     ) -> None:
         """
         Updates user list via PanelSearchBox and _start_presence_updates.
         """
         assert (user_list is None and search_box is not None) or (  # PanelSearchBox.
-            user_list is not None and search_box is None and new_text is None
+                user_list is not None and search_box is None and new_text is None
         )  # _start_presence_updates.
 
         # Return if the method is called by PanelSearchBox (urwid.Edit) while
@@ -786,7 +790,7 @@ class LeftColumnView(urwid.Pile):
         self.view = view
         self.controller = view.controller
         self.menu_v = self.menu_view()
-        self.stream_v = self.streams_view()
+        self.stream_v = self.streams_view(topic_name, stream_id)
 
         self.is_in_topic_view = False
         contents = [(4, self.menu_v), self.stream_v]
@@ -818,13 +822,22 @@ class LeftColumnView(urwid.Pile):
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
-    def streams_view(self) -> Any:
+    def streams_view(self, topic_name=None, stream_id=None) -> Any:
         streams_btn_list = [
+
             StreamButton(
                 properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                curr_topic_name=topic_name
+            ) if stream.stream_id == stream_id else
+            StreamButton(
+                properties=stream,
+                controller=self.controller,
+                view=self.view,
+                count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                curr_topic_name=None
             )
             for stream in self.view.pinned_streams
         ]
@@ -838,6 +851,14 @@ class LeftColumnView(urwid.Pile):
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                curr_topic_name=topic_name
+            ) if stream.stream_id == stream_id else
+            StreamButton(
+                properties=stream,
+                controller=self.controller,
+                view=self.view,
+                count=self.model.unread_counts["streams"].get(stream["id"], 0),
+                curr_topic_name=None
             )
             for stream in self.view.unpinned_streams
         ]
@@ -864,7 +885,7 @@ class LeftColumnView(urwid.Pile):
         )
         return w
 
-    def topics_view(self, stream_button: Any) -> Any:
+    def topics_view(self, stream_button: Any, curr_topic_name) -> Any:
         stream_id = stream_button.stream_id
         topics = self.model.topics_in_stream(stream_id)
         topics_btn_list = [
@@ -880,7 +901,7 @@ class LeftColumnView(urwid.Pile):
             for topic in topics
         ]
 
-        self.view.topic_w = TopicsView(topics_btn_list, self.view, stream_button)
+        self.view.topic_w = TopicsView(topics_btn_list, self.view, stream_button, curr_topic_name)
         w = urwid.LineBox(
             self.view.topic_w,
             title="Topics",
@@ -898,8 +919,8 @@ class LeftColumnView(urwid.Pile):
 
     def is_in_topic_view_with_stream_id(self, stream_id: int) -> bool:
         return (
-            self.is_in_topic_view
-            and stream_id == self.view.topic_w.stream_button.stream_id
+                self.is_in_topic_view
+                and stream_id == self.view.topic_w.stream_button.stream_id
         )
 
     def update_stream_view(self) -> None:
@@ -907,20 +928,20 @@ class LeftColumnView(urwid.Pile):
         if not self.is_in_topic_view:
             self.show_stream_view()
 
-    def show_stream_view(self) -> None:
+    def show_stream_view(self, topic_name=None, stream_name=None) -> None:
         self.is_in_topic_view = False
-        self.contents[1] = (self.stream_v, self.options(height_type="weight"))
+        self.contents[1] = (self.stream_v(topic_name, stream_name), self.options(height_type="weight"))
 
-    def show_topic_view(self, stream_button: Any) -> None:
+    def show_topic_view(self, stream_button: Any, curr_topic_name) -> None:
         self.is_in_topic_view = True
         self.contents[1] = (
-            self.topics_view(stream_button),
+            self.topics_view(stream_button, curr_topic_name),
             self.options(height_type="weight"),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("SEARCH_STREAMS", key) or is_command_key(
-            "SEARCH_TOPICS", key
+                "SEARCH_TOPICS", key
         ):
             self.focus_position = 1
             if self.is_in_topic_view:
@@ -955,14 +976,14 @@ PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]
 
 class PopUpView(urwid.Frame):
     def __init__(
-        self,
-        controller: Any,
-        body: List[Any],
-        command: str,
-        requested_width: int,
-        title: str,
-        header: Optional[Any] = None,
-        footer: Optional[Any] = None,
+            self,
+            controller: Any,
+            body: List[Any],
+            command: str,
+            requested_width: int,
+            title: str,
+            header: Optional[Any] = None,
+            footer: Optional[Any] = None,
     ) -> None:
         self.controller = controller
         self.command = command
@@ -981,10 +1002,10 @@ class PopUpView(urwid.Frame):
 
     @staticmethod
     def calculate_popup_height(
-        body: List[Any],
-        header: Optional[Any],
-        footer: Optional[Any],
-        popup_width: int,
+            body: List[Any],
+            header: Optional[Any],
+            footer: Optional[Any],
+            popup_width: int,
     ) -> int:
         """
         Returns popup height. The popup height is calculated using urwid's
@@ -998,7 +1019,7 @@ class PopUpView(urwid.Frame):
 
     @staticmethod
     def calculate_table_widths(
-        contents: PopUpViewTableContent, title_len: int, dividechars: int = 2
+            contents: PopUpViewTableContent, title_len: int, dividechars: int = 2
     ) -> Tuple[int, List[int]]:
         """
         Returns a tuple that contains the required width for the popup and a
@@ -1036,7 +1057,7 @@ class PopUpView(urwid.Frame):
 
     @staticmethod
     def make_table_with_categories(
-        contents: PopUpViewTableContent, column_widths: List[int], dividechars: int = 2
+            contents: PopUpViewTableContent, column_widths: List[int], dividechars: int = 2
     ) -> List[Any]:
         """
         Returns a list of widgets to render a table with different categories.
@@ -1070,7 +1091,7 @@ class PopUpView(urwid.Frame):
 
 class NoticeView(PopUpView):
     def __init__(
-        self, controller: Any, notice_text: Any, width: int, title: str
+            self, controller: Any, notice_text: Any, width: int, title: str
     ) -> None:
         widgets = [
             urwid.Divider(),
@@ -1082,18 +1103,18 @@ class NoticeView(PopUpView):
 
 class AboutView(PopUpView):
     def __init__(
-        self,
-        controller: Any,
-        title: str,
-        *,
-        zt_version: str,
-        server_version: str,
-        server_feature_level: Optional[int],
-        theme_name: str,
-        color_depth: int,
-        autohide_enabled: bool,
-        maximum_footlinks: int,
-        notify_enabled: bool,
+            self,
+            controller: Any,
+            title: str,
+            *,
+            zt_version: str,
+            server_version: str,
+            server_feature_level: Optional[int],
+            theme_name: str,
+            color_depth: int,
+            autohide_enabled: bool,
+            maximum_footlinks: int,
+            notify_enabled: bool,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1249,11 +1270,11 @@ PopUpConfirmationViewLocation = Literal["top-left", "center"]
 
 class PopUpConfirmationView(urwid.Overlay):
     def __init__(
-        self,
-        controller: Any,
-        question: Any,
-        success_callback: Callable[[], None],
-        location: PopUpConfirmationViewLocation = "top-left",
+            self,
+            controller: Any,
+            question: Any,
+            success_callback: Callable[[], None],
+            location: PopUpConfirmationViewLocation = "top-left",
     ):
         self.controller = controller
         self.success_callback = success_callback
@@ -1509,13 +1530,13 @@ class StreamMembersView(PopUpView):
 
 class MsgInfoView(PopUpView):
     def __init__(
-        self,
-        controller: Any,
-        msg: Message,
-        title: str,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        time_mentions: List[Tuple[str, str]],
+            self,
+            controller: Any,
+            msg: Message,
+            title: str,
+            topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
@@ -1557,8 +1578,8 @@ class MsgInfoView(PopUpView):
         ]
         # Only show the 'Edit History' label for edited messages.
         self.show_edit_history_label = (
-            self.msg["id"] in controller.model.index["edited_messages"]
-            and controller.model.initial_data["realm_allow_edit_history"]
+                self.msg["id"] in controller.model.index["edited_messages"]
+                and controller.model.initial_data["realm_allow_edit_history"]
         )
         if self.show_edit_history_label:
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
@@ -1618,7 +1639,7 @@ class MsgInfoView(PopUpView):
             button_widgets.append(message_links)
 
             widgets = (
-                widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
+                    widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
             )
             popup_width = max(popup_width, message_link_width)
 
@@ -1626,7 +1647,7 @@ class MsgInfoView(PopUpView):
 
     @staticmethod
     def create_link_buttons(
-        controller: Any, links: "OrderedDict[str, Tuple[str, int, bool]]"
+            controller: Any, links: "OrderedDict[str, Tuple[str, int, bool]]"
     ) -> Tuple[List[MessageLinkButton], int]:
         link_widgets = []
         link_width = 0
@@ -1719,13 +1740,13 @@ EditHistoryTag = Literal["(Current Version)", "(Original Version)", ""]
 
 class EditHistoryView(PopUpView):
     def __init__(
-        self,
-        controller: Any,
-        message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        time_mentions: List[Tuple[str, str]],
-        title: str,
+            self,
+            controller: Any,
+            message: Message,
+            topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            time_mentions: List[Tuple[str, str]],
+            title: str,
     ) -> None:
         self.controller = controller
         self.message = message
@@ -1809,9 +1830,9 @@ class EditHistoryView(PopUpView):
         false_alarm_content = content == snapshot.get("prev_content")
         false_alarm_topic = topic == snapshot.get("prev_topic")
         if (
-            "prev_topic" in snapshot
-            and "prev_content" in snapshot
-            and not (false_alarm_content or false_alarm_topic)
+                "prev_topic" in snapshot
+                and "prev_content" in snapshot
+                and not (false_alarm_content or false_alarm_topic)
         ):
             author_prefix = "Content & Topic edited"
         elif "prev_content" in snapshot and not false_alarm_content:
@@ -1837,13 +1858,13 @@ class EditHistoryView(PopUpView):
 
 class FullRenderedMsgView(PopUpView):
     def __init__(
-        self,
-        controller: Any,
-        message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        time_mentions: List[Tuple[str, str]],
-        title: str,
+            self,
+            controller: Any,
+            message: Message,
+            topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            time_mentions: List[Tuple[str, str]],
+            title: str,
     ) -> None:
         self.controller = controller
         self.message = message
@@ -1867,7 +1888,7 @@ class FullRenderedMsgView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("GO_BACK", key) or is_command_key(
-            "FULL_RENDERED_MESSAGE", key
+                "FULL_RENDERED_MESSAGE", key
         ):
             self.controller.show_msg_info(
                 msg=self.message,
@@ -1881,13 +1902,13 @@ class FullRenderedMsgView(PopUpView):
 
 class FullRawMsgView(PopUpView):
     def __init__(
-        self,
-        controller: Any,
-        message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        time_mentions: List[Tuple[str, str]],
-        title: str,
+            self,
+            controller: Any,
+            message: Message,
+            topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+            time_mentions: List[Tuple[str, str]],
+            title: str,
     ) -> None:
         self.controller = controller
         self.message = message
@@ -1935,12 +1956,12 @@ class EmojiPickerView(PopUpView):
     """
 
     def __init__(
-        self,
-        controller: Any,
-        title: str,
-        emoji_units: List[Tuple[str, str, List[str]]],
-        message: Message,
-        view: Any,
+            self,
+            controller: Any,
+            title: str,
+            emoji_units: List[Tuple[str, str, List[str]]],
+            message: Message,
+            view: Any,
     ) -> None:
         self.view = view
         self.message = message
@@ -1979,16 +2000,16 @@ class EmojiPickerView(PopUpView):
 
     @asynch
     def update_emoji_list(
-        self,
-        search_box: Any = None,
-        new_text: Optional[str] = None,
-        emoji_list: Any = None,
+            self,
+            search_box: Any = None,
+            new_text: Optional[str] = None,
+            emoji_list: Any = None,
     ) -> None:
         """
         Updates emoji list via PanelSearchBox.
         """
         assert (emoji_list is None and search_box is not None) or (
-            emoji_list is not None and search_box is None and new_text is None
+                emoji_list is not None and search_box is None and new_text is None
         )
 
         # Return if the method is called by PanelSearchBox without
@@ -2039,7 +2060,7 @@ class EmojiPickerView(PopUpView):
         return num_reacts
 
     def generate_emoji_buttons(
-        self, emoji_units: List[Tuple[str, str, List[str]]]
+            self, emoji_units: List[Tuple[str, str, List[str]]]
     ) -> List[EmojiButton]:
         emoji_buttons = [
             EmojiButton(
@@ -2058,7 +2079,7 @@ class EmojiPickerView(PopUpView):
         return sorted_emoji_buttons
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
         if event == "mouse press":
             if button == 1 and self.controller.is_in_editor_mode():
@@ -2074,8 +2095,8 @@ class EmojiPickerView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (
-            is_command_key("SEARCH_EMOJIS", key)
-            and not self.controller.is_in_editor_mode()
+                is_command_key("SEARCH_EMOJIS", key)
+                and not self.controller.is_in_editor_mode()
         ):
             self.set_focus("header")
             self.emoji_search.set_caption(" ")

@@ -21,14 +21,14 @@ from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 class TopButton(urwid.Button):
     def __init__(
-        self,
-        *,
-        controller: Any,
-        prefix_markup: urwid_MarkupTuple = (None, ""),
-        label_markup: urwid_MarkupTuple,
-        suffix_markup: urwid_MarkupTuple = (None, ""),
-        show_function: Callable[[], Any],
-        count: int = 0,
+            self,
+            *,
+            controller: Any,
+            prefix_markup: urwid_MarkupTuple = (None, ""),
+            label_markup: urwid_MarkupTuple,
+            suffix_markup: urwid_MarkupTuple = (None, ""),
+            show_function: Callable[[], Any],
+            count: int = 0,
     ) -> None:
         self.controller = controller
         self._prefix_markup = prefix_markup
@@ -170,12 +170,12 @@ class StarredButton(TopButton):
 
 class StreamButton(TopButton):
     def __init__(
-        self,
-        *,
-        properties: StreamData,
-        controller: Any,
-        view: Any,
-        count: int,
+            self,
+            *,
+            properties: StreamData,
+            controller: Any,
+            view: Any,
+            count: int,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
@@ -188,7 +188,7 @@ class StreamButton(TopButton):
         self.model = controller.model
         self.count = count
         self.view = view
-
+        self.curr_topic_name = None
         for entry in view.palette:
             if entry[0] is None:
                 background = entry[5] if len(entry) > 4 else entry[2]
@@ -237,7 +237,7 @@ class StreamButton(TopButton):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
-            self.view.left_panel.show_topic_view(self)
+            self.view.left_panel.show_topic_view(self, self.curr_topic_name)
         elif is_command_key("TOGGLE_MUTE_STREAM", key):
             self.controller.stream_muting_confirmation_popup(
                 self.stream_id, self.stream_name
@@ -249,15 +249,15 @@ class StreamButton(TopButton):
 
 class UserButton(TopButton):
     def __init__(
-        self,
-        *,
-        user: Dict[str, Any],
-        controller: Any,
-        view: Any,
-        state_marker: str,
-        color: Optional[str] = None,
-        count: int,
-        is_current_user: bool = False,
+            self,
+            *,
+            user: Dict[str, Any],
+            controller: Any,
+            view: Any,
+            state_marker: str,
+            color: Optional[str] = None,
+            count: int,
+            is_current_user: bool = False,
     ) -> None:
         # Properties accessed externally
         self.email = user["email"]
@@ -298,13 +298,13 @@ class UserButton(TopButton):
 
 class TopicButton(TopButton):
     def __init__(
-        self,
-        *,
-        stream_id: int,
-        topic: str,
-        controller: Any,
-        view: Any,
-        count: int,
+            self,
+            *,
+            stream_id: int,
+            topic: str,
+            controller: Any,
+            view: Any,
+            count: int,
     ) -> None:
         self.stream_name = controller.model.stream_dict[stream_id]["name"]
         self.topic_name = topic
@@ -348,20 +348,21 @@ class TopicButton(TopButton):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
-            self.view.left_panel.show_stream_view()
+
+            self.view.left_panel.show_stream_view(self.topic_name, self.stream_id)
         return super().keypress(size, key)
 
 
 class EmojiButton(TopButton):
     def __init__(
-        self,
-        *,
-        controller: Any,
-        emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
-        message: Message,
-        reaction_count: int = 0,
-        is_selected: Callable[[str], bool],
-        toggle_selection: Callable[[str, str], None],
+            self,
+            *,
+            controller: Any,
+            emoji_unit: Tuple[str, str, List[str]],  # (emoji_name, emoji_code, aliases)
+            message: Message,
+            reaction_count: int = 0,
+            is_selected: Callable[[str], bool],
+            toggle_selection: Callable[[str, str], None],
     ) -> None:
         self.controller = controller
         self.message = message
@@ -392,7 +393,7 @@ class EmojiButton(TopButton):
         self.update_widget()
 
     def mouse_event(
-        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
+            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
         if event == "mouse press":
             if button == 1:
@@ -427,7 +428,7 @@ class ParsedNarrowLink(TypedDict, total=False):
 
 class MessageLinkButton(urwid.Button):
     def __init__(
-        self, *, controller: Any, caption: str, link: str, display_attr: Optional[str]
+            self, *, controller: Any, caption: str, link: str, display_attr: Optional[str]
     ) -> None:
         self.controller = controller
         self.model = self.controller.model
@@ -510,7 +511,7 @@ class MessageLinkButton(urwid.Button):
             parsed_link = dict(narrow="stream", stream=stream_data)
 
         elif (
-            len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "topic"
+                len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "topic"
         ):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
@@ -526,10 +527,10 @@ class MessageLinkButton(urwid.Button):
             )
 
         elif (
-            len_fragments == 7
-            and fragments[1] == "stream"
-            and fragments[3] == "topic"
-            and fragments[5] == "near"
+                len_fragments == 7
+                and fragments[1] == "stream"
+                and fragments[3] == "topic"
+                and fragments[5] == "near"
         ):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
@@ -551,13 +552,13 @@ class MessageLinkButton(urwid.Button):
         stream_id = parsed_link["stream"]["stream_id"]
         stream_name = parsed_link["stream"]["stream_name"]
         assert (stream_id is None and stream_name is not None) or (
-            stream_id is not None and stream_name is None
+                stream_id is not None and stream_name is None
         )
 
         model = self.model
         # Validate stream ID and name.
         if (stream_id and not model.is_user_subscribed_to_stream(stream_id)) or (
-            stream_name and not model.is_valid_stream(stream_name)
+                stream_name and not model.is_valid_stream(stream_name)
         ):
             # TODO: Narrow to the concerned stream in a 'preview' mode or
             # report whether the stream id is invalid instead.
