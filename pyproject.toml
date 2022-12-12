@@ -1,4 +1,26 @@
 [tool.black]
-# Default line-length, but use explicit value here since used for isort & flake8
+# Default line-length, but use explicit value here since used for isort & ruff
 line-length = 88
 target-version = ['py36']
+
+[tool.ruff]
+line-length = 88
+target-version = "py37"
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "zt_venv",
+]
+ignore = [
+    # E501 - Ignore max-line-length property - this is already defined by black
+    "E501",
+    # F841 - assigned to but never used - FIXME: indicates potential issues
+    "F841",
+]
+select = [
+    "E", # Error (pycodestyle)
+    "F", # pyFlakes
+    "W", # Warnings (pycodestyle)
+]
