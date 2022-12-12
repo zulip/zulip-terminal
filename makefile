@@ -36,8 +36,7 @@ force-fix: venv
 	@echo "=== Auto-fixing files ==="
 	isort $(SOURCES) tools
 	black zulipterminal/ tests/
-	autopep8 --recursive --in-place $(SOURCES)
-	autoflake --recursive --in-place $(SOURCES)
+	ruff --fix $(SOURCES)
 
 ### VENV SETUP ###
 # Short name for file dependency

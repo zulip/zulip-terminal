@@ -31,9 +31,9 @@ jobs:
       - name: Run mypy
         run: ./tools/run-mypy
 
-  flake8:
+  ruff:
     runs-on: ubuntu-latest
-    name: Lint - PEP8 & more (flake8)
+    name: Lint - PEP8 & more (ruff)
     steps:
       - uses: actions/checkout@v3
         with:
@@ -45,8 +45,8 @@ jobs:
           cache-dependency-path: 'setup.py'
       - name: Install with linting tools
         run: pip install .[linting]
-      - name: Run flake8
-        run: flake8 zulipterminal/ tests/ setup.py `tools/python_tools.py`
+      - name: Run ruff
+        run: ruff zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
