@@ -9,7 +9,7 @@ on:
 
 # Cancel previous runs within same workflow and if within a PR (all branch runs complete)
 # (head_ref [branch name] is unique to and only for PRs, otherwise use always-unique run_id)
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
@@ -128,6 +128,7 @@ jobs:
           - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
           - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", CODECOV: true}
           - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)"}
+          - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)"}
           - {PYTHON: 'pypy-3.6', OS: ubuntu-latest, NAME: "PyPy 3.6 (ubuntu)"}
           - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)"}
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)"}

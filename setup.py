@@ -96,7 +96,7 @@ setup(
         "Issues": "https://github.com/zulip/zulip-terminal/issues",
         "Hot Keys": "https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md",
     },
-    python_requires=">=3.6, <3.11",
+    python_requires=">=3.6, <3.12",
     keywords="",
     packages=find_packages(exclude=["tests", "tests.*"]),
     zip_safe=True,
