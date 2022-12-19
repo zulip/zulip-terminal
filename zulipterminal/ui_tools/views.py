@@ -409,7 +409,7 @@ class StreamsView(urwid.Frame):
 
 class TopicsView(urwid.Frame):
     def __init__(
-        self, topics_btn_list: List[Any], view: Any, stream_button: Any, curr_topic_name=None
+        self, topics_btn_list: List[Any], view: Any, stream_button: Any, curr_topic_name: Any = None
     ) -> None:
         self.view = view
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
@@ -424,9 +424,9 @@ class TopicsView(urwid.Frame):
             [self.stream_button, urwid.Divider("─"), self.topic_search_box]
         )
         if curr_topic_name is not None:
-            for i, topic in enumerate(log):
+            for i, topic in enumerate(self.log):
                 if topic.topic_name == curr_topic_name:
-                    log.set_focus(i)
+                    self.log.set_focus(i)
 
         super().__init__(
             self.list_box,
@@ -791,7 +791,7 @@ class LeftColumnView(urwid.Pile):
         self.view = view
         self.controller = view.controller
         self.menu_v = self.menu_view()
-        self.stream_v = self.streams_view(topic_name, stream_id)
+        self.stream_v = self.streams_view()
 
         self.is_in_topic_view = False
         contents = [(4, self.menu_v), self.stream_v]
@@ -823,7 +823,7 @@ class LeftColumnView(urwid.Pile):
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
 
-    def streams_view(self, topic_name=None, stream_id=None) -> Any:
+    def streams_view(self, topic_name: Any = None, stream_id: Any = None) -> Any:
         streams_btn_list = [
 
             StreamButton(
@@ -886,7 +886,7 @@ class LeftColumnView(urwid.Pile):
         )
         return w
 
-    def topics_view(self, stream_button: Any, curr_topic_name) -> Any:
+    def topics_view(self, stream_button: Any, curr_topic_name: Any) -> Any:
         stream_id = stream_button.stream_id
         topics = self.model.topics_in_stream(stream_id)
         topics_btn_list = [
@@ -929,11 +929,11 @@ class LeftColumnView(urwid.Pile):
         if not self.is_in_topic_view:
             self.show_stream_view()
 
-    def show_stream_view(self, topic_name=None, stream_name=None) -> None:
+    def show_stream_view(self, topic_name: Any = None, stream_name: Any = None) -> None:
         self.is_in_topic_view = False
         self.contents[1] = (self.stream_v(topic_name, stream_name), self.options(height_type="weight"))
 
-    def show_topic_view(self, stream_button: Any, curr_topic_name) -> None:
+    def show_topic_view(self, stream_button: Any, curr_topic_name: Any) -> None:
         self.is_in_topic_view = True
         self.contents[1] = (
             self.topics_view(stream_button, curr_topic_name),

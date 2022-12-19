@@ -176,7 +176,7 @@ class StreamButton(TopButton):
         controller: Any,
         view: Any,
         count: int,
-        curr_topic_name=None,
+        curr_topic_name: Any =None,
     ) -> None:
         # FIXME Is having self.stream_id the best way to do this?
         # (self.stream_id is used elsewhere)
