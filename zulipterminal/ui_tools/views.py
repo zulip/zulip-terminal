@@ -409,7 +409,11 @@ class StreamsView(urwid.Frame):
 
 class TopicsView(urwid.Frame):
     def __init__(
-        self, topics_btn_list: List[Any], view: Any, stream_button: Any, curr_topic_name: Any = None
+        self,
+        topics_btn_list: List[Any],
+        view: Any,
+        stream_button: Any,
+        curr_topic_name: Any = None,
     ) -> None:
         self.view = view
         self.log = urwid.SimpleFocusListWalker(topics_btn_list)
@@ -494,7 +498,7 @@ class TopicsView(urwid.Frame):
             self.list_box.set_focus(0)
 
     def mouse_event(
-            self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
             if button == 4:
@@ -825,20 +829,20 @@ class LeftColumnView(urwid.Pile):
 
     def streams_view(self, topic_name: Any = None, stream_id: Any = None) -> Any:
         streams_btn_list = [
-
             StreamButton(
                 properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                curr_topic_name=topic_name
-            ) if stream.stream_id == stream_id else
-            StreamButton(
+                curr_topic_name=topic_name,
+            )
+            if stream['id'] == stream_id
+            else StreamButton(
                 properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                curr_topic_name=None
+                curr_topic_name=None,
             )
             for stream in self.view.pinned_streams
         ]
@@ -852,14 +856,15 @@ class LeftColumnView(urwid.Pile):
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                curr_topic_name=topic_name
-            ) if stream.stream_id == stream_id else
-            StreamButton(
+                curr_topic_name=topic_name,
+            )
+            if stream['id'] == stream_id
+            else StreamButton(
                 properties=stream,
                 controller=self.controller,
                 view=self.view,
                 count=self.model.unread_counts["streams"].get(stream["id"], 0),
-                curr_topic_name=None
+                curr_topic_name=None,
             )
             for stream in self.view.unpinned_streams
         ]
@@ -886,7 +891,7 @@ class LeftColumnView(urwid.Pile):
         )
         return w
 
-    def topics_view(self, stream_button: Any, curr_topic_name: Any) -> Any:
+    def topics_view(self, stream_button: Any, curr_topic_name: Any = None) -> Any:
         stream_id = stream_button.stream_id
         topics = self.model.topics_in_stream(stream_id)
         topics_btn_list = [
@@ -902,7 +907,9 @@ class LeftColumnView(urwid.Pile):
             for topic in topics
         ]
 
-        self.view.topic_w = TopicsView(topics_btn_list, self.view, stream_button, curr_topic_name)
+        self.view.topic_w = TopicsView(
+            topics_btn_list, self.view, stream_button, curr_topic_name
+        )
         w = urwid.LineBox(
             self.view.topic_w,
             title="Topics",
@@ -931,7 +938,10 @@ class LeftColumnView(urwid.Pile):
 
     def show_stream_view(self, topic_name: Any = None, stream_name: Any = None) -> None:
         self.is_in_topic_view = False
-        self.contents[1] = (self.stream_v(topic_name, stream_name), self.options(height_type="weight"))
+        self.contents[1] = (
+            self.stream_v(topic_name, stream_name),
+            self.options(height_type="weight"),
+        )
 
     def show_topic_view(self, stream_button: Any, curr_topic_name: Any) -> None:
         self.is_in_topic_view = True
@@ -942,7 +952,7 @@ class LeftColumnView(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("SEARCH_STREAMS", key) or is_command_key(
-                "SEARCH_TOPICS", key
+            "SEARCH_TOPICS", key
         ):
             self.focus_position = 1
             if self.is_in_topic_view:
