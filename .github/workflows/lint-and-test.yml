@@ -132,7 +132,7 @@ jobs:
           - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)"}
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)"}
-          - {PYTHON: 3.9, OS: macos-latest, NAME: "CPython 3.9 (macos)"}
+          - {PYTHON: '3.x', OS: macos-latest, NAME: "CPython 3.x [latest] (macos)"}
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
