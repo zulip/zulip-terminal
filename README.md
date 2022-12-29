@@ -64,11 +64,13 @@ The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zul
 
 ### Supported Python Versions
 
+Version 0.7.0 was the last release with support for Python 3.6.
+
 Version 0.6.0 was the last release with support for Python 3.5.
 
 Later releases and the main development branch are currently tested (on Ubuntu) with:
-- CPython 3.6-3.10
-- PyPy 3.6-3.9
+- CPython 3.7-3.11
+- PyPy 3.7-3.9
 
 Since our automated testing does not cover interactive testing of the UI, there
 may be issues with some Python versions, though generally we have not found
