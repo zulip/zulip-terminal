@@ -66,6 +66,14 @@ to show links at the end of a given message.
 
 **NOTE** Footlinks were added in version 0.5.2.
 
+### Why can I only see 3 footlinks when there are more links in my message?
+
+This behavior was introduced in version 0.7.0, to avoid a message with many
+links having a very long footlinks list below it.
+
+This can be controlled by giving a different value to the new
+`maximum-footlinks` setting in the `zuliprc` file, which defaults to 3.
+
 ## When are messages marked as having been read?
 
 The approach currently taken is that that a message is marked read when
