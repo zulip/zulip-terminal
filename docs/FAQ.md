@@ -49,6 +49,23 @@ theme=<theme_name>
 
 **NOTE** Theme aliases are likely to be deprecated in the future, so we recommend using the full theme names.
 
+## How do links in messages work? What are footlinks?
+
+Each link (hyperlink) in a Zulip message resembles those on the internet, and is split into two parts:
+- the representation a user would see on the web page (eg. a textual description)
+- the location the link would go to (if clicking, in a GUI web browser)
+
+To avoid squashing these two parts next to each other within the message
+content, ZT places only the first within the content, followed by a number in square
+brackets, eg. `Zulip homepage [1]`.
+
+Underneath the message content, each location is then listed next to the
+related number, eg. `1: zulip.com`. Within ZT we term these **footlinks**,
+adapting the idea of a [Footnote](https://wikipedia.org/wiki/Note_(typography))
+to show links at the end of a given message.
+
+**NOTE** Footlinks were added in version 0.5.2.
+
 ## When are messages marked as having been read?
 
 The approach currently taken is that that a message is marked read when
