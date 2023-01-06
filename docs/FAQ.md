@@ -74,9 +74,50 @@ links having a very long footlinks list below it.
 This can be controlled by giving a different value to the new
 `maximum-footlinks` setting in the `zuliprc` file, which defaults to 3.
 
-### Links don't render completely as a footlink
+### Why can I not see the full text of a footlink?
 
-Links that don't fit on one line are cropped with an ellipsis in the footlinks, since typically they are not recognized as a link across multiple lines in terminal emulators, copy/pasting can be challenging, and this also saves screen real estate. However, they will become visible with each message if you can widen your terminal window, and they're rendered completely in the Message Information view (see also [#622](https://www.github.com/zulip/zulip-terminal/issues/622)).
+Links can in some cases be long, many multiples of the width of the message
+column width. Particularly on narrow terminals, this could cause one link to
+take up many lines all by itself as a footlink. Therefore links that wouldn't
+fit on one line are clipped in the footlinks, with an ellipsis at the end of
+the first line.
+
+**NOTE** If you are able to increase the number of columns of characters - such
+as by widening your terminal window or decreasing the font size - you may be
+able to see all of the footlink on one line.
+
+### How do I access the full contents of all links, to copy them or open attachments?
+
+To bypass the two practical limitations described in the above sections, the
+full contents of every link in a message are available in the **Message
+Information** popup, accessible using <kbd>i</kbd> on that message.
+
+The **Message Links** section of this popup contains both the text and location
+for each numbered link, using the same numbering system as in the message
+content.
+
+The same scrolling keys as used elsewhere in the application can be used in
+this popup, and you may notice as you move that different lines of the popup
+will be highlighted. If a link is highlighted and you press <kbd>Enter</kbd>,
+an action may occur depending on the type of link:
+- *Attachments to a particular message* (eg. images, text files, pdfs, etc)
+  * will be downloaded, with an option given to open it with your default
+    application (from version 0.7.0)
+- *Internal links to a stream or topic* (eg. **#announce>terminal releases**,
+  from message content such as `#**announce>terminal releases**`)
+  * the active narrow will be changed to the stream or topic (from version 0.6.0)
+- *External links* (eg. a website, file from a website)
+  * no internal action is supported at this time
+
+Any method supported by your terminal emulator to select and copy text should
+also be suitable to extract these links. Some emulators can identify links to
+open, and may do so in simple cases; however, while the popup is wider than the
+message column, it will not fit all lengths of links, and so can fail in the
+multiline case (see
+[#622](https://www.github.com/zulip/zulip-terminal/issues/622)). Some emulators
+may support area selection, as opposed to selecting multiple lines of the
+terminal, but it's unclear how common this support is or if it converts such
+text into one line suitable for use as a link.
 
 ## When are messages marked as having been read?
 
