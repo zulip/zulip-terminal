@@ -74,6 +74,10 @@ links having a very long footlinks list below it.
 This can be controlled by giving a different value to the new
 `maximum-footlinks` setting in the `zuliprc` file, which defaults to 3.
 
+### Links don't render completely as a footlink
+
+Links that don't fit on one line are cropped with an ellipsis in the footlinks, since typically they are not recognized as a link across multiple lines in terminal emulators, copy/pasting can be challenging, and this also saves screen real estate. However, they will become visible with each message if you can widen your terminal window, and they're rendered completely in the Message Information view (see also [#622](https://www.github.com/zulip/zulip-terminal/issues/622)).
+
 ## When are messages marked as having been read?
 
 The approach currently taken is that that a message is marked read when
@@ -163,12 +167,6 @@ Alternatively, you might try different modifier keys (eg. shift, ctrl, alt) with
 If you are still facing problems, please discuss them at
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open issues
 for them mentioning your terminal name, version, and OS.
-
-## Links don't render completely as a footlink
-
-Links that don't fit on one line are cropped with an ellipsis in the footlinks, since typically they are not recognized as a link across multiple lines in terminal emulators, copy/pasting can be challenging, and this also saves screen real estate. However, they will become visible with each message if you can widen your terminal window, and they're rendered completely in the Message Information view (see also [#622](https://www.github.com/zulip/zulip-terminal/issues/622)).
-
-**NOTE** Footlinks, ie. footnotes in messages showing the targets of links, exist in release 0.5.2 onwards.
 
 ## How small a size of terminal is supported?
 
