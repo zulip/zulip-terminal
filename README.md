@@ -128,30 +128,41 @@ We suggest running `zulip-term` using the `-e` or `--explore` option (in explore
 
 ## Configuration
 
-The `zuliprc` file contains information to connect to your chat server in the `[api]` section, but also optional configuration for `zulip-term` in the `[zterm]` section:
+The `zuliprc` file contains two sections:
+- an `[api]` section with information required to connect to your Zulip server
+- a `[zterm]` section with configuration specific to `zulip-term`
 
+A file with only the first section can be auto-generated in some cases by
+`zulip-term`, or you can download one from your account on your server (see
+above). Parts of the second section can be added and adjusted in stages when
+you wish to customize the behavior of `zulip-term`.
+
+The example below, with dummy `[api]` section contents, represents a working
+configuration file with all the default compatible `[zterm]` values uncommented
+and with accompanying notes:
 ```
 [api]
 email=example@example.com
 key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-site=https://realm.zulipchat.com
+site=https://example.zulipchat.com
 
 [zterm]
-# Alternative themes are listed in the FAQ
+## Theme: available themes can be found by running `zulip-term --list-themes`, or in docs/FAQ.md
 theme=zt_dark
-# Autohide defaults to 'no_autohide', but can be set to 'autohide' to hide the left & right panels except when focused.
-autohide=autohide
-# Footlinks default to 'enabled', but can be set to 'disabled' to hide footlinks.
-# disabled won't show any footlinks.
-# enabled will show the first 3 per message.
-footlinks=disabled
-# If you need more flexibility, use maximum-footlinks.
-# Maximum footlinks to be shown, defaults to 3, but can be set to any value 0 or greater.
-# This option cannot be used with the footlinks option; use one or the other.
-maximum-footlinks=3
-# Notify defaults to 'disabled', but can be set to 'enabled' to display notifications (see next section).
-notify=enabled
-# Color depth defaults to 256 colors, but can be set to 1 (for monochrome), 16, or 24bit.
+
+## Autohide: set to 'autohide' to hide the left & right panels except when they're focused
+autohide=no_autohide
+
+## Footlinks: set to 'disabled' to hide footlinks; 'enabled' will show the first 3 per message
+## For more flexibility, comment-out this value, and un-comment maximum-footlinks below
+footlinks=enabled
+## Maximum-footlinks: set to any value 0 or greater, to limit footlinks shown per message
+# maximum-footlinks=3
+
+## Notify: set to 'enabled' to display notifications (see elsewhere for configuration notes)
+notify=disabled
+
+## Color-depth: set to one of 1 (for monochrome), 16, 256, or 24bit
 color-depth=256
 ```
 
