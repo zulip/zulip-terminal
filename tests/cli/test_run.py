@@ -410,11 +410,11 @@ def test_successful_main_function_with_config(
     [
         (
             {"footlinks": "enabled", "maximum-footlinks": "3"},
-            "Footlinks property is not allowed alongside maximum-footlinks",
+            "Configuration Error: footlinks and maximum-footlinks options cannot be used together",
         ),
         (
             {"maximum-footlinks": "-3"},
-            "Minimum value allowed for maximum-footlinks is 0",
+            "Configuration Error: Minimum value allowed for maximum-footlinks is 0; you used '-3'",
         ),
     ],
 )
