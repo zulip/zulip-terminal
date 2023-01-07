@@ -396,14 +396,18 @@ def main(options: Optional[List[str]] = None) -> None:
             and zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG
         ):
             exit_with_error(
-                "Footlinks property is not allowed alongside maximum-footlinks"
+                "Configuration Error: "
+                "footlinks and maximum-footlinks options cannot be used together"
             )
 
-        if (
-            zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG
-            and int(zterm["maximum-footlinks"][0]) < 0
-        ):
-            exit_with_error("Minimum value allowed for maximum-footlinks is 0")
+        if zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG:
+            maximum_footlinks = int(zterm["maximum-footlinks"][0])
+            if maximum_footlinks < 0:
+                exit_with_error(
+                    "Configuration Error: "
+                    "Minimum value allowed for maximum-footlinks is 0; "
+                    f"you used '{maximum_footlinks}'"
+                )
 
         if zterm["footlinks"][1] == ZULIPRC_CONFIG:
             if zterm["footlinks"][0] == DEFAULT_SETTINGS["footlinks"]:
