@@ -117,11 +117,13 @@ def test_valid_zuliprc_but_no_connection(
     mocker: MockerFixture,
     minimal_zuliprc: str,
     server_connection_error: str = "some_error",
+    platform: str = "some_platform",
 ) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
+    mocker.patch(MODULE + ".detected_platform", return_value=platform)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc])
@@ -132,6 +134,7 @@ def test_valid_zuliprc_but_no_connection(
 
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        f"Detected platform: {platform}",
         "Loading with:",
         "   theme 'zt_dark' specified with no config.",
         "   autohide setting 'no_autohide' specified with no config.",
@@ -161,11 +164,13 @@ def test_warning_regarding_incomplete_theme(
     expected_complete_incomplete_themes: Tuple[List[str], List[str]],
     expected_warning: str,
     server_connection_error: str = "sce",
+    platform: str = "some_platform",
 ) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
+    mocker.patch(MODULE + ".detected_platform", return_value=platform)
     mocker.patch(MODULE + ".all_themes", return_value=("a", "b", "c", "d"))
     mocker.patch(
         MODULE + ".complete_and_incomplete_themes",
@@ -182,6 +187,7 @@ def test_warning_regarding_incomplete_theme(
 
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        f"Detected platform: {platform}",
         "Loading with:",
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
@@ -377,7 +383,10 @@ def test_successful_main_function_with_config(
     config_key: str,
     config_value: str,
     footlinks_output: str,
+    platform: str = "some_platform",
 ) -> None:
+    mocker.patch(MODULE + ".detected_platform", return_value=platform)
+
     config = {
         "theme": "default",
         "autohide": "autohide",
@@ -395,6 +404,7 @@ def test_successful_main_function_with_config(
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
     expected_lines = [
+        f"Detected platform: {platform}",
         "Loading with:",
         "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
         "   autohide setting 'autohide' specified in zuliprc file.",
@@ -424,9 +434,11 @@ def test_main_error_with_invalid_zuliprc_options(
     parameterized_zuliprc: Callable[[Dict[str, str]], str],
     zulip_config: Dict[str, str],
     error_message: str,
+    platform: str = "some_platform",
 ) -> None:
     zuliprc = parameterized_zuliprc(zulip_config)
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
+    mocker.patch(MODULE + ".detected_platform", return_value=platform)
     mocker.patch(CONTROLLER + ".main", return_value=None)
 
     with pytest.raises(SystemExit) as e:
@@ -436,7 +448,9 @@ def test_main_error_with_invalid_zuliprc_options(
 
     captured = capsys.readouterr()
     lines = captured.out.strip()
-    expected_lines = f"\033[91m{error_message}\033[0m"
+    expected_lines = "\n".join(
+        [f"Detected platform: {platform}", f"\033[91m{error_message}\033[0m"]
+    )
     assert lines == expected_lines
 
 
