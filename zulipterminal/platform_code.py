@@ -28,6 +28,10 @@ else:
 MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
+def detected_platform() -> str:
+    return PLATFORM
+
+
 def notify(title: str, text: str) -> str:
     command_list = None
     if PLATFORM == "MacOS":
