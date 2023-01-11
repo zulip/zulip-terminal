@@ -123,16 +123,18 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)"}
-          - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)"}
-          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", CODECOV: true}
-          - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)"}
-          - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)"}
-          - {PYTHON: 'pypy-3.6', OS: ubuntu-latest, NAME: "PyPy 3.6 (ubuntu)"}
-          - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)"}
-          - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)"}
-          - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)"}
-          - {PYTHON: '3.x', OS: macos-latest, NAME: "CPython 3.x [latest] (macos)"}
+          - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux", CODECOV: true}
+          - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.6', OS: ubuntu-latest, NAME: "PyPy 3.6 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: '3.x', OS: macos-latest, NAME: "CPython 3.x [latest] (macos)", EXPECT: "MacOS"}
+    env:
+      EXPECT: ${{ matrix.env.EXPECT }}
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
@@ -154,6 +156,8 @@ jobs:
         run: sudo apt install libxml2-dev libxslt1-dev
       - name: Ensure regular package installs from checkout
         run: pip install .
+      - name: Check we detect the platform correctly
+        run: python -c "from zulipterminal.platform_code import detected_platform; import os; e, d = os.environ['EXPECT'], detected_platform(); assert d == e, f'{d} != {e}'"
       - name: Install test dependencies
         run: pip install .[testing]
       - name: Run tests with pytest
