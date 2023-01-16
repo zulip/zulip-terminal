@@ -35,16 +35,30 @@ ordered_emojis = OrderedDict(sorted(emoji_map.items()))
 
 with OUTPUT_FILE.open("w") as f:
     f.write(
-        "from collections import OrderedDict\n\n\n"
-        "# fmt: off\n"
-        f"# Generated automatically by tools/{SCRIPT_NAME}\n"
-        "# Do not modify.\n\n"
-        "EMOJI_DATA = OrderedDict(\n    [\n"
+        "\n".join(
+            [
+                "from collections import OrderedDict\n\n",
+                "# fmt: off",
+                f"# Generated automatically by tools/{SCRIPT_NAME}",
+                "# Do not modify.\n",
+                "EMOJI_DATA = OrderedDict(",
+                "    [\n",
+            ]
+        )
     )
     for emoji_name, emoji in ordered_emojis.items():
         # {'smile': {'code': '263a', 'aliases': []}}
         f.write(f'        ("{emoji_name}", {emoji}),\n')
-    f.write("    ]\n)\n# fmt: on\n")
+    f.write(
+        "\n".join(
+            [
+                "    ]",
+                ")",
+                "# fmt: on",
+                "",
+            ]
+        )
+    )
 
 print(f"Emoji list saved in {OUTPUT_FILE}")
 
