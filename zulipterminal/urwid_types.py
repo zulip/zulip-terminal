@@ -1,5 +1,5 @@
 """
-Preliminary urwid types to improve type analysis
+Types from the urwid API, to improve type checking
 """
 
 from typing import Optional, Tuple, Union
