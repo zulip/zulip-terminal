@@ -1,5 +1,5 @@
 """
-Stores valid unicode emoji data
+Unicode emoji data, synchronized semi-regularly with the server source
 """
 
 from collections import OrderedDict
