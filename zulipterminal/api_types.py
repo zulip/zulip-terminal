@@ -1,6 +1,8 @@
 """
-Preliminary Zulip API types defined in python, to allow type checking
+Types from the Zulip API, translated into python, to improve type checking
 """
+# NOTE: Only modify this file if it leads to a better match to the types used
+#       in the API at http://zulip.com/api
 
 from typing import Any, Dict, List, Optional, Union
 
