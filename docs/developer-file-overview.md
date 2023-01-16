@@ -14,7 +14,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | platform_code.py    | Detection of supported platforms & platform-specific functions                                         |
 |                        | server_url.py       | Constructs and encodes server_url of messages.                                                         |
 |                        | ui.py               | Defines the `View`, and controls where each component is displayed                                     |
-|                        | unicode_emojis.py   | Stores valid unicode emoji data                                                                        |
+|                        | unicode_emojis.py   | Unicode emoji data, synchronized semi-regularly with the server source                                 |
 |                        | urwid_types.py      | Types from the urwid API, to improve type checking                                                     |
 |                        | version.py          | Keeps track of the version of the current code                                                         |
 |                        |                     |                                                                                                        |
