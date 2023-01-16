@@ -16,6 +16,7 @@ except ModuleNotFoundError:
     )
     exit(1)
 
+DOCSTRING = "Stores valid unicode emoji data"
 WORKING_FOLDER = Path(__file__).resolve().parent.parent / "zulipterminal"
 INPUT_FILE = WORKING_FOLDER / "unicode_emoji_dict.py"
 OUTPUT_FILE = WORKING_FOLDER / "unicode_emojis.py"
@@ -37,6 +38,10 @@ with OUTPUT_FILE.open("w") as f:
     f.write(
         "\n".join(
             [
+                '"""',
+                DOCSTRING,
+                '"""',
+                "",
                 "from collections import OrderedDict\n\n",
                 "# fmt: off",
                 f"# Generated automatically by tools/{SCRIPT_NAME}",
