@@ -139,9 +139,27 @@ Since we expect the above to be straightforward for most users and it allows the
 However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
 In the longer term we may move to multiple servers per session, which is tracked in [zulip-terminal#961](https://github.com/zulip/zulip-terminal/issues/961).
 
-## How do I use autocompletes in ZT?
+## What is autocomplete? Why is it useful?
 
-Composing messages could be a tiring task when you have to type all things by yourself. Autocompletes come to the rescue here! ZT currently supports some basic autocompletes, for different compose boxes.
+Autocomplete can be used to request matching options, and cycle through each option in turn, including:
+- helping to specify users for new private messages (eg. after <kbd>x</kbd>)
+- helping to specify streams and existing topics for new stream messages (eg. after <kbd>c</kbd>)
+- mentioning a user or user-group (in message content)
+- linking to a stream or existing topic (in message content)
+- emojis (in message content)
+
+This helps ensure that:
+- messages are sent to valid users, streams, and matching existing topics if appropriate - so they
+  are sent to the correct location;
+- message content has references to valid users, user-groups, streams, topics and emojis, with
+  correct syntax - so is rendered well in all Zulip clients.
+
+> Note that if using the left or right panels of the application to search for
+> streams, topics or users, this is **not** part of the autocomplete system. In
+> those cases, as you type, the results of these searches are shown
+> automatically by limiting what is displayed in the existing area, until the
+> search is cleared. Autocomplete operates differently, and uses the bottom
+> line(s) of the screen to show a limited set of matches.
 
 ### Hotkeys triggering autocomplete
 
