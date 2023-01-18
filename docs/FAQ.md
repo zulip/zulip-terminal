@@ -179,6 +179,7 @@ Since each of the stream (1), topic (2) and private message recipients (3) areas
 ![Stream header](https://user-images.githubusercontent.com/55916430/118403323-8e5b7580-b68b-11eb-9c8a-734c2fe6b774.png)
 
 **NOTE:** The stream box prefix is automatic:
+* `⊚` (with stream color) if the stream is valid and web-public,
 * `#` (with stream color) if the stream is valid and public,
 * `P` (with stream color) if the stream is valid and private,
 * `✗` if the stream is invalid.
