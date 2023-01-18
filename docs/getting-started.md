@@ -157,7 +157,7 @@ To send a PM using the autocomplete feature:
 
 Try following the steps above to send a message to the Welcome Bot!
 
-> It's generally best to use <kbd>ctrl</kbd><kbd>f</kbd> to autocomplete the name and Zulip address of the person you want to PM; if you just type in their full name Zulip Terminal will not necessarily know who you are trying to send to.
+> It's best to use <kbd>ctrl</kbd><kbd>f</kbd> to autocomplete the name and Zulip address of the person (or bot) you want to message; if you just type in their full name, Zulip Terminal does not know for sure who you are trying to send to - and there may be multiple people with that name!
 
 <img src="getting-started-imgs/send-pm-autocomplete1.png" width="85%">
 <img src="getting-started-imgs/send-pm-autocomplete2.png" width="85%">
