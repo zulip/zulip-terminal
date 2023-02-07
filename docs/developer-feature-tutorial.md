@@ -103,8 +103,8 @@ You can view these events in the `type` file in your `zulip-terminal` home direc
 
 Now to display if user is typing in the view, we need to check few things:
 * The `op` is `start`.
-* User is narrowed into PM with a user.
-* The `user_id` of the person is present in the narrowed PM recipients.
+* User is narrowed into private message conversation with a user.
+* The `user_id` of the person is present in the narrowed private message conversation recipients.
 
 If all the above conditions are satisfied we can successfully update the footer to display `X is typing` until we receive
 a `stop` event for typing.

@@ -2,7 +2,7 @@
 
 # Zulip Terminal User Tutorial
 
-Hi, are you new to [Zulip](https://github.com/zulip/zulip)? If so, we recommend trying out our [web-client](https://chat.zulip.org) first to understand the concept of [streams/topics/PMs](https://zulip.com/help/about-streams-and-topics) in the world of Zulip. Please read through our [community docs](https://zulip.readthedocs.io/en/latest/contributing/chat-zulip-org.html) to get a feel for how things work. Just sending a message or two in the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream should help you get started. If you don't already have a Zulip account, you'll also have to use our [web-client](https://chat.zulip.org) to sign up because currently you can't create an account using Zulip Terminal.
+Hi, are you new to [Zulip](https://github.com/zulip/zulip)? If so, we recommend trying out our [web-client](https://chat.zulip.org) first to understand the concept of [streams and topics](https://zulip.com/help/about-streams-and-topics) in the world of Zulip. Please read through our [community docs](https://zulip.readthedocs.io/en/latest/contributing/chat-zulip-org.html) to get a feel for how things work. Just sending a message or two in the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream should help you get started. If you don't already have a Zulip account, you'll also have to use our [web-client](https://chat.zulip.org) to sign up because currently you can't create an account using Zulip Terminal.
 
 Now let's help you get started with using Zulip Terminal. First, if you haven't already, go ahead and complete the [installation](https://github.com/zulip/zulip-terminal#installation). If you encountered any issues, we have common issues and their solutions listed [here](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) if you run into trouble. Feel free to ask questions or for help at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or support@zulip.com.
 
@@ -124,7 +124,7 @@ You can also type <kbd>z</kbd> to 'zoom in' or 'zoom out.' What do I mean by 'zo
 
 ### Reply to a Message
 
-To reply to a message in a narrow (stream/topic/PM), rest your cursor on the message you want to reply to and then type <kbd>r</kbd>. Type your message in the Message box that pops up at the bottom of the middle column. Type <kbd>ctrl</kbd><kbd>d</kbd> to send. If you change your mind and don't want to send the message, type <kbd>esc</kbd> to get out of the message editor. Let's try replying to a random message in the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream (don't worry about messing anything up, the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream was made for stuff like this).
+To reply to an existing stream- or private-message in any narrow, rest your cursor on the message you want to reply to and then type <kbd>r</kbd>. Type your message in the Message box that pops up at the bottom of the middle column. Type <kbd>ctrl</kbd><kbd>d</kbd> to send. If you change your mind and don't want to send the message, type <kbd>esc</kbd> to get out of the message editor. Let's try replying to a random message in the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream (don't worry about messing anything up, the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream was made for stuff like this).
 
 <img src="getting-started-imgs/reply-to-message.png" width="85%">
 
@@ -136,19 +136,19 @@ If you want to show you agree with the current message, type <kbd>+</kbd> to add
 
 ### Reply via a Private Message
 
-Let's try sending a PM to the author of a message. Select the message you sent to the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream earlier and press <kbd>shift</kbd><kbd>r</kbd> to send a PM to yourself. Type your message in the message editor that appears at the bottom of the middle column and then type <kbd>ctrl</kbd><kbd>d</kbd> to send. Press the <kbd>shift</kbd><kbd>p</kbd> hotkey as we did earlier in the tutorial to narrow to your PM's and make sure everything worked properly.
+Let's try sending a private message to the author of a message. Select the message you sent to the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream earlier and press <kbd>shift</kbd><kbd>r</kbd> to send a private message to yourself. Type your message in the message editor that appears at the bottom of the middle column and then type <kbd>ctrl</kbd><kbd>d</kbd> to send. Press the <kbd>shift</kbd><kbd>p</kbd> hotkey as we did earlier in the tutorial to narrow to your private messages and make sure everything worked properly.
 
 <img src="getting-started-imgs/send-pm.png" width="85%">
 
 ### Send a Private Message to Someone New
 
-You can send a PM by moving your cursor to the list of "Users" in the right column and selecting the name of the person you'd like to send a message to.
+You can send a private message by moving your cursor to the list of "Users" in the right column and selecting the name of the person you'd like to send a message to.
 
 From version 0.7.0 you can also use autocomplete to enter people's names from partial information, and easily send one-to-one or group private messages!
 
-To send a PM using the autocomplete feature:
+To send a private message using the autocomplete feature:
 1. Use the <kbd>x</kbd> hotkey. A message editor will pop open at the bottom of the middle column. 
-2. Type in part of the name of the person you'd like to send a PM to (IMG 1)
+2. Type in part of the name of the person you'd like to send a private message to (IMG 1)
 3. Press <kbd>ctrl</kbd><kbd>f</kbd> and a list of potential recipients will appear in the footer (highlighted in red). 
 4. Press <kbd>ctrl</kbd><kbd>f</kbd> until the name of the person you want to send a message to is highlighted (IMG 2). 
 5. Press <kbd>tab</kbd> to jump to the message section and type in your message. 

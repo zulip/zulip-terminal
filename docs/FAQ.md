@@ -204,7 +204,7 @@ Since each of the stream (1), topic (2) and private message recipients (3) areas
 
 ![PM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
 
-**NOTE:** If a PM recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
+**NOTE:** If a private message recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
 
 ## Unable to render symbols
 
