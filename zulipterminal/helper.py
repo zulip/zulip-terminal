@@ -398,7 +398,6 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     narrow = model.narrow
     for msg in messages:
-
         if "edit_history" in msg.keys():
             index["edited_messages"].add(msg["id"])
 
@@ -411,7 +410,6 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             continue
 
         if len(narrow) == 1:
-
             if narrow[0][1] == "starred":
                 if "starred" in msg["flags"]:
                     index["starred_msg_ids"].add(msg["id"])

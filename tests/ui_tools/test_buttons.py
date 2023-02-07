@@ -48,7 +48,6 @@ class TestTopButton:
         return top_button
 
     def test_init(self, mocker: MockerFixture, top_button: TopButton) -> None:
-
         assert top_button.controller == self.controller
         assert top_button._prefix_markup == ("style", "-")
         assert top_button._label_markup == (None, "label")

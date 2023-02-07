@@ -1123,7 +1123,6 @@ class AboutView(PopUpView):
 
 class UserInfoView(PopUpView):
     def __init__(self, controller: Any, user_id: int, title: str) -> None:
-
         display_data = self._fetch_user_data(controller, user_id)
 
         user_details = [
