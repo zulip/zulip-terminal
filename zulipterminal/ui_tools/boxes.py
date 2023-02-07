@@ -192,7 +192,6 @@ class WriteBox(urwid.Pile):
         *,
         recipient_user_ids: Optional[List[int]] = None,
     ) -> None:
-
         self.set_editor_mode()
 
         self.compose_box_status = "open_with_private"
@@ -1513,7 +1512,6 @@ class MessageBox(urwid.Pile):
         return markup, metadata["message_links"], metadata["time_mentions"]
 
     def main_view(self) -> List[Any]:
-
         # Recipient Header
         if self.need_recipient_header():
             if self.message["type"] == "stream":

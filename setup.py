@@ -46,7 +46,7 @@ linting_deps = [
     "flake8~=4.0.1",
     "flake8-quotes~=3.2.0",
     "flake8-continuation~=1.0.5",
-    "black>=22.1.0",
+    "black~=23.0",
 ]
 
 typing_deps = [

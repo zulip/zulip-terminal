@@ -343,7 +343,6 @@ class TestWriteBox:
         raw_recipients: str,
         invalid_recipients: str,
     ) -> None:
-
         write_box.model.is_valid_private_recipient = mocker.Mock(return_value=False)
         write_box.private_box_view()
         assert write_box.to_write_box is not None

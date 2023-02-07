@@ -1645,7 +1645,6 @@ class Model:
         message_id = event["message_id"]
         # If the message is indexed
         if message_id in self.index["messages"]:
-
             message = self.index["messages"][message_id]
             if event["op"] == "add":
                 message["reactions"].append(

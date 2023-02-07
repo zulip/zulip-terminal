@@ -1284,7 +1284,6 @@ class TestModel:
     def test_modernize_message_response(
         self, model, messages, expected_messages_response
     ):
-
         assert model.modernize_message_response(messages) == expected_messages_response
 
     @pytest.mark.parametrize(
