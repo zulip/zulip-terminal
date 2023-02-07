@@ -163,9 +163,9 @@ This helps ensure that:
 
 ### Hotkeys triggering autocomplete
 
-We use `ctrl` + **`f`** and `ctrl` + **`r`** for cycling through autocompletes (**forward** & **reverse** respectively).
+We use <kbd>ctrl</kbd>+<kbd>**f**</kbd> and <kbd>ctrl</kbd>+<kbd>**r**</kbd> for cycling through autocompletes (**forward** & **reverse** respectively).
 
-**NOTE:** We don't use `tab`/`shift tab` (although it is widely used elsewhere) for cycling through matches. However, recall that we do use `tab` to cycle through recipient and content boxes. (See [hotkeys for composing a message](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md#composing-a-message))
+**NOTE:** We don't use <kbd>tab</kbd>/<kbd>shift</kbd>+<kbd>tab</kbd> (although it is widely used elsewhere) for cycling through matches. However, recall that we do use <kbd>tab</kbd> to cycle through recipient and content boxes. (See [hotkeys for composing a message](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md#composing-a-message))
 
 ### Example: Using autocomplete to add a recognized emoji in your message content
 
