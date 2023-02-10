@@ -161,6 +161,15 @@ jobs:
         uses: codecov/codecov-action@v3
 
   pytest-on-other-platforms:
+    needs:
+      - mypy
+      - ruff
+      - isort
+      - black
+      - codespell
+      - hotkeys
+      - docstrings
+      - base_pytest
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
       fail-fast: false
