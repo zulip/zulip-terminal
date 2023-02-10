@@ -134,15 +134,40 @@ jobs:
       - name: Run lint-docstring
         run: ./tools/lint-docstring
 
-  pytest:
+  base_pytest:
+    runs-on: ubuntu-latest
+    name: Install & test - CPython 3.7 (ubuntu), codecov
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Install Python version
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
+      - name: Output Python version
+        run: python --version
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Ensure regular package installs from checkout
+        run: pip install .
+      - name: Install test dependencies
+        run: pip install .[testing]
+      - name: Run tests with pytest
+        run: pytest --cov-report=xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
+  pytest-on-other-platforms:
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
       fail-fast: false
       matrix:
         env:
-          - {PYTHON: 3.7, OS: ubuntu-latest, NAME: "CPython 3.7 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 3.8, OS: ubuntu-latest, NAME: "CPython 3.8 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux", CODECOV: true}
+          - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
@@ -177,8 +202,4 @@ jobs:
       - name: Install test dependencies
         run: pip install .[testing]
       - name: Run tests with pytest
-        run: pytest --cov-report=xml
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        # We avoid extra work by just running codecov on one python version
-        if: matrix.env.CODECOV
+        run: pytest --cov-report=
