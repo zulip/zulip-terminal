@@ -1,5 +1,5 @@
 """
-UI boxes for entering text: WriteBox, SearchBox, PanelSearchBox
+UI boxes for entering text: WriteBox, MessageSearchBox, PanelSearchBox
 """
 
 import re
@@ -916,7 +916,11 @@ class WriteBox(urwid.Pile):
         return key
 
 
-class SearchBox(urwid.Pile):
+class MessageSearchBox(urwid.Pile):
+    """
+    Search Box to search/control main list of messages
+    """
+
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         super().__init__(self.main_view())
