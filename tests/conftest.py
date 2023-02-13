@@ -14,8 +14,8 @@ from zulipterminal.config.keys import (
 )
 from zulipterminal.helper import Index, TidiedUserInfo
 from zulipterminal.helper import initial_index as helper_initial_index
-from zulipterminal.ui_tools.boxes import MessageBox
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
+from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.urwid_types import urwid_Size
 from zulipterminal.version import (
     MINIMUM_SUPPORTED_SERVER_VERSION,

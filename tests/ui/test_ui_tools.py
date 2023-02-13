@@ -16,7 +16,7 @@ from zulipterminal.config.symbols import (
     TIME_MENTION_MARKER,
 )
 from zulipterminal.helper import powerset
-from zulipterminal.ui_tools.boxes import MessageBox
+from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.views import (
     SIDE_PANELS_MOUSE_SCROLL_LINES,
     LeftColumnView,
@@ -33,7 +33,7 @@ from zulipterminal.ui_tools.views import (
 
 
 SUBDIR = "zulipterminal.ui_tools"
-BOXES = SUBDIR + ".boxes"
+BOXES = SUBDIR + ".messages"
 VIEWS = SUBDIR + ".views"
 MESSAGEVIEW = VIEWS + ".MessageView"
 MIDCOLVIEW = VIEWS + ".MiddleColumnView"
@@ -3092,7 +3092,6 @@ class TestMessageBox:
         col = 1
         row = 1
         focus = mocker.Mock()
-        mocker.patch(BOXES + ".keys_for_command", return_value=[key])
         mocker.patch.object(msg_box, "keypress")
         msg_box.model = mocker.Mock()
         msg_box.model.controller.is_in_editor_mode.return_value = compose_box_is_open

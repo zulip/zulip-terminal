@@ -29,8 +29,9 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | ui_mappings.py      | Relationships between state/API data and presentation in the UI                                        |
 |                        | ui_sizes.py         | Fixed sizes of UI elements                                                                             |
 |                        |                     |                                                                                                        |
-| zulipterminal/ui_tools | boxes.py            | UI boxes for displaying messages and entering text, such as `MessageBox`, `SearchBox`, `WriteBox`, etc.|
+| zulipterminal/ui_tools | boxes.py            | UI boxes for entering text: WriteBox, SearchBox, PanelSearchBox                                        |
 |                        | buttons.py          | UI buttons for 'narrowing' & showing unread counts, eg. All, Stream, Private message, Topic, Starred   |
+|                        | messages.py         | UI to render a Zulip message for display, and respond contextually to actions                          |
 |                        | tables.py           | Helper functions which render tables in the UI                                                         |
 |                        | utils.py            | The `MessageBox` for every message displayed is created here                                           |
 |                        | views.py            | UI views for larger elements such as Streams, Messages, Topics, Help, etc                              |

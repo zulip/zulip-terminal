@@ -25,7 +25,7 @@ SERVER_URL = "https://chat.zulip.zulip"
 class TestController:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: MockerFixture) -> None:
-        mocker.patch("zulipterminal.ui_tools.boxes.MessageBox.main_view")
+        mocker.patch("zulipterminal.ui_tools.messages.MessageBox.main_view")
         self.client = mocker.patch("zulip.Client")
         # Patch init only, in general, allowing specific patching elsewhere
         self.model = mocker.patch(MODEL + ".__init__", return_value=None)

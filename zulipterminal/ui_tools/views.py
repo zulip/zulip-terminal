@@ -43,7 +43,7 @@ from zulipterminal.helper import (
     match_user,
 )
 from zulipterminal.server_url import near_message_url
-from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
+from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     EmojiButton,
     HomeButton,
@@ -55,6 +55,7 @@ from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UserButton,
 )
+from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
 
