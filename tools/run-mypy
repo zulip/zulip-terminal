@@ -19,6 +19,7 @@ EXCLUDE_FILES = [
     # Remaining test files to have types applied:
     "tests/model/test_model.py",
     "tests/ui/test_ui_tools.py",
+    "tests/ui_tools/test_messages.py",
 ]
 
 python_project_folders = ["zulipterminal", "tests", "tools"]
