@@ -42,11 +42,6 @@ MIDCOLVIEW = VIEWS + ".MiddleColumnView"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
-@pytest.fixture(params=[True, False], ids=["ignore_mouse_click", "handle_mouse_click"])
-def compose_box_is_open(request):
-    return request.param
-
-
 class TestModListWalker:
     @pytest.fixture
     def mod_walker(self):

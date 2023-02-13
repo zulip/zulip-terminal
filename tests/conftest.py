@@ -23,6 +23,9 @@ from zulipterminal.version import (
 )
 
 
+# --------------- Autouse Fixtures -----------------------------------------
+
+
 @pytest.fixture(autouse=True)
 def no_requests(monkeypatch: pytest.MonkeyPatch) -> None:
     """
@@ -1232,6 +1235,11 @@ def classified_unread_counts() -> Dict[str, Any]:
 
 
 # --------------- UI Fixtures -----------------------------------------
+
+
+@pytest.fixture(params=[True, False], ids=["ignore_mouse_click", "handle_mouse_click"])
+def compose_box_is_open(request: Any) -> bool:
+    return request.param
 
 
 @pytest.fixture(
