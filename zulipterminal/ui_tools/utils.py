@@ -7,7 +7,7 @@ from typing import Any, Iterable, List, Optional
 import urwid
 
 from zulipterminal.api_types import Message
-from zulipterminal.ui_tools.boxes import MessageBox
+from zulipterminal.ui_tools.messages import MessageBox
 
 
 def create_msg_box_list(

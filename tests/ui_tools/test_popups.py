@@ -10,7 +10,7 @@ from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import TidiedUserInfo
-from zulipterminal.ui_tools.boxes import MessageBox
+from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryTag,
