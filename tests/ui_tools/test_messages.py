@@ -17,8 +17,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.ui_tools.messages import MessageBox
 
 
-SUBDIR = "zulipterminal.ui_tools"
-BOXES = SUBDIR + ".messages"
+MODULE = "zulipterminal.ui_tools.messages"
 
 
 SERVER_URL = "https://chat.zulip.zulip"
@@ -80,7 +79,7 @@ class TestMessageBox:
         )
         self.model.user_email = "foo@zulip.com"
         mocker.patch(
-            BOXES + ".MessageBox._is_private_message_to_self", return_value=True
+            MODULE + ".MessageBox._is_private_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
@@ -663,7 +662,7 @@ class TestMessageBox:
     )
     def test_soup2markup(self, content, expected_markup, mocker):
         mocker.patch(
-            BOXES + ".get_localzone", return_value=pytz.timezone("Asia/Kolkata")
+            MODULE + ".get_localzone", return_value=pytz.timezone("Asia/Kolkata")
         )
         soup = BeautifulSoup(content, "lxml").find(name="body")
         metadata = dict(
@@ -779,7 +778,7 @@ class TestMessageBox:
         ],
     )
     def test_main_view_renders_slash_me(self, mocker, message, content, is_me_message):
-        mocker.patch(BOXES + ".urwid.Text")
+        mocker.patch(MODULE + ".urwid.Text")
         message["content"] = content
         message["is_me_message"] = is_me_message
         msg_box = MessageBox(message, self.model, message)
@@ -1015,7 +1014,7 @@ class TestMessageBox:
         starred_msg,
         to_vary_in_last_message,
     ):
-        mocked_date = mocker.patch(BOXES + ".date")
+        mocked_date = mocker.patch(MODULE + ".date")
         mocked_date.today.return_value = date(current_year, 1, 1)
         mocked_date.side_effect = lambda *args, **kw: date(*args, **kw)
 
@@ -1299,7 +1298,7 @@ class TestMessageBox:
         write_box.msg_body_edit_enabled = None
         report_error = msg_box.model.controller.report_error
         report_warning = msg_box.model.controller.report_warning
-        mocker.patch(BOXES + ".time", return_value=100)
+        mocker.patch(MODULE + ".time", return_value=100)
 
         msg_box.keypress(size, key)
 
