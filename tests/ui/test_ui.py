@@ -21,7 +21,7 @@ class TestView:
         self.controller = mocker.patch(CONTROLLER, return_value=None)
         self.model = mocker.patch(CONTROLLER + ".model")
         self.write_box = mocker.patch(MODULE + ".WriteBox")
-        self.search_box = mocker.patch(MODULE + ".SearchBox")
+        self.search_box = mocker.patch(MODULE + ".MessageSearchBox")
         mocker.patch(MODULE + ".TabView")
         mocker.patch(MODULE + ".LeftColumnView")
         mocker.patch("zulipterminal.ui_tools.views.urwid.Frame")
