@@ -416,7 +416,7 @@ def msg_template_factory(
     msg_type: str,
     timestamp: int,
     *,
-    subject: str = "",
+    topic: str = "",
     stream_id: Optional[int] = None,
     recipients: Union[str, List[Dict[str, Any]]] = "PTEST",
 ) -> Message:
@@ -435,7 +435,8 @@ def msg_template_factory(
         flags=["read"],
         sender_id=5140,
         content_type="text/x-markdown",
-        subject=subject,
+        topic=topic,
+        subject=topic,
         reactions=[],
         subject_links=[],
         avatar_url="dummy_avatar_url",
@@ -459,7 +460,7 @@ def msg_template_factory(
 @pytest.fixture
 def stream_msg_template() -> Message:
     msg_template = msg_template_factory(
-        537286, "stream", 1520918722, subject="Test", stream_id=205
+        537286, "stream", 1520918722, topic="Test", stream_id=205
     )
     return msg_template
 
@@ -467,7 +468,7 @@ def stream_msg_template() -> Message:
 @pytest.fixture
 def extra_stream_msg_template() -> Message:
     msg_template = msg_template_factory(
-        537289, "stream", 1520918740, subject="Test", stream_id=205
+        537289, "stream", 1520918740, topic="Test", stream_id=205
     )
     return msg_template
 

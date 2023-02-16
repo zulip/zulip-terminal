@@ -953,7 +953,7 @@ class TestModel:
         old_stream_name="stream",
     ):
         self.client.update_message = mocker.Mock(return_value=response)
-        model.index["messages"][req["message_id"]]["subject"] = old_topic
+        model.index["messages"][req["message_id"]]["topic"] = old_topic
         model.index["messages"][req["message_id"]][
             "display_recipient"
         ] = old_stream_name
@@ -1735,7 +1735,7 @@ class TestModel:
         "response, narrow, recipients, log",
         [
             case(
-                {"type": "stream", "stream_id": 1, "subject": "FOO", "id": 1},
+                {"type": "stream", "stream_id": 1, "topic": "FOO", "id": 1},
                 [],
                 frozenset(),
                 ["msg_w"],
@@ -1753,7 +1753,7 @@ class TestModel:
                     "type": "stream",
                     "id": 1,
                     "stream_id": 1,
-                    "subject": "FOO",
+                    "topic": "FOO",
                     "display_recipient": "a",
                 },
                 [["stream", "a"]],
@@ -1766,7 +1766,7 @@ class TestModel:
                     "type": "stream",
                     "id": 1,
                     "stream_id": 1,
-                    "subject": "b",
+                    "topic": "b",
                     "display_recipient": "a",
                 },
                 [["stream", "a"], ["topic", "b"]],
@@ -1779,7 +1779,7 @@ class TestModel:
                     "type": "stream",
                     "id": 1,
                     "stream_id": 1,
-                    "subject": "b",
+                    "topic": "b",
                     "display_recipient": "a",
                 },
                 [["stream", "c"], ["topic", "b"]],
@@ -1821,7 +1821,7 @@ class TestModel:
                     "type": "stream",
                     "id": 1,
                     "stream_id": 1,
-                    "subject": "c",
+                    "topic": "c",
                     "display_recipient": "a",
                     "flags": ["mentioned"],
                 },
@@ -2370,7 +2370,7 @@ class TestModel:
             model.controller.update_screen.assert_called_once_with()
 
     @pytest.mark.parametrize(
-        "subject, narrow, new_log_len",
+        "topic, narrow, new_log_len",
         [
             ("foo", [["stream", "boo"], ["topic", "foo"]], 2),
             ("foo", [["stream", "boo"], ["topic", "not foo"]], 1),
@@ -2383,11 +2383,11 @@ class TestModel:
         ],
     )
     def test__update_rendered_view(
-        self, mocker, model, subject, narrow, new_log_len, msg_id=1
+        self, mocker, model, topic, narrow, new_log_len, msg_id=1
     ):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
-        msg_w.original_widget.message = {"id": msg_id, "subject": subject}
+        msg_w.original_widget.message = {"id": msg_id, "topic": topic}
         model.narrow = narrow
         other_msg_w.original_widget.message = {"id": 2}
         self.controller.view.message_view = mocker.Mock(log=[msg_w, other_msg_w])
@@ -2407,7 +2407,7 @@ class TestModel:
         assert model.controller.update_screen.called
 
     @pytest.mark.parametrize(
-        "subject, narrow, narrow_changed",
+        "topic, narrow, narrow_changed",
         [
             ("foo", [["stream", "boo"], ["topic", "foo"]], False),
             ("foo", [["stream", "boo"], ["topic", "not foo"]], True),
@@ -2420,11 +2420,11 @@ class TestModel:
         ],
     )
     def test__update_rendered_view_change_narrow(
-        self, mocker, model, subject, narrow, narrow_changed, msg_id=1
+        self, mocker, model, topic, narrow, narrow_changed, msg_id=1
     ):
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
-        msg_w.original_widget.message = {"id": msg_id, "subject": subject}
+        msg_w.original_widget.message = {"id": msg_id, "topic": topic}
         model.narrow = narrow
         self.controller.view.message_view = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.

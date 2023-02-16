@@ -1448,6 +1448,7 @@ class TestWriteBox:
             )
         else:
             write_box.model.send_stream_message.assert_called_once_with(
+                # FIXME: This parameter is causing an error while testing
                 stream=write_box.stream_write_box.edit_text,
                 topic=topic_sent_to_server,
                 content=write_box.msg_write_box.edit_text,

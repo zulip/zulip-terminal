@@ -395,7 +395,7 @@ class Model:
                     len(self.narrow) == 1  # stream
                     or (
                         len(self.narrow) == 2  # stream+topic
-                        and self.narrow[1][1] == message["subject"]
+                        and self.narrow[1][1] == message["topic"]
                     )
                 )
             )
@@ -589,7 +589,7 @@ class Model:
         if response["result"] == "success":
             message = self.index["messages"][message_id]
             stream_name = message.get("display_recipient", None)
-            old_topic = message.get("subject", None)
+            old_topic = message.get("topic", None)
             new_topic = request["topic"]
             stream_name_markup = (
                 "footer_contrast",
@@ -810,6 +810,11 @@ class Model:
             ]
             if topic_links:
                 message["topic_links"] = topic_links
+
+        # (3) `subject` param is changed to `topic` from
+        # server version 2.0
+        if "subject" in message:
+            message["topic"] = message["subject"]
 
         return message
 
@@ -1446,7 +1451,7 @@ class Model:
             if {"mentioned", "wildcard_mentioned"}.intersection(
                 set(message["flags"])
             ) or self.is_visual_notifications_enabled(stream_id):
-                recipient = "{display_recipient} -> {subject}".format(**message)
+                recipient = "{display_recipient} -> {topic}".format(**message)
 
         if recipient:
             if hidden_content:
@@ -1492,7 +1497,7 @@ class Model:
             # consecutive block independently). However, it is critical to keep
             # the topics index synchronized as it used whenever the topics list
             # view is reconstructed later.
-            self._update_topic_index(message["stream_id"], message["subject"])
+            self._update_topic_index(message["stream_id"], message["topic"])
             # If the topic view is toggled for incoming message's
             # recipient stream, then we re-arrange topic buttons
             # with most recent at the top.
@@ -1502,7 +1507,7 @@ class Model:
                     message["stream_id"]
                 ):
                     view.topic_w.update_topics_list(
-                        message["stream_id"], message["subject"], message["sender_id"]
+                        message["stream_id"], message["topic"], message["sender_id"]
                     )
                     self.controller.update_screen()
 
@@ -1576,7 +1581,7 @@ class Model:
 
     def _handle_update_message_event(self, event: Event) -> None:
         """
-        Handle updated (edited) messages (changed content/subject)
+        Handle updated (edited) messages (changed content/topic)
         """
         assert event["type"] == "update_message"
         # Update edited message status from single message id
@@ -1623,7 +1628,7 @@ class Model:
                 # Update and re-render indexed messages.
                 indexed_msg = self.index["messages"].get(msg_id)
                 if indexed_msg:
-                    indexed_msg["subject"] = new_subject
+                    indexed_msg["topic"] = new_subject
                     self._update_rendered_view(msg_id)
 
             # If topic view is open, reload list else reset cache.
@@ -1764,7 +1769,7 @@ class Model:
                 # narrow.
                 if (
                     len(self.narrow) == 2
-                    and msg_box.message["subject"] != self.narrow[1][1]
+                    and msg_box.message["topic"] != self.narrow[1][1]
                 ):
                     view.message_view.log.remove(msg_w)
                     # Change narrow if there are no messages left in the

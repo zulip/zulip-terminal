@@ -41,6 +41,8 @@ class Message(TypedDict, total=False):
     timestamp: int
     client: str
     subject: str  # Only for stream msgs.
+    # Changing subject -> topic as per the migration in Zulip 2.0
+    topic: str  # Only for stream msgs.
     # NOTE: new in Zulip 3.0 / ZFL 1, replacing `subject_links`
     # NOTE: API response format of `topic_links` changed in Zulip 4.0 / ZFL 46
     topic_links: List[Any]
