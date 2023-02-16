@@ -1096,6 +1096,7 @@ class MessageBox(urwid.Pile):
             ]
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
+        text_to_fill: Union[str, Tuple[str, List[Tuple[str, str]]]]
         if curr_narrow == []:
             text_to_fill = "All messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
@@ -1110,14 +1111,14 @@ class MessageBox(urwid.Pile):
             bar_color = f"s{bar_color}"
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (
-                    "bar",  # type: ignore
+                    "bar",
                     [
                         (bar_color, self.stream_name),
                         (bar_color, ": topic narrow"),
                     ],
                 )
             else:
-                text_to_fill = ("bar", [(bar_color, self.stream_name)])  # type: ignore
+                text_to_fill = ("bar", [(bar_color, self.stream_name)])
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = "Group private conversation"
         else:
