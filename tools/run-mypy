@@ -16,10 +16,6 @@ EXCLUDE_FILES = [
     "tools/fetch-rebase-pull-request",
     "tools/check-branch",
     "tools/lister.py",  # Came from zulip/zulip, now in zulint?
-    # Remaining test files to have types applied:
-    "tests/model/test_model.py",
-    "tests/ui/test_ui_tools.py",
-    "tests/ui_tools/test_messages.py",
 ]
 
 python_project_folders = ["zulipterminal", "tests", "tools"]

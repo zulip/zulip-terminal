@@ -79,6 +79,17 @@ strict_optional = true
 # If a library is typed, that's fine, otherwise don't worry
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# Tests remaining to be typed
+module = [
+    "tests.model.test_model",
+    "tests.ui.test_ui_tools",
+    "tests.ui_tools.test_messages",
+]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 xfail_strict = true
