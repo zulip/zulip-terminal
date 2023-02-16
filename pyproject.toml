@@ -11,6 +11,16 @@ target-version = ['py36']
 # test_messages: uses IST as Indian time zone, which is confused for IS/IT/ITS/IT'S/etc
 skip = "zulipterminal/unicode_emojis.py,tests/config/test_themes.py,tests/ui_tools/test_boxes.py,tests/ui_tools/test_messages.py"
 
+[tool.isort]
+py_version = 37
+# Use black for the default settings (with adjustments listed below)
+profile = "black"
+# For compatibility with 'black' we'd want to set this consistently
+line_length = 88
+atomic = true
+# This is compatible with black, but we could remove it
+lines_after_imports = 2
+
 [tool.ruff]
 line-length = 88
 target-version = "py37"
