@@ -550,7 +550,7 @@ def main(options: Optional[List[str]] = None) -> None:
                 pudb.post_mortem()
 
         if hasattr(e, "extra_info"):
-            print(in_color("red", f"\n{e.extra_info}"), file=sys.stderr)  # type: ignore
+            print(in_color("red", f"\n{e.extra_info}"), file=sys.stderr)
 
         print(
             in_color(
