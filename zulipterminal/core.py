@@ -21,16 +21,19 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
-from zulipterminal.helper import asynch, suppress_output
+from zulipterminal.helper import StreamData, asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
+from zulipterminal.ui_tools.boxes import PanelSearchBox
+from zulipterminal.ui_tools.buttons import TopButton, TopicButton
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    TopicSearchView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -299,6 +302,40 @@ class Controller:
             self, "Add/Remove Emojis", all_emoji_units, message, self.view
         )
         self.show_pop_up(emoji_picker_view, "area:msg")
+
+    def show_topic_list(self, stream_id: Any, controller: Any) -> Any:
+        topics = self.model.topics_in_stream(stream_id)
+        topics_btn_list = [
+            TopicButton(
+                stream_id=stream_id,
+                topic=topic,
+                controller = controller,
+                view=self.view,
+                count=self.model.unread_counts["unread_topics"].get(
+                    (stream_id, topic), 0
+                ),
+            )
+            for topic in topics
+        ]
+        text = urwid.Text(f"""Topics in {self.model.stream_dict[stream_id]["name"]}""", align="center")
+        title_map = urwid.AttrMap(urwid.Filler(text), "area:msg")
+        title_box_adapter = urwid.BoxAdapter(title_map, height=1)
+        
+        # 64 is the width, need to check how to make it dynamic
+        topic_list_view = TopicSearchView(
+            self, topics_btn_list, "TOGGLE_TOPIC", 64, "TOPICS", header=urwid.LineBox(
+                title_box_adapter,
+                tlcorner="─",
+                tline="",
+                lline="",
+                trcorner="─",
+                blcorner="─",
+                rline="",
+                bline="─",
+                brcorner="─",
+            )
+        )
+        self.show_pop_up(topic_list_view, "area:msg")
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)

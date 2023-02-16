@@ -5,7 +5,7 @@ UI views for larger elements such as Streams, Messages, Topics, Help, etc
 import threading
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 import pytz
 import urwid
@@ -36,12 +36,14 @@ from zulipterminal.config.ui_mappings import (
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
     Message,
+    StreamData,
     TidiedUserInfo,
     asynch,
     match_emoji,
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import notify
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import MessageBox, PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -441,7 +443,9 @@ class TopicsView(urwid.Frame):
         self.empty_search = False
 
     @asynch
-    def update_topics(self, search_box: Any, new_text: str) -> None:
+    def update_topics(self, 
+    search_box: Any, 
+    new_text: str) -> None:
         if not self.view.controller.is_in_editor_mode():
             return
         # wait for any previously started search to finish to avoid
@@ -971,8 +975,10 @@ class PopUpView(urwid.Frame):
         self.body = urwid.ListBox(self.log)
 
         max_cols, max_rows = controller.maximum_popup_dimensions()
-
-        self.width = min(max_cols, requested_width)
+        try:
+            self.width = min(max_cols, requested_width)
+        except TypeError:
+            self.width = max_cols
 
         height = self.calculate_popup_height(body, header, footer, self.width)
         self.height = min(max_rows, height)
@@ -990,7 +996,11 @@ class PopUpView(urwid.Frame):
         Returns popup height. The popup height is calculated using urwid's
         .rows method on every widget.
         """
-        height = sum(widget.rows((popup_width,)) for widget in body)
+        try:
+            height = sum(widget.rows((popup_width,)) for widget in body)
+        except:
+            notify(str(body), "SSSS")
+            height = 10
         height += header.rows((popup_width,)) if header else 0
         height += footer.rows((popup_width,)) if footer else 0
 
@@ -1928,6 +1938,146 @@ class FullRawMsgView(PopUpView):
         return super().keypress(size, key)
 
 
+class TopicSearchView(PopUpView):
+    """
+    Displays Topics in selected stream.
+    """
+    def __init_(
+        self, 
+        controller: Any,
+        title: str,
+        view: Any, 
+        stream_id: Any,
+    ) -> None:
+        self.view = view
+        self.controller = controller
+        topics = self.model.topics_in_stream(stream_id)
+        self.topics_btn_list = [
+            TopicButton(
+                stream_id=stream_id,
+                topic=topic,
+                controller = controller,
+                view=self.view,
+                count=self.model.unread_counts["unread_topics"].get(
+                    (stream_id, topic), 0
+                ),
+            )
+            for topic in topics
+        ]
+
+        self.stream_id = stream_id
+        self.focus_index_before_search = 0
+        width = max(len(button.label) for button in self.topics_btn_list)
+        width = 64
+
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        popup_width = max(max_cols, width)
+        popup_width = 64
+
+        self.topic_search_box = PanelSearchBox(
+            self, "SEARCH_EMOJIS", self.update_topics_list
+        )
+        self.empty_search = False
+        self.search_lock = threading.Lock()
+        super().__init__(
+            controller,
+            self.topics_btn_list,
+            "TOGGLE_TOPIC",
+            popup_width,
+            title,
+            header=urwid.LineBox(
+                self.header_list,
+                tlcorner="─",
+                tline="",
+                lline="",
+                trcorner="─",
+                blcorner="─",
+                rline="",
+                bline="─",
+                brcorner="─",
+            ),
+        )
+        self.set_focus("header")
+
+
+    # Not sure if both of these functions needs to stay.
+    def update_topics(self, 
+    search_box: Any, 
+    new_text: str) -> None:
+        if not self.view.controller.is_in_editor_mode():
+            return
+        with self.search_lock:
+            new_text = new_text.lower()
+            topics_to_display = [
+                topic
+                for topic in self.topics_btn_list.copy()
+                if new_text in topic.topic_name.lower()
+            ]
+            self.empty_search = len(topics_to_display) == 0
+
+            self.log.clear()
+            if not self.empty_search:
+                self.log.extend(topics_to_display)
+            else:
+                self.log.extend([self.topic_search_box.search_error])
+            self.controller.update_screen()
+
+    @asynch
+    def update_topics_list(
+        self, 
+        stream_id: int = None, 
+        topic_name: str = None, 
+        sender_id: int = None,
+        search_box: Any = None,
+    ) -> None:
+        for topic_iterator, topic_button in enumerate(self.log):
+            if topic_button.topic_name == topic_name:
+                self.log.insert(0, self.log.pop(topic_iterator))
+                self.list_box.set_focus_valign("bottom")
+                if sender_id == self.view.model.user_id:
+                    self.list_box.set_focus(0)
+                return
+        new_topic_button = TopicButton(
+            stream_id=stream_id,
+            topic=topic_name,
+            controller=self.view.controller,
+            view=self.view,
+            count=0,
+        )
+        self.log.insert(0, new_topic_button)
+        self.list_box.set_focus_valign("bottom")
+        if sender_id == self.view.model.user_id:
+            self.list_box.set_focus(0)
+        self.controller.update_screen
+
+    def mouse_event(
+        self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
+    ) -> bool:
+        if event == "mouse press":
+            if button == 4:
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_UP"))
+                return True
+            elif button == 5:
+                for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
+                    self.keypress(size, primary_key_for_command("GO_DOWN"))
+                return True
+        return super().mouse_event(size, event, button, col, row, focus)
+
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key("SEARCH_TOPICS", key):
+            _, self.focus_index_before_search = self.log.get_focus()
+            self.set_focus("header")
+            self.header_list.set_focus(2)
+            self.topic_search_box.set_caption(" ")
+            self.view.controller.enter_editor_mode_with(self.topic_search_box)
+            return key
+        elif is_command_key("GO_BACK", key):
+            self.controller.exit_popup()
+            # Needs more work to get working with searching
+            return key
+        return super().keypress(size, key)
+        
 class EmojiPickerView(PopUpView):
     """
     Displays Emoji Picker view for messages.
@@ -2055,7 +2205,7 @@ class EmojiPickerView(PopUpView):
             emoji_buttons, key=lambda button: button.reaction_count, reverse=True
         )
         return sorted_emoji_buttons
-
+    
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
@@ -2088,3 +2238,6 @@ class EmojiPickerView(PopUpView):
             self.controller.exit_popup()
             return key
         return super().keypress(size, key)
+
+
+
