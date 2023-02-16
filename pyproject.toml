@@ -11,6 +11,31 @@ target-version = ['py36']
 # test_messages: uses IST as Indian time zone, which is confused for IS/IT/ITS/IT'S/etc
 skip = "zulipterminal/unicode_emojis.py,tests/config/test_themes.py,tests/ui_tools/test_boxes.py,tests/ui_tools/test_messages.py"
 
+[tool.coverage.run]
+branch = true
+# omit = ...
+
+[tool.coverage.report]
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self.debug",
+
+    # Don't complain if tests don't hit defensive assertion code
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code is not run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
+precision = 1
+skip_covered = true
+show_missing = true
+
 [tool.isort]
 py_version = 37
 # Use black for the default settings (with adjustments listed below)
