@@ -43,6 +43,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
     Message,
+    TidiedUserInfo,
     asynch,
     format_string,
     get_unused_fence,
@@ -214,7 +215,19 @@ class WriteBox(urwid.Pile):
             recipient_info = ""
 
         self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
+        try:
+            recipient_ID = int(
+                recipient_info[
+                    recipient_info.find("user") + 4 : recipient_info.find("@")
+                ]
+            )
+            data: TidiedUserInfo = self.model.get_user_info(recipient_ID)
+            last_active = data["last_active"]
+        except:
+            last_active = ""
+        self.to_write_box = ReadlineEdit(
+            "To: ", edit_text=recipient_info + ", last seen on " + last_active
+        )
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
