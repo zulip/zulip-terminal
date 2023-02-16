@@ -21,6 +21,19 @@ atomic = true
 # This is compatible with black, but we could remove it
 lines_after_imports = 2
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+xfail_strict = true
+addopts = "-rxXs --cov=zulipterminal --no-cov-on-fail"
+filterwarnings = [
+    # distutils: imp module is deprecated in favor of importlib
+    # * python3.6/3.7/3.8
+    "ignore::DeprecationWarning:distutils.*:",
+    # bs4: ABCs must be imported from collections.abc, not collections, from python3.9
+    # * python 3.7/3.8
+    "ignore::DeprecationWarning:bs4.*:",
+]
+
 [tool.ruff]
 line-length = 88
 target-version = "py37"
