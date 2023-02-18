@@ -41,6 +41,8 @@ with OUTPUT_FILE.open("w") as f:
                 '"""',
                 DOCSTRING,
                 '"""',
+                "# Ignore long lines",
+                "# ruff: noqa: E501",
                 "",
                 "from collections import OrderedDict\n\n",
                 "# fmt: off",

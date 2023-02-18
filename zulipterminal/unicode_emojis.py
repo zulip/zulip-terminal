@@ -1,6 +1,8 @@
 """
 Unicode emoji data, synchronized semi-regularly with the server source
 """
+# Ignore long lines
+# ruff: noqa: E501
 
 from collections import OrderedDict
 
