@@ -854,7 +854,8 @@ class TestWriteBox:
                 },
                 {"pinned": ["Secret stream", "Stream 1"], "muted": ["Secret stream"]},
             ),
-            # With 'Stream 1' and 'Secret stream' pinned, 'Some general stream' and 'Stream 2' muted.
+            # With 'Stream 1' and 'Secret stream' pinned,
+            # 'Some general stream' and 'Stream 2' muted.
             (
                 "#Stream",
                 {
@@ -869,7 +870,8 @@ class TestWriteBox:
                     "muted": ["Some general stream", "Stream 2"],
                 },
             ),
-            # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' and 'Stream 2' muted.
+            # With 'Stream 1' and 'Secret stream' pinned,
+            # 'Secret stream' and 'Stream 2' muted.
             (
                 "#Stream",
                 {
@@ -896,7 +898,8 @@ class TestWriteBox:
                 },
                 {"current_stream": 1},
             ),
-            # With 'Stream 1' and 'Secret stream' pinned, 'Secret stream' and 'Stream 2' muted, 'Stream 2' as current stream.
+            # With 'Stream 1' and 'Secret stream' pinned,
+            # 'Secret stream' and 'Stream 2' muted, 'Stream 2' as current stream.
             (
                 "#Stream",
                 {
@@ -1224,7 +1227,8 @@ class TestWriteBox:
         )
 
     @pytest.mark.parametrize(
-        "stream_name, stream_id, is_valid_stream, stream_access_type, expected_marker, expected_color",
+        "stream_name, stream_id, is_valid_stream, stream_access_type,"
+        " expected_marker, expected_color",
         [
             (
                 "Web public stream",
