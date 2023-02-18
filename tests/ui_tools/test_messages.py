@@ -1171,7 +1171,10 @@ class TestMessageBox:
                 {"stream": False, "private": False},
                 {"stream": False, "private": False},
                 {
-                    "stream": " You can't edit messages sent by other users that already have a topic.",
+                    "stream": (
+                        " You can't edit messages sent by other users"
+                        " that already have a topic."
+                    ),
                     "private": " You can't edit private messages sent by other users.",
                 },
                 id="msg_sent_by_other_user_with_topic",
@@ -1183,8 +1186,10 @@ class TestMessageBox:
                 {"stream": False, "private": False},
                 {"stream": True, "private": False},
                 {
-                    "stream": " Only topic editing allowed."
-                    " Time Limit for editing the message body has been exceeded.",
+                    "stream": (
+                        " Only topic editing allowed."
+                        " Time Limit for editing the message body has been exceeded."
+                    ),
                     "private": " Time Limit for editing the message has been exceeded.",
                 },
                 id="topic_edit_only_after_time_limit",
@@ -1226,8 +1231,10 @@ class TestMessageBox:
                 {"stream": False, "private": False},
                 {"stream": True, "private": False},
                 {
-                    "stream": " Only topic editing allowed."
-                    " Time Limit for editing the message body has been exceeded.",
+                    "stream": (
+                        " Only topic editing allowed."
+                        " Time Limit for editing the message body has been exceeded."
+                    ),
                     "private": " Time Limit for editing the message has been exceeded.",
                 },
                 id="msg_sent_by_me_with_no_topic",
@@ -1239,8 +1246,10 @@ class TestMessageBox:
                 {"stream": False, "private": False},
                 {"stream": True, "private": False},
                 {
-                    "stream": " Only topic editing is allowed."
-                    " This is someone else's message but with (no topic).",
+                    "stream": (
+                        " Only topic editing is allowed."
+                        " This is someone else's message but with (no topic)."
+                    ),
                     "private": " You can't edit private messages sent by other users.",
                 },
                 id="msg_sent_by_other_with_no_topic",

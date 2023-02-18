@@ -436,7 +436,8 @@ def test_notify_if_message_sent_outside_narrow(
         key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
         report_success.assert_called_once_with(
             [
-                f"Message is sent outside of current narrow. Press [{key}] to narrow to conversation."
+                "Message is sent outside of current narrow."
+                f" Press [{key}] to narrow to conversation."
             ],
             duration=6,
         )

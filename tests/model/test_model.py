@@ -1101,7 +1101,8 @@ class TestModel:
                     "_moderator": ["", True],
                     "_member": ["", True],
                     "_guest": [
-                        "Only organization administrators, moderators, full members and members can edit topic",
+                        "Only organization administrators, moderators, full members and"
+                        " members can edit topic",
                         False,
                     ],
                 },
@@ -1137,7 +1138,8 @@ class TestModel:
                     "_moderator": ["", True],
                     "_member": ["", True],
                     "_guest": [
-                        "Only organization administrators, moderators and full members can edit topic",
+                        "Only organization administrators, moderators and full members"
+                        " can edit topic",
                         False,
                     ],
                 },
@@ -1151,11 +1153,13 @@ class TestModel:
                     "_admin": ["", True],
                     "_moderator": ["", True],
                     "_member": [
-                        "Only organization administrators and moderators can edit topic",
+                        "Only organization administrators and moderators"
+                        " can edit topic",
                         False,
                     ],
                     "_guest": [
-                        "Only organization administrators and moderators can edit topic",
+                        "Only organization administrators and moderators"
+                        " can edit topic",
                         False,
                     ],
                 },
@@ -3591,11 +3595,11 @@ class TestModel:
                 (1, "topic"),
                 id="unread_present_before_previous_topic",
             ),
-            case(
+            case(  # TODO Should be None? (2 other cases)
                 {(1, "topic")},
                 (1, "topic"),
                 (1, "topic"),
-                id="unread_still_present_in_topic",  # TODO Should be None? (2 other cases)
+                id="unread_still_present_in_topic",
             ),
             case(
                 {},
