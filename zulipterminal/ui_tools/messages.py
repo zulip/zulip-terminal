@@ -451,10 +451,10 @@ class MessageBox(urwid.Pile):
                 # uses http as the default scheme but keeps the text as-is.
                 # For instance, see how example.com/some/path becomes
                 # <a href="http://example.com">example.com/some/path</a>.
-                link_without_scheme, text_without_scheme = [
+                link_without_scheme, text_without_scheme = (
                     data.split("://")[1] if "://" in data else data
                     for data in [link, text]
-                ]  # Split on '://' is for cases where text == link.
+                )  # Split on '://' is for cases where text == link.
                 if link_without_scheme == text_without_scheme:
                     last_segment = text.split("/")[-1]
                     if "." in last_segment:
