@@ -14,11 +14,11 @@ exclude = [
     "zt_venv",
 ]
 ignore = [
-    # E501 - Ignore max-line-length property - this is already defined by black
-    "E501",
     # F841 - assigned to but never used - FIXME: indicates potential issues
     "F841",
 ]
+# Ignore length in tools for now (and otherwise where noqa specified)
+per-file-ignores = {"tools/*" = ["E501"]}
 select = [
     "E", # Error (pycodestyle)
     "F", # pyFlakes
