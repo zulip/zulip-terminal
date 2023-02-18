@@ -559,7 +559,7 @@ class WriteBox(urwid.Pile):
         matching_users = [
             user for user in users_list if match_user(user, text[len(prefix_string) :])
         ]
-        matching_ids = set([user["user_id"] for user in matching_users])
+        matching_ids = {user["user_id"] for user in matching_users}
         matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
         # Display subscribed users/recipients first.
         sorted_matching_users = sorted(
