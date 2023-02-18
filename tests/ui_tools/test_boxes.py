@@ -935,11 +935,11 @@ class TestWriteBox:
         write_box.view.pinned_streams = streams_to_pin
         write_box.stream_id = stream_categories.get("current_stream", None)
         write_box.model.stream_dict = stream_dict
-        write_box.model.muted_streams = set(
+        write_box.model.muted_streams = {
             stream["stream_id"]
             for stream in stream_dict.values()
             if stream["name"] in stream_categories.get("muted", set())
-        )
+        }
         states = state_and_required_typeahead.keys()
         required_typeaheads = list(state_and_required_typeahead.values())
         typeahead_strings = [

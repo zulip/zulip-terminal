@@ -87,11 +87,11 @@ class MessageBox(urwid.Pile):
                 self.recipient_ids = [self.model.user_id]
             else:
                 self.recipients_names = ", ".join(
-                    list(
+                    [
                         recipient["full_name"]
                         for recipient in self.message["display_recipient"]
                         if recipient["email"] != self.model.user_email
-                    )
+                    ]
                 )
                 self.recipient_emails = [
                     recipient["email"]

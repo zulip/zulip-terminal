@@ -908,7 +908,7 @@ class TestMsgInfoView:
         edited_message_id: int,
     ) -> None:
         self.controller.model.index = {
-            "edited_messages": set([edited_message_id]),
+            "edited_messages": {edited_message_id},
         }
         self.controller.model.initial_data = {
             "realm_allow_edit_history": realm_allow_edit_history,

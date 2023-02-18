@@ -566,7 +566,7 @@ def match_stream(
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.
-    assert data == sorted(
+    assert data == sorted(  # noqa: C414 (nested sort)
         sorted(data, key=lambda data: data[1].lower()),
         key=lambda data: data[1] in pinned_stream_names,
         reverse=True,

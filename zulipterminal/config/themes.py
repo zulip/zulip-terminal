@@ -150,8 +150,8 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
         for meta, conf in theme.META.items()
         if set(conf) == set(REQUIRED_META.get(meta, {}))
     }
-    incomplete = list(set(THEMES) - complete)
-    return sorted(list(complete)), sorted(incomplete)
+    incomplete = set(THEMES) - complete
+    return sorted(complete), sorted(incomplete)
 
 
 def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
