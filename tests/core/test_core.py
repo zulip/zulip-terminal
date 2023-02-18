@@ -1,5 +1,6 @@
 import os
 import webbrowser
+from datetime import datetime, timedelta
 from platform import platform
 from threading import Thread, Timer
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -553,7 +554,14 @@ class TestController:
     @pytest.mark.parametrize(
         "active_conversation_info",
         [
-            case({"sender_name": "hamlet"}, id="in_pm_narrow_with_sender_typing:start"),
+            case(
+                {
+                    "sender_name": "hamlet",
+                    "typing_start_time": datetime.now() + timedelta(1),
+                    "narrow": ["pm"],
+                },
+                id="in_pm_narrow_with_sender_typing:start",
+            ),
             case({}, id="in_pm_narrow_with_sender_typing:stop"),
         ],
     )
@@ -565,13 +573,16 @@ class TestController:
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
         sleep = mocker.patch(MODULE + ".time.sleep")
+        controller.model.narrow = ["pm"]
         controller.active_conversation_info = active_conversation_info
 
         def mock_typing() -> None:
             controller.active_conversation_info = {}
 
         Timer(0.1, mock_typing).start()
-        Thread(controller.show_typing_notification()).start()
+        thread = Thread(target=controller.show_typing_notification)
+        thread.start()
+        thread.join()
 
         if active_conversation_info:
             set_footer_text.assert_has_calls(
@@ -586,4 +597,38 @@ class TestController:
         else:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
+        assert controller.active_conversation_info == {}
+
+    def test_end_typing_notification_on_unresponsive_event(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+    ) -> None:
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        controller.model.narrow = ["pm"]
+        controller.active_conversation_info = {
+            "sender_name": "hamlet",
+            "narrow": controller.model.narrow,
+        }
+        controller.active_conversation_info[
+            "typing_start_time"
+        ] = datetime.now() - timedelta(seconds=14.5)
+
+        controller.show_typing_notification()
+
+        assert controller.active_conversation_info == {}
+
+    def test_end_typing_notification_on_narrow_change(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        controller.model.narrow = [["pm_with", "othello@zulip.com"]]
+        controller.active_conversation_info = {
+            "sender_name": "hamlet",
+            "narrow": [["pm_with", "hamlet@zulip.com"]],
+        }
+        controller.active_conversation_info["typing_start_time"] = datetime.now()
+
+        controller.show_typing_notification()
+
         assert controller.active_conversation_info == {}
