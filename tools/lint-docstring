@@ -9,7 +9,7 @@ from typing import Dict, List
 
 
 TABLE_OFFSET = 10
-COLUMN_WIDTHS = (23, 20, 103)
+COLUMN_WIDTHS = (23, 20, 88)  # Use 88 as line-length for docstring for simplicity
 SPACEBAR = " "
 
 # leaving blank rows after exhausting files from each folder
