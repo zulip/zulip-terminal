@@ -795,7 +795,7 @@ class TestMiddleColumnView:
         self.search_box = mocker.Mock()
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
         self.super_keypress = mocker.patch(VIEWS + ".urwid.Frame.keypress")
-        self.model.controller == mocker.Mock()
+        self.model.controller = mocker.Mock()
 
     @pytest.fixture
     def mid_col_view(self):
