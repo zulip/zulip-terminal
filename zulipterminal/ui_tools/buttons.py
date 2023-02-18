@@ -1,5 +1,5 @@
 """
-UI buttons for 'narrowing' & showing unread counts, eg. All, Stream, Private message, Topic, Starred
+UI buttons for narrowing & showing unread counts, eg. All, Stream, Private, Topic
 """
 
 import re
