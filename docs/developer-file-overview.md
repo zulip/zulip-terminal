@@ -8,7 +8,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 | Folder                 | File                | Description                                                                                            |
 | ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
 | zulipterminal          | api_types.py        | Types from the Zulip API, translated into python, to improve type checking                             |
-|                        | core.py             | Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application           |
+|                        | core.py             | Defines the `Controller`, which sets up the `Model`, `View`, and how they interact                     |
 |                        | helper.py           | Helper functions used in multiple places                                                               |
 |                        | model.py            | Defines the `Model`, fetching and storing data retrieved from the Zulip server                         |
 |                        | platform_code.py    | Detection of supported platforms & platform-specific functions                                         |
@@ -30,7 +30,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | ui_sizes.py         | Fixed sizes of UI elements                                                                             |
 |                        |                     |                                                                                                        |
 | zulipterminal/ui_tools | boxes.py            | UI boxes for entering text: WriteBox, MessageSearchBox, PanelSearchBox                                 |
-|                        | buttons.py          | UI buttons for 'narrowing' & showing unread counts, eg. All, Stream, Private message, Topic, Starred   |
+|                        | buttons.py          | UI buttons for narrowing & showing unread counts, eg. All, Stream, Private, Topic                      |
 |                        | messages.py         | UI to render a Zulip message for display, and respond contextually to actions                          |
 |                        | tables.py           | Helper functions which render tables in the UI                                                         |
 |                        | utils.py            | The `MessageBox` for every message displayed is created here                                           |

@@ -1,5 +1,5 @@
 """
-Defines the `Controller`, which sets up the `model`, `view`, and coordinates the application
+Defines the `Controller`, which sets up the `Model`, `View`, and how they interact
 """
 
 import itertools
