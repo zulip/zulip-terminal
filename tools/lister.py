@@ -21,7 +21,8 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
                 return "py"
             elif re.search(r"^#!", first_line):
                 print(
-                    "Error: Unknown shebang in file" ' "%s":\n%s' % (fpath, first_line),
+                    "Error: Unknown shebang in file"
+                    ' "{}":\n{}'.format(fpath, first_line),
                     file=sys.stderr,
                 )
                 return ""
@@ -105,7 +106,7 @@ def list_files(
             except (OSError, UnicodeDecodeError) as e:
                 etype = e.__class__.__name__
                 print(
-                    'Error: %s while determining type of file "%s":' % (etype, fpath),
+                    f'Error: {etype} while determining type of file "{fpath}":',
                     file=sys.stderr,
                 )
                 print(e, file=sys.stderr)

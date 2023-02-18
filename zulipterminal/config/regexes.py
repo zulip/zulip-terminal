@@ -12,9 +12,9 @@ REGEX_TOPIC_NAME = r"([^*]*)"
 
 
 # (*) Example: #**zulip-terminal
-REGEX_STREAM_FENCED_HALF = r"#\*\*{stream}".format(stream=REGEX_STREAM_NAME)
+REGEX_STREAM_FENCED_HALF = rf"#\*\*{REGEX_STREAM_NAME}"
 # (*) Example: #**zulip-terminal**
-REGEX_STREAM_FENCED = r"#\*\*{stream}\*\*".format(stream=REGEX_STREAM_NAME)
+REGEX_STREAM_FENCED = rf"#\*\*{REGEX_STREAM_NAME}\*\*"
 # (*) Example text: #**stream name>Topic name
 REGEX_STREAM_AND_TOPIC_FENCED_HALF = f"{REGEX_STREAM_FENCED_HALF}>{REGEX_TOPIC_NAME}$"
 # (*) Example text: #**stream name**>Topic name
@@ -37,7 +37,7 @@ REGEX_COLOR_6_DIGIT = r"^#[0-9A-Fa-f]{6}$"
 # Example: example-user@zulip.com
 REGEX_RECIPIENT_EMAIL = r"[\w\.-]+@[\w\.-]+"
 # Example: Test User <example-user@zulip.com>
-REGEX_CLEANED_RECIPIENT = r"^(.*?)(?:\s*?<?({})>?(.*))?$".format(REGEX_RECIPIENT_EMAIL)
+REGEX_CLEANED_RECIPIENT = rf"^(.*?)(?:\s*?<?({REGEX_RECIPIENT_EMAIL})>?(.*))?$"
 # Example: # #000000-#ffffff or #000-#fff or h0-h255 or g0-g100 or g#00-g#ff
 REGEX_COLOR_VALID_FORMATS = (
     "#[\\da-f]{6}|#[\\da-f]{3}|(?:h|g)([\\d]{1,3})|g#[\\da-f]{2}|default$"

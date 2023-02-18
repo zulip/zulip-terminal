@@ -160,7 +160,7 @@ if args.quick:
 # run mypy
 status = 0
 for repo, python_files in repo_python_files.items():
-    print("Running mypy for `{}`.".format(repo), flush=True)
+    print(f"Running mypy for `{repo}`.", flush=True)
     if python_files:
         result = subprocess.call([mypy_command] + extra_args + python_files)
         if result != 0:
