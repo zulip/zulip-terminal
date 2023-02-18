@@ -73,4 +73,4 @@ try:
     INPUT_FILE.unlink()
     print(f"{INPUT_FILE} deleted.")
 except Exception as exc:
-    print("Warning: Could not delete file:\n{exc}")
+    print(f"Warning: Could not delete file:\n{exc}")
