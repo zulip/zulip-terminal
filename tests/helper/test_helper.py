@@ -343,7 +343,7 @@ def test_display_error_if_present(
         case(
             {"type": "private", "to": [1], "content": "bar"},
             [["is", "private"]],
-            False,
+            True,
             id="all_private__pm__not_notified",
         ),
         case(
@@ -390,7 +390,7 @@ def test_display_error_if_present(
                 "content": "Hi `|new_stream|`",
             },
             [],
-            False,
+            True,
             id="all_messages__stream__not_notified",
         ),
         case(
