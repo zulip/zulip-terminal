@@ -62,12 +62,12 @@ ROLE_BY_ID: Dict[int, Dict[str, str]] = {
 STREAM_POST_POLICY = {
     1: "Any user can post",
     2: "Only organization administrators can send to this stream",
-    3: "Only organization administrators, moderators and full members can send to this stream",
+    3: "Only organization administrators, moderators and full members can send to this stream",  # noqa: E501
     4: "Only organization administrators and moderators can send to this stream",
 }
 
 EDIT_TOPIC_POLICY = {
-    1: "Only organization administrators, moderators, full members and members can edit topic",
+    1: "Only organization administrators, moderators, full members and members can edit topic",  # noqa: E501
     2: "Only organization administrators can edit topic",
     3: "Only organization administrators, moderators and full members can edit topic",
     4: "Only organization administrators and moderators can edit topic",
