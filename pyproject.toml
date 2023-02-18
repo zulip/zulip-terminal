@@ -14,8 +14,6 @@ exclude = [
     "zt_venv",
 ]
 ignore = [
-    # F841 - assigned to but never used - FIXME: indicates potential issues
-    "F841",
 ]
 # Ignore length in tools for now (and otherwise where noqa specified)
 per-file-ignores = {"tools/*" = ["E501"]}
