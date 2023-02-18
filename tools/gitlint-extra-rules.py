@@ -38,7 +38,7 @@ class AreaFormatting(CommitRule):
         exclusions = self.options["exclusions"].value
         exclusions_text = ", or ".join(exclusions)
         if exclusions_text:
-            exclusions_text = " (or {})".format(exclusions_text)
+            exclusions_text = f" (or {exclusions_text})"
         error = (
             f"Areas at start of title should be lower case{exclusions_text}, "
             "followed by ': '"

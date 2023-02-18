@@ -435,7 +435,7 @@ def main(options: Optional[List[str]] = None) -> None:
             real_theme_name = theme_aliases[theme_to_use[0]]
             theme_to_use = (
                 real_theme_name,
-                "{} (by alias '{}')".format(theme_to_use[1], theme_to_use[0]),
+                f"{theme_to_use[1]} (by alias '{theme_to_use[0]}')",
             )
 
         if args.color_depth:

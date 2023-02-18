@@ -13,5 +13,5 @@ r = requests.get(URL)
 
 with open(OUTPUT_FILE, "w") as f:
     f.write(r.text)
-print("Emoji dictionary saved in {}".format(OUTPUT_FILE))
+print(f"Emoji dictionary saved in {OUTPUT_FILE}")
 print("Run tools/convert-unicode-emoji-data to convert dictionary to a list")
