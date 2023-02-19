@@ -434,7 +434,7 @@ class TestController:
 
     def test_main(self, mocker: MockerFixture, controller: Controller) -> None:
         controller.view.palette = {"default": "theme_properties"}
-        mock_tsk = mocker.patch(MODULE + ".Screen.tty_signal_keys")
+        mocker.patch(MODULE + ".Screen.tty_signal_keys")
         controller.loop.screen.tty_signal_keys = mocker.Mock(return_value={})
 
         controller.main()
@@ -564,7 +564,7 @@ class TestController:
         active_conversation_info: Dict[str, str],
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
-        sleep = mocker.patch(MODULE + ".time.sleep")
+        mocker.patch(MODULE + ".time.sleep")
         controller.active_conversation_info = active_conversation_info
 
         def mock_typing() -> None:

@@ -64,7 +64,7 @@ def test_notify_quotes(
     text: str,
 ) -> None:
     subprocess = mocker.patch(MODULE + ".subprocess")
-    platform = mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
 
     notify(title, text)
 

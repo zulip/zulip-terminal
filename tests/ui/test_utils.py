@@ -164,7 +164,7 @@ def test_create_msg_box_list(
         },
         "pointer": {},
     }
-    msg_box = mocker.patch(MODULE + ".MessageBox")
+    mocker.patch(MODULE + ".MessageBox")
     mocker.patch(MODULE + ".urwid.AttrMap", return_value="MSG")
     mock_muted = mocker.patch(MODULE + ".is_muted", return_value=muted)
     mocker.patch(

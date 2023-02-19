@@ -312,7 +312,7 @@ def test_color_formats(mocker: MockerFixture, color: str) -> None:
 )
 def test_invalid_color_format(mocker: MockerFixture, color: str) -> None:
     with pytest.raises(ValueError) as e:
-        canon = canonicalize_color(color)
+        canonicalize_color(color)
     assert str(e.value) == f'Unknown format for color "{color}"'
 
 

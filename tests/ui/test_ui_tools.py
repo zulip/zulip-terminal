@@ -1018,7 +1018,7 @@ class TestRightColumnView:
         self.view.users = ["USER1", "USER2"]
         mocker.patch(VIEWS + ".match_user", return_value=match_return_value)
         mocker.patch(VIEWS + ".UsersView")
-        list_w = mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
         set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
 
         right_col_view.update_user_list("SEARCH_BOX", search_string)
@@ -1059,7 +1059,6 @@ class TestRightColumnView:
         users_view = mocker.patch(VIEWS + ".UsersView")
         right_col_view = RightColumnView(self.view)
         if status != "inactive":
-            unread_counts = right_col_view.view.model.unread_counts
             user_btn.assert_called_once_with(
                 user=self.view.users[0],
                 controller=self.view.controller,
@@ -1152,11 +1151,11 @@ class TestLeftColumnView:
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
         stream_button = mocker.patch(VIEWS + ".StreamButton")
-        stream_view = mocker.patch(VIEWS + ".StreamsView")
-        line_box = mocker.patch(VIEWS + ".urwid.LineBox")
+        mocker.patch(VIEWS + ".StreamsView")
+        mocker.patch(VIEWS + ".urwid.LineBox")
         divider = mocker.patch(VIEWS + ".StreamsViewDivider")
 
-        left_col_view = LeftColumnView(self.view)
+        LeftColumnView(self.view)
 
         if pinned:
             assert divider.called
@@ -1179,8 +1178,8 @@ class TestLeftColumnView:
         mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         mocker.patch(VIEWS + ".LeftColumnView.menu_view")
         topic_button = mocker.patch(VIEWS + ".TopicButton")
-        topics_view = mocker.patch(VIEWS + ".TopicsView")
-        line_box = mocker.patch(VIEWS + ".urwid.LineBox")
+        mocker.patch(VIEWS + ".TopicsView")
+        mocker.patch(VIEWS + ".urwid.LineBox")
         topic_list = ["TOPIC1", "TOPIC2", "TOPIC3"]
         unread_count_list = [34, 100, 0]
         self.view.model.topics_in_stream = mocker.Mock(return_value=topic_list)

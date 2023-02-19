@@ -197,7 +197,7 @@ class TestModel:
         )
 
         with pytest.raises(ServerConnectionFailure) as e:
-            model = Model(self.controller)
+            Model(self.controller)
 
         assert str(e.value) == "Invalid API key (get_messages, register)"
 
@@ -215,7 +215,7 @@ class TestModel:
         )
 
         with pytest.raises(ServerConnectionFailure) as e:
-            model = Model(self.controller)
+            Model(self.controller)
 
         assert str(e.value) == exception_text + " (get_messages, register)"
 
@@ -1364,8 +1364,6 @@ class TestModel:
         model = Model(self.controller)
         model.get_messages(num_before=num_before, num_after=num_after, anchor=0)
         self.client.get_messages.return_value = messages_successful_response
-        # anchor should have remained the same
-        anchor = messages_successful_response["anchor"]
         assert model.index["pointer"][repr(model.narrow)] == 0
 
         # TEST `query_range` < no of messages received
@@ -1391,7 +1389,7 @@ class TestModel:
         # self.client.do_api_query.return_value = error_response
 
         with pytest.raises(ServerConnectionFailure):
-            model = Model(self.controller)
+            Model(self.controller)
 
     @pytest.mark.parametrize(
         "response, expected_raw_content, display_error_called",
@@ -1660,7 +1658,7 @@ class TestModel:
     ):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
+        mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[])
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
@@ -1679,7 +1677,7 @@ class TestModel:
     def test__handle_message_event_with_valid_log(self, mocker, model, message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
+        mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
@@ -1701,11 +1699,9 @@ class TestModel:
     def test__handle_message_event_with_flags(self, mocker, model, message_fixture):
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
+        mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
-        create_msg_box_list = mocker.patch(
-            MODULE + ".create_msg_box_list", return_value=["msg_w"]
-        )
+        mocker.patch(MODULE + ".create_msg_box_list", return_value=["msg_w"])
         model.notify_user = mocker.Mock()
         set_count = mocker.patch(MODULE + ".set_count")
 
@@ -1841,10 +1837,8 @@ class TestModel:
     ):
         model._have_last_message[repr(narrow)] = True
         mocker.patch(MODEL + "._update_topic_index")
-        index_msg = mocker.patch(MODULE + ".index_messages", return_value={})
-        create_msg_box_list = mocker.patch(
-            MODULE + ".create_msg_box_list", return_value=["msg_w"]
-        )
+        mocker.patch(MODULE + ".index_messages", return_value={})
+        mocker.patch(MODULE + ".create_msg_box_list", return_value=["msg_w"])
         set_count = mocker.patch(MODULE + ".set_count")
         self.controller.view.message_view = mocker.Mock(log=[])
         (
@@ -2397,7 +2391,7 @@ class TestModel:
         self.controller.view.message_view = mocker.Mock(log=[msg_w, other_msg_w])
         # New msg widget generated after updating index.
         new_msg_w = mocker.Mock()
-        cmbl = mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
+        mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
 
         model._update_rendered_view(msg_id)
 
@@ -2427,14 +2421,13 @@ class TestModel:
         self, mocker, model, subject, narrow, narrow_changed, msg_id=1
     ):
         msg_w = mocker.Mock()
-        other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {"id": msg_id, "subject": subject}
         model.narrow = narrow
         self.controller.view.message_view = mocker.Mock(log=[msg_w])
         # New msg widget generated after updating index.
         original_widget = mocker.Mock(message=dict(id=2))  # FIXME: id matters?
         new_msg_w = mocker.Mock(original_widget=original_widget)
-        cmbl = mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
+        mocker.patch(MODULE + ".create_msg_box_list", return_value=[new_msg_w])
 
         model._update_rendered_view(msg_id)
 
