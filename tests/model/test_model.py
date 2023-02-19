@@ -2139,6 +2139,42 @@ class TestModel:
                 ["private"],
                 id="notified_private_since_private_message",
             ),  # No Stream setting so (stream/topic) muting limits streams
+            case(
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                True,
+                True,
+                ["private"],
+                id="not_notified_for_stream_since_topic/stream_both_muted",
+            ),
+            case(
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                True,
+                False,
+                ["private"],
+                id="not_notified_for_stream_since_stream_muted",
+            ),
+            case(
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                False,
+                True,
+                ["private"],
+                id="not_notified_for_stream_since_topic_muted",
+            ),
+            case(
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                False,
+                False,
+                ["stream", "private"],
+                id="notified_for_stream_since_topic/stream_both_not_muted",
+            ),
         ],
     )
     def test_notify_user__calling_message_type(
