@@ -26,6 +26,7 @@ select = [
     "C4", # Comprehensions
     "E", # Error (pycodestyle)
     "F", # pyFlakes
+    "RUF100", # Checks noqa rules are used
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
 ]
