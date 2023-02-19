@@ -63,7 +63,7 @@ class TestMessageBox:
         message = dict(type="BLAH")
 
         with pytest.raises(RuntimeError):
-            msg_box = MessageBox(message, self.model, None)
+            MessageBox(message, self.model, None)
 
     def test_private_message_to_self(self, mocker):
         message = dict(
@@ -748,7 +748,7 @@ class TestMessageBox:
                 "color": "#bd6",
             },
         }
-        msg_box = MessageBox(message, self.model, last_message)
+        MessageBox(message, self.model, last_message)
 
     @pytest.mark.parametrize(
         "message",

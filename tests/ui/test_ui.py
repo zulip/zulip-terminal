@@ -474,7 +474,7 @@ class TestView:
         view.body = mocker.Mock()
         view.user_search = mocker.Mock()
 
-        super_view = mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
+        mocker.patch(MODULE + ".urwid.WidgetWrap.keypress")
 
         view.controller.is_in_editor_mode = lambda: True
         size = widget_size(view)
