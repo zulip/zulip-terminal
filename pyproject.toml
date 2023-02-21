@@ -25,6 +25,9 @@ select = [
     "E", # Error (pycodestyle)
     "F", # pyFlakes
     "PGH", # PyGrep Hooks
+    "PLC", # pylint convention
+    "PLE", # pylint error
+    "PLW", # pylint warning
     "RUF100", # Checks noqa rules are used
     "T20", # prinT present
     "W", # Warnings (pycodestyle)
