@@ -311,6 +311,11 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'View user information (From Users list)',
         'key_category': 'general',
     }),
+    ('TOGGLE_RECIPIENTS_VIEW', {
+        'keys': ['t'],
+        'help_text': 'Toggle Users/Recipients View (From Users list)',
+        'key_category': 'general',
+    }),
     ('BEGINNING_OF_LINE', {
         'keys': ['ctrl a'],
         'help_text': 'Jump to the beginning of line',
