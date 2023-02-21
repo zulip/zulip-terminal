@@ -36,6 +36,7 @@ select = [
     "T20", # prinT present
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
+    "YTT", # Year TwentyTwenty (flake8-2020), sys.version checks
 ]
 [tool.ruff.per-file-ignores]
 # ANN: We don't consider this worth typing
