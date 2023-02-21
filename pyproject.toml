@@ -25,9 +25,13 @@ select = [
     "E", # Error (pycodestyle)
     "F", # pyFlakes
     "RUF100", # Checks noqa rules are used
+    "T20", # prinT present
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
 ]
 [tool.ruff.per-file-ignores]
 # E501: Ignore length in tools for now (and otherwise where noqa specified)
-"tools/*" = ["E501"]
+# T20: Expect print output from CLI from tools
+"tools/*" = ["E501", "T20"]
+# T20: Expect print output from CLI from run.py
+"zulipterminal/cli/run.py" = ["T20"]
