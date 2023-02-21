@@ -14,12 +14,16 @@ exclude = [
     "zt_venv",
 ]
 ignore = [
+    "ANN101", # Missing type annotation for `self` in method
+    "ANN102", # Missing type annotation for `cls` in classmethod
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
     "B006", # Do not use mutable data structures for argument defaults
     "B007", # Loop control variable not used within the loop body [informative!]
     "C408", # Unnecessary 'dict' call (rewrite as a literal)
     "UP015", # Unnecessary open mode parameters [informative?]
 ]
 select = [
+    "ANN", # Annotations
     "B", # Bugbear
     "C4", # Comprehensions
     "E", # Error (pycodestyle)
@@ -34,6 +38,14 @@ select = [
     "UP", # pyUPgrade
 ]
 [tool.ruff.per-file-ignores]
+# ANN: We don't consider this worth typing
+"setup.py" = ["ANN"]
+# ANN: These test files are not yet typed
+"tests/model/test_model.py" = ["ANN"]
+"tests/ui/test_ui_tools.py" = ["ANN"]
+"tests/ui_tools/test_messages.py" = ["ANN"]
+# ANN: This tool is an old variation from zulip/zulip and is only updated where necessary
+"tools/lister.py" = ["ANN"]
 # E501: Ignore length in tools for now (and otherwise where noqa specified)
 # T20: Expect print output from CLI from tools
 "tools/*" = ["E501", "T20"]
