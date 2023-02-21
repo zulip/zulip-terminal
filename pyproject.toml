@@ -19,8 +19,6 @@ ignore = [
     "C408", # Unnecessary 'dict' call (rewrite as a literal)
     "UP015", # Unnecessary open mode parameters [informative?]
 ]
-# Ignore length in tools for now (and otherwise where noqa specified)
-per-file-ignores = {"tools/*" = ["E501"]}
 select = [
     "B", # Bugbear
     "C4", # Comprehensions
@@ -30,3 +28,6 @@ select = [
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
 ]
+[tool.ruff.per-file-ignores]
+# E501: Ignore length in tools for now (and otherwise where noqa specified)
+"tools/*" = ["E501"]
