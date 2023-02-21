@@ -1254,7 +1254,7 @@ class PopUpConfirmationView(urwid.Overlay):
         question: Any,
         success_callback: Callable[[], None],
         location: PopUpConfirmationViewLocation = "top-left",
-    ):
+    ) -> None:
         self.controller = controller
         self.success_callback = success_callback
         yes = urwid.Button("Yes", self.exit_popup_yes)
@@ -1682,7 +1682,7 @@ class MsgInfoView(PopUpView):
 
 
 class EditModeView(PopUpView):
-    def __init__(self, controller: Any, button: Any):
+    def __init__(self, controller: Any, button: Any) -> None:
         self.edit_mode_button = button
         self.widgets: List[urwid.RadioButton] = []
 
