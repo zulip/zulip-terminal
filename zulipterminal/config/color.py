@@ -66,7 +66,7 @@ def color_properties(colors: Any, *prop: str) -> Any:
     """
     prop_n = "_".join([p.upper() for p in prop])
     prop_v = " , ".join([p.lower() for p in prop])
-    updated_colors: Any = Enum(  # type: ignore # Ref: python/mypy#529, #535 and #5317
+    updated_colors: Any = Enum(  # type: ignore[misc] # python/mypy#529, #535 and #5317
         "Color",
         {
             **{c.name: c.value for c in colors},
