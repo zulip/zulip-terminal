@@ -24,6 +24,7 @@ select = [
     "C4", # Comprehensions
     "E", # Error (pycodestyle)
     "F", # pyFlakes
+    "PGH", # PyGrep Hooks
     "RUF100", # Checks noqa rules are used
     "T20", # prinT present
     "W", # Warnings (pycodestyle)
