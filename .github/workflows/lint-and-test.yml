@@ -83,6 +83,23 @@ jobs:
       - name: Check code & tests meet black standards
         run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
+  codespell:
+    runs-on: ubuntu-latest
+    name: Lint - Spelling (codespell)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
+      - name: Install with linting tools
+        run: pip install .[linting]
+      - name: Check spelling
+        run: ./tools/run-codespell
+
   hotkeys:
     runs-on: ubuntu-latest
     name: Lint - Hotkeys linting & docs sync check
