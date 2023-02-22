@@ -3,6 +3,14 @@
 line-length = 88
 target-version = ['py36']
 
+[tool.codespell]
+# codespell doesn't appear to support skip as a list?
+# unicode_emojis: words are defined externally
+# test_themes: uses wrong words as part of a theme syntax test
+# test_boxes: uses word prefixes as part of an autocomplete test
+# test_messages: uses IST as Indian time zone, which is confused for IS/IT/ITS/IT'S/etc
+skip = "zulipterminal/unicode_emojis.py,tests/config/test_themes.py,tests/ui_tools/test_boxes.py,tests/ui_tools/test_messages.py"
+
 [tool.ruff]
 line-length = 88
 target-version = "py37"

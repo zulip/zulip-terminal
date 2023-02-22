@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+
+cmds = ["codespell"]
+files = [
+    "zulipterminal",
+    "tests",
+    "tools",
+    "setup.py",
+    "docs",
+    "docker",
+    "README.md",
+    "CHANGELOG.md",
+]
+
+result = subprocess.call(cmds + ["--toml pyproject.toml"] + files)
+
+if result == 0:
+    print("All files appear to have correct spelling.")
+else:
+    print("Some files have incorrect spelling according to codespell.")
+    print("Try 'codespell -i3 -w <path>' to fix a path recursively.")
+
+sys.exit(result)
