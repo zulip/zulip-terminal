@@ -45,6 +45,7 @@ linting_deps = [
     "isort~=5.10.1",
     "black~=23.0",
     "ruff",
+    "codespell[toml]~=2.2.2",
 ]
 
 typing_deps = [
