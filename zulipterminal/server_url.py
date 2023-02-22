@@ -19,7 +19,7 @@ def hash_util_encode(string: str) -> str:
 
 def encode_stream(stream_id: int, stream_name: str) -> str:
     """
-    Encodes stream_name with stream_id and replacing any occurence
+    Encodes stream_name with stream_id and replacing any occurrence
     of whitespace to '-'. This is the format of message representation
     in webapp. Referred from zerver/lib/url_encoding.py.
     """

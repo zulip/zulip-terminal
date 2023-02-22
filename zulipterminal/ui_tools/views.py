@@ -751,7 +751,7 @@ class RightColumnView(urwid.Frame):
                 )
             )
         user_w = UsersView(self.view.controller, users_btn_list)
-        # Donot reset them while searching.
+        # Do not reset them while searching.
         if reset_default_view_users:
             self.users_btn_list = users_btn_list
             self.view.user_w = user_w
