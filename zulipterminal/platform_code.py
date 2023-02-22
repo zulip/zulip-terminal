@@ -64,7 +64,7 @@ def notify(title: str, text: str) -> str:
 
 def successful_GUI_return_code() -> int:
     """
-    Returns success retrn code for GUI commands, which are OS specific.
+    Returns success return code for GUI commands, which are OS specific.
     """
     # WSL uses GUI return code as 1. Refer below link to know more:
     # https://stackoverflow.com/questions/52423031/

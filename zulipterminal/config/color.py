@@ -54,7 +54,7 @@ class DefaultColor(Enum):
 def color_properties(colors: Any, *prop: str) -> Any:
     """
     Adds properties(Bold, Italics, etc...) to Enum Colors in theme files.
-    Useage: color_properties(Color, 'BOLD', 'ITALICS', 'STRIKETHROUGH')
+    Usage: color_properties(Color, 'BOLD', 'ITALICS', 'STRIKETHROUGH')
 
         NOTE: color_properties(Color, BOLD, ITALICS) would result in only
         Color.WHITE and Color.WHITE__BOLD_ITALICS

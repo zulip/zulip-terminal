@@ -194,7 +194,7 @@ class Controller:
     def maximum_popup_dimensions(self) -> Tuple[int, int]:
         """
         Returns 3/4th of the screen estate's columns if columns are greater
-        than 100 (MAX_LINEAR_SCALING_WIDTH) else scales accordingly untill
+        than 100 (MAX_LINEAR_SCALING_WIDTH) else scales accordingly until
         popup width becomes full width at 80 (MIN_SUPPORTED_POPUP_WIDTH) below
         which popup width remains full width.
         The screen estate's rows are always scaled by 3/4th to get the

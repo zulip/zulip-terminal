@@ -193,7 +193,7 @@ def extract_docstrings_from_file_overview() -> Dict[str, Dict[str, str]]:
     """
     Reads the developer-file-overview.md document and creates
     a dictionary containing folder name which in turn is a dictionary
-    containing files and their respective descriptons
+    containing files and their respective descriptions
     """
     with open(DEVELOPER_DOC_PATH, "r") as file:
         doc_data = file.readlines()

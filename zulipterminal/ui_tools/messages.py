@@ -848,8 +848,8 @@ class MessageBox(urwid.Pile):
                 if len(child_block) == 0:
                     child_iterator = child_list
                 else:
-                    # If there is some text at the begining of a
-                    # quote, we pad it seperately.
+                    # If there is some text at the beginning of a
+                    # quote, we pad it separately.
                     if child_list[0].name == "p":
                         new_tag = soup.new_tag("p")
                         new_tag.string = f"\n{actual_padding}"

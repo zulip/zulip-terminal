@@ -589,7 +589,7 @@ class TestModel:
             ),
             case(
                 ("grinning", "1f600", "unicode_emoji"),
-                [dict(user="mot me", emoji_code="1f600")],
+                [dict(user="not me", emoji_code="1f600")],
                 "POST",
                 id="add_unicode_alias_others_existing_same_emoji",
             ),
