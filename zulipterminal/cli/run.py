@@ -520,12 +520,12 @@ def main(options: Optional[List[str]] = None) -> None:
         ).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs
-        zt_logger.info(f"\n\n{e}\n\n")
+        zt_logger.info("\n\n%s\n\n", e)
         zt_logger.exception(e)
         exit_with_error(f"\nError connecting to Zulip server: {e}.")
     except InvalidThemeColorCode as e:
         # Acts as separator between logs
-        zt_logger.info(f"\n\n{e}\n\n")
+        zt_logger.info("\n\n%s\n\n", e)
         zt_logger.exception(e)
         exit_with_error(f"\n{e}")
     except (display_common.AttrSpecError, display_common.ScreenError) as e:
@@ -533,7 +533,7 @@ def main(options: Optional[List[str]] = None) -> None:
         # FIXME: Add test for this - once loading takes place after UI setup
 
         # Acts as separator between logs
-        zt_logger.info(f"\n\n{e}\n\n")
+        zt_logger.info("\n\n%s\n\n", e)
         zt_logger.exception(e)
         exit_with_error(f"\nPossible theme error: {e}.")
     except Exception as e:
