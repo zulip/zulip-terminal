@@ -145,7 +145,6 @@ jobs:
           - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux", CODECOV: true}
           - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
-          - {PYTHON: 'pypy-3.6', OS: ubuntu-latest, NAME: "PyPy 3.6 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
