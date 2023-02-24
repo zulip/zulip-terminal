@@ -69,12 +69,12 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         # Check if 24-bit and 256 color is any of the valid color codes
         pattern = re.compile(REGEX_COLOR_VALID_FORMATS)
         for code in [codes[1], codes[2]]:
-            code = pattern.match(code)
-            assert code
-            if code.group(1) and code.group(0).startswith("h"):
-                assert int(code.group(1)) < 256
-            elif code.group(1) and code.group(0).startswith("g"):
-                assert int(code.group(1)) <= 100
+            code_match = pattern.match(code)
+            assert code_match
+            if code_match.group(1) and code_match.group(0).startswith("h"):
+                assert int(code_match.group(1)) < 256
+            elif code_match.group(1) and code_match.group(0).startswith("g"):
+                assert int(code_match.group(1)) <= 100
     # Check if color used in STYLE exists in Color.
     for style_name, style_conf in theme_styles.items():
         fg, bg = style_conf

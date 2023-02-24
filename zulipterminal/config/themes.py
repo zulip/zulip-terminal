@@ -196,9 +196,9 @@ def parse_themefile(
     theme_styles: Dict[Optional[str], Tuple[Any, Any]], color_depth: int
 ) -> ThemeSpec:
     urwid_theme = []
-    for style_name, (fg, bg) in theme_styles.items():
-        fg_code16, fg_code256, fg_code24, *fg_props = fg.value.split()
-        bg_code16, bg_code256, bg_code24, *bg_props = bg.value.split()
+    for style_name, (fg_name, bg_name) in theme_styles.items():
+        fg_code16, fg_code256, fg_code24, *fg_props = fg_name.value.split()
+        bg_code16, bg_code256, bg_code24, *bg_props = bg_name.value.split()
 
         new_style: StyleSpec
         if color_depth == 1:
