@@ -3875,7 +3875,7 @@ class TestModel:
     @pytest.fixture
     def raising_event(self, mocker):
         def raiser(*args):
-            raise TestModel.LoopEnder()
+            raise TestModel.LoopEnder
 
         return mocker.MagicMock(__getitem__=raiser)
 
