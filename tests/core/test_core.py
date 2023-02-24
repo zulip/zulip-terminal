@@ -520,9 +520,7 @@ class TestController:
             num_after=0, num_before=30, anchor=10000000000
         )
         create_msg.assert_called_once_with(controller.model, msg_ids)
-        assert controller.model.index == dict(
-            index_search_messages, **{"search": msg_ids}
-        )
+        assert controller.model.index == dict(index_search_messages, search=msg_ids)
 
     @pytest.mark.parametrize(
         "screen_size, expected_popup_size",
