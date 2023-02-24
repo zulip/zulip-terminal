@@ -36,9 +36,12 @@ select = [
     "C4", # Comprehensions
     "E", # Error (pycodestyle)
     "F", # pyFlakes
+    "G", # loGging
     "PGH", # PyGrep Hooks
+    "PIE", # pie (miscellaneous)
     "PLC", # pylint convention
     "PLE", # pylint error
+    "RSE", # RaiSE
     "PLW", # pylint warning
     "RUF100", # Checks noqa rules are used
     "T20", # prinT present
