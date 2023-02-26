@@ -136,8 +136,8 @@ def write_hotkeys_file(hotkeys_file_string: str) -> None:
     """
     Write hotkeys_file_string variable once to OUTPUT_FILE
     """
-    with open(OUTPUT_FILE, "w") as mdFile:
-        mdFile.write(hotkeys_file_string)
+    with open(OUTPUT_FILE, "w") as hotkeys_file:
+        hotkeys_file.write(hotkeys_file_string)
 
 
 if __name__ == "__main__":
