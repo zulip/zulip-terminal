@@ -1169,11 +1169,11 @@ class Model:
             subscription["color"] = canonicalize_color(subscription["color"])
 
             self.stream_dict[subscription["stream_id"]] = subscription
-            streamData = make_reduced_stream_data(subscription)
+            stream_data = make_reduced_stream_data(subscription)
             if subscription["pin_to_top"]:
-                new_pinned_streams.append(streamData)
+                new_pinned_streams.append(stream_data)
             else:
-                new_unpinned_streams.append(streamData)
+                new_unpinned_streams.append(stream_data)
             if subscription["is_muted"]:
                 new_muted_streams.add(subscription["stream_id"])
             if subscription["desktop_notifications"]:
