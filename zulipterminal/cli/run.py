@@ -311,7 +311,6 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
         exit_with_error(f"Failed to parse zuliprc file at {zuliprc_path}")
 
     # Initialize with default settings
-    NO_CONFIG = "with no config"
     settings = {
         setting: (default, NO_CONFIG) for setting, default in DEFAULT_SETTINGS.items()
     }
