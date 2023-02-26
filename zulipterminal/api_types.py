@@ -17,6 +17,11 @@ from zulip import ModifiableMessageFlag  # directly modifiable read/starred/coll
 
 RESOLVED_TOPIC_PREFIX = "✔ "
 
+# Refer to https://zulip.com/api/set-typing-status for the protocol
+# on typing notifications sent by clients.
+TYPING_STARTED_WAIT_PERIOD = 10
+TYPING_STOPPED_WAIT_PERIOD = 5
+
 
 class PrivateComposition(TypedDict):
     type: Literal["private"]

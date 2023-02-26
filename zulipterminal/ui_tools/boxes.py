@@ -13,7 +13,13 @@ import urwid
 from typing_extensions import Literal
 from urwid_readline import ReadlineEdit
 
-from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
+from zulipterminal.api_types import (
+    TYPING_STARTED_WAIT_PERIOD,
+    TYPING_STOPPED_WAIT_PERIOD,
+    Composition,
+    PrivateComposition,
+    StreamComposition,
+)
 from zulipterminal.config.keys import (
     is_command_key,
     keys_for_command,
@@ -228,13 +234,6 @@ class WriteBox(urwid.Pile):
             (self.msg_write_box, self.options()),
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
-
-        # Typing status is sent in regular intervals to limit the number of
-        # notifications sent. Idleness should also prompt a notification.
-        # Refer to https://zulip.com/api/set-typing-status for the protocol
-        # on typing notifications sent by clients.
-        TYPING_STARTED_WAIT_PERIOD = 10
-        TYPING_STOPPED_WAIT_PERIOD = 5
 
         start_period_delta = timedelta(seconds=TYPING_STARTED_WAIT_PERIOD)
         stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
