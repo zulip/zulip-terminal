@@ -120,6 +120,7 @@ ignore = [
     "B006", # Do not use mutable data structures for argument defaults
     "B007", # Loop control variable not used within the loop body [informative!]
     "C408", # Unnecessary 'dict' call (rewrite as a literal)
+    "N818",  # Exception name should be named with an Error suffix
     "UP015", # Unnecessary open mode parameters [informative?]
 ]
 select = [
@@ -129,6 +130,7 @@ select = [
     "E", # Error (pycodestyle)
     "F", # pyFlakes
     "G", # loGging
+    "N", # Naming
     "PGH", # PyGrep Hooks
     "PIE", # pie (miscellaneous)
     "PLC", # pylint convention
@@ -155,3 +157,5 @@ select = [
 "tools/*" = ["E501", "T20"]
 # T20: Expect print output from CLI from run.py
 "zulipterminal/cli/run.py" = ["T20"]
+# N802: Allow upper-case in test function names, eg. for commands, such as test_keypress_ENTER
+"tests/*" = ["N802"]
