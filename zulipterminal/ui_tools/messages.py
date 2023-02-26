@@ -33,6 +33,9 @@ from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
 
+# Usernames to show before just showing reaction counts
+MAXIMUM_USERNAMES_VISIBLE = 3
+
 
 class _MessageEditState(NamedTuple):
     message_id: int
@@ -249,7 +252,6 @@ class MessageBox(urwid.Pile):
         if not reactions:
             return ""
         try:
-            MAXIMUM_USERNAMES_VISIBLE = 3
             my_user_id = self.model.user_id
             reaction_stats = defaultdict(list)
             for reaction in reactions:
