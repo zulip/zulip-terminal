@@ -666,9 +666,8 @@ class MessageBox(urwid.Pile):
         any_differences = any(different.values())
 
         if any_differences:  # Construct content_header, if needed
-            TextType = Dict[str, urwid_MarkupTuple]
             text_keys = ("author", "star", "time", "status")
-            text: TextType = {key: (None, " ") for key in text_keys}
+            text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("msg_sender", message["this"]["author"])
