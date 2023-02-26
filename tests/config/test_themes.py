@@ -80,7 +80,7 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         fg, bg = style_conf
         assert fg in theme_colors and bg in theme_colors
     # Check completeness of META
-    expected_META = {"pygments": ["styles", "background", "overrides"]}
+    expected_META = {"pygments": ["styles", "background", "overrides"]}  # noqa: N806
     for metadata, config in expected_META.items():
         assert theme_meta[metadata]
         assert all([theme_meta[metadata][c] for c in config])

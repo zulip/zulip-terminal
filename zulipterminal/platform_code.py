@@ -62,7 +62,7 @@ def notify(title: str, text: str) -> str:
     return ""
 
 
-def successful_GUI_return_code() -> int:
+def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
     """
     Returns success return code for GUI commands, which are OS specific.
     """

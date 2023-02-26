@@ -7,7 +7,7 @@ def test_color_properties() -> None:
     class Color(Enum):
         WHITE = "wh  #256  #24"
 
-    ExpandedColor = color_properties(Color, "BOLD", "ITALICS")
+    ExpandedColor = color_properties(Color, "BOLD", "ITALICS")  # noqa: N806
 
     assert ExpandedColor.WHITE in ExpandedColor
     assert ExpandedColor.WHITE.value == "wh  #256  #24"
