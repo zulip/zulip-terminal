@@ -136,14 +136,14 @@ def test_parse_themefile(
         WHITE__BOLD_ITALICS = "white  #fff   #ffffff , bold , italics"
         DARK_MAGENTA = "dark_magenta  h90    #870087"
 
-    STYLES: Dict[Optional[str], Tuple[Color, Color]] = {
+    theme_styles: Dict[Optional[str], Tuple[Color, Color]] = {
         "s1": (Color.WHITE__BOLD, Color.DARK_MAGENTA),
         "s2": (Color.WHITE__BOLD_ITALICS, Color.DARK_MAGENTA),
     }
 
     req_styles = {"s1": "", "s2": "bold"}
     mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
-    assert parse_themefile(STYLES, color_depth) == expected_urwid_theme
+    assert parse_themefile(theme_styles, color_depth) == expected_urwid_theme
 
 
 @pytest.mark.parametrize(
