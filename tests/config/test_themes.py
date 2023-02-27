@@ -83,7 +83,7 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     expected_META = {"pygments": ["styles", "background", "overrides"]}  # noqa: N806
     for metadata, config in expected_META.items():
         assert theme_meta[metadata]
-        assert all([theme_meta[metadata][c] for c in config])
+        assert all(theme_meta[metadata][c] for c in config)
 
 
 def test_complete_and_incomplete_themes() -> None:
