@@ -21,6 +21,10 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.themes import ThemeSpec
+from zulipterminal.config.ui_sizes import (
+    MAX_LINEAR_SCALING_WIDTH,
+    MIN_SUPPORTED_POPUP_WIDTH,
+)
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
@@ -194,14 +198,12 @@ class Controller:
     def maximum_popup_dimensions(self) -> Tuple[int, int]:
         """
         Returns 3/4th of the screen estate's columns if columns are greater
-        than 100 (MAX_LINEAR_SCALING_WIDTH) else scales accordingly until
-        popup width becomes full width at 80 (MIN_SUPPORTED_POPUP_WIDTH) below
+        than MAX_LINEAR_SCALING_WIDTH else scales accordingly until
+        popup width becomes full width at MIN_SUPPORTED_POPUP_WIDTH below
         which popup width remains full width.
         The screen estate's rows are always scaled by 3/4th to get the
         popup rows.
         """
-        MIN_SUPPORTED_POPUP_WIDTH = 80
-        MAX_LINEAR_SCALING_WIDTH = 100
 
         def clamp(n: int, minn: int, maxn: int) -> int:
             return max(min(maxn, n), minn)
