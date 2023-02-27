@@ -1224,7 +1224,7 @@ class TestTabView:
             ]
         ],
     )
-    @pytest.mark.parametrize("TAB_WIDTH, TAB_HEIGHT", [(3, 10)])
-    def test_tab_render(self, tab_view, TAB_WIDTH, TAB_HEIGHT, expected_output):
-        render_output = tab_view._w.render((TAB_WIDTH, TAB_HEIGHT)).text
+    @pytest.mark.parametrize("tab_width, tab_height", [(3, 10)])
+    def test_tab_render(self, tab_view, tab_width, tab_height, expected_output):
+        render_output = tab_view._w.render((tab_width, tab_height)).text
         assert render_output == expected_output

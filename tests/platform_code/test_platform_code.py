@@ -14,9 +14,9 @@ MODULE = "zulipterminal.platform_code"
 
 
 @pytest.mark.parametrize(
-    "PLATFORM, is_notification_sent",
+    "platform, is_notification_sent",
     [
-        # PLATFORM: Literal["WSL", "MacOS", "Linux", "unsupported"]
+        # platform: Literal["WSL", "MacOS", "Linux", "unsupported"]
         pytest.param(
             "WSL",
             True,
@@ -28,11 +28,11 @@ MODULE = "zulipterminal.platform_code"
     ],
 )
 def test_notify(
-    mocker: MockerFixture, PLATFORM: AllPlatforms, is_notification_sent: bool
+    mocker: MockerFixture, platform: AllPlatforms, is_notification_sent: bool
 ) -> None:
     title = "Author"
     text = "Hello!"
-    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    mocker.patch(MODULE + ".PLATFORM", platform)
     subprocess = mocker.patch(MODULE + ".subprocess")
     notify(title, text)
     assert subprocess.run.called == is_notification_sent
@@ -49,7 +49,7 @@ def test_notify(
     ids=["X", "spaced_title", "single", "double"],
 )
 @pytest.mark.parametrize(
-    "PLATFORM, cmd_length",
+    "platform, cmd_length",
     [
         ("Linux", 4),
         ("MacOS", 10),
@@ -58,13 +58,13 @@ def test_notify(
 )
 def test_notify_quotes(
     mocker: MockerFixture,
-    PLATFORM: SupportedPlatforms,
+    platform: SupportedPlatforms,
     cmd_length: int,
     title: str,
     text: str,
 ) -> None:
     subprocess = mocker.patch(MODULE + ".subprocess")
-    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    mocker.patch(MODULE + ".PLATFORM", platform)
 
     notify(title, text)
 
@@ -76,7 +76,7 @@ def test_notify_quotes(
 
 
 @pytest.mark.parametrize(
-    "PLATFORM, expected_return_code",
+    "platform, expected_return_code",
     [
         ("Linux", 0),
         ("MacOS", 0),
@@ -85,15 +85,15 @@ def test_notify_quotes(
 )
 def test_successful_GUI_return_code(
     mocker: MockerFixture,
-    PLATFORM: SupportedPlatforms,
+    platform: SupportedPlatforms,
     expected_return_code: int,
 ) -> None:
-    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    mocker.patch(MODULE + ".PLATFORM", platform)
     assert successful_GUI_return_code() == expected_return_code
 
 
 @pytest.mark.parametrize(
-    "PLATFORM, expected_path",
+    "platform, expected_path",
     [
         ("Linux", "/path/to/file"),
         ("MacOS", "/path/to/file"),
@@ -102,9 +102,9 @@ def test_successful_GUI_return_code(
 )
 def test_normalized_file_path(
     mocker: MockerFixture,
-    PLATFORM: SupportedPlatforms,
+    platform: SupportedPlatforms,
     expected_path: str,
     path: str = "/path/to/file",
 ) -> None:
-    mocker.patch(MODULE + ".PLATFORM", PLATFORM)
+    mocker.patch(MODULE + ".PLATFORM", platform)
     assert normalized_file_path(path) == expected_path
