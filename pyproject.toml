@@ -1,7 +1,7 @@
 [tool.black]
 # Default line-length, but use explicit value here since used for isort & ruff
 line-length = 88
-target-version = ['py36']
+target-version = ['py37']
 
 [tool.codespell]
 # codespell doesn't appear to support skip as a list?
@@ -47,7 +47,7 @@ atomic = true
 lines_after_imports = 2
 
 [tool.mypy]
-python_version = 3.6
+python_version = 3.7
 
 # Logistics of what code to check and how to handle the data.
 # mypy_path = stubs/
