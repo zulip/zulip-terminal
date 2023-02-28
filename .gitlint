@@ -4,6 +4,9 @@ ignore=title-trailing-punctuation, body-is-missing, body-min-length, title-must-
 # ZT: These are custom rules written for Zulip-Terminal, included by default
 extra-path=tools/gitlint-extra-rules.py
 
+# Added to acknowledge that eg. ignore-by-title regex
+regex-style-search=True
+
 # verbosity should be a value between 1 and 3, the commandline -v flags take precedence over this
 # verbosity = 2
 

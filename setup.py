@@ -43,7 +43,7 @@ typing_deps = [
 dev_helper_deps = [
     "pudb==2022.1.1",
     "snakeviz>=2.1.1",
-    "gitlint>=0.17",
+    "gitlint~=0.18.0",
 ]
 
 setup(
