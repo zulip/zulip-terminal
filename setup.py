@@ -96,7 +96,7 @@ setup(
         "urwid~=2.1.2",
         "zulip>=0.8.2",
         "urwid_readline>=0.13",
-        "beautifulsoup4>=4.10.0",
+        "beautifulsoup4>=4.11.1",
         "lxml>=4.7.1",
         "pygments>=2.11.2",
         "typing_extensions~=4.0.0",
