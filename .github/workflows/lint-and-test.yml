@@ -185,14 +185,12 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'setup.py'
-      - name: Testing install
-        if: github.event_name == 'pull_request'
-        run: pip install .[linting,testing,typing]
       - name: Run check-branch
         if: github.event_name == 'pull_request'
+        # Note that we install at each step since dependencies may change
         run:
           git fetch https://github.com/zulip/zulip-terminal main;
-          ./tools/check-branch FETCH_HEAD
+          CHECK="pip install .[linting,testing,typing] && ./tools/lint-all && pytest" ./tools/check-branch FETCH_HEAD
 
   pytest-on-other-platforms:
     needs: isolated-commits
