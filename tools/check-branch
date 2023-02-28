@@ -28,5 +28,8 @@ if git diff --quiet "$main_branch" HEAD; then
     exit 1
 fi
 
+# By default run 'make check' on each commit, if CHECK is not set
+command_per_commit=${CHECK:-"make check"}
+
 echo "Checking commits..."
-git rebase $(git merge-base "$main_branch" @) --exec 'git --no-pager log -1 && make check'
+git rebase $(git merge-base "$main_branch" @) --exec "git --no-pager log -1 && $command_per_commit"
