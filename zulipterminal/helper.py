@@ -510,10 +510,7 @@ def match_user(user: Any, text: str) -> bool:
     # adding full_name helps in further narrowing down the right user.
     keywords.append(full_name)
     keywords.append(user["email"].lower())
-    for keyword in keywords:
-        if keyword.startswith(text.lower()):
-            return True
-    return False
+    return any(keyword.startswith(text.lower()) for keyword in keywords)
 
 
 def match_user_name_and_email(user: Any, text: str) -> bool:
@@ -527,10 +524,7 @@ def match_user_name_and_email(user: Any, text: str) -> bool:
     keywords.append(full_name)
     keywords.append(email)
     keywords.append(f"{full_name} <{email}>")
-    for keyword in keywords:
-        if keyword.startswith(text.lower()):
-            return True
-    return False
+    return any(keyword.startswith(text.lower()) for keyword in keywords)
 
 
 def match_emoji(emoji: str, text: str) -> bool:
