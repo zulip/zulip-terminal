@@ -38,7 +38,7 @@ def lint_hotkeys_file() -> None:
     # To lint keys description
     error_flag = 0
     categories = read_help_categories()
-    for action in HELP_CATEGORIES.keys():
+    for action in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
         for help_text, key_combinations_list in categories[action]:
             check_duplicate_keys_list.extend(key_combinations_list)
@@ -95,7 +95,7 @@ def get_hotkeys_file_string() -> str:
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
         "<!--- Do not modify -->\n\n# Hot Keys\n"
     )
-    for action in HELP_CATEGORIES.keys():
+    for action in HELP_CATEGORIES:
         hotkeys_file_string += (
             f"## {HELP_CATEGORIES[action]}\n"
             "|Command|Key Combination|\n"

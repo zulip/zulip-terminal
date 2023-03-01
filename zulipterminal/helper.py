@@ -398,7 +398,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     narrow = model.narrow
     for msg in messages:
-        if "edit_history" in msg.keys():
+        if "edit_history" in msg:
             index["edited_messages"].add(msg["id"])
 
         index["messages"][msg["id"]] = msg
