@@ -394,10 +394,9 @@ class EmojiButton(TopButton):
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
-        if event == "mouse press":
-            if button == 1:
-                self.keypress(size, primary_key_for_command("ENTER"))
-                return True
+        if event == "mouse press" and button == 1:
+            self.keypress(size, primary_key_for_command("ENTER"))
+            return True
         return super().mouse_event(size, event, button, col, row, focus)
 
     def update_emoji_button(self) -> None:

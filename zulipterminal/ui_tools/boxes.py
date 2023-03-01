@@ -715,14 +715,13 @@ class WriteBox(urwid.Pile):
         return emoji_typeahead, emojis
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if self.is_in_typeahead_mode:
-            if not (
-                is_command_key("AUTOCOMPLETE", key)
-                or is_command_key("AUTOCOMPLETE_REVERSE", key)
-            ):
-                # set default footer when done with autocomplete
-                self.is_in_typeahead_mode = False
-                self.view.set_footer_text()
+        if self.is_in_typeahead_mode and not (
+            is_command_key("AUTOCOMPLETE", key)
+            or is_command_key("AUTOCOMPLETE_REVERSE", key)
+        ):
+            # set default footer when done with autocomplete
+            self.is_in_typeahead_mode = False
+            self.view.set_footer_text()
 
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()

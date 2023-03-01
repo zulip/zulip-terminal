@@ -880,12 +880,11 @@ class MessageBox(urwid.Pile):
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
-        if event == "mouse press":
-            if button == 1:
-                if self.model.controller.is_in_editor_mode():
-                    return True
-                self.keypress(size, primary_key_for_command("ENTER"))
+        if event == "mouse press" and button == 1:
+            if self.model.controller.is_in_editor_mode():
                 return True
+            self.keypress(size, primary_key_for_command("ENTER"))
+            return True
 
         return super().mouse_event(size, event, button, col, row, focus)
 

@@ -1062,15 +1062,12 @@ class Model:
                     elif (time.time() - timestamp) < OFFLINE_THRESHOLD_SECS:
                         if status == "active":
                             aggregate_status = "active"
-                        if status == "idle":
-                            if aggregate_status != "active":
-                                aggregate_status = status
-                        if status == "offline":
-                            if (
-                                aggregate_status != "active"
-                                and aggregate_status != "idle"
-                            ):
-                                aggregate_status = status
+                        if status == "idle" and aggregate_status != "active":
+                            aggregate_status = status
+                        if status == "offline" and (
+                            aggregate_status != "active" and aggregate_status != "idle"
+                        ):
+                            aggregate_status = status
 
                 status = aggregate_status
             else:
@@ -1813,11 +1810,11 @@ class Model:
         (previously "update_display_settings" and "update_global_notifications")
         """
         assert event["type"] == "user_settings"
-        if event["op"] == "update":  # Should always be the case
-            # Only update settings after initialization
-            if event["property"] in self._user_settings:
-                setting = event["property"]
-                self._user_settings[setting] = event["value"]
+        # We only expect these to be "update" event operations
+        # Update the setting (property) to the value, but only if already initialized
+        if event["op"] == "update" and event["property"] in self._user_settings:
+            setting = event["property"]
+            self._user_settings[setting] = event["value"]
 
     def _handle_update_global_notifications_event(self, event: Event) -> None:
         assert event["type"] == "update_global_notifications"
