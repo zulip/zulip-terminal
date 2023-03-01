@@ -18,9 +18,9 @@ symbol_dict = {
     for name, symbol in vars(symbols).items()
     if not name.startswith("__") and not name.endswith("__")
 }
-max_symbol_name_length = max([len(name) for name in symbol_dict.keys()])
+max_symbol_name_length = max([len(name) for name in symbol_dict])
 
-symbol_names_list = [urwid.Text(name, align="center") for name in symbol_dict.keys()]
+symbol_names_list = [urwid.Text(name, align="center") for name in symbol_dict]
 symbols_list = [urwid.Text(symbol) for symbol in symbol_dict.values()]
 
 symbols_display_box = urwid.Columns(

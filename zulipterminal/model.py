@@ -878,7 +878,7 @@ class Model:
         """
         stream_name = self.stream_dict[stream_id]["name"]
         topic_to_search = (stream_name, topic)
-        return topic_to_search in self._muted_topics.keys()
+        return topic_to_search in self._muted_topics
 
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
@@ -1815,7 +1815,7 @@ class Model:
         assert event["type"] == "user_settings"
         if event["op"] == "update":  # Should always be the case
             # Only update settings after initialization
-            if event["property"] in self._user_settings.keys():
+            if event["property"] in self._user_settings:
                 setting = event["property"]
                 self._user_settings[setting] = event["value"]
 

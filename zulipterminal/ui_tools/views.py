@@ -1686,7 +1686,7 @@ class EditModeView(PopUpView):
         self.edit_mode_button = button
         self.widgets: List[urwid.RadioButton] = []
 
-        for mode in EDIT_MODE_CAPTIONS.keys():
+        for mode in EDIT_MODE_CAPTIONS:
             self.add_radio_button(mode)
         super().__init__(
             controller, self.widgets, "ENTER", 62, "Topic edit propagation mode"
