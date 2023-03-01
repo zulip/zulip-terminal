@@ -1781,7 +1781,7 @@ class TestPanelSearchBox:
         size = widget_size(panel_search_box)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = lambda: True
         panel_search_box.panel_view.log = log
-        empty_search = False if log else True
+        empty_search = not log
         panel_search_box.panel_view.empty_search = empty_search
         panel_search_box.set_caption("")
         panel_search_box.edit_text = "key words"
