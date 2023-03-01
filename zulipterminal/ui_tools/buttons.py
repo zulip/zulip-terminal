@@ -608,21 +608,21 @@ class MessageLinkButton(urwid.Button):
         Switches narrow via narrow_to_* methods.
         """
         narrow = parsed_link["narrow"]
-        if "stream" == narrow:
+        if narrow == "stream":
             self.controller.narrow_to_stream(
                 stream_name=parsed_link["stream"]["stream_name"],
             )
-        elif "stream:near" == narrow:
+        elif narrow == "stream:near":
             self.controller.narrow_to_stream(
                 stream_name=parsed_link["stream"]["stream_name"],
                 contextual_message_id=parsed_link["message_id"],
             )
-        elif "stream:topic" == narrow:
+        elif narrow == "stream:topic":
             self.controller.narrow_to_topic(
                 stream_name=parsed_link["stream"]["stream_name"],
                 topic_name=parsed_link["topic_name"],
             )
-        elif "stream:topic:near" == narrow:
+        elif narrow == "stream:topic:near":
             self.controller.narrow_to_topic(
                 stream_name=parsed_link["stream"]["stream_name"],
                 topic_name=parsed_link["topic_name"],

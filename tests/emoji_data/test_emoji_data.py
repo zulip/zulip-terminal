@@ -5,7 +5,7 @@ from zulipterminal.unicode_emojis import EMOJI_DATA
 
 
 def test_generated_emoji_list_sorted() -> None:
-    assert EMOJI_DATA == OrderedDict(sorted(EMOJI_DATA.items()))
+    assert OrderedDict(sorted(EMOJI_DATA.items())) == EMOJI_DATA
 
 
 def test_unicode_emojis_fixture_sorted(
