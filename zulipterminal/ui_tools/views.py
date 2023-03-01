@@ -226,16 +226,13 @@ class MessageView(urwid.ListBox):
             else:
                 return super().keypress(size, primary_key_for_command("SCROLL_DOWN"))
 
-        elif is_command_key("THUMBS_UP", key):
-            if self.focus is not None:
-                self.model.toggle_message_reaction(
-                    self.focus.original_widget.message, reaction_to_toggle="thumbs_up"
-                )
+        elif is_command_key("THUMBS_UP", key) and self.focus is not None:
+            message = self.focus.original_widget.message
+            self.model.toggle_message_reaction(message, reaction_to_toggle="thumbs_up")
 
-        elif is_command_key("TOGGLE_STAR_STATUS", key):
-            if self.focus is not None:
-                message = self.focus.original_widget.message
-                self.model.toggle_message_star_status(message)
+        elif is_command_key("TOGGLE_STAR_STATUS", key) and self.focus is not None:
+            message = self.focus.original_widget.message
+            self.model.toggle_message_star_status(message)
 
         key = super().keypress(size, key)
         return key
@@ -361,13 +358,12 @@ class StreamsView(urwid.Frame):
                 if stream.stream_name not in pinned_stream_names:
                     first_unpinned_index = index
                     break
-            if first_unpinned_index not in [0, streams_display_num]:
-                # Do not add a divider when it is already present. This can
-                # happen when new_text=''.
-                if not isinstance(
-                    streams_display[first_unpinned_index], StreamsViewDivider
-                ):
-                    streams_display.insert(first_unpinned_index, StreamsViewDivider())
+            # Do not add a divider when it is already present. This can
+            # happen when new_text=''.
+            if first_unpinned_index not in [0, streams_display_num] and not isinstance(
+                streams_display[first_unpinned_index], StreamsViewDivider
+            ):
+                streams_display.insert(first_unpinned_index, StreamsViewDivider())
 
             self.log.clear()
             if not self.empty_search:
@@ -533,9 +529,8 @@ class UsersView(urwid.ListBox):
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse press":
-            if button == 1:
-                if self.controller.is_in_editor_mode():
-                    return True
+            if button == 1 and self.controller.is_in_editor_mode():
+                return True
             if button == 4:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
                     self.keypress(size, primary_key_for_command("GO_UP"))

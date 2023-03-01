@@ -410,13 +410,12 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             continue
 
         if len(narrow) == 1:
-            if narrow[0][1] == "starred":
-                if "starred" in msg["flags"]:
-                    index["starred_msg_ids"].add(msg["id"])
+            if narrow[0][1] == "starred" and "starred" in msg["flags"]:
+                index["starred_msg_ids"].add(msg["id"])
 
-            if narrow[0][1] == "mentioned":
-                if {"mentioned", "wildcard_mentioned"} & set(msg["flags"]):
-                    index["mentioned_msg_ids"].add(msg["id"])
+            msg_has_mention = {"mentioned", "wildcard_mentioned"} & set(msg["flags"])
+            if narrow[0][1] == "mentioned" and msg_has_mention:
+                index["mentioned_msg_ids"].add(msg["id"])
 
             if msg["type"] == "private":
                 index["private_msg_ids"].add(msg["id"])
