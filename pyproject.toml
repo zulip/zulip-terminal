@@ -121,6 +121,7 @@ ignore = [
     "B007", # Loop control variable not used within the loop body [informative!]
     "C408", # Unnecessary 'dict' call (rewrite as a literal)
     "N818",  # Exception name should be named with an Error suffix
+    "SIM108", # Prefer ternary operator over if-else (as per zulip/zulip)
     "UP015", # Unnecessary open mode parameters [informative?]
 ]
 select = [
@@ -138,6 +139,7 @@ select = [
     "RSE", # RaiSE
     "PLW", # pylint warning
     "RUF100", # Checks noqa rules are used
+    "SIM", # SIMplify
     "T20", # prinT present
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade

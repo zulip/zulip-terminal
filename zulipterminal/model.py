@@ -1624,7 +1624,7 @@ class Model:
                     self._update_rendered_view(msg_id)
 
             # If topic view is open, reload list else reset cache.
-            if stream_id in self.index["topics"]:
+            if stream_id in self.index["topics"]:  # noqa: SIM102
                 if hasattr(self.controller, "view"):
                     view = self.controller.view
                     if view.left_panel.is_in_topic_view_with_stream_id(stream_id):

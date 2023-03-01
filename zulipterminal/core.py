@@ -170,10 +170,10 @@ class Controller:
 
         if self.debug_path is not None:
             # buffering=1 avoids need for flush=True with print() debugging
-            sys.stdout = open(self.debug_path, "a", buffering=1)
+            sys.stdout = open(self.debug_path, "a", buffering=1)  # noqa: SIM115
         else:
             # Redirect stdout (print does nothing)
-            sys.stdout = open(os.devnull, "a")
+            sys.stdout = open(os.devnull, "a")  # noqa: SIM115
 
     def restore_stdout(self) -> None:
         if not hasattr(self, "_stdout"):
