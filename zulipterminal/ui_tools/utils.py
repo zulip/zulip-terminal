@@ -56,14 +56,15 @@ def create_msg_box_list(
     return w_list
 
 
+# The SIM114 warnings are ignored here since combining the branches would be less clear
 def is_muted(msg: Message, model: Any) -> bool:
     # PMs cannot be muted
-    if msg["type"] == "private":
+    if msg["type"] == "private":  # noqa: SIM114
         return False
     # In a topic narrow
     elif len(model.narrow) == 2:
         return False
-    elif model.is_muted_stream(msg["stream_id"]):
+    elif model.is_muted_stream(msg["stream_id"]):  # noqa: SIM114
         return True
     elif model.is_muted_topic(msg["stream_id"], msg["subject"]):
         return True

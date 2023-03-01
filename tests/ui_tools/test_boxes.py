@@ -1664,7 +1664,7 @@ class TestWriteBox:
                 expected_focus_col_name
             )
         else:
-            assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(
+            assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(  # noqa: SIM300
                 expected_focus_col_name
             )
 
