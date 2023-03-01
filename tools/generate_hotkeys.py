@@ -114,7 +114,9 @@ def get_hotkeys_file_string() -> str:
 
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
-    if hotkeys_file_string == open(OUTPUT_FILE).read():
+    with open(OUTPUT_FILE) as output_file:
+        content_is_identical = hotkeys_file_string == output_file.read()
+    if content_is_identical:
         print(f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}")
         return True
     else:
