@@ -415,14 +415,7 @@ def main(options: Optional[List[str]] = None) -> None:
     try:
         zterm = parse_zuliprc(zuliprc_path)
 
-        if args.autohide:
-            zterm["autohide"] = SettingData(args.autohide, ConfigSource.COMMANDLINE)
-
-        if args.theme:
-            theme_to_use = SettingData(args.theme, ConfigSource.COMMANDLINE)
-        else:
-            theme_to_use = zterm["theme"]
-
+        ### Validate footlinks settings (not from command line)
         if (
             zterm["footlinks"].source == ConfigSource.ZULIPRC
             and zterm["maximum-footlinks"].source == ConfigSource.ZULIPRC
@@ -449,6 +442,12 @@ def main(options: Optional[List[str]] = None) -> None:
         else:
             maximum_footlinks = int(zterm["maximum-footlinks"].value)
 
+        ### Load theme override & validate
+        if args.theme:
+            theme_to_use = SettingData(args.theme, ConfigSource.COMMANDLINE)
+        else:
+            theme_to_use = zterm["theme"]
+
         theme_alias_suffix = ""
         available_themes = all_themes()
         theme_aliases = aliased_themes()
@@ -467,6 +466,10 @@ def main(options: Optional[List[str]] = None) -> None:
             real_theme_name = theme_aliases[theme_to_use.value]
             theme_to_use = SettingData(real_theme_name, theme_to_use.source)
 
+        ### Load overrides & validate remaining settings
+        if args.autohide:
+            zterm["autohide"] = SettingData(args.autohide, ConfigSource.COMMANDLINE)
+
         if args.color_depth:
             zterm["color-depth"] = SettingData(
                 args.color_depth, ConfigSource.COMMANDLINE
@@ -475,9 +478,30 @@ def main(options: Optional[List[str]] = None) -> None:
         if args.notify:
             zterm["notify"] = SettingData(args.notify, ConfigSource.COMMANDLINE)
 
+        valid_remaining_settings = dict(
+            VALID_BOOLEAN_SETTINGS,
+            **{"color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
+        )
+
+        # Validate remaining settings
+        for setting, valid_values in valid_remaining_settings.items():
+            if zterm[setting].value not in valid_values:
+                helper_text = (
+                    ["Valid values are:"]
+                    + [f"  {option}" for option in valid_values]
+                    + [f"Specify the {setting} option in zuliprc file."]
+                )
+                exit_with_error(
+                    "Invalid {} setting '{}' was specified {}.".format(
+                        setting, *zterm[setting]
+                    ),
+                    helper_text="\n".join(helper_text),
+                )
+
         def print_setting(setting: str, data: SettingData, suffix: str = "") -> None:
             print(f"   {setting} '{data.value}' specified {data.source.value}{suffix}.")
 
+        ### Let the user know we're starting to load, with what options, from where
         print("Loading with:")
         print_setting("theme", theme_to_use, theme_alias_suffix)
         complete, incomplete = complete_and_incomplete_themes()
@@ -505,34 +529,17 @@ def main(options: Optional[List[str]] = None) -> None:
         print_setting("color depth setting", zterm["color-depth"])
         print_setting("notify setting", zterm["notify"])
 
-        # Validate remaining settings
-        valid_remaining_settings = dict(
-            VALID_BOOLEAN_SETTINGS,
-            **{"color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
-        )
-        for setting, valid_values in valid_remaining_settings.items():
-            if zterm[setting].value not in valid_values:
-                helper_text = (
-                    ["Valid values are:"]
-                    + [f"  {option}" for option in valid_values]
-                    + [f"Specify the {setting} option in zuliprc file."]
-                )
-                exit_with_error(
-                    "Invalid {} setting '{}' was specified {}.".format(
-                        setting, *zterm[setting]
-                    ),
-                    helper_text="\n".join(helper_text),
-                )
+        ### Generate data not output to user, but into Controller
+        # Generate urwid palette
+        color_depth_str = zterm["color-depth"].value
+        color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
+
+        theme_data = generate_theme(theme_to_use.value, color_depth)
 
         # Translate valid strings for boolean values into True/False
         boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
             boolean_settings[setting] = zterm[setting].value == valid_values[0]
-
-        color_depth_str = zterm["color-depth"].value
-        color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
-
-        theme_data = generate_theme(theme_to_use.value, color_depth)
 
         Controller(
             config_file=zuliprc_path,
