@@ -31,7 +31,7 @@ from zulipterminal.version import ZT_VERSION
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
 ZULIPRC_CONFIG = "in zuliprc file"
-NO_CONFIG = "with no config"
+DEFAULT_CONFIG = "from default config"
 
 # Create a logger for this application
 zt_logger = logging.getLogger(__name__)
@@ -331,7 +331,8 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
 
     # Initialize with default settings
     settings = {
-        setting: (default, NO_CONFIG) for setting, default in DEFAULT_SETTINGS.items()
+        setting: (default, DEFAULT_CONFIG)
+        for setting, default in DEFAULT_SETTINGS.items()
     }
 
     if "zterm" in zuliprc:
