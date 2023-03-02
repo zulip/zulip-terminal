@@ -11,6 +11,7 @@ import sys
 import traceback
 from os import path, remove
 from typing import Any, Dict, List, Optional, Tuple
+from pkg_resources import WorkingSet, Requirement, VersionConflict
 
 import requests
 from urwid import display_common, set_encoding
@@ -336,11 +337,35 @@ def list_themes() -> str:
         "using -t/--theme options on command line."
     )
 
+def check_packages_version() -> None:
+    req_file = open("requirements.txt", "r") 
+    current_working_set = WorkingSet() # Getting current active distributions
+    unmet_req_list = list()
+
+    for line in req_file.read().splitlines():
+        line = line.strip()
+        if line == '': # Empty line
+            continue
+        elif not line or line.startswith('#'): # Comment line
+            continue
+        else:
+            try:
+                package_found = current_working_set.find(Requirement.parse(line)) # Parse and find if the requirement is met
+            except VersionConflict:
+                unmet_req_list.append(str(Requirement.parse(line))) # The versions do not match
+            
+            if not package_found:
+                unmet_req_list.append(str(Requirement.parse(line))) # Package not installed
+    
+    if len(unmet_req_list) != 0:
+        print("WARNING: The following package versions are not consistent with those specified in requirements:", ', '.join(unmet_req_list))
 
 def main(options: Optional[List[str]] = None) -> None:
     """
     Launch Zulip Terminal.
     """
+
+    check_packages_version()
 
     argv = options if options is not None else sys.argv[1:]
     args = parse_args(argv)
