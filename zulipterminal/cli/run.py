@@ -30,8 +30,10 @@ from zulipterminal.version import ZT_VERSION
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
+
 ZULIPRC_CONFIG = "in zuliprc file"
 DEFAULT_CONFIG = "from default config"
+COMMANDLINE_CONFIG = "on command line"
 
 # Create a logger for this application
 zt_logger = logging.getLogger(__name__)
@@ -406,10 +408,10 @@ def main(options: Optional[List[str]] = None) -> None:
         zterm = parse_zuliprc(zuliprc_path)
 
         if args.autohide:
-            zterm["autohide"] = (args.autohide, "on command line")
+            zterm["autohide"] = (args.autohide, COMMANDLINE_CONFIG)
 
         if args.theme:
-            theme_to_use = (args.theme, "on command line")
+            theme_to_use = (args.theme, COMMANDLINE_CONFIG)
         else:
             theme_to_use = zterm["theme"]
 
@@ -458,10 +460,10 @@ def main(options: Optional[List[str]] = None) -> None:
             )
 
         if args.color_depth:
-            zterm["color-depth"] = (args.color_depth, "on command line")
+            zterm["color-depth"] = (args.color_depth, COMMANDLINE_CONFIG)
 
         if args.notify:
-            zterm["notify"] = (args.notify, "on command line")
+            zterm["notify"] = (args.notify, COMMANDLINE_CONFIG)
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
