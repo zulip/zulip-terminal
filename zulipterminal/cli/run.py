@@ -421,16 +421,16 @@ def main(options: Optional[List[str]] = None) -> None:
             theme_to_use = zterm["theme"]
 
         if (
-            zterm["footlinks"][1] == ZULIPRC_CONFIG
-            and zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG
+            zterm["footlinks"].source == ZULIPRC_CONFIG
+            and zterm["maximum-footlinks"].source == ZULIPRC_CONFIG
         ):
             exit_with_error(
                 "Configuration Error: "
                 "footlinks and maximum-footlinks options cannot be used together"
             )
 
-        if zterm["maximum-footlinks"][1] == ZULIPRC_CONFIG:
-            maximum_footlinks = int(zterm["maximum-footlinks"][0])
+        if zterm["maximum-footlinks"].source == ZULIPRC_CONFIG:
+            maximum_footlinks = int(zterm["maximum-footlinks"].value)
             if maximum_footlinks < 0:
                 exit_with_error(
                     "Configuration Error: "
@@ -438,30 +438,31 @@ def main(options: Optional[List[str]] = None) -> None:
                     f"you used '{maximum_footlinks}'"
                 )
 
-        if zterm["footlinks"][1] == ZULIPRC_CONFIG:
-            if zterm["footlinks"][0] == DEFAULT_SETTINGS["footlinks"]:
+        if zterm["footlinks"].source == ZULIPRC_CONFIG:
+            if zterm["footlinks"].value == DEFAULT_SETTINGS["footlinks"]:
                 maximum_footlinks = 3
             else:
                 maximum_footlinks = 0
         else:
-            maximum_footlinks = int(zterm["maximum-footlinks"][0])
+            maximum_footlinks = int(zterm["maximum-footlinks"].value)
 
         available_themes = all_themes()
         theme_aliases = aliased_themes()
         is_valid_theme = (
-            theme_to_use[0] in available_themes or theme_to_use[0] in theme_aliases
+            theme_to_use.value in available_themes
+            or theme_to_use.value in theme_aliases
         )
         if not is_valid_theme:
             exit_with_error(
                 "Invalid theme '{}' was specified {}.".format(*theme_to_use),
                 helper_text=list_themes(),
             )
-        if theme_to_use[0] not in available_themes:
+        if theme_to_use.value not in available_themes:
             # theme must be an alias, as it is valid
-            real_theme_name = theme_aliases[theme_to_use[0]]
+            real_theme_name = theme_aliases[theme_to_use.value]
             theme_to_use = SettingData(
                 real_theme_name,
-                f"{theme_to_use[1]} (by alias '{theme_to_use[0]}')",
+                f"{theme_to_use.source} (by alias '{theme_to_use.value}')",
             )
 
         if args.color_depth:
@@ -473,7 +474,7 @@ def main(options: Optional[List[str]] = None) -> None:
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
         complete, incomplete = complete_and_incomplete_themes()
-        if theme_to_use[0] in incomplete:
+        if theme_to_use.value in incomplete:
             if complete:
                 incomplete_theme_warning = (
                     "   WARNING: Incomplete theme; results may vary!\n"
@@ -486,10 +487,10 @@ def main(options: Optional[List[str]] = None) -> None:
                 )
             print(in_color("yellow", incomplete_theme_warning))
         print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
-        if zterm["footlinks"][1] == ZULIPRC_CONFIG:
+        if zterm["footlinks"].source == ZULIPRC_CONFIG:
             print(
                 "   maximum footlinks value '{}' specified {} from footlinks.".format(
-                    maximum_footlinks, zterm["footlinks"][1]
+                    maximum_footlinks, zterm["footlinks"].source
                 )
             )
         else:
@@ -507,7 +508,7 @@ def main(options: Optional[List[str]] = None) -> None:
             **{"color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
         )
         for setting, valid_values in valid_remaining_settings.items():
-            if zterm[setting][0] not in valid_values:
+            if zterm[setting].value not in valid_values:
                 helper_text = (
                     ["Valid values are:"]
                     + [f"  {option}" for option in valid_values]
@@ -523,17 +524,17 @@ def main(options: Optional[List[str]] = None) -> None:
         # Translate valid strings for boolean values into True/False
         boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
-            boolean_settings[setting] = zterm[setting][0] == valid_values[0]
+            boolean_settings[setting] = zterm[setting].value == valid_values[0]
 
-        color_depth_str = zterm["color-depth"][0]
+        color_depth_str = zterm["color-depth"].value
         color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
 
-        theme_data = generate_theme(theme_to_use[0], color_depth)
+        theme_data = generate_theme(theme_to_use.value, color_depth)
 
         Controller(
             config_file=zuliprc_path,
             maximum_footlinks=maximum_footlinks,
-            theme_name=theme_to_use[0],
+            theme_name=theme_to_use.value,
             theme=theme_data,
             color_depth=color_depth,
             in_explore_mode=args.explore,
