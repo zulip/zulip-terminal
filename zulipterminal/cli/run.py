@@ -52,6 +52,13 @@ VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
     "notify": ("enabled", "disabled"),
 }
 
+COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
+    "1": 1,
+    "16": 16,
+    "256": 256,
+    "24bit": 2**24,
+}
+
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
@@ -63,6 +70,7 @@ DEFAULT_SETTINGS = {
 }
 assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
+assert DEFAULT_SETTINGS["color-depth"] in COLOR_DEPTH_ARGS_TO_DEPTHS
 
 
 def in_color(color: str, text: str) -> str:
@@ -121,7 +129,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--color-depth",
-        choices=["1", "16", "256", "24bit"],
+        choices=COLOR_DEPTH_ARGS_TO_DEPTHS,
         help=f"force the color depth (default: {DEFAULT_SETTINGS['color-depth']})",
     )
     parser.add_argument(
@@ -451,12 +459,6 @@ def main(options: Optional[List[str]] = None) -> None:
         if args.color_depth:
             zterm["color-depth"] = (args.color_depth, "on command line")
 
-        color_depth_str = zterm["color-depth"][0]
-        if color_depth_str == "24bit":
-            color_depth = 2**24
-        else:
-            color_depth = int(color_depth_str)
-
         if args.notify:
             zterm["notify"] = (args.notify, "on command line")
 
@@ -494,7 +496,7 @@ def main(options: Optional[List[str]] = None) -> None:
         # Validate remaining settings
         valid_remaining_settings = dict(
             VALID_BOOLEAN_SETTINGS,
-            **{"color-depth": ["1", "16", "256", "24bit"]},
+            **{"color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
         )
         for setting, valid_values in valid_remaining_settings.items():
             if zterm[setting][0] not in valid_values:
@@ -514,6 +516,9 @@ def main(options: Optional[List[str]] = None) -> None:
         boolean_settings: Dict[str, bool] = dict()
         for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
+
+        color_depth_str = zterm["color-depth"][0]
+        color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
 
         theme_data = generate_theme(theme_to_use[0], color_depth)
 
