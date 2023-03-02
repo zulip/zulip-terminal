@@ -328,8 +328,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
-    response = mocker.Mock(json=lambda: dict(api_key=""), status_code=200)
-    mocker.patch(MODULE + ".get_api_key", return_value=(response, None))
+    mocker.patch(MODULE + ".get_api_key", return_value=("my_login", "my_api_key"))
 
     with pytest.raises(SystemExit):
         main([])

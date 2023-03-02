@@ -196,7 +196,7 @@ def get_login_id(realm_url: str) -> str:
     return styled_input(label)
 
 
-def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str]]:
     from getpass import getpass
 
     login_id = get_login_id(realm_url)
@@ -208,7 +208,9 @@ def get_api_key(realm_url: str) -> Tuple[requests.Response, str]:
             "password": password,
         },
     )
-    return response, login_id
+    if response.status_code == requests.codes.OK:
+        return login_id, str(response.json()["api_key"])
+    return None
 
 
 def fetch_zuliprc(zuliprc_path: str) -> None:
@@ -231,16 +233,17 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     # Remove trailing "/"s from realm_url to simplify the below logic
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
-    res, login_id = get_api_key(realm_url)
+    login_data = get_api_key(realm_url)
 
-    while res.status_code != 200:
+    while login_data is None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
-        res, login_id = get_api_key(realm_url)
+        login_data = get_api_key(realm_url)
 
+    login_id, api_key = login_data
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
-        api_key=str(res.json()["api_key"]),
+        api_key=api_key,
         server_url=realm_url,
     )
     if not save_zuliprc_failure:
