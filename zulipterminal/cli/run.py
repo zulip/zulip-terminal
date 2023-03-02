@@ -46,6 +46,12 @@ zt_logger.addHandler(zt_logfile_handler)
 requests_logger = logging.getLogger("urllib3")
 requests_logger.setLevel(logging.DEBUG)
 
+# Valid boolean settings, which map from (str, str) to (True, False)
+VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
+    "autohide": ("autohide", "no_autohide"),
+    "notify": ("enabled", "disabled"),
+}
+
 # These should be the defaults without config file or command-line overrides
 DEFAULT_SETTINGS = {
     "theme": "zt_dark",
@@ -55,6 +61,8 @@ DEFAULT_SETTINGS = {
     "color-depth": "256",
     "maximum-footlinks": "3",
 }
+assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
+assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
 
 
 def in_color(color: str, text: str) -> str:
@@ -483,15 +491,12 @@ def main(options: Optional[List[str]] = None) -> None:
         print("   color depth setting '{}' specified {}.".format(*zterm["color-depth"]))
         print("   notify setting '{}' specified {}.".format(*zterm["notify"]))
 
-        # For binary settings
-        # Specify setting in order True, False
-        valid_settings = {
-            "autohide": ["autohide", "no_autohide"],
-            "notify": ["enabled", "disabled"],
-            "color-depth": ["1", "16", "256", "24bit"],
-        }
-        boolean_settings: Dict[str, bool] = dict()
-        for setting, valid_values in valid_settings.items():
+        # Validate remaining settings
+        valid_remaining_settings = dict(
+            VALID_BOOLEAN_SETTINGS,
+            **{"color-depth": ["1", "16", "256", "24bit"]},
+        )
+        for setting, valid_values in valid_remaining_settings.items():
             if zterm[setting][0] not in valid_values:
                 helper_text = (
                     ["Valid values are:"]
@@ -504,8 +509,10 @@ def main(options: Optional[List[str]] = None) -> None:
                     ),
                     helper_text="\n".join(helper_text),
                 )
-            if setting == "color-depth":
-                break
+
+        # Translate valid strings for boolean values into True/False
+        boolean_settings: Dict[str, bool] = dict()
+        for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
             boolean_settings[setting] = zterm[setting][0] == valid_values[0]
 
         theme_data = generate_theme(theme_to_use[0], color_depth)
