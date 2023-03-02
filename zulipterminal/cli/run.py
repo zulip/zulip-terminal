@@ -10,7 +10,7 @@ import stat
 import sys
 import traceback
 from os import path, remove
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
 from urwid import display_common, set_encoding
@@ -26,6 +26,11 @@ from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform
 from zulipterminal.version import ZT_VERSION
+
+
+class SettingData(NamedTuple):
+    value: str
+    source: str
 
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
@@ -289,7 +294,7 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
+def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
     zuliprc_path = path.expanduser(zuliprc_str)
     while not path.exists(zuliprc_path):
         try:
@@ -333,14 +338,14 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, Any]:
 
     # Initialize with default settings
     settings = {
-        setting: (default, DEFAULT_CONFIG)
+        setting: SettingData(default, DEFAULT_CONFIG)
         for setting, default in DEFAULT_SETTINGS.items()
     }
 
     if "zterm" in zuliprc:
         config = zuliprc["zterm"]
         for conf in config:
-            settings[conf] = (config[conf], ZULIPRC_CONFIG)
+            settings[conf] = SettingData(config[conf], ZULIPRC_CONFIG)
 
     return settings
 
@@ -408,10 +413,10 @@ def main(options: Optional[List[str]] = None) -> None:
         zterm = parse_zuliprc(zuliprc_path)
 
         if args.autohide:
-            zterm["autohide"] = (args.autohide, COMMANDLINE_CONFIG)
+            zterm["autohide"] = SettingData(args.autohide, COMMANDLINE_CONFIG)
 
         if args.theme:
-            theme_to_use = (args.theme, COMMANDLINE_CONFIG)
+            theme_to_use = SettingData(args.theme, COMMANDLINE_CONFIG)
         else:
             theme_to_use = zterm["theme"]
 
@@ -454,16 +459,16 @@ def main(options: Optional[List[str]] = None) -> None:
         if theme_to_use[0] not in available_themes:
             # theme must be an alias, as it is valid
             real_theme_name = theme_aliases[theme_to_use[0]]
-            theme_to_use = (
+            theme_to_use = SettingData(
                 real_theme_name,
                 f"{theme_to_use[1]} (by alias '{theme_to_use[0]}')",
             )
 
         if args.color_depth:
-            zterm["color-depth"] = (args.color_depth, COMMANDLINE_CONFIG)
+            zterm["color-depth"] = SettingData(args.color_depth, COMMANDLINE_CONFIG)
 
         if args.notify:
-            zterm["notify"] = (args.notify, COMMANDLINE_CONFIG)
+            zterm["notify"] = SettingData(args.notify, COMMANDLINE_CONFIG)
 
         print("Loading with:")
         print("   theme '{}' specified {}.".format(*theme_to_use))
