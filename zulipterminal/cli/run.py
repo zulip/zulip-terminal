@@ -446,6 +446,7 @@ def main(options: Optional[List[str]] = None) -> None:
         else:
             maximum_footlinks = int(zterm["maximum-footlinks"].value)
 
+        theme_alias_suffix = ""
         available_themes = all_themes()
         theme_aliases = aliased_themes()
         is_valid_theme = (
@@ -459,11 +460,9 @@ def main(options: Optional[List[str]] = None) -> None:
             )
         if theme_to_use.value not in available_themes:
             # theme must be an alias, as it is valid
+            theme_alias_suffix = f" (by alias '{theme_to_use.value}')"
             real_theme_name = theme_aliases[theme_to_use.value]
-            theme_to_use = SettingData(
-                real_theme_name,
-                f"{theme_to_use.source} (by alias '{theme_to_use.value}')",
-            )
+            theme_to_use = SettingData(real_theme_name, theme_to_use.source)
 
         if args.color_depth:
             zterm["color-depth"] = SettingData(args.color_depth, COMMANDLINE_CONFIG)
@@ -471,8 +470,11 @@ def main(options: Optional[List[str]] = None) -> None:
         if args.notify:
             zterm["notify"] = SettingData(args.notify, COMMANDLINE_CONFIG)
 
+        def print_setting(setting: str, data: SettingData, suffix: str = "") -> None:
+            print(f"   {setting} '{data.value}' specified {data.source}{suffix}.")
+
         print("Loading with:")
-        print("   theme '{}' specified {}.".format(*theme_to_use))
+        print_setting("theme", theme_to_use, theme_alias_suffix)
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use.value in incomplete:
             if complete:
@@ -486,21 +488,17 @@ def main(options: Optional[List[str]] = None) -> None:
                     "      (all themes are incomplete)"
                 )
             print(in_color("yellow", incomplete_theme_warning))
-        print("   autohide setting '{}' specified {}.".format(*zterm["autohide"]))
+        print_setting("autohide setting", zterm["autohide"])
         if zterm["footlinks"].source == ZULIPRC_CONFIG:
-            print(
-                "   maximum footlinks value '{}' specified {} from footlinks.".format(
-                    maximum_footlinks, zterm["footlinks"].source
-                )
+            print_setting(
+                "maximum footlinks value",
+                SettingData(str(maximum_footlinks), zterm["footlinks"].source),
+                " from footlinks",
             )
         else:
-            print(
-                "   maximum footlinks value '{}' specified {}.".format(
-                    *zterm["maximum-footlinks"]
-                )
-            )
-        print("   color depth setting '{}' specified {}.".format(*zterm["color-depth"]))
-        print("   notify setting '{}' specified {}.".format(*zterm["notify"]))
+            print_setting("maximum footlinks value", zterm["maximum-footlinks"])
+        print_setting("color depth setting", zterm["color-depth"])
+        print_setting("notify setting", zterm["notify"])
 
         # Validate remaining settings
         valid_remaining_settings = dict(
