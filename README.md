@@ -356,36 +356,42 @@ the changes.
 You can also use the tools individually on a file or directory, eg.
 `black zulipterminal` or `isort tests/model/test_model.py`
 
-#### Commit Style
+#### Commit Message Style
 
 We aim to follow a standard commit style to keep the `git log` consistent and easy to read.
 
-Much like working with code, it's great to refer to the git log, for the style we're actively using.
+Much like working with code, we suggest you refer to recent commits in the git log, for examples of the style we're actively using.
 
-Our overall style for commit structure and messages broadly follows the general [Zulip version control guidelines](http://zulip.readthedocs.io/en/latest/contributing/version-control.html), so we recommend reading that first.
+Our overall style for commit messages broadly follows the general guidelines
+given for
+[Zulip Commit messages](http://zulip.readthedocs.io/en/latest/contributing/commit-discipline.html#commit-messages),
+so we recommend reading that first.
 
-Our commit titles have slight variations from the general Zulip style, with each:
-* starting with one or more areas in lower case, followed by a colon and space
-* area being slash-separated modified files without extensions, or the type of the change
-* ending with a concise description starting with a capital and ending with a full-stop (period)
-* having a maximum overall length of 72 (fitting github web interface without abbreviation)
+Our commit titles (summaries) have slight variations from the general Zulip style, with each:
+* starting with one or more **areas** - in lower case, followed by a colon and space
+  * generally each commit has at least one area of each modified file - without extensions, separated by a `/`
+  * generally *don't* include test files in this list (instead `Tests updated` or `Tests added` in the commit text)
+  * other common areas include types like `refactor:`, `bugfix:` and `requirements:` (see below)
+* ending with a **concise description** starting with a capital and ending with a full-stop (period)
+* having a maximum overall length of 72 (fitting the github web interface without abbreviation)
 
-Some example commit titles:
-* `file3/file1/file2: Improve behavior of something.` - a general commit updating files `file1.txt`, `file2.py` and `file3.md`
-* `refactor: file1/file2: Extract some common function.` - a pure refactor which doesn't change the functional behavior
-* `bugfix: file1: Avoid some noticeable bug.` - an ideally small commit to fix a bug
-* `tests: file1: Improve test for something.` - only improve tests for `file1`, likely in `test_file1.py`
-* `requirements: Upgrade some-dependency from 9.2 to 9.3.` - upgrade a dependency from version 9.2 to version 9.3
-
-Generally with changes to code we request you update linting and tests to pass on a per-commit basis (not just per pull request).
-If you update tests, you can add eg. `Tests updated.` in your commit text.
-
-Ideally we prefer that behavioral changes are accompanied by test improvements or additions, and an accompanying `Tests added.` or similar is then useful.
+Some example commit titles: (ideally more descriptive in practice!)
+* `file3/file1/file2: Improve behavior of something.`
+  - a general commit updating files `file1.txt`, `file2.py` and `file3.md`
+* `refactor: file1/file2: Extract some common function.`
+  - a pure refactor which doesn't change the functional behavior, involving `file1.py` and `file2.py`
+* `bugfix: file1: Avoid some noticeable bug.`
+  - a small commit to fix a bug in `file1.py`
+* `tests: file1: Improve test for something.`
+  - only improve tests for `file1`, likely in `test_file1.py`
+* `requirements: Upgrade some-dependency from ==9.2 to ==9.3.`
+  - upgrade a dependency from version ==9.2 to version ==9.3, in the central dependencies file (*not* some file requirements.*)
 
 To aid in satisfying some of these rules you can use `GitLint`, as described in the following section.
+
 **However**, please check your commits manually versus these style rules, since GitLint cannot check everything - including language or grammar!
 
-##### GitLint
+#### GitLint
 
 If you plan to submit git commits in pull-requests (PRs), then we highly suggest installing the `gitlint` commit-message hook by running `gitlint install-hook` (or `pipenv run gitlint install-hook` with pipenv setups). While the content still depends upon your writing skills, this ensures a more consistent formatting structure between commits, including by different authors.
 
