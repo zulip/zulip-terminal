@@ -9,6 +9,7 @@ import os
 import stat
 import sys
 import traceback
+from enum import Enum
 from os import path, remove
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
@@ -28,17 +29,19 @@ from zulipterminal.platform_code import detected_platform
 from zulipterminal.version import ZT_VERSION
 
 
+class ConfigSource(Enum):
+    DEFAULT = "from default config"
+    ZULIPRC = "in zuliprc file"
+    COMMANDLINE = "on command line"
+
+
 class SettingData(NamedTuple):
     value: str
-    source: str
+    source: ConfigSource
 
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
-
-ZULIPRC_CONFIG = "in zuliprc file"
-DEFAULT_CONFIG = "from default config"
-COMMANDLINE_CONFIG = "on command line"
 
 # Create a logger for this application
 zt_logger = logging.getLogger(__name__)
@@ -338,14 +341,14 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
 
     # Initialize with default settings
     settings = {
-        setting: SettingData(default, DEFAULT_CONFIG)
+        setting: SettingData(default, ConfigSource.DEFAULT)
         for setting, default in DEFAULT_SETTINGS.items()
     }
 
     if "zterm" in zuliprc:
         config = zuliprc["zterm"]
         for conf in config:
-            settings[conf] = SettingData(config[conf], ZULIPRC_CONFIG)
+            settings[conf] = SettingData(config[conf], ConfigSource.ZULIPRC)
 
     return settings
 
@@ -413,23 +416,23 @@ def main(options: Optional[List[str]] = None) -> None:
         zterm = parse_zuliprc(zuliprc_path)
 
         if args.autohide:
-            zterm["autohide"] = SettingData(args.autohide, COMMANDLINE_CONFIG)
+            zterm["autohide"] = SettingData(args.autohide, ConfigSource.COMMANDLINE)
 
         if args.theme:
-            theme_to_use = SettingData(args.theme, COMMANDLINE_CONFIG)
+            theme_to_use = SettingData(args.theme, ConfigSource.COMMANDLINE)
         else:
             theme_to_use = zterm["theme"]
 
         if (
-            zterm["footlinks"].source == ZULIPRC_CONFIG
-            and zterm["maximum-footlinks"].source == ZULIPRC_CONFIG
+            zterm["footlinks"].source == ConfigSource.ZULIPRC
+            and zterm["maximum-footlinks"].source == ConfigSource.ZULIPRC
         ):
             exit_with_error(
                 "Configuration Error: "
                 "footlinks and maximum-footlinks options cannot be used together"
             )
 
-        if zterm["maximum-footlinks"].source == ZULIPRC_CONFIG:
+        if zterm["maximum-footlinks"].source == ConfigSource.ZULIPRC:
             maximum_footlinks = int(zterm["maximum-footlinks"].value)
             if maximum_footlinks < 0:
                 exit_with_error(
@@ -438,7 +441,7 @@ def main(options: Optional[List[str]] = None) -> None:
                     f"you used '{maximum_footlinks}'"
                 )
 
-        if zterm["footlinks"].source == ZULIPRC_CONFIG:
+        if zterm["footlinks"].source == ConfigSource.ZULIPRC:
             if zterm["footlinks"].value == DEFAULT_SETTINGS["footlinks"]:
                 maximum_footlinks = 3
             else:
@@ -465,13 +468,15 @@ def main(options: Optional[List[str]] = None) -> None:
             theme_to_use = SettingData(real_theme_name, theme_to_use.source)
 
         if args.color_depth:
-            zterm["color-depth"] = SettingData(args.color_depth, COMMANDLINE_CONFIG)
+            zterm["color-depth"] = SettingData(
+                args.color_depth, ConfigSource.COMMANDLINE
+            )
 
         if args.notify:
-            zterm["notify"] = SettingData(args.notify, COMMANDLINE_CONFIG)
+            zterm["notify"] = SettingData(args.notify, ConfigSource.COMMANDLINE)
 
         def print_setting(setting: str, data: SettingData, suffix: str = "") -> None:
-            print(f"   {setting} '{data.value}' specified {data.source}{suffix}.")
+            print(f"   {setting} '{data.value}' specified {data.source.value}{suffix}.")
 
         print("Loading with:")
         print_setting("theme", theme_to_use, theme_alias_suffix)
@@ -489,7 +494,7 @@ def main(options: Optional[List[str]] = None) -> None:
                 )
             print(in_color("yellow", incomplete_theme_warning))
         print_setting("autohide setting", zterm["autohide"])
-        if zterm["footlinks"].source == ZULIPRC_CONFIG:
+        if zterm["footlinks"].source == ConfigSource.ZULIPRC:
             print_setting(
                 "maximum footlinks value",
                 SettingData(str(maximum_footlinks), zterm["footlinks"].source),
