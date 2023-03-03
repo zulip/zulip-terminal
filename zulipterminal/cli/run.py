@@ -506,17 +506,12 @@ def main(options: Optional[List[str]] = None) -> None:
         print_setting("theme", theme_to_use, theme_alias_suffix)
         complete, incomplete = complete_and_incomplete_themes()
         if theme_to_use.value in incomplete:
+            incomplete_theme_text = "   WARNING: Incomplete theme; results may vary!\n"
             if complete:
-                incomplete_theme_warning = (
-                    "   WARNING: Incomplete theme; results may vary!\n"
-                    "      (you could try: {})".format(", ".join(complete))
-                )
+                incomplete_theme_text += f"      (you could try: {', '.join(complete)})"
             else:
-                incomplete_theme_warning = (
-                    "   WARNING: Incomplete theme; results may vary!\n"
-                    "      (all themes are incomplete)"
-                )
-            print(in_color("yellow", incomplete_theme_warning))
+                incomplete_theme_text += "      (all themes are incomplete)"
+            print(in_color("yellow", incomplete_theme_text))
         print_setting("autohide setting", zterm["autohide"])
         if zterm["footlinks"].source == ConfigSource.ZULIPRC:
             print_setting(
