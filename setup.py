@@ -1,5 +1,4 @@
 import codecs
-import os
 
 from setuptools import find_packages, setup
 
@@ -7,14 +6,9 @@ from zulipterminal.version import ZT_VERSION
 
 
 def long_description():
-    if not (os.path.isfile("README.md") and os.access("README.md", os.R_OK)):
-        return ""
-
-    with codecs.open("README.md", encoding="utf8") as f:
-        source = f.read()
-
+    with codecs.open("README.md", encoding="utf8") as readme:
         # Skip first line (assumed to have title) to reduce duplication
-        return "\n".join(source.splitlines()[1:])
+        return "\n".join(readme.readlines()[1:])
 
 
 testing_deps = [
