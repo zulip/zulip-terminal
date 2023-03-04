@@ -356,6 +356,77 @@ the changes.
 You can also use the tools individually on a file or directory, eg.
 `black zulipterminal` or `isort tests/model/test_model.py`
 
+#### Structuring Commits - speeding up reviews, merging & development
+
+As you work locally, investigating changes to make, it's common to make a
+series of small commits to store your progress.
+Often this can include commits that fix linting or testing issues in the
+previous commit(s).
+These are **developmental-style commits** - and almost everyone is likely to
+write commits in this style to some degree.
+
+Developmental-style commits store the changes just fine for you right now.
+However, when sharing your code, commit messages are a great place to instead
+communicate to others what you're changing and why. Tidying the structure can
+also make it easier and quicker for a reader to understand changes, and that you
+respect their time. One example is that very large single commits can take a
+lot of time to review, compared to if they are split up. Another is if you fix
+the tests/linting in a commit: which commit (or commits!) does this fix, and if
+it's in the same branch/PR, why isn't the original commit just fixed instead?
+
+Therefore, when creating a Pull Request (PR), please consider that your code is
+**more likely to be merged, more quickly, if it is easier to read, understand
+and review** - and a big part of that is how you structure your changes into
+commits, and describe those changes in commit messages.
+
+To be productive and make it easier for your PRs to be reviewed and updated, we
+follow an approach taken at
+[Zulip](https://zulip.readthedocs.io/en/latest/contributing/commit-discipline.html)
+and elsewhere, aiming for PRs to consist of a series of **minimal coherent**
+commits:
+* **Minimal**:
+  Look at each commit. Does it make different kinds of changes to lots of
+  files? Are you treating the title of a commit as a list of changes?  Consider
+  how to break down a large change into a sequence of smaller changes that you
+  can individually easily describe and that can flow after one another.
+* **Coherent**:
+  Each commit should individually pass all linting and existing automated
+  tests, and if you add new behavior, then add or extend the tests to cover it.
+
+Note that keeping to these principles can give other benefits, both before,
+during and after reviewing a PR, including:
+* Minimal commits can always later be *squashed* (combined) together - splitting commits is more challenging!
+* Coherent commits mean nothing should be broken between and after commits
+  * If a new commit in your branch breaks the linting/tests, it's likely that commit at fault!
+  * This improves the utility of `git bisect` in your branch or on `main`
+* These commits are easier to *reorder* in a branch
+  * Commits at the start of a branch (or can be moved there), may be merged early to simplify a branch
+* Understanding what changes were made and why is easier when reading a git log comprising these commits
+
+We now enforce a limited aspect of the *coherent* nature of commits in a PR in
+a job as part of our Continuous Integration (CI), *Ensure isolated PR commits*,
+which essentially runs `make check` on each commit in your branch.  You can
+replicate this locally before pushing to GitHub using `tools/check-branch`.
+
+While small or proof-of-concept PRs are initially fine to push as they are,
+they will likely only be reviewed based on the overall changes. Generally if
+individual commits look like they have a developmental style then reviewers are
+likely to give less specific feedback, and minimal coherent commits are certain
+to be requested before merging.
+
+**Restructuring commands** - Most restructuring relies upon *interactive
+rebasing* (eg. `git rebase -i upstream/main`), but consider searching online
+for specific actions, as well as searching or asking in **#git help** or
+**#learning** on chat.zulip.org.
+
+**Self review** - Another useful approach is to review your own commits both
+locally (see [Zulip
+suggestions](https://zulip.readthedocs.io/en/latest/git/setup.html#get-a-graphical-client))
+and after you push to GitHub. This allows you to inspect and fix anything that
+looks out of place, which someone is likely to pick up in their review, helping
+your submissions look more polished, as well as again indicating that you
+respect reviewers' time.
+
 #### Commit Message Style
 
 We aim to follow a standard commit style to keep the `git log` consistent and easy to read.
