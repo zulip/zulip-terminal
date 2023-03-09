@@ -168,13 +168,12 @@ If it doesn't find this file, you have two options:
    **NOTE:** If you use Google, Github or another external authentication to
    access your Zulip organization then you likely won't have a password set and
    currently need to create one to use zulip-terminal.
-   If your organization is on Zulip cloud, you can visit
+   - If your organization is on Zulip cloud, you can visit
    https://zulip.com/accounts/go?next=/accounts/password/reset to create a new
    password for your account.
-   For self-hosted servers please go to your
-   `<Organization URL>/accounts/password/reset/` (eg:
-   https://chat.zulip.org/accounts/password/reset/) to create a new password
-   for your account.
+   - For self-hosted servers please go to your
+   `<Organization URL>/accounts/password/reset/` to create a new password for
+   your account (eg: https://chat.zulip.org/accounts/password/reset/).
 
 2. Each time you run `zulip-term`, you can specify the path to an alternative
    `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c
@@ -184,10 +183,12 @@ If it doesn't find this file, you have two options:
    can be downloaded via Web or Desktop applications connected to that server.
    In recent versions this can be found in your **Personal settings** in the
    **Account & privacy** section, under **API key** as 'Show/change your API key'.
+
    If this is your only Zulip account, you may want to move and rename this
    file to the default file location above, or rename it to something more
    memorable that you can pass to the `---config-file` option.
-   This `.zuliprc` file gives you all the permissions you have as that user.
+   **This `.zuliprc` file gives you all the permissions you have as that user.**
+
    Similar `.zuliprc files` can be downloaded from the **Bots** section for any
    bots you have set up, though with correspondingly limited permissions.
 
