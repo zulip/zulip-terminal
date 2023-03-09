@@ -111,13 +111,13 @@ In some cases this can give rise to the symptoms in issue #1145.
 We recommend installing in a dedicated python virtual environment (see below)
 or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
 
-* **Stable** - Numbered stable releases are available on PyPI as the package
+* **Stable releases** - These are available on PyPI as the package
   [zulip-term](https://pypi.python.org/pypi/zulip-term)
 
   To install, run a command like: `pip3 install zulip-term`
 
-* **Latest** - The latest development version can be installed from the main
-  git repository
+* **Latest (git) versions** - The latest development version can be installed
+  from the git repository `main` branch
 
   To install, run a command like:
   `pip3 install git+https://github.com/zulip/zulip-terminal.git@main`
@@ -143,17 +143,46 @@ You can read more about virtual environments in the
 
 ### Keeping your install up to date
 
-Stable releases are made available on PyPI and GitHub; to ensure you keep up to
-date with them we suggest checking those sites for updates.
-Stable releases are also announced in the #**announce** stream on the Zulip
-Community server (https://chat.zulip.org), where you are welcome to make an
-account; future releases are expected to be announced in #**announce>terminal
-releases**.
+Note that there is no automatic-update system, so please track the update
+locations relevant to your installation version:
 
-If running from the `main` git branch, note that this does not automatically
-update, and you must do so manually.
-This also applies to other source or development installs, including eg.
-https://aur.archlinux.org/packages/python-zulip-term-git/
+**Stable releases**
+
+Before upgrading, we recommend you check the
+[Changes in recent releases](https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md)
+so you are aware of any important changes between releases.
+
+- These are now announced in the
+[#**announce>terminal releases**](https://chat.zulip.org/#narrow/stream/1-announce/topic/terminal.20releases)
+topic on the Zulip Community server (https://chat.zulip.org), which is visible
+without an account.
+
+  If you wish to receive emails when updates are announced, you are welcome to
+sign up for an account on this server, which will enable you to enable email
+notifications for the **#announce** stream
+([help article](https://zulip.com/help/using-zulip-via-email),
+[notifications settings on chat.zulip.org](https://chat.zulip.org/#settings/notifications)).
+
+- You can also customize your GitHub Watch setting on the project page to include releases.
+
+- PyPI provides a
+[RSS Release feed](https://pypi.org/rss/project/zulip-term/releases.xml), and
+various other services track this information.
+
+**Latest (git) versions**
+
+Versions installed from the `main` git branch will also not update
+automatically - the 'latest' refers to the status at the point of installation.
+
+This also applies to other source or development installs
+(eg. https://aur.archlinux.org/packages/python-zulip-term-git/).
+
+Therefore, upgrade your package using the command above, or one pertinent to
+your package system (eg. Arch).
+
+While the `main` branch is intended to remain stable, if upgrading between two
+arbitrary 'latest' versions, please be aware that **changes are not summarized**,
+though our commit log should be very readable.
 
 ## Running for the first time
 
