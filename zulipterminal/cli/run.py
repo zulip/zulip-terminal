@@ -221,23 +221,27 @@ def get_login_id(server_properties: Dict[str, Any]) -> str:
     return styled_input(label)
 
 
-def get_api_key(realm_url: str) -> Optional[Tuple[str, str]]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     from getpass import getpass
 
     server_properties = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
+
+    # Assuming we connect to and get data from the server, use the realm_url it suggests
+    # This avoids cases where there are redirects between http and https, for example
+    preferred_realm_url = server_properties["realm_uri"]
 
     login_id = get_login_id(server_properties)
     password = getpass(in_color("blue", "Password: "))
 
     response = requests.post(
-        url=f"{realm_url}/api/v1/fetch_api_key",
+        url=f"{preferred_realm_url}/api/v1/fetch_api_key",
         data={
             "username": login_id,
             "password": password,
         },
     )
     if response.status_code == requests.codes.OK:
-        return login_id, str(response.json()["api_key"])
+        return preferred_realm_url, login_id, str(response.json()["api_key"])
     return None
 
 
@@ -267,12 +271,12 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
-    login_id, api_key = login_data
+    preferred_realm_url, login_id, api_key = login_data
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
         api_key=api_key,
-        server_url=realm_url,
+        server_url=preferred_realm_url,
     )
     if not save_zuliprc_failure:
         print(f"Generated API key saved at {zuliprc_path}")
