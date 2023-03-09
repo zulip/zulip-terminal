@@ -16,33 +16,51 @@
 
 ## About
 
-Zulip Terminal is the official terminal client for Zulip, providing a [text-based user interface (TUI)](https://en.wikipedia.org/wiki/Text-based_user_interface).
+Zulip Terminal is the official terminal client for Zulip, providing a
+[text-based user interface (TUI)](https://en.wikipedia.org/wiki/Text-based_user_interface).
 
 Specific aims include:
-* Providing a broadly similar user experience to the Zulip web client, ultimately supporting all of its features
-* Enabling all actions to be achieved through the keyboard (see [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md))
-* Exploring alternative user interface designs suited to the display and input constraints
+* Providing a broadly similar user experience to the Zulip web client,
+  ultimately supporting all of its features
+* Enabling all actions to be achieved through the keyboard (see
+  [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md))
+* Exploring alternative user interface designs suited to the display and input
+  constraints
 * Supporting a wide range of platforms and terminal emulators
-* Making best use of available rows/columns to scale from 80x24 upwards (see [Small terminal notes](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#how-small-a-size-of-terminal-is-supported))
+* Making best use of available rows/columns to scale from 80x24 upwards (see
+  [Small terminal notes](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#how-small-a-size-of-terminal-is-supported))
 
-Learn how to use Zulip Terminal with our [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md).
+Learn how to use Zulip Terminal with our
+[Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md).
 
 ### Feature status
 
-We consider the client to already provide a fairly stable moderately-featureful everyday-user experience.
+We consider the client to already provide a fairly stable moderately-featureful
+everyday-user experience.
 
 The terminal client currently has a number of intentional differences to the Zulip web client:
-- Additional and occasionally *different* [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md) to better support keyboard-only navigation; other than directional movement these also include:
+- Additional and occasionally *different*
+  [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md)
+  to better support keyboard-only navigation; other than directional movement
+  these also include:
   - <kbd>z</kbd> - zoom in/out, between streams & topics, or all private messages & specific conversations
-  - <kbd>t</kbd> - toggle view of topics for a stream in left panel (**later adopted for recent topics in web client**)
+  - <kbd>t</kbd> - toggle view of topics for a stream in left panel
+    (**later adopted for recent topics in web client**)
   - <kbd>#</kbd> - narrow to messages in which you're mentioned (<kbd>@</kbd> is already used)
   - <kbd>f</kbd> - narrow to messages you've starred (are **f**ollowing)
-- Not marking additional messages read when the end of a conversation is visible ([FAQ entry](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#when-are-messages-marked-as-having-been-read))
-- Emoji and reactions are rendered as text only, for maximum terminal/font compatibility
-- Footlinks - footnotes for links (URLs) - make messages readable, while retaining a list of links to cross-reference
-- Content previewable in the web client, such as images, are also stored as footlinks
+- Not marking additional messages read when the end of a conversation is
+  visible
+  ([FAQ entry](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#when-are-messages-marked-as-having-been-read))
+- Emoji and reactions are rendered as text only, for maximum terminal/font
+  compatibility
+- Footlinks - footnotes for links (URLs) - make messages readable, while
+  retaining a list of links to cross-reference
+- Content previewable in the web client, such as images, are also stored as
+  footlinks
 
-The current development focus is on improving aspects of everyday usage which are more commonly used - to reduce the need for users to temporarily switch to another client for a particular feature.
+The current development focus is on improving aspects of everyday usage which
+are more commonly used - to reduce the need for users to temporarily switch to
+another client for a particular feature.
 
 Current limitations which we expect to only resolve over the long term include support for:
 * All operations performed by users with extra privileges (owners/admins)
@@ -50,8 +68,12 @@ Current limitations which we expect to only resolve over the long term include s
 * Using a mouse/pointer to achieve all actions
 * An internationalized UI
 
-For queries on missing feature support please take a look at the [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md),
-our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up on https://chat.zulip.org and chat with users and developers in the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream!
+For queries on missing feature support please take a look at the
+[Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md),
+our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up
+on https://chat.zulip.org and chat with users and developers in the
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
+stream!
 
 ### Supported platforms
 - Linux
@@ -60,7 +82,9 @@ our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up o
 
 ### Supported Server Versions
 
-The minimum server version that Zulip Terminal supports is [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#zulip-2-1-x-series). It may still work with earlier versions.
+The minimum server version that Zulip Terminal supports is
+[`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#zulip-2-1-x-series).
+It may still work with earlier versions.
 
 ### Supported Python Versions
 
@@ -68,7 +92,8 @@ Version 0.7.0 was the last release with support for Python 3.6.
 
 Version 0.6.0 was the last release with support for Python 3.5.
 
-Later releases and the main development branch are currently tested (on Ubuntu) with:
+Later releases and the main development branch are currently tested (on Ubuntu)
+with:
 - CPython 3.7-3.11
 - PyPy 3.7-3.9
 
@@ -83,52 +108,98 @@ In some cases this can give rise to the symptoms in issue #1145.
 
 ## Installation
 
-We recommend installing in a dedicated python virtual environment (see below) or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
+We recommend installing in a dedicated python virtual environment (see below)
+or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
 
-* **Stable** - Numbered stable releases are available on PyPI as the package [zulip-term](https://pypi.python.org/pypi/zulip-term)
+* **Stable** - Numbered stable releases are available on PyPI as the package
+  [zulip-term](https://pypi.python.org/pypi/zulip-term)
 
   To install, run a command like: `pip3 install zulip-term`
 
-* **Latest** - The latest development version can be installed from the main git repository
+* **Latest** - The latest development version can be installed from the main
+  git repository
 
-  To install, run a command like: `pip3 install git+https://github.com/zulip/zulip-terminal.git@main`
+  To install, run a command like:
+  `pip3 install git+https://github.com/zulip/zulip-terminal.git@main`
 
-We also provide some sample Dockerfiles to build docker images in [docker/](https://github.com/zulip/zulip-terminal/tree/main/docker).
+We also provide some sample Dockerfiles to build docker images in
+[docker/](https://github.com/zulip/zulip-terminal/tree/main/docker).
 
 ### Installing into an isolated Python virtual environment
 
-With the python 3.6+ required for running, the following should work on most systems:
-1. `python3 -m venv zt_venv` (creates a virtual environment named `zt_venv` in the current directory)
-2. `source zt_venv/bin/activate` (activates the virtual environment; this assumes a bash-like shell)
+With the python 3.6+ required for running, the following should work on most
+systems:
+1. `python3 -m venv zt_venv`
+   (creates a virtual environment named `zt_venv` in the current directory)
+2. `source zt_venv/bin/activate`
+   (activates the virtual environment; this assumes a bash-like shell)
 3. Run one of the install commands above, 
 
-If you open a different terminal window (or log-off/restart your computer), you'll need to run **step 2** of the above list again before running `zulip-term`, since that activates that virtual environment. You can read more about virtual environments in the [Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
+If you open a different terminal window (or log-off/restart your computer),
+you'll need to run **step 2** of the above list again before running
+`zulip-term`, since that activates that virtual environment.
+You can read more about virtual environments in the
+[Python 3 library venv documentation](https://docs.python.org/3/library/venv.html).
 
 ### Keeping your install up to date
 
-Stable releases are made available on PyPI and GitHub; to ensure you keep up to date with them we suggest checking those sites for updates.
-Stable releases are also announced in the #**announce** stream on the Zulip Community server (https://chat.zulip.org), where you are welcome to make an account; future releases are expected to be announced in #**announce>terminal releases**.
+Stable releases are made available on PyPI and GitHub; to ensure you keep up to
+date with them we suggest checking those sites for updates.
+Stable releases are also announced in the #**announce** stream on the Zulip
+Community server (https://chat.zulip.org), where you are welcome to make an
+account; future releases are expected to be announced in #**announce>terminal
+releases**.
 
-If running from the `main` git branch, note that this does not automatically update, and you must do so manually.
-This also applies to other source or development installs, including eg. https://aur.archlinux.org/packages/python-zulip-term-git/
+If running from the `main` git branch, note that this does not automatically
+update, and you must do so manually.
+This also applies to other source or development installs, including eg.
+https://aur.archlinux.org/packages/python-zulip-term-git/
 
 ## Running for the first time
 
-Upon first running `zulip-term` it looks for a `zuliprc` file, by default in your home directory, which contains the details to log into a Zulip server.
+Upon first running `zulip-term` it looks for a `zuliprc` file, by default in
+your home directory, which contains the details to log into a Zulip server.
 
 If it doesn't find this file, you have two options:
 
-1. `zulip-term` will prompt you for your server, email and password, and create a `zuliprc` file for you in that location
+1. `zulip-term` will prompt you for your server, email and password, and create
+   a `zuliprc` file for you in that location
 
-   **NOTE:** If you use Google, Github or another external authentication to access your Zulip organization then you likely won't have a password set and currently need to create one to use zulip-terminal. If your organization is on Zulip cloud, you can visit https://zulip.com/accounts/go?next=/accounts/password/reset to create a new password for your account. For self-hosted servers please go to your `<Organization URL>/accounts/password/reset/` (eg: https://chat.zulip.org/accounts/password/reset/) to create a new password for your account.
+   **NOTE:** If you use Google, Github or another external authentication to
+   access your Zulip organization then you likely won't have a password set and
+   currently need to create one to use zulip-terminal.
+   If your organization is on Zulip cloud, you can visit
+   https://zulip.com/accounts/go?next=/accounts/password/reset to create a new
+   password for your account.
+   For self-hosted servers please go to your
+   `<Organization URL>/accounts/password/reset/` (eg:
+   https://chat.zulip.org/accounts/password/reset/) to create a new password
+   for your account.
 
-2. Each time you run `zulip-term`, you can specify the path to an alternative `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c /path/to/zuliprc`
+2. Each time you run `zulip-term`, you can specify the path to an alternative
+   `zuliprc` file using the `-c` or `--config-file` options, eg. `$ zulip-term -c
+   /path/to/zuliprc`
 
-   A `.zuliprc` file corresponding to your account on a particular Zulip server can be downloaded via Web or Desktop applications connected to that server. In recent versions this can be found in your **Personal settings** in the **Account & privacy** section, under **API key** as 'Show/change your API key'. If this is your only Zulip account, you may want to move and rename this file to the default file location above, or rename it to something more memorable that you can pass to the `---config-file` option. This `.zuliprc` file gives you all the permissions you have as that user. Similar `.zuliprc files` can be downloaded from the **Bots** section for any bots you have set up, though with correspondingly limited permissions.
+   A `.zuliprc` file corresponding to your account on a particular Zulip server
+   can be downloaded via Web or Desktop applications connected to that server.
+   In recent versions this can be found in your **Personal settings** in the
+   **Account & privacy** section, under **API key** as 'Show/change your API key'.
+   If this is your only Zulip account, you may want to move and rename this
+   file to the default file location above, or rename it to something more
+   memorable that you can pass to the `---config-file` option.
+   This `.zuliprc` file gives you all the permissions you have as that user.
+   Similar `.zuliprc files` can be downloaded from the **Bots** section for any
+   bots you have set up, though with correspondingly limited permissions.
 
-**NOTE:** If your server uses self-signed certificates or an insecure connection, you will need to add extra options to the `zuliprc` file manually - see the documentation for the [Zulip python module](https://pypi.org/project/zulip/).
+**NOTE:** If your server uses self-signed certificates or an insecure
+connection, you will need to add extra options to the `zuliprc` file manually -
+see the documentation for the [Zulip python module](https://pypi.org/project/zulip/).
 
-We suggest running `zulip-term` using the `-e` or `--explore` option (in explore mode) when you are trying Zulip Terminal for the first time, where we intentionally do not mark messages as read. Try following along with our [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md) to get the hang of things.
+We suggest running `zulip-term` using the `-e` or `--explore` option (in
+explore mode) when you are trying Zulip Terminal for the first time, where we
+intentionally do not mark messages as read. Try following along with our
+[Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md)
+to get the hang of things.
 
 ## Configuration
 
@@ -170,11 +241,14 @@ notify=disabled
 color-depth=256
 ```
 
-> **NOTE:** Most of these configuration settings may be specified on the command line when `zulip-term` is started; `zulip-term -h` or `zulip-term --help` will give the full list of options.
+> **NOTE:** Most of these configuration settings may be specified on the
+command line when `zulip-term` is started; `zulip-term -h` or `zulip-term --help`
+will give the full list of options.
 
 ### Notifications
 
-Note that notifications are not currently supported on WSL; see [#767](https://github.com/zulip/zulip-terminal/issues/767).
+Note that notifications are not currently supported on WSL; see
+[#767](https://github.com/zulip/zulip-terminal/issues/767).
 
 #### Linux
 
@@ -186,7 +260,11 @@ sudo apt-get install libnotify-bin
 
 #### OSX
 
-No additional package is required to enable notifications in OS X. However to have a notification sound, set the following variable (based on your type of shell). The sound value (here Ping) can be any one of the `.aiff` files found at `/System/Library/Sounds` or `~/Library/Sounds`.
+No additional package is required to enable notifications in OS X.
+However to have a notification sound, set the following variable (based on your
+type of shell).
+The sound value (here Ping) can be any one of the `.aiff` files found at
+`/System/Library/Sounds` or `~/Library/Sounds`.
 
 *Bash*
 ```
@@ -201,12 +279,19 @@ source ~/.zshenv
 
 ### Copy to clipboard
 
-Zulip Terminal allows users to copy certain texts to the clipboard via a Python module, [`Pyperclip`](https://pypi.org/project/pyperclip/). This module makes use of various system packages which may or may not come with the OS.
-The "Copy to clipboard" feature is currently only available for copying Stream email, from the [Stream information popup](docs/hotkeys.md#stream-list-actions).
+Zulip Terminal allows users to copy certain texts to the clipboard via a Python
+module, [`Pyperclip`](https://pypi.org/project/pyperclip/).
+This module makes use of various system packages which may or may not come with
+the OS.
+The "Copy to clipboard" feature is currently only available for copying Stream
+email, from the [Stream information popup](docs/hotkeys.md#stream-list-actions).
 
 #### Linux
 
-On Linux, this module makes use of `xclip` or `xsel` commands, which should already come with the OS. If none of these commands are installed on your system, then install any ONE using:
+On Linux, this module makes use of `xclip` or `xsel` commands, which should
+already come with the OS.
+If none of these commands are installed on your system, then install any ONE
+using:
 ```
 sudo apt-get install xclip [Recommended]
 ```
