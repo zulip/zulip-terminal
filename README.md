@@ -171,8 +171,8 @@ If it doesn't find this file, you have two options:
    - If your organization is on Zulip cloud, you can visit
    https://zulip.com/accounts/go?next=/accounts/password/reset to create a new
    password for your account.
-   - For self-hosted servers please go to your
-   `<Organization URL>/accounts/password/reset/` to create a new password for
+   - For self-hosted servers please go to your equivalent of
+   `<Zulip server URL>/accounts/password/reset/` to create a new password for
    your account (eg: https://chat.zulip.org/accounts/password/reset/).
 
 2. Each time you run `zulip-term`, you can specify the path to an alternative

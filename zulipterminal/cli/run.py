@@ -244,14 +244,14 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
-        f"\nNOTE: The {in_color('blue', 'Zulip URL')}"
+        f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
         f" is where you would go in a web browser to log in to Zulip."
         f"\nIt often looks like one of the following:"
         f"\n   {in_color('green', 'your-org.zulipchat.com')} (Zulip cloud)"
         f"\n   {in_color('green', 'zulip.your-org.com')} (self-hosted servers)"
         f"\n   {in_color('green', 'chat.zulip.org')} (the Zulip community server)"
     )
-    realm_url = styled_input("Zulip URL: ")
+    realm_url = styled_input("Zulip server URL: ")
     if realm_url.startswith("localhost"):
         realm_url = f"http://{realm_url}"
     elif not realm_url.startswith("http"):
