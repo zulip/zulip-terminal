@@ -11,7 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 import requests
 from urwid import display_common, set_encoding
@@ -206,10 +206,9 @@ def styled_input(label: str) -> str:
     return input(in_color("blue", label))
 
 
-def get_login_id(realm_url: str) -> str:
-    res_json = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
-    require_email_format_usernames = res_json["require_email_format_usernames"]
-    email_auth_enabled = res_json["email_auth_enabled"]
+def get_login_id(server_properties: Dict[str, Any]) -> str:
+    require_email_format_usernames = server_properties["require_email_format_usernames"]
+    email_auth_enabled = server_properties["email_auth_enabled"]
 
     if not require_email_format_usernames and email_auth_enabled:
         label = "Email or Username: "
@@ -225,8 +224,11 @@ def get_login_id(realm_url: str) -> str:
 def get_api_key(realm_url: str) -> Optional[Tuple[str, str]]:
     from getpass import getpass
 
-    login_id = get_login_id(realm_url)
+    server_properties = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
+
+    login_id = get_login_id(server_properties)
     password = getpass(in_color("blue", "Password: "))
+
     response = requests.post(
         url=f"{realm_url}/api/v1/fetch_api_key",
         data={
