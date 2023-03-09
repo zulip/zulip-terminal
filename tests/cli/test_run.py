@@ -55,16 +55,13 @@ def test_in_color(color: str, code: str, text: str = "some text") -> None:
     ],
 )
 def test_get_login_id(mocker: MockerFixture, json: Dict[str, bool], label: str) -> None:
-    response = mocker.Mock(json=lambda: json)
-    mocked_get = mocker.patch("requests.get", return_value=response)
     mocked_styled_input = mocker.patch(
         MODULE + ".styled_input", return_value="input return value"
     )
 
-    result = get_login_id("REALM_URL")
+    result = get_login_id(json)
 
     assert result == "input return value"
-    mocked_get.assert_called_with(url="REALM_URL/api/v1/server_settings")
     mocked_styled_input.assert_called_with(label + ": ")
 
 
