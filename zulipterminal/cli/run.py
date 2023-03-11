@@ -220,15 +220,24 @@ def get_login_label(server_properties: ServerSettings) -> str:
         return "Email: "
 
 
+class NotAZulipOrganizationError(Exception):
+    pass
+
+
 def get_server_settings(realm_url: str) -> ServerSettings:
-    server_properties = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
-    return server_properties
+    response = requests.get(url=f"{realm_url}/api/v1/server_settings")
+    if response.status_code != requests.codes.OK:
+        raise NotAZulipOrganizationError(realm_url)
+    return response.json()
 
 
 def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     from getpass import getpass
 
-    server_properties = get_server_settings(realm_url)
+    try:
+        server_properties = get_server_settings(realm_url)
+    except NotAZulipOrganizationError:
+        exit_with_error(f"No Zulip Organization found at {realm_url}.")
 
     # Assuming we connect to and get data from the server, use the realm_url it suggests
     # This avoids cases where there are redirects between http and https, for example

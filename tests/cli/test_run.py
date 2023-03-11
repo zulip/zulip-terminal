@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple
 
 import pytest
+import requests
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
 from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
+    NotAZulipOrganizationError,
     _write_zuliprc,
     exit_with_error,
     get_login_label,
@@ -90,13 +92,30 @@ def test_get_server_settings(
     server_settings_minimal: ServerSettings,
     realm_url: str = "https://chat.zulip.org",
 ) -> None:
-    response = mocker.Mock(json=lambda: server_settings_minimal)
+    response = mocker.Mock(
+        status_code=requests.codes.OK, json=lambda: server_settings_minimal
+    )
     mocked_get = mocker.patch("requests.get", return_value=response)
 
     result = get_server_settings(realm_url)
 
     assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
     assert result == server_settings_minimal
+
+
+def test_get_server_settings__not_a_zulip_organization(
+    mocker: MockerFixture, realm_url: str = "https://google.com"
+) -> None:
+    response = mocker.Mock(
+        status_code=requests.codes.bad_request  # FIXME: Test others?
+    )
+    mocked_get = mocker.patch("requests.get", return_value=response)
+
+    with pytest.raises(NotAZulipOrganizationError) as exc:
+        get_server_settings(realm_url)
+
+    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    assert str(exc.value) == realm_url
 
 
 @pytest.mark.parametrize("options", ["-h", "--help"])
