@@ -12,7 +12,7 @@ from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
     _write_zuliprc,
     exit_with_error,
-    get_login_id,
+    get_login_label,
     in_color,
     main,
     parse_args,
@@ -55,19 +55,13 @@ def test_in_color(color: str, code: str, text: str = "some text") -> None:
         (dict(require_email_format_usernames=True, email_auth_enabled=False), "Email"),
     ],
 )
-def test_get_login_id(
+def test_get_login_label(
     mocker: MockerFixture,
     json: ServerSettings,  # NOTE: pytest does not ensure dict above is complete
     label: str,
 ) -> None:
-    mocked_styled_input = mocker.patch(
-        MODULE + ".styled_input", return_value="input return value"
-    )
-
-    result = get_login_id(json)
-
-    assert result == "input return value"
-    mocked_styled_input.assert_called_with(label + ": ")
+    result = get_login_label(json)
+    assert result == label + ": "
 
 
 @pytest.mark.parametrize("options", ["-h", "--help"])
