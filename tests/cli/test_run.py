@@ -8,6 +8,7 @@ import pytest
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
+from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
     _write_zuliprc,
     exit_with_error,
@@ -54,7 +55,11 @@ def test_in_color(color: str, code: str, text: str = "some text") -> None:
         (dict(require_email_format_usernames=True, email_auth_enabled=False), "Email"),
     ],
 )
-def test_get_login_id(mocker: MockerFixture, json: Dict[str, bool], label: str) -> None:
+def test_get_login_id(
+    mocker: MockerFixture,
+    json: ServerSettings,  # NOTE: pytest does not ensure dict above is complete
+    label: str,
+) -> None:
     mocked_styled_input = mocker.patch(
         MODULE + ".styled_input", return_value="input return value"
     )
