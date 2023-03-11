@@ -357,3 +357,59 @@ Event = Union[
     UpdateGlobalNotificationsEvent,
     RealmUserEvent,
 ]
+
+###############################################################################
+# In response from:
+#   https://zulip.com/api/get-server-settings
+
+AuthenticationMethod = Literal[
+    "password",
+    "dev",
+    "email",
+    "ldap",
+    "remoteuser",
+    "github",
+    "azuread",
+    "gitlab",  # New in Zulip 3.0, ZFL 1
+    "apple",
+    "google",
+    "saml",
+    "openid_connect",
+]
+
+
+class ExternalAuthenticationMethod(TypedDict):
+    name: str
+    display_name: str
+    display_icon: Optional[str]
+    login_url: str
+    signup_url: str
+
+
+# As of ZFL 121
+class ServerSettings(TypedDict):
+    # authentication_methods is deprecated in favor of external_authentication_methods
+    authentication_methods: Dict[AuthenticationMethod, bool]
+    # Added in Zulip 2.1.0
+    external_authentication_methods: List[ExternalAuthenticationMethod]
+
+    # TODO Refactor ZFL to default to zero
+    zulip_feature_level: NotRequired[int]  # New in Zulip 3.0, ZFL 1
+    zulip_version: str
+    zulip_merge_base: NotRequired[str]  # New in Zulip 5.0, ZFL 88
+
+    push_notifications_enabled: bool
+    is_incompatible: bool
+    email_auth_enabled: bool
+    require_email_format_usernames: bool
+
+    # This appears to be present for all Zulip servers, even for no organization,
+    # which makes it useful to determine a 'preferred' URL for the server/organization
+    realm_uri: str
+
+    # These may only be present if it's an organization, not just a Zulip server
+    # Re realm_name discussion, See #api document > /server_settings: `realm_name`, etc.
+    realm_name: NotRequired[str]  # Absence indicates root Zulip server but no realm
+    realm_icon: str
+    realm_description: str
+    realm_web_public_access_enabled: NotRequired[bool]  # New in Zulip 5.0, ZFL 116
