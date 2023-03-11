@@ -13,6 +13,7 @@ from zulipterminal.cli.run import (
     _write_zuliprc,
     exit_with_error,
     get_login_label,
+    get_server_settings,
     in_color,
     main,
     parse_args,
@@ -62,6 +63,40 @@ def test_get_login_label(
 ) -> None:
     result = get_login_label(json)
     assert result == label + ": "
+
+
+@pytest.fixture
+def server_settings_minimal() -> ServerSettings:
+    return ServerSettings(
+        authentication_methods={},
+        external_authentication_methods=[],
+        zulip_feature_level=0,  # New in Zulip 3.0, ZFL 1
+        zulip_version="2.1.0",
+        zulip_merge_base="",  # New in Zulip 5.0, ZFL 88
+        push_notifications_enabled=True,
+        is_incompatible=False,
+        require_email_format_usernames=False,
+        email_auth_enabled=True,
+        realm_uri="chat.zulip.zulip",  # Present if a Zulip server; preferred URL
+        realm_name="A Zulip Server",  # Present if Organization is active at URL
+        realm_icon="...",
+        realm_description="Very exciting server",
+        realm_web_public_access_enabled=True,  # New in Zulip 5.0, ZFL 116
+    )
+
+
+def test_get_server_settings(
+    mocker: MockerFixture,
+    server_settings_minimal: ServerSettings,
+    realm_url: str = "https://chat.zulip.org",
+) -> None:
+    response = mocker.Mock(json=lambda: server_settings_minimal)
+    mocked_get = mocker.patch("requests.get", return_value=response)
+
+    result = get_server_settings(realm_url)
+
+    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    assert result == server_settings_minimal
 
 
 @pytest.mark.parametrize("options", ["-h", "--help"])
