@@ -212,14 +212,12 @@ def get_login_label(server_properties: ServerSettings) -> str:
     email_auth_enabled = server_properties["email_auth_enabled"]
 
     if not require_email_format_usernames and email_auth_enabled:
-        label = "Email or Username: "
+        return "Email or Username: "
     elif not require_email_format_usernames:
-        label = "Username: "
+        return "Username: "
     else:
         # TODO: Validate Email address
-        label = "Email: "
-
-    return label
+        return "Email: "
 
 
 def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
