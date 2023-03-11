@@ -11,11 +11,12 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
 from urwid import display_common, set_encoding
 
+from zulipterminal.api_types import ServerSettings
 from zulipterminal.config.themes import (
     InvalidThemeColorCode,
     aliased_themes,
@@ -206,7 +207,7 @@ def styled_input(label: str) -> str:
     return input(in_color("blue", label))
 
 
-def get_login_id(server_properties: Dict[str, Any]) -> str:
+def get_login_id(server_properties: ServerSettings) -> str:
     require_email_format_usernames = server_properties["require_email_format_usernames"]
     email_auth_enabled = server_properties["email_auth_enabled"]
 
