@@ -207,7 +207,7 @@ def styled_input(label: str) -> str:
     return input(in_color("blue", label))
 
 
-def get_login_id(server_properties: ServerSettings) -> str:
+def get_login_label(server_properties: ServerSettings) -> str:
     require_email_format_usernames = server_properties["require_email_format_usernames"]
     email_auth_enabled = server_properties["email_auth_enabled"]
 
@@ -219,7 +219,7 @@ def get_login_id(server_properties: ServerSettings) -> str:
         # TODO: Validate Email address
         label = "Email: "
 
-    return styled_input(label)
+    return label
 
 
 def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
@@ -231,7 +231,8 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     # This avoids cases where there are redirects between http and https, for example
     preferred_realm_url = server_properties["realm_uri"]
 
-    login_id = get_login_id(server_properties)
+    login_id_label = get_login_label(server_properties)
+    login_id = styled_input(login_id_label)
     password = getpass(in_color("blue", "Password: "))
 
     response = requests.post(
