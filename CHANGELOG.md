@@ -364,7 +364,7 @@ While not composed of as many significant changes as 0.5.0, this is a meaningful
 - Support nested lists (bulleted and numbered)
 - Style reaction counts which include yourself differently (inverted colors, typically)
 - Sort reactions alphabetically for consistency
-- Support color depths other than 256-colors; try --color-depth=1 for a retro, high-constrast experience!
+- Support color depths other than 256-colors; try --color-depth=1 for a retro, high-contrast experience!
 - Improve specificity of colors in default theme, enhancing rendering and consistency in 256 color mode
 - Use triangle symbol (▶) to separate streams and topics, instead of simply '>'
 - The 'bar' extending from topics or private message recipients is now thinner and colored if a stream

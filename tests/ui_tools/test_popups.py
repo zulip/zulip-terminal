@@ -1338,7 +1338,7 @@ class TestStreamInfoView:
             ),
         ],
     )
-    def test_markup_descrption(
+    def test_markup_description(
         self, rendered_description: str, expected_markup: Tuple[None, Any]
     ) -> None:
         model = self.controller.model

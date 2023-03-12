@@ -3295,11 +3295,11 @@ class TestModel:
         ids=[
             "user_subscribed_to_stream:ZFLNone",
             "user_subscribed_to_stream:ZFL34",
-            "user_subscribed_to_stream:ZFL34shouldbe35",
+            "user_subscribed_to_stream:ZFL34_should_be_35",
             "user_subscribed_to_stream:ZFL35",
             "user_unsubscribed_from_stream:ZFLNone",
             "user_unsubscribed_from_stream:ZFL34",
-            "user_unsubscribed_from_stream:ZFL34shouldbe35",
+            "user_unsubscribed_from_stream:ZFL34_should_be_35",
             "user_unsubscribed_from_stream:ZFL35",
         ],
     )
@@ -3360,9 +3360,9 @@ class TestModel:
             ({"op": "peer_remove", "user_ids": [12, 11]}, 35, [1001]),
         ],
         ids=[
-            "users_subscribed_to_stream:ZFL34shouldbe35",
+            "users_subscribed_to_stream:ZFL34_should_be_35",
             "users_subscribed_to_stream:ZFL35",
-            "users_unsubscribed_from_stream:ZFL34shouldbe35",
+            "users_unsubscribed_from_stream:ZFL34_should_be_35",
             "users_unsubscribed_from_stream:ZFL35",
         ],
     )
@@ -3390,9 +3390,9 @@ class TestModel:
             ({"op": "peer_remove", "user_ids": [12]}, 35, [1001, 11]),
         ],
         ids=[
-            "user_subscribed_to_streams:ZFL34shouldbe35",
+            "user_subscribed_to_streams:ZFL34_should_be_35",
             "user_subscribed_to_streams:ZFL35",
-            "user_unsubscribed_from_streams:ZFL34shouldbe35",
+            "user_unsubscribed_from_streams:ZFL34_should_be_35",
             "user_unsubscribed_from_streams:ZFL35",
         ],
     )
