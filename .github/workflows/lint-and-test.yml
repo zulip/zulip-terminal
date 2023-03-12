@@ -83,9 +83,9 @@ jobs:
       - name: Check code & tests meet black standards
         run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
 
-  codespell:
+  spellcheck:
     runs-on: ubuntu-latest
-    name: Lint - Spelling (codespell)
+    name: Lint - Spellcheck
     steps:
       - uses: actions/checkout@v3
         with:
@@ -98,7 +98,7 @@ jobs:
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check spelling
-        run: ./tools/run-codespell
+        run: ./tools/run-spellcheck
 
   hotkeys:
     runs-on: ubuntu-latest
@@ -168,7 +168,7 @@ jobs:
       - ruff
       - isort
       - black
-      - codespell
+      - spellcheck
       - hotkeys
       - docstrings
       - base_pytest
