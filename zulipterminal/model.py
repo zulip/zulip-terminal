@@ -1444,7 +1444,7 @@ class Model:
                 ]
                 recipient = ", ".join(extra_targets)
             if not self.user_settings()["pm_content_in_desktop_notifications"]:
-                content = f"New private message from {message['sender_full_name']}"
+                content = f"New direct message from {message['sender_full_name']}"
                 hidden_content = True
         elif message["type"] == "stream":
             stream_id = message["stream_id"]
