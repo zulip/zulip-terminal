@@ -2,34 +2,18 @@
 
 import subprocess
 import sys
-from typing import List
+from typing import List, Tuple
 
 
-TOOLS: List[List[str]] = [
-    [
-        "codespell",
-        "--toml",
-        "pyproject.toml",
-    ],
-    [
-        "typos",
-        "--format",
-        "brief",
+TOOLS: List[Tuple[List[str], str]] = [
+    (
+        ["codespell"],
+        "-S",
+    ),
+    (
+        ["typos", "--format", "brief"],
         "--exclude",
-        "zulipterminal/unicode_emojis.py",  # Words are defined externally
-        "--exclude",
-        "tests/ui_tools/test_messages.py",  # IST as Indian timezone
-        "--exclude",
-        "tests/ui_tools/test_boxes.py",  # Word prefixes as part of autocomplete test
-        "--exclude",
-        "tests/config/test_themes.py",  # Wrong words as part of theme syntax test
-        "--exclude",
-        "tests/model/test_model.py",  # 2nd not recognized crate-ci/typos#466
-        "--exclude",
-        "docs/FAQ.md",  # iterm2 is proper noun [term, item, interm]
-        "--exclude",
-        "tools/run-spellcheck",  # Exclude ourself due to notes
-    ],
+    ),
 ]
 SOURCE = [
     "zulipterminal",
@@ -41,15 +25,28 @@ SOURCE = [
     "README.md",
     "CHANGELOG.md",
 ]
+EXCLUDE_FILES = [
+    "zulipterminal/unicode_emojis.py",  # Words are defined externally
+    "tests/ui_tools/test_messages.py",  # IST as Indian timezone
+    "tests/ui_tools/test_boxes.py",  # Word prefixes as part of autocomplete test
+    "tests/config/test_themes.py",  # Wrong words as part of theme syntax test
+    "tests/model/test_model.py",  # 2nd not recognized crate-ci/typos#466
+    "docs/FAQ.md",  # iterm2 is proper noun [term, item, interm]
+    "tools/run-spellcheck",  # Exclude ourself due to notes
+]
 
 failed_commands = []
 result = 0
-for command in TOOLS:
-    result = subprocess.call(command + SOURCE)
+for base_command, exclude_option in TOOLS:
+    expanded_excludes = []
+    for exclude_file in EXCLUDE_FILES:
+        expanded_excludes.extend([exclude_option, exclude_file])
+    result = subprocess.call(base_command + expanded_excludes + SOURCE)
+    readable_command = base_command[0]
     if result == 0:
-        print(f"Spellchecker {command[0]} passed with no errors.")
+        print(f"Spellchecker {readable_command} passed with no errors.")
     else:
-        failed_commands.append(command[0])
+        failed_commands.append(readable_command)
 
 if result == 0:
     print("All files appear to have correct spelling.")
