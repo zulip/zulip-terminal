@@ -2081,7 +2081,7 @@ class TestModel:
 
     @pytest.mark.parametrize(
         "hide_content, expected_content",
-        [(True, "New private message from Foo Foo"), (False, "private content here.")],
+        [(True, "New direct message from Foo Foo"), (False, "private content here.")],
     )
     def test_notify_users_hides_PM_content_based_on_user_setting(
         self, mocker, model, private_message_fixture, hide_content, expected_content
