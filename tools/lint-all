@@ -19,7 +19,7 @@ tools = {
     "Type consistency (mypy)": "./tools/run-mypy",
     "PEP8 & more (ruff)": ["ruff"] + python_sources,
     "Formatting (black)": ["black", "--check"] + python_sources,
-    "Common spelling mistakes (codespell)": "./tools/run-codespell",
+    "Common spelling mistakes": "./tools/run-spellcheck",
     "Hotkey linting & docs sync check": [
         "./tools/generate_hotkeys.py",
         "--check-only",
