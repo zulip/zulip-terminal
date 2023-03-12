@@ -109,7 +109,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('REPLY_AUTHOR', {
         'keys': ['R'],
-        'help_text': 'Reply privately to the sender of the current message',
+        'help_text': 'Reply directly to the sender of the current message',
         'key_category': 'msg_actions',
     }),
     ('EDIT_MESSAGE', {
@@ -176,7 +176,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     ('TOGGLE_NARROW', {
         'keys': ['z'],
         'help_text':
-            'Narrow to a topic/private-chat, or stream/all-private-messages',
+            'Narrow to a topic/direct-chat, or stream/all-direct-messages',
         'key_category': 'msg_actions',
     }),
     ('TOGGLE_TOPIC', {
@@ -191,7 +191,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('ALL_PM', {
         'keys': ['P'],
-        'help_text': 'Narrow to all private messages',
+        'help_text': 'Narrow to all direct messages',
         'key_category': 'navigation',
     }),
     ('ALL_STARRED', {
@@ -211,7 +211,7 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
     }),
     ('NEXT_UNREAD_PM', {
         'keys': ['p'],
-        'help_text': 'Next unread private message',
+        'help_text': 'Next unread direct message',
         'key_category': 'navigation',
     }),
     ('SEARCH_PEOPLE', {

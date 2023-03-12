@@ -25,11 +25,11 @@
 |Scroll down|<kbd>page</kbd> + <kbd>down</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>end</kbd> / <kbd>G</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>esc</kbd>|
-|Narrow to all private messages|<kbd>P</kbd>|
+|Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
 |Narrow to messages in which you're mentioned|<kbd>#</kbd>|
 |Next unread topic|<kbd>n</kbd>|
-|Next unread private message|<kbd>p</kbd>|
+|Next unread direct message|<kbd>p</kbd>|
 |Perform current action|<kbd>enter</kbd>|
 
 ## Searching
@@ -47,14 +47,14 @@
 |Reply to the current message|<kbd>r</kbd> / <kbd>enter</kbd>|
 |Reply mentioning the sender of the current message|<kbd>@</kbd>|
 |Reply quoting the current message text|<kbd>></kbd>|
-|Reply privately to the sender of the current message|<kbd>R</kbd>|
+|Reply directly to the sender of the current message|<kbd>R</kbd>|
 |Edit message's content or topic|<kbd>e</kbd>|
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
 |Show/hide Emoji picker popup for current message|<kbd>:</kbd>|
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
-|Narrow to a topic/private-chat, or stream/all-private-messages|<kbd>z</kbd>|
+|Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Add/remove thumbs-up reaction to the current message|<kbd>+</kbd>|
 |Add/remove star status of the current message|<kbd>ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
