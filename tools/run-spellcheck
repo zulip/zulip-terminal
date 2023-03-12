@@ -2,10 +2,36 @@
 
 import subprocess
 import sys
+from typing import List
 
 
-cmds = ["codespell"]
-files = [
+TOOLS: List[List[str]] = [
+    [
+        "codespell",
+        "--toml",
+        "pyproject.toml",
+    ],
+    [
+        "typos",
+        "--format",
+        "brief",
+        "--exclude",
+        "zulipterminal/unicode_emojis.py",  # Words are defined externally
+        "--exclude",
+        "tests/ui_tools/test_messages.py",  # IST as Indian timezone
+        "--exclude",
+        "tests/ui_tools/test_boxes.py",  # Word prefixes as part of autocomplete test
+        "--exclude",
+        "tests/config/test_themes.py",  # Wrong words as part of theme syntax test
+        "--exclude",
+        "tests/model/test_model.py",  # 2nd not recognized crate-ci/typos#466
+        "--exclude",
+        "docs/FAQ.md",  # iterm2 is proper noun [term, item, interm]
+        "--exclude",
+        "tools/run-spellcheck",  # Exclude ourself due to notes
+    ],
+]
+SOURCE = [
     "zulipterminal",
     "tests",
     "tools",
@@ -16,12 +42,22 @@ files = [
     "CHANGELOG.md",
 ]
 
-result = subprocess.call(cmds + ["--toml pyproject.toml"] + files)
+failed_commands = []
+result = 0
+for command in TOOLS:
+    result = subprocess.call(command + SOURCE)
+    if result == 0:
+        print(f"Spellchecker {command[0]} passed with no errors.")
+    else:
+        failed_commands.append(command[0])
 
 if result == 0:
     print("All files appear to have correct spelling.")
 else:
-    print("Some files have incorrect spelling according to codespell.")
-    print("Try 'codespell -i3 -w <path>' to fix a path recursively.")
+    print(
+        f"Some files have incorrect spelling according to spellcheckers ({', '.join(failed_commands)})."
+    )
+    if "codespell" in failed_commands:
+        print("Try 'codespell -i3 -w <path>' to fix a path recursively.")
 
 sys.exit(result)
