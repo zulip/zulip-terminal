@@ -9,7 +9,7 @@ target-version = ['py37']
 # test_themes: uses wrong words as part of a theme syntax test
 # test_boxes: uses word prefixes as part of an autocomplete test
 # test_messages: uses IST as Indian time zone, which is confused for IS/IT/ITS/IT'S/etc
-skip = "zulipterminal/unicode_emojis.py,tests/config/test_themes.py,tests/ui_tools/test_boxes.py,tests/ui_tools/test_messages.py"
+skip = "zulipterminal/unicode_emojis.py,tests/config/test_themes.py,tests/ui_tools/test_boxes.py,tests/ui_tools/test_messages.py,tools/run-spellcheck"
 
 [tool.coverage.run]
 branch = true
