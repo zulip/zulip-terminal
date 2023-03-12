@@ -908,14 +908,19 @@ class TestMessageBox:
                 f"PTEST {STREAM_TOPIC_SEPARATOR}",
                 ("bar", [("s#bd6", "PTEST"), ("s#bd6", ": topic narrow")]),
             ),
-            ([["is", "private"]], 1, "You and ", "All private messages"),
-            ([["is", "private"]], 2, "You and ", "All private messages"),
-            ([["pm_with", "boo@zulip.com"]], 1, "You and ", "Private conversation"),
+            ([["is", "private"]], 1, "You and ", "All direct messages"),
+            ([["is", "private"]], 2, "You and ", "All direct messages"),
+            (
+                [["pm_with", "boo@zulip.com"]],
+                1,
+                "You and ",
+                "Direct message conversation",
+            ),
             (
                 [["pm_with", "boo@zulip.com, bar@zulip.com"]],
                 2,
                 "You and ",
-                "Group private conversation",
+                "Group direct message conversation",
             ),
             (
                 [["is", "starred"]],
@@ -1175,7 +1180,7 @@ class TestMessageBox:
                         " You can't edit messages sent by other users"
                         " that already have a topic."
                     ),
-                    "private": " You can't edit private messages sent by other users.",
+                    "private": " You can't edit direct messages sent by other users.",
                 },
                 id="msg_sent_by_other_user_with_topic",
             ),
@@ -1250,7 +1255,7 @@ class TestMessageBox:
                         " Only topic editing is allowed."
                         " This is someone else's message but with (no topic)."
                     ),
-                    "private": " You can't edit private messages sent by other users.",
+                    "private": " You can't edit direct messages sent by other users.",
                 },
                 id="msg_sent_by_other_with_no_topic",
             ),

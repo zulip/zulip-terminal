@@ -204,7 +204,7 @@ class MessageBox(urwid.Pile):
         if curr_narrow == []:
             text_to_fill = "All messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = "All private messages"
+            text_to_fill = "All direct messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
             text_to_fill = "Starred messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
@@ -227,9 +227,9 @@ class MessageBox(urwid.Pile):
                     [(bar_color, self.stream_name)],
                 )
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
-            text_to_fill = "Group private conversation"
+            text_to_fill = "Group direct message conversation"
         else:
-            text_to_fill = "Private conversation"
+            text_to_fill = "Direct message conversation"
 
         if is_search_narrow:
             title_markup = (
@@ -1017,7 +1017,7 @@ class MessageBox(urwid.Pile):
                     )
                 else:
                     self.model.controller.report_error(
-                        [" You can't edit private messages sent by other users."]
+                        [" You can't edit direct messages sent by other users."]
                     )
                 return key
             # Check if editing is allowed in the realm
