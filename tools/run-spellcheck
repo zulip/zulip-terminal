@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import subprocess
 import sys
 from typing import List, Tuple
@@ -35,26 +36,45 @@ EXCLUDE_FILES = [
     "tools/run-spellcheck",  # Exclude ourself due to notes
 ]
 
-failed_commands = []
-result = 0
-for base_command, exclude_option in TOOLS:
-    expanded_excludes = []
-    for exclude_file in EXCLUDE_FILES:
-        expanded_excludes.extend([exclude_option, exclude_file])
-    result = subprocess.call(base_command + expanded_excludes + SOURCE)
-    readable_command = base_command[0]
-    if result == 0:
-        print(f"Spellchecker {readable_command} passed with no errors.")
+
+def main(show: bool) -> None:
+    always_pass = show
+    exclude_files = [] if show else EXCLUDE_FILES
+
+    failed_commands = []
+    result = 0
+    for base_command, exclude_option in TOOLS:
+        expanded_excludes = []
+        for exclude_file in exclude_files:
+            expanded_excludes.extend([exclude_option, exclude_file])
+        result = subprocess.call(base_command + expanded_excludes + SOURCE)
+        readable_command = base_command[0]
+        if result == 0:
+            print(f"Spellchecker {readable_command} passed with no errors.")
+        else:
+            failed_commands.append(readable_command)
+
+    if always_pass:
+        result = 0
+        print("Only showing warnings.")
+    elif result == 0:
+        print("All files appear to have correct spelling.")
     else:
-        failed_commands.append(readable_command)
+        print(
+            f"Some files have incorrect spelling according to spellcheckers ({', '.join(failed_commands)})."
+        )
+        if "codespell" in failed_commands:
+            print("Try 'codespell -i3 -w <path>' to fix a path recursively.")
 
-if result == 0:
-    print("All files appear to have correct spelling.")
-else:
-    print(
-        f"Some files have incorrect spelling according to spellcheckers ({', '.join(failed_commands)})."
+    sys.exit(result)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--show",
+        action="store_true",
+        help="Don't use excludes; show what currently would fail",
     )
-    if "codespell" in failed_commands:
-        print("Try 'codespell -i3 -w <path>' to fix a path recursively.")
-
-sys.exit(result)
+    args = parser.parse_args()
+    main(args.show)
