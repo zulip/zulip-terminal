@@ -77,7 +77,7 @@ setup(
     },
     python_requires=">=3.7, <3.12",
     keywords="",
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(include=["zulipterminal*"]),
     zip_safe=True,
     entry_points={
         "console_scripts": [
