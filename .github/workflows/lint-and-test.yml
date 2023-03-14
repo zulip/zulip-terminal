@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install with type-checking tools
         run: pip install .[typing]
       - name: Run mypy
@@ -42,11 +42,11 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Run ruff
-        run: ruff zulipterminal/ tests/ setup.py `tools/python_tools.py`
+        run: ruff zulipterminal/ tests/ `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install with linting tools
         # NOTE: Install pytest so that isort recognizes it as a known library
         run: pip install .[linting] && pip install pytest
@@ -77,11 +77,11 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
+        run: black --check zulipterminal/ tests/ `tools/python_tools.py`
 
   codespell:
     runs-on: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install with linting tools
         run: pip install .[linting]
       - name: Check spelling
@@ -111,7 +111,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Minimal install
         run: pip install .
       - name: Run generate_hotkeys
@@ -128,7 +128,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Minimal install
         run: pip install .
       - name: Run lint-docstring
@@ -146,7 +146,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Output Python version
         run: python --version
       - name: Upgrade pip
@@ -184,7 +184,7 @@ jobs:
         with:
           python-version: 3.7
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Run check-branch
         if: github.event_name == 'pull_request'
         # Note that we install at each step since dependencies may change
@@ -220,7 +220,7 @@ jobs:
         with:
           python-version: ${{ matrix.env.PYTHON }}
           cache: 'pip'
-          cache-dependency-path: 'setup.py'
+          cache-dependency-path: 'pyproject.toml'
       - name: Output Python version
         run: python --version
       - name: Upgrade pip
