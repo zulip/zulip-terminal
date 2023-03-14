@@ -9,7 +9,6 @@ from python_tools import lintable_tools_files
 python_sources = [
     "zulipterminal/",
     "tests/",
-    "setup.py",
 ]
 
 python_sources += lintable_tools_files
