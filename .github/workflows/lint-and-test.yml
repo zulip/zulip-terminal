@@ -98,11 +98,10 @@ jobs:
 #      - name: Install with linting tools
 #        run: pip install .[linting]
       - name: NEW INSTALL
-        run: make
-      - name: ACTIVATE
-        run: . zt_venv/bin/activate
-      - name: Check spelling
-        run: ./tools/run-codespell
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/run-codespell
 
   hotkeys:
     runs-on: ubuntu-latest
