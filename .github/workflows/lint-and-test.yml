@@ -95,8 +95,12 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with linting tools
-        run: pip install .[linting]
+#      - name: Install with linting tools
+#        run: pip install .[linting]
+      - name: NEW INSTALL
+        run: make
+      - name: ACTIVATE
+        run: . zt_venv/bin/activate
       - name: Check spelling
         run: ./tools/run-codespell
 
