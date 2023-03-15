@@ -101,10 +101,11 @@ jobs:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with linting tools
-        run: pip install .[linting]
-      - name: Check spelling
-        run: ./tools/run-spellcheck
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/run-spellcheck
 
   hotkeys:
     runs-on: ubuntu-latest
@@ -118,10 +119,11 @@ jobs:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Minimal install
-        run: pip install .
-      - name: Run lint-hotkeys
-        run: ./tools/lint-hotkeys
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/lint-hotkeys
 
   docstrings:
     runs-on: ubuntu-latest
@@ -135,10 +137,11 @@ jobs:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Minimal install
-        run: pip install .
-      - name: Run lint-docstring
-        run: ./tools/lint-docstring
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/lint-docstring
 
   gitlint:
     runs-on: ubuntu-latest
