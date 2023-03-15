@@ -26,10 +26,11 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with type-checking tools
-        run: pip install .[typing]
-      - name: Run mypy
-        run: ./tools/run-mypy
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/run-mypy
 
   ruff:
     runs-on: ubuntu-latest
@@ -43,10 +44,11 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with linting tools
-        run: pip install .[linting]
-      - name: Run ruff
-        run: ruff zulipterminal/ tests/ `tools/python_tools.py`
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ruff zulipterminal/ tests/ `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
@@ -60,11 +62,12 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with linting tools
         # NOTE: Install pytest so that isort recognizes it as a known library
-        run: pip install .[linting] && pip install pytest
-      - name: Run isort
-        run: ./tools/run-isort-check
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          ./tools/run-isort-check
 
   black:
     runs-on: ubuntu-latest
@@ -78,10 +81,11 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'pyproject.toml'
-      - name: Install with linting tools
-        run: pip install .[linting]
-      - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/ `tools/python_tools.py`
+      - name: Lint
+        run: |
+          make
+          . zt_venv/bin/activate
+          black --check zulipterminal/ tests/ `tools/python_tools.py`
 
   codespell:
     runs-on: ubuntu-latest
