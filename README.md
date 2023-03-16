@@ -457,6 +457,20 @@ However, other linting errors may be fixed automatically, as detailed below -
 **this can save a lot of time manually adjusting your code to pass the
 linters!**
 
+#### Updating hotkeys & file docstrings, vs related documentation
+
+If you update these, note that you do not need to update the text in both
+places manually to pass linting.
+
+The source of truth is in the source code, so simply update the python file and
+run the relevant tool, as detailed below.
+
+Currently we have
+* `tools/generate-hotkeys.py` to regenerate docs/hotkeys.md from config/keys.py
+* `tools/lint-docstring --fix` to regenerate docs/developer-file-overview.md from file docstrings
+
+(these tools are also used for the linting process to ensure that these files are synchronzed)
+
 #### Auto-formatting code
 
 The project uses `black` and `isort` for code-style and import sorting respectively.
