@@ -115,7 +115,7 @@ jobs:
       - name: Minimal install
         run: pip install .
       - name: Run generate_hotkeys
-        run: ./tools/generate_hotkeys.py --check-only
+        run: ./tools/generate_hotkeys.py
 
   docstrings:
     runs-on: ubuntu-latest
