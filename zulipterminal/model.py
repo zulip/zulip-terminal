@@ -575,6 +575,8 @@ class Model:
         message_id: int,
         propagate_mode: EditPropagateMode,
         content: Optional[str] = None,
+        notify_old: bool = False,
+        notify_new: bool = False,
     ) -> bool:
         request = {
             "message_id": message_id,
@@ -583,6 +585,10 @@ class Model:
         }
         if content is not None:
             request["content"] = content
+
+        if self.server_feature_level is not None and self.server_feature_level >= 9:
+            request["send_notification_to_old_thread"] = notify_old
+            request["send_notification_to_new_thread"] = notify_new
 
         response = self.client.update_message(request)
         display_error_if_present(response, self.controller)
