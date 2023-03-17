@@ -832,8 +832,8 @@ class TestModel:
     @pytest.mark.parametrize(
         "response, return_value",
         [
-            ({"result": "success"}, True),
-            ({"result": "some_failure"}, False),
+            case({"result": "success"}, True, id="API_success"),
+            case({"result": "some_failure"}, False, id="API_error"),
         ],
     )
     @pytest.mark.parametrize(
@@ -846,6 +846,7 @@ class TestModel:
                     "topic": "old topic",
                 },
                 None,  # None as footer is not updated.
+                id="topic_passed_but_same_so_not_changed:content_changed",
             ),
             case(
                 {
@@ -861,6 +862,7 @@ class TestModel:
                     ("footer_contrast", " Topic change "),
                     " .",
                 ],
+                id="topic_changed[one]",
             ),
             case(
                 {
@@ -868,6 +870,7 @@ class TestModel:
                     "topic": "old topic",
                 },
                 None,  # None as footer is not updated.
+                id="topic_passed_but_same_so_not_changed[all]",
             ),
             case(
                 {
@@ -876,6 +879,7 @@ class TestModel:
                     "topic": "old topic",
                 },
                 None,  # None as footer is not updated.
+                id="topic_passed_but_same_so_not_changed[later]:content_changed",
             ),
             case(
                 {
@@ -892,6 +896,7 @@ class TestModel:
                     ("footer_contrast", " new_terminal "),
                     " .",
                 ],
+                id="topic_changed[later]:content_changed",
             ),
             case(
                 {
@@ -908,6 +913,7 @@ class TestModel:
                     ("footer_contrast", " grett "),
                     " .",
                 ],
+                id="topic_changed[one]:content_changed",
             ),
             case(
                 {
@@ -924,6 +930,7 @@ class TestModel:
                     ("footer_contrast", " party "),
                     " .",
                 ],
+                id="topic_changed[all]:content_changed",
             ),
         ],
     )
