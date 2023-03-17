@@ -1,4 +1,4 @@
-<!--- Generated automatically by tools/generate_hotkeys.py -->
+<!--- Generated automatically by tools/lint-hotkeys -->
 <!--- Do not modify -->
 
 # Hot Keys

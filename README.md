@@ -466,7 +466,7 @@ The source of truth is in the source code, so simply update the python file and
 run the relevant tool, as detailed below.
 
 Currently we have
-* `tools/generate-hotkeys.py` to regenerate docs/hotkeys.md from config/keys.py
+* `tools/lint-hotkeys --fix` to regenerate docs/hotkeys.md from config/keys.py
 * `tools/lint-docstring --fix` to regenerate docs/developer-file-overview.md from file docstrings
 
 (these tools are also used for the linting process to ensure that these files are synchronzed)

@@ -20,7 +20,7 @@ tools = {
     "PEP8 & more (ruff)": ["ruff"] + python_sources,
     "Formatting (black)": ["black", "--check"] + python_sources,
     "Common spelling mistakes": "./tools/run-spellcheck",
-    "Hotkey linting & docs sync check": ["./tools/generate_hotkeys.py"],
+    "Hotkey linting & docs sync check": ["./tools/lint-hotkeys"],
     "Docstring linting & docs sync check (lint-docstring)": "./tools/lint-docstring",
 }
 

@@ -114,8 +114,8 @@ jobs:
           cache-dependency-path: 'setup.py'
       - name: Minimal install
         run: pip install .
-      - name: Run generate_hotkeys
-        run: ./tools/generate_hotkeys.py
+      - name: Run lint-hotkeys
+        run: ./tools/lint-hotkeys
 
   docstrings:
     runs-on: ubuntu-latest
