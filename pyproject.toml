@@ -152,4 +152,6 @@ select = [
 # T20: Expect print output from CLI from run.py
 "zulipterminal/cli/run.py" = ["T20"]
 # N802: Allow upper-case in test function names, eg. for commands, such as test_keypress_ENTER
-"tests/*" = ["N802"]
+# N803: Allow upper-case in test function argument names, eg. ZFL, API
+# N806: Allow upper-case in test function variables
+"tests/*" = ["N802", "N803", "N806"]
