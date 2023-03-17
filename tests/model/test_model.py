@@ -964,10 +964,63 @@ class TestModel:
         else:
             report_success.assert_not_called()
 
-        # Implementation detail
-        self.client.update_message.assert_called_once_with(
-            dict(message_id=message_id, **kwargs)
-        )
+        # Implementation detail; only check here that it's always called
+        assert self.client.update_message.called
+
+    @pytest.mark.parametrize(
+        "ZFL, expect_API_notify_args",
+        [
+            (None, False),
+            (8, False),
+            (9, True),
+            (152, True),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "notify_args, API_notify_old_thread, API_notify_new_thread",
+        [
+            ({}, False, False),
+            (dict(notify_new=False), False, False),
+            (dict(notify_old=False), False, False),
+            (dict(notify_old=True), True, False),
+            (dict(notify_new=True), False, True),
+            (dict(notify_new=True, notify_old=True), True, True),
+        ],
+    )
+    def test_update_stream_message__notify_thread_vs_ZFL(
+        self,
+        model,
+        ZFL,
+        expect_API_notify_args,
+        notify_args,
+        API_notify_old_thread,
+        API_notify_new_thread,
+        message_id=1,
+        old_content="old content",
+        old_topic="old topic",
+        old_stream_name="old stream name",
+        new_topic="new topic",
+        mode="change_all",
+    ) -> None:
+        model.server_feature_level = ZFL
+        model.index["messages"][message_id]["subject"] = old_topic
+        model.index["messages"][message_id]["display_recipient"] = old_stream_name
+        model.index["messages"][message_id]["content"] = old_content
+
+        base_kwargs = dict(message_id=message_id, topic=new_topic, propagate_mode=mode)
+
+        model.update_stream_message(**base_kwargs, **notify_args)
+
+        # Implementation detail, but only way of testing
+        if expect_API_notify_args:
+            expected_API_args = dict(
+                base_kwargs,
+                send_notification_to_old_thread=API_notify_old_thread,
+                send_notification_to_new_thread=API_notify_new_thread,
+            )
+        else:
+            expected_API_args = dict(base_kwargs)
+        self.client.update_message.assert_called_once_with(expected_API_args)
 
     @pytest.mark.parametrize(
         "response, return_value",
