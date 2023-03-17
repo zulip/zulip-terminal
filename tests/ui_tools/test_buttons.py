@@ -187,7 +187,7 @@ class TestPMButton:
     def test_button_text_title(self, mocker: MockerFixture, count: int = 10) -> None:
         pm_button = PMButton(controller=mocker.Mock(), count=count)
         title_text = pm_button.label_text[:-3].strip()
-        assert title_text == "Private messages"
+        assert title_text == "Direct messages"
 
 
 class TestStarredButton:
