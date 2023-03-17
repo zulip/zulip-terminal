@@ -34,9 +34,11 @@ from zulipterminal.api_types import (
     EditPropagateMode,
     Event,
     PrivateComposition,
+    PrivateMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
     StreamComposition,
+    StreamMessageUpdateRequest,
     Subscription,
 )
 from zulipterminal.config.keys import primary_key_for_command
@@ -561,7 +563,7 @@ class Model:
         return message_was_sent
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
-        request = {
+        request: PrivateMessageUpdateRequest = {
             "message_id": msg_id,
             "content": content,
         }
@@ -578,7 +580,7 @@ class Model:
         notify_old: bool = False,
         notify_new: bool = False,
     ) -> bool:
-        request = {
+        request: StreamMessageUpdateRequest = {
             "message_id": message_id,
             "propagate_mode": propagate_mode,
             "topic": topic,

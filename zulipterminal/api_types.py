@@ -6,7 +6,7 @@ Types from the Zulip API, translated into python, to improve type checking
 
 from typing import Any, Dict, List, Optional, Union
 
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, TypedDict
 
 # These are documented in the zulip package (python-zulip-api repo)
 from zulip import EditPropagateMode  # one/all/later
@@ -36,7 +36,36 @@ class StreamComposition(TypedDict):
     subject: str  # TODO: Migrate to using topic
 
 
+# https://zulip.com/api/send-message
 Composition = Union[PrivateComposition, StreamComposition]
+
+
+class PrivateMessageUpdateRequest(TypedDict):
+    message_id: int
+    content: str
+
+
+class StreamMessageUpdateRequest(TypedDict):
+    message_id: int
+
+    # May update combination of content for specified message
+    # ...and/or topic of that message and potentially others (via mode)
+    # ...but content and stream may not be changed together
+    content: NotRequired[str]
+    topic: NotRequired[str]
+    propagate_mode: NotRequired[EditPropagateMode]
+
+    # Supported for stream moves in ZFL 9 (Zulip 3)
+    # Default values if not passed in ZFL 152 (Zulip 6)
+    send_notification_to_old_thread: NotRequired[bool]
+    send_notification_to_new_thread: NotRequired[bool]
+
+    # TODO: Implement message moves between streams
+    # stream_id: int
+
+
+# https://zulip.com/api/update-message
+MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateRequest]
 
 
 class Message(TypedDict, total=False):
