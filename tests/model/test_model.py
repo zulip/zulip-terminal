@@ -837,7 +837,7 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize(
-        "req, old_topic, expected_report_success",
+        "kwargs, old_topic, expected_report_success",
         [
             case(
                 {
@@ -947,25 +947,31 @@ class TestModel:
         model,
         response,
         return_value,
-        req,
+        kwargs,
         old_topic,
         expected_report_success,
         old_stream_name="stream",
     ):
         self.client.update_message = mocker.Mock(return_value=response)
-        model.index["messages"][req["message_id"]]["subject"] = old_topic
-        model.index["messages"][req["message_id"]][
+        model.index["messages"][kwargs["message_id"]]["subject"] = old_topic
+        model.index["messages"][kwargs["message_id"]][
             "display_recipient"
         ] = old_stream_name
-        result = model.update_stream_message(**req)
-        self.client.update_message.assert_called_once_with(req)
+
+        result = model.update_stream_message(**kwargs)
+
         assert result == return_value
+
         self.display_error_if_present.assert_called_once_with(response, self.controller)
+
         report_success = model.controller.report_success
         if result and expected_report_success is not None:
             report_success.assert_called_once_with(expected_report_success, duration=6)
         else:
             report_success.assert_not_called()
+
+        # Implementation detail
+        self.client.update_message.assert_called_once_with(kwargs)
 
     @pytest.mark.parametrize(
         "response, return_value",
