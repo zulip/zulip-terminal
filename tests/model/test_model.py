@@ -837,15 +837,14 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize(
-        "kwargs, old_topic, expected_report_success",
+        "kwargs, expected_report_success",
         [
             case(
                 {
                     "propagate_mode": "change_one",
                     "content": "hi!",
-                    "topic": "Some topic",
+                    "topic": "old topic",
                 },
-                "Some topic",
                 None,  # None as footer is not updated.
             ),
             case(
@@ -853,11 +852,10 @@ class TestModel:
                     "propagate_mode": "change_one",
                     "topic": "Topic change",
                 },
-                "Old topic",
                 [
                     "You changed one message's topic from ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
-                    ("footer_contrast", " Old topic "),
+                    ("footer_contrast", " old topic "),
                     " to ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
                     ("footer_contrast", " Topic change "),
@@ -867,18 +865,16 @@ class TestModel:
             case(
                 {
                     "propagate_mode": "change_all",
-                    "topic": "Old topic",
+                    "topic": "old topic",
                 },
-                "Old topic",
                 None,  # None as footer is not updated.
             ),
             case(
                 {
                     "propagate_mode": "change_later",
                     "content": ":smile:",
-                    "topic": "terminal",
+                    "topic": "old topic",
                 },
-                "terminal",
                 None,  # None as footer is not updated.
             ),
             case(
@@ -887,11 +883,10 @@ class TestModel:
                     "content": ":smile:",
                     "topic": "new_terminal",
                 },
-                "old_terminal",
                 [
                     "You changed some messages' topic from ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
-                    ("footer_contrast", " old_terminal "),
+                    ("footer_contrast", " old topic "),
                     " to ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
                     ("footer_contrast", " new_terminal "),
@@ -904,11 +899,10 @@ class TestModel:
                     "content": "Hey!",
                     "topic": "grett",
                 },
-                "greet",
                 [
                     "You changed one message's topic from ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
-                    ("footer_contrast", " greet "),
+                    ("footer_contrast", " old topic "),
                     " to ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
                     ("footer_contrast", " grett "),
@@ -921,11 +915,10 @@ class TestModel:
                     "content": "Lets party!",
                     "topic": "party",
                 },
-                "lets_party",
                 [
                     "You changed all messages' topic from ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
-                    ("footer_contrast", " lets_party "),
+                    ("footer_contrast", " old topic "),
                     " to ",
                     ("footer_contrast", f" stream {STREAM_TOPIC_SEPARATOR} "),
                     ("footer_contrast", " party "),
@@ -941,13 +934,13 @@ class TestModel:
         response,
         return_value,
         kwargs,
-        old_topic,
         expected_report_success,
         old_stream_name="stream",
+        old_topic_name="old topic",
         message_id=1,
     ):
         self.client.update_message = mocker.Mock(return_value=response)
-        model.index["messages"][message_id]["subject"] = old_topic
+        model.index["messages"][message_id]["subject"] = old_topic_name
         model.index["messages"][message_id]["display_recipient"] = old_stream_name
 
         result = model.update_stream_message(message_id=message_id, **kwargs)
