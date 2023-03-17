@@ -2464,9 +2464,7 @@ class TestModel:
         Input is a list of pairs, of a message-id and a list of reaction tuples
         NOTE: reactions as None indicate not indexed, [] indicates no reaction
         """
-        MsgsType = List[  # noqa: N806
-            Tuple[int, Optional[List[Tuple[int, str, str, str]]]]
-        ]
+        MsgsType = List[Tuple[int, Optional[List[Tuple[int, str, str, str]]]]]
 
         def _factory(msgs: MsgsType):
             return {
