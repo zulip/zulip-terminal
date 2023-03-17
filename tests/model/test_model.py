@@ -841,7 +841,6 @@ class TestModel:
         [
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_one",
                     "content": "hi!",
                     "topic": "Some topic",
@@ -851,7 +850,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_one",
                     "topic": "Topic change",
                 },
@@ -868,7 +866,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_all",
                     "topic": "Old topic",
                 },
@@ -877,7 +874,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_later",
                     "content": ":smile:",
                     "topic": "terminal",
@@ -887,7 +883,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_later",
                     "content": ":smile:",
                     "topic": "new_terminal",
@@ -905,7 +900,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_one",
                     "content": "Hey!",
                     "topic": "grett",
@@ -923,7 +917,6 @@ class TestModel:
             ),
             case(
                 {
-                    "message_id": 1,
                     "propagate_mode": "change_all",
                     "content": "Lets party!",
                     "topic": "party",
@@ -951,14 +944,13 @@ class TestModel:
         old_topic,
         expected_report_success,
         old_stream_name="stream",
+        message_id=1,
     ):
         self.client.update_message = mocker.Mock(return_value=response)
-        model.index["messages"][kwargs["message_id"]]["subject"] = old_topic
-        model.index["messages"][kwargs["message_id"]][
-            "display_recipient"
-        ] = old_stream_name
+        model.index["messages"][message_id]["subject"] = old_topic
+        model.index["messages"][message_id]["display_recipient"] = old_stream_name
 
-        result = model.update_stream_message(**kwargs)
+        result = model.update_stream_message(message_id=message_id, **kwargs)
 
         assert result == return_value
 
@@ -971,7 +963,9 @@ class TestModel:
             report_success.assert_not_called()
 
         # Implementation detail
-        self.client.update_message.assert_called_once_with(kwargs)
+        self.client.update_message.assert_called_once_with(
+            dict(message_id=message_id, **kwargs)
+        )
 
     @pytest.mark.parametrize(
         "response, return_value",
