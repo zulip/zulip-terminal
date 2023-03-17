@@ -935,6 +935,7 @@ class TestModel:
         return_value,
         kwargs,
         expected_report_success,
+        old_content="old content",
         old_stream_name="stream",
         old_topic_name="old topic",
         message_id=1,
@@ -942,6 +943,7 @@ class TestModel:
         self.client.update_message = mocker.Mock(return_value=response)
         model.index["messages"][message_id]["subject"] = old_topic_name
         model.index["messages"][message_id]["display_recipient"] = old_stream_name
+        model.index["messages"][message_id]["content"] = old_content
 
         result = model.update_stream_message(message_id=message_id, **kwargs)
 
