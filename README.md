@@ -43,7 +43,7 @@ The terminal client currently has a number of intentional differences to the Zul
   [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md)
   to better support keyboard-only navigation; other than directional movement
   these also include:
-  - <kbd>z</kbd> - zoom in/out, between streams & topics, or all private messages & specific conversations
+  - <kbd>z</kbd> - zoom in/out, between streams & topics, or all direct messages & specific conversations
   - <kbd>t</kbd> - toggle view of topics for a stream in left panel
     (**later adopted for recent topics in web client**)
   - <kbd>#</kbd> - narrow to messages in which you're mentioned (<kbd>@</kbd> is already used)

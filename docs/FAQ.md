@@ -142,7 +142,7 @@ In the longer term we may move to multiple servers per session, which is tracked
 ## What is autocomplete? Why is it useful?
 
 Autocomplete can be used to request matching options, and cycle through each option in turn, including:
-- helping to specify users for new private messages (eg. after <kbd>x</kbd>)
+- helping to specify users for new direct messages (eg. after <kbd>x</kbd>)
 - helping to specify streams and existing topics for new stream messages (eg. after <kbd>c</kbd>)
 - mentioning a user or user-group (in message content)
 - linking to a stream or existing topic (in message content)
@@ -192,7 +192,7 @@ As in the example above, a specific prefix is required to indicate which action 
 
 ### Autocomplete of message recipients
 
-Since each of the stream (1), topic (2) and private message recipients (3) areas are very specific, no prefix must be manually entered and values provided through autocomplete depend upon the context automatically.
+Since each of the stream (1), topic (2) and direct message recipients (3) areas are very specific, no prefix must be manually entered and values provided through autocomplete depend upon the context automatically.
 
 ![Stream header](https://user-images.githubusercontent.com/55916430/118403323-8e5b7580-b68b-11eb-9c8a-734c2fe6b774.png)
 
@@ -204,7 +204,7 @@ Since each of the stream (1), topic (2) and private message recipients (3) areas
 
 ![PM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
 
-**NOTE:** If a private message recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
+**NOTE:** If a direct message recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
 
 ## Unable to render symbols
 
