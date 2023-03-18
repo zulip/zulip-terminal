@@ -343,6 +343,18 @@ class Model:
                 ]
                 self.active_button = new_stream_button  # Save to deactivate
                 self.active_button.is_active = True
+            if new_narrow == []:
+                self.active_button = self.controller.view.home_button
+                self.active_button.is_active = True
+            if pms is True:
+                self.active_button = self.controller.view.pm_button
+                self.active_button.is_active = True
+            if starred is True:
+                self.active_button = self.controller.view.starred_button
+                self.active_button.is_active = True
+            if mentioned is True:
+                self.active_button = self.controller.view.mentioned_button
+                self.active_button.is_active = True
 
             return False
         else:
