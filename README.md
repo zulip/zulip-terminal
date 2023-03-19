@@ -70,10 +70,9 @@ Current limitations which we expect to only resolve over the long term include s
 
 For queries on missing feature support please take a look at the
 [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md),
-our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or sign up
-on https://chat.zulip.org and chat with users and developers in the
-[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
-stream!
+our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or
+[chat with users & developers](#chat-with-fellow-users--developers) online at
+the Zulip Community server!
 
 ### Supported platforms
 - Linux
@@ -333,6 +332,63 @@ sudo apt-get install xsel
 #### OSX and WSL
 
 No additional package is required to enable copying to clipboard.
+
+## Chat with fellow users & developers!
+
+While Zulip Terminal is designed to work with any Zulip server, the main
+contributors are present on the Zulip Community server at
+https://chat.zulip.org, with most conversation in the
+[**#zulip-terminal** stream](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+
+You are welcome to view conversations in that stream using the link above, or
+sign up for an account and chat with us - whether you are a user or developer!
+
+We aim to keep the Zulip community friendly, welcoming and productive, so if
+participating, please respect our
+[Community norms](https://zulip.com/development-community/#community-norms).
+
+### Notes more relevant to the **#zulip-terminal** stream
+
+These are a subset of the **Community norms** linked above, which are more
+relevant to users of Zulip Terminal: those more likely to be in a text
+environment, limited in character rows/columns, and present in this one smaller
+stream.
+
+* **Prefer text in [code blocks](https://zulip.com/help/code-blocks), instead of screenshots**
+
+  Zulip Terminal supports downloading images, but there is no guarantee that
+  users will be able to view them.
+
+  *Try <kbd>Meta</kbd>+<kbd>m</kbd> to see example content formatting, including code blocks*
+
+* **Prefer [silent mentions](https://zulip.com/help/mention-a-user-or-group#silently-mention-a-user)
+  over regular mentions - or avoid mentions entirely**
+
+  With Zulip's topics, the intended recipient can often already be clear.
+  Experienced members will be present as their time permits - responding
+  to messages when they return - and others may be able to assist before then.
+
+  (Save [regular mentions](https://zulip.com/help/mention-a-user-or-group#mention-a-user-or-group_1)
+  for those who you do not expect to be present on a regular basis)
+
+  *Try <kbd>Ctrl</kbd>+<kbd>f</kbd>/<kbd>b</kbd> to cycle through autocompletion in message content, after typing `@_` to specify a silent mention*
+
+* **Prefer trimming [quote and reply](https://zulip.com/help/quote-and-reply)
+  text to only the relevant parts of longer messages - or avoid quoting entirely**
+
+  Zulip's topics often make it clear which message you're replying to. Long
+  messages can be more difficult to read with limited rows and columns of text,
+  but this is worsened if quoting an entire long message with extra content.
+
+  *Try <kbd>></kbd> to quote a selected message, deleting text as normal when composing a message*
+
+* **Prefer a [quick emoji reaction](https://zulip.com/help/emoji-reactions)
+to show agreement instead of simple short messages**
+
+  Reactions take up less space, including in Zulip Terminal, particularly
+  when multiple users wish to respond with the same sentiment.
+
+  *Try <kbd>+</kbd> to toggle thumbs-up (+1) on a message, or use <kbd>:</kbd> to search for other reactions*
 
 ## Contributor Guidelines
 
