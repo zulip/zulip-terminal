@@ -661,9 +661,7 @@ class MessageBox(urwid.Pile):
                 message["last"]["time"] is not None
                 and message["this"]["time"] != message["last"]["time"]
             ),
-            "star_status": (
-                message["this"]["is_starred"] != message["last"]["is_starred"]
-            ),
+            "star_status": (message["this"]["is_starred"]),
         }
         any_differences = any(different.values())
 
