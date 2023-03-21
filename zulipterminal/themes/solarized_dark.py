@@ -7,65 +7,65 @@ SOLARIZED DARK
 
 from pygments.styles.solarized import SolarizedDarkStyle
 
-from zulipterminal.themes.colors_solarized import DefaultBoldColor as Color
+from zulipterminal.themes.colors_solarized import SolarizedColor as Color
 
 STYLES = {
     # style_name       :  foreground                   background
-    None               : (Color.base0,                 Color.base03),
-    'selected'         : (Color.base0,                 Color.base02),
-    'msg_selected'     : (Color.base0,                 Color.base02),
-    'header'           : (Color.cyan,                  Color.blue),
-    'general_narrow'   : (Color.base0,                 Color.blue),
-    'general_bar'      : (Color.base0,                 Color.base03),
-    'name'             : (Color.red__BOLD,             Color.base03),
-    'unread'           : (Color.violet,                Color.base03),
-    'user_active'      : (Color.green,                 Color.base03),
-    'user_idle'        : (Color.yellow,                Color.base03),
-    'user_offline'     : (Color.base01,                Color.base03),
-    'user_inactive'    : (Color.base01,                Color.base03),
-    'title'            : (Color.base0__BOLD,           Color.base03),
-    'column_title'     : (Color.base0__BOLD,           Color.base03),
-    'time'             : (Color.base01,                Color.base03),
-    'bar'              : (Color.base0,                 Color.base00),
-    'msg_emoji'        : (Color.violet,                Color.base03),
-    'reaction'         : (Color.violet__BOLD,          Color.base03),
-    'reaction_mine'    : (Color.base03,                Color.violet),
-    'msg_heading'      : (Color.base03__BOLD,          Color.base01),
-    'msg_math'         : (Color.base02,                Color.base00),
-    'msg_mention'      : (Color.orange__BOLD,          Color.base03),
-    'msg_link'         : (Color.blue,                  Color.base03),
-    'msg_link_index'   : (Color.blue__BOLD,            Color.base03),
-    'msg_quote'        : (Color.base1,                 Color.base03),
-    'msg_code'         : (Color.base03,                Color.base0),
-    'msg_bold'         : (Color.base0__BOLD,           Color.base03),
-    'msg_time'         : (Color.base03,                Color.base1),
-    'footer'           : (Color.base03,                Color.base2),
-    'footer_contrast'  : (Color.base2,                 Color.base03),
-    'starred'          : (Color.orange__BOLD,          Color.base03),
-    'unread_count'     : (Color.base1,                 Color.base03),
-    'starred_count'    : (Color.base2,                 Color.base03),
-    'table_head'       : (Color.base0__BOLD,           Color.base03),
-    'filter_results'   : (Color.base03,                Color.base01),
-    'edit_topic'       : (Color.base03,                Color.base00),
-    'edit_tag'         : (Color.base03,                Color.base00),
-    'edit_author'      : (Color.base1,                 Color.base03),
-    'edit_time'        : (Color.base01,                Color.base03),
-    'current_user'     : (Color.base0,                 Color.base03),
-    'muted'            : (Color.base00,                Color.base03),
-    'popup_border'     : (Color.base0,                 Color.base03),
-    'popup_category'   : (Color.base0__BOLD,           Color.base03),
-    'popup_contrast'   : (Color.base03,                Color.base00),
-    'popup_important'  : (Color.orange__BOLD,          Color.base03),
-    'widget_disabled'  : (Color.base00,                Color.base03),
-    'area:help'        : (Color.base03,                Color.base01),
-    'area:msg'         : (Color.base03,                Color.orange),
-    'area:stream'      : (Color.base03,                Color.base0),
-    'area:error'       : (Color.base0,                 Color.red),
-    'area:user'        : (Color.base0,                 Color.blue),
-    'search_error'     : (Color.orange,                Color.base03),
-    'task:success'     : (Color.base03,                Color.base01),
-    'task:error'       : (Color.base0,                 Color.red),
-    'task:warning'     : (Color.base03,                Color.orange),   
+    None               : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR),
+    'selected'         : (Color.DARK_BG_REGULAR,   Color.CYAN), # neiljp # inverted + COLOR
+    'msg_selected'     : (Color.DARK_BG_REGULAR,   Color.CYAN), # neiljp # inverted + COLOR
+    'header'           : (Color.CYAN,              Color.BLUE),
+    'general_narrow'   : (Color.DARK_BG_REGULAR,   Color.BLUE), # neiljp # update fg for contrast
+    'general_bar'      : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR),
+    'msg_sender'       : (Color.RED,               Color.DARK_BG_REGULAR), # neiljp # update name
+    'unread'           : (Color.VIOLET,            Color.DARK_BG_REGULAR),
+    'user_active'      : (Color.GREEN,             Color.DARK_BG_REGULAR),
+    'user_idle'        : (Color.YELLOW,            Color.DARK_BG_REGULAR),
+    'user_offline'     : (Color.DARK_FG_SECONDARY, Color.DARK_BG_REGULAR),
+    'user_inactive'    : (Color.DARK_FG_SECONDARY, Color.DARK_BG_REGULAR),
+    'title'            : (Color.BASE0,             Color.DARK_BG_REGULAR),
+    'column_title'     : (Color.BASE0,             Color.DARK_BG_REGULAR),
+    'time'             : (Color.DARK_FG_SECONDARY, Color.DARK_BG_REGULAR),
+    'bar'              : (Color.DARK_FG_PRIMARY,   Color.DARK_FG_PRIMARY), # neiljp # BASE00 -> FG_PRIM?
+    'msg_emoji'        : (Color.VIOLET,            Color.DARK_BG_REGULAR),
+    'reaction'         : (Color.VIOLET,            Color.DARK_BG_REGULAR),
+    'reaction_mine'    : (Color.DARK_BG_REGULAR,   Color.VIOLET),
+    'msg_heading'      : (Color.DARK_BG_REGULAR,   Color.DARK_FG_SECONDARY),
+    'msg_math'         : (Color.DARK_BG_HIGHLIGHT, Color.DARK_FG_PRIMARY), # neiljp # BASE00 -> FG_PRIM?
+    'msg_mention'      : (Color.ORANGE,            Color.DARK_BG_REGULAR),
+    'msg_link'         : (Color.BLUE,              Color.DARK_BG_REGULAR),
+    'msg_link_index'   : (Color.BLUE,              Color.DARK_BG_REGULAR),
+    'msg_quote'        : (Color.DARK_FG_EMPHASIZE, Color.DARK_BG_REGULAR),
+    'msg_code'         : (Color.DARK_BG_REGULAR,   Color.DARK_FG_PRIMARY),
+    'msg_bold'         : (Color.BASE0,             Color.DARK_BG_REGULAR),
+    'msg_time'         : (Color.DARK_BG_REGULAR,   Color.DARK_FG_EMPHASIZE),
+    'footer'           : (Color.DARK_BG_REGULAR,   Color.BASE2),
+    'footer_contrast'  : (Color.BASE2,             Color.DARK_BG_REGULAR),
+    'starred'          : (Color.ORANGE,            Color.DARK_BG_REGULAR),
+    'unread_count'     : (Color.DARK_FG_EMPHASIZE, Color.DARK_BG_REGULAR),
+    'starred_count'    : (Color.BASE2,             Color.DARK_BG_REGULAR),
+    'table_head'       : (Color.BASE0,             Color.DARK_BG_REGULAR),
+    'filter_results'   : (Color.DARK_BG_REGULAR,   Color.DARK_FG_SECONDARY),
+    'edit_topic'       : (Color.DARK_BG_REGULAR,   Color.DARK_FG_PRIMARY), # neiljp # BASE00 -> FG_PRIM?
+    'edit_tag'         : (Color.DARK_BG_REGULAR,   Color.DARK_FG_PRIMARY), # neiljp # BASE00 -> FG_PRIM?
+    'edit_author'      : (Color.DARK_FG_EMPHASIZE, Color.DARK_BG_REGULAR),
+    'edit_time'        : (Color.DARK_FG_SECONDARY, Color.DARK_BG_REGULAR),
+    'current_user'     : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR),
+    'muted'            : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR), # neiljp # BASE00 -> FG_PRIM?
+    'popup_border'     : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR),
+    'popup_category'   : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR),
+    'popup_contrast'   : (Color.DARK_BG_REGULAR,   Color.DARK_FG_PRIMARY), # neiljp # BASE00 -> FG_PRIM?
+    'popup_important'  : (Color.ORANGE,            Color.DARK_BG_REGULAR),
+    'widget_disabled'  : (Color.DARK_FG_PRIMARY,   Color.DARK_BG_REGULAR), # neiljp # BASE00 -> FG_PRIM?
+    'area:help'        : (Color.DARK_BG_REGULAR,   Color.DARK_FG_SECONDARY),
+    'area:msg'         : (Color.DARK_BG_REGULAR,   Color.ORANGE),
+    'area:stream'      : (Color.DARK_BG_REGULAR,   Color.BASE0),
+    'area:error'       : (Color.DARK_FG_PRIMARY,   Color.RED),
+    'area:user'        : (Color.DARK_FG_PRIMARY,   Color.BLUE),
+    'search_error'     : (Color.ORANGE,            Color.DARK_BG_REGULAR),
+    'task:success'     : (Color.DARK_BG_REGULAR,   Color.DARK_FG_SECONDARY),
+    'task:error'       : (Color.DARK_FG_PRIMARY,   Color.RED),
+    'task:warning'     : (Color.DARK_BG_REGULAR,   Color.ORANGE),
 }
 
 META = {
@@ -73,15 +73,15 @@ META = {
         'styles'    : SolarizedDarkStyle().styles,
         'background': 'h234',
         'overrides' : {
-            'c'   : '#586e75, italics',    # base01
-            'cp'  : '#d33682',             # magenta
-            'cpf' : '#586e75',             # base01
-            'ge'  : '#839496, italics',    # base0
-            'gh'  : '#839496, bold',       # base0
-            'gu'  : '#839496, underline',  # base0
-            'gp'  : '#268bd2, bold',       # blue
-            'gs'  : '#839496, bold',       # base0
-            'err' : '#dc322f',             # red
+            'c'   : '#586e75, italics',    # DARK_FG_SECONDARY
+            'cp'  : '#d33682',             # MAGENTA
+            'cpf' : '#586e75',             # DARK_FG_SECONDARY
+            'ge'  : '#839496, italics',    # BASE0
+            'gh'  : '#839496, bold',       # BASE0
+            'gu'  : '#839496, underline',  # BASE0
+            'gp'  : '#268bd2, bold',       # BLUE
+            'gs'  : '#839496, bold',       # BASE0
+            'err' : '#dc322f',             # RED
             'n'   : '#bdae93',             # gruvbox: light4
             'p'   : '#bdae93',             # gruvbox: light4
             'w'   : '#bdae93',             # gruvbox: light4

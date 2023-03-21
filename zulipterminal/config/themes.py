@@ -104,7 +104,6 @@ THEMES: Dict[str, Any] = {
 THEME_ALIASES = {
     "default": "zt_dark",
     "gruvbox": "gruvbox_dark",
-    "solarized": "solarized_dark",
     "light": "zt_light",
     "blue": "zt_blue",
 }
