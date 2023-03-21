@@ -547,8 +547,8 @@ class Controller:
                 " installing any ONE of the copy/paste mechanisms below:\n",
                 ("msg_bold", "- xclip\n- xsel"),
                 "\n\nvia something like:\n",
-                ("msg_code", "apt-get install xclip [Recommended]\n"),
-                ("msg_code", "apt-get install xsel"),
+                ("ui_code", "apt-get install xclip [Recommended]\n"),
+                ("ui_code", "apt-get install xsel"),
             ]
             self.show_pop_up(
                 NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"

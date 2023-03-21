@@ -42,7 +42,6 @@ STYLES = {
     'msg_link'         : (Color.FADED_BLUE,             Color.LIGHT0_HARD),
     'msg_link_index'   : (Color.FADED_BLUE__BOLD,       Color.LIGHT0_HARD),
     'msg_quote'        : (Color.NEUTRAL_YELLOW,         Color.LIGHT0_HARD),
-    'msg_code'         : (Color.LIGHT0_HARD,            Color.DARK2),
     'msg_bold'         : (Color.DARK2__BOLD,            Color.LIGHT0_HARD),
     'msg_time'         : (Color.LIGHT0_HARD,            Color.DARK2),
     'footer'           : (Color.LIGHT0_HARD,            Color.DARK4),
@@ -72,6 +71,7 @@ STYLES = {
     'task:success'     : (Color.LIGHT0_HARD,            Color.FADED_GREEN),
     'task:error'       : (Color.LIGHT0_HARD,            Color.FADED_RED),
     'task:warning'     : (Color.LIGHT0_HARD,            Color.NEUTRAL_PURPLE),
+    'ui_code'          : (Color.LIGHT0_HARD,            Color.DARK2),
 }
 
 META = {
