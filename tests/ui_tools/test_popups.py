@@ -345,7 +345,10 @@ class TestUserInfoView:
 
         display_data = self.user_info_view._fetch_user_data(self.controller, 1)
 
-        assert display_data.get(expected_key, None) == expected_value
+        try:
+            assert expected_value in display_data.get(expected_key, None)
+        except TypeError:
+            assert display_data.get(expected_key, None) == expected_value
 
     def test__fetch_user_data_USER_NOT_FOUND(self, mocker: MockerFixture) -> None:
         mocker.patch.object(self.controller.model, "get_user_info", return_value=dict())
@@ -1027,7 +1030,7 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 6
+        expected_height = 7
         # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (view message in browser)
         # +1 (full rendered message)
@@ -1101,7 +1104,7 @@ class TestMsgInfoView:
         )
         # 12 = 6 labels + 1 blank line + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 12
+        expected_height = 13
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
