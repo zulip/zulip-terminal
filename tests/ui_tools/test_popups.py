@@ -1027,8 +1027,10 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 6
+        expected_height = 8
         # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
+        # +1 (display group header)
+        # +1 (whitespace column)
         # +1 (view message in browser)
         # +1 (full rendered message)
         # +1 (full raw message)
@@ -1099,9 +1101,9 @@ class TestMsgInfoView:
             OrderedDict(),
             list(),
         )
-        # 12 = 6 labels + 1 blank line + 1 'Reactions' (category)
+        # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 12
+        expected_height = 14
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
