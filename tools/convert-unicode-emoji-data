@@ -3,7 +3,6 @@
 # Convert emoji file downloaded using tools/fetch-unicode-emoji-data
 # into what is required by ZT.
 
-from collections import OrderedDict
 from pathlib import Path, PurePath
 
 
@@ -32,7 +31,7 @@ for emoji_code, emoji_data in emoji_dict.items():
         "aliases": emoji_data["aliases"],
     }
 
-ordered_emojis = OrderedDict(sorted(emoji_map.items()))
+ordered_emojis = dict(sorted(emoji_map.items()))
 
 with OUTPUT_FILE.open("w") as f:
     f.write(
