@@ -5,7 +5,7 @@ Helper functions used in multiple places
 import os
 import subprocess
 import time
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from contextlib import contextmanager
 from functools import partial, wraps
 from itertools import chain, combinations
@@ -572,14 +572,10 @@ def match_stream(
         for datum, stream_name in data
     ]
 
-    matches: "OrderedDict[str, DefaultDict[int, List[Tuple[DataT, str]]]]" = (
-        OrderedDict(
-            [
-                ("pinned", defaultdict(list)),
-                ("unpinned", defaultdict(list)),
-            ]
-        )
-    )
+    matches: Dict[str, DefaultDict[int, List[Tuple[DataT, str]]]] = {
+        "pinned": defaultdict(list),
+        "unpinned": defaultdict(list),
+    }
 
     for datum, splits in stream_splits:
         stream_name = splits[0]
