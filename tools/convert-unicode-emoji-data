@@ -43,23 +43,20 @@ with OUTPUT_FILE.open("w") as f:
                 "# Ignore long lines",
                 "# ruff: noqa: E501",
                 "",
-                "from collections import OrderedDict\n\n",
                 "# fmt: off",
                 f"# Generated automatically by tools/{SCRIPT_NAME}",
                 "# Do not modify.\n",
-                "EMOJI_DATA = OrderedDict(",
-                "    [\n",
+                "EMOJI_DATA = {\n",
             ]
         )
     )
     for emoji_name, emoji in ordered_emojis.items():
         # {'smile': {'code': '263a', 'aliases': []}}
-        f.write(f'        ("{emoji_name}", {emoji}),\n')
+        f.write(f'    "{emoji_name}": {emoji},\n')
     f.write(
         "\n".join(
             [
-                "    ]",
-                ")",
+                "}",
                 "# fmt: on",
                 "",
             ]
