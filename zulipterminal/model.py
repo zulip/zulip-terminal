@@ -733,7 +733,7 @@ class Model:
             all_emoji_names.append(emoji_name)
             all_emoji_names.extend(emoji_data["aliases"])
         all_emoji_names = sorted(all_emoji_names)
-        active_emoji_data = OrderedDict(sorted(all_emoji_data.items()))
+        active_emoji_data = dict(sorted(all_emoji_data.items()))
         return active_emoji_data, all_emoji_names
 
     def get_messages(
