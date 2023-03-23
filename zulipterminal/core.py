@@ -8,7 +8,6 @@ import signal
 import sys
 import time
 import webbrowser
-from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
@@ -278,8 +277,8 @@ class Controller:
     def show_msg_info(
         self,
         msg: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         msg_info_view = MsgInfoView(
@@ -339,8 +338,8 @@ class Controller:
     def show_full_rendered_message(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -358,8 +357,8 @@ class Controller:
     def show_full_raw_message(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -377,8 +376,8 @@ class Controller:
     def show_edit_history(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
