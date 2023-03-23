@@ -3,7 +3,6 @@ UI views for larger elements such as Streams, Messages, Topics, Help, etc
 """
 
 import threading
-from collections import OrderedDict
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -1508,8 +1507,8 @@ class MsgInfoView(PopUpView):
         controller: Any,
         msg: Message,
         title: str,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.msg = msg
@@ -1626,7 +1625,7 @@ class MsgInfoView(PopUpView):
 
     @staticmethod
     def create_link_buttons(
-        controller: Any, links: "OrderedDict[str, Tuple[str, int, bool]]"
+        controller: Any, links: Dict[str, Tuple[str, int, bool]]
     ) -> Tuple[List[MessageLinkButton], int]:
         link_widgets = []
         link_width = 0
@@ -1722,8 +1721,8 @@ class EditHistoryView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1840,8 +1839,8 @@ class FullRenderedMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1884,8 +1883,8 @@ class FullRawMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
