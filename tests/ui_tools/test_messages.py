@@ -911,13 +911,13 @@ class TestMessageBox:
             ([["is", "private"]], 1, "You and ", "All direct messages"),
             ([["is", "private"]], 2, "You and ", "All direct messages"),
             (
-                [["pm_with", "boo@zulip.com"]],
+                [["pm-with", "boo@zulip.com"]],
                 1,
                 "You and ",
                 "Direct message conversation",
             ),
             (
-                [["pm_with", "boo@zulip.com, bar@zulip.com"]],
+                [["pm-with", "boo@zulip.com, bar@zulip.com"]],
                 2,
                 "You and ",
                 "Group direct message conversation",
@@ -1129,7 +1129,7 @@ class TestMessageBox:
             ([["is", "starred"]], False),
             ([["is", "mentioned"]], False),
             ([["is", "private"]], False),
-            ([["pm_with", "notification-bot@zulip.com"]], False),
+            ([["pm-with", "notification-bot@zulip.com"]], False),
         ],
         ids=[
             "all_messages_narrow",

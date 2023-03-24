@@ -337,8 +337,8 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm_with", "FOO@zulip.com"]],
-            [["pm_with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["pm-with", "FOO@zulip.com"]],
+            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
             [["is", "private"]],
             [["is", "starred"]],
         ],
@@ -355,8 +355,8 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm_with", "FOO@zulip.com"]],
-            [["pm_with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["pm-with", "FOO@zulip.com"]],
+            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
             [["is", "private"]],
             [["is", "starred"]],
         ],
@@ -414,7 +414,7 @@ class TestModel:
             ([["is", "starred"]], dict(starred=True)),
             ([["is", "mentioned"]], dict(mentioned=True)),
             ([["is", "private"]], dict(pms=True)),
-            ([["pm_with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
+            ([["pm-with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
         ],
     )
     def test_set_narrow_already_set(self, model, narrow, good_args):
@@ -435,7 +435,7 @@ class TestModel:
             ([], [["is", "starred"]], dict(starred=True)),
             ([], [["is", "mentioned"]], dict(mentioned=True)),
             ([], [["is", "private"]], dict(pms=True)),
-            ([], [["pm_with", "FOOBOO@gmail.com"]], dict(pm_with="FOOBOO@gmail.com")),
+            ([], [["pm-with", "FOOBOO@gmail.com"]], dict(pm_with="FOOBOO@gmail.com")),
         ],
     )
     def test_set_narrow_not_already_set(
@@ -466,12 +466,12 @@ class TestModel:
             ),
             ([["is", "private"]], {"private_msg_ids": {0, 1}}, {0, 1}),
             (
-                [["pm_with", "FOO@zulip.com"]],
+                [["pm-with", "FOO@zulip.com"]],
                 {"private_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
                 {0, 1},
             ),
             (
-                [["pm_with", "FOO@zulip.com"]],
+                [["pm-with", "FOO@zulip.com"]],
                 {  # Covers recipient empty-set case
                     "private_msg_ids_by_user_ids": {
                         frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
@@ -1848,7 +1848,7 @@ class TestModel:
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 5}],
                 },
-                [["pm_with", "notification-bot@zulip.com"]],
+                [["pm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 ["msg_w"],
                 id="user_pm_x_appears_in_narrow_with_x",
@@ -1866,7 +1866,7 @@ class TestModel:
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 3212}],
                 },
-                [["pm_with", "notification-bot@zulip.com"]],
+                [["pm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 [],
                 id="user_pm_x_does_not_appear_in_narrow_without_x",
@@ -2904,7 +2904,7 @@ class TestModel:
                 id="not_in_pm_narrow",
             ),
             case(
-                [["pm_with", "othello@zulip.com"]],
+                [["pm-with", "othello@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -2920,7 +2920,7 @@ class TestModel:
                 id="not_in_pm_narrow_with_sender",
             ),
             case(
-                [["pm_with", "hamlet@zulip.com"]],
+                [["pm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -2936,7 +2936,7 @@ class TestModel:
                 id="in_pm_narrow_with_sender_typing:start",
             ),
             case(
-                [["pm_with", "hamlet@zulip.com"]],
+                [["pm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -2952,7 +2952,7 @@ class TestModel:
                 id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
             ),
             case(
-                [["pm_with", "hamlet@zulip.com"]],
+                [["pm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -2968,7 +2968,7 @@ class TestModel:
                 id="in_pm_narrow_with_sender_typing:stop",
             ),
             case(
-                [["pm_with", "hamlet@zulip.com"]],
+                [["pm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -2984,7 +2984,7 @@ class TestModel:
                 id="in_pm_narrow_with_other_myself_typing:start",
             ),
             case(
-                [["pm_with", "hamlet@zulip.com"]],
+                [["pm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3000,7 +3000,7 @@ class TestModel:
                 id="in_pm_narrow_with_other_myself_typing:stop",
             ),
             case(
-                [["pm_with", "iago@zulip.com"]],
+                [["pm-with", "iago@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3013,7 +3013,7 @@ class TestModel:
                 id="in_pm_narrow_with_oneself:start",
             ),
             case(
-                [["pm_with", "iago@zulip.com"]],
+                [["pm-with", "iago@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},

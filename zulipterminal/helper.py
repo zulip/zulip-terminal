@@ -423,7 +423,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     {recipient["id"] for recipient in msg["display_recipient"]}
                 )
 
-                if narrow[0][0] == "pm_with":
+                if narrow[0][0] == "pm-with":
                     narrow_emails = [
                         model.user_dict[email]["user_id"]
                         for email in narrow[0][1].split(", ")
@@ -678,7 +678,7 @@ def notify_if_message_sent_outside_narrow(
         recipient_emails = [
             controller.model.user_id_email_dict[user_id] for user_id in message["to"]
         ]
-        pm_with_narrow = [["pm_with", ", ".join(recipient_emails)]]
+        pm_with_narrow = [["pm-with", ", ".join(recipient_emails)]]
         check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
 
 

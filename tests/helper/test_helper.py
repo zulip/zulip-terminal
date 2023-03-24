@@ -79,7 +79,7 @@ def test_index_messages_narrow_user(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm_with", "boo@zulip.com"]]
+    model.narrow = [["pm-with", "boo@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -99,7 +99,7 @@ def test_index_messages_narrow_user_multiple(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm_with", "boo@zulip.com, bar@zulip.com"]]
+    model.narrow = [["pm-with", "boo@zulip.com, bar@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -348,13 +348,13 @@ def test_display_error_if_present(
         ),
         case(
             {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm_with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
+            [["pm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
             False,
             id="group_private_conv__same_group_pm__not_notified",
         ),
         case(
             {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm_with", "welcome-bot@zulip.com"]],
+            [["pm-with", "welcome-bot@zulip.com"]],
             True,
             id="private_conv__other_pm__notified",
         ),
@@ -362,7 +362,7 @@ def test_display_error_if_present(
             {"type": "private", "to": [4], "content": ":party_parrot:"},
             [
                 [
-                    "pm_with",
+                    "pm-with",
                     "person1@example.com, person2@example.com, "
                     "welcome-bot@zulip.com",
                 ]
