@@ -4,7 +4,7 @@ Defines the `Model`, fetching and storing data retrieved from the Zulip server
 
 import json
 import time
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from datetime import datetime
@@ -141,24 +141,19 @@ class Model:
         ]
 
         # Events desired with their corresponding callback
-        self.event_actions: "OrderedDict[str, Callable[[Event], None]]" = OrderedDict(
-            [
-                ("message", self._handle_message_event),
-                ("update_message", self._handle_update_message_event),
-                ("reaction", self._handle_reaction_event),
-                ("subscription", self._handle_subscription_event),
-                ("typing", self._handle_typing_event),
-                ("update_message_flags", self._handle_update_message_flags_event),
-                (
-                    "update_global_notifications",
-                    self._handle_update_global_notifications_event,
-                ),
-                ("update_display_settings", self._handle_update_display_settings_event),
-                ("user_settings", self._handle_user_settings_event),
-                ("realm_emoji", self._handle_update_emoji_event),
-                ("realm_user", self._handle_realm_user_event),
-            ]
-        )
+        self.event_actions: Dict[str, Callable[[Event], None]] = {
+            "message": self._handle_message_event,
+            "update_message": self._handle_update_message_event,
+            "reaction": self._handle_reaction_event,
+            "subscription": self._handle_subscription_event,
+            "typing": self._handle_typing_event,
+            "update_message_flags": self._handle_update_message_flags_event,
+            "update_global_notifications": self._handle_update_global_notifications_event,  # noqa: E501
+            "update_display_settings": self._handle_update_display_settings_event,
+            "user_settings": self._handle_user_settings_event,
+            "realm_emoji": self._handle_update_emoji_event,
+            "realm_user": self._handle_realm_user_event,
+        }
 
         self.initial_data: Dict[str, Any] = {}
 
