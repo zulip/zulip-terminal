@@ -3,7 +3,7 @@ UI to render a Zulip message for display, and respond contextually to actions
 """
 
 import typing
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from datetime import date, datetime
 from time import time
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
@@ -55,8 +55,8 @@ class MessageBox(urwid.Pile):
         self.topic_name = ""
         self.email = ""  # FIXME: Can we remove this?
         self.user_id: Optional[int] = None
-        self.message_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
-        self.topic_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
+        self.message_links: Dict[str, Tuple[str, int, bool]] = dict()
+        self.topic_links: Dict[str, Tuple[str, int, bool]] = dict()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
@@ -295,11 +295,9 @@ class MessageBox(urwid.Pile):
         except Exception:
             return ""
 
-    # Use quotes as a workaround for OrderedDict typing issue.
-    # See https://github.com/python/mypy/issues/6904.
     @staticmethod
     def footlinks_view(
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: Dict[str, Tuple[str, int, bool]],
         *,
         maximum_footlinks: int,
         padded: bool,
@@ -357,9 +355,7 @@ class MessageBox(urwid.Pile):
     @classmethod
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
-    ) -> Tuple[
-        List[Any], "OrderedDict[str, Tuple[str, int, bool]]", List[Tuple[str, str]]
-    ]:
+    ) -> Tuple[List[Any], Dict[str, Tuple[str, int, bool]], List[Tuple[str, str]]]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
@@ -807,7 +803,7 @@ class MessageBox(urwid.Pile):
         cls, content: Any, server_url: str
     ) -> Tuple[
         Tuple[None, Any],
-        "OrderedDict[str, Tuple[str, int, bool]]",
+        Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],
     ]:
         soup = BeautifulSoup(content, "lxml")
@@ -815,7 +811,7 @@ class MessageBox(urwid.Pile):
 
         metadata = dict(
             server_url=server_url,
-            message_links=OrderedDict(),
+            message_links=dict(),
             time_mentions=list(),
         )  # type: Dict[str, Any]
 
