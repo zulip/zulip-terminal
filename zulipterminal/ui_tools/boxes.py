@@ -4,7 +4,7 @@ UI boxes for entering text: WriteBox, MessageSearchBox, PanelSearchBox
 
 import re
 import unicodedata
-from collections import Counter, OrderedDict
+from collections import Counter
 from datetime import datetime, timedelta
 from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
@@ -467,18 +467,16 @@ class WriteBox(urwid.Pile):
         return self._process_typeaheads(matched_streams[0], state, matched_streams[1])
 
     def generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
-        autocomplete_map = OrderedDict(
-            [
-                ("@_", self.autocomplete_users),
-                ("@_**", self.autocomplete_users),
-                ("@", self.autocomplete_mentions),
-                ("@*", self.autocomplete_groups),
-                ("@**", self.autocomplete_users),
-                ("#", self.autocomplete_streams),
-                ("#**", self.autocomplete_streams),
-                (":", self.autocomplete_emojis),
-            ]
-        )
+        autocomplete_map = {
+            "@_": self.autocomplete_users,
+            "@_**": self.autocomplete_users,
+            "@": self.autocomplete_mentions,
+            "@*": self.autocomplete_groups,
+            "@**": self.autocomplete_users,
+            "#": self.autocomplete_streams,
+            "#**": self.autocomplete_streams,
+            ":": self.autocomplete_emojis,
+        }
 
         # Look in a reverse order to find the last autocomplete prefix used in
         # the text. For instance, if text='@#example', use '#' as the prefix.
@@ -673,7 +671,7 @@ class WriteBox(urwid.Pile):
     def validate_and_patch_autocomplete_stream_and_topic(
         self,
         text: str,
-        autocomplete_map: "OrderedDict[str, Callable[..., Any]]",
+        autocomplete_map: Dict[str, Callable[..., Any]],
         prefix_indices: Dict[str, int],
     ) -> str:
         """
