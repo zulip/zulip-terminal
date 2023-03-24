@@ -228,7 +228,7 @@ class TestController:
 
         controller.narrow_to_user(recipient_emails=emails)
 
-        assert controller.model.narrow == [["pm_with", user_email]]
+        assert controller.model.narrow == [["pm-with", user_email]]
         controller.view.message_view.log.clear.assert_called_once_with()
         recipients = frozenset([controller.model.user_id, user_id])
         assert controller.model.recipients == recipients
@@ -474,8 +474,8 @@ class TestController:
             ([["search", "BOO"]], [["search", "FOO"]]),
             ([["stream", "PTEST"]], [["stream", "PTEST"], ["search", "FOO"]]),
             (
-                [["pm_with", "foo@zulip.com"], ["search", "BOO"]],
-                [["pm_with", "foo@zulip.com"], ["search", "FOO"]],
+                [["pm-with", "foo@zulip.com"], ["search", "BOO"]],
+                [["pm-with", "foo@zulip.com"], ["search", "FOO"]],
             ),
             (
                 [["stream", "PTEST"], ["topic", "RDS"]],
