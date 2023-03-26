@@ -2,6 +2,7 @@
 Defines the `Model`, fetching and storing data retrieved from the Zulip server
 """
 
+import bisect
 import itertools
 import json
 import time
@@ -111,7 +112,6 @@ class Model:
         self.stream_id: Optional[int] = None
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
-        self._last_unread_topic = None
         self.last_unread_pm = None
 
         self.user_id = -1
@@ -901,11 +901,26 @@ class Model:
             return (stream_id, topic)
         return None
 
-    def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
+    def get_next_unread_topic(
+        self, current_message: Optional[int]
+    ) -> Optional[Tuple[int, str]]:
+        if current_message:
+            current_topic = self.stream_topic_from_message_id(current_message)
+        else:
+            current_topic = (
+                self.stream_id_from_name(self.narrow[0][1]),
+                self.narrow[1][1],
+            )
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
         next_topic = False
-        if self._last_unread_topic not in unread_topics:
+        if current_topic is None:
             next_topic = True
+        elif current_topic not in unread_topics:
+            # insert current_topic in list of unread_topics for the case where
+            # current_topic is not in unread_topics, and the next unmuted topic
+            # is to be returned. This does not modify the original unread topics
+            # data, and is just used to compute the next unmuted topic to be returned.
+            bisect.insort(unread_topics, current_topic)
         # loop over unread_topics list twice for the case that last_unread_topic was
         # the last valid unread_topic in unread_topics list.
         for unread_topic in unread_topics * 2:
@@ -915,9 +930,8 @@ class Model:
                 and not self.is_muted_stream(stream_id)
                 and next_topic
             ):
-                self._last_unread_topic = unread_topic
                 return unread_topic
-            if unread_topic == self._last_unread_topic:
+            if unread_topic == current_topic:
                 next_topic = True
         return None
 

@@ -72,7 +72,6 @@ class TestModel:
         assert model.stream_dict == stream_dict
         assert model.recipients == frozenset()
         assert model.index == initial_index
-        assert model._last_unread_topic is None
         assert model.last_unread_pm is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
@@ -3900,7 +3899,7 @@ class TestModel:
         assert return_value == is_muted
 
     @pytest.mark.parametrize(
-        "unread_topics, last_unread_topic, next_unread_topic",
+        "unread_topics, current_topic, next_unread_topic",
         [
             case(
                 {(1, "topic"), (2, "topic2")},
@@ -3929,7 +3928,7 @@ class TestModel:
             case(
                 {},
                 (1, "topic"),
-                None,
+                (1, "topic"),
                 id="no_unreads_with_previous_topic_state",
             ),
             case({}, None, None, id="no_unreads_with_no_previous_topic_state"),
@@ -3948,7 +3947,7 @@ class TestModel:
             case(
                 {(3, "topic3")},
                 (2, "topic2"),
-                None,
+                (2, "topic2"),
                 id="unread_present_only_in_muted_stream",
             ),
             case(
@@ -3993,16 +3992,36 @@ class TestModel:
                 (2, "topic2"),
                 id="unread_present_after_previous_topic_muted",
             ),
+            case(
+                {(1, "topic1"), (2, "topic2"), (2, "topic2 muted")},
+                (2, "topic1"),
+                (2, "topic2"),
+                id="unmuted_unread_present_in_same_stream_as_current_topic_not_in_unread_list",
+            ),
+            case(
+                {(1, "topic1"), (2, "topic2 muted"), (4, "topic4")},
+                (2, "topic1"),
+                (4, "topic4"),
+                id="unmuted_unread_present_in_next_stream_as_current_topic_not_in_unread_list",
+            ),
+            case(
+                {(1, "topic1"), (2, "topic2 muted"), (3, "topic3")},
+                (2, "topic1"),
+                (1, "topic1"),
+                id="unmuted_unread_not_present_in_next_stream_as_current_topic_not_in_unread_list",
+            ),
         ],
     )
     def test_get_next_unread_topic(
-        self, model, unread_topics, last_unread_topic, next_unread_topic
+        self, mocker, model, unread_topics, current_topic, next_unread_topic
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
         model.unread_counts = {
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
-        model._last_unread_topic = last_unread_topic
+
+        current_message_id = 10  # Arbitrary value due to mock below
+        model.stream_topic_from_message_id = mocker.Mock(return_value=current_topic)
 
         # Minimal extra streams for muted stream testing (should not exist otherwise)
         assert {3, 4} & set(model.stream_dict) == set()
@@ -4020,7 +4039,38 @@ class TestModel:
             ]
         }
 
-        unread_topic = model.get_next_unread_topic()
+        unread_topic = model.get_next_unread_topic(current_message=current_message_id)
+
+        assert unread_topic == next_unread_topic
+
+    @pytest.mark.parametrize(
+        "unread_topics, empty_narrow, narrow_stream_id, next_unread_topic",
+        [
+            case(
+                {(1, "topic1"), (1, "topic2"), (2, "topic3")},
+                [["stream", "Stream 1"], ["topic", "topic1.5"]],
+                1,
+                (1, "topic2"),
+            ),
+        ],
+    )
+    def test_get_next_unread_topic__empty_narrow(
+        self,
+        mocker,
+        model,
+        unread_topics,
+        empty_narrow,
+        narrow_stream_id,
+        next_unread_topic,
+    ):
+        # NOTE Not important how many unreads per topic, so just use '1'
+        model.unread_counts = {
+            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
+        }
+        model.stream_id_from_name = mocker.Mock(return_value=narrow_stream_id)
+        model.narrow = empty_narrow
+
+        unread_topic = model.get_next_unread_topic(current_message=None)
 
         assert unread_topic == next_unread_topic
 
