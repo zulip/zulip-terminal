@@ -584,9 +584,20 @@ class MiddleColumnView(urwid.Frame):
 
         elif is_command_key("NEXT_UNREAD_TOPIC", key):
             # narrow to next unread topic
-            stream_topic = self.model.get_next_unread_topic()
-            if stream_topic is None:
+            focus = self.view.message_view.focus
+            narrow = self.model.narrow
+            if focus:
+                current_msg_id = focus.original_widget.message["id"]
+                stream_topic = self.model.get_next_unread_topic(
+                    current_message=current_msg_id
+                )
+                if stream_topic is None:
+                    return key
+            elif narrow[0][0] == "stream" and narrow[1][0] == "topic":
+                stream_topic = self.model.get_next_unread_topic(current_message=None)
+            else:
                 return key
+
             stream_id, topic = stream_topic
             self.controller.narrow_to_topic(
                 stream_name=self.model.stream_dict[stream_id]["name"],
