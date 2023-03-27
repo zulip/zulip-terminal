@@ -15,10 +15,10 @@ python_sources = [
 python_sources += lintable_tools_files
 
 tools = {
-    "Import order (isort)": "./tools/run-isort-check",
-    "Type consistency (mypy)": "./tools/run-mypy",
     "PEP8 & more (ruff)": ["ruff"] + python_sources,
     "Formatting (black)": ["black", "--check"] + python_sources,
+    "Import order (isort)": "./tools/run-isort-check",
+    "Type consistency (mypy)": "./tools/run-mypy",
     "Common spelling mistakes": "./tools/run-spellcheck",
     "Hotkey linting & docs sync check": ["./tools/lint-hotkeys"],
     "Docstring linting & docs sync check (lint-docstring)": "./tools/lint-docstring",
