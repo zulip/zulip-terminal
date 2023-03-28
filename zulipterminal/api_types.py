@@ -22,6 +22,10 @@ RESOLVED_TOPIC_PREFIX = "✔ "
 TYPING_STARTED_WAIT_PERIOD = 10
 TYPING_STOPPED_WAIT_PERIOD = 5
 
+###############################################################################
+# Parameter to pass in request to:
+#   https://zulip.com/api/send-message
+
 
 class PrivateComposition(TypedDict):
     type: Literal["private"]
@@ -36,8 +40,11 @@ class StreamComposition(TypedDict):
     subject: str  # TODO: Migrate to using topic
 
 
-# https://zulip.com/api/send-message
 Composition = Union[PrivateComposition, StreamComposition]
+
+###############################################################################
+# Parameter to pass in request to:
+#   https://zulip.com/api/update-message
 
 
 class PrivateMessageUpdateRequest(TypedDict):
@@ -64,8 +71,14 @@ class StreamMessageUpdateRequest(TypedDict):
     # stream_id: int
 
 
-# https://zulip.com/api/update-message
 MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateRequest]
+
+###############################################################################
+# In "messages" response from:
+#   https://zulip.com/api/get-messages
+# In "message" response from:
+#   https://zulip.com/api/get-events#message
+#   https://zulip.com/api/get-message  (unused)
 
 
 class Message(TypedDict, total=False):
@@ -102,7 +115,14 @@ class Message(TypedDict, total=False):
     # sender_short_name: str
 
 
-# Elements and types taken from https://zulip.com/api/get-events
+###############################################################################
+# In "subscriptions" response from:
+#   https://zulip.com/api/register-queue
+# Also directly from:
+#   https://zulip.com/api/get-events#subscription-add
+#   https://zulip.com/api/get-subscriptions (unused)
+
+
 class Subscription(TypedDict):
     stream_id: int
     name: str
@@ -134,6 +154,17 @@ class Subscription(TypedDict):
 
     # Deprecated fields
     # in_home_view: bool  # Replaced by is_muted in Zulip 2.1; still present in updates
+
+
+###############################################################################
+# In "realm_user" response from:
+#   https://zulip.com/api/register-queue
+# Also directly from:
+#   https://zulip.com/api/get-events#realm_user-add
+#   https://zulip.com/api/get-users     (unused)
+#   https://zulip.com/api/get-own-user  (unused)
+#   https://zulip.com/api/get-user      (unused)
+# NOTE: Responses between versions & endpoints vary
 
 
 class RealmUser(TypedDict):
@@ -171,6 +202,12 @@ class RealmUser(TypedDict):
     # is_moderator: bool  # NOTE: new in Zulip 4.0 (ZFL 60) - ONLY IN REGISTER RESPONSE
     # is_cross_realm_bot: bool  # NOTE: Only for cross-realm bots
     # max_message_id: int  # NOTE: DEPRECATED & only for /users/me
+
+
+###############################################################################
+# Events possible in "events" from:
+#   https://zulip.com/api/get-events
+# (also helper data structures not used elsewhere)
 
 
 class MessageEvent(TypedDict):
