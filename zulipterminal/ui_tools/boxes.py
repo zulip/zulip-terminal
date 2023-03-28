@@ -805,6 +805,29 @@ class WriteBox(urwid.Pile):
                     )
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
+            if len(self.msg_write_box.edit_text) > 10:
+                if self.compose_box_status == "open_with_private":
+                    all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
+                        self.to_write_box
+                    )
+                    if not all_valid:
+                        return key
+                    self.update_recipients(self.to_write_box)
+                    draft: Composition = PrivateComposition(
+                        type="private",
+                        to=self.recipient_user_ids,
+                        content=self.msg_write_box.edit_text,
+                    )
+                elif self.compose_box_status == "open_with_stream":
+                    draft = StreamComposition(
+                        type="stream",
+                        to=self.stream_write_box.edit_text,
+                        content=self.msg_write_box.edit_text,
+                        subject=self.title_write_box.edit_text,
+                    )
+                self.view.controller.exit_compose_confirmation_popup(
+                    draft,
+                )
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
             self.main_view(False)
