@@ -529,6 +529,11 @@ class Controller:
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
         self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
 
+    def exit_compose_confirmation_popup(self, draft: Composition) -> None:
+        question = urwid.Text(("bold", f"Save composed message as a draft?"))
+        save_draft = partial(self.model.save_draft, draft)
+        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
+
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
         try:
             pyperclip.copy(text)
