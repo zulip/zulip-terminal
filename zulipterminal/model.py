@@ -64,6 +64,7 @@ from zulipterminal.helper import (
     StreamData,
     TidiedUserInfo,
     UserStatus,
+    analyse_edit_history,
     asynch,
     canonicalize_color,
     classify_unread_counts,
@@ -1709,9 +1710,29 @@ class Model:
         #       they are not all marked as edited, as per server optimization
         message_id = event["message_id"]
         indexed_message = self.index["messages"].get(message_id, None)
-
+        current_topic = None
+        old_topic = None
         if indexed_message:
-            self.index["edited_messages"].add(message_id)
+            if "prev_content" in event:
+                content_changed = True
+            else:
+                content_changed = False
+            if "prev_stream" in event:
+                stream_changed = True
+            else:
+                stream_changed = False
+            if "subject" in event:
+                current_topic = event["subject"]
+                old_topic = event["orig_subject"]
+
+            analyse_edit_history(
+                message_id,
+                self.index,
+                content_changed,
+                stream_changed,
+                current_topic,
+                old_topic,
+            )
 
         # Update the rendered content, if the message is indexed
         if "rendered_content" in event and indexed_message:
