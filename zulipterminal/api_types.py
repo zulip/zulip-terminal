@@ -182,6 +182,7 @@ class Message(TypedDict, total=False):
     # NOTE: `subject_links` in Zulip 2.1; deprecated from Zulip 3.0 / ZFL 1
     subject_links: List[str]
     is_me_message: bool
+    edit_history: List[Dict[str, Any]]
     reactions: List[Dict[str, Any]]
     submessages: List[Dict[str, Any]]
     flags: List[MessageFlag]
