@@ -1475,6 +1475,29 @@ class StreamInfoView(PopUpView):
         return super().keypress(size, key)
 
 
+class SubscriptionOption(PopUpView):
+    def __init__(self, controller: Any, stream_id: int) -> None:
+        self.stream_id = stream_id
+        self.controller = controller
+
+        title = "Stream Subscription Toggle"
+
+        subscription_checkbox = urwid.CheckBox(
+            label="Subscription Status",
+            state=self.controller.model.is_user_subscribed_to_stream(stream_id),
+            checked_symbol=CHECK_MARK,
+        )
+        widgets = []
+        widgets.append(subscription_checkbox)
+        urwid.connect_signal(
+            subscription_checkbox, "change", self.toggle_subscribe_status
+        )
+        super().__init__(self.controller, widgets, "STREAM_SUBSCRIBE", 36, title)
+
+    def toggle_subscribe_status(self, button: Any, new_state: bool) -> None:
+        self.controller.model.toggle_stream_subscription(self.stream_id)
+
+
 class StreamMembersView(PopUpView):
     def __init__(self, controller: Any, stream_id: int) -> None:
         self.stream_id = stream_id

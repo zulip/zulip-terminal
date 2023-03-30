@@ -182,6 +182,12 @@ class Model:
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
+        self.unsubscribed_stream_dict: Dict[int, Any] = {}
+
+        self.unsubscribed_streams: Set[int] = set()
+        self.subscribed_streams: Set[int] = set()
+        self._unsubscribed_recently(self.initial_data["unsubscribed"])
+
         # NOTE: The date_created field of stream has been added in feature
         # level 30, server version 4. For consistency we add this field
         # on server iterations even before this with value of None.
@@ -1196,6 +1202,25 @@ class Model:
             new_visual_notified_streams
         )
 
+    def _unsubscribed_recently(self, unsubscribed_list: List[Subscription]) -> None:
+
+        new_unsubscribed_stream = set()
+
+        for unsubscribed_stream in unsubscribed_list:
+            unsubscribed_stream["color"] = canonicalize_color(
+                unsubscribed_stream["color"]
+            )
+
+            self.unsubscribed_stream_dict[
+                unsubscribed_stream["stream_id"]
+            ] = unsubscribed_stream
+            new_unsubscribed_stream.add(unsubscribed_stream["stream_id"])
+
+        if new_unsubscribed_stream:
+            self.unsubscribed_streams = self.unsubscribed_streams.union(
+                new_unsubscribed_stream
+            )
+
     def _group_info_from_realm_user_groups(
         self, groups: List[Dict[str, Any]]
     ) -> List[str]:
@@ -1226,6 +1251,22 @@ class Model:
         ]
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)
+
+    def toggle_stream_subscription(self, stream_id: int) -> None:
+        if not self.is_user_subscribed_to_stream(stream_id):
+            stream_to_be_subscribed = {
+                "name": self.unsubscribed_stream_dict[stream_id]["name"]
+            }
+            list_of_streams = []
+            list_of_streams.append(stream_to_be_subscribed)
+            subscribe_response = self.client.add_subscriptions(streams=list_of_streams)
+            display_error_if_present(subscribe_response, self.controller)
+        else:
+            stream_to_be_unsubscribed = [self.stream_dict[stream_id]["name"]]
+            unsubscribe_response = self.client.remove_subscriptions(
+                stream_to_be_unsubscribed
+            )
+            display_error_if_present(unsubscribe_response, self.controller)
 
     def stream_id_from_name(self, stream_name: str) -> int:
         for stream_id, stream in self.stream_dict.items():
@@ -1367,6 +1408,18 @@ class Model:
                     else:
                         for user_id in user_ids:
                             subscribers.remove(user_id)
+
+        elif event["op"] == "remove":
+            if hasattr(self.controller, "view"):
+                stream_id = event["subscriptions"][0]["stream_id"]
+                self.unsubscribed_stream_dict[stream_id] = self.stream_dict[stream_id]
+                self.stream_dict.pop(stream_id)
+        elif event["op"] == "add":
+            if hasattr(self.controller, "view"):
+                stream_id = event["subscriptions"][0]["stream_id"]
+                unread_count = self.unread_counts["streams"][stream_id]
+                self.stream_dict[stream_id] = self.unsubscribed_stream_dict[stream_id]
+                self.unsubscribed_stream_dict.pop(stream_id)
 
     def _handle_typing_event(self, event: Event) -> None:
         """
