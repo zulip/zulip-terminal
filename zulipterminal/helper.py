@@ -32,7 +32,12 @@ from urllib.parse import unquote
 import requests
 from typing_extensions import Literal, ParamSpec, TypedDict
 
-from zulipterminal.api_types import Composition, EmojiType, Message
+from zulipterminal.api_types import (
+    RESOLVED_TOPIC_PREFIX,
+    Composition,
+    EmojiType,
+    Message,
+)
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.regexes import (
     REGEX_COLOR_3_DIGIT,
@@ -110,6 +115,7 @@ class Index(TypedDict):
     topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
     edited_messages: Set[int]  # {message_id, ...}
+    moved_messages: Set[int]
     topics: Dict[int, List[str]]  # {topic names, ...}
     search: Set[int]  # {message_id, ...}
     # Downloaded message data by message id
@@ -126,6 +132,7 @@ initial_index = Index(
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
+    moved_messages=set(),
     topics=defaultdict(list),
     search=set(),
     # mypy bug: https://github.com/python/mypy/issues/7217
@@ -305,6 +312,44 @@ def set_count(id_list: List[int], controller: Any, new_count: int) -> None:
     controller.update_screen()
 
 
+def analyse_edit_history(
+    msg_id: int,
+    index: Index,
+    content_changed: bool,
+    stream_changed: bool,
+    current_topic: Any = None,
+    old_topic: Any = None,
+) -> None:
+    resolve_change = False
+    resolved_prefix = RESOLVED_TOPIC_PREFIX + " "
+    if content_changed or stream_changed:
+        index["edited_messages"].add(msg_id)
+    elif old_topic:
+        old_topic_resolved = old_topic.startswith(resolved_prefix)
+        current_topic_resolved = current_topic.startswith(resolved_prefix)
+        if not current_topic_resolved:
+            if old_topic_resolved:
+                if old_topic[2:] != current_topic:
+                    index["moved_messages"].add(msg_id)
+                if old_topic[2:] == current_topic:
+                    resolve_change = True
+            if not old_topic_resolved and not current_topic_resolved:
+                index["moved_messages"].add(msg_id)
+        else:
+            if old_topic_resolved and old_topic[2:] != current_topic[2:]:
+                index["moved_messages"].add(msg_id)
+            if not old_topic_resolved:
+                if current_topic[2:] != old_topic:
+                    index["moved_messages"].add(msg_id)
+                if current_topic[2:] == old_topic:
+                    resolve_change = True
+
+    else:
+        index["edited_messages"].add(msg_id)
+    if msg_id not in index["moved_messages"] and not resolve_change:
+        index["edited_messages"].add(msg_id)
+
+
 def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     STRUCTURE OF INDEX
@@ -433,8 +478,26 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     narrow = model.narrow
     for msg in messages:
         if "edit_history" in msg:
-            index["edited_messages"].add(msg["id"])
-
+            stream_changed = False
+            content_changed = False
+            current_topic = None
+            old_topic = None
+            for edit_history_event in msg["edit_history"]:
+                if "prev_content" in edit_history_event:
+                    content_changed = True
+                if "prev_stream" in edit_history_event:
+                    stream_changed = True
+                if "prev_topic" in edit_history_event:
+                    current_topic = edit_history_event["topic"]
+                    old_topic = edit_history_event["prev_topic"]
+            analyse_edit_history(
+                msg["id"],
+                index,
+                content_changed,
+                stream_changed,
+                current_topic,
+                old_topic,
+            )
         index["messages"][msg["id"]] = msg
         if not narrow:
             index["all_msg_ids"].add(msg["id"])
