@@ -396,6 +396,12 @@ KEY_BINDINGS: 'OrderedDict[str, KeyBinding]' = OrderedDict([
         'help_text': 'Show/hide full raw message (from message information)',
         'key_category': 'msg_actions',
     }),
+    ('COPY_MESSAGE', {
+        'keys': ['C'],
+        'help_text':
+            'Copy message content to clipboard',
+        'key_category': 'msg_actions',
+    }),
 ])
 # fmt: on
 

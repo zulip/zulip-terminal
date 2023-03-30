@@ -1530,6 +1530,9 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
         )
+        copy_message_keys = "[{}]".format(
+            ", ".join(map(str, keys_for_command("COPY_MESSAGE")))
+        )
         msg_info = [
             (
                 "",
@@ -1548,6 +1551,7 @@ class MsgInfoView(PopUpView):
                 ("Open in web browser", view_in_browser_keys),
                 ("Full rendered message", full_rendered_message_keys),
                 ("Full raw message", full_raw_message_keys),
+                ("Copy message", copy_message_keys),
             ],
         )
         msg_info.append(viewing_actions)
@@ -1678,6 +1682,17 @@ class MsgInfoView(PopUpView):
                 time_mentions=self.time_mentions,
             )
             return key
+        elif is_command_key("COPY_MESSAGE", key):
+            rendered_content, *_ = MessageBox.transform_content(
+                self.msg["content"], self.controller.model.server_url
+            )
+            content = []
+            for word in rendered_content[1]:
+                if isinstance(word, tuple):  # if msg content has markup
+                    content.append(word[1])
+                else:
+                    content.append(word)
+            self.controller.copy_to_clipboard("".join(content), "Message Content")
         return super().keypress(size, key)
 
 

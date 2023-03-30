@@ -1001,6 +1001,18 @@ class TestMsgInfoView:
             time_mentions=list(),
         )
 
+    @pytest.mark.parametrize("key", keys_for_command("COPY_MESSAGE"))
+    def test_keypress_copy_message(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.msg_info_view)
+
+        self.msg_info_view.keypress(size, key)
+
+        self.controller.copy_to_clipboard.assert_called_once_with(
+            self.msg_info_view.msg["content"], "Message Content"
+        )
+
     @pytest.mark.parametrize(
         "key", {*keys_for_command("GO_BACK"), *keys_for_command("MSG_INFO")}
     )
@@ -1027,13 +1039,14 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 8
-        # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
-        # +1 (display group header)
+        expected_height = 9
+        # 9 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (whitespace column)
+        # +1 (display group header)
         # +1 (view message in browser)
         # +1 (full rendered message)
         # +1 (full raw message)
+        # +1 (copy message content)
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -1101,9 +1114,9 @@ class TestMsgInfoView:
             OrderedDict(),
             list(),
         )
-        # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
+        # 15 = 8 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 14
+        expected_height = 15
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
