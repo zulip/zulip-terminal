@@ -33,7 +33,7 @@ import requests
 from typing_extensions import ParamSpec, TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
-from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.keys import display_primary_key_for_command
 from zulipterminal.config.regexes import (
     REGEX_COLOR_3_DIGIT,
     REGEX_COLOR_6_DIGIT,
@@ -655,7 +655,7 @@ def check_narrow_and_notify(
         and current_narrow != outer_narrow
         and current_narrow != inner_narrow
     ):
-        key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
+        key = display_primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
 
         controller.report_success(
             [

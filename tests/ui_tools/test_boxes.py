@@ -7,7 +7,11 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
 
-from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.keys import (
+    display_primary_key_for_command,
+    keys_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
@@ -354,9 +358,12 @@ class TestWriteBox:
         expected_lines = [
             "Invalid recipient(s) - " + invalid_recipients,
             " - Use ",
-            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+            ("footer_contrast", display_primary_key_for_command("AUTOCOMPLETE")),
             " or ",
-            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE_REVERSE")),
+            (
+                "footer_contrast",
+                display_primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            ),
             " to autocomplete.",
         ]
 
@@ -1718,7 +1725,7 @@ class TestPanelSearchBox:
     @pytest.fixture
     def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
         # X is the return from keys_for_command("UNTESTED_TOKEN")
-        mocker.patch(MODULE + ".keys_for_command", return_value="X")
+        mocker.patch(MODULE + ".display_keys_for_command", return_value="X")
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)

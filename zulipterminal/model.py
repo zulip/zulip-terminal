@@ -42,7 +42,7 @@ from zulipterminal.api_types import (
     StreamMessageUpdateRequest,
     Subscription,
 )
-from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.keys import display_primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import (
     EDIT_TOPIC_POLICY,
@@ -1522,7 +1522,7 @@ class Model:
                 "Press '{}' to close this window."
             )
             notice = notice_template.format(
-                failed_command, primary_key_for_command("GO_BACK")
+                failed_command, display_primary_key_for_command("GO_BACK")
             )
             self.controller.popup_with_message(notice, width=50)
             self.controller.update_screen()
