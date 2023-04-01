@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 from pytest_mock import MockerFixture
@@ -36,6 +36,30 @@ def test_primary_key_for_command(valid_command: str) -> None:
 def test_keys_for_command_invalid_command(invalid_command: str) -> None:
     with pytest.raises(keys.InvalidCommand):
         keys.keys_for_command(invalid_command)
+
+
+@pytest.mark.parametrize(
+    "valid_urwid_key_list,display_key_list",
+    [
+        (["meta m", "ctrl d"], ["Meta m", "Ctrl d"]),
+        (["page up", "esc"], ["PgUp", "Esc"]),
+        (["ctrl p", "P"], ["Ctrl p", "P"]),
+        (["z", ":"], ["z", ":"]),
+    ],
+)
+def test_display_keys_for_urwid_keys(
+    valid_urwid_key_list: List[str], display_key_list: List[str]
+) -> None:
+    assert display_key_list == keys.display_keys_for_urwid_keys(valid_urwid_key_list)
+
+
+@pytest.mark.parametrize(
+    "invalid_urwid_key_list",
+    [(["meta z", "ctrl t"]), (["META M", "CTRL L"]), (["meta .", "up down"])],
+)
+def test_display_keys_for_invalid_urwid_keys(invalid_urwid_key_list: List[str]) -> None:
+    with pytest.raises(keys.InvalidKey):
+        keys.display_keys_for_urwid_keys(invalid_urwid_key_list)
 
 
 def test_keys_for_command_identity(valid_command: str) -> None:

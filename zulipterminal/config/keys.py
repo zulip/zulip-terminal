@@ -16,6 +16,8 @@ from urwid.command_map import (
     command_map,
 )
 
+from zulipterminal.config.ui_mappings import URWID_KEY_TO_DISPLAY_KEY_MAPPING
+
 
 class KeyBinding(TypedDict):
     keys: List[str]
@@ -422,6 +424,10 @@ class InvalidCommand(Exception):
     pass
 
 
+class InvalidKey(Exception):
+    pass
+
+
 def is_command_key(command: str, key: str) -> bool:
     """
     Returns the mapped binding for a key if mapped
@@ -459,6 +465,25 @@ def commands_for_random_tips() -> List[KeyBinding]:
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
     ]
+
+
+def display_keys_for_command(command: str) -> List[str]:
+    try:
+        urwid_keys = KEY_BINDINGS[command]["keys"]
+        return display_keys_for_urwid_keys(urwid_keys)
+    except KeyError as exception:
+        raise InvalidCommand(command) from exception
+
+
+def display_keys_for_urwid_keys(urwid_keys: List[str]) -> List[str]:
+    try:
+        return [URWID_KEY_TO_DISPLAY_KEY_MAPPING[key] for key in urwid_keys]
+    except KeyError as exception:
+        raise InvalidKey(urwid_keys) from exception
+
+
+def display_primary_key_for_command(command: str) -> str:
+    return display_keys_for_command(command).pop(0)
 
 
 # Refer urwid/command_map.py
