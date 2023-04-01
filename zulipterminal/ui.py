@@ -5,7 +5,7 @@ Defines the `View`, and controls where each component is displayed
 import random
 import re
 import time
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import urwid
 
@@ -44,6 +44,7 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
+        self.stream_topic_map: Dict[int, Any] = {}
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
