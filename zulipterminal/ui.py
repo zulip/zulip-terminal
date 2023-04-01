@@ -44,12 +44,15 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
-        self.stream_topic_map: Dict[int, Any] = {}
+        self.stream_topic_map: Dict[int, Optional[str]] = {}
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
 
         super().__init__(self.main_window())
+
+    def associate_stream_with_topic(self, stream_id: int, topic_name: str) -> None:
+        self.stream_topic_map[stream_id] = topic_name
 
     def left_column_view(self) -> Any:
         tab = TabView(

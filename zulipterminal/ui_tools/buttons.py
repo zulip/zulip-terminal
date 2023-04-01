@@ -348,6 +348,7 @@ class TopicButton(TopButton):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
+            self.view.associate_stream_with_topic(self.stream_id, self.topic_name)
             self.view.left_panel.show_stream_view()
         return super().keypress(size, key)
 
