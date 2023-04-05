@@ -9,7 +9,7 @@ from urwid import Columns, Pile, Text, Widget
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
-from zulipterminal.helper import TidiedUserInfo
+from zulipterminal.helper import CustomProfileData, TidiedUserInfo
 from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -271,6 +271,15 @@ class TestUserInfoView:
             return_value="Tue Mar 13 10:55 AM",
         )
 
+        mocked_user_name_from_id = {
+            11: "Human 1",
+            12: "Human 2",
+            13: "Human 3",
+        }
+        self.controller.model.user_name_from_id = mocker.Mock(
+            side_effect=lambda param: mocked_user_name_from_id.get(param, "(No name)")
+        )
+
         self.user_info_view = UserInfoView(
             self.controller, 10000, "User Info (up/down scrolls)", "USER_INFO"
         )
@@ -334,26 +343,77 @@ class TestUserInfoView:
     )
     def test__fetch_user_data(
         self,
-        mocker: MockerFixture,
         to_vary_in_each_user: Dict[str, Any],
         expected_key: str,
         expected_value: Optional[str],
     ) -> None:
         data = dict(self.user_data, **to_vary_in_each_user)
 
-        mocker.patch.object(self.controller.model, "get_user_info", return_value=data)
+        self.controller.model.get_user_info.return_value = data
 
-        display_data = self.user_info_view._fetch_user_data(self.controller, 1)
+        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
+            self.controller, 1
+        )
 
         assert display_data.get(expected_key, None) == expected_value
+
+    @pytest.mark.parametrize(
+        [
+            "to_vary_in_each_user",
+            "expected_value",
+        ],
+        [
+            case(
+                [],
+                {},
+                id="user_has_no_custom_profile_data",
+            ),
+            case(
+                [
+                    {
+                        "label": "Biography",
+                        "value": "Simplicity",
+                        "type": 2,
+                        "order": 2,
+                    },
+                    {
+                        "label": "Mentor",
+                        "value": [11, 12],
+                        "type": 6,
+                        "order": 7,
+                    },
+                ],
+                {"Biography": "Simplicity", "Mentor": "Human 1, Human 2"},
+                id="user_has_custom_profile_data",
+            ),
+        ],
+    )
+    def test__fetch_user_data__custom_profile_data(
+        self,
+        to_vary_in_each_user: List[CustomProfileData],
+        expected_value: Dict[str, str],
+    ) -> None:
+        data = dict(self.user_data)
+        data["custom_profile_data"] = to_vary_in_each_user
+
+        self.controller.model.get_user_info.return_value = data
+
+        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
+            self.controller, 1
+        )
+
+        assert custom_profile_data == expected_value
 
     def test__fetch_user_data_USER_NOT_FOUND(self, mocker: MockerFixture) -> None:
         mocker.patch.object(self.controller.model, "get_user_info", return_value=dict())
 
-        display_data = self.user_info_view._fetch_user_data(self.controller, 1)
+        display_data, custom_profile_data = self.user_info_view._fetch_user_data(
+            self.controller, 1
+        )
 
         assert display_data["Name"] == "(Unavailable)"
         assert display_data["Error"] == "User data not found"
+        assert custom_profile_data == {}
 
     @pytest.mark.parametrize(
         "key", {*keys_for_command("GO_BACK"), *keys_for_command("USER_INFO")}
