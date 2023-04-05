@@ -5,6 +5,7 @@
 [![Chat with us!](https://img.shields.io/badge/Zulip-chat_with_us!-brightgreen.svg)](https://github.com/zulip/zulip-terminal/blob/main/README.md#chat-with-fellow-users--developers)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
+[![Python Implementations](https://img.shields.io/pypi/implementation/zulip-term.svg)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-python-implementations-are-supported)
 
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=main)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amain)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/main.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/main)
