@@ -38,6 +38,18 @@ Learn how to use Zulip Terminal with our
 We consider the client to already provide a fairly stable moderately-featureful
 everyday-user experience.
 
+The current development focus is on improving aspects of everyday usage which
+are more commonly used - to reduce the need for users to temporarily switch to
+another client for a particular feature.
+
+Current limitations which we expect to only resolve over the long term include support for:
+* All operations performed by users with extra privileges (owners/admins)
+* Accessing and updating all settings
+* Using a mouse/pointer to achieve all actions
+* An internationalized UI
+
+#### Intentional differences
+
 The terminal client currently has a number of intentional differences to the Zulip web client:
 - Additional and occasionally *different*
   [Hot keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md)
@@ -58,15 +70,7 @@ The terminal client currently has a number of intentional differences to the Zul
 - Content previewable in the web client, such as images, are also stored as
   footlinks
 
-The current development focus is on improving aspects of everyday usage which
-are more commonly used - to reduce the need for users to temporarily switch to
-another client for a particular feature.
-
-Current limitations which we expect to only resolve over the long term include support for:
-* All operations performed by users with extra privileges (owners/admins)
-* Accessing and updating all settings
-* Using a mouse/pointer to achieve all actions
-* An internationalized UI
+#### Feature queries?
 
 For queries on missing feature support please take a look at the
 [Frequently Asked Questions (FAQs)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md),
