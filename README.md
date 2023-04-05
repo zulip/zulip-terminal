@@ -6,6 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Implementations](https://img.shields.io/pypi/implementation/zulip-term.svg)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-python-implementations-are-supported)
+[![OS Platforms](https://img.shields.io/static/v1?label=OS&message=Linux%20%7C%20WSL%20%7C%20macOS%20%7C%20Docker&color=blueviolet)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-operating-systems-are-supported)
 
 [![GitHub Actions - Linting & tests](https://github.com/zulip/zulip-terminal/workflows/Linting%20%26%20tests/badge.svg?branch=main)](https://github.com/zulip/zulip-terminal/actions?query=workflow%3A%22Linting+%26+tests%22+branch%3Amain)
 [![Coverage status](https://img.shields.io/codecov/c/github/zulip/zulip-terminal/main.svg)](https://app.codecov.io/gh/zulip/zulip-terminal/branch/main)
@@ -78,11 +79,6 @@ For queries on missing feature support please take a look at the
 our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or
 [chat with users & developers](#chat-with-fellow-users--developers) online at
 the Zulip Community server!
-
-### Supported platforms
-- Linux
-- OSX
-- WSL (On Windows)
 
 ### Supported Server Versions
 
