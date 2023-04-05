@@ -12,6 +12,28 @@ application in these tests.
 Feedback on using these or any other implementations are welcome, such as those
 [listed at python.org](https://www.python.org/download/alternatives/).
 
+## What operating systems are supported?
+
+We expect everything to work smoothly on the following operating systems:
+* Linux
+* macOS
+* WSL (Windows Subsystem for Linux)
+
+These are covered in our automatic test suite, though it is assumed that Python
+insulates us from excessive variations between distributions and versions,
+including when using WSL.
+
+Note that some features are not supported or require extra configuration,
+depending on the platform - see
+[Configuration](https://github.com/zulip/zulip-terminal/blob/main/README.md#configuration).
+
+> NOTE: Windows is **not** natively supported right now, see
+> [#357](https://github.com/zulip/zulip-terminal/issues/357).
+
+`Dockerfile`s have also been contributed, though we don't currently distribute
+pre-built versions of these to install - see the [Docker
+documentation](https://github.com/zulip/zulip-terminal/blob/main/docker/).
+
 ## Colors appear mismatched, don't change with theme, or look strange
 
 Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
