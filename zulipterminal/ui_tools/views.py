@@ -1084,12 +1084,19 @@ class AboutView(PopUpView):
 
 class UserInfoView(PopUpView):
     def __init__(self, controller: Any, user_id: int, title: str, command: str) -> None:
-        display_data = self._fetch_user_data(controller, user_id)
+        display_data, display_custom_profile_data = self._fetch_user_data(
+            controller, user_id
+        )
 
         user_details = [
             (key, value) for key, value in display_data.items() if key != "Name"
         ]
         user_view_content = [(display_data["Name"], user_details)]
+
+        if display_custom_profile_data:
+            user_view_content.extend(
+                [("Additional Details", list(display_custom_profile_data.items()))]
+            )
 
         popup_width, column_widths = self.calculate_table_widths(
             user_view_content, len(title)
@@ -1099,16 +1106,19 @@ class UserInfoView(PopUpView):
         super().__init__(controller, widgets, command, popup_width, title)
 
     @staticmethod
-    def _fetch_user_data(controller: Any, user_id: int) -> Dict[str, Any]:
+    def _fetch_user_data(
+        controller: Any, user_id: int
+    ) -> Tuple[Dict[str, str], Dict[str, str]]:
         # Get user data from model
         data: TidiedUserInfo = controller.model.get_user_info(user_id)
 
+        display_custom_profile_data = {}
         if not data:
             display_data = {
                 "Name": "(Unavailable)",
                 "Error": "User data not found",
             }
-            return display_data
+            return (display_data, display_custom_profile_data)
 
         # Style the data obtained to make it displayable
         display_data = {"Name": data["full_name"]}
@@ -1144,7 +1154,23 @@ class UserInfoView(PopUpView):
             if data["last_active"]:
                 display_data["Last active"] = data["last_active"]
 
-        return display_data
+        # This will be an empty dict in case of bot users
+        custom_profile_data = data["custom_profile_data"]
+
+        if custom_profile_data:
+            for field in custom_profile_data:
+                if field["type"] == 6:  # Person picker
+                    user_names = [
+                        controller.model.user_name_from_id(user)
+                        for user in field["value"]
+                    ]
+                    field["value"] = ", ".join(user_names)
+                # After conversion of field type 6, all values are str
+                assert isinstance(field["value"], str)
+
+                display_custom_profile_data[field["label"]] = field["value"]
+
+        return (display_data, display_custom_profile_data)
 
 
 class HelpView(PopUpView):
