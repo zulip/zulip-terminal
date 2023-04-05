@@ -1,5 +1,17 @@
 # Frequently Asked Questions (FAQ)
 
+## What Python implementations are supported?
+
+Users and developers run regularly with the "traditional" implementation of
+Python (CPython).
+
+We also expect running with [PyPy](https://www.pypy.org) to be smooth based on
+our automated testing, though it is worth noting we do not explicitly run the
+application in these tests.
+
+Feedback on using these or any other implementations are welcome, such as those
+[listed at python.org](https://www.python.org/download/alternatives/).
+
 ## Colors appear mismatched, don't change with theme, or look strange
 
 Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
