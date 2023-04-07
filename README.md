@@ -4,7 +4,7 @@
 
 [![Chat with us!](https://img.shields.io/badge/Zulip-chat_with_us!-brightgreen.svg)](https://github.com/zulip/zulip-terminal/blob/main/README.md#chat-with-fellow-users--developers)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
-[![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
+[![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-python-versions-are-supported)
 [![Python Implementations](https://img.shields.io/pypi/implementation/zulip-term.svg)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-python-implementations-are-supported)
 [![OS Platforms](https://img.shields.io/static/v1?label=OS&message=Linux%20%7C%20WSL%20%7C%20macOS%20%7C%20Docker&color=blueviolet)](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md#what-operating-systems-are-supported)
 
@@ -85,26 +85,6 @@ the Zulip Community server!
 The minimum server version that Zulip Terminal supports is
 [`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#zulip-2-1-x-series).
 It may still work with earlier versions.
-
-### Supported Python Versions
-
-Version 0.7.0 was the last release with support for Python 3.6.
-
-Version 0.6.0 was the last release with support for Python 3.5.
-
-Later releases and the main development branch are currently tested (on Ubuntu)
-with:
-- CPython 3.7-3.11
-- PyPy 3.7-3.9
-
-Since our automated testing does not cover interactive testing of the UI, there
-may be issues with some Python versions, though generally we have not found
-this to be the case.
-
-Please note that generally we limit each release to between a lower and upper
-Python version, so it is possible that for example if you have a newer version
-of Python installed, then some releases (or `main`) may not install correctly.
-In some cases this can give rise to the symptoms in issue #1145.
 
 ## Installation
 

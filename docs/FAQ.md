@@ -12,6 +12,26 @@ application in these tests.
 Feedback on using these or any other implementations are welcome, such as those
 [listed at python.org](https://www.python.org/download/alternatives/).
 
+## What Python versions are supported?
+
+Current practice is to pin minimum and maximum python version support.
+
+As a result:
+- the current `main` branch in git supports Python 3.7 to 3.11
+- Release 0.7.0 was the last release to support Python 3.6 (maximum 3.10)
+- Release 0.6.0 was the last release to support Python 3.5 (maximum 3.9)
+
+Note the minimum versions of Python are close to or in the unsupported range at
+this time.
+
+The next release will include support for Python 3.11; before then we suggest
+installing the
+[latest (git) version](https://github.com/zulip/zulip-terminal/blob/main/README.md#installation).
+
+> NOTE: If you attempt to install on a system using a version of Python which
+> pip cannot match, it may install a very old version - see
+> [issue 1145](https://github.com/zulip/zulip-terminal/issues/1145).
+
 ## What operating systems are supported?
 
 We expect everything to work smoothly on the following operating systems:
