@@ -80,12 +80,6 @@ our open [Issues](https://github.com/zulip/zulip-terminal/issues/), or
 [chat with users & developers](#chat-with-fellow-users--developers) online at
 the Zulip Community server!
 
-### Supported Server Versions
-
-The minimum server version that Zulip Terminal supports is
-[`2.1.0`](https://zulip.readthedocs.io/en/latest/overview/changelog.html#zulip-2-1-x-series).
-It may still work with earlier versions.
-
 ## Installation
 
 We recommend installing in a dedicated python virtual environment (see below)

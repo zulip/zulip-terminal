@@ -54,6 +54,18 @@ depending on the platform - see
 pre-built versions of these to install - see the [Docker
 documentation](https://github.com/zulip/zulip-terminal/blob/main/docker/).
 
+## What versions of Zulip are supported?
+
+For the features that we support, we expect Zulip server versions as far
+back as 2.1.0 to be usable.
+
+> NOTE: You can check your server version by pressing
+> <kbd>meta</kbd><kbd>?</kbd> in the application.
+
+Note that a subset of features in more recent Zulip versions are supported, and
+could in some cases be present when using this client, particularly if the
+feature relies upon a client-side implementation.
+
 ## Colors appear mismatched, don't change with theme, or look strange
 
 Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
