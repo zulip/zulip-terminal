@@ -238,6 +238,25 @@ class Subscription(TypedDict):
 
 
 ###############################################################################
+# In "custom_profile_fields" response from:
+#   https://zulip.com/api/register-queue
+# Also directly from:
+#   https://zulip.com/api/get-events#custom_profile_fields
+#   NOTE: This data structure is currently used in conftest.py to improve
+#   typing of fixtures, and can be used when initial_data is refactored to have
+#   better typing.
+
+
+class CustomProfileField(TypedDict):
+    id: int
+    name: str
+    type: Literal[1, 2, 3, 4, 5, 6, 7, 8]  # Field types range from 1 to 8.
+    hint: str
+    field_data: str
+    order: int
+
+
+###############################################################################
 # In "realm_user" response from:
 #   https://zulip.com/api/register-queue
 # Also directly from:
@@ -246,6 +265,11 @@ class Subscription(TypedDict):
 #   https://zulip.com/api/get-own-user  (unused)
 #   https://zulip.com/api/get-user      (unused)
 # NOTE: Responses between versions & endpoints vary
+
+
+class CustomFieldValue(TypedDict):
+    value: str
+    rendered_value: NotRequired[str]
 
 
 class RealmUser(TypedDict):

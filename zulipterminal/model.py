@@ -35,6 +35,7 @@ from zulipterminal.api_types import (
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
     Composition,
+    CustomFieldValue,
     DirectTypingNotification,
     EditPropagateMode,
     Event,
@@ -60,6 +61,7 @@ from zulipterminal.config.ui_mappings import (
     StreamAccessType,
 )
 from zulipterminal.helper import (
+    CustomProfileData,
     Message,
     NamedEmojiData,
     StreamData,
@@ -974,6 +976,56 @@ class Model:
                 if stream["name"] == stream_name
                 if sub != self.user_id
             ]
+
+    def _clean_and_order_custom_profile_data(
+        self, custom_profile_data: Dict[str, CustomFieldValue]
+    ) -> List[CustomProfileData]:
+        # Get custom profile fields
+        profile_fields = {
+            str(field["id"]): field
+            for field in self.initial_data["custom_profile_fields"]
+        }
+
+        cleaned_profile_data = []
+        for field_id in custom_profile_data:
+            field = profile_fields[field_id]
+            raw_value = custom_profile_data[field_id]["value"]
+
+            if field["type"] == 3:  # List of options
+                field_options = json.loads(field["field_data"])
+                field_value = field_options[raw_value]["text"]
+
+            elif field["type"] == 6:  # Person picker
+                field_value = list(
+                    map(
+                        int,
+                        raw_value.strip("][").split(","),
+                    )
+                )
+
+            elif field["type"] == 7:  # External Account
+                field_options = json.loads(field["field_data"])
+                field_subtype = field_options["subtype"]
+                if field_subtype == "github":
+                    url_pattern = "https://github.com/%(username)s"
+                elif field_subtype == "twitter":
+                    url_pattern = "https://twitter.com/%(username)s"
+                else:
+                    url_pattern = field_options["url_pattern"]
+                field_value = url_pattern % {"username": raw_value}
+            else:
+                field_value = raw_value
+
+            data: CustomProfileData = {
+                "label": field["name"],
+                "value": field_value,
+                "type": field["type"],
+                "order": field["order"],
+            }
+            cleaned_profile_data.append(data)
+
+        cleaned_profile_data.sort(key=lambda field: field["order"])
+        return cleaned_profile_data
 
     def get_user_info(self, user_id: int) -> Optional[TidiedUserInfo]:
         api_user_data: Optional[RealmUser] = self._all_users_by_id.get(user_id, None)

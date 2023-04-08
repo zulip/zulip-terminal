@@ -6,13 +6,18 @@ import pytest
 from pytest_mock import MockerFixture
 from urwid import Widget
 
-from zulipterminal.api_types import Message, MessageType
+from zulipterminal.api_types import (
+    CustomFieldValue,
+    CustomProfileField,
+    Message,
+    MessageType,
+)
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
     keys_for_command,
     primary_key_for_command,
 )
-from zulipterminal.helper import Index, TidiedUserInfo
+from zulipterminal.helper import CustomProfileData, Index, TidiedUserInfo
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
 from zulipterminal.ui_tools.messages import MessageBox
@@ -624,6 +629,224 @@ def mentioned_messages_combination(request: Any) -> Tuple[Set[int], Set[int]]:
     Returns a combination of mentioned and wildcard_mentioned messages
     """
     return deepcopy(request.param)
+
+
+@pytest.fixture
+def custom_profile_fields_fixture() -> List[CustomProfileField]:
+    return [
+        {
+            # Short text: For one line responses, like "Job title".
+            # Responses are limited to 50 characters.
+            "id": 1,
+            "name": "Phone number",
+            "type": 1,
+            "hint": "",
+            "field_data": "",
+            "order": 1,
+        },
+        {
+            # Long text: For multiline responses, like "Biography".
+            "id": 2,
+            "name": "Biography",
+            "type": 2,
+            "hint": "What are you known for?",
+            "field_data": "",
+            "order": 2,
+        },
+        {
+            # Another example of Short text field.
+            "id": 3,
+            "name": "Favorite food",
+            "type": 1,
+            "hint": "Or drink, if you'd prefer",
+            "field_data": "",
+            "order": 3,
+        },
+        {
+            # List of options: Creates a dropdown with a list of options.
+            "id": 4,
+            "name": "Favorite editor",
+            "type": 3,
+            "hint": "",
+            "field_data": (
+                '{"0":{"text":"Vim","order":"1"},"1":{"text":"Emacs","order":"2"}}'
+            ),
+            "order": 4,
+        },
+        {
+            # Date picker: For dates, like "Birthday".
+            "id": 5,
+            "name": "Birthday",
+            "type": 4,
+            "hint": "",
+            "field_data": "",
+            "order": 5,
+        },
+        {
+            # Link: For links to websites.
+            "id": 6,
+            "name": "Favorite website",
+            "type": 5,
+            "hint": "Or your personal blog's URL",
+            "field_data": "",
+            "order": 6,
+        },
+        {
+            # Person picker: For selecting one or more users,
+            # like "Manager" or "Direct reports".
+            "id": 7,
+            "name": "Manager",
+            "type": 6,
+            "hint": "Only one person",
+            "field_data": "",
+            "order": 7,
+        },
+        {
+            # Another person picker: Use case with multiple users.
+            "id": 8,
+            "name": "Mentor",
+            "type": 6,
+            "hint": "",
+            "field_data": "",
+            "order": 8,
+        },
+        {
+            # External account: For linking to GitHub, Twitter, etc.
+            # GitHub example
+            "id": 9,
+            "name": "GitHub username",
+            "type": 7,
+            "hint": "",
+            "field_data": '{"subtype":"github"}',
+            "order": 9,
+        },
+        {
+            # Twitter example
+            "id": 10,
+            "name": "Twitter username",
+            "type": 7,
+            "hint": "",
+            "field_data": '{"subtype":"twitter"}',
+            "order": 10,
+        },
+        {
+            # Custom example
+            "id": 11,
+            "name": "Reddit username",
+            "type": 7,
+            "hint": "",
+            "field_data": '{"subtype":"custom", "url_pattern":"https://www.reddit.com/u/%(username)s"}',
+            "order": 11,
+        },
+        {
+            # Pronouns: What pronouns should people use to refer to the user?
+            "id": 12,
+            "name": "Pronouns",
+            "type": 8,
+            "hint": "What pronouns should people use to refer to you?",
+            "field_data": "",
+            "order": 12,
+        },
+    ]
+
+
+@pytest.fixture
+def custom_profile_data_fixture() -> Dict[str, CustomFieldValue]:
+    return {
+        "1": {"value": "6352813452", "rendered_value": "<p>6352813452</p>"},
+        "2": {
+            "value": "Simplicity\nThis is a multiline field",
+            "rendered_value": "<p>Simplicity\nThis is a multiline field</p>",
+        },
+        "3": {"value": "cola", "rendered_value": "<p>cola</p>"},
+        "4": {"value": "0"},
+        "5": {"value": "2023-04-22"},
+        "6": {"value": "https://www.google.com"},
+        "7": {"value": "[11]"},
+        "8": {"value": "[11, 13]"},
+        "9": {"value": "gitmaster"},
+        "10": {"value": "twittermaster"},
+        "11": {"value": "redditmaster"},
+        "12": {"value": "he/him"},
+    }
+
+
+@pytest.fixture
+def clean_custom_profile_data_fixture() -> List[CustomProfileData]:
+    return [
+        {
+            "label": "Phone number",
+            "value": "6352813452",
+            "type": 1,
+            "order": 1,
+        },
+        {
+            "label": "Biography",
+            "value": "Simplicity\nThis is a multiline field",
+            "type": 2,
+            "order": 2,
+        },
+        {
+            "label": "Favorite food",
+            "value": "cola",
+            "type": 1,
+            "order": 3,
+        },
+        {
+            "label": "Favorite editor",
+            "value": "Vim",
+            "type": 3,
+            "order": 4,
+        },
+        {
+            "label": "Birthday",
+            "value": "2023-04-22",
+            "type": 4,
+            "order": 5,
+        },
+        {
+            "label": "Favorite website",
+            "value": "https://www.google.com",
+            "type": 5,
+            "order": 6,
+        },
+        {
+            "label": "Manager",
+            "value": [11],
+            "type": 6,
+            "order": 7,
+        },
+        {
+            "label": "Mentor",
+            "value": [11, 13],
+            "type": 6,
+            "order": 8,
+        },
+        {
+            "label": "GitHub username",
+            "value": "https://github.com/gitmaster",
+            "type": 7,
+            "order": 9,
+        },
+        {
+            "label": "Twitter username",
+            "value": "https://twitter.com/twittermaster",
+            "type": 7,
+            "order": 10,
+        },
+        {
+            "label": "Reddit username",
+            "value": "https://www.reddit.com/u/redditmaster",
+            "type": 7,
+            "order": 11,
+        },
+        {
+            "label": "Pronouns",
+            "value": "he/him",
+            "type": 8,
+            "order": 12,
+        },
+    ]
 
 
 @pytest.fixture

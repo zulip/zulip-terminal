@@ -1570,6 +1570,19 @@ class TestModel:
         }
         assert user_group_names == ["Group 1", "Group 2", "Group 3", "Group 4"]
 
+    def test__clean_and_order_custom_profile_data(
+        self,
+        model,
+        custom_profile_fields_fixture,
+        custom_profile_data_fixture,
+        clean_custom_profile_data_fixture,
+    ):
+        model.initial_data["custom_profile_fields"] = custom_profile_fields_fixture
+        assert (
+            clean_custom_profile_data_fixture
+            == model._clean_and_order_custom_profile_data(custom_profile_data_fixture)
+        )
+
     @pytest.mark.parametrize(
         ["to_vary_in_each_user", "key", "expected_value"],
         [
