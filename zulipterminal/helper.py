@@ -535,9 +535,20 @@ def match_emoji(emoji: str, text: str) -> bool:
 
 
 def match_topics(topic_names: List[str], search_text: str) -> List[str]:
-    return [
-        name for name in topic_names if name.lower().startswith(search_text.lower())
-    ]
+    matching_topics = []
+    delimiters = "-_/"
+    trans = str.maketrans(delimiters, len(delimiters) * " ")
+    for full_topic_name in topic_names:
+        # "abc def-gh" --> ["abc def gh", "def", "gh"]
+        words_to_be_matched = [full_topic_name] + full_topic_name.translate(
+            trans
+        ).split()[1:]
+
+        for word in words_to_be_matched:
+            if word.lower().startswith(search_text.lower()):
+                matching_topics.append(full_topic_name)
+                break
+    return matching_topics
 
 
 DataT = TypeVar("DataT")

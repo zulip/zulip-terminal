@@ -587,7 +587,14 @@ def message_history(request: Any) -> List[Dict[str, Any]]:
 
 @pytest.fixture
 def topics() -> List[str]:
-    return ["Topic 1", "This is a topic", "Hello there!"]
+    return [
+        "Topic 1",
+        "This is a topic",
+        "Hello there!",
+        "He-llo there!",
+        "Hello t/here!",
+        "Hello from out-er_space!",
+    ]
 
 
 @pytest.fixture(
