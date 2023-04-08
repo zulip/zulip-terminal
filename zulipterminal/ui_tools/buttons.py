@@ -1,5 +1,5 @@
 """
-UI buttons for narrowing & showing unread counts, eg. All, Stream, Private, Topic
+UI buttons for narrowing & showing unread counts, eg. All, Stream, Direct, Topic
 """
 
 import re
@@ -131,7 +131,7 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Private messages [{primary_key_for_command('ALL_PM')}]"
+        button_text = f"Direct messages  [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,

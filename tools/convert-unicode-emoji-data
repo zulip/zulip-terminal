@@ -3,7 +3,6 @@
 # Convert emoji file downloaded using tools/fetch-unicode-emoji-data
 # into what is required by ZT.
 
-from collections import OrderedDict
 from pathlib import Path, PurePath
 
 
@@ -32,7 +31,7 @@ for emoji_code, emoji_data in emoji_dict.items():
         "aliases": emoji_data["aliases"],
     }
 
-ordered_emojis = OrderedDict(sorted(emoji_map.items()))
+ordered_emojis = dict(sorted(emoji_map.items()))
 
 with OUTPUT_FILE.open("w") as f:
     f.write(
@@ -44,23 +43,20 @@ with OUTPUT_FILE.open("w") as f:
                 "# Ignore long lines",
                 "# ruff: noqa: E501",
                 "",
-                "from collections import OrderedDict\n\n",
                 "# fmt: off",
                 f"# Generated automatically by tools/{SCRIPT_NAME}",
                 "# Do not modify.\n",
-                "EMOJI_DATA = OrderedDict(",
-                "    [\n",
+                "EMOJI_DATA = {\n",
             ]
         )
     )
     for emoji_name, emoji in ordered_emojis.items():
         # {'smile': {'code': '263a', 'aliases': []}}
-        f.write(f'        ("{emoji_name}", {emoji}),\n')
+        f.write(f'    "{emoji_name}": {emoji},\n')
     f.write(
         "\n".join(
             [
-                "    ]",
-                ")",
+                "}",
                 "# fmt: on",
                 "",
             ]

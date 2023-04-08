@@ -1,36 +1,41 @@
-<!-- Please see https://github.com/zulip/zulip-terminal#contributor-guidelines ! -->
+<!-- See README for documentation, or ask in #zulip-terminal if unclear -->
+### What does this PR do, and why?
 
-**What does this PR do?**  <!-- Overall description goes here -->
 
-<!-- If fixing a filed bug or new feature, add 'Fixes #<issue>' or 'Partial fix for #<issue>' -->
 
-<!-- Add a link to a discussion on chat.zulip.org, if relevant -->
+### Outstanding aspect(s)    <!-- DELETE SECTION IF EMPTY -->
+<!-- In what ways is this not fully implemented/functioning? Compared to a discussion/issue? -->
+<!-- Do you not understand something? Are you unsure about a certain approach? Want feedback? -->
+- [ ] 
 
-**Tested?** <!-- Fine to leave some of these unchecked if this is a draft/work-in-progress -->
-- [ ] Manually
-- [ ] Existing tests (adapted, if necessary)
-- [ ] New tests added (for any new behavior)
-- [ ] Passed linting & tests (each commit)
-<!-- Code must pass CI (GitHub Actions) before merging - look for the green tick! -->
+### External discussion & connections
+<!-- [x] all that apply, specifying topic and adding numbers after # for issues/PRs -->
+- [ ] Discussed in **#zulip-terminal** in `topic`
+- [ ] Fully fixes #
+- [ ] Partially fixes issue #
+- [ ] Builds upon previous unmerged work in PR #
+- [ ] Is a follow-up to work in PR #
+- [ ] Requires merge of PR #
+- [ ] Merge will enable work on #
 
-<!-- See https://github.com/zulip/zulip-terminal#commit-style -->
-**Commit flow** <!-- if more than one commit; add/delete/fill-in as appropriate -->
-<!-- For example:
-- first commit doing some thing
-- maybe multiple commits doing similar things
+### How did you test this?
+<!-- [x] all that apply -->
+- [ ] Manually - Behavioral changes
+- [ ] Manually - Visual changes
+- [ ] Adapting existing automated tests
+- [ ] Adding automated tests for new behavior (or missing tests)
+- [ ] Existing automated tests should already cover this (*only a refactor of tested code*)
+
+### Self-review checklist for each commit
+- [ ] It is a [minimal coherent idea](https://github.com/zulip/zulip-terminal#structuring-commits---speeding-up-reviews-merging--development)
+- [ ] It has a commit summary following the [documented style](https://github.com/zulip/zulip-terminal#structuring-commits---speeding-up-reviews-merging--development) (title & body)
+- [ ] It has a commit summary describing the  motivation and reasoning for the change
+- [ ] It individually passes linting and tests
+- [ ] It contains test additions for any new behavior
+- [ ] It flows clearly from a previous branch commit, and/or prepares for the next commit
+
+### Visual changes    <!-- DELETE SECTION IF NO VISUAL CHANGE -->
+<!-- Zulip tips at https://zulip.readthedocs.io/en/latest/tutorials/screenshot-and-gif-software.html -->
+<!-- For video, try asciinema; after uploading, embed using
+[![yourtitle](https://asciinema.org/a/<id>.png)](https://asciinema.org/a/<id>)
 -->
-
-**Notes & Questions** <!-- if any; add/delete/fill-in as appropriate -->
-<!-- For example:
-- this doesn't include feature X (yet?)
-- unsure about Y
-- should this do Z?
--->
-
-**Interactions** <!-- if any; add/delete/fill-in as appropriate -->
-<!-- eg.
-- Waiting on #<PR>
-- Blocks #<PR>
--->
-
-**Visual changes** <!-- if any; add/delete/fill-in with screenshot/diagram as appropriate -->

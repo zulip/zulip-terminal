@@ -24,8 +24,8 @@ This tutorial was designed to be interactive. We highly recommend opening up Zul
     + [Narrow to the Stream or Topic of a Message](#Narrow-to-the-Stream-or-Topic-of-a-Message)
 6. [Sending Messages](#Sending-Messages)
     + [Reply to a Message](#Reply-to-a-Message)
-    + [Reply via a Private Message](#Reply-via-a-Private-Message)
-    + [Send a Private Message to Someone New](#Send-a-Private-Message-to-Someone-New)
+    + [Reply via a Direct Message](#Reply-via-a-Direct-Message)
+    + [Send a Direct Message to Someone New](#Send-a-Direct-Message-to-Someone-New)
     + [Create a New Topic](#Create-a-New-Topic)
 7. [Edit a Message](#Edit-a-Message)
 8. [Close Zulip Terminal](#Close-Zulip-Terminal)
@@ -63,7 +63,7 @@ Sometimes it can take forever to manually move our cursor where we want it - tha
 
 Let's try out a few of these shortcuts!
 
-+ First, type <kbd>shift</kbd><kbd>p</kbd> to view your **Private Messages** (PMs).
++ First, type <kbd>shift</kbd><kbd>p</kbd> to view your **Direct Messages**.
 
 + Second, type <kbd>#</kbd> to view all messages you were mentioned (@'ed) in.
 
@@ -77,7 +77,7 @@ Let's try out a few of these shortcuts!
 You'll be hearing the term 'narrow' a lot in Zulip. What does it mean?
 
 + **Noun**: A narrow is a set of filters for Zulip messages, that can be based on many different factors (like sender, stream, topic, search keywords, etc.).
-+ **Verb**: The process of navigating to a different narrow. For example, to go from viewing a stream to a topic within that stream. There are several different ways to 'narrow to a narrow' so to speak. For example, you can use the keyboard shortcuts as we did in the section above. When you used the keyboard shortcut <kbd>shift</kbd><kbd>p</kbd> to view your private messages (PMs), you 'narrowed' to the **Private Messages** narrow.
++ **Verb**: The process of navigating to a different narrow. For example, to go from viewing a stream to a topic within that stream. There are several different ways to 'narrow to a narrow' so to speak. For example, you can use the keyboard shortcuts as we did in the section above. When you used the keyboard shortcut <kbd>shift</kbd><kbd>p</kbd> to view your direct messages, you 'narrowed' to the **Direct Messages** narrow.
 
 ### Your Current Narrow
 
@@ -124,7 +124,7 @@ You can also type <kbd>z</kbd> to 'zoom in' or 'zoom out.' What do I mean by 'zo
 
 ### Reply to a Message
 
-To reply to an existing stream- or private-message in any narrow, rest your cursor on the message you want to reply to and then type <kbd>r</kbd>. Type your message in the Message box that pops up at the bottom of the middle column. Type <kbd>ctrl</kbd><kbd>d</kbd> to send. If you change your mind and don't want to send the message, type <kbd>esc</kbd> to get out of the message editor. Let's try replying to a random message in the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream (don't worry about messing anything up, the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream was made for stuff like this).
+To reply to an existing stream- or direct-message in any narrow, rest your cursor on the message you want to reply to and then type <kbd>r</kbd>. Type your message in the Message box that pops up at the bottom of the middle column. Type <kbd>ctrl</kbd><kbd>d</kbd> to send. If you change your mind and don't want to send the message, type <kbd>esc</kbd> to get out of the message editor. Let's try replying to a random message in the **[#test here](https://chat.zulip.org/#narrow/stream/7-test-here)** stream (don't worry about messing anything up, the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream was made for stuff like this).
 
 <img src="getting-started-imgs/reply-to-message.png" width="85%">
 
@@ -134,21 +134,21 @@ If you want to show you agree with the current message, type <kbd>+</kbd> to add
 
 <img src="getting-started-imgs/thumbs-up.png" width="85%">
 
-### Reply via a Private Message
+### Reply via a Direct Message
 
-Let's try sending a private message to the author of a message. Select the message you sent to the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream earlier and press <kbd>shift</kbd><kbd>r</kbd> to send a private message to yourself. Type your message in the message editor that appears at the bottom of the middle column and then type <kbd>ctrl</kbd><kbd>d</kbd> to send. Press the <kbd>shift</kbd><kbd>p</kbd> hotkey as we did earlier in the tutorial to narrow to your private messages and make sure everything worked properly.
+Let's try sending a direct message to the author of a message. Select the message you sent to the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream earlier and press <kbd>shift</kbd><kbd>r</kbd> to send a direct message to yourself. Type your message in the message editor that appears at the bottom of the middle column and then type <kbd>ctrl</kbd><kbd>d</kbd> to send. Press the <kbd>shift</kbd><kbd>p</kbd> hotkey as we did earlier in the tutorial to narrow to your direct messages and make sure everything worked properly.
 
 <img src="getting-started-imgs/send-pm.png" width="85%">
 
-### Send a Private Message to Someone New
+### Send a Direct Message to Someone New
 
-You can send a private message by moving your cursor to the list of "Users" in the right column and selecting the name of the person you'd like to send a message to.
+You can send a direct message by moving your cursor to the list of "Users" in the right column and selecting the name of the person you'd like to send a message to.
 
-From version 0.7.0 you can also use autocomplete to enter people's names from partial information, and easily send one-to-one or group private messages!
+From version 0.7.0 you can also use autocomplete to enter people's names from partial information, and easily send one-to-one or group direct messages!
 
-To send a private message using the autocomplete feature:
+To send a direct message using the autocomplete feature:
 1. Use the <kbd>x</kbd> hotkey. A message editor will pop open at the bottom of the middle column. 
-2. Type in part of the name of the person you'd like to send a private message to (IMG 1)
+2. Type in part of the name of the person you'd like to send a direct message to (IMG 1)
 3. Press <kbd>ctrl</kbd><kbd>f</kbd> and a list of potential recipients will appear in the footer (highlighted in red). 
 4. Press <kbd>ctrl</kbd><kbd>f</kbd> until the name of the person you want to send a message to is highlighted (IMG 2). 
 5. Press <kbd>tab</kbd> to jump to the message section and type in your message. 

@@ -8,7 +8,6 @@ import signal
 import sys
 import time
 import webbrowser
-from collections import OrderedDict
 from functools import partial
 from platform import platform
 from types import TracebackType
@@ -278,8 +277,8 @@ class Controller:
     def show_msg_info(
         self,
         msg: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         msg_info_view = MsgInfoView(
@@ -339,8 +338,8 @@ class Controller:
     def show_full_rendered_message(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -358,8 +357,8 @@ class Controller:
     def show_full_raw_message(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -377,8 +376,8 @@ class Controller:
     def show_edit_history(
         self,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -547,8 +546,8 @@ class Controller:
                 " installing any ONE of the copy/paste mechanisms below:\n",
                 ("msg_bold", "- xclip\n- xsel"),
                 "\n\nvia something like:\n",
-                ("msg_code", "apt-get install xclip [Recommended]\n"),
-                ("msg_code", "apt-get install xsel"),
+                ("ui_code", "apt-get install xclip [Recommended]\n"),
+                ("ui_code", "apt-get install xsel"),
             ]
             self.show_pop_up(
                 NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"

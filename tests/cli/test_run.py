@@ -5,13 +5,17 @@ from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Tuple
 
 import pytest
+import requests
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
+from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
+    NotAZulipOrganizationError,
     _write_zuliprc,
     exit_with_error,
-    get_login_id,
+    get_login_label,
+    get_server_settings,
     in_color,
     main,
     parse_args,
@@ -54,15 +58,64 @@ def test_in_color(color: str, code: str, text: str = "some text") -> None:
         (dict(require_email_format_usernames=True, email_auth_enabled=False), "Email"),
     ],
 )
-def test_get_login_id(mocker: MockerFixture, json: Dict[str, bool], label: str) -> None:
-    mocked_styled_input = mocker.patch(
-        MODULE + ".styled_input", return_value="input return value"
+def test_get_login_label(
+    mocker: MockerFixture,
+    json: ServerSettings,  # NOTE: pytest does not ensure dict above is complete
+    label: str,
+) -> None:
+    result = get_login_label(json)
+    assert result == label + ": "
+
+
+@pytest.fixture
+def server_settings_minimal() -> ServerSettings:
+    return ServerSettings(
+        authentication_methods={},
+        external_authentication_methods=[],
+        zulip_feature_level=0,  # New in Zulip 3.0, ZFL 1
+        zulip_version="2.1.0",
+        zulip_merge_base="",  # New in Zulip 5.0, ZFL 88
+        push_notifications_enabled=True,
+        is_incompatible=False,
+        require_email_format_usernames=False,
+        email_auth_enabled=True,
+        realm_uri="chat.zulip.zulip",  # Present if a Zulip server; preferred URL
+        realm_name="A Zulip Server",  # Present if Organization is active at URL
+        realm_icon="...",
+        realm_description="Very exciting server",
+        realm_web_public_access_enabled=True,  # New in Zulip 5.0, ZFL 116
     )
 
-    result = get_login_id(json)
 
-    assert result == "input return value"
-    mocked_styled_input.assert_called_with(label + ": ")
+def test_get_server_settings(
+    mocker: MockerFixture,
+    server_settings_minimal: ServerSettings,
+    realm_url: str = "https://chat.zulip.org",
+) -> None:
+    response = mocker.Mock(
+        status_code=requests.codes.OK, json=lambda: server_settings_minimal
+    )
+    mocked_get = mocker.patch("requests.get", return_value=response)
+
+    result = get_server_settings(realm_url)
+
+    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    assert result == server_settings_minimal
+
+
+def test_get_server_settings__not_a_zulip_organization(
+    mocker: MockerFixture, realm_url: str = "https://google.com"
+) -> None:
+    response = mocker.Mock(
+        status_code=requests.codes.bad_request  # FIXME: Test others?
+    )
+    mocked_get = mocker.patch("requests.get", return_value=response)
+
+    with pytest.raises(NotAZulipOrganizationError) as exc:
+        get_server_settings(realm_url)
+
+    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    assert str(exc.value) == realm_url
 
 
 @pytest.mark.parametrize("options", ["-h", "--help"])

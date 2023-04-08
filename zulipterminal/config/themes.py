@@ -48,7 +48,6 @@ REQUIRED_STYLES = {
     'msg_link'        : '',
     'msg_link_index'  : 'bold',
     'msg_quote'       : 'underline',
-    'msg_code'        : 'bold',
     'msg_bold'        : 'bold',
     'msg_time'        : 'bold',
     'footer'          : 'standout',
@@ -78,6 +77,7 @@ REQUIRED_STYLES = {
     'task:success'    : 'standout',
     'task:error'      : 'standout',
     'task:warning'    : 'standout',
+    'ui_code'         : 'bold',
 }
 
 REQUIRED_META = {

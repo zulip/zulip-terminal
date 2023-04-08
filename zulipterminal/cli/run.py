@@ -11,11 +11,12 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
 from urwid import display_common, set_encoding
 
+from zulipterminal.api_types import ServerSettings
 from zulipterminal.config.themes import (
     InvalidThemeColorCode,
     aliased_themes,
@@ -206,31 +207,44 @@ def styled_input(label: str) -> str:
     return input(in_color("blue", label))
 
 
-def get_login_id(server_properties: Dict[str, Any]) -> str:
+def get_login_label(server_properties: ServerSettings) -> str:
     require_email_format_usernames = server_properties["require_email_format_usernames"]
     email_auth_enabled = server_properties["email_auth_enabled"]
 
     if not require_email_format_usernames and email_auth_enabled:
-        label = "Email or Username: "
+        return "Email or Username: "
     elif not require_email_format_usernames:
-        label = "Username: "
+        return "Username: "
     else:
         # TODO: Validate Email address
-        label = "Email: "
+        return "Email: "
 
-    return styled_input(label)
+
+class NotAZulipOrganizationError(Exception):
+    pass
+
+
+def get_server_settings(realm_url: str) -> ServerSettings:
+    response = requests.get(url=f"{realm_url}/api/v1/server_settings")
+    if response.status_code != requests.codes.OK:
+        raise NotAZulipOrganizationError(realm_url)
+    return response.json()
 
 
 def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     from getpass import getpass
 
-    server_properties = requests.get(url=f"{realm_url}/api/v1/server_settings").json()
+    try:
+        server_properties = get_server_settings(realm_url)
+    except NotAZulipOrganizationError:
+        exit_with_error(f"No Zulip Organization found at {realm_url}.")
 
     # Assuming we connect to and get data from the server, use the realm_url it suggests
     # This avoids cases where there are redirects between http and https, for example
     preferred_realm_url = server_properties["realm_uri"]
 
-    login_id = get_login_id(server_properties)
+    login_id_label = get_login_label(server_properties)
+    login_id = styled_input(login_id_label)
     password = getpass(in_color("blue", "Password: "))
 
     response = requests.post(

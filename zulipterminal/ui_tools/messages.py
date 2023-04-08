@@ -3,7 +3,7 @@ UI to render a Zulip message for display, and respond contextually to actions
 """
 
 import typing
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from datetime import date, datetime
 from time import time
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
@@ -55,8 +55,8 @@ class MessageBox(urwid.Pile):
         self.topic_name = ""
         self.email = ""  # FIXME: Can we remove this?
         self.user_id: Optional[int] = None
-        self.message_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
-        self.topic_links: "OrderedDict[str, Tuple[str, int, bool]]" = OrderedDict()
+        self.message_links: Dict[str, Tuple[str, int, bool]] = dict()
+        self.topic_links: Dict[str, Tuple[str, int, bool]] = dict()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
         # if this is the first message
@@ -204,7 +204,7 @@ class MessageBox(urwid.Pile):
         if curr_narrow == []:
             text_to_fill = "All messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = "All private messages"
+            text_to_fill = "All direct messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
             text_to_fill = "Starred messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
@@ -227,9 +227,9 @@ class MessageBox(urwid.Pile):
                     [(bar_color, self.stream_name)],
                 )
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
-            text_to_fill = "Group private conversation"
+            text_to_fill = "Group direct message conversation"
         else:
-            text_to_fill = "Private conversation"
+            text_to_fill = "Direct message conversation"
 
         if is_search_narrow:
             title_markup = (
@@ -295,11 +295,9 @@ class MessageBox(urwid.Pile):
         except Exception:
             return ""
 
-    # Use quotes as a workaround for OrderedDict typing issue.
-    # See https://github.com/python/mypy/issues/6904.
     @staticmethod
     def footlinks_view(
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: Dict[str, Tuple[str, int, bool]],
         *,
         maximum_footlinks: int,
         padded: bool,
@@ -357,9 +355,7 @@ class MessageBox(urwid.Pile):
     @classmethod
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
-    ) -> Tuple[
-        List[Any], "OrderedDict[str, Tuple[str, int, bool]]", List[Tuple[str, str]]
-    ]:
+    ) -> Tuple[List[Any], Dict[str, Tuple[str, int, bool]], List[Tuple[str, str]]]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
@@ -511,8 +507,13 @@ class MessageBox(urwid.Pile):
                 # BLOCKQUOTE TEXT
                 markup.append(("msg_quote", cls.soup2markup(element, metadata)[0]))
             elif tag == "code":
-                # CODE (INLINE?)
-                markup.append(("msg_code", tag_text))
+                """
+                CODE INLINE
+                -----------
+                Use the same style as plain text codeblocks
+                which is the `whitespace` token of pygments.
+                """
+                markup.append(("pygments:w", tag_text))
             elif tag == "div" and "codehilite" in tag_classes:
                 """
                 CODE BLOCK
@@ -802,7 +803,7 @@ class MessageBox(urwid.Pile):
         cls, content: Any, server_url: str
     ) -> Tuple[
         Tuple[None, Any],
-        "OrderedDict[str, Tuple[str, int, bool]]",
+        Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],
     ]:
         soup = BeautifulSoup(content, "lxml")
@@ -810,7 +811,7 @@ class MessageBox(urwid.Pile):
 
         metadata = dict(
             server_url=server_url,
-            message_links=OrderedDict(),
+            message_links=dict(),
             time_mentions=list(),
         )  # type: Dict[str, Any]
 
@@ -1017,7 +1018,7 @@ class MessageBox(urwid.Pile):
                     )
                 else:
                     self.model.controller.report_error(
-                        [" You can't edit private messages sent by other users."]
+                        [" You can't edit direct messages sent by other users."]
                     )
                 return key
             # Check if editing is allowed in the realm

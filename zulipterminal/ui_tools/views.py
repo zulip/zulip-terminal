@@ -3,7 +3,6 @@ UI views for larger elements such as Streams, Messages, Topics, Help, etc
 """
 
 import threading
-from collections import OrderedDict
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -1508,8 +1507,8 @@ class MsgInfoView(PopUpView):
         controller: Any,
         msg: Message,
         title: str,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.msg = msg
@@ -1520,13 +1519,15 @@ class MsgInfoView(PopUpView):
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
         )
-        view_in_browser_keys = ", ".join(map(repr, keys_for_command("VIEW_IN_BROWSER")))
-
-        full_rendered_message_keys = ", ".join(
-            map(repr, keys_for_command("FULL_RENDERED_MESSAGE"))
+        view_in_browser_keys = "[{}]".format(
+            ", ".join(map(str, keys_for_command("VIEW_IN_BROWSER")))
         )
-        full_raw_message_keys = ", ".join(
-            map(repr, keys_for_command("FULL_RAW_MESSAGE"))
+
+        full_rendered_message_keys = "[{}]".format(
+            ", ".join(map(str, keys_for_command("FULL_RENDERED_MESSAGE")))
+        )
+        full_raw_message_keys = "[{}]".format(
+            ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
         )
         msg_info = [
             (
@@ -1535,22 +1536,22 @@ class MsgInfoView(PopUpView):
                     ("Date & Time", date_and_time),
                     ("Sender", msg["sender_full_name"]),
                     ("Sender's Email ID", msg["sender_email"]),
-                    (
-                        "View message in browser",
-                        f"Press {view_in_browser_keys} to view message in browser",
-                    ),
-                    (
-                        "Full rendered message",
-                        f"Press {full_rendered_message_keys} to view",
-                    ),
-                    (
-                        "Full raw message",
-                        f"Press {full_raw_message_keys} to view",
-                    ),
                 ],
-            ),
+            )
         ]
+
+        # actions for message info popup
+        viewing_actions = (
+            "Viewing Actions",
+            [
+                ("Open in web browser", view_in_browser_keys),
+                ("Full rendered message", full_rendered_message_keys),
+                ("Full raw message", full_raw_message_keys),
+            ],
+        )
+        msg_info.append(viewing_actions)
         # Only show the 'Edit History' label for edited messages.
+
         self.show_edit_history_label = (
             self.msg["id"] in controller.model.index["edited_messages"]
             and controller.model.initial_data["realm_allow_edit_history"]
@@ -1558,8 +1559,8 @@ class MsgInfoView(PopUpView):
         if self.show_edit_history_label:
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
 
-            keys = ", ".join(map(repr, keys_for_command("EDIT_HISTORY")))
-            msg_info[0][1].append(("Edit History", f"Press {keys} to view"))
+            keys = "[{}]".format(", ".join(map(str, keys_for_command("EDIT_HISTORY"))))
+            msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
         if message_links:
             msg_info.append(("Message Links", []))
@@ -1594,7 +1595,9 @@ class MsgInfoView(PopUpView):
 
             # slice_index = Number of labels before message links + 1 newline
             #               + 1 'Message Links' category label.
-            slice_index = len(msg_info[0][1]) + 2
+            #               + 2 for Viewing Actions category label and its newline
+            slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
+
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
             self.button_widgets.append(message_links)
 
@@ -1610,7 +1613,8 @@ class MsgInfoView(PopUpView):
 
             # slice_index = Number of labels before topic links + 1 newline
             #               + 1 'Topic Links' category label.
-            slice_index = len(msg_info[0][1]) + 2
+            #               + 2 for Viewing Actions category label and its newline
+            slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
             self.button_widgets.append(topic_links)
 
@@ -1621,7 +1625,7 @@ class MsgInfoView(PopUpView):
 
     @staticmethod
     def create_link_buttons(
-        controller: Any, links: "OrderedDict[str, Tuple[str, int, bool]]"
+        controller: Any, links: Dict[str, Tuple[str, int, bool]]
     ) -> Tuple[List[MessageLinkButton], int]:
         link_widgets = []
         link_width = 0
@@ -1717,8 +1721,8 @@ class EditHistoryView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1835,8 +1839,8 @@ class FullRenderedMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1879,8 +1883,8 @@ class FullRawMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: "OrderedDict[str, Tuple[str, int, bool]]",
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
