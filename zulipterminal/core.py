@@ -44,6 +44,7 @@ from zulipterminal.ui_tools.views import (
     PopUpConfirmationView,
     StreamInfoView,
     StreamMembersView,
+    TopicInfoView,
     UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
@@ -292,6 +293,10 @@ class Controller:
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
         self.show_pop_up(show_stream_view, "area:stream")
+
+    def show_topic_info(self, stream_id: int, topic_name: str) -> None:
+        show_topic_view = TopicInfoView(self, stream_id, topic_name)
+        self.show_pop_up(show_topic_view, "area:topic")
 
     def show_stream_members(self, stream_id: int) -> None:
         stream_members_view = StreamMembersView(self, stream_id)
