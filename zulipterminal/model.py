@@ -886,6 +886,21 @@ class Model:
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
+    def stream_topic_from_message_id(
+        self, message_id: int
+    ) -> Optional[Tuple[int, str]]:
+        """
+        Returns the stream and topic of a message of a given message id.
+        If the message is not a stream message or if it is not present in the index,
+        None is returned.
+        """
+        message = self.index["messages"].get(message_id, None)
+        if message is not None and message["type"] == "stream":
+            stream_id = message["stream_id"]
+            topic = message["subject"]
+            return (stream_id, topic)
+        return None
+
     def get_next_unread_topic(self) -> Optional[Tuple[int, str]]:
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
         next_topic = False
