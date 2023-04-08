@@ -4044,6 +4044,21 @@ class TestModel:
         assert model.last_unread_pm is None
 
     @pytest.mark.parametrize(
+        "message_id, expected_value",
+        [
+            case(537286, (205, "Test"), id="stream_message"),
+            case(537287, None, id="direct_message"),
+            case(537289, None, id="non-existent message"),
+        ],
+    )
+    def test_stream_topic_from_message_id(
+        self, mocker, model, message_id, expected_value, empty_index
+    ):
+        model.index = empty_index
+        current_topic = model.stream_topic_from_message_id(message_id)
+        assert current_topic == expected_value
+
+    @pytest.mark.parametrize(
         "stream_id, expected_response",
         [
             (1, True),
