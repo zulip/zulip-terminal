@@ -445,9 +445,7 @@ class WriteBox(urwid.Pile):
 
     def _topic_box_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         topic_names = self.model.topics_in_stream(self.stream_id)
-
         topic_typeaheads = match_topics(topic_names, text)
-
         # Typeaheads and suggestions are the same.
         return self._process_typeaheads(topic_typeaheads, state, topic_typeaheads)
 
@@ -486,7 +484,6 @@ class WriteBox(urwid.Pile):
         #        anything; this implementation simply chooses the right-most
         #        match of the longest length
         prefix_indices = {prefix: text.rfind(prefix) for prefix in autocomplete_map}
-
         text = self.validate_and_patch_autocomplete_stream_and_topic(
             text, autocomplete_map, prefix_indices
         )

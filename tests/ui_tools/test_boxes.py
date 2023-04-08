@@ -96,10 +96,18 @@ class TestWriteBox:
         [
             ("#**Stream 1>T", 0, True, "#**Stream 1>Topic 1**"),
             ("#**Stream 1>T", 1, True, "#**Stream 1>This is a topic**"),
-            ("#**Stream 1>T", 2, True, None),
-            ("#**Stream 1>T", -1, True, "#**Stream 1>This is a topic**"),
-            ("#**Stream 1>T", -2, True, "#**Stream 1>Topic 1**"),
-            ("#**Stream 1>T", -3, True, None),
+            # ("#**Stream 1>T", 2, True, None),
+            # changed test
+            ("#**Stream 1>T", 2, True, "#**Stream 1>Hello there!**"),
+            # ("#**Stream 1>T", -1, True, "#**Stream 1>This is a topic**"),
+            # changed test
+            ("#**Stream 1>T", -1, True, "#**Stream 1>Hello there!**"),
+            # ("#**Stream 1>T", -2, True, "#**Stream 1>Topic 1**"),
+            # changed test
+            ("#**Stream 1>T", -2, True, "#**Stream 1>This is a topic**"),
+            # ("#**Stream 1>T", -3, True, None),
+            # changed test
+            ("#**Stream 1>T", -3, True, "#**Stream 1>Topic 1**"),
             ("#**Stream 1>To", 0, True, "#**Stream 1>Topic 1**"),
             ("#**Stream 1>H", 0, True, "#**Stream 1>Hello there!**"),
             ("#**Stream 1>Hello ", 0, True, "#**Stream 1>Hello there!**"),
@@ -112,6 +120,8 @@ class TestWriteBox:
             # Unfenced prefix
             ("#Stream 1>T", 0, True, "#**Stream 1>Topic 1**"),
             ("#Stream 1>T", 1, True, "#**Stream 1>This is a topic**"),
+            ("#Stream 1>T", 2, True, "#**Stream 1>Hello there!**"),
+            # added test
             # Invalid stream
             ("#**invalid stream>", 0, False, None),
             ("#**invalid stream**>", 0, False, None),
@@ -1307,7 +1317,9 @@ class TestWriteBox:
         "text, matching_topics",
         [
             ("", ["Topic 1", "This is a topic", "Hello there!"]),
-            ("Th", ["This is a topic"]),
+            # ("Th", ["This is a topic"]),
+            # changed test
+            ("Th", ["This is a topic", "Hello there!"]),
         ],
         ids=[
             "no_search_text",
@@ -1325,7 +1337,6 @@ class TestWriteBox:
     ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
-
         write_box._topic_box_autocomplete(text, state)
 
         _process_typeaheads.assert_called_once_with(
