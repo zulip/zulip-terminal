@@ -25,6 +25,7 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
+    Union,
 )
 from urllib.parse import unquote
 
@@ -61,6 +62,13 @@ class EmojiData(TypedDict):
 
 
 NamedEmojiData = Dict[str, EmojiData]
+
+
+class CustomProfileData(TypedDict):
+    label: str
+    value: Union[str, List[int]]
+    type: int
+    order: int
 
 
 class TidiedUserInfo(TypedDict):
