@@ -59,6 +59,7 @@ STYLES = {
     'widget_disabled' : (Color.DARK_GRAY,           Color.LIGHT_BLUE),
     'area:help'       : (Color.WHITE,               Color.DARK_GREEN),
     'area:stream'     : (Color.WHITE,               Color.DARK_CYAN),
+    'area:topic'      : (Color.WHITE,               Color.DARK_CYAN),
     'area:msg'        : (Color.WHITE,               Color.BROWN),
     'area:error'      : (Color.WHITE,               Color.DARK_RED),
     'area:user'       : (Color.WHITE,               Color.DARK_BLUE),
