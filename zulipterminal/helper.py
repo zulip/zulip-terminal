@@ -78,6 +78,7 @@ class TidiedUserInfo(TypedDict):
     timezone: str
     role: int
     last_active: str
+    custom_profile_data: List[CustomProfileData]
 
     is_bot: bool
     # Below fields are only meaningful if is_bot == True

@@ -298,8 +298,9 @@ class RealmUser(TypedDict):
     is_admin: bool
     is_guest: bool  # NOTE: added /users/me ZFL 10; other changes before that
 
+    profile_data: Dict[str, CustomFieldValue]
+
     # To support in future:
-    # profile_data: Dict  # NOTE: Only if requested
     # is_active: bool  # NOTE: Dependent upon realm_users vs realm_non_active_users
     # delivery_email: str  # NOTE: Only available if admin, and email visibility limited
 

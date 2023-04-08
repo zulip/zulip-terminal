@@ -141,6 +141,7 @@ class Model:
             "update_display_settings",
             "user_settings",
             "realm_emoji",
+            "custom_profile_fields",
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
@@ -1046,6 +1047,10 @@ class Model:
         else:
             user_role = raw_user_role
 
+        custom_profile_data = api_user_data.get("profile_data", {})
+        cleaned_custom_profile_data = self._clean_and_order_custom_profile_data(
+            custom_profile_data
+        )
         # TODO: Add custom fields later as an enhancement
         user_info: TidiedUserInfo = dict(
             full_name=api_user_data.get("full_name", "(No name)"),
@@ -1054,6 +1059,7 @@ class Model:
             timezone=api_user_data.get("timezone", ""),
             is_bot=api_user_data.get("is_bot", False),
             role=user_role,
+            custom_profile_data=cleaned_custom_profile_data,
             bot_type=api_user_data.get("bot_type", None),
             bot_owner_name="",  # Can be non-empty only if is_bot == True
             last_active="",

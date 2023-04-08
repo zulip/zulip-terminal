@@ -254,6 +254,7 @@ class TestModel:
             "update_display_settings",
             "user_settings",
             "realm_emoji",
+            "custom_profile_fields",
             "zulip_version",
         ]
         model.client.register.assert_called_once_with(
@@ -1638,6 +1639,26 @@ class TestModel:
                 id="user_bot_has_owner:preZulip_3.0",
             ),
             case({}, "bot_owner_name", "", id="user_bot_has_no_owner"),
+            case(
+                {
+                    "profile_data": {
+                        "2": {
+                            "value": "Simplicity",
+                            "rendered_value": "<p>Simplicity</p>",
+                        },
+                    },
+                },
+                "custom_profile_data",
+                [
+                    {
+                        "label": "Biography",
+                        "value": "Simplicity",
+                        "type": 2,
+                        "order": 2,
+                    },
+                ],
+                id="user_has_custom_profile_data",
+            ),
         ],
     )
     def test_get_user_info(
