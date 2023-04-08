@@ -30,6 +30,7 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
+    RESOLVED_TOPIC_PREFIX,
     Composition,
     EditPropagateMode,
     Event,
@@ -698,6 +699,38 @@ class Model:
                     return True
         self.controller.report_error("User not found")
         return False
+
+    def toggle_topic_resolve_status(self, stream_id: int, topic_name: str) -> None:
+        if self.can_user_edit_topic():
+            latest_msg = self.get_latest_message_in_topic(stream_id, topic_name)
+            if latest_msg:
+                time_since_msg_sent = time.time() - latest_msg["timestamp"]
+                # ZFL < 11, community_topic_editing_limit_seconds
+                # was hardcoded as int value in secs eg. 86400s (1 day) or None
+                if self.server_feature_level is None or self.server_feature_level >= 11:
+                    edit_time_limit = self.initial_data.get(
+                        "realm_community_topic_editing_limit_seconds", None
+                    )
+                else:
+                    edit_time_limit = 86400
+                # Don't allow editing topic if time-limit exceeded.
+                if (
+                    edit_time_limit is not None
+                    and time_since_msg_sent >= edit_time_limit
+                ):
+                    self.controller.report_error(
+                        " Time limit for editing topic has been exceeded."
+                    )
+                else:
+                    if topic_name.startswith(RESOLVED_TOPIC_PREFIX):
+                        topic_name = topic_name[2:]
+                    else:
+                        topic_name = RESOLVED_TOPIC_PREFIX + topic_name
+                    self.update_stream_message(
+                        message_id=latest_msg["id"],
+                        topic=topic_name,
+                        propagate_mode="change_all",
+                    )
 
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]
