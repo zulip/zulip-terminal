@@ -125,7 +125,10 @@ def msg_box(
 
 
 @pytest.fixture
-def users_fixture(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
+def users_fixture(
+    logged_on_user: Dict[str, Any],
+    custom_profile_data_fixture: Dict[str, CustomFieldValue],
+) -> List[Dict[str, Any]]:
     users = [logged_on_user]
     for i in range(1, 3):
         users.append(
@@ -154,11 +157,19 @@ def users_fixture(logged_on_user: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "is_admin": False,
             }
         )
+    # Add custom profile data to user 12
+    for user in users:
+        if user["user_id"] == 12:
+            user["profile_data"] = custom_profile_data_fixture
+        else:
+            user["profile_data"] = {}
     return users
 
 
 @pytest.fixture
-def tidied_user_info_response() -> TidiedUserInfo:
+def tidied_user_info_response(
+    clean_custom_profile_data_fixture: List[CustomProfileData],
+) -> TidiedUserInfo:
     # FIXME: Refactor this to use a more generic user?
     return {
         "full_name": "Human 2",
@@ -170,6 +181,7 @@ def tidied_user_info_response() -> TidiedUserInfo:
         "bot_type": None,
         "bot_owner_name": "",
         "last_active": "",
+        "custom_profile_data": clean_custom_profile_data_fixture,
     }
 
 
@@ -855,6 +867,7 @@ def initial_data(
     users_fixture: List[Dict[str, Any]],
     streams_fixture: List[Dict[str, Any]],
     realm_emojis: Dict[str, Dict[str, Any]],
+    custom_profile_fields_fixture: List[Dict[str, Union[str, int]]],
 ) -> Dict[str, Any]:
     """
     Response from /register API request.
@@ -1029,6 +1042,7 @@ def initial_data(
         "zulip_version": MINIMUM_SUPPORTED_SERVER_VERSION[0],
         "zulip_feature_level": MINIMUM_SUPPORTED_SERVER_VERSION[1],
         "starred_messages": [1117554, 1117558, 1117574],
+        "custom_profile_fields": custom_profile_fields_fixture,
     }
 
 
