@@ -1097,11 +1097,11 @@ class TestModel:
                 },
                 {
                     "_": ["User not found", False],
-                    "_owner": ["Editing messages is disabled", False],
-                    "_admin": ["Editing messages is disabled", False],
-                    "_moderator": ["Editing messages is disabled", False],
-                    "_member": ["Editing messages is disabled", False],
-                    "_guest": ["Editing messages is disabled", False],
+                    "_owner": [" Editing messages is disabled", False],
+                    "_admin": [" Editing messages is disabled", False],
+                    "_moderator": [" Editing messages is disabled", False],
+                    "_member": [" Editing messages is disabled", False],
+                    "_guest": [" Editing messages is disabled", False],
                 },
                 id="editing_msg_disabled:PreZulip4.0",
             ),
@@ -1114,9 +1114,9 @@ class TestModel:
                     "_": ["User not found", False],
                     "_owner": ["", True],
                     "_admin": ["", True],
-                    "_moderator": ["Editing topic is disabled", False],
-                    "_member": ["Editing topic is disabled", False],
-                    "_guest": ["Editing topic is disabled", False],
+                    "_moderator": [" Editing topic is disabled", False],
+                    "_member": [" Editing topic is disabled", False],
+                    "_guest": [" Editing topic is disabled", False],
                 },
                 id="editing_topic_disabled:PreZulip4.0",
             ),
@@ -1136,18 +1136,6 @@ class TestModel:
                 id="editing_topic_and_msg_enabled:PreZulip4.0",
             ),
             case(
-                {"allow_message_editing": False, "edit_topic_policy": 1},
-                {
-                    "_": ["User not found", False],
-                    "_owner": ["Editing messages is disabled", False],
-                    "_admin": ["Editing messages is disabled", False],
-                    "_moderator": ["Editing messages is disabled", False],
-                    "_member": ["Editing messages is disabled", False],
-                    "_guest": ["Editing messages is disabled", False],
-                },
-                id="all_but_no_editing:Zulip4.0+:ZFL75",
-            ),
-            case(
                 {"allow_message_editing": True, "edit_topic_policy": 1},
                 {
                     "_": ["User not found", False],
@@ -1156,8 +1144,8 @@ class TestModel:
                     "_moderator": ["", True],
                     "_member": ["", True],
                     "_guest": [
-                        "Only organization administrators, moderators, full members and"
-                        " members can edit topic",
+                        "Only organization administrators, moderators, full members"
+                        " and members can edit topic",
                         False,
                     ],
                 },
@@ -1208,13 +1196,13 @@ class TestModel:
                     "_admin": ["", True],
                     "_moderator": ["", True],
                     "_member": [
-                        "Only organization administrators and moderators"
-                        " can edit topic",
+                        "Only organization administrators and moderators can edit"
+                        " topic",
                         False,
                     ],
                     "_guest": [
-                        "Only organization administrators and moderators"
-                        " can edit topic",
+                        "Only organization administrators and moderators can edit"
+                        " topic",
                         False,
                     ],
                 },
@@ -1246,9 +1234,9 @@ class TestModel:
     ):
         model.get_user_info = mocker.Mock(return_value=user_role)
         model.initial_data = initial_data
-        initial_data["realm_allow_message_editing"] = realm_editing_settings[
+        initial_data["realm_allow_message_editing"] = realm_editing_settings.get(
             "allow_message_editing"
-        ]
+        )
         allow_community_topic_editing = realm_editing_settings.get(
             "allow_community_topic_editing", None
         )

@@ -648,7 +648,7 @@ class Model:
         user_info = self.get_user_info(self.user_id)
         if user_info is not None:
             if not self.initial_data.get("realm_allow_message_editing"):
-                self.controller.report_error("Editing messages is disabled")
+                self.controller.report_error(" Editing messages is disabled")
                 return False
             role = user_info["role"]
             if role <= 200:
@@ -661,7 +661,7 @@ class Model:
             if allow_community_topic_editing is True:
                 return True
             elif allow_community_topic_editing is False:
-                self.controller.report_error("Editing topic is disabled")
+                self.controller.report_error(" Editing topic is disabled")
                 return False
             else:
                 edit_topic_policy = self.initial_data.get("realm_edit_topic_policy")
@@ -693,7 +693,7 @@ class Model:
                     else:
                         self.controller.report_error(EDIT_TOPIC_POLICY[1])
                         return False
-                else:  # edit_topic_policy == 5 (or None)
+                else:
                     # All users including guests
                     return True
         self.controller.report_error("User not found")
