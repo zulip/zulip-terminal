@@ -255,6 +255,7 @@ class TestModel:
             "user_settings",
             "realm_emoji",
             "zulip_version",
+            "alert_words",
         ]
         model.client.register.assert_called_once_with(
             event_types=event_types,
