@@ -23,18 +23,27 @@ TYPING_STARTED_WAIT_PERIOD = 10
 TYPING_STOPPED_WAIT_PERIOD = 5
 
 ###############################################################################
+# Core message types (used in Composition and Message below)
+
+DirectMessageString = Literal["private"]
+StreamMessageString = Literal["stream"]
+
+MessageType = Union[DirectMessageString, StreamMessageString]
+
+
+###############################################################################
 # Parameter to pass in request to:
 #   https://zulip.com/api/send-message
 
 
 class PrivateComposition(TypedDict):
-    type: Literal["private"]
+    type: DirectMessageString
     content: str
     to: List[int]  # User ids
 
 
 class StreamComposition(TypedDict):
-    type: Literal["stream"]
+    type: StreamMessageString
     content: str
     to: str  # stream name  # TODO: Migrate to using int (stream id)
     subject: str  # TODO: Migrate to using topic
@@ -80,6 +89,8 @@ MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateReq
 #   https://zulip.com/api/get-events#message
 #   https://zulip.com/api/get-message  (unused)
 
+## TODO: Improve this typing to split private and stream message data
+
 
 class Message(TypedDict, total=False):
     id: int
@@ -101,7 +112,7 @@ class Message(TypedDict, total=False):
     sender_email: str
     sender_realm_str: str
     display_recipient: Any
-    type: str
+    type: MessageType
     stream_id: int  # Only for stream msgs.
     avatar_url: str
     content_type: str
