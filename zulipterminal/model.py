@@ -341,6 +341,12 @@ class Model:
         if self.is_search_narrow():
             self.narrow = [item for item in self.narrow if item[0] != "search"]
 
+    def get_narrow(self) -> List[Any]:
+        return self.narrow
+
+    def get_narrow_length(self) -> int:
+        return len(self.narrow)
+
     def get_message_ids_in_current_narrow(self) -> Set[int]:
         narrow = self.narrow
         index = self.index
