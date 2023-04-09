@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 from urwid import Widget
 
-from zulipterminal.api_types import Message
+from zulipterminal.api_types import Message, MessageType
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
     keys_for_command,
@@ -416,7 +416,7 @@ def display_recipient_factory(
 
 def msg_template_factory(
     msg_id: int,
-    msg_type: str,
+    msg_type: MessageType,
     timestamp: int,
     *,
     subject: str = "",
