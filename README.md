@@ -369,52 +369,82 @@ to show agreement instead of simple short messages**
 
 Zulip Terminal is being built by the awesome [Zulip](https://zulip.com/team) community.
 
-To be a part of it and to contribute to the code, feel free to work on any [issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
+To be a part of it and to contribute to the code, feel free to work on any
+[issue](https://github.com/zulip/zulip-terminal/issues) or propose your idea on
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
-For commit structure and style, please review the [Commit Style](#commit-style) section below.
+For commit structure and style, please review the [Commit Style](#commit-style)
+section below.
 
-If you are new to `git` (or not!), you may benefit from the [Zulip git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
-When contributing, it's important to note that we use a **rebase-oriented workflow**.
+If you are new to `git` (or not!), you may benefit from the
+[Zulip git guide](http://zulip.readthedocs.io/en/latest/git/index.html).
+When contributing, it's important to note that we use a **rebase-oriented
+workflow**.
 
-A simple [tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/developer-feature-tutorial.md) is available for implementing the `typing` indicator.
+A simple
+[tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/developer-feature-tutorial.md)
+is available for implementing the `typing` indicator.
 Follow it to understand how to implement a new feature for zulip-terminal.
 
-You can of course browse the source on GitHub & in the source tree you download, and check the [source file overview](https://github.com/zulip/zulip-terminal/docs/developer-file-overview.md) for ideas of how files are currently arranged.
+You can of course browse the source on GitHub & in the source tree you
+download, and check the
+[source file overview](https://github.com/zulip/zulip-terminal/docs/developer-file-overview.md)
+for ideas of how files are currently arranged.
 
 ### Urwid
 
-Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in terminal. Urwid is an awesome library through which you can render a decent terminal UI just using python. [Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to start for new contributors.
+Zulip Terminal uses [urwid](http://urwid.org/) to render the UI components in
+terminal.
+Urwid is an awesome library through which you can render a decent terminal UI
+just using python.
+[Urwid's Tutorial](http://urwid.org/tutorial/index.html) is a great place to
+start for new contributors.
 
 ### Getting Zulip Terminal code and connecting it to upstream
 
-First, fork the `zulip/zulip-terminal` repository on GitHub ([see how](https://docs.github.com/en/get-started/quickstart/fork-a-repo)) and then clone your forked repository locally, replacing **YOUR_USERNAME** with your GitHub username:
+First, fork the `zulip/zulip-terminal` repository on GitHub
+([see how](https://docs.github.com/en/get-started/quickstart/fork-a-repo))
+and then clone your forked repository locally, replacing **YOUR_USERNAME** with
+your GitHub username:
+
 ```
 $ git clone --config pull.rebase git@github.com:YOUR_USERNAME/zulip-terminal.git
 ```
 
-This should create a new directory for the repository in the current directory, so enter the repository directory with `cd zulip-terminal` and configure and fetch the upstream remote repository for your cloned fork of Zulip Terminal:
+This should create a new directory for the repository in the current directory,
+so enter the repository directory with `cd zulip-terminal` and configure and
+fetch the upstream remote repository for your cloned fork of Zulip Terminal:
+
 ```
 $ git remote add -f upstream https://github.com/zulip/zulip-terminal.git
 ```
 
-For detailed explanation on the commands used for cloning and setting upstream, refer to Step 1 of the [Get Zulip Code](https://zulip.readthedocs.io/en/latest/git/cloning.html) section of Zulip's Git guide.
+For detailed explanation on the commands used for cloning and setting upstream,
+refer to Step 1 of the
+[Get Zulip Code](https://zulip.readthedocs.io/en/latest/git/cloning.html)
+section of Zulip's Git guide.
 
 ### Setting up a development environment
 
-Various options are available; we are exploring the benefits of each and would appreciate feedback on which you use or feel works best.
+Various options are available; we are exploring the benefits of each and would
+appreciate feedback on which you use or feel works best.
 
-Note that the tools used in each case are typically the same, but are called in different ways.
+Note that the tools used in each case are typically the same, but are called in
+different ways.
 
-The following commands should be run in the repository directory, created by a process similar to that in the previous section.
+The following commands should be run in the repository directory, created by a
+process similar to that in the previous section.
 
 #### Pipenv
 
-1. Install pipenv (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/install/#pragmatic-installation-of-pipenv); pipenv can be installed in a virtual environment, if you wish)
+1. Install pipenv
+   (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/install/#pragmatic-installation-of-pipenv);
+   pipenv can be installed in a virtual environment, if you wish)
 ```
 $ pip3 install --user pipenv
 ```
-2. Initialize the pipenv virtual environment for zulip-term (using the default python 3; use eg. `--python 3.6` to be more specific)
+2. Initialize the pipenv virtual environment for zulip-term (using the default
+   python 3; use eg. `--python 3.6` to be more specific)
 
 ```
 $ pipenv --three
@@ -429,7 +459,8 @@ $ pipenv run pip3 install -e '.[dev]'
 
 #### Pip
 
-1. Manually create & activate a virtual environment; any method should work, such as that used in the above simple installation
+1. Manually create & activate a virtual environment; any method should work,
+   such as that used in the above simple installation
 
     1. `python3 -m venv zt_venv` (creates a venv named `zt_venv` in the current directory)
     2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
@@ -459,7 +490,9 @@ Once you have a development environment set up, you might find the following use
 | Run all tests | `pytest` | `pipenv run pytest` |
 | Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
 
-If using make with pip, running `make` will ensure the development environment is up to date with the specified dependencies, useful after fetching from git and rebasing.
+If using make with pip, running `make` will ensure the development environment
+is up to date with the specified dependencies, useful after fetching from git
+and rebasing.
 
 #### Passing linters and automated tests
 
@@ -506,7 +539,8 @@ Currently we have
 
 The project uses `black` and `isort` for code-style and import sorting respectively.
 
-These tools can be run as linters locally , but can also *automatically* format your code for you.
+These tools can be run as linters locally , but can also *automatically* format
+your code for you.
 
 If you're using a `make`-based setup, running `make fix` will run both (and a
 few other tools) and reformat the current state of your code - so you'll want
@@ -589,9 +623,11 @@ respect reviewers' time.
 
 #### Commit Message Style
 
-We aim to follow a standard commit style to keep the `git log` consistent and easy to read.
+We aim to follow a standard commit style to keep the `git log` consistent and
+easy to read.
 
-Much like working with code, we suggest you refer to recent commits in the git log, for examples of the style we're actively using.
+Much like working with code, we suggest you refer to recent commits in the git
+log, for examples of the style we're actively using.
 
 Our overall style for commit messages broadly follows the general guidelines
 given for
@@ -618,64 +654,121 @@ Some example commit titles: (ideally more descriptive in practice!)
 * `requirements: Upgrade some-dependency from ==9.2 to ==9.3.`
   - upgrade a dependency from version ==9.2 to version ==9.3, in the central dependencies file (*not* some file requirements.*)
 
-To aid in satisfying some of these rules you can use `GitLint`, as described in the following section.
+To aid in satisfying some of these rules you can use `GitLint`, as described in
+the following section.
 
-**However**, please check your commits manually versus these style rules, since GitLint cannot check everything - including language or grammar!
+**However**, please check your commits manually versus these style rules, since
+GitLint cannot check everything - including language or grammar!
 
 #### GitLint
 
-If you plan to submit git commits in pull-requests (PRs), then we highly suggest installing the `gitlint` commit-message hook by running `gitlint install-hook` (or `pipenv run gitlint install-hook` with pipenv setups). While the content still depends upon your writing skills, this ensures a more consistent formatting structure between commits, including by different authors.
+If you plan to submit git commits in pull-requests (PRs), then we highly
+suggest installing the `gitlint` commit-message hook by running `gitlint
+install-hook` (or `pipenv run gitlint install-hook` with pipenv setups).
+While the content still depends upon your writing skills, this ensures a more
+consistent formatting structure between commits, including by different
+authors.
 
-If the hook is installed as described above, then after completing the text for a commit, it will be checked by gitlint against the style we have set up, and will offer advice if there are any issues it notices. If gitlint finds any, it will ask if you wish to commit with the message as it is (`y` for 'yes'), stop the commit process (`n` for 'no'), or edit the commit message (`e` for 'edit').
+If the hook is installed as described above, then after completing the text for
+a commit, it will be checked by gitlint against the style we have set up, and
+will offer advice if there are any issues it notices.
+If gitlint finds any, it will ask if you wish to commit with the message as it
+is (`y` for 'yes'), stop the commit process (`n` for 'no'), or edit the commit
+message (`e` for 'edit').
 
-Other gitlint options are available; for example it is possible to apply it to a range of commits with the `--commits` option, eg. `gitlint --commits HEAD~2..HEAD` would apply it to the last few commits.
+Other gitlint options are available; for example it is possible to apply it to
+a range of commits with the `--commits` option, eg. `gitlint --commits
+HEAD~2..HEAD` would apply it to the last few commits.
 
 ### Tips for working with tests (pytest)
 
-Tests for zulip-terminal are written using [pytest](https://pytest.org/). You can read the tests in the `/tests` folder to learn about writing tests for a new class/function. If you are new to pytest, reading its documentation is definitely recommended.
+Tests for zulip-terminal are written using [pytest](https://pytest.org/).
+You can read the tests in the `/tests` folder to learn about writing tests for
+a new class/function.
+If you are new to pytest, reading its documentation is definitely recommended.
 
-We currently have thousands of tests which get checked upon running `pytest`. While it is dependent on your system capability, this should typically take less than one minute to run. However, during debugging you may still wish to limit the scope of your tests, to improve the turnaround time:
-* If lots of tests are failing in a very verbose way, you might try the `-x` option (eg. `pytest -x`) to stop tests after the first failure; due to parametrization of tests and test fixtures, many apparent errors/failures can be resolved with just one fix! (try eg. `pytest --maxfail 3` for a less-strict version of this)
-* To avoid running all the successful tests each time, along with the failures, you can run with `--lf` (eg. `pytest --lf`), short for `--last-failed` (similar useful options may be `--failed-first` and `--new-first`, which may work well with `-x`)
-* Since pytest 3.10 there is `--sw` (`--stepwise`), which works through known failures in the same way as `--lf` and `-x` can be used, which can be combined with `--stepwise-skip` to control which test is the current focus
-* If you know the names of tests which are failing and/or in a specific location, you might limit tests to a particular location (eg. `pytest tests/model`) or use a selected keyword (eg. `pytest -k __handle`)
+We currently have thousands of tests which get checked upon running `pytest`.
+While it is dependent on your system capability, this should typically take
+less than one minute to run.
+However, during debugging you may still wish to limit the scope of your tests,
+to improve the turnaround time:
 
-When only a subset of tests are running it becomes more practical and useful to use the `-v` option (`--verbose`); instead of showing a `.` (or `F`, `E`, `x`, etc) for each test result, it gives the name (with parameters) of each test being run (eg. `pytest -v -k __handle`). This option also shows more detail in tests and can be given multiple times (eg. `pytest -vv`).
+* If lots of tests are failing in a very verbose way, you might try the `-x`
+  option (eg. `pytest -x`) to stop tests after the first failure; due to
+parametrization of tests and test fixtures, many apparent errors/failures can
+be resolved with just one fix! (try eg. `pytest --maxfail 3` for a less-strict
+version of this)
 
-For additional help with pytest options see `pytest -h`, or check out the [full pytest documentation](https://docs.pytest.org/en/latest/).
+* To avoid running all the successful tests each time, along with the failures,
+  you can run with `--lf` (eg. `pytest --lf`), short for `--last-failed`
+(similar useful options may be `--failed-first` and `--new-first`, which may
+work well with `-x`)
+
+* Since pytest 3.10 there is `--sw` (`--stepwise`), which works through known
+  failures in the same way as `--lf` and `-x` can be used, which can be
+combined with `--stepwise-skip` to control which test is the current focus
+
+* If you know the names of tests which are failing and/or in a specific
+  location, you might limit tests to a particular location (eg. `pytest
+tests/model`) or use a selected keyword (eg. `pytest -k __handle`)
+
+When only a subset of tests are running it becomes more practical and useful to
+use the `-v` option (`--verbose`); instead of showing a `.` (or `F`, `E`, `x`,
+etc) for each test result, it gives the name (with parameters) of each test
+being run (eg. `pytest -v -k __handle`).
+This option also shows more detail in tests and can be given multiple times
+(eg. `pytest -vv`).
+
+For additional help with pytest options see `pytest -h`, or check out the [full
+pytest documentation](https://docs.pytest.org/en/latest/).
 
 ### Debugging Tips
 
 #### Output using `print`
 
-The stdout (standard output) for zulip-terminal is redirected to `./debug.log` if debugging is enabled at run-time using `-d` or `--debug`.
+The stdout (standard output) for zulip-terminal is redirected to `./debug.log`
+if debugging is enabled at run-time using `-d` or `--debug`.
 
-This means that if you want to check the value of a variable, or perhaps indicate reaching a certain point in the code, you can simply use `print()`, eg.
+This means that if you want to check the value of a variable, or perhaps
+indicate reaching a certain point in the code, you can simply use `print()`,
+eg.
 ```python3
 print(f"Just about to do something with {variable}")
 ```
-and when running with a debugging option, the string will be printed to `./debug.log`.
+and when running with a debugging option, the string will be printed to
+`./debug.log`.
 
-With a bash-like terminal, you can run something like `tail -f debug.log` in another terminal, to see the output from `print` as it happens.
+With a bash-like terminal, you can run something like `tail -f debug.log` in
+another terminal, to see the output from `print` as it happens.
 
 #### Interactive debugging using pudb & telnet
 
-If you want to debug zulip-terminal while it is running, or in a specific state, you can insert
+If you want to debug zulip-terminal while it is running, or in a specific
+state, you can insert
 ```python3
 from pudb.remote import set_trace
 set_trace()
 ```
-in the part of the code you want to debug. This will start a telnet connection for you. You can find the IP address and
+in the part of the code you want to debug.
+This will start a telnet connection for you. You can find the IP address and
 port of the telnet connection in `./debug.log`. Then simply run
 ```
 $ telnet 127.0.0.1 6899
 ```
-in another terminal, where `127.0.0.1` is the IP address and `6899` is port you find in `./debug.log`.
+in another terminal, where `127.0.0.1` is the IP address and `6899` is port you
+find in `./debug.log`.
 
 #### There's no effect in Zulip Terminal after making local changes!
 
-This likely means that you have installed both normal and development versions of zulip-terminal.
+This likely means that you have installed both normal and development versions
+of zulip-terminal.
 
 To ensure you run the development version:
-* If using pipenv, call `pipenv run zulip-term` from the cloned/downloaded `zulip-terminal` directory;
-* If using pip (pip3), ensure you have activated the correct virtual environment (venv); depending on how your shell is configured, the name of the venv may appear in the command prompt. Note that not including the `-e` in the pip3 command will also cause this problem.
+* If using pipenv, call `pipenv run zulip-term` from the cloned/downloaded
+  `zulip-terminal` directory;
+
+* If using pip (pip3), ensure you have activated the correct virtual
+  environment (venv); depending on how your shell is configured, the name of
+the venv may appear in the command prompt.
+Note that not including the `-e` in the pip3 command will also cause this
+problem.
