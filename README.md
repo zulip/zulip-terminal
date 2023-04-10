@@ -539,7 +539,7 @@ Currently we have
 
 The project uses `black` and `isort` for code-style and import sorting respectively.
 
-These tools can be run as linters locally , but can also *automatically* format
+These tools can be run as linters locally, but can also *automatically* format
 your code for you.
 
 If you're using a `make`-based setup, running `make fix` will run both (and a
@@ -665,6 +665,7 @@ GitLint cannot check everything - including language or grammar!
 If you plan to submit git commits in pull-requests (PRs), then we highly
 suggest installing the `gitlint` commit-message hook by running `gitlint
 install-hook` (or `pipenv run gitlint install-hook` with pipenv setups).
+
 While the content still depends upon your writing skills, this ensures a more
 consistent formatting structure between commits, including by different
 authors.
