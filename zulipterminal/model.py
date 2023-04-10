@@ -1193,10 +1193,9 @@ class Model:
                 * UserStatus, an arbitrary one is chosen.
                 """
                 aggregate_status: UserStatus = "offline"
-                for client in presences[email].items():
-                    client_name = client[0]
-                    status = client[1]["status"]
-                    timestamp = client[1]["timestamp"]
+                for client_name, client_presence in presences[email].items():
+                    status = client_presence["status"]
+                    timestamp = client_presence["timestamp"]
                     if client_name == "aggregated":
                         continue
                     if (server_timestamp - timestamp) < OFFLINE_THRESHOLD_SECS:
