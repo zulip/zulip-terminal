@@ -1231,24 +1231,27 @@ class Model:
                 * UserStatus, an arbitrary one is chosen.
                 """
                 aggregate_status: UserStatus = "offline"
+                server_aggregate_status = "offline"
                 for client_name, client_presence in presences[email].items():
                     status = client_presence["status"]
                     timestamp = client_presence["timestamp"]
-                    if client_name == "aggregated":
-                        continue
                     if (
                         server_timestamp - timestamp
                     ) < self.server_presence_offline_threshold_secs:
-                        if status == "active":
-                            aggregate_status = "active"
-                        if status == "idle" and aggregate_status != "active":
-                            aggregate_status = status
-                        if status == "offline" and (
-                            aggregate_status != "active" and aggregate_status != "idle"
-                        ):
-                            aggregate_status = status
+                        if client_name == "aggregated":
+                            server_aggregate_status = status
+                        else:
+                            if status == "active":
+                                aggregate_status = "active"
+                            if status == "idle" and aggregate_status != "active":
+                                aggregate_status = status
+                            if status == "offline" and (
+                                aggregate_status != "active"
+                                and aggregate_status != "idle"
+                            ):
+                                aggregate_status = status
 
-                status = aggregate_status
+                status = server_aggregate_status
             else:
                 # Set status of users not in the  `presence` list
                 # as 'inactive'. They will not be displayed in the
