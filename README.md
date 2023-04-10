@@ -388,7 +388,7 @@ Follow it to understand how to implement a new feature for zulip-terminal.
 
 You can of course browse the source on GitHub & in the source tree you
 download, and check the
-[source file overview](https://github.com/zulip/zulip-terminal/docs/developer-file-overview.md)
+[source file overview](https://github.com/zulip/zulip-terminal/blob/main/docs/developer-file-overview.md)
 for ideas of how files are currently arranged.
 
 ### Urwid
