@@ -2,6 +2,7 @@
 Defines the `Model`, fetching and storing data retrieved from the Zulip server
 """
 
+import itertools
 import json
 import time
 from collections import defaultdict
@@ -46,6 +47,7 @@ from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import (
     EDIT_TOPIC_POLICY,
     ROLE_BY_ID,
+    STATE_ICON,
     StreamAccessType,
 )
 from zulipterminal.helper import (
@@ -1100,35 +1102,27 @@ class Model:
             self._all_users_by_id[bot["user_id"]] = bot
             self.user_id_email_dict[bot["user_id"]] = email
 
-        # Generate filtered lists for active & idle users
-        active = [
-            properties
-            for properties in self.user_dict.values()
-            if properties["status"] == "active"
-        ]
-        idle = [
-            properties
-            for properties in self.user_dict.values()
-            if properties["status"] == "idle"
-        ]
-        offline = [
-            properties
-            for properties in self.user_dict.values()
-            if properties["status"] == "offline"
-        ]
-        inactive = [
-            properties
-            for properties in self.user_dict.values()
-            if properties["status"] == "inactive"
-        ]
+        # Generate filtered lists for each status
+        ordered_statuses = list(STATE_ICON.keys())
+        presences_by_status = {
+            status: sorted(
+                [
+                    properties
+                    for properties in self.user_dict.values()
+                    if properties["status"] == status
+                ],
+                key=lambda user: user["full_name"].casefold(),
+            )
+            for status in ordered_statuses
+        }
+        user_list = list(
+            itertools.chain.from_iterable(
+                presences_by_status[status] for status in ordered_statuses
+            )
+        )
+        user_list.insert(0, current_user)  # Add current user to the top of the list
 
-        # Construct user_list from sorted components of each list
-        user_list = sorted(active, key=lambda u: u["full_name"].casefold())
-        user_list += sorted(idle, key=lambda u: u["full_name"].casefold())
-        user_list += sorted(offline, key=lambda u: u["full_name"].casefold())
-        user_list += sorted(inactive, key=lambda u: u["full_name"].casefold())
-        # Add current user to the top of the list
-        user_list.insert(0, current_user)
+        # NOTE: Do this after generating user_list to avoid current_user duplication
         self.user_dict[current_user["email"]] = current_user
         self.user_id_email_dict[self.user_id] = current_user["email"]
 
