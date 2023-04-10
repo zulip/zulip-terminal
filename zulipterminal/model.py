@@ -1927,6 +1927,21 @@ class Model:
                     # realm_users has 'email' attribute and not 'new_email'
                     if "new_email" in updated_details:
                         realm_user["email"] = updated_details["new_email"]
+
+                    elif "custom_profile_field" in updated_details:
+                        profile_field_data = updated_details["custom_profile_field"]
+                        profile_field_id = str(profile_field_data["id"])
+
+                        if profile_field_data["value"] is None:
+                            # Ignore if field does not exist
+                            realm_user["profile_data"].pop(profile_field_id, None)
+                        else:
+                            updated_data = {
+                                key: value
+                                for key, value in profile_field_data.items()
+                                if key != "id"
+                            }
+                            realm_user["profile_data"][profile_field_id] = updated_data
                     else:
                         realm_user.update(updated_details)
                     break

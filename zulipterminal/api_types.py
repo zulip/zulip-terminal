@@ -400,6 +400,12 @@ class ReactionEvent(TypedDict):
 # See https://zulip.com/api/get-events#realm_user-add and -remove
 
 
+class UpdateCustomFieldValue(TypedDict):
+    id: int
+    value: Optional[str]
+    rendered_value: NotRequired[str]
+
+
 @final
 class RealmUserUpdateName(TypedDict):
     user_id: int
@@ -449,9 +455,8 @@ class RealmUserUpdateDeliveryEmail(TypedDict):
 
 @final
 class RealmUserUpdateCustomProfileField(TypedDict):
-    # TODO: Requires checking before implementation
     user_id: int
-    custom_profile_field: Dict[str, Any]
+    custom_profile_field: UpdateCustomFieldValue
 
 
 @final
@@ -468,6 +473,7 @@ RealmUserEventPerson = Union[
     RealmUserUpdateRole,
     RealmUserUpdateBillingRole,
     RealmUserUpdateDeliveryEmail,
+    RealmUserUpdateCustomProfileField,
     RealmUserUpdateEmail,
 ]
 
