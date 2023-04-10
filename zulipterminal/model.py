@@ -444,7 +444,7 @@ class Model:
             if response["result"] == "success":
                 self.initial_data["presences"] = response["presences"]
 
-                self._presence_timestamp = time.time()
+                self._presence_timestamp = response.get("server_timestamp", time.time())
                 self._update_users_data_from_initial_data()
 
                 if hasattr(self.controller, "view"):
