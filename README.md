@@ -2,7 +2,7 @@
 
 [Recent changes](https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md) | [Configuration](#Configuration) | [Hot Keys](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md) | [FAQs](https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md) | [Development](#contributor-guidelines) | [Tutorial](https://github.com/zulip/zulip-terminal/blob/main/docs/getting-started.md)
 
-[![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
+[![Chat with us!](https://img.shields.io/badge/Zulip-chat_with_us!-brightgreen.svg)](https://github.com/zulip/zulip-terminal/blob/main/README.md#chat-with-fellow-users--developers)
 [![PyPI](https://img.shields.io/pypi/v/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 [![Python Versions](https://img.shields.io/pypi/pyversions/zulip-term.svg)](https://pypi.python.org/pypi/zulip-term)
 
