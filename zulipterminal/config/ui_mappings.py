@@ -25,8 +25,10 @@ EDIT_MODE_CAPTIONS: Dict[EditPropagateMode, str] = {
 }
 
 
+UserStatus = Literal["active", "idle", "offline", "inactive"]
+
 # Mapping that binds user activity status to corresponding markers.
-STATE_ICON = {
+STATE_ICON: Dict[UserStatus, str] = {
     "active": STATUS_ACTIVE,
     "idle": STATUS_IDLE,
     "offline": STATUS_OFFLINE,
