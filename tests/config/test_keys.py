@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.config import keys
+from zulipterminal.config import keys, symbols
 
 
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
@@ -45,6 +45,8 @@ def test_keys_for_command_invalid_command(invalid_command: str) -> None:
         (["page up", "esc"], ["PgUp", "Esc"]),
         (["ctrl p", "P"], ["Ctrl p", "P"]),
         (["z", ":"], ["z", ":"]),
+        (["tab", "up"], ["Tab", symbols.UP_ARROW_KEY]),
+        (["left", "right"], [symbols.LEFT_ARROW_KEY, symbols.RIGHT_ARROW_KEY]),
     ],
 )
 def test_display_keys_for_urwid_keys(

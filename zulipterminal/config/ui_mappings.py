@@ -9,6 +9,9 @@ from typing_extensions import Literal
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
     BOT_MARKER,
+    DOWN_ARROW_KEY,
+    LEFT_ARROW_KEY,
+    RIGHT_ARROW_KEY,
     STATUS_ACTIVE,
     STATUS_IDLE,
     STATUS_INACTIVE,
@@ -16,6 +19,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PRIVATE,
     STREAM_MARKER_PUBLIC,
     STREAM_MARKER_WEB_PUBLIC,
+    UP_ARROW_KEY,
 )
 
 
@@ -111,10 +115,10 @@ URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
     "end": "End",
     "enter": "Enter",
     "tab": "Tab",
-    "up": "Up",
-    "down": "Down",
-    "left": "Left",
-    "right": "Right",
+    "up": UP_ARROW_KEY,
+    "down": DOWN_ARROW_KEY,
+    "left": LEFT_ARROW_KEY,
+    "right": RIGHT_ARROW_KEY,
     "?": "?",
     "@": "@",
     ">": ">",
