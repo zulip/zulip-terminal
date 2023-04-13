@@ -248,9 +248,11 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
-    def reactions_view(self, reactions: List[Dict[str, Any]]) -> Any:
+    def reactions_view(
+        self, reactions: List[Dict[str, Any]]
+    ) -> Optional[urwid.Padding]:
         if not reactions:
-            return ""
+            return None
         try:
             my_user_id = self.model.user_id
             reaction_stats = defaultdict(list)
@@ -293,7 +295,7 @@ class MessageBox(urwid.Pile):
                 min_width=50,
             )
         except Exception:
-            return ""
+            return None
 
     @staticmethod
     def footlinks_view(
@@ -767,7 +769,7 @@ class MessageBox(urwid.Pile):
             (content_header, any_differences),
             (wrapped_content, True),
             (footlinks, footlinks is not None),
-            (reactions, reactions != ""),
+            (reactions, reactions is not None),
         ]
 
         self.header = [part for part, condition in parts[:2] if condition]
