@@ -147,6 +147,7 @@ class Model:
 
         # Events desired with their corresponding callback
         self.event_actions: Dict[str, Callable[[Event], None]] = {
+            "alert_words": self._handle_alert_words_event,
             "message": self._handle_message_event,
             "update_message": self._handle_update_message_event,
             "reaction": self._handle_reaction_event,
@@ -1379,6 +1380,13 @@ class Model:
                     else:
                         for user_id in user_ids:
                             subscribers.remove(user_id)
+
+    def _handle_alert_words_event(self, event: Event) -> None:
+        """
+        Handle alert_words events
+        """
+        assert event["type"] == "alert_words"
+        self._alert_words = event["alert_words"]
 
     def _handle_typing_event(self, event: Event) -> None:
         """
