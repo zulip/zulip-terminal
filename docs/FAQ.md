@@ -28,8 +28,11 @@ The next release will include support for Python 3.11; before then we suggest
 installing the
 [latest (git) version](https://github.com/zulip/zulip-terminal/blob/main/README.md#installation).
 
-> NOTE: If you attempt to install on a system using a version of Python which
-> pip cannot match, it may install a very old version - see
+> Until Mid-April 2023 it is possible that installing with a very recent
+> version of Python could lead to an apparently broken installation with a very
+> old version of zulip-terminal.
+> This should no longer be the case, now that these older versions have been
+> yanked from PyPI, but could give symptoms resembling
 > [issue 1145](https://github.com/zulip/zulip-terminal/issues/1145).
 
 ## What operating systems are supported?
