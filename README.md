@@ -438,7 +438,7 @@ process similar to that in the previous section.
 #### Pipenv
 
 1. Install pipenv
-   (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/install/#pragmatic-installation-of-pipenv);
+   (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/installation);
    pipenv can be installed in a virtual environment, if you wish)
 ```
 $ pip3 install --user pipenv
