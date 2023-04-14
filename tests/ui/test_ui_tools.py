@@ -1,6 +1,8 @@
 from collections import OrderedDict
 
 import pytest
+import urwid
+from pytest import param as case
 from urwid import Divider
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
@@ -613,6 +615,33 @@ class TestTopicsView:
                 self.divider("─"),
             ]
         )
+
+    @pytest.mark.parametrize(
+        "stream_id, saved_topic_state, expected_focus_index",
+        [
+            case(1, None, 0, id="initial_condition-no_topic_is_stored"),
+            case(2, "Topic 3", 2, id="topic_is_stored_and_present_in_topic_list"),
+            case(3, "Topic 4", 0, id="topic_is_stored_but_not_present_in_topic_list"),
+        ],
+    )
+    def test__focus_position_for_topic_name(
+        self, mocker, stream_id, saved_topic_state, topic_view, expected_focus_index
+    ):
+        topic_view.stream_button.stream_id = stream_id
+        topic_view.list_box = mocker.MagicMock(spec=urwid.ListBox)
+        topic_view.list_box.body = [
+            mocker.Mock(topic_name="Topic 1"),
+            mocker.Mock(topic_name="Topic 2"),
+            mocker.Mock(topic_name="Topic 3"),
+        ]
+        topic_view.log = urwid.SimpleFocusListWalker(topic_view.list_box.body)
+        mocker.patch.object(
+            topic_view.view, "saved_topic_in_stream_id", return_value=saved_topic_state
+        )
+
+        topic_view.list_box.focus_position = topic_view._focus_position_for_topic_name()
+
+        assert topic_view.list_box.focus_position == expected_focus_index
 
     @pytest.mark.parametrize(
         "new_text, expected_log",
