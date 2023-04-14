@@ -111,9 +111,11 @@ class MessageBox(urwid.Pile):
 
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
-        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm_with":
+        narrow = self.model.get_narrow()
+        narrow_length = self.model.get_narrow_length()
+        if narrow_length == 1 and narrow[0][0] == "pm_with":
             return False
-        if len(self.model.narrow) == 2 and self.model.narrow[1][0] == "topic":
+        if narrow_length == 2 and narrow[1][0] == "topic":
             return False
 
         last_msg = self.last_message
@@ -193,7 +195,7 @@ class MessageBox(urwid.Pile):
             return message_view.private_header()
 
     def top_search_bar(self) -> Any:
-        curr_narrow = self.model.narrow
+        curr_narrow = self.model.get_narrow()
         is_search_narrow = self.model.is_search_narrow()
         if is_search_narrow:
             curr_narrow = [
@@ -890,6 +892,8 @@ class MessageBox(urwid.Pile):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        narrow = self.model.get_narrow()
+        narrow_length = self.model.get_narrow_length()
         if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
@@ -902,7 +906,7 @@ class MessageBox(urwid.Pile):
                     stream_id=self.stream_id,
                 )
         elif is_command_key("STREAM_MESSAGE", key):
-            if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
+            if narrow_length != 0 and narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message["display_recipient"],
                     stream_id=self.stream_id,
@@ -923,7 +927,7 @@ class MessageBox(urwid.Pile):
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
-                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm_with":
+                if narrow_length == 1 and narrow[0][0] == "pm_with":
                     self.model.controller.narrow_to_all_pm(
                         contextual_message_id=self.message["id"],
                     )
@@ -933,7 +937,7 @@ class MessageBox(urwid.Pile):
                         contextual_message_id=self.message["id"],
                     )
             elif self.message["type"] == "stream":
-                if len(self.model.narrow) > 1:  # in a topic
+                if narrow_length > 1:  # in a topic
                     self.model.controller.narrow_to_stream(
                         stream_name=self.stream_name,
                         contextual_message_id=self.message["id"],

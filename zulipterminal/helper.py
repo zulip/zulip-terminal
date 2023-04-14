@@ -396,7 +396,8 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
         },
     }
     """
-    narrow = model.narrow
+    narrow = model.get_narrow()
+    narrow_length = model.get_narrow_length()
     for msg in messages:
         if "edit_history" in msg:
             index["edited_messages"].add(msg["id"])
@@ -409,7 +410,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             index["search"].add(msg["id"])
             continue
 
-        if len(narrow) == 1:
+        if narrow_length == 1:
             if narrow[0][1] == "starred" and "starred" in msg["flags"]:
                 index["starred_msg_ids"].add(msg["id"])
 
@@ -436,7 +437,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
 
         if (
             msg["type"] == "stream"
-            and len(narrow) == 2
+            and narrow_length == 2
             and narrow[1][1] == msg["subject"]
         ):
             topics_in_stream = index["topic_msg_ids"][msg["stream_id"]]
@@ -648,7 +649,7 @@ def display_error_if_present(response: Dict[str, Any], controller: Any) -> None:
 def check_narrow_and_notify(
     outer_narrow: List[Any], inner_narrow: List[Any], controller: Any
 ) -> None:
-    current_narrow = controller.model.narrow
+    current_narrow = controller.model.get_narrow()
 
     if (
         current_narrow != []

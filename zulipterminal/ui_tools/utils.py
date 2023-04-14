@@ -20,7 +20,7 @@ def create_msg_box_list(
     """
     MessageBox for every message displayed is created here.
     """
-    if not model.narrow and messages is None:
+    if not model.get_narrow() and messages is None:
         messages = list(model.index["all_msg_ids"])
     if messages is not None:
         message_list = [model.index["messages"][id] for id in messages]
@@ -62,7 +62,7 @@ def is_muted(msg: Message, model: Any) -> bool:
     if msg["type"] == "private":  # noqa: SIM114
         return False
     # In a topic narrow
-    elif len(model.narrow) == 2:
+    elif model.get_narrow_length() == 2:
         return False
     elif model.is_muted_stream(msg["stream_id"]):  # noqa: SIM114
         return True
