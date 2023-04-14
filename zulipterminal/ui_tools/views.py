@@ -1355,7 +1355,7 @@ class StreamInfoView(PopUpView):
 
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
-        self.markup_desc, message_links, _ = MessageBox.transform_content(
+        self.markup_desc, message_links, _, _ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,
         )
