@@ -472,15 +472,18 @@ class TestController:
         [
             ([], [["search", "FOO"]]),
             ([["search", "BOO"]], [["search", "FOO"]]),
-            ([["stream", "PTEST"]], [["stream", "PTEST"], ["search", "FOO"]]),
+            ([["stream", "Stream 1"]], [["stream", "Stream 1"], ["search", "FOO"]]),
             (
-                [["pm_with", "foo@zulip.com"], ["search", "BOO"]],
-                [["pm_with", "foo@zulip.com"], ["search", "FOO"]],
+                [["pm_with", "person1@example.com"], ["search", "BOO"]],
+                [["pm_with", "person1@example.com"], ["search", "FOO"]],
             ),
             (
-                [["stream", "PTEST"], ["topic", "RDS"]],
-                [["stream", "PTEST"], ["topic", "RDS"], ["search", "FOO"]],
+                [["stream", "Stream 1"], ["topic", "RDS"]],
+                [["stream", "Stream 1"], ["topic", "RDS"], ["search", "FOO"]],
             ),
+            ([["is", "starred"]], [["is", "starred"], ["search", "FOO"]]),
+            ([["is", "mentioned"]], [["is", "mentioned"], ["search", "FOO"]]),
+            ([["is", "private"]], [["is", "private"], ["search", "FOO"]]),
         ],
         ids=[
             "Default_all_msg_search",
@@ -488,6 +491,9 @@ class TestController:
             "search_within_stream",
             "pm_search_again",
             "search_within_topic_narrow",
+            "search_in_is_starred_narrow",
+            "search_in_is_mentioned_narrow",
+            "search_in_is_private_narrow",
         ],
     )
     @pytest.mark.parametrize("msg_ids", [({200, 300, 400}), (set()), ({100})])
@@ -498,12 +504,17 @@ class TestController:
         controller: Controller,
         mocker: MockerFixture,
         msg_ids: Set[int],
+        user_dict: Dict[str, Dict[str, Any]],
+        stream_dict: Dict[int, Dict[str, Any]],
         index_search_messages: Index,
     ) -> None:
         get_message = mocker.patch(MODEL + ".get_messages")
         create_msg = mocker.patch(MODULE + ".create_msg_box_list")
         mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=msg_ids)
         controller.model.index = index_search_messages  # Any initial search index
+        controller.model.user_id = 10
+        controller.model.user_dict = user_dict
+        controller.model.stream_dict = stream_dict
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.narrow = initial_narrow
 

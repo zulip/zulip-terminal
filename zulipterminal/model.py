@@ -277,12 +277,69 @@ class Model:
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
         self.index["pointer"][repr(self.narrow)] = focus_message
 
+    def additional_search_text_for_current_narrow(self) -> str:
+        """
+        This function converts the current narrow to corresponding search text using keywords
+        """
+        # In cases where '+' is already present in stream and/or topic name, it is converted to '%2B'
+        # then the spaces in stream and topic names are converted to '+'
+        text = ""
+        if len(self.narrow) > 0:
+            if self.narrow[0][0] == "stream":
+                text += (
+                    f"stream:{self.narrow[0][1].replace('+', '%2B').replace(' ', '+')}"
+                )
+                if len(self.narrow) > 1 and self.narrow[1][0] == "topic":
+                    text += f" topic:{self.narrow[1][1].replace('+', '%2B').replace(' ', '+')}"
+            elif self.narrow[0][1] == "private":
+                text = "is:private"
+            elif self.narrow[0][0] == "pm_with":
+                pm_group_emails = self.narrow[0][1].replace(" ", "")
+                text = f"pm_with:{pm_group_emails}"
+            elif self.narrow[0][1] == "starred":
+                text = "is:starred"
+            elif self.narrow[0][1] == "mentioned":
+                text = "is:mentioned"
+        return text
+
     def is_search_narrow(self) -> bool:
         """
         Checks if the current narrow is a result of a previous search for
         a messages in a different narrow.
         """
         return "search" in [subnarrow[0] for subnarrow in self.narrow]
+
+    def extract_keywords_and_set_narrow(self, query: str) -> str:
+        """
+        This function checks for prefixes in the search string
+        and returns the query without the prefixes.
+        """
+        stream_prefix_present_flag = False
+        search_text_without_keywords = ""
+        stream = ""
+        for word in query.split(" "):
+            if word.startswith("stream:"):
+                stream_prefix_present_flag = True
+                stream = word.split(":")[1].replace("+", " ").replace("%2B", "+")
+                self.set_narrow(stream=stream)
+            elif word.startswith("topic:") and stream_prefix_present_flag:
+                topic = word.split(":")[1].replace("+", " ").replace("%2B", "+")
+                self.set_narrow(stream=stream, topic=topic)
+            elif word == "is:starred":
+                self.set_narrow(starred=True)
+            elif word == "is:mentioned":
+                self.set_narrow(mentioned=True)
+            elif word == "is:private":
+                self.set_narrow(pms=True)
+            elif word.startswith("pm_with:"):
+                recipient_id = word.split(":")[1].replace(",", ", ")
+                new_narrow = [["pm_with", recipient_id]]
+                self.set_narrow(pm_with=recipient_id)
+            elif not search_text_without_keywords:
+                search_text_without_keywords = word
+            else:
+                search_text_without_keywords += " " + word
+        return search_text_without_keywords
 
     def set_narrow(
         self,

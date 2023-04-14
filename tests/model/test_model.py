@@ -370,6 +370,48 @@ class TestModel:
         assert model.index["pointer"][str(narrow)] == msg_id
 
     @pytest.mark.parametrize(
+        "narrow, expected_additional_text",
+        (
+            case([], "", id="all_messages"),
+            case([["stream", "PTEST"]], "stream:PTEST", id="stream_without_spaces"),
+            case(
+                [["stream", "PTEST1 PTEST2+PTEST3"]],
+                "stream:PTEST1+PTEST2%2BPTEST3",
+                id="stream_with_spaces_and_plus_symbol",
+            ),
+            case(
+                [["stream", "PTEST"], ["topic", "Test"]],
+                "stream:PTEST topic:Test",
+                id="stream_and_topic_no_spaces",
+            ),
+            case(
+                [["stream", "PTEST1 PTEST2+PTEST3"], ["topic", "Test1 Test2+Test3"]],
+                "stream:PTEST1+PTEST2%2BPTEST3 topic:Test1+Test2%2BTest3",
+                id="stream_and_topic_with_space_and_plus",
+            ),
+            case([["is", "private"]], "is:private", id="is_private"),
+            case([["is", "mentioned"]], "is:mentioned", id="is_mentioned"),
+            case([["is", "starred"]], "is:starred", id="is_starred"),
+            case(
+                [["pm_with", "some1@email.com, some2@email.com"]],
+                "pm_with:some1@email.com,some2@email.com",
+                id="group_pms",
+            ),
+        ),
+    )
+    def test_additional_search_text_for_current_narrow(
+        self,
+        model,
+        narrow: List[List[str]],
+        expected_additional_text: str,
+    ) -> None:
+        model.narrow = narrow
+        assert (
+            model.additional_search_text_for_current_narrow()
+            == expected_additional_text
+        )
+
+    @pytest.mark.parametrize(
         "narrow, is_search_narrow",
         [
             ([], False),
@@ -388,6 +430,48 @@ class TestModel:
     def test_is_search_narrow(self, model, narrow, is_search_narrow):
         model.narrow = narrow
         assert model.is_search_narrow() == is_search_narrow
+
+    @pytest.mark.parametrize(
+        "search_text, expected_search_text, expected_search_narrow",
+        [
+            case("FOO", "FOO", [], id="all_messages"),
+            case(
+                "FOO stream:Stream+1",
+                "FOO",
+                [["stream", "Stream 1"]],
+                id="stream_without_spaces",
+            ),
+            case(
+                "FOO stream:Stream+1 topic:some+topic1%2Bsome+topic2",
+                "FOO",
+                [["stream", "Stream 1"], ["topic", "some topic1+some topic2"]],
+                id="stream_and_topic_without_spaces",
+            ),
+            case("FOO is:private", "FOO", [["is", "private"]], id="is_private"),
+            case("FOO is:mentioned", "FOO", [["is", "mentioned"]], id="is_mentioned"),
+            case("FOO is:starred", "FOO", [["is", "starred"]], id="is_starred"),
+            case(
+                "FOO pm_with:person1@example.com,person2@example.com",
+                "FOO",
+                [["pm_with", "person1@example.com, person2@example.com"]],
+            ),
+        ],
+    )
+    def test_extract_keywords_and_set_narrow(
+        self,
+        search_text: str,
+        model,
+        stream_dict,
+        user_dict,
+        expected_search_text: str,
+        expected_search_narrow: List[List[str]],
+    ) -> None:
+        model.stream_dict = stream_dict
+        model.narrow = []
+        model.user_dict = user_dict
+        result_query = model.extract_keywords_and_set_narrow(search_text)
+        assert model.narrow == expected_search_narrow
+        assert result_query == expected_search_text
 
     @pytest.mark.parametrize(
         "bad_args",
