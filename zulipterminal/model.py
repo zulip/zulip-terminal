@@ -930,6 +930,8 @@ class Model:
                 and not self.is_muted_stream(stream_id)
                 and next_topic
             ):
+                if unread_topic == current_topic:
+                    return None
                 return unread_topic
             if unread_topic == current_topic:
                 next_topic = True
