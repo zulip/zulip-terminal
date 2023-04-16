@@ -202,18 +202,16 @@ class WriteBox(urwid.Pile):
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
 
-    def private_box_view(
-        self,
-        *,
-        recipient_user_ids: Optional[List[int]] = None,
-    ) -> None:
+    def update_recipients_from_user_ids(
+        self, recipient_user_ids: Optional[List[int]] = None
+    ) -> str:
         if recipient_user_ids:
             self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
             self.recipient_emails = [
                 self.model.user_id_email_dict[user_id]
                 for user_id in self.recipient_user_ids
             ]
-            recipient_info = ", ".join(
+            return ", ".join(
                 [
                     f"{self.model.user_dict[email]['full_name']} <{email}>"
                     for email in self.recipient_emails
@@ -222,9 +220,15 @@ class WriteBox(urwid.Pile):
         else:
             self._set_regular_and_typing_recipient_user_ids(None)
             self.recipient_emails = []
-            recipient_info = ""
+            return ""
 
+    def private_box_view(
+        self,
+        *,
+        recipient_user_ids: Optional[List[int]] = None,
+    ) -> None:
         self.send_next_typing_update = datetime.now()
+        recipient_info = self.update_recipients_from_user_ids(recipient_user_ids)
         self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
