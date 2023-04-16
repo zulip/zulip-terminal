@@ -4012,7 +4012,7 @@ class TestModel:
             ),
         ],
     )
-    def test_get_next_unread_topic(
+    def test_next_unread_topic_from_message(
         self, mocker, model, unread_topics, current_topic, next_unread_topic
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
@@ -4039,7 +4039,7 @@ class TestModel:
             ]
         }
 
-        unread_topic = model.get_next_unread_topic(current_message=current_message_id)
+        unread_topic = model.next_unread_topic_from_message_id(current_message_id)
 
         assert unread_topic == next_unread_topic
 
@@ -4054,7 +4054,7 @@ class TestModel:
             ),
         ],
     )
-    def test_get_next_unread_topic__empty_narrow(
+    def test_next_unread_topic_from_message__empty_narrow(
         self,
         mocker,
         model,
@@ -4070,7 +4070,7 @@ class TestModel:
         model.stream_id_from_name = mocker.Mock(return_value=narrow_stream_id)
         model.narrow = empty_narrow
 
-        unread_topic = model.get_next_unread_topic(current_message=None)
+        unread_topic = model.next_unread_topic_from_message_id(None)
 
         assert unread_topic == next_unread_topic
 

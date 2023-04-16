@@ -890,7 +890,7 @@ class TestMiddleColumnView:
         mocker.patch.object(self.view, "message_view")
 
         mid_col_view.model.stream_dict = {1: {"name": "stream"}}
-        mid_col_view.model.get_next_unread_topic.return_value = (1, "topic")
+        mid_col_view.model.next_unread_topic_from_message_id.return_value = (1, "topic")
 
         return_value = mid_col_view.keypress(size, key)
 
@@ -906,7 +906,7 @@ class TestMiddleColumnView:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch.object(self.view, "message_view")
-        mid_col_view.model.get_next_unread_topic.return_value = None
+        mid_col_view.model.next_unread_topic_from_message_id.return_value = None
 
         return_value = mid_col_view.keypress(size, key)
 

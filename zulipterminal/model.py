@@ -901,7 +901,7 @@ class Model:
             return (stream_id, topic)
         return None
 
-    def get_next_unread_topic(
+    def next_unread_topic_from_message_id(
         self, current_message: Optional[int]
     ) -> Optional[Tuple[int, str]]:
         if current_message:
