@@ -3919,16 +3919,16 @@ class TestModel:
                 (1, "topic"),
                 id="unread_present_before_previous_topic",
             ),
-            case(  # TODO Should be None? (2 other cases)
+            case(
                 {(1, "topic")},
                 (1, "topic"),
-                (1, "topic"),
+                None,
                 id="unread_still_present_in_topic",
             ),
             case(
                 {},
                 (1, "topic"),
-                (1, "topic"),
+                None,
                 id="no_unreads_with_previous_topic_state",
             ),
             case({}, None, None, id="no_unreads_with_no_previous_topic_state"),
@@ -3947,7 +3947,7 @@ class TestModel:
             case(
                 {(3, "topic3")},
                 (2, "topic2"),
-                (2, "topic2"),
+                None,
                 id="unread_present_only_in_muted_stream",
             ),
             case(
