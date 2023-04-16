@@ -1731,6 +1731,37 @@ class TestWriteBox:
         )
         assert write_box.focus_position == 1
 
+    @pytest.mark.parametrize(
+        "recipient_user_ids, expected_recipient_emails, expected_recipient_info",
+        [
+            (
+                [11, 12],
+                ["person1@example.com", "person2@example.com"],
+                "Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+            ),
+            ([11], ["person1@example.com"], "Human 1 <person1@example.com>"),
+            ([], [], ""),
+        ],
+    )
+    def test_update_recipients_from_user_ids(
+        self,
+        recipient_user_ids: List[int],
+        expected_recipient_emails: List[str],
+        expected_recipient_info: str,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        write_box = WriteBox(self.view)
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+
+        write_box.recipient_info = write_box.update_recipients_from_user_ids(
+            recipient_user_ids
+        )
+
+        assert write_box.recipient_emails == expected_recipient_emails
+        assert write_box.recipient_info == expected_recipient_info
+
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
         self, write_box: WriteBox, key: str, widget_size: Callable[[Widget], urwid_Size]
