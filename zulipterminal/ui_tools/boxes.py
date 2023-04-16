@@ -227,6 +227,15 @@ class WriteBox(urwid.Pile):
             self.recipient_emails = []
             return ""
 
+    def private_box_edit_view(
+        self,
+        *,
+        recipient_user_ids: Optional[List[int]] = None,
+    ) -> None:
+        self.recipient_info = self.update_recipients_from_user_ids(recipient_user_ids)
+        self.to_write_box = urwid.Text("To: " + self.recipient_info)
+        self._setup_common_private_compose()
+
     def private_box_view(
         self,
         *,
