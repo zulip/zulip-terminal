@@ -1,11 +1,14 @@
 import datetime
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional
+from unittest import mock
 
 import pytest
+import urwid
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
@@ -1702,6 +1705,31 @@ class TestWriteBox:
             assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(  # noqa: SIM300
                 expected_focus_col_name
             )
+
+    def test__setup_common_private_compose(self, mocker: MockerFixture) -> None:
+        write_box = WriteBox(self.view)
+        write_box.to_write_box = mocker.MagicMock()
+        write_box.msg_write_box = mocker.MagicMock()
+
+        enable_autocomplete_mock = mocker.patch.object(
+            ReadlineEdit, "enable_autocomplete"
+        )
+        write_box._setup_common_private_compose()
+        connect_signal_mock = mocker.patch.object(urwid, "connect_signal")
+        assert hasattr(write_box, "msg_write_box")
+        connect_signal_mock.assert_not_called()
+        enable_autocomplete_mock.assert_called_once()
+
+        enable_autocomplete_mock.assert_has_calls(
+            [
+                mock.call(
+                    func=write_box.generic_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+            ]
+        )
+        assert write_box.focus_position == 1
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
