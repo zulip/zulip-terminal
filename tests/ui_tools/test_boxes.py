@@ -1706,6 +1706,39 @@ class TestWriteBox:
                 expected_focus_col_name
             )
 
+    def test_private_box_view(
+        self,
+        mocker: MockerFixture,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        recipient_user_ids = [11]
+
+        write_box = WriteBox(self.view)
+        write_box.to_write_box = mocker.MagicMock(spec=ReadlineEdit)
+        enable_autocomplete = mocker.patch.object(ReadlineEdit, "enable_autocomplete")
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+        connect_signal_mock = mocker.patch.object(urwid, "connect_signal")
+        write_box.private_box_view(recipient_user_ids=recipient_user_ids)
+        enable_autocomplete.assert_has_calls(
+            [
+                mock.call(
+                    func=write_box._to_box_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+                mock.call(
+                    func=write_box.generic_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+            ]
+        )
+        connect_signal_mock.assert_called_once()
+        assert isinstance(write_box.to_write_box, ReadlineEdit)
+        assert write_box.to_write_box.text == "To: Human 1 <person1@example.com>"
+
     def test__setup_common_private_compose(self, mocker: MockerFixture) -> None:
         write_box = WriteBox(self.view)
         write_box.to_write_box = mocker.MagicMock()
