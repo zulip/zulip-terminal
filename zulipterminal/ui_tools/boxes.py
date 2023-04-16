@@ -173,40 +173,10 @@ class WriteBox(urwid.Pile):
             self.idle_status_tracking = False
             self.sent_start_typing_status = False
 
-    def private_box_view(
-        self,
-        *,
-        recipient_user_ids: Optional[List[int]] = None,
-    ) -> None:
+    def _setup_common_private_compose(self) -> None:
         self.set_editor_mode()
 
         self.compose_box_status = "open_with_private"
-
-        if recipient_user_ids:
-            self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
-            self.recipient_emails = [
-                self.model.user_id_email_dict[user_id]
-                for user_id in self.recipient_user_ids
-            ]
-            recipient_info = ", ".join(
-                [
-                    f"{self.model.user_dict[email]['full_name']} <{email}>"
-                    for email in self.recipient_emails
-                ]
-            )
-        else:
-            self._set_regular_and_typing_recipient_user_ids(None)
-            self.recipient_emails = []
-            recipient_info = ""
-
-        self.send_next_typing_update = datetime.now()
-        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
-        self.to_write_box.enable_autocomplete(
-            func=self._to_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
-        )
-        self.to_write_box.set_completer_delims("")
 
         self.msg_write_box = ReadlineEdit(
             multiline=True, max_char=self.model.max_message_length
@@ -232,6 +202,37 @@ class WriteBox(urwid.Pile):
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
 
+    def private_box_view(
+        self,
+        *,
+        recipient_user_ids: Optional[List[int]] = None,
+    ) -> None:
+        if recipient_user_ids:
+            self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
+            self.recipient_emails = [
+                self.model.user_id_email_dict[user_id]
+                for user_id in self.recipient_user_ids
+            ]
+            recipient_info = ", ".join(
+                [
+                    f"{self.model.user_dict[email]['full_name']} <{email}>"
+                    for email in self.recipient_emails
+                ]
+            )
+        else:
+            self._set_regular_and_typing_recipient_user_ids(None)
+            self.recipient_emails = []
+            recipient_info = ""
+
+        self.send_next_typing_update = datetime.now()
+        self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
+        self.to_write_box.enable_autocomplete(
+            func=self._to_box_autocomplete,
+            key=primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+        )
+        self.to_write_box.set_completer_delims("")
+        self._setup_common_private_compose()
         start_period_delta = timedelta(
             milliseconds=self.model.typing_started_wait_period
         )
