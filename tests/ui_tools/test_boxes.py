@@ -6,6 +6,7 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import (
     TYPING_STARTED_EXPIRY_PERIOD,
@@ -1717,6 +1718,35 @@ class TestWriteBox:
             assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(  # noqa: SIM300
                 expected_focus_col_name
             )
+
+    @pytest.mark.parametrize(
+        "recipient_ids, expected_recipient_text",
+        [
+            ([], "To: "),
+            ([11], "To: Human 1 <person1@example.com>"),
+            (
+                [11, 12],
+                "To: Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+            ),
+        ],
+    )
+    def test_private_box_recipient_editing(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+        recipient_ids: List[int],
+        expected_recipient_text: str,
+    ) -> None:
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+        mocker.patch("urwid.connect_signal")
+
+        write_box.private_box_view(recipient_user_ids=recipient_ids)
+
+        assert isinstance(write_box.to_write_box, ReadlineEdit)
+        assert write_box.to_write_box.text == expected_recipient_text
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
