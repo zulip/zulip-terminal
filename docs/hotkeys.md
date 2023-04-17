@@ -55,6 +55,7 @@
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
 |Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
+|Toggle first emoji reaction on selected message|<kbd>=</kbd>|
 |Add/remove thumbs-up reaction to the current message|<kbd>+</kbd>|
 |Add/remove star status of the current message|<kbd>ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
