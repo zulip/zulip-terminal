@@ -178,6 +178,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
             'Narrow to a topic/direct-chat, or stream/all-direct-messages',
         'key_category': 'msg_actions',
     },
+    'REACTION_AGREEMENT': {
+        'keys': ['='],
+        'help_text': 'Toggle first emoji reaction on selected message',
+        'key_category': 'msg_actions',
+    },
     'TOGGLE_TOPIC': {
         'keys': ['t'],
         'help_text': 'Toggle topics in a stream',
