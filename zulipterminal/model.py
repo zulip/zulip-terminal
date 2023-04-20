@@ -189,12 +189,7 @@ class Model:
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
-        # NOTE: The date_created field of stream has been added in feature
-        # level 30, server version 4. For consistency we add this field
-        # on server iterations even before this with value of None.
-        if self.server_feature_level is None or self.server_feature_level < 30:
-            for stream_id in self.get_all_stream_ids():
-                self.set_stream_date_created(stream_id, None)
+        self.normalize_date_created_field()
 
         self.normalize_and_cache_message_retention_text()
 
@@ -244,6 +239,14 @@ class Model:
 
     def user_settings(self) -> UserSettings:
         return deepcopy(self._user_settings)
+
+    def normalize_date_created_field(self) -> None:
+        # NOTE: The date_created field of stream has been added in feature
+        # level 30, server version 4. For consistency we add this field
+        # on server iterations even before this with value of None.
+        if self.server_feature_level is None or self.server_feature_level < 30:
+            for stream_id in self.get_all_subscription_ids():
+                self.set_stream_date_created(stream_id, None)
 
     def message_retention_days_response(self, days: int, org_default: bool) -> str:
         suffix = " [Organization default]" if org_default else ""

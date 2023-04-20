@@ -264,6 +264,18 @@ class TestModel:
             include_subscribers=True,
         )
 
+    @pytest.mark.parametrize("feature_level", [None, 29])
+    def test_normalize_date_created_field(
+        self, model, _subscribed_streams, feature_level
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model.server_feature_level = feature_level
+        for stream in _subscribed_streams:
+            del _subscribed_streams[stream]["date_created"]
+        model.normalize_date_created_field()
+        for stream in _subscribed_streams:
+            assert _subscribed_streams[stream]["date_created"] is None
+
     @pytest.mark.parametrize(
         [
             "to_vary_in__subscribed_streams",
