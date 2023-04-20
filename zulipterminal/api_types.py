@@ -6,7 +6,7 @@ Types from the Zulip API, translated into python, to improve type checking
 
 from typing import Any, Dict, List, Optional, Union
 
-from typing_extensions import Literal, NotRequired, TypedDict
+from typing_extensions import Final, Literal, NotRequired, TypedDict
 
 # These are documented in the zulip package (python-zulip-api repo)
 from zulip import EditPropagateMode  # one/all/later
@@ -21,6 +21,17 @@ RESOLVED_TOPIC_PREFIX = "✔ "
 # on typing notifications sent by clients.
 TYPING_STARTED_WAIT_PERIOD = 10
 TYPING_STOPPED_WAIT_PERIOD = 5
+
+
+###############################################################################
+# These values are in the register response from ZFL 53
+# Before this feature level, they had the listed default (fixed) values
+# (strictly, the stream value was available, under a different name)
+
+MAX_STREAM_NAME_LENGTH: Final = 60
+MAX_TOPIC_NAME_LENGTH: Final = 60
+MAX_MESSAGE_LENGTH: Final = 10000
+
 
 ###############################################################################
 # Core message types (used in Composition and Message below)

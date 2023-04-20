@@ -31,6 +31,9 @@ from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
+    MAX_MESSAGE_LENGTH,
+    MAX_STREAM_NAME_LENGTH,
+    MAX_TOPIC_NAME_LENGTH,
     Composition,
     EditPropagateMode,
     Event,
@@ -69,14 +72,6 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
 OFFLINE_THRESHOLD_SECS = 140
-
-# Adapted from zerver/models.py
-# These fields have migrated to the API inside the Realm object
-# in ZFL 53. To allow backporting to earlier server versions, we
-# define these hard-coded parameters.
-MAX_STREAM_NAME_LENGTH = 60
-MAX_TOPIC_NAME_LENGTH = 60
-MAX_MESSAGE_LENGTH = 10000
 
 
 class ServerConnectionFailure(Exception):
