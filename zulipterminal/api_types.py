@@ -17,12 +17,6 @@ from zulip import ModifiableMessageFlag  # directly modifiable read/starred/coll
 
 RESOLVED_TOPIC_PREFIX = "✔ "
 
-# Refer to https://zulip.com/api/set-typing-status for the protocol
-# on typing notifications sent by clients.
-TYPING_STARTED_WAIT_PERIOD = 10
-TYPING_STOPPED_WAIT_PERIOD = 5
-
-
 ###############################################################################
 # These values are in the register response from ZFL 53
 # Before this feature level, they had the listed default (fixed) values
@@ -40,6 +34,37 @@ DirectMessageString = Literal["private"]
 StreamMessageString = Literal["stream"]
 
 MessageType = Union[DirectMessageString, StreamMessageString]
+
+
+###############################################################################
+# Parameters to pass in request to:
+#   https://zulip.com/api/set-typing-status
+# Refer to the top of that page for the expected protocol clients should observe
+#
+# NOTE: `to` field could be email until ZFL 11/3.0; ids were possible from 2.0+
+
+# Timing parameters for when notifications should occur
+TYPING_STARTED_WAIT_PERIOD: Final = 10
+TYPING_STOPPED_WAIT_PERIOD: Final = 5
+TYPING_STARTED_EXPIRY_PERIOD: Final = 15  # TODO: Needs implementation in ZT
+
+TypingStatusChange = Literal["start", "stop"]
+
+
+class DirectTypingNotification(TypedDict):
+    # The type field was added in ZFL 58, Zulip 4.0, so don't require it yet
+    ## type: DirectMessageString
+    op: TypingStatusChange
+    to: List[int]
+
+
+# NOTE: Not yet implemented in ZT
+# New in ZFL 58, Zulip 4.0
+class StreamTypingNotification(TypedDict):
+    type: StreamMessageString
+    op: TypingStatusChange
+    to: List[int]  # NOTE: Length 1, stream id
+    topic: str
 
 
 ###############################################################################
