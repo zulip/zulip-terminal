@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 
 import zulip
 from bs4 import BeautifulSoup
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
@@ -35,6 +35,7 @@ from zulipterminal.api_types import (
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
     Composition,
+    DirectTypingNotification,
     EditPropagateMode,
     Event,
     PrivateComposition,
@@ -44,6 +45,7 @@ from zulipterminal.api_types import (
     StreamComposition,
     StreamMessageUpdateRequest,
     Subscription,
+    TypingStatusChange,
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
@@ -513,12 +515,12 @@ class Model:
 
     @asynch
     def send_typing_status_by_user_ids(
-        self, recipient_user_ids: List[int], *, status: Literal["start", "stop"]
+        self, recipient_user_ids: List[int], *, status: TypingStatusChange
     ) -> None:
         if not self.user_settings()["send_private_typing_notifications"]:
             return
         if recipient_user_ids:
-            request = {"to": recipient_user_ids, "op": status}
+            request: DirectTypingNotification = {"to": recipient_user_ids, "op": status}
             response = self.client.set_typing_status(request)
             display_error_if_present(response, self.controller)
         else:
