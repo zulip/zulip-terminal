@@ -349,6 +349,8 @@ class TopicButton(TopButton):
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
             self.view.left_panel.show_stream_view()
+        elif is_command_key("TOPIC_INFO", key):
+            self.model.controller.show_topic_info(self.stream_id, self.topic_name)
         return super().keypress(size, key)
 
 

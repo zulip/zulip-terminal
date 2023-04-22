@@ -10,7 +10,7 @@ import pytz
 import urwid
 from typing_extensions import Literal
 
-from zulipterminal.api_types import EditPropagateMode
+from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
@@ -23,6 +23,7 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
+    STREAM_TOPIC_SEPARATOR,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -1472,6 +1473,65 @@ class StreamInfoView(PopUpView):
         elif is_command_key("COPY_STREAM_EMAIL", key):
             self.controller.copy_to_clipboard(self.stream_email, "Stream email")
         return super().keypress(size, key)
+
+
+class TopicInfoView(PopUpView):
+    def __init__(self, controller: Any, stream_id: int, topic: str) -> None:
+        self.stream_id = stream_id
+        self.controller = controller
+        stream = controller.model.stream_dict[stream_id]
+        self.topic_name = topic
+        stream_name = stream["name"]
+
+        title = f"{stream_name} {STREAM_TOPIC_SEPARATOR} {self.topic_name}"
+
+        topic_info_content: PopUpViewTableContent = []
+
+        popup_width, column_widths = self.calculate_table_widths(
+            topic_info_content, len(title)
+        )
+
+        if self.topic_name.startswith(RESOLVED_TOPIC_PREFIX):
+            self.resolve_topic_setting_btn_lbl = "Unresolve Topic"
+        else:
+            self.resolve_topic_setting_btn_lbl = "Resolve Topic"
+        resolve_topic_setting = urwid.Button(
+            self.resolve_topic_setting_btn_lbl,
+            self.toggle_resolve_status,
+        )
+
+        curs_pos = len(self.resolve_topic_setting_btn_lbl) + 1
+        # This shifts the ugly cursor present over the first character of
+        # resolve_topic_button_setting label to last character + 1 so that it isn't
+        # visible
+
+        resolve_topic_setting._w = urwid.AttrMap(
+            urwid.SelectableIcon(
+                self.resolve_topic_setting_btn_lbl, cursor_position=curs_pos
+            ),
+            None,
+            "selected",
+        )
+
+        # Manual because calculate_table_widths does not support buttons.
+        # Add 4 to button label to accommodate the buttons itself.
+        popup_width = max(
+            popup_width,
+            len(resolve_topic_setting.label) + 4,
+        )
+
+        self.widgets = self.make_table_with_categories(
+            topic_info_content, column_widths
+        )
+
+        self.widgets.append(resolve_topic_setting)
+        super().__init__(controller, self.widgets, "TOPIC_INFO", popup_width, title)
+
+    def toggle_resolve_status(self, args: Any) -> None:
+        self.controller.model.toggle_topic_resolve_status(
+            stream_id=self.stream_id, topic_name=self.topic_name
+        )
+        self.controller.exit_popup()
 
 
 class StreamMembersView(PopUpView):

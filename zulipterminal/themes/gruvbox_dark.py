@@ -67,6 +67,7 @@ STYLES = {
     'area:help'        : (Color.DARK0_HARD,            Color.BRIGHT_GREEN),
     'area:msg'         : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
     'area:stream'      : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
+    'area:topic'       : (Color.DARK0_HARD,            Color.BRIGHT_BLUE),
     'area:error'       : (Color.DARK0_HARD,            Color.BRIGHT_RED),
     'area:user'        : (Color.DARK0_HARD,            Color.BRIGHT_YELLOW),
     'search_error'     : (Color.BRIGHT_RED,            Color.DARK0_HARD),

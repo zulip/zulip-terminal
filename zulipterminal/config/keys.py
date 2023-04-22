@@ -310,6 +310,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'View user information (From Users list)',
         'key_category': 'general',
     },
+    'TOPIC_INFO': {
+        'keys': ['i'],
+        'help_text': 'Show/hide topic information & modify settings',
+        'key_category': 'general',
+    },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a'],
         'help_text': 'Jump to the beginning of line',

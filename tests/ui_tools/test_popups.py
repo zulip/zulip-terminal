@@ -26,6 +26,7 @@ from zulipterminal.ui_tools.views import (
     PopUpView,
     StreamInfoView,
     StreamMembersView,
+    TopicInfoView,
     UserInfoView,
 )
 from zulipterminal.urwid_types import urwid_Size
@@ -1152,6 +1153,24 @@ class TestMsgInfoView:
         assert link_w._wrapped_widget.focus_map == expected_focus_map
         assert link_w._wrapped_widget.attr_map == expected_attr_map
         assert link_width == expected_link_width
+
+
+class TestTopicInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(
+        self, mocker: MockerFixture, general_stream: Dict[str, Any], topics: List[str]
+    ) -> None:
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(LISTWALKER, return_value=[])
+        self.stream_id = general_stream["stream_id"]
+        self.topic = topics[0]
+
+        self.topic_info_view = TopicInfoView(
+            self.controller, self.stream_id, self.topic
+        )
 
 
 class TestStreamInfoView:

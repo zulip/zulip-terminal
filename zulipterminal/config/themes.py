@@ -72,6 +72,7 @@ REQUIRED_STYLES = {
     'area:help'       : 'standout',
     'area:msg'        : 'standout',
     'area:stream'     : 'standout',
+    'area:topic'      : 'standout',
     'area:error'      : 'standout',
     'area:user'       : 'standout',
     'search_error'    : 'standout',
