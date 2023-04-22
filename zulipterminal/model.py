@@ -1308,6 +1308,9 @@ class Model:
             new_visual_notified_streams
         )
 
+        self.normalize_and_cache_message_retention_text()
+        self.normalize_date_created_field()
+
     def _unsubscribe_from_streams(
         self, subscriptions: List[RemovedSubscription]
     ) -> None:
@@ -1487,7 +1490,7 @@ class Model:
                         self.visual_notified_streams.add(stream_id)
                     else:
                         self.visual_notified_streams.discard(stream_id)
-        elif event["op"] in ("peer_add", "peer_remove"):
+        elif event["op"] == "peer_add" or event["op"] == "peer_remove":
             # NOTE: ZFL 35 commit was not atomic with API change
             #       (ZFL >=35 can use new plural style)
             if "stream_ids" not in event or "user_ids" not in event:
@@ -1505,6 +1508,14 @@ class Model:
                     else:
                         for user_id in user_ids:
                             subscribers.remove(user_id)
+        elif event["op"] == "add":
+            self._subscribe_to_streams(event["subscriptions"])
+            self.controller.view.left_panel.update_stream_view()
+            self.controller.update_screen()
+        elif event["op"] == "remove":
+            self._unsubscribe_from_streams(event["subscriptions"])
+            self.controller.view.left_panel.update_stream_view()
+            self.controller.update_screen()
 
     def _handle_typing_event(self, event: Event) -> None:
         """

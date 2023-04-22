@@ -4311,6 +4311,70 @@ class TestModel:
             assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize(
+        "event, action",
+        [
+            case(
+                {
+                    "type": "subscription",
+                    "op": "add",
+                    "subscriptions": [
+                        {
+                            "name": "Stream 10",
+                            "date_created": 1472047124,
+                            "invite_only": False,
+                            "color": "#b0a5fd",
+                            "pin_to_top": False,
+                            "stream_id": 10,
+                            "is_muted": False,
+                            "audible_notifications": False,
+                            "description": "A description of stream 10",
+                            "rendered_description": "A description of stream 10",
+                            "desktop_notifications": False,
+                            "stream_weekly_traffic": 0,
+                            "push_notifications": False,
+                            "message_retention_days": 30,
+                            "email_address": "stream10@example.com",
+                            "email_notifications": False,
+                            "wildcard_mentions_notify": False,
+                            "subscribers": [1001, 11, 12],
+                            "history_public_to_subscribers": True,
+                            "is_announcement_only": True,
+                            "stream_post_policy": 0,
+                            "is_web_public": True,
+                            "first_message_id": None,
+                        }
+                    ],
+                },
+                "add",
+            ),
+            case(
+                {
+                    "type": "subscription",
+                    "op": "remove",
+                    "subscriptions": [
+                        {
+                            "name": "Stream 10",
+                            "stream_id": 10,
+                        }
+                    ],
+                },
+                "remove",
+            ),
+        ],
+    )
+    def test__handle_subscription_event_add_remove_subscription(
+        self, mocker, model, event, action
+    ):
+        if action == "add":
+            model._subscribe_to_streams = mocker.Mock()
+            model._handle_subscription_event(event)
+            model._subscribe_to_streams.assert_called_once()
+        else:
+            model._unsubscribe_from_streams = mocker.Mock()
+            model._handle_subscription_event(event)
+            model._unsubscribe_from_streams.assert_called_once()
+
+    @pytest.mark.parametrize(
         "person, event_field, updated_field_if_different",
         [
             (

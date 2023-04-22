@@ -438,6 +438,18 @@ class SubscriptionPeerAddRemoveEvent(TypedDict):
     user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
 
 
+class SubscriptionAddEvent(TypedDict):
+    type: Literal["subscription"]
+    op: Literal["add"]
+    subscriptions: List[Subscription]
+
+
+class SubscriptionRemoveEvent(TypedDict):
+    type: Literal["subscription"]
+    op: Literal["remove"]
+    subscriptions: List[RemovedSubscription]
+
+
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#typing-start and -stop
 class _TypingEventUser(TypedDict):
@@ -532,6 +544,8 @@ Event = Union[
     UpdateMessagesLocationEvent,
     ReactionEvent,
     SubscriptionUpdateEvent,
+    SubscriptionAddEvent,
+    SubscriptionRemoveEvent,
     SubscriptionPeerAddRemoveEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,
