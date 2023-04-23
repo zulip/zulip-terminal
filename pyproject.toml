@@ -113,6 +113,7 @@ ignore = [
     "B007", # Loop control variable not used within the loop body [informative!]
     "C408", # Unnecessary 'dict' call (rewrite as a literal)
     "N818",  # Exception name should be named with an Error suffix
+    "PLC1901",  # Allow explicit falsey checks in tests, eg. x == "" vs not x
     "SIM108", # Prefer ternary operator over if-else (as per zulip/zulip)
     "UP015", # Unnecessary open mode parameters [informative?]
 ]

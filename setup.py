@@ -26,7 +26,7 @@ testing_deps = [
 linting_deps = [
     "isort~=5.11.0",
     "black~=23.0",
-    "ruff==0.0.253",
+    "ruff==0.0.267",
     "codespell[toml]~=2.2.2",
     "typos~=1.13.20",
 ]
