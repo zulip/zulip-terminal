@@ -99,7 +99,7 @@ def test_get_server_settings(
 
     result = get_server_settings(realm_url)
 
-    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    mocked_get.assert_called_once_with(url=realm_url + "/api/v1/server_settings")
     assert result == server_settings_minimal
 
 
@@ -114,7 +114,7 @@ def test_get_server_settings__not_a_zulip_organization(
     with pytest.raises(NotAZulipOrganizationError) as exc:
         get_server_settings(realm_url)
 
-    assert mocked_get.called_once_with(url=realm_url + "/api/v1/server_settings")
+    mocked_get.assert_called_once_with(url=realm_url + "/api/v1/server_settings")
     assert str(exc.value) == realm_url
 
 
