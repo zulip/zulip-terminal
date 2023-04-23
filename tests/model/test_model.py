@@ -1953,7 +1953,7 @@ class TestModel:
             ),  # message_fixture sender_id is 5140
             (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
             (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream"]),
+            (5179, {"flags": []}, True, ["stream", "private"]),
             (5179, {"flags": []}, False, ["private"]),
         ],
         ids=[
@@ -1998,7 +1998,7 @@ class TestModel:
             # TODO: Test message content too?
             notify.assert_called_once_with(title, mocker.ANY)
         else:
-            notify.assert_not_called
+            notify.assert_not_called()
 
     @pytest.mark.parametrize(
         "content, expected_notification_text",
