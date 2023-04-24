@@ -24,7 +24,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
-from zulipterminal.config.ui_mappings import STATE_ICON
+from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
@@ -153,9 +153,12 @@ class MessageBox(urwid.Pile):
         assert self.stream_id is not None
         color = self.model.stream_dict[self.stream_id]["color"]
         bar_color = f"s{color}"
+        stream_access_type = self.model.stream_access_type(self.stream_id)
+        stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
         stream_title_markup = (
             "bar",
             [
+                (bar_color, f" {stream_icon} "),
                 (bar_color, f"{self.stream_name} {STREAM_TOPIC_SEPARATOR} "),
                 ("title", f" {self.topic_name}"),
             ],
