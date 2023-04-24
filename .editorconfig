@@ -1,0 +1,26 @@
+# See https://editorconfig.org
+
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+indent_size = 4
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{py,pyi}]
+max_line_length = 88
+
+[*.{md,yaml,yml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.diff]
+trim_trailing_whitespace = false
+
+[.git/*]
+trim_trailing_whitespace = false

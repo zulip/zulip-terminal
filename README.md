@@ -494,6 +494,15 @@ If using make with pip, running `make` will ensure the development environment
 is up to date with the specified dependencies, useful after fetching from git
 and rebasing.
 
+#### Editing the source
+
+Pick your favorite text editor or development environment!
+
+The source includes an `.editorconfig` file which enables many editors to
+automatically configure themselves to produce files which meet the minimum
+requirements for the project. See https://editorconfig.org for editor support;
+note that some may require plugins if you wish to use this feature.
+
 #### Passing linters and automated tests
 
 The linters and automated tests (pytest) are run in CI (GitHub Actions) when
