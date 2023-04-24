@@ -119,9 +119,11 @@ def msg_box(
     """
     Mocked MessageBox with stream message
     """
+    model_mock = mocker.patch("zulipterminal.model.Model")
+    model_mock.stream_access_type.return_value = "public"
     return MessageBox(
         messages_successful_response["messages"][0],
-        mocker.patch("zulipterminal.model.Model"),
+        model_mock,
         None,
     )
 
