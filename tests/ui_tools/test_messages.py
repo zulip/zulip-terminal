@@ -11,6 +11,7 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
     QUOTED_TEXT_MARKER,
     STATUS_INACTIVE,
+    STREAM_MARKER_PUBLIC,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
@@ -28,6 +29,7 @@ class TestMessageBox:
     def mock_external_classes(self, mocker, initial_index):
         self.model = mocker.MagicMock()
         self.model.index = initial_index
+        self.model.stream_access_type.return_value = "public"
 
     @pytest.mark.parametrize(
         "message_type, set_fields",
@@ -893,19 +895,24 @@ class TestMessageBox:
     @pytest.mark.parametrize(
         "msg_narrow, msg_type, assert_header_bar, assert_search_bar",
         [
-            ([], 0, f"PTEST {STREAM_TOPIC_SEPARATOR} ", "All messages"),
+            (
+                [],
+                0,
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
+                "All messages",
+            ),
             ([], 1, "You and ", "All messages"),
             ([], 2, "You and ", "All messages"),
             (
                 [["stream", "PTEST"]],
                 0,
-                f"PTEST {STREAM_TOPIC_SEPARATOR} ",
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 ("bar", [("s#bd6", "PTEST")]),
             ),
             (
                 [["stream", "PTEST"], ["topic", "b"]],
                 0,
-                f"PTEST {STREAM_TOPIC_SEPARATOR}",
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR}",
                 ("bar", [("s#bd6", "PTEST"), ("s#bd6", ": topic narrow")]),
             ),
             ([["is", "private"]], 1, "You and ", "All direct messages"),
@@ -925,7 +932,7 @@ class TestMessageBox:
             (
                 [["is", "starred"]],
                 0,
-                f"PTEST {STREAM_TOPIC_SEPARATOR} ",
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 "Starred messages",
             ),
             ([["is", "starred"]], 1, "You and ", "Starred messages"),
@@ -934,10 +941,15 @@ class TestMessageBox:
             (
                 [["search", "FOO"]],
                 0,
-                f"PTEST {STREAM_TOPIC_SEPARATOR} ",
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 "All messages",
             ),
-            ([["is", "mentioned"]], 0, f"PTEST {STREAM_TOPIC_SEPARATOR} ", "Mentions"),
+            (
+                [["is", "mentioned"]],
+                0,
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
+                "Mentions",
+            ),
             ([["is", "mentioned"]], 1, "You and ", "Mentions"),
             ([["is", "mentioned"]], 2, "You and ", "Mentions"),
             ([["is", "mentioned"], ["search", "FOO"]], 1, "You and ", "Mentions"),
