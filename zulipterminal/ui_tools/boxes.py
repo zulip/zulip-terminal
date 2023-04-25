@@ -896,22 +896,29 @@ class WriteBox(urwid.Pile):
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
                 else:
-                    all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
-                        self.to_write_box
-                    )
-                    if not all_valid:
-                        return key
-                    # We extract recipients' user_ids and emails only once we know
-                    # that all the recipients are valid, to avoid including any
-                    # invalid ones.
-                    self.update_recipients(self.to_write_box)
+                    if self.msg_edit_state is None:
+                        all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
+                            self.to_write_box
+                        )
+                        if not all_valid:
+                            return key
+                        # We extract recipients' user_ids and emails only once we know
+                        # that all the recipients are valid, to avoid including any
+                        # invalid ones.
+                        self.update_recipients(self.to_write_box)
 
             if not self.msg_body_edit_enabled:
                 return key
             if self.focus_position == self.FOCUS_CONTAINER_HEADER:
                 self.focus_position = self.FOCUS_CONTAINER_MESSAGE
             else:
-                self.focus_position = self.FOCUS_CONTAINER_HEADER
+                if self.compose_box_status == "open_with_stream":
+                    self.focus_position = self.FOCUS_CONTAINER_HEADER
+                if (
+                    self.compose_box_status == "open_with_private"
+                    and self.msg_edit_state is None
+                ):
+                    self.focus_position = self.FOCUS_CONTAINER_HEADER
             if self.compose_box_status == "open_with_stream":
                 if self.msg_edit_state is not None:
                     header.focus_col = self.FOCUS_HEADER_BOX_TOPIC

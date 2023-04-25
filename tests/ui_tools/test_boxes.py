@@ -1680,7 +1680,10 @@ class TestWriteBox:
             else:
                 write_box.stream_box_view(stream_id)
         else:
-            write_box.private_box_view()
+            if not message_being_edited:
+                write_box.private_box_view()
+            else:
+                write_box.private_box_edit_view()
         size = widget_size(write_box)
 
         def focus_val(x: str) -> int:
