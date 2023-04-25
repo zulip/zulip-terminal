@@ -1663,6 +1663,16 @@ class TestWriteBox:
                 "HEADER_BOX_RECIPIENT",
                 id="message_to_recipient_box",
             ),
+            case(
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                "private",
+                True,
+                True,
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="private_edit_box-no_cycle",
+            ),
         ],
     )
     @pytest.mark.parametrize("tab_key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
@@ -1683,13 +1693,14 @@ class TestWriteBox:
     ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
 
+        if message_being_edited:
+            write_box.msg_edit_state = _MessageEditState(
+                message_id=10, old_topic="some old topic"
+            )
         if box_type == "stream":
             if message_being_edited:
                 mocker.patch(MODULE + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
-                write_box.msg_edit_state = _MessageEditState(
-                    message_id=10, old_topic="some old topic"
-                )
             else:
                 write_box.stream_box_view(stream_id)
         else:
