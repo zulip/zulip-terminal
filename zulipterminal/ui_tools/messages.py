@@ -186,11 +186,11 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
-    def top_header_bar(self, message_view: Any) -> Any:
+    def top_header_bar(self) -> Any:
         if self.message["type"] == "stream":
-            return message_view.stream_header()
+            return self.stream_header()
         else:
-            return message_view.private_header()
+            return self.private_header()
 
     def top_search_bar(self) -> Any:
         curr_narrow = self.model.narrow
