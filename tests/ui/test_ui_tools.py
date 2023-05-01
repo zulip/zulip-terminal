@@ -29,8 +29,9 @@ MIDCOLVIEW = VIEWS + ".MiddleColumnView"
 
 class TestModListWalker:
     @pytest.fixture
-    def mod_walker(self):
-        return ModListWalker(contents=[list(range(1))])
+    def mod_walker(self, mocker):
+        read_message = mocker.Mock(spec=lambda: None)
+        return ModListWalker(contents=[list(range(1))], action=read_message)
 
     @pytest.mark.parametrize(
         "num_items, focus_position",
@@ -46,12 +47,10 @@ class TestModListWalker:
         mod_walker._set_focus.assert_called_once_with(focus_position)
 
     def test__set_focus(self, mod_walker, mocker):
-        mod_walker.read_message = mocker.Mock()
         mod_walker._set_focus(0)
         mod_walker.read_message.assert_called_once_with()
 
     def test_set_focus(self, mod_walker, mocker):
-        mod_walker.read_message = mocker.Mock()
         mod_walker.set_focus(0)
         mod_walker.read_message.assert_called_once_with()
 
