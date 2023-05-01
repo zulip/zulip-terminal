@@ -671,13 +671,14 @@ GitLint cannot check everything - including language or grammar!
 
 #### GitLint
 
-If you plan to submit git commits in pull-requests (PRs), then we highly
-suggest installing the `gitlint` commit-message hook by running `gitlint
-install-hook` (or `pipenv run gitlint install-hook` with pipenv setups).
+The `gitlint` tool is installed by default in the development environment, and
+can help ensure that your commits meet the expected standard.
 
-While the content still depends upon your writing skills, this ensures a more
-consistent formatting structure between commits, including by different
-authors.
+The tool can check specific commits manually, eg. `gitlint` for the latest
+commit, or `gitlint --commits main..` for commits leading from `main`.
+However, we highly recommend running `gitlint install-hook` to install the
+`gitlint` commit-message hook
+(or `pipenv run gitlint install-hook` with pipenv setups).
 
 If the hook is installed as described above, then after completing the text for
 a commit, it will be checked by gitlint against the style we have set up, and
@@ -686,9 +687,9 @@ If gitlint finds any, it will ask if you wish to commit with the message as it
 is (`y` for 'yes'), stop the commit process (`n` for 'no'), or edit the commit
 message (`e` for 'edit').
 
-Other gitlint options are available; for example it is possible to apply it to
-a range of commits with the `--commits` option, eg. `gitlint --commits
-HEAD~2..HEAD` would apply it to the last few commits.
+While the content still depends upon your writing skills, this ensures a more
+consistent formatting structure between commits, including by different
+authors.
 
 ### Tips for working with tests (pytest)
 
