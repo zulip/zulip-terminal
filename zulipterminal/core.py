@@ -571,9 +571,9 @@ class Controller:
         w_list = create_msg_box_list(self.model, msg_id_list, focus_msg_id=anchor)
 
         focus_position = self.model.get_focus_in_current_narrow()
-        if focus_position == set():  # No available focus; set to end
+        if focus_position is None:  # No available focus; set to end
             focus_position = len(w_list) - 1
-        assert not isinstance(focus_position, set)
+        assert focus_position is not None
 
         self.view.message_view.log.clear()
         if 0 <= focus_position < len(w_list):

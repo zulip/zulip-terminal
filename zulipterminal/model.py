@@ -264,12 +264,12 @@ class Model:
             )
             self.cached_retention_text[stream["stream_id"]] = message_retention_response
 
-    def get_focus_in_current_narrow(self) -> Union[int, Set[None]]:
+    def get_focus_in_current_narrow(self) -> Optional[int]:
         """
         Returns the focus in the current narrow.
-        For no existing focus this returns {}, otherwise the message ID.
+        For no existing focus this returns None, otherwise the message ID.
         """
-        return self.index["pointer"][repr(self.narrow)]
+        return self.index["pointer"].get(repr(self.narrow), None)
 
     def set_focus_in_current_narrow(self, focus_message: int) -> None:
         self.index["pointer"][repr(self.narrow)] = focus_message

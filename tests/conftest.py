@@ -820,7 +820,7 @@ def empty_index(
 ) -> Index:
     return deepcopy(
         Index(
-            pointer=defaultdict(set, {}),
+            pointer=dict(),
             all_msg_ids=set(),
             starred_msg_ids=set(),
             mentioned_msg_ids=set(),
