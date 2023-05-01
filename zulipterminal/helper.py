@@ -25,7 +25,6 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
-    Union,
 )
 from urllib.parse import unquote
 
@@ -79,7 +78,7 @@ class TidiedUserInfo(TypedDict):
 
 
 class Index(TypedDict):
-    pointer: Dict[str, Union[int, Set[None]]]  # narrow_str, message_id
+    pointer: Dict[str, Optional[int]]  # narrow_str, message_id (or no data)
     # Various sets of downloaded message ids (all, starred, ...)
     all_msg_ids: Set[int]
     starred_msg_ids: Set[int]
@@ -97,7 +96,7 @@ class Index(TypedDict):
 
 
 initial_index = Index(
-    pointer=defaultdict(set),
+    pointer=dict(),
     all_msg_ids=set(),
     starred_msg_ids=set(),
     mentioned_msg_ids=set(),

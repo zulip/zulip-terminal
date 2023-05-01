@@ -330,7 +330,7 @@ class TestModel:
                 == expect_msg_retention_text[stream_id]
             )
 
-    @pytest.mark.parametrize("msg_id", [1, 5, set()])
+    @pytest.mark.parametrize("msg_id", [1, 5, None])
     @pytest.mark.parametrize(
         "narrow",
         [
@@ -362,9 +362,7 @@ class TestModel:
         ],
     )
     def test_set_focus_in_current_narrow(self, mocker, model, narrow, msg_id):
-        from collections import defaultdict
-
-        model.index = dict(pointer=defaultdict(set))
+        model.index = dict(pointer=dict())
         model.narrow = narrow
         model.set_focus_in_current_narrow(msg_id)
         assert model.index["pointer"][str(narrow)] == msg_id
