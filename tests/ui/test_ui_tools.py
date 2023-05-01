@@ -47,12 +47,14 @@ class TestModListWalker:
         mod_walker._set_focus.assert_called_once_with(focus_position)
 
     def test__set_focus(self, mod_walker, mocker):
+        mod_walker._action.assert_not_called()
         mod_walker._set_focus(0)
-        mod_walker.read_message.assert_called_once_with()
+        mod_walker._action.assert_called_once_with()
 
     def test_set_focus(self, mod_walker, mocker):
+        mod_walker._action.assert_not_called()
         mod_walker.set_focus(0)
-        mod_walker.read_message.assert_called_once_with()
+        mod_walker._action.assert_called_once_with()
 
 
 class TestMessageView:
