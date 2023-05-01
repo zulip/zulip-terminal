@@ -241,7 +241,7 @@ class MessageView(urwid.ListBox):
             return
         # if view is ready display current narrow
         # at the bottom of the view.
-        recipient_bar = message_view.top_header_bar(message_view)
+        recipient_bar = message_view.top_header_bar()
         top_header = message_view.top_search_bar()
         self.model.controller.view.search_box.conversation_focus.set_text(
             top_header.markup
