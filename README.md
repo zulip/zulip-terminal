@@ -107,7 +107,7 @@ systems:
    (creates a virtual environment named `zt_venv` in the current directory)
 2. `source zt_venv/bin/activate`
    (activates the virtual environment; this assumes a bash-like shell)
-3. Run one of the install commands above, 
+3. Run one of the install commands above.
 
 If you open a different terminal window (or log-off/restart your computer),
 you'll need to run **step 2** of the above list again before running
@@ -494,7 +494,7 @@ If using make with pip, running `make` will ensure the development environment
 is up to date with the specified dependencies, useful after fetching from git
 and rebasing.
 
-#### Editing the source
+### Editing the source
 
 Pick your favorite text editor or development environment!
 
@@ -503,48 +503,54 @@ automatically configure themselves to produce files which meet the minimum
 requirements for the project. See https://editorconfig.org for editor support;
 note that some may require plugins if you wish to use this feature.
 
-#### Passing linters and automated tests
+### Running linters and automated tests
 
-The linters and automated tests (pytest) are run in CI (GitHub Actions) when
-you submit a pull request (PR), and we expect them to pass before code is
-merged.
-> **NOTE:** Mergeable PRs with multiple commits are expected to pass linting
-> and tests at **each commit**, not simply overall
+The linters and automated tests (pytest) are automatically run in CI (GitHub
+Actions) when you submit a pull request (PR), or push changes to an existing
+pull request.
 
-Running these tools locally can speed your development and avoid the need
-to repeatedly push your code to GitHub simply to run these checks.
-> If you have troubles understanding why the linters or pytest are failing,
-> please do push your code to a branch/PR and we can discuss the problems in
-> the PR or on chat.zulip.org.
-
-All linters and tests can be run using the commands in the table above.
-Individual linters may also be run via scripts in `tools/`.
+However, running these checks on your computer can speed up your development by
+avoiding the need to repeatedly push your code to GitHub.
+Commands to achieve this are listed in the table of development tasks above
+(individual linters may also be run via scripts in `tools/`).
 
 In addition, if using a `make`-based system:
 - `make lint` and `make test` run all of each group of tasks
 - `make check` runs all checks, which is useful before pushing a PR (or an update)
+- `tools/check-branch` will run `make check` on each commit in your branch
+
+> **NOTE: It is highly unlikely that a pull request will be merged, until *all*
+linters and tests are passing, including on a per-commit basis.**
+
+#### The linters and tests aren't passing on my branch/PR - what do I do?
 
 Correcting some linting errors requires manual intervention, such as from
 `mypy` for type-checking.
+
+For tips on testing, please review the section further below regarding pytest.
+
 However, other linting errors may be fixed automatically, as detailed below -
 **this can save a lot of time manually adjusting your code to pass the
 linters!**
 
-#### Updating hotkeys & file docstrings, vs related documentation
+> If you have troubles understanding why the linters or pytest are failing,
+> please do push your code to a branch/PR and we can discuss the problems in
+> the PR or on chat.zulip.org.
+
+#### Automatically updating hotkeys & file docstrings, vs related documentation
 
 If you update these, note that you do not need to update the text in both
 places manually to pass linting.
 
 The source of truth is in the source code, so simply update the python file and
-run the relevant tool, as detailed below.
-
-Currently we have
+run the relevant tool. Currently we have:
 * `tools/lint-hotkeys --fix` to regenerate docs/hotkeys.md from config/keys.py
 * `tools/lint-docstring --fix` to regenerate docs/developer-file-overview.md from file docstrings
 
-(these tools are also used for the linting process to ensure that these files are synchronzed)
+(these tools are also used for the linting process, to ensure that these files
+are synchronized)
 
-#### Auto-formatting code
+#### Automatically formatting code
 
 The project uses `black` and `isort` for code-style and import sorting respectively.
 
@@ -559,7 +565,7 @@ the changes.
 You can also use the tools individually on a file or directory, eg.
 `black zulipterminal` or `isort tests/model/test_model.py`
 
-#### Structuring Commits - speeding up reviews, merging & development
+### Structuring Commits - speeding up reviews, merging & development
 
 As you work locally, investigating changes to make, it's common to make a
 series of small commits to store your progress.
