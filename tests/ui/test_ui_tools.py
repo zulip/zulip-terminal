@@ -30,7 +30,7 @@ MIDCOLVIEW = VIEWS + ".MiddleColumnView"
 class TestModListWalker:
     @pytest.fixture
     def mod_walker(self):
-        return ModListWalker([list(range(1))])
+        return ModListWalker(contents=[list(range(1))])
 
     @pytest.mark.parametrize(
         "num_items, focus_position",
