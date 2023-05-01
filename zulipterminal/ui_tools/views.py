@@ -64,15 +64,16 @@ SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
-    def __init__(self, *, contents: List[Any]) -> None:
+    def __init__(self, *, contents: List[Any], action: Callable[[], None]) -> None:
+        self.read_message = action
         super().__init__(contents)
 
     def set_focus(self, position: int) -> None:
         # When setting focus via set_focus method.
         self.focus = position
         self._modified()
-        if hasattr(self, "read_message"):
-            self.read_message()
+
+        self.read_message()
 
     def _set_focus(self, index: int) -> None:
         # This method is called when directly setting focus via
@@ -88,8 +89,8 @@ class ModListWalker(urwid.SimpleFocusListWalker):
         if index != self._focus:
             self._focus_changed(index)
         self._focus = index
-        if hasattr(self, "read_message"):
-            self.read_message()
+
+        self.read_message()
 
     def extend(self, items: List[Any], focus_position: Optional[int] = None) -> int:
         if focus_position is None:
@@ -109,8 +110,7 @@ class MessageView(urwid.ListBox):
         self.view = view
         # Initialize for reference
         self.focus_msg = 0
-        self.log = ModListWalker(contents=self.main_view())
-        self.log.read_message = self.read_message
+        self.log = ModListWalker(contents=self.main_view(), action=self.read_message)
 
         super().__init__(self.log)
         self.set_focus(self.focus_msg)
