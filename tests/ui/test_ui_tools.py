@@ -804,31 +804,12 @@ class TestMiddleColumnView:
     def test_init(self, mid_col_view):
         assert mid_col_view.model == self.model
         assert mid_col_view.controller == self.model.controller
-        assert mid_col_view.last_unread_pm is None
         assert mid_col_view.search_box == self.search_box
         assert self.view.message_view == "MSG_LIST"
         self.super.assert_called_once_with(
             "MSG_LIST", header=self.search_box, footer=self.write_box
         )
 
-    def test_get_next_unread_pm(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        return_value = mid_col_view.get_next_unread_pm()
-        assert return_value == 1
-        assert mid_col_view.last_unread_pm == 1
-
-    def test_get_next_unread_pm_again(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        mid_col_view.last_unread_pm = 1
-        return_value = mid_col_view.get_next_unread_pm()
-        assert return_value == 2
-        assert mid_col_view.last_unread_pm == 2
-
-    def test_get_next_unread_pm_no_unread(self, mid_col_view):
-        mid_col_view.model.unread_counts = {"unread_pms": {}}
-        return_value = mid_col_view.get_next_unread_pm()
-        assert return_value is None
-        assert mid_col_view.last_unread_pm is None
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
@@ -930,15 +911,17 @@ class TestMiddleColumnView:
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=1)
+        
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
+        mid_col_view.model.get_next_unread_pm.return_value = 1
 
-        mid_col_view.keypress(size, key)
+        return_value = mid_col_view.keypress(size, key)
 
         mid_col_view.controller.narrow_to_user.assert_called_once_with(
             recipient_emails=["EMAIL"],
             contextual_message_id=1,
         )
+        assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_no_pm(
@@ -946,16 +929,18 @@ class TestMiddleColumnView:
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=None)
+        mid_col_view.model.get_next_unread_pm.return_value = None
 
         return_value = mid_col_view.keypress(size, key)
+
+        assert mid_col_view.controller.narrow_to_user.called is False
         assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
     def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mocker.patch(MIDCOLVIEW + ".get_next_unread_pm", return_value=None)
+        mid_col_view.model.get_next_unread_pm.return_value = None
         mid_col_view.footer = mocker.Mock()
         return_value = mid_col_view.keypress(size, key)
         mid_col_view.footer.private_box_view.assert_called_once_with()

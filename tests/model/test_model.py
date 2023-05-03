@@ -72,6 +72,7 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model._last_unread_topic is None
+        assert model.last_unread_pm is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
         )
@@ -3744,6 +3745,36 @@ class TestModel:
         unread_topic = model.get_next_unread_topic()
 
         assert unread_topic == next_unread_topic
+
+    @pytest.mark.parametrize(
+        "unread_pms, last_unread_pm, next_unread_pm",
+        [
+            case(
+                {(1, "pm"), (2, "pm2")},
+                None,
+                (1, "pm"),
+                id="unread_present_after_no_state",
+            ),
+            case(
+                {(1, "pm"), (2, "pm2")},
+                (1, "pm"),
+                (2, "pm2"),
+                id="unread_present_after_previous_pm",
+            ),
+            case({}, None, None, id="no_unreads"),
+        ],
+    )
+    def test_get_next_unread_pm(
+        self, model, unread_pms, last_unread_pm, next_unread_pm
+    ):
+        model.unread_counts = {
+            "unread_pms": {stream_pm: 1 for stream_pm in unread_pms}
+        }
+        model.last_unread_pm = last_unread_pm
+
+        unread_pm = model.get_next_unread_pm()
+
+        assert unread_pm == next_unread_pm
 
     @pytest.mark.parametrize(
         "stream_id, expected_response",
