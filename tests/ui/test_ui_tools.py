@@ -810,7 +810,6 @@ class TestMiddleColumnView:
             "MSG_LIST", header=self.search_box, footer=self.write_box
         )
 
-
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)

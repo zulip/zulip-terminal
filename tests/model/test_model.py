@@ -3767,9 +3767,7 @@ class TestModel:
     def test_get_next_unread_pm(
         self, model, unread_pms, last_unread_pm, next_unread_pm
     ):
-        model.unread_counts = {
-            "unread_pms": {stream_pm: 1 for stream_pm in unread_pms}
-        }
+        model.unread_counts = {"unread_pms": {stream_pm: 1 for stream_pm in unread_pms}}
         model.last_unread_pm = last_unread_pm
 
         unread_pm = model.get_next_unread_pm()

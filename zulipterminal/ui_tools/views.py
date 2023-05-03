@@ -550,7 +550,6 @@ class MiddleColumnView(urwid.Frame):
         view.message_view = message_view
         super().__init__(message_view, header=search_box, footer=write_box)
 
-
     def update_message_list_status_markers(self) -> None:
         for message_w in self.body.log:
             message_box = message_w.original_widget
