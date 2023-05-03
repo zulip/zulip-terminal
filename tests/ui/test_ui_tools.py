@@ -911,7 +911,7 @@ class TestMiddleColumnView:
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        
+
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
         mid_col_view.model.get_next_unread_pm.return_value = 1
 
