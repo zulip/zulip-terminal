@@ -962,7 +962,7 @@ class TestMessageBox:
         current_message = messages[msg_type]
         msg_box = MessageBox(current_message, self.model, messages[0])
         search_bar = msg_box.top_search_bar()
-        header_bar = msg_box.top_header_bar()
+        header_bar = msg_box.recipient_header()
 
         assert header_bar[0].text.startswith(assert_header_bar)
         assert search_bar.text_to_fill == assert_search_bar

@@ -386,7 +386,7 @@ class TestMessageView:
         msg_w = mocker.MagicMock()
         msg_w.original_widget.message = {"id": 1}
         msg_view.update_search_box_narrow(msg_w.original_widget)
-        msg_w.original_widget.top_header_bar.assert_called_once_with()
+        msg_w.original_widget.recipient_header.assert_called_once_with()
         msg_w.original_widget.top_search_bar.assert_called_once_with()
 
     def test_read_message_no_msgw(self, mocker, msg_view):

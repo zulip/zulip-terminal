@@ -186,7 +186,7 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
-    def top_header_bar(self) -> Any:
+    def recipient_header(self) -> Any:
         if self.message["type"] == "stream":
             return self.stream_header()
         else:
@@ -622,10 +622,7 @@ class MessageBox(urwid.Pile):
     def main_view(self) -> List[Any]:
         # Recipient Header
         if self.need_recipient_header():
-            if self.message["type"] == "stream":
-                recipient_header = self.stream_header()
-            else:
-                recipient_header = self.private_header()
+            recipient_header = self.recipient_header()
         else:
             recipient_header = None
 
