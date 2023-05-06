@@ -916,12 +916,13 @@ class TestMiddleColumnView:
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
         mid_col_view.model.get_next_unread_pm.return_value = 1
 
-        mid_col_view.keypress(size, key)
+        return_value = mid_col_view.keypress(size, key)
 
         mid_col_view.controller.narrow_to_user.assert_called_once_with(
             recipient_emails=["EMAIL"],
             contextual_message_id=1,
         )
+        assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_no_pm(
@@ -933,6 +934,7 @@ class TestMiddleColumnView:
 
         return_value = mid_col_view.keypress(size, key)
 
+        assert not mid_col_view.controller.narrow_to_user.called
         assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
