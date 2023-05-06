@@ -108,6 +108,7 @@ class Model:
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
         self._last_unread_topic = None
+        self.last_unread_pm = None
 
         self.user_id = -1
         self.user_email = ""
@@ -900,6 +901,21 @@ class Model:
                 return unread_topic
             if unread_topic == self._last_unread_topic:
                 next_topic = True
+        return None
+
+    def get_next_unread_pm(self) -> Optional[int]:
+        pms = list(self.unread_counts["unread_pms"].keys())
+        next_pm = False
+        for pm in pms:
+            if next_pm is True:
+                self.last_unread_pm = pm
+                return pm
+            if pm == self.last_unread_pm:
+                next_pm = True
+        if len(pms) > 0:
+            pm = pms[0]
+            self.last_unread_pm = pm
+            return pm
         return None
 
     def _fetch_initial_data(self) -> None:

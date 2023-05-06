@@ -549,25 +549,9 @@ class MiddleColumnView(urwid.Frame):
         self.model = model
         self.controller = model.controller
         self.view = view
-        self.last_unread_pm = None
         self.search_box = search_box
         view.message_view = message_view
         super().__init__(message_view, header=search_box, footer=write_box)
-
-    def get_next_unread_pm(self) -> Optional[int]:
-        pms = list(self.model.unread_counts["unread_pms"].keys())
-        next_pm = False
-        for pm in pms:
-            if next_pm is True:
-                self.last_unread_pm = pm
-                return pm
-            if pm == self.last_unread_pm:
-                next_pm = True
-        if len(pms) > 0:
-            pm = pms[0]
-            self.last_unread_pm = pm
-            return pm
-        return None
 
     def update_message_list_status_markers(self) -> None:
         for message_w in self.body.log:
@@ -624,7 +608,7 @@ class MiddleColumnView(urwid.Frame):
             return key
         elif is_command_key("NEXT_UNREAD_PM", key):
             # narrow to next unread pm
-            pm = self.get_next_unread_pm()
+            pm = self.model.get_next_unread_pm()
             if pm is None:
                 return key
             email = self.model.user_id_email_dict[pm]
