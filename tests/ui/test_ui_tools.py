@@ -80,8 +80,10 @@ class TestMessageView:
         assert msg_view.old_loading is False
         assert msg_view.new_loading is False
 
-    @pytest.mark.parametrize("narrow_focus_pos, focus_msg", [(set(), 1), (0, 0)])
-    def test_main_view(self, mocker, narrow_focus_pos, focus_msg):
+    @pytest.mark.parametrize(
+        "narrow_focus_pos, expected_focus_msg", [(None, 1), (0, 0)]
+    )
+    def test_main_view(self, mocker, narrow_focus_pos, expected_focus_msg):
         mocker.patch(MESSAGEVIEW + ".read_message")
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(MESSAGEVIEW + ".set_focus")
@@ -91,7 +93,7 @@ class TestMessageView:
 
         msg_view = MessageView(self.model, self.view)
 
-        assert msg_view.focus_msg == focus_msg
+        assert msg_view.focus_msg == expected_focus_msg
 
     @pytest.mark.parametrize(
         "messages_fetched",
