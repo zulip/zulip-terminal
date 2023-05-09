@@ -224,19 +224,11 @@ class Controller:
         text = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
-        title_box = urwid.LineBox(
-            title_box_adapter,
-            tlcorner="▄",
-            tline="▄",
-            trcorner="▄",
-            rline="",
-            lline="",
-            blcorner="",
-            bline="",
-            brcorner="",
-        )
-        title = urwid.AttrMap(title_box, "popup_border")
+        title_top = urwid.AttrMap(urwid.Divider("▄"), "popup_border")
+        title = urwid.Pile([title_top, title_box_adapter])
+
         content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
+
         self.loop.widget = urwid.Overlay(
             urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
             self.view,
