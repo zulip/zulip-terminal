@@ -320,16 +320,8 @@ class StreamsView(urwid.Frame):
         )
         super().__init__(
             list_box,
-            header=urwid.LineBox(
-                self.stream_search_box,
-                tlcorner="",
-                tline="",
-                lline="",
-                trcorner="",
-                blcorner=SECTION_DIVIDER_LINE,
-                rline="",
-                bline=SECTION_DIVIDER_LINE,
-                brcorner=SECTION_DIVIDER_LINE,
+            header=urwid.Pile(
+                [self.stream_search_box, urwid.Divider(SECTION_DIVIDER_LINE)]
             ),
         )
         self.search_lock = threading.Lock()
@@ -425,21 +417,12 @@ class TopicsView(urwid.Frame):
                 self.stream_button,
                 urwid.Divider(SECTION_DIVIDER_LINE),
                 self.topic_search_box,
+                urwid.Divider(SECTION_DIVIDER_LINE),
             ]
         )
         super().__init__(
             self.list_box,
-            header=urwid.LineBox(
-                self.header_list,
-                tlcorner="",
-                tline="",
-                lline="",
-                trcorner="",
-                blcorner=SECTION_DIVIDER_LINE,
-                rline="",
-                bline=SECTION_DIVIDER_LINE,
-                brcorner=SECTION_DIVIDER_LINE,
-            ),
+            header=self.header_list,
         )
         self.search_lock = threading.Lock()
         self.empty_search = False
@@ -643,17 +626,8 @@ class RightColumnView(urwid.Frame):
         self.view = view
         self.user_search = PanelSearchBox(self, "SEARCH_PEOPLE", self.update_user_list)
         self.view.user_search = self.user_search
-        search_box = urwid.LineBox(
-            self.user_search,
-            tlcorner="",
-            tline="",
-            lline="",
-            trcorner="",
-            blcorner=SECTION_DIVIDER_LINE,
-            rline="",
-            bline=SECTION_DIVIDER_LINE,
-            brcorner=SECTION_DIVIDER_LINE,
-        )
+        search_box = urwid.Pile([self.user_search, urwid.Divider(SECTION_DIVIDER_LINE)])
+
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
         self.empty_search = False
@@ -1944,16 +1918,8 @@ class EmojiPickerView(PopUpView):
         self.emoji_search = PanelSearchBox(
             self, "SEARCH_EMOJIS", self.update_emoji_list
         )
-        search_box = urwid.LineBox(
-            self.emoji_search,
-            tlcorner="",
-            tline="",
-            lline="",
-            trcorner="",
-            blcorner=SECTION_DIVIDER_LINE,
-            rline="",
-            bline=SECTION_DIVIDER_LINE,
-            brcorner=SECTION_DIVIDER_LINE,
+        search_box = urwid.Pile(
+            [self.emoji_search, urwid.Divider(SECTION_DIVIDER_LINE)]
         )
         self.empty_search = False
         self.search_lock = threading.Lock()
