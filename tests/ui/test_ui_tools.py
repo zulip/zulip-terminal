@@ -606,7 +606,12 @@ class TestTopicsView:
             topic_view, "SEARCH_TOPICS", topic_view.update_topics
         )
         self.header_list.assert_called_once_with(
-            [topic_view.stream_button, self.divider("─"), topic_view.topic_search_box]
+            [
+                topic_view.stream_button,
+                self.divider("─"),
+                topic_view.topic_search_box,
+                self.divider("─"),
+            ]
         )
 
     @pytest.mark.parametrize(
@@ -953,7 +958,7 @@ class TestRightColumnView:
         self.view = mocker.Mock()
         self.user_search = mocker.patch(VIEWS + ".PanelSearchBox")
         self.connect_signal = mocker.patch(VIEWS + ".urwid.connect_signal")
-        self.line_box = mocker.patch(VIEWS + ".urwid.LineBox")
+        self.pile = mocker.patch(VIEWS + ".urwid.Pile")
         self.thread = mocker.patch(VIEWS + ".threading")
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
@@ -976,7 +981,7 @@ class TestRightColumnView:
         assert right_col_view.search_lock == self.thread.Lock()
         self.super.assert_called_once_with(
             right_col_view.users_view(),
-            header=self.line_box(right_col_view.user_search),
+            header=self.pile(right_col_view.user_search),
         )
 
     def test_update_user_list_editor_mode(self, mocker, right_col_view):
