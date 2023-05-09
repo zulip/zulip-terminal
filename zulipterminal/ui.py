@@ -82,7 +82,7 @@ class View(urwid.WidgetWrap):
             tline=COLUMN_TITLE_BAR_LINE,
             trcorner=COLUMN_TITLE_BAR_LINE,
             lline="",
-            blcorner="─",
+            blcorner="",
             rline="",
             bline="",
             brcorner="",

@@ -321,10 +321,10 @@ class StreamsView(urwid.Frame):
             list_box,
             header=urwid.LineBox(
                 self.stream_search_box,
-                tlcorner="─",
+                tlcorner="",
                 tline="",
                 lline="",
-                trcorner="─",
+                trcorner="",
                 blcorner="─",
                 rline="",
                 bline="─",
@@ -426,10 +426,10 @@ class TopicsView(urwid.Frame):
             self.list_box,
             header=urwid.LineBox(
                 self.header_list,
-                tlcorner="─",
+                tlcorner="",
                 tline="",
                 lline="",
-                trcorner="─",
+                trcorner="",
                 blcorner="─",
                 rline="",
                 bline="─",
@@ -640,10 +640,10 @@ class RightColumnView(urwid.Frame):
         self.view.user_search = self.user_search
         search_box = urwid.LineBox(
             self.user_search,
-            tlcorner="─",
+            tlcorner="",
             tline="",
             lline="",
-            trcorner="─",
+            trcorner="",
             blcorner="─",
             rline="",
             bline="─",
@@ -842,7 +842,7 @@ class LeftColumnView(urwid.Pile):
             rline="",
             lline="",
             bline="",
-            brcorner="─",
+            brcorner="",
         )
         return w
 
@@ -874,7 +874,7 @@ class LeftColumnView(urwid.Pile):
             rline="",
             lline="",
             bline="",
-            brcorner="─",
+            brcorner="",
         )
         return w
 
@@ -1941,10 +1941,10 @@ class EmojiPickerView(PopUpView):
         )
         search_box = urwid.LineBox(
             self.emoji_search,
-            tlcorner="─",
+            tlcorner="",
             tline="",
             lline="",
-            trcorner="─",
+            trcorner="",
             blcorner="─",
             rline="",
             bline="─",
