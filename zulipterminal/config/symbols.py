@@ -30,6 +30,7 @@ CHECK_MARK = "✓"  # CHECK MARK, U+2713 (Dingbats)
 APPLICATION_TITLE_BAR_LINE = "═"  # BOX DRAWINGS DOUBLE HORIZONTAL, U+2550 (Box drawing)
 PINNED_STREAMS_DIVIDER = "-"  # HYPHEN-MINUS, U+002D (Basic latin)
 COLUMN_TITLE_BAR_LINE = "━"  # BOX DRAWINGS HEAVY HORIZONTAL, U+2501 (Box drawing)
+COLUMN_DIVIDER_LINE = "│"  # BOX DRAWINGS LIGHT VERTICAL, U+2502 (Box drawing)
 
 # NOTE: The '⏱' emoji needs an extra space while rendering. Otherwise, it
 # appears to overlap its subsequent text.
