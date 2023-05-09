@@ -23,6 +23,7 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
+    SECTION_DIVIDER_LINE,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -325,10 +326,10 @@ class StreamsView(urwid.Frame):
                 tline="",
                 lline="",
                 trcorner="",
-                blcorner="─",
+                blcorner=SECTION_DIVIDER_LINE,
                 rline="",
-                bline="─",
-                brcorner="─",
+                bline=SECTION_DIVIDER_LINE,
+                brcorner=SECTION_DIVIDER_LINE,
             ),
         )
         self.search_lock = threading.Lock()
@@ -420,7 +421,11 @@ class TopicsView(urwid.Frame):
             self, "SEARCH_TOPICS", self.update_topics
         )
         self.header_list = urwid.Pile(
-            [self.stream_button, urwid.Divider("─"), self.topic_search_box]
+            [
+                self.stream_button,
+                urwid.Divider(SECTION_DIVIDER_LINE),
+                self.topic_search_box,
+            ]
         )
         super().__init__(
             self.list_box,
@@ -430,10 +435,10 @@ class TopicsView(urwid.Frame):
                 tline="",
                 lline="",
                 trcorner="",
-                blcorner="─",
+                blcorner=SECTION_DIVIDER_LINE,
                 rline="",
-                bline="─",
-                brcorner="─",
+                bline=SECTION_DIVIDER_LINE,
+                brcorner=SECTION_DIVIDER_LINE,
             ),
         )
         self.search_lock = threading.Lock()
@@ -644,10 +649,10 @@ class RightColumnView(urwid.Frame):
             tline="",
             lline="",
             trcorner="",
-            blcorner="─",
+            blcorner=SECTION_DIVIDER_LINE,
             rline="",
-            bline="─",
-            brcorner="─",
+            bline=SECTION_DIVIDER_LINE,
+            brcorner=SECTION_DIVIDER_LINE,
         )
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
@@ -1945,10 +1950,10 @@ class EmojiPickerView(PopUpView):
             tline="",
             lline="",
             trcorner="",
-            blcorner="─",
+            blcorner=SECTION_DIVIDER_LINE,
             rline="",
-            bline="─",
-            brcorner="─",
+            bline=SECTION_DIVIDER_LINE,
+            brcorner=SECTION_DIVIDER_LINE,
         )
         self.empty_search = False
         self.search_lock = threading.Lock()
