@@ -32,7 +32,12 @@ from zulipterminal.config.regexes import (
     REGEX_STREAM_AND_TOPIC_FENCED_HALF,
     REGEX_STREAM_AND_TOPIC_UNFENCED,
 )
-from zulipterminal.config.symbols import INVALID_MARKER, STREAM_TOPIC_SEPARATOR
+from zulipterminal.config.symbols import (
+    COMPOSE_HEADER_BOTTOM,
+    COMPOSE_HEADER_TOP,
+    INVALID_MARKER,
+    STREAM_TOPIC_SEPARATOR,
+)
 from zulipterminal.config.ui_mappings import STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
     asynch,
@@ -220,9 +225,9 @@ class WriteBox(urwid.Pile):
         self.header_write_box = urwid.Columns([self.to_write_box])
         header_line_box = urwid.Pile(
             [
-                urwid.Divider("━"),
+                urwid.Divider(COMPOSE_HEADER_TOP),
                 self.header_write_box,
-                urwid.Divider("─"),
+                urwid.Divider(COMPOSE_HEADER_BOTTOM),
             ]
         )
         self.contents = [
@@ -352,9 +357,9 @@ class WriteBox(urwid.Pile):
         )
         header_line_box = urwid.Pile(
             [
-                urwid.Divider("━"),
+                urwid.Divider(COMPOSE_HEADER_TOP),
                 self.header_write_box,
-                urwid.Divider("─"),
+                urwid.Divider(COMPOSE_HEADER_BOTTOM),
             ]
         )
         write_box = [
