@@ -19,6 +19,7 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
+from zulipterminal.config.symbols import POPUP_CONTENT_BORDER
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
@@ -220,16 +221,6 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
-        border_lines = dict(
-            tlcorner="▛",
-            tline="▀",
-            trcorner="▜",
-            rline="▐",
-            lline="▌",
-            blcorner="▙",
-            bline="▄",
-            brcorner="▟",
-        )
         text = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
@@ -245,7 +236,7 @@ class Controller:
             brcorner="",
         )
         title = urwid.AttrMap(title_box, "popup_border")
-        content = urwid.LineBox(to_show, **border_lines)
+        content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
         self.loop.widget = urwid.Overlay(
             urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
             self.view,
