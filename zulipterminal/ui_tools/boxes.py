@@ -36,6 +36,7 @@ from zulipterminal.config.symbols import (
     COMPOSE_HEADER_BOTTOM,
     COMPOSE_HEADER_TOP,
     INVALID_MARKER,
+    MESSAGE_RECIPIENTS_BORDER,
     STREAM_TOPIC_SEPARATOR,
 )
 from zulipterminal.config.ui_mappings import STREAM_ACCESS_TYPE
@@ -935,14 +936,7 @@ class MessageSearchBox(urwid.Pile):
         self.recipient_bar = urwid.LineBox(
             self.msg_narrow,
             title="Current message recipients",
-            tline="─",
-            lline="",
-            trcorner="─",
-            tlcorner="─",
-            blcorner="─",
-            rline="",
-            bline="─",
-            brcorner="─",
+            **MESSAGE_RECIPIENTS_BORDER,
         )
         return [self.search_bar, self.recipient_bar]
 
