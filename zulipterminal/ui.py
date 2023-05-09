@@ -14,6 +14,7 @@ from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
     AUTOHIDE_TAB_LEFT_ARROW,
     AUTOHIDE_TAB_RIGHT_ARROW,
+    COLUMN_DIVIDER_LINE,
     COLUMN_TITLE_BAR_LINE,
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
@@ -66,8 +67,8 @@ class View(urwid.WidgetWrap):
             title_attr="column_title",
             tline=COLUMN_TITLE_BAR_LINE,
             bline="",
-            trcorner="│",
-            tlcorner="│",
+            trcorner=COLUMN_DIVIDER_LINE,
+            tlcorner=COLUMN_DIVIDER_LINE,
         )
 
     def right_column_view(self) -> Any:
