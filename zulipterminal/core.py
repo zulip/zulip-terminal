@@ -19,7 +19,7 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
-from zulipterminal.config.symbols import POPUP_CONTENT_BORDER
+from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
@@ -224,7 +224,7 @@ class Controller:
         text = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
-        title_top = urwid.AttrMap(urwid.Divider("▄"), "popup_border")
+        title_top = urwid.AttrMap(urwid.Divider(POPUP_TOP_LINE), "popup_border")
         title = urwid.Pile([title_top, title_box_adapter])
 
         content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
