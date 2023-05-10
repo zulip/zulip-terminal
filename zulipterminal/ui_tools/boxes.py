@@ -21,8 +21,9 @@ from zulipterminal.api_types import (
     StreamComposition,
 )
 from zulipterminal.config.keys import (
+    display_keys_for_command,
+    display_primary_key_for_command,
     is_command_key,
-    keys_for_command,
     primary_key_for_command,
 )
 from zulipterminal.config.regexes import (
@@ -302,11 +303,11 @@ class WriteBox(urwid.Pile):
             invalid_recipients_error = [
                 "Invalid recipient(s) - " + ", ".join(invalid_recipients),
                 " - Use ",
-                ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+                ("footer_contrast", display_primary_key_for_command("AUTOCOMPLETE")),
                 " or ",
                 (
                     "footer_contrast",
-                    primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                    display_primary_key_for_command("AUTOCOMPLETE_REVERSE"),
                 ),
                 " to autocomplete.",
             ]
@@ -854,8 +855,10 @@ class WriteBox(urwid.Pile):
                             invalid_stream_error = (
                                 "Invalid stream name."
                                 " Use {} or {} to autocomplete.".format(
-                                    primary_key_for_command("AUTOCOMPLETE"),
-                                    primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                                    display_primary_key_for_command("AUTOCOMPLETE"),
+                                    display_primary_key_for_command(
+                                        "AUTOCOMPLETE_REVERSE"
+                                    ),
                                 )
                             )
                             self.view.controller.report_error([invalid_stream_error])
@@ -922,7 +925,9 @@ class MessageSearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = f"Search [{', '.join(keys_for_command('SEARCH_MESSAGES'))}]: "
+        search_text = (
+            f"Search [{', '.join(display_keys_for_command('SEARCH_MESSAGES'))}]: "
+        )
         self.text_box = ReadlineEdit(f"{search_text} ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
@@ -978,7 +983,9 @@ class PanelSearchBox(urwid.Edit):
     ) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = f" Search [{', '.join(keys_for_command(search_command))}]: "
+        self.search_text = (
+            f" Search [{', '.join(display_keys_for_command(search_command))}]: "
+        )
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )

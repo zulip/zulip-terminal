@@ -5,7 +5,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.api_types import Composition
-from zulipterminal.config.keys import primary_key_for_command
+from zulipterminal.config.keys import display_primary_key_for_command
 from zulipterminal.helper import (
     Index,
     canonicalize_color,
@@ -433,7 +433,7 @@ def test_notify_if_message_sent_outside_narrow(
     notify_if_message_sent_outside_narrow(req, controller)
 
     if footer_updated:
-        key = primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
+        key = display_primary_key_for_command("NARROW_MESSAGE_RECIPIENT")
         report_success.assert_called_once_with(
             [
                 "Message is sent outside of current narrow."
