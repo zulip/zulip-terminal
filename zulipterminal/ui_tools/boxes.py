@@ -218,16 +218,12 @@ class WriteBox(urwid.Pile):
         self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
 
         self.header_write_box = urwid.Columns([self.to_write_box])
-        header_line_box = urwid.LineBox(
-            self.header_write_box,
-            tlcorner="━",
-            tline="━",
-            trcorner="━",
-            lline="",
-            blcorner="─",
-            bline="─",
-            brcorner="─",
-            rline="",
+        header_line_box = urwid.Pile(
+            [
+                urwid.Divider("━"),
+                self.header_write_box,
+                urwid.Divider("─"),
+            ]
         )
         self.contents = [
             (header_line_box, self.options()),
@@ -354,16 +350,12 @@ class WriteBox(urwid.Pile):
             ],
             dividechars=1,
         )
-        header_line_box = urwid.LineBox(
-            self.header_write_box,
-            tlcorner="━",
-            tline="━",
-            trcorner="━",
-            lline="",
-            blcorner="─",
-            bline="─",
-            brcorner="─",
-            rline="",
+        header_line_box = urwid.Pile(
+            [
+                urwid.Divider("━"),
+                self.header_write_box,
+                urwid.Divider("─"),
+            ]
         )
         write_box = [
             (header_line_box, self.options()),
