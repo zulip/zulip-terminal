@@ -13,11 +13,24 @@ palette = [
     ("footer", "black", "white"),
 ]
 
-symbol_dict = {
+initial_symbol_dict = {
     name: symbol
     for name, symbol in vars(symbols).items()
     if not name.startswith("__") and not name.endswith("__")
 }
+nested_dict = {
+    f"{name}__{subname}": subsymbol
+    for name, symbol in initial_symbol_dict.items()
+    if isinstance(symbol, dict)
+    for subname, subsymbol in symbol.items()
+}
+symbol_dict = {
+    name: symbol
+    for name, symbol in initial_symbol_dict.items()
+    if not isinstance(symbol, dict)
+}
+symbol_dict.update(nested_dict)
+
 max_symbol_name_length = max([len(name) for name in symbol_dict])
 
 symbol_names_list = [urwid.Text(name, align="center") for name in symbol_dict]
