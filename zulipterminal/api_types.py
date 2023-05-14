@@ -348,10 +348,23 @@ class SubscriptionEvent(TypedDict):
 
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#typing-start and -stop
+class _TypingEventUser(TypedDict):
+    user_id: int
+    email: str
+
+
 class TypingEvent(TypedDict):
     type: Literal["typing"]
-    sender: Dict[str, Any]  # 'email', ...
-    op: str
+    op: TypingStatusChange
+    sender: _TypingEventUser
+
+    # Unused as yet
+    # Pre Zulip 4.0, always present; now only present if message_type == "private"
+    # recipients: List[_TypingEventUser]
+    # NOTE: These fields are all new in Zulip 4.0 / ZFL 58, if client capability sent
+    # message_type: NotRequired[MessageType]
+    # stream_id: NotRequired[int]  # Only present if message_type == "stream"
+    # topic: NotRequired[str]  # Only present if message_type == "stream"
 
 
 # -----------------------------------------------------------------------------
