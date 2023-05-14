@@ -28,7 +28,7 @@ linting_deps = [
     "black~=23.0",
     "ruff==0.0.267",
     "codespell[toml]~=2.2.2",
-    "typos~=1.13.20",
+    "typos~=1.14.9",
 ]
 
 typing_deps = [
