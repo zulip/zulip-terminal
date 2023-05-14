@@ -257,12 +257,16 @@ class RealmUser(TypedDict):
 # (also helper data structures not used elsewhere)
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#message
 class MessageEvent(TypedDict):
     type: Literal["message"]
     message: Message
     flags: List[MessageFlag]
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#update_message
 class UpdateMessageEvent(TypedDict):
     type: Literal["update_message"]
     message_id: int
@@ -277,6 +281,8 @@ class UpdateMessageEvent(TypedDict):
     stream_id: int
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#reaction-add and -remove
 class ReactionEvent(TypedDict):
     type: Literal["reaction"]
     op: str
@@ -287,6 +293,8 @@ class ReactionEvent(TypedDict):
     message_id: int
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#realm_user-add and -remove
 class RealmUserEventPerson(TypedDict):
     user_id: int
 
@@ -320,6 +328,9 @@ class RealmUserEvent(TypedDict):
     person: RealmUserEventPerson
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#subscription-update
+# (also -peer_add and -peer_remove; FIXME: -add & -remove are not yet supported)
 class SubscriptionEvent(TypedDict):
     type: Literal["subscription"]
     op: str
@@ -335,12 +346,16 @@ class SubscriptionEvent(TypedDict):
     message_ids: List[int]  # Present when subject of msg(s) is updated
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#typing-start and -stop
 class TypingEvent(TypedDict):
     type: Literal["typing"]
     sender: Dict[str, Any]  # 'email', ...
     op: str
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#update_message_flags-add and -remove
 class UpdateMessageFlagsEvent(TypedDict):
     type: Literal["update_message_flags"]
     messages: List[int]
@@ -350,12 +365,16 @@ class UpdateMessageFlagsEvent(TypedDict):
     all: bool
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#update_display_settings
 class UpdateDisplaySettings(TypedDict):
     type: Literal["update_display_settings"]
     setting_name: str
     setting: bool
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#realm_emoji-update
 class RealmEmojiData(TypedDict):
     id: str
     name: str
@@ -370,6 +389,8 @@ class UpdateRealmEmojiEvent(TypedDict):
     realm_emoji: Dict[str, RealmEmojiData]
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#user_settings-update
 # This is specifically only those supported by ZT
 SupportedUserSettings = Literal["send_private_typing_notifications"]
 
@@ -381,6 +402,8 @@ class UpdateUserSettingsEvent(TypedDict):
     value: Any
 
 
+# -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#update_global_notifications
 # This is specifically only those supported by ZT
 SupportedGlobalNotificationSettings = Literal["pm_content_in_desktop_notifications"]
 
@@ -391,6 +414,7 @@ class UpdateGlobalNotificationsEvent(TypedDict):
     setting: Any
 
 
+# -----------------------------------------------------------------------------
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
