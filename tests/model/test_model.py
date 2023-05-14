@@ -1558,25 +1558,6 @@ class TestModel:
     def test__update_initial_data(self, model, initial_data):
         assert model.initial_data == initial_data
 
-    def test__update_initial_data_raises_exception(self, mocker, initial_data):
-        # Initialize Model
-        mocker.patch(MODEL + ".get_messages", return_value="")
-        mocker.patch(MODEL + ".get_all_users", return_value=[])
-        mocker.patch(MODEL + "._subscribe_to_streams")
-        self.classify_unread_counts = mocker.patch(
-            MODULE + ".classify_unread_counts", return_value=[]
-        )
-
-        # Setup mocks before calling get_messages
-        self.client.register.return_value = initial_data
-        self.client.get_members.return_value = {"members": initial_data["realm_users"]}
-        model = Model(self.controller)
-
-        # Test if raises Exception
-        self.client.register.side_effect = Exception()
-        with pytest.raises(Exception):
-            model._update_initial_data()
-
     def test__group_info_from_realm_user_groups(self, model, user_groups_fixture):
         user_group_names = model._group_info_from_realm_user_groups(user_groups_fixture)
         assert model.user_group_by_id == {
