@@ -38,6 +38,7 @@ from zulipterminal.api_types import (
     DirectTypingNotification,
     EditPropagateMode,
     Event,
+    MessagesFlagChange,
     PrivateComposition,
     PrivateMessageUpdateRequest,
     RealmEmojiData,
@@ -493,11 +494,11 @@ class Model:
 
     @asynch
     def toggle_message_star_status(self, message: Message) -> None:
-        base_request = dict(flag="starred", messages=[message["id"]])
+        messages = [message["id"]]
         if "starred" in message["flags"]:
-            request = dict(base_request, op="remove")
+            request = MessagesFlagChange(messages=messages, flag="starred", op="remove")
         else:
-            request = dict(base_request, op="add")
+            request = MessagesFlagChange(messages=messages, flag="starred", op="add")
         response = self.client.update_message_flags(request)
         display_error_if_present(response, self.controller)
 
@@ -506,11 +507,7 @@ class Model:
         if not id_list:
             return
         response = self.client.update_message_flags(
-            {
-                "messages": id_list,
-                "flag": "read",
-                "op": "add",
-            }
+            MessagesFlagChange(messages=id_list, flag="read", op="add")
         )
         display_error_if_present(response, self.controller)
 
