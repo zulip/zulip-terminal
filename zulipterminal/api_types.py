@@ -394,14 +394,6 @@ class UpdateMessageFlagsEvent(TypedDict):
 
 
 # -----------------------------------------------------------------------------
-# See https://zulip.com/api/get-events#update_display_settings
-class UpdateDisplaySettings(TypedDict):
-    type: Literal["update_display_settings"]
-    setting_name: str
-    setting: bool
-
-
-# -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#realm_emoji-update
 class RealmEmojiData(TypedDict):
     id: str
@@ -443,6 +435,18 @@ class UpdateGlobalNotificationsEvent(TypedDict):
 
 
 # -----------------------------------------------------------------------------
+# See https://zulip.com/api/get-events#update_display_settings
+# This is specifically only those supported by ZT
+SupportedDisplaySettings = Literal["twenty_four_hour_time"]
+
+
+class UpdateDisplaySettingsEvent(TypedDict):
+    type: Literal["update_display_settings"]
+    setting_name: SupportedDisplaySettings
+    setting: bool
+
+
+# -----------------------------------------------------------------------------
 Event = Union[
     MessageEvent,
     UpdateMessageEvent,
@@ -450,7 +454,7 @@ Event = Union[
     SubscriptionEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,
-    UpdateDisplaySettings,
+    UpdateDisplaySettingsEvent,
     UpdateRealmEmojiEvent,
     UpdateUserSettingsEvent,
     UpdateGlobalNotificationsEvent,
