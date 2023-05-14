@@ -88,6 +88,19 @@ class StreamComposition(TypedDict):
 Composition = Union[PrivateComposition, StreamComposition]
 
 ###############################################################################
+# Parameters to pass in request to:
+#   https://zulip.com/api/update-message-flags
+
+MessageFlagStatusChange = Literal["add", "remove"]
+
+
+class MessagesFlagChange(TypedDict):
+    messages: List[int]
+    op: MessageFlagStatusChange
+    flag: ModifiableMessageFlag
+
+
+###############################################################################
 # Parameter to pass in request to:
 #   https://zulip.com/api/update-message
 
@@ -369,11 +382,13 @@ class TypingEvent(TypedDict):
 
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#update_message_flags-add and -remove
+
+
 class UpdateMessageFlagsEvent(TypedDict):
     type: Literal["update_message_flags"]
     messages: List[int]
-    operation: str  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
-    op: str
+    operation: MessageFlagStatusChange  # NOTE: deprecated in Zulip 4.0 / ZFL 32 -> 'op'
+    op: MessageFlagStatusChange
     flag: ModifiableMessageFlag
     all: bool
 
