@@ -39,3 +39,4 @@
 <!-- For video, try asciinema; after uploading, embed using
 [![yourtitle](https://asciinema.org/a/<id>.png)](https://asciinema.org/a/<id>)
 -->
+<!-- NOTE: Attached videos/images will be clearer from smaller terminal windows -->
