@@ -46,6 +46,7 @@ from zulipterminal.api_types import (
     StreamComposition,
     StreamMessageUpdateRequest,
     Subscription,
+    SubscriptionSettingChange,
     TypingStatusChange,
 )
 from zulipterminal.config.keys import primary_key_for_command
@@ -1220,12 +1221,12 @@ class Model:
 
     def toggle_stream_muted_status(self, stream_id: int) -> None:
         request = [
-            {
-                "stream_id": stream_id,
-                "property": "is_muted",
-                "value": not self.is_muted_stream(stream_id)
+            SubscriptionSettingChange(
+                stream_id=stream_id,
+                property="is_muted",
+                value=not self.is_muted_stream(stream_id)
                 # True for muting and False for unmuting.
-            }
+            )
         ]
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)
@@ -1251,11 +1252,11 @@ class Model:
 
     def toggle_stream_pinned_status(self, stream_id: int) -> bool:
         request = [
-            {
-                "stream_id": stream_id,
-                "property": "pin_to_top",
-                "value": not self.is_pinned_stream(stream_id),
-            }
+            SubscriptionSettingChange(
+                stream_id=stream_id,
+                property="pin_to_top",
+                value=not self.is_pinned_stream(stream_id),
+            )
         ]
         response = self.client.update_subscription_settings(request)
         return response["result"] == "success"
@@ -1268,11 +1269,11 @@ class Model:
 
     def toggle_stream_visual_notifications(self, stream_id: int) -> None:
         request = [
-            {
-                "stream_id": stream_id,
-                "property": "desktop_notifications",
-                "value": not self.is_visual_notifications_enabled(stream_id),
-            }
+            SubscriptionSettingChange(
+                stream_id=stream_id,
+                property="desktop_notifications",
+                value=not self.is_visual_notifications_enabled(stream_id),
+            )
         ]
         response = self.client.update_subscription_settings(request)
         display_error_if_present(response, self.controller)

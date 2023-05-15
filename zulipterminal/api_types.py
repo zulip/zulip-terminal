@@ -132,6 +132,27 @@ class StreamMessageUpdateRequest(TypedDict):
 MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateRequest]
 
 ###############################################################################
+# Parameter to pass in request to:
+#   https://zulip.com/api/update-subscription-settings
+
+PersonalSubscriptionSetting = Literal[
+    "in_home_view", "is_muted", "pin_to_top", "desktop_notifications"
+]
+# Currently unsupported in ZT:
+# - color  # TODO: Add support (value is str not bool)
+# - audible_notifications
+# - push_notifications
+# - email_notifications
+# - wildcard_mentions_notify  # TODO: Add support
+
+
+class SubscriptionSettingChange(TypedDict):
+    stream_id: int
+    property: PersonalSubscriptionSetting
+    value: bool
+
+
+###############################################################################
 # In "messages" response from:
 #   https://zulip.com/api/get-messages
 # In "message" response from:
@@ -344,19 +365,24 @@ class RealmUserEvent(TypedDict):
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#subscription-update
 # (also -peer_add and -peer_remove; FIXME: -add & -remove are not yet supported)
-class SubscriptionEvent(TypedDict):
-    type: Literal["subscription"]
-    op: str
-    property: str
 
-    user_id: int  # Present when a streams subscribers are updated.
-    user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
+
+# Update of personal properties
+class SubscriptionUpdateEvent(SubscriptionSettingChange):
+    type: Literal["subscription"]
+    op: Literal["update"]
+
+
+# User(s) have been (un)subscribed from stream(s)
+class SubscriptionPeerAddRemoveEvent(TypedDict):
+    type: Literal["subscription"]
+    op: Literal["peer_add", "peer_remove"]
 
     stream_id: int
-    stream_ids: List[int]  # NOTE: replaces 'stream_id' in ZFL 35 for peer*
+    stream_ids: List[int]  # NOTE: replaces 'stream_id' in ZFL 35
 
-    value: bool
-    message_ids: List[int]  # Present when subject of msg(s) is updated
+    user_id: int
+    user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
 
 
 # -----------------------------------------------------------------------------
@@ -451,7 +477,8 @@ Event = Union[
     MessageEvent,
     UpdateMessageEvent,
     ReactionEvent,
-    SubscriptionEvent,
+    SubscriptionUpdateEvent,
+    SubscriptionPeerAddRemoveEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,
     UpdateDisplaySettingsEvent,
