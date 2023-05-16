@@ -48,6 +48,8 @@ from zulipterminal.api_types import (
     Subscription,
     SubscriptionSettingChange,
     TypingStatusChange,
+    UpdateMessageContentEvent,
+    UpdateMessagesLocationEvent,
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
@@ -1588,6 +1590,7 @@ class Model:
         Handle updated (edited) messages (changed content/subject)
         """
         assert event["type"] == "update_message"
+
         # Update edited message status from single message id
         # NOTE: If all messages in topic have topic edited,
         #       they are not all marked as edited, as per server optimization
@@ -1599,7 +1602,8 @@ class Model:
 
         # Update the rendered content, if the message is indexed
         if "rendered_content" in event and indexed_message:
-            indexed_message["content"] = event["rendered_content"]
+            content_event = cast(UpdateMessageContentEvent, event)
+            indexed_message["content"] = content_event["rendered_content"]
             self.index["messages"][message_id] = indexed_message
             self._update_rendered_view(message_id)
 
@@ -1608,14 +1612,15 @@ class Model:
         # * 'subject' is not present in update event if
         #   the event didn't have a 'subject' update.
         if "subject" in event:
-            new_subject = event["subject"]
-            stream_id = event["stream_id"]
-            old_subject = event["orig_subject"]
+            location_event = cast(UpdateMessagesLocationEvent, event)
+            new_subject = location_event["subject"]
+            stream_id = location_event["stream_id"]
+            old_subject = location_event["orig_subject"]
             msg_ids_by_topic = self.index["topic_msg_ids"][stream_id]
 
             # Remove each message_id from the old topic's `topic_msg_ids` set
             # if it exists, and update & re-render the message if it is indexed.
-            for msg_id in event["message_ids"]:
+            for msg_id in location_event["message_ids"]:
                 # Ensure that the new topic is not the same as the old one
                 # (no-op topic edit).
                 if new_subject != old_subject:
