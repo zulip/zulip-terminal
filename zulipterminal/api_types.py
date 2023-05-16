@@ -301,18 +301,62 @@ class MessageEvent(TypedDict):
 
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#update_message
-class UpdateMessageEvent(TypedDict):
+# NOTE: A single "update_message" event can be both derived event classes
+
+
+class BaseUpdateMessageEvent(TypedDict):
     type: Literal["update_message"]
+
+    # Present in both cases:
+    # - specific message content being updated
+    # - move one message (change_one) or this message and those later (change_later)
     message_id: int
-    # FIXME: These groups of types are not always present
-    # A: Content needs re-rendering
+    # Present in both cases; message_id may change read/mention/alert status
+    # flags: List[MessageFlag]
+
+    # Omitted before Zulip 5.0 / ZFL 114 for rendering-only updates
+    # Subsequently always present (and None for rendering_only==True)
+    # user_id: NotRequired[Optional[int]]  # sender
+    # edit_timestamp: NotRequired[int]
+
+    # When True, does not relate to user-generated edit or message history
+    # Prior to Zulip 5.0 / ZFL 114, detect via presence/absence of user_id
+    # rendering_only: NotRequired[bool]  # New in Zulip 5.0 / ZFL 114
+
+
+class UpdateMessageContentEvent(BaseUpdateMessageEvent):
+    # stream_name: str  # Not recommended; prefer stream_id
+    # stream_id: NotRequired[int]  # Only if a stream message
+
+    # orig_rendered_content: str
     rendered_content: str
-    # B: Subject of these message ids needs updating?
+
+    # Not used since we parse the rendered_content only
+    # orig_content: str
+    # content: str
+
+    # is_me_message: bool
+
+
+class UpdateMessagesLocationEvent(BaseUpdateMessageEvent):
+    # All previously sent to stream_id with topic orig_subject
     message_ids: List[int]
-    orig_subject: str
-    subject: str
-    propagate_mode: EditPropagateMode
+
+    # Old location of messages
+    # stream_name: str  # Not recommended; prefer stream_id
     stream_id: int
+    orig_subject: str
+
+    propagate_mode: EditPropagateMode
+
+    # Only present if messages are moved to a different topic
+    # eg. if subject unchanged, but stream does change, these will be absent
+    subject: NotRequired[str]
+    # subject_links: NotRequired[List[Any]]
+    # topic_links: NotRequired[List[Any]]
+
+    # Only present if messages are moved to a different stream
+    # new_stream_id: NotRequired[int]
 
 
 # -----------------------------------------------------------------------------
@@ -475,7 +519,8 @@ class UpdateDisplaySettingsEvent(TypedDict):
 # -----------------------------------------------------------------------------
 Event = Union[
     MessageEvent,
-    UpdateMessageEvent,
+    UpdateMessageContentEvent,
+    UpdateMessagesLocationEvent,
     ReactionEvent,
     SubscriptionUpdateEvent,
     SubscriptionPeerAddRemoveEvent,
