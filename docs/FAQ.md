@@ -1,5 +1,24 @@
 # Frequently Asked Questions (FAQ)
 
+- [What Python implementations are supported?](#what-python-implementations-are-supported)
+- [What Python versions are supported?](#what-python-versions-are-supported)
+- [What operating systems are supported?](#what-operating-systems-are-supported)
+- [What versions of Zulip are supported?](#what-versions-of-zulip-are-supported)
+- [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
+- [It doesn't seem to run or display properly in my terminal (emulator)?](#it-doesnt-seem-to-run-or-display-properly-in-my-terminal-emulator)
+- [Are there any themes available, other than the default one?](#are-there-any-themes-available-other-than-the-default-one)
+- [How do links in messages work? What are footlinks?](#how-do-links-in-messages-work-what-are-footlinks)
+- [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
+- [How do I access multiple servers?](#how-do-i-access-multiple-servers)
+- [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
+- [Unable to render symbols](#unable-to-render-symbols)
+- [Unable to open links](#unable-to-open-links)
+- [How small a size of terminal is supported?](#how-small-a-size-of-terminal-is-supported)
+- [Mouse does not support *performing some action/feature*](#mouse-does-not-support-performing-some-action-feature)
+- [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
+- [Zulip-term crashed!](#zulip-term-crashed)
+- [Something looks wrong! Where's this feature? There's a bug!](#something-looks-wrong-wheres-this-feature-theres-a-bug)
+
 ## What Python implementations are supported?
 
 Users and developers run regularly with the "traditional" implementation of
