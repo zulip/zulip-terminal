@@ -110,27 +110,42 @@ We have reports of success on the following terminal emulators:
 Issues have been reported with the following:
 
 * (**major**) terminal app **Mac only**
-  - Issues with some default keypresses, including for sending messages [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
-* (**minor**) Microsoft/Windows Terminal (https://github.com/Microsoft/Terminal) **Windows only**
-  - Bold text isn't actually bold, it either renders the same as normal text or renders in a different colour [microsoft/terminal#109](https://github.com/microsoft/terminal/issues/109)
+  - Issues with some default keypresses, including for sending messages
+    [zulip-terminal#680](https://github.com/zulip/zulip-terminal/issues/680)
+* (**minor**) Microsoft/Windows Terminal
+  (https://github.com/Microsoft/Terminal) **Windows only**
+  - Bold text isn't actually bold, it either renders the same as normal text or
+    renders in a different colour
+    [microsoft/terminal#109](https://github.com/microsoft/terminal/issues/109)
 
-Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
+Please let us know if you have feedback on the success or failure in these or
+any other terminal emulator!
 
 ## How small a size of terminal is supported?
 
-While most users likely do not use such sizes, we aim to support sizes from the standard 80 columns by 24 rows upwards.
+While most users likely do not use such sizes, we aim to support sizes from the
+standard 80 columns by 24 rows upwards.
 
-If you use a width from approximately 100 columns upwards, everything is expected to work as documented.
+If you use a width from approximately 100 columns upwards, everything is
+expected to work as documented.
 
-However, since we currently use a fixed width for the left and right side panels, for widths from approximately 80-100 columns the message list can become too narrow.
-In these situations we recommend using the `autohide` option in your configuration file (see [configuration file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the command-line in a particular session via `--autohide`.
+However, since we currently use a fixed width for the left and right side
+panels, for widths from approximately 80-100 columns the message list can
+become too narrow.
+In these situations we recommend using the `autohide` option in your
+configuration file (see [configuration
+file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the
+command-line in a particular session via `--autohide`.
 
 If you use a small terminal size (or simply read long messages), you may find
 it useful to read a message which is too long to fit in the window by opening
-the Message Information (<kbd>i</kbd>) for a message and scrolling through the Full
-rendered message (<kbd>f</kbd>).
+the Message Information (<kbd>i</kbd>) for a message and scrolling through the
+Full rendered message (<kbd>f</kbd>).
 
-If you experience problems related to small sizes that are not resolved using the above, please check [#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any unresolved such issues and report them there.
+If you experience problems related to small sizes that are not resolved using
+the above, please check
+[#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any
+unresolved such issues and report them there.
 
 ## Are there any themes available, other than the default one?
 
@@ -141,24 +156,30 @@ Yes. There are five supported themes:
 - `zt_light` (alias: `light`)
 - `zt_blue` (alias: `blue`)
 
-You can specify one of them on the command-line using the command-line option `--theme <theme>` or `-t <theme>` (where _theme_ is the name of the theme, or its alias). You can also specify it in the `zuliprc` file like this:
+You can specify one of them on the command-line using the command-line option
+`--theme <theme>` or `-t <theme>` (where _theme_ is the name of the theme, or
+its alias).
+You can also specify it in the `zuliprc` file like this:
 ```
 [zterm]
 theme=<theme_name>
 ```
 (where _theme_name_ is the name of theme or its alias).
 
-**NOTE** Theme aliases are likely to be deprecated in the future, so we recommend using the full theme names.
+**NOTE** Theme aliases are likely to be deprecated in the future, so we
+recommend using the full theme names.
 
 ## How do links in messages work? What are footlinks?
 
-Each link (hyperlink) in a Zulip message resembles those on the internet, and is split into two parts:
-- the representation a user would see on the web page (eg. a textual description)
+Each link (hyperlink) in a Zulip message resembles those on the internet, and
+is split into two parts:
+- the representation a user would see on the web page (eg. a textual
+  description)
 - the location the link would go to (if clicking, in a GUI web browser)
 
 To avoid squashing these two parts next to each other within the message
-content, ZT places only the first within the content, followed by a number in square
-brackets, eg. `Zulip homepage [1]`.
+content, ZT places only the first within the content, followed by a number in
+square brackets, eg. `Zulip homepage [1]`.
 
 Underneath the message content, each location is then listed next to the
 related number, eg. `1: zulip.com`. Within ZT we term these **footlinks**,
@@ -199,8 +220,9 @@ content.
 
 The same scrolling keys as used elsewhere in the application can be used in
 this popup, and you may notice as you move that different lines of the popup
-will be highlighted. If a link is highlighted and you press <kbd>Enter</kbd>,
-an action may occur depending on the type of link:
+will be highlighted.
+If a link is highlighted and you press <kbd>Enter</kbd>, an action may occur
+depending on the type of link:
 - *Attachments to a particular message* (eg. images, text files, pdfs, etc)
   * will be downloaded, with an option given to open it with your default
     application (from version 0.7.0)
@@ -211,14 +233,14 @@ an action may occur depending on the type of link:
   * no internal action is supported at this time
 
 Any method supported by your terminal emulator to select and copy text should
-also be suitable to extract these links. Some emulators can identify links to
-open, and may do so in simple cases; however, while the popup is wider than the
-message column, it will not fit all lengths of links, and so can fail in the
-multiline case (see
-[#622](https://www.github.com/zulip/zulip-terminal/issues/622)). Some emulators
-may support area selection, as opposed to selecting multiple lines of the
-terminal, but it's unclear how common this support is or if it converts such
-text into one line suitable for use as a link.
+also be suitable to extract these links.
+Some emulators can identify links to open, and may do so in simple cases;
+however, while the popup is wider than the message column, it will not fit all
+lengths of links, and so can fail in the multiline case (see
+[#622](https://www.github.com/zulip/zulip-terminal/issues/622)).
+Some emulators may support area selection, as opposed to selecting multiple
+lines of the terminal, but it's unclear how common this support is or if it
+converts such text into one line suitable for use as a link.
 
 ## When are messages marked as having been read?
 
@@ -226,61 +248,101 @@ The approach currently taken is that that a message is marked read when
 * it has been selected *or*
 * it is a message that you have sent
 
-Unlike the web and mobile apps, we **don't** currently mark as read based on visibility, eg. if you have a message selected and all newer messages are also visible. This makes the marking-read process more explicit, balanced against needing to scroll through messages to mark them. Our styling is intended to promote moving onto unread messages to more easily read them.
+Unlike the web and mobile apps, we **don't** currently mark as read based on
+visibility, eg. if you have a message selected and all newer messages are also
+visible.
+This makes the marking-read process more explicit, balanced against needing to
+scroll through messages to mark them.
+Our styling is intended to promote moving onto unread messages to more easily
+read them.
 
-In contrast, like with the web app, we don't mark messages as read while in a search - but if you go to a message visible in a search within a topic or stream context then it will be marked as read, just like normal.
+In contrast, like with the web app, we don't mark messages as read while in a
+search - but if you go to a message visible in a search within a topic or
+stream context then it will be marked as read, just like normal.
 
-An additional feature to other front-ends is **explore mode**, which can be enabled when starting the application (with `-e` or `--explore`); this allows browsing through all your messages and interacting within the application like normal, with the exception that messages are never marked as read. Other than providing a means to test the application with no change in state (ie. *explore* it), this can be useful to scan through your messages quickly when you intend to return to look at them properly later.
+An additional feature to other front-ends is **explore mode**, which can be
+enabled when starting the application (with `-e` or `--explore`); this allows
+browsing through all your messages and interacting within the application like
+normal, with the exception that messages are never marked as read.
+Other than providing a means to test the application with no change in state
+(ie.  *explore* it), this can be useful to scan through your messages quickly
+when you intend to return to look at them properly later.
 
 ## How do I access multiple servers?
 
-One session of Zulip Terminal represents a connection of one user to one Zulip server. Each session refers to a zuliprc file to identify how to connect to the server, so by running Zulip Terminal and specifying a different zuliprc file (using `-c` or `--config-file`), you may connect to a different server. You might choose to do that after exiting from one Zulip Terminal session, or open another terminal and run it concurrently there.
+One session of Zulip Terminal represents a connection of one user to one Zulip
+server.
+Each session refers to a zuliprc file to identify how to connect to the server,
+so by running Zulip Terminal and specifying a different zuliprc file (using
+`-c` or `--config-file`), you may connect to a different server.
+You might choose to do that after exiting from one Zulip Terminal session, or
+open another terminal and run it concurrently there.
 
-Since we expect the above to be straightforward for most users and it allows the code to remain dramatically simpler, we are unlikely to support multiple Zulip servers within the same session in at least the short/medium term.
-However, we are certainly likely to move towards a system to make access of the different servers simpler, which should be made easier through work such as [zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
-In the longer term we may move to multiple servers per session, which is tracked in [zulip-terminal#961](https://github.com/zulip/zulip-terminal/issues/961).
+Since we expect the above to be straightforward for most users and it allows
+the code to remain dramatically simpler, we are unlikely to support multiple
+Zulip servers within the same session in at least the short/medium term.
+However, we are certainly likely to move towards a system to make access of the
+different servers simpler, which should be made easier through work such as
+[zulip-terminal#678](https://github.com/zulip/zulip-terminal/issues/678).
+In the longer term we may move to multiple servers per session, which is
+tracked in
+[zulip-terminal#961](https://github.com/zulip/zulip-terminal/issues/961).
 
 ## What is autocomplete? Why is it useful?
 
-Autocomplete can be used to request matching options, and cycle through each option in turn, including:
+Autocomplete can be used to request matching options, and cycle through each
+option in turn, including:
 - helping to specify users for new direct messages (eg. after <kbd>x</kbd>)
-- helping to specify streams and existing topics for new stream messages (eg. after <kbd>c</kbd>)
+- helping to specify streams and existing topics for new stream messages (eg.
+  after <kbd>c</kbd>)
 - mentioning a user or user-group (in message content)
 - linking to a stream or existing topic (in message content)
 - emojis (in message content)
 
 This helps ensure that:
-- messages are sent to valid users, streams, and matching existing topics if appropriate - so they
-  are sent to the correct location;
-- message content has references to valid users, user-groups, streams, topics and emojis, with
-  correct syntax - so is rendered well in all Zulip clients.
+- messages are sent to valid users, streams, and matching existing topics if
+  appropriate - so they are sent to the correct location;
+- message content has references to valid users, user-groups, streams, topics
+  and emojis, with correct syntax - so is rendered well in all Zulip clients.
 
 > Note that if using the left or right panels of the application to search for
-> streams, topics or users, this is **not** part of the autocomplete system. In
-> those cases, as you type, the results of these searches are shown
+> streams, topics or users, this is **not** part of the autocomplete system.
+> In those cases, as you type, the results of these searches are shown
 > automatically by limiting what is displayed in the existing area, until the
-> search is cleared. Autocomplete operates differently, and uses the bottom
-> line(s) of the screen to show a limited set of matches.
+> search is cleared.
+> Autocomplete operates differently, and uses the bottom line(s) of the screen
+> to show a limited set of matches.
 
 ### Hotkeys triggering autocomplete
 
-We use <kbd>ctrl</kbd>+<kbd>**f**</kbd> and <kbd>ctrl</kbd>+<kbd>**r**</kbd> for cycling through autocompletes (**forward** & **reverse** respectively).
+We use <kbd>ctrl</kbd>+<kbd>**f**</kbd> and <kbd>ctrl</kbd>+<kbd>**r**</kbd>
+for cycling through autocompletes (**forward** & **reverse** respectively).
 
-**NOTE:** We don't use <kbd>tab</kbd>/<kbd>shift</kbd>+<kbd>tab</kbd> (although it is widely used elsewhere) for cycling through matches. However, recall that we do use <kbd>tab</kbd> to cycle through recipient and content boxes. (See [hotkeys for composing a message](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md#composing-a-message))
+**NOTE:** We don't use <kbd>tab</kbd>/<kbd>shift</kbd>+<kbd>tab</kbd> (although
+it is widely used elsewhere) for cycling through matches.
+However, recall that we do use <kbd>tab</kbd> to cycle through recipient and
+content boxes. (See
+[hotkeys for composing a message](https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md#composing-a-message))
 
 ### Example: Using autocomplete to add a recognized emoji in your message content
 
-1. Type a prefix designated for an autocomplete (e.g., `:` for autocompleting emojis).
-2. Along with the prefix, type the initial letters of the text (e.g., `air` for `airplane`).
-3. Now hit the hotkey. You'd see suggestions being listed in the footer (a maximum of 10) if there are any.
-4. Cycle between different suggestions as described in above hotkey section. (Notice that a selected suggestion is highlighted)
-5. Cycling past the end of suggestions goes back to the prefix you entered (`:air` for this case).
+1. Type a prefix designated for an autocomplete (e.g., `:` for autocompleting
+   emojis).
+2. Along with the prefix, type the initial letters of the text (e.g., `air` for
+   `airplane`).
+3. Now hit the hotkey. You'd see suggestions being listed in the footer (a
+   maximum of 10) if there are any.
+4. Cycle between different suggestions as described in above hotkey section.
+   (Notice that a selected suggestion is highlighted)
+5. Cycling past the end of suggestions goes back to the prefix you entered
+   (`:air` for this case).
 
 ![selected_footer_autocomplete](https://user-images.githubusercontent.com/55916430/116669526-53cfb880-a9bc-11eb-8073-11b220e6f15a.gif)
 
 ### Autocomplete in the message content
 
-As in the example above, a specific prefix is required to indicate which action to perform (what text to insert) via the autocomplete:
+As in the example above, a specific prefix is required to indicate which action
+to perform (what text to insert) via the autocomplete:
 
 |Action|Prefix text(s)|Autocompleted text format|
 | :--- | :---: | :---: |
@@ -293,7 +355,9 @@ As in the example above, a specific prefix is required to indicate which action 
 
 ### Autocomplete of message recipients
 
-Since each of the stream (1), topic (2) and direct message recipients (3) areas are very specific, no prefix must be manually entered and values provided through autocomplete depend upon the context automatically.
+Since each of the stream (1), topic (2) and direct message recipients (3) areas
+are very specific, no prefix must be manually entered and values provided
+through autocomplete depend upon the context automatically.
 
 ![Stream header](https://user-images.githubusercontent.com/55916430/118403323-8e5b7580-b68b-11eb-9c8a-734c2fe6b774.png)
 
@@ -305,52 +369,80 @@ Since each of the stream (1), topic (2) and direct message recipients (3) areas 
 
 ![PM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
 
-**NOTE:** If a direct message recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
+**NOTE:** If a direct message recipient's name contains comma(s) (`,`), they
+are currently treated as comma-separated recipients.
 
 ## Colors appear mismatched, don't change with theme, or look strange
 
-Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
+Some terminal emulators support specifying custom colors, or custom color
+schemes. If you do this then this can override the colors that Zulip Terminal
+attempts to use.
 
-**NOTE** If you have color issues, also note that urwid version 2.1.1 should have fixed these for various terminal emulators (including rxvt, urxvt, mosh and Terminal.app), so please ensure you are running the latest Zulip Terminal release and at least this urwid version before reporting issues.
+**NOTE** If you have color issues, also note that urwid version 2.1.1 should
+have fixed these for various terminal emulators (including rxvt, urxvt, mosh
+and Terminal.app), so please ensure you are running the latest Zulip Terminal
+release and at least this urwid version before reporting issues.
 
 ## Symbols look different to in the provided screenshots, or just look incorrect
 
-If some symbols don't render properly on your terminal, it could likely be because of the symbols not being supported on your terminal emulator and/or font.
+If some symbols don't render properly on your terminal, it could likely be
+because of the symbols not being supported on your terminal emulator and/or
+font.
 
-We provide a tool that you can run with the command `zulip-term-check-symbols` to check whether or not the symbols render properly on your terminal emulator and font configuration.
+We provide a tool that you can run with the command `zulip-term-check-symbols`
+to check whether or not the symbols render properly on your terminal emulator
+and font configuration.
 
-Ideally, you should see something similar to the following screenshot (taken on the GNOME Terminal) as a result of running the tool:
+Ideally, you should see something similar to the following screenshot (taken on
+the GNOME Terminal) as a result of running the tool:
 
 ![Render Symbols Screenshot](https://user-images.githubusercontent.com/60441372/115103315-9a5df580-9f6e-11eb-8c90-3b2585817d08.png)
 
-If you are unable to observe a similar result upon running the tool, please take a screenshot and let us know about it along with your terminal and font configuration by opening an issue or at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+If you are unable to observe a similar result upon running the tool, please
+take a screenshot and let us know about it along with your terminal and font
+configuration by opening an issue or at
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
 ## Unable to open links
 
-If you are unable to open links in messages, then try double right-click on the link.
+If you are unable to open links in messages, then try double right-click on the
+link.
 
-Alternatively, you might try different modifier keys (eg. shift, ctrl, alt) with a right-click.
+Alternatively, you might try different modifier keys (eg. shift, ctrl, alt)
+with a right-click.
 
 If you are still facing problems, please discuss them at
-[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open issues
-for them mentioning your terminal name, version, and OS.
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or
+open issues for them mentioning your terminal name, version, and OS.
 
 ## Mouse does not support *performing some action/feature*
 
-We think of Zulip Terminal as a keyboard-centric client. Consequently, while functionality via the mouse does work in places, mouse support is not currently a priority for the project (see also [#248](https://www.github.com/zulip/zulip-terminal/issues/248)).
+We think of Zulip Terminal as a keyboard-centric client.
+Consequently, while functionality via the mouse does work in places, mouse
+support is not currently a priority for the project (see also
+[#248](https://www.github.com/zulip/zulip-terminal/issues/248)).
 
 ## Hotkeys don't work as described
 
-If any of the hotkeys don't work for you, feel free to open an issue or discuss it on [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+If any of the hotkeys don't work for you, feel free to open an issue or discuss
+it on
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
 ## Zulip-term crashed!
 
-We hope this doesn't happen, but would love to hear about this in order to fix it, since the application should be increasingly stable! Please let us know the problem, and if you're able to duplicate the issue, on the github issue-tracker or at [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
+We hope this doesn't happen, but would love to hear about this in order to fix
+it, since the application should be increasingly stable!
+Please let us know the problem, and if you're able to duplicate the issue, on
+the github issue-tracker or at
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal).
 
-This process would be helped if you could send us the 'traceback' showing the cause of the error, which should be output in such cases:
+This process would be helped if you could send us the 'traceback' showing the
+cause of the error, which should be output in such cases:
 * version 0.3.1 and earlier: the error is shown on the terminal;
 * versions 0.3.2+: the error is present/appended to the file `zulip-terminal-tracebacks.log`.
 
 ## Something looks wrong! Where's this feature? There's a bug!
-Come meet us on the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream on *chat.zulip.org*.
+Come meet us on the
+[#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
+stream on *chat.zulip.org*.
 
