@@ -5,7 +5,7 @@
   - [What Python versions are supported?](#what-python-versions-are-supported)
   - [What operating systems are supported?](#what-operating-systems-are-supported)
   - [What versions of Zulip are supported?](#what-versions-of-zulip-are-supported)
-  - [It doesn't seem to run or display properly in my terminal (emulator)?](#it-doesnt-seem-to-run-or-display-properly-in-my-terminal-emulator)
+  - [Will it run and display properly in my terminal (emulator)?](#will-it-run-and-display-properly-in-my-terminal-emulator)
   - [How small a size of terminal is supported?](#how-small-a-size-of-terminal-is-supported)
 - Features
   - [Are there any themes available, other than the default one?](#are-there-any-themes-available-other-than-the-default-one)
@@ -15,7 +15,7 @@
   - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
 - Something is not working!
   - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
-  - [Unable to render symbols](#unable-to-render-symbols)
+  - [Symbols look different to in the provided screenshots, or just look incorrect](#symbols-look-different-to-in-the-provided-screenshots-or-just-look-incorrect)
   - [Unable to open links](#unable-to-open-links)
   - [Mouse does not support *performing some action/feature*](#mouse-does-not-support-performing-some-actionfeature)
   - [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
@@ -91,7 +91,7 @@ Note that a subset of features in more recent Zulip versions are supported, and
 could in some cases be present when using this client, particularly if the
 feature relies upon a client-side implementation.
 
-## It doesn't seem to run or display properly in my terminal (emulator)?
+## Will it run and display properly in my terminal (emulator)?
 
 We have reports of success on the following terminal emulators:
 
@@ -313,7 +313,7 @@ Some terminal emulators support specifying custom colors, or custom color scheme
 
 **NOTE** If you have color issues, also note that urwid version 2.1.1 should have fixed these for various terminal emulators (including rxvt, urxvt, mosh and Terminal.app), so please ensure you are running the latest Zulip Terminal release and at least this urwid version before reporting issues.
 
-## Unable to render symbols
+## Symbols look different to in the provided screenshots, or just look incorrect
 
 If some symbols don't render properly on your terminal, it could likely be because of the symbols not being supported on your terminal emulator and/or font.
 
