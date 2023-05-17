@@ -1,23 +1,26 @@
 # Frequently Asked Questions (FAQ)
 
-- [What Python implementations are supported?](#what-python-implementations-are-supported)
-- [What Python versions are supported?](#what-python-versions-are-supported)
-- [What operating systems are supported?](#what-operating-systems-are-supported)
-- [What versions of Zulip are supported?](#what-versions-of-zulip-are-supported)
-- [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
-- [It doesn't seem to run or display properly in my terminal (emulator)?](#it-doesnt-seem-to-run-or-display-properly-in-my-terminal-emulator)
-- [Are there any themes available, other than the default one?](#are-there-any-themes-available-other-than-the-default-one)
-- [How do links in messages work? What are footlinks?](#how-do-links-in-messages-work-what-are-footlinks)
-- [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
-- [How do I access multiple servers?](#how-do-i-access-multiple-servers)
-- [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
-- [Unable to render symbols](#unable-to-render-symbols)
-- [Unable to open links](#unable-to-open-links)
-- [How small a size of terminal is supported?](#how-small-a-size-of-terminal-is-supported)
-- [Mouse does not support *performing some action/feature*](#mouse-does-not-support-performing-some-action-feature)
-- [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
-- [Zulip-term crashed!](#zulip-term-crashed)
-- [Something looks wrong! Where's this feature? There's a bug!](#something-looks-wrong-wheres-this-feature-theres-a-bug)
+- Supported environments
+  - [What Python implementations are supported?](#what-python-implementations-are-supported)
+  - [What Python versions are supported?](#what-python-versions-are-supported)
+  - [What operating systems are supported?](#what-operating-systems-are-supported)
+  - [What versions of Zulip are supported?](#what-versions-of-zulip-are-supported)
+  - [It doesn't seem to run or display properly in my terminal (emulator)?](#it-doesnt-seem-to-run-or-display-properly-in-my-terminal-emulator)
+  - [How small a size of terminal is supported?](#how-small-a-size-of-terminal-is-supported)
+- Features
+  - [Are there any themes available, other than the default one?](#are-there-any-themes-available-other-than-the-default-one)
+  - [How do links in messages work? What are footlinks?](#how-do-links-in-messages-work-what-are-footlinks)
+  - [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
+  - [How do I access multiple servers?](#how-do-i-access-multiple-servers)
+  - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
+- Something is not working!
+  - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
+  - [Unable to render symbols](#unable-to-render-symbols)
+  - [Unable to open links](#unable-to-open-links)
+  - [Mouse does not support *performing some action/feature*](#mouse-does-not-support-performing-some-actionfeature)
+  - [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
+  - [Zulip-term crashed!](#zulip-term-crashed)
+  - [Something looks wrong! Where's this feature? There's a bug!](#something-looks-wrong-wheres-this-feature-theres-a-bug)
 
 ## What Python implementations are supported?
 
@@ -88,12 +91,6 @@ Note that a subset of features in more recent Zulip versions are supported, and
 could in some cases be present when using this client, particularly if the
 feature relies upon a client-side implementation.
 
-## Colors appear mismatched, don't change with theme, or look strange
-
-Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
-
-**NOTE** If you have color issues, also note that urwid version 2.1.1 should have fixed these for various terminal emulators (including rxvt, urxvt, mosh and Terminal.app), so please ensure you are running the latest Zulip Terminal release and at least this urwid version before reporting issues.
-
 ## It doesn't seem to run or display properly in my terminal (emulator)?
 
 We have reports of success on the following terminal emulators:
@@ -118,6 +115,22 @@ Issues have been reported with the following:
   - Bold text isn't actually bold, it either renders the same as normal text or renders in a different colour [microsoft/terminal#109](https://github.com/microsoft/terminal/issues/109)
 
 Please let us know if you have feedback on the success or failure in these or any other terminal emulator!
+
+## How small a size of terminal is supported?
+
+While most users likely do not use such sizes, we aim to support sizes from the standard 80 columns by 24 rows upwards.
+
+If you use a width from approximately 100 columns upwards, everything is expected to work as documented.
+
+However, since we currently use a fixed width for the left and right side panels, for widths from approximately 80-100 columns the message list can become too narrow.
+In these situations we recommend using the `autohide` option in your configuration file (see [configuration file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the command-line in a particular session via `--autohide`.
+
+If you use a small terminal size (or simply read long messages), you may find
+it useful to read a message which is too long to fit in the window by opening
+the Message Information (<kbd>i</kbd>) for a message and scrolling through the Full
+rendered message (<kbd>f</kbd>).
+
+If you experience problems related to small sizes that are not resolved using the above, please check [#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any unresolved such issues and report them there.
 
 ## Are there any themes available, other than the default one?
 
@@ -294,6 +307,12 @@ Since each of the stream (1), topic (2) and direct message recipients (3) areas 
 
 **NOTE:** If a direct message recipient's name contains comma(s) (`,`), they are currently treated as comma-separated recipients.
 
+## Colors appear mismatched, don't change with theme, or look strange
+
+Some terminal emulators support specifying custom colors, or custom color schemes. If you do this then this can override the colors that Zulip Terminal attempts to use.
+
+**NOTE** If you have color issues, also note that urwid version 2.1.1 should have fixed these for various terminal emulators (including rxvt, urxvt, mosh and Terminal.app), so please ensure you are running the latest Zulip Terminal release and at least this urwid version before reporting issues.
+
 ## Unable to render symbols
 
 If some symbols don't render properly on your terminal, it could likely be because of the symbols not being supported on your terminal emulator and/or font.
@@ -315,22 +334,6 @@ Alternatively, you might try different modifier keys (eg. shift, ctrl, alt) with
 If you are still facing problems, please discuss them at
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) or open issues
 for them mentioning your terminal name, version, and OS.
-
-## How small a size of terminal is supported?
-
-While most users likely do not use such sizes, we aim to support sizes from the standard 80 columns by 24 rows upwards.
-
-If you use a width from approximately 100 columns upwards, everything is expected to work as documented.
-
-However, since we currently use a fixed width for the left and right side panels, for widths from approximately 80-100 columns the message list can become too narrow.
-In these situations we recommend using the `autohide` option in your configuration file (see [configuration file](https://github.com/zulip/zulip-terminal/#configuration) notes) or on the command-line in a particular session via `--autohide`.
-
-If you use a small terminal size (or simply read long messages), you may find
-it useful to read a message which is too long to fit in the window by opening
-the Message Information (<kbd>i</kbd>) for a message and scrolling through the Full
-rendered message (<kbd>f</kbd>).
-
-If you experience problems related to small sizes that are not resolved using the above, please check [#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any unresolved such issues and report them there.
 
 ## Mouse does not support *performing some action/feature*
 
