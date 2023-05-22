@@ -335,7 +335,7 @@ class UpdateMessageContentEvent(BaseUpdateMessageEvent):
     # orig_content: str
     # content: str
 
-    # is_me_message: bool
+    is_me_message: bool
 
 
 class UpdateMessagesLocationEvent(BaseUpdateMessageEvent):
