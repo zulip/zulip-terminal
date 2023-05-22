@@ -1604,6 +1604,7 @@ class Model:
         if "rendered_content" in event and indexed_message:
             content_event = cast(UpdateMessageContentEvent, event)
             indexed_message["content"] = content_event["rendered_content"]
+            indexed_message["is_me_message"] = content_event["is_me_message"]
             self.index["messages"][message_id] = indexed_message
             self._update_rendered_view(message_id)
 
