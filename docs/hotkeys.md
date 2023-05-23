@@ -58,6 +58,7 @@
 |Add/remove thumbs-up reaction to the current message|<kbd>+</kbd>|
 |Add/remove star status of the current message|<kbd>ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
+|Show/hide message sender information|<kbd>u</kbd>|
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
 |View current message in browser (from message information)|<kbd>v</kbd>|
 |Show/hide full rendered message (from message information)|<kbd>f</kbd>|
