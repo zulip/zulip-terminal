@@ -314,7 +314,9 @@ class Controller:
 
     def show_user_info(self, user_id: int) -> None:
         self.show_pop_up(
-            UserInfoView(self, user_id, "User Information (up/down scrolls)"),
+            UserInfoView(
+                self, user_id, "User Information (up/down scrolls)", "USER_INFO"
+            ),
             "area:user",
         )
 
