@@ -1083,7 +1083,7 @@ class AboutView(PopUpView):
 
 
 class UserInfoView(PopUpView):
-    def __init__(self, controller: Any, user_id: int, title: str) -> None:
+    def __init__(self, controller: Any, user_id: int, title: str, command: str) -> None:
         display_data = self._fetch_user_data(controller, user_id)
 
         user_details = [
@@ -1096,7 +1096,7 @@ class UserInfoView(PopUpView):
         )
         widgets = self.make_table_with_categories(user_view_content, column_widths)
 
-        super().__init__(controller, widgets, "USER_INFO", popup_width, title)
+        super().__init__(controller, widgets, command, popup_width, title)
 
     @staticmethod
     def _fetch_user_data(controller: Any, user_id: int) -> Dict[str, Any]:

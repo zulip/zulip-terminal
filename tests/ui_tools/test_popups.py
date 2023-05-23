@@ -272,7 +272,7 @@ class TestUserInfoView:
         )
 
         self.user_info_view = UserInfoView(
-            self.controller, 10000, "User Info (up/down scrolls)"
+            self.controller, 10000, "User Info (up/down scrolls)", "USER_INFO"
         )
 
     @pytest.mark.parametrize(
