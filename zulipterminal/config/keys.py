@@ -264,6 +264,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide message information',
         'key_category': 'msg_actions',
     },
+    'MSG_SENDER_INFO': {
+        'keys': ['u'],
+        'help_text': 'Show/hide message sender information',
+        'key_category': 'msg_actions',
+    },
     'EDIT_HISTORY': {
         'keys': ['e'],
         'help_text': 'Show/hide edit history (from message information)',
