@@ -13,6 +13,7 @@
   - [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
   - [How do I access multiple servers?](#how-do-i-access-multiple-servers)
   - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
+  - [Can I compose messages in another editor?](#can-i-compose-messages-in-another-editor)
 - Something is not working!
   - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
   - [Symbols look different to in the provided screenshots, or just look incorrect](#symbols-look-different-to-in-the-provided-screenshots-or-just-look-incorrect)
@@ -372,6 +373,55 @@ through autocomplete depend upon the context automatically.
 
 **NOTE:** If a direct message recipient's name contains comma(s) (`,`), they
 are currently treated as comma-separated recipients.
+
+## Can I compose messages in another editor?
+
+In the `main` branch of zulip-terminal, you can now use an external editor of
+your choice to compose your messages using the `Ctrl o` hotkey.
+
+The editor command is looked for in the `ZULIP_EDITOR_COMMAND` and `EDITOR`
+environment variables (in that order), or the `editor` entry of the zuliprc
+file (which overrides both of those).
+
+It should work directly for most terminal editors with only the program name,
+eg. `vim`, `nano`, `helix`, `kakoune`, `nvim`, etc.
+
+It can also be used with a desktop editor with some constraints: the program
+must not fork or detach from the running terminal and should open in a new
+window. For this reason it may be useful to use `ZULIP_EDITOR_COMMAND` (or the
+zuliprc setting) to avoid conflict with the more widely used `EDITOR`
+environment variable. Some examples include:
+
+- [lapce](https://github.com/lapce/lapce) with `lapce -n -w`
+- [sublime-text](https://www.sublimetext.com/) with `subl -n -w`
+- [marker](https://github.com/fabiocolacio/Marker) with `marker`
+- [vim](https://github.com/vim/vim) with `vim -g -f` or `gvim -f`
+- [vscode](https://github.com/microsoft/vscode) with `code -n -w`
+
+**NOTE:** Backslashing white space (`\ `) is needed when using an executable
+containing them, for example Sublime Text on macOS can be configured with
+`/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl`.
+
+This feature works by sending the message content back and forth using
+temporary files:
+- A temporary file is created, filled with any existing message content;
+- The editor command is run, with the filename appended (standard practice for editors);
+- You edit your text in the editor of your choice;
+- When the external editor process ends (closing the window, or quitting the terminal
+editor), the compose box will be updated with the new message content from
+the temporary file.
+
+> NOTE 1: If using a terminal-based editor, it will temporarily take over the
+> entire terminal and replace the application. However, upon exiting that
+> editor, the application should return to the terminal.
+
+> NOTE 2: Whichever type of editor you use (terminal or desktop/graphical), the
+> application will temporarily pause while you are editing. The application
+> should resume as normal once you exit the external editor and the text you
+> entered appears in the compose area.
+
+**If you have success with other editors, these examples do not work, or have
+other problems, please let us know!**
 
 ## Colors appear mismatched, don't change with theme, or look strange
 
