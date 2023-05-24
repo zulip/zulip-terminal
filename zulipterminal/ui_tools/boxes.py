@@ -3,9 +3,13 @@ UI boxes for entering text: WriteBox, MessageSearchBox, PanelSearchBox
 """
 
 import re
+import shlex
+import shutil
+import subprocess
 import unicodedata
 from collections import Counter
 from datetime import datetime, timedelta
+from tempfile import NamedTemporaryFile
 from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
@@ -839,6 +843,47 @@ class WriteBox(urwid.Pile):
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
+        elif is_command_key("OPEN_EXTERNAL_EDITOR", key):
+            editor_command = self.view.controller.editor_command
+
+            # None would indicate for shlex.split to read sys.stdin for Python < 3.12
+            # It should never occur in practice
+            assert isinstance(editor_command, str)
+
+            if editor_command == "":
+                self.view.controller.report_error(
+                    "No external editor command specified; "
+                    "Set 'editor' in zuliprc file, or "
+                    "$ZULIP_EDITOR_COMMAND or $EDITOR environment variables."
+                )
+                return key
+
+            editor_command_line: List[str] = shlex.split(editor_command)
+            if not editor_command_line:
+                fullpath_program = None  # A command may be specified, but empty
+            else:
+                fullpath_program = shutil.which(editor_command_line[0])
+            if fullpath_program is None:
+                self.view.controller.report_error(
+                    "External editor command not found; "
+                    "Check your zuliprc file, $EDITOR or $ZULIP_EDITOR_COMMAND."
+                )
+                return key
+            editor_command_line[0] = fullpath_program
+
+            with NamedTemporaryFile(suffix=".md") as edit_tempfile:
+                with open(edit_tempfile.name, mode="w") as edit_writer:
+                    edit_writer.write(self.msg_write_box.edit_text)
+                self.view.controller.loop.screen.stop()
+
+                editor_command_line.append(edit_tempfile.name)
+                subprocess.call(editor_command_line)
+
+                with open(edit_tempfile.name, mode="r") as edit_reader:
+                    self.msg_write_box.edit_text = edit_reader.read().rstrip()
+            self.view.controller.loop.screen.start()
+            return key
+
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.compose_box_status == "open_with_private":
