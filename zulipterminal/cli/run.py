@@ -33,6 +33,7 @@ from zulipterminal.version import ZT_VERSION
 class ConfigSource(Enum):
     DEFAULT = "from default config"
     ZULIPRC = "in zuliprc file"
+    ENV = "from environment"
     COMMANDLINE = "on command line"
 
 
@@ -82,6 +83,7 @@ DEFAULT_SETTINGS = {
     "maximum-footlinks": "3",
     "exit_confirmation": "enabled",
     "transparency": "disabled",
+    "editor": "",
 }
 assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
@@ -579,6 +581,21 @@ def main(options: Optional[List[str]] = None) -> None:
         print_setting("notify setting", zterm["notify"])
         print_setting("transparency setting", zterm["transparency"])
 
+        if zterm["editor"].source == ConfigSource.ZULIPRC:
+            editor_command = zterm["editor"].value
+            editor_config_source = ConfigSource.ZULIPRC
+        else:
+            editor_command = os.environ.get(
+                "ZULIP_EDITOR_COMMAND",
+                os.environ.get("EDITOR", ""),
+            )
+            editor_config_source = ConfigSource.ENV
+
+        print_setting(
+            "external editor command",
+            SettingData(editor_command, editor_config_source),
+        )
+
         ### Generate data not output to user, but into Controller
         # Translate valid strings for boolean values into True/False
         boolean_settings: Dict[str, bool] = dict()
@@ -605,6 +622,7 @@ def main(options: Optional[List[str]] = None) -> None:
             in_explore_mode=args.explore,
             **boolean_settings,
             debug_path=debug_path,
+            editor_command=editor_command,
         ).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs

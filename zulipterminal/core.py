@@ -69,6 +69,7 @@ class Controller:
         theme: ThemeSpec,
         color_depth: int,
         debug_path: Optional[str],
+        editor_command: str,
         in_explore_mode: bool,
         transparency: bool,
         autohide: bool,
@@ -84,6 +85,7 @@ class Controller:
         self.exit_confirmation = exit_confirmation
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
+        self.editor_command = editor_command
 
         self.debug_path = debug_path
 

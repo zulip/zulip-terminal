@@ -97,6 +97,7 @@
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
+|Open an external editor to edit the message content|<kbd>Ctrl</kbd> + <kbd>o</kbd>|
 
 ## Editor: Navigation
 |Command|Key Combination|

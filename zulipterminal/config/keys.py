@@ -428,6 +428,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Insert new line',
         'key_category': 'compose_box',
     },
+    'OPEN_EXTERNAL_EDITOR': {
+        'keys': ['ctrl o'],
+        'help_text': 'Open an external editor to edit the message content',
+        'key_category': 'compose_box',
+    },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
         'help_text': 'Show/hide full rendered message (from message information)',

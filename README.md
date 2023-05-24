@@ -251,6 +251,10 @@ color-depth=256
 ## This is highly dependent on a suitable terminal emulator, and support in the selected theme
 ## Terminal emulators without this feature may show an arbitrary solid background color
 transparency=disabled
+
+## Editor: set external editor command, to edit message content
+## If not set, this falls back to the $ZULIP_EDITOR_COMMAND then $EDITOR environment variables
+# editor: nano
 ```
 
 > **NOTE:** Most of these configuration settings may be specified on the
