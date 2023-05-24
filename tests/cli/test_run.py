@@ -27,6 +27,8 @@ from zulipterminal.version import ZT_VERSION
 MODULE = "zulipterminal.cli.run"
 CONTROLLER = MODULE + ".Controller"
 
+os.environ["ZULIP_EDITOR_COMMAND"] = ""
+
 
 @pytest.mark.parametrize(
     "color, code",
@@ -203,6 +205,7 @@ def test_valid_zuliprc_but_no_connection(
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
         "   notify setting 'disabled' specified from default config.",
+        "   external editor command '' specified from environment.",
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
@@ -262,6 +265,7 @@ def test_warning_regarding_incomplete_theme(
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
         "   notify setting 'disabled' specified from default config.",
+        "   external editor command '' specified from environment.",
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
@@ -481,6 +485,7 @@ def test_successful_main_function_with_config(
         f"   maximum footlinks value {footlinks_output}",
         "   color depth setting '256' specified in zuliprc file.",
         "   notify setting 'enabled' specified in zuliprc file.",
+        "   external editor command '' specified from environment.",
     ]
     assert lines == expected_lines
 

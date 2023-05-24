@@ -246,6 +246,9 @@ notify=disabled
 
 ## Color-depth: set to one of 1 (for monochrome), 16, 256, or 24bit
 color-depth=256
+
+## Editor: set external editor command, fallback to $ZULIP_EDITOR_COMMAND and $EDITOR env
+# editor: nano
 ```
 
 > **NOTE:** Most of these configuration settings may be specified on the
