@@ -3,9 +3,13 @@ UI boxes for entering text: WriteBox, MessageSearchBox, PanelSearchBox
 """
 
 import re
+import shlex
+import shutil
+import subprocess
 import unicodedata
 from collections import Counter
 from datetime import datetime, timedelta
+from tempfile import NamedTemporaryFile
 from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
@@ -807,6 +811,33 @@ class WriteBox(urwid.Pile):
             self.view.middle_column.set_focus("body")
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
+            return key
+        elif is_command_key("OPEN_EXTERNAL_EDITOR", key):
+            editor = self.view.controller.editor_command
+            if editor == "":
+                self.view.controller.report_error(
+                    "Configure zuliprc file editor key, $EDITOR or "
+                    "$ZULIP_EDITOR_COMMAND shell environment."
+                )
+                return key
+            editor_splits = shlex.split(editor)
+            fullpath_program = shutil.which(editor_splits[0])
+            if fullpath_program is None:
+                self.view.controller.report_error(
+                    "Editor program not found, check $EDITOR "
+                    "or $ZULIP_EDITOR_COMMAND."
+                )
+                return key
+            editor_splits[0] = fullpath_program
+            with NamedTemporaryFile(suffix=".md") as edit_tempfile:
+                with open(edit_tempfile.name, mode="w") as edit_writer:
+                    edit_writer.write(self.msg_write_box.edit_text)
+                self.view.controller.loop.screen.stop()
+                editor_splits.append(edit_tempfile.name)
+                subprocess.call(editor_splits)
+                with open(edit_tempfile.name, mode="r") as edit_reader:
+                    self.msg_write_box.edit_text = edit_reader.read().rstrip()
+            self.view.controller.loop.screen.start()
             return key
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:

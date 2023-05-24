@@ -33,6 +33,7 @@ from zulipterminal.version import ZT_VERSION
 class ConfigSource(Enum):
     DEFAULT = "from default config"
     ZULIPRC = "in zuliprc file"
+    ENV = "from environment"
     COMMANDLINE = "on command line"
 
 
@@ -80,6 +81,7 @@ DEFAULT_SETTINGS = {
     "color-depth": "256",
     "maximum-footlinks": "3",
     "exit_confirmation": "enabled",
+    "editor": "",
 }
 assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
@@ -553,6 +555,20 @@ def main(options: Optional[List[str]] = None) -> None:
             print_setting("maximum footlinks value", zterm["maximum-footlinks"])
         print_setting("color depth setting", zterm["color-depth"])
         print_setting("notify setting", zterm["notify"])
+        if zterm["editor"].source == ConfigSource.ZULIPRC:
+            editor_command = zterm["editor"].value
+            editor_config_source = ConfigSource.ZULIPRC
+        else:
+            editor_command = os.environ.get(
+                "ZULIP_EDITOR_COMMAND",
+                os.environ.get("EDITOR", ""),
+            )
+            editor_config_source = ConfigSource.ENV
+
+        print_setting(
+            "external editor command",
+            SettingData(editor_command, editor_config_source),
+        )
 
         ### Generate data not output to user, but into Controller
         # Generate urwid palette
@@ -575,6 +591,7 @@ def main(options: Optional[List[str]] = None) -> None:
             in_explore_mode=args.explore,
             **boolean_settings,
             debug_path=debug_path,
+            editor_command=editor_command,
         ).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs

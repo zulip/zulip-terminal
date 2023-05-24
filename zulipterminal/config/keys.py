@@ -320,6 +320,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'View user information (From Users list)',
         'key_category': 'general',
     },
+    'OPEN_EXTERNAL_EDITOR': {
+        'keys': ['ctrl o'],
+        'help_text': 'Open the message in external editor',
+        'key_category': 'msg_compose',
+    },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a'],
         'help_text': 'Jump to the beginning of line',
