@@ -320,6 +320,17 @@ class Controller:
             "area:user",
         )
 
+    def show_msg_sender_info(self, user_id: int) -> None:
+        self.show_pop_up(
+            UserInfoView(
+                self,
+                user_id,
+                "Message Sender Information (up/down scrolls)",
+                "MSG_SENDER_INFO",
+            ),
+            "area:user",
+        )
+
     def show_full_rendered_message(
         self,
         message: Message,

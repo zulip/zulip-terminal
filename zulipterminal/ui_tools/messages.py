@@ -1110,4 +1110,6 @@ class MessageBox(urwid.Pile):
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
+        elif is_command_key("MSG_SENDER_INFO", key):
+            self.model.controller.show_msg_sender_info(self.message["sender_id"])
         return key
