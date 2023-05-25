@@ -1205,7 +1205,7 @@ def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
         },
     ],
     ids=[
-        "zulip_feature_level:None",
+        "zulip_feature_level:0",
         "zulip_feature_level:1",
     ],
 )

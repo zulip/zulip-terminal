@@ -1206,14 +1206,14 @@ class TestStreamInfoView:
             case(
                 {"date_created": None, "is_announcement_only": True},
                 "74 [Organization default]",
-                None,
+                0,
                 17,
                 id="ZFL=None_no_date_created__no_retention_days__admins_only",
             ),
             case(
                 {"date_created": None, "is_announcement_only": False},
                 "74 [Organization default]",
-                None,
+                0,
                 16,
                 id="ZFL=None_no_date_created__no_retention_days__anyone_can_type",
             ),

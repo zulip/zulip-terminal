@@ -78,7 +78,7 @@ class TestModel:
         )
         assert model.initial_data == initial_data
         assert model.server_version == initial_data["zulip_version"]
-        assert model.server_feature_level == initial_data.get("zulip_feature_level")
+        assert model.server_feature_level == initial_data.get("zulip_feature_level", 0)
         assert model.user_id == user_profile["user_id"]
         assert model.user_full_name == user_profile["full_name"]
         assert model.user_email == user_profile["email"]
@@ -154,7 +154,7 @@ class TestModel:
             (
                 [["Stream 1", "muted stream muted topic"]],
                 {("Stream 1", "muted stream muted topic"): None},
-                None,
+                0,
             ),
             (
                 [["Stream 2", "muted topic", 1530129122]],
@@ -163,7 +163,7 @@ class TestModel:
             ),
         ],
         ids=[
-            "zulip_feature_level:None",
+            "zulip_feature_level:0",
             "zulip_feature_level:1",
         ],
     )
@@ -969,7 +969,7 @@ class TestModel:
     @pytest.mark.parametrize(
         "ZFL, expect_API_notify_args",
         [
-            (None, False),
+            (0, False),
             (8, False),
             (9, True),
             (152, True),
@@ -1347,7 +1347,7 @@ class TestModel:
     @pytest.mark.parametrize(
         "feature_level, to_vary_in_initial_data",
         [
-            (None, {}),
+            (0, {}),
             (27, {}),
             (52, {}),
             (
@@ -1360,7 +1360,7 @@ class TestModel:
             ),
         ],
         ids=[
-            "Zulip_2.1.x_ZFL_None_no_restrictions",
+            "Zulip_2.1.x_ZFL_0_no_restrictions",
             "Zulip_3.1.x_ZFL_27_no_restrictions",
             "Zulip_4.0.x_ZFL_52_no_restrictions",
             "Zulip_4.0.x_ZFL_53_with_restrictions",
@@ -2699,7 +2699,7 @@ class TestModel:
         params=[
             ("op", 32),  # At server feature level 32, event uses standard field
             ("operation", 31),
-            ("operation", None),
+            ("operation", 0),
         ]
     )
     def update_message_flags_operation(self, request):
@@ -3391,7 +3391,7 @@ class TestModel:
         [
             (
                 {"op": "peer_add", "stream_id": 99, "user_id": 12},
-                None,
+                0,
                 99,
                 [1001, 11, 12],
             ),
@@ -3413,7 +3413,7 @@ class TestModel:
                 99,
                 [1001, 11, 12],
             ),
-            ({"op": "peer_remove", "stream_id": 2, "user_id": 12}, None, 2, [1001, 11]),
+            ({"op": "peer_remove", "stream_id": 2, "user_id": 12}, 0, 2, [1001, 11]),
             ({"op": "peer_remove", "stream_id": 2, "user_id": 12}, 34, 2, [1001, 11]),
             (
                 {"op": "peer_remove", "stream_ids": [2], "user_ids": [12]},
@@ -3429,11 +3429,11 @@ class TestModel:
             ),
         ],
         ids=[
-            "user_subscribed_to_stream:ZFLNone",
+            "user_subscribed_to_stream:ZFL0",
             "user_subscribed_to_stream:ZFL34",
             "user_subscribed_to_stream:ZFL34_should_be_35",
             "user_subscribed_to_stream:ZFL35",
-            "user_unsubscribed_from_stream:ZFLNone",
+            "user_unsubscribed_from_stream:ZFL0",
             "user_unsubscribed_from_stream:ZFL34",
             "user_unsubscribed_from_stream:ZFL34_should_be_35",
             "user_unsubscribed_from_stream:ZFL35",
