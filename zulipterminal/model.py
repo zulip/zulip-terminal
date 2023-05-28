@@ -913,6 +913,7 @@ class Model:
             )
         unread_topics = sorted(self.unread_counts["unread_topics"].keys())
         next_topic = False
+        stream_start: Optional[Tuple[int, str]] = None
         if current_topic is None:
             next_topic = True
         elif current_topic not in unread_topics:
@@ -925,14 +926,26 @@ class Model:
         # the last valid unread_topic in unread_topics list.
         for unread_topic in unread_topics * 2:
             stream_id, topic_name = unread_topic
-            if (
-                not self.is_muted_topic(stream_id, topic_name)
-                and not self.is_muted_stream(stream_id)
-                and next_topic
-            ):
-                if unread_topic == current_topic:
-                    return None
-                return unread_topic
+            if not self.is_muted_topic(
+                stream_id, topic_name
+            ) and not self.is_muted_stream(stream_id):
+                if next_topic:
+                    if unread_topic == current_topic:
+                        return None
+                    if (
+                        current_topic is not None
+                        and unread_topic[0] != current_topic[0]
+                        and stream_start != current_topic
+                    ):
+                        return stream_start
+                    return unread_topic
+
+                if (
+                    stream_start is None
+                    and current_topic is not None
+                    and unread_topic[0] == current_topic[0]
+                ):
+                    stream_start = unread_topic
             if unread_topic == current_topic:
                 next_topic = True
         return None
