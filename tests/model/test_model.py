@@ -4010,6 +4010,12 @@ class TestModel:
                 (1, "topic1"),
                 id="unmuted_unread_not_present_in_next_stream_as_current_topic_not_in_unread_list",
             ),
+            case(
+                {(1, "topic1"), (1, "topic11"), (2, "topic2")},
+                (1, "topic11"),
+                (1, "topic1"),
+                id="unread_present_in_same_stream_wrap_around",
+            ),
         ],
     )
     def test_next_unread_topic_from_message(
