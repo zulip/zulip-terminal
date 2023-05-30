@@ -137,7 +137,7 @@ class PMButton(TopButton):
             controller=controller,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=controller.narrow_to_all_dm,
             count=count,
         )
 

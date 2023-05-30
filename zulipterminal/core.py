@@ -603,7 +603,7 @@ class Controller:
     ) -> None:
         self._narrow_to(
             anchor=contextual_message_id,
-            pm_with=", ".join(recipient_emails),
+            dm_with=", ".join(recipient_emails),
         )
 
     def narrow_to_all_messages(
@@ -611,8 +611,8 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
-    def narrow_to_all_pm(self, *, contextual_message_id: Optional[int] = None) -> None:
-        self._narrow_to(anchor=contextual_message_id, pms=True)
+    def narrow_to_all_dm(self, *, contextual_message_id: Optional[int] = None) -> None:
+        self._narrow_to(anchor=contextual_message_id, dms=True)
 
     def narrow_to_all_starred(self) -> None:
         # NOTE: Should we allow maintaining anchor focus here?

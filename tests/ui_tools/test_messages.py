@@ -872,7 +872,7 @@ class TestMessageBox:
             {"type": "stream"},
         ],
         ids=[
-            "larger_pm_group",
+            "larger_dm_group",
             "stream_before",
         ],
     )
@@ -911,13 +911,13 @@ class TestMessageBox:
             ([["is", "private"]], 1, "You and ", "All direct messages"),
             ([["is", "private"]], 2, "You and ", "All direct messages"),
             (
-                [["pm-with", "boo@zulip.com"]],
+                [["dm-with", "boo@zulip.com"]],
                 1,
                 "You and ",
                 "Direct message conversation",
             ),
             (
-                [["pm-with", "boo@zulip.com, bar@zulip.com"]],
+                [["dm-with", "boo@zulip.com, bar@zulip.com"]],
                 2,
                 "You and ",
                 "Group direct message conversation",
@@ -1128,8 +1128,8 @@ class TestMessageBox:
             ([["stream", "general"], ["topic", "Test"]], True),
             ([["is", "starred"]], False),
             ([["is", "mentioned"]], False),
-            ([["is", "private"]], False),
-            ([["pm-with", "notification-bot@zulip.com"]], False),
+            ([["is", "direct"]], False),
+            ([["dm-with", "notification-bot@zulip.com"]], False),
         ],
         ids=[
             "all_messages_narrow",

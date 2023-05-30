@@ -72,7 +72,7 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model._last_unread_topic is None
-        assert model.last_unread_pm is None
+        assert model.last_unread_dm is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
         )
@@ -130,8 +130,8 @@ class TestModel:
         assert model.user_settings() == UserSettings(
             send_direct_typing_notifications=expected_sptn_value,
             twenty_four_hour_time=initial_data["twenty_four_hour_time"],
-            pm_content_in_desktop_notifications=initial_data[
-                "pm_content_in_desktop_notifications"
+            dm_content_in_desktop_notifications=initial_data[
+                "dm_content_in_desktop_notifications"
             ],
         )
 
@@ -139,7 +139,7 @@ class TestModel:
         expected_keys = {
             "send_direct_typing_notifications",
             "twenty_four_hour_time",
-            "pm_content_in_desktop_notifications",
+            "dm_content_in_desktop_notifications",
         }
         settings = model.user_settings()
         assert set(settings) == expected_keys
@@ -338,9 +338,9 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm-with", "FOO@zulip.com"]],
-            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
-            [["is", "private"]],
+            [["dm-with", "FOO@zulip.com"]],
+            [["dm-with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["is", "direct"]],
             [["is", "starred"]],
         ],
     )
@@ -356,9 +356,9 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm-with", "FOO@zulip.com"]],
-            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
-            [["is", "private"]],
+            [["dm-with", "FOO@zulip.com"]],
+            [["dm-with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["is", "direct"]],
             [["is", "starred"]],
         ],
     )
@@ -392,9 +392,9 @@ class TestModel:
         "bad_args",
         [
             dict(topic="some topic"),
-            dict(stream="foo", pm_with="someone"),
-            dict(topic="blah", pm_with="someone"),
-            dict(pm_with="someone", topic="foo"),
+            dict(stream="foo", dm_with="someone"),
+            dict(topic="blah", dm_with="someone"),
+            dict(dm_with="someone", topic="foo"),
         ],
     )
     def test_set_narrow_bad_input(self, model, bad_args):
@@ -412,8 +412,8 @@ class TestModel:
             ),
             ([["is", "starred"]], dict(starred=True)),
             ([["is", "mentioned"]], dict(mentioned=True)),
-            ([["is", "private"]], dict(pms=True)),
-            ([["pm-with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
+            ([["is", "direct"]], dict(dms=True)),
+            ([["dm-with", "FOO@zulip.com"]], dict(dm_with="FOO@zulip.com")),
         ],
     )
     def test_set_narrow_already_set(self, model, narrow, good_args):
@@ -433,8 +433,8 @@ class TestModel:
             ),
             ([], [["is", "starred"]], dict(starred=True)),
             ([], [["is", "mentioned"]], dict(mentioned=True)),
-            ([], [["is", "private"]], dict(pms=True)),
-            ([], [["pm-with", "FOOBOO@gmail.com"]], dict(pm_with="FOOBOO@gmail.com")),
+            ([], [["is", "direct"]], dict(dms=True)),
+            ([], [["dm-with", "FOOBOO@gmail.com"]], dict(dm_with="FOOBOO@gmail.com")),
         ],
     )
     def test_set_narrow_not_already_set(
@@ -465,12 +465,12 @@ class TestModel:
             ),
             ([["is", "private"]], {"private_msg_ids": {0, 1}}, {0, 1}),
             (
-                [["pm-with", "FOO@zulip.com"]],
-                {"private_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
+                [["dm-with", "FOO@zulip.com"]],
+                {"direct_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
                 {0, 1},
             ),
             (
-                [["pm-with", "FOO@zulip.com"]],
+                [["dm-with", "FOO@zulip.com"]],
                 {  # Covers recipient empty-set case
                     "private_msg_ids_by_user_ids": {
                         frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
@@ -1828,10 +1828,10 @@ class TestModel:
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 5}],
                 },
-                [["pm-with", "notification-bot@zulip.com"]],
+                [["dm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 ["msg_w"],
-                id="user_pm_x_appears_in_narrow_with_x",
+                id="user_dm_x_appears_in_narrow_with_x",
             ),
             case(
                 {"type": "private", "id": 1},
@@ -1846,10 +1846,10 @@ class TestModel:
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 3212}],
                 },
-                [["pm-with", "notification-bot@zulip.com"]],
+                [["dm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 [],
-                id="user_pm_x_does_not_appear_in_narrow_without_x",
+                id="user_dm_x_does_not_appear_in_narrow_without_x",
             ),
             case(
                 {
@@ -2067,7 +2067,7 @@ class TestModel:
         self, mocker, model, private_message_fixture, hide_content, expected_content
     ):
         notify = mocker.patch(MODULE + ".notify")
-        model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
+        model._user_settings["dm_content_in_desktop_notifications"] = not hide_content
 
         message = direct_message_fixture
         message["user_id"] = 5179
@@ -2984,10 +2984,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="not_in_pm_narrow",
+                id="not_in_dm_narrow",
             ),
             case(
-                [["pm-with", "othello@zulip.com"]],
+                [["dm-with", "othello@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3000,10 +3000,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="not_in_pm_narrow_with_sender",
+                id="not_in_dm_narrow_with_sender",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3016,10 +3016,10 @@ class TestModel:
                 False,
                 {"sender_name": "hamlet"},
                 True,
-                id="in_pm_narrow_with_sender_typing:start",
+                id="in_dm_narrow_with_sender_typing:start",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3032,10 +3032,10 @@ class TestModel:
                 True,
                 {"sender_name": "hamlet"},
                 False,
-                id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
+                id="in_dm_narrow_with_sender_typing:start_while_animation_in_progress",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3048,10 +3048,10 @@ class TestModel:
                 True,
                 {},
                 False,
-                id="in_pm_narrow_with_sender_typing:stop",
+                id="in_dm_narrow_with_sender_typing:stop",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3064,10 +3064,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_other_myself_typing:start",
+                id="in_dm_narrow_with_other_myself_typing:start",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3080,10 +3080,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_other_myself_typing:stop",
+                id="in_dm_narrow_with_other_myself_typing:stop",
             ),
             case(
-                [["pm-with", "iago@zulip.com"]],
+                [["dm-with", "iago@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3093,10 +3093,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_oneself:start",
+                id="in_dm_narrow_with_oneself:start",
             ),
             case(
-                [["pm-with", "iago@zulip.com"]],
+                [["dm-with", "iago@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3106,7 +3106,7 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_oneself:stop",
+                id="in_dm_narrow_with_oneself:stop",
             ),
         ],
     )
@@ -3611,8 +3611,8 @@ class TestModel:
         assert model.user_settings()[setting] == value
 
     @pytest.mark.parametrize("setting", [True, False])
-    def test_update_pm_content_in_desktop_notifications(self, mocker, model, setting):
-        setting_name = "pm_content_in_desktop_notifications"
+    def test_update_dm_content_in_desktop_notifications(self, mocker, model, setting):
+        setting_name = "dm_content_in_desktop_notifications"
         event = {
             "type": "update_global_notifications",
             "notification_name": setting_name,
@@ -3828,24 +3828,24 @@ class TestModel:
 
         assert unread_topic == next_unread_topic
 
-    def test_get_next_unread_pm(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm(self, model):
+        model.unread_counts = {"unread_dms": {1: 1, 2: 1}}
+        return_value = model.get_next_unread_dm()
         assert return_value == 1
-        assert model.last_unread_pm == 1
+        assert model.last_unread_dm == 1
 
-    def test_get_next_unread_pm_again(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        model.last_unread_pm = 1
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm_again(self, model):
+        model.unread_counts = {"unread_dms": {1: 1, 2: 1}}
+        model.last_unread_dm = 1
+        return_value = model.get_next_unread_dm()
         assert return_value == 2
-        assert model.last_unread_pm == 2
+        assert model.last_unread_dm == 2
 
-    def test_get_next_unread_pm_no_unread(self, model):
-        model.unread_counts = {"unread_pms": {}}
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm_no_unread(self, model):
+        model.unread_counts = {"unread_dms": {}}
+        return_value = model.get_next_unread_dm()
         assert return_value is None
-        assert model.last_unread_pm is None
+        assert model.last_unread_dm is None
 
     @pytest.mark.parametrize(
         "stream_id, expected_response",

@@ -111,7 +111,7 @@ class MessageBox(urwid.Pile):
 
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
-        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
+        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "dm-with":
             return False
         if len(self.model.narrow) == 2 and self.model.narrow[1][0] == "topic":
             return False
@@ -921,9 +921,9 @@ class MessageBox(urwid.Pile):
                 )
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
-            if self.message["type"] == "private":
-                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
-                    self.model.controller.narrow_to_all_pm(
+            if self.message["type"] == "direct":
+                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "dm-with":
+                    self.model.controller.narrow_to_all_dm(
                         contextual_message_id=self.message["id"],
                     )
                 else:

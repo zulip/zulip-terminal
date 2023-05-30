@@ -79,7 +79,7 @@ def test_index_messages_narrow_user(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm-with", "boo@zulip.com"]]
+    model.narrow = [["dm-with", "boo@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -99,7 +99,7 @@ def test_index_messages_narrow_user_multiple(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm-with", "boo@zulip.com, bar@zulip.com"]]
+    model.narrow = [["dm-with", "boo@zulip.com, bar@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -344,17 +344,17 @@ def test_display_error_if_present(
             {"type": "private", "to": [1], "content": "bar"},
             [["is", "private"]],
             False,
-            id="all_private__pm__not_notified",
+            id="all_direct__dm__not_notified",
         ),
         case(
-            {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
+            {"type": "direct", "to": [4, 5], "content": "Hi"},
+            [["dm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
             False,
             id="group_direct_conv__same_group_dm__not_notified",
         ),
         case(
-            {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm-with", "welcome-bot@zulip.com"]],
+            {"type": "direct", "to": [4, 5], "content": "Hi"},
+            [["dm-with", "welcome-bot@zulip.com"]],
             True,
             id="direct_conv__other_dm__notified",
         ),
@@ -362,7 +362,7 @@ def test_display_error_if_present(
             {"type": "private", "to": [4], "content": ":party_parrot:"},
             [
                 [
-                    "pm-with",
+                    "dm-with",
                     "person1@example.com, person2@example.com, "
                     "welcome-bot@zulip.com",
                 ]
