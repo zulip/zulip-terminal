@@ -364,7 +364,7 @@ class Model:
             ids = index["direct_msg_ids"]
         elif narrow[0][0] == "dm-with":
             recipients = self.recipients
-            ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
+            ids = index["direct_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":

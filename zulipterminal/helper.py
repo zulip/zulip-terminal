@@ -83,8 +83,8 @@ class Index(TypedDict):
     all_msg_ids: Set[int]
     starred_msg_ids: Set[int]
     mentioned_msg_ids: Set[int]
-    private_msg_ids: Set[int]
-    private_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
+    direct_msg_ids: Set[int]
+    direct_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
     stream_msg_ids_by_stream_id: Dict[int, Set[int]]
     topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
@@ -100,8 +100,8 @@ initial_index = Index(
     all_msg_ids=set(),
     starred_msg_ids=set(),
     mentioned_msg_ids=set(),
-    private_msg_ids=set(),
-    private_msg_ids_by_user_ids=defaultdict(set),
+    direct_msg_ids=set(),
+    direct_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
@@ -287,7 +287,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     ...
                 }
         },
-        'private_msg_ids_by_user_ids': {
+        'direct_msg_ids_by_user_ids': {
             (3, 7): {  # user_ids frozenset
                 51234,
                 56454,
@@ -310,7 +310,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             23423,
             ...
         },
-        'private_msg_ids': {
+        'direct_msg_ids': {
             22334,
             23423,
             ...
@@ -428,7 +428,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                         for email in narrow[0][1].split(", ")
                     ] + [model.user_id]
                     if recipients == frozenset(narrow_emails):
-                        index["private_msg_ids_by_user_ids"][recipients].add(msg["id"])
+                        index["direct_msg_ids_by_user_ids"][recipients].add(msg["id"])
 
             if msg["type"] == "stream" and msg["stream_id"] == model.stream_id:
                 index["stream_msg_ids_by_stream_id"][msg["stream_id"]].add(msg["id"])

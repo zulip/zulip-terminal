@@ -472,7 +472,7 @@ class TestModel:
             (
                 [["dm-with", "FOO@zulip.com"]],
                 {  # Covers recipient empty-set case
-                    "private_msg_ids_by_user_ids": {
+                    "direct_msg_ids_by_user_ids": {
                         frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
                     }
                 },
