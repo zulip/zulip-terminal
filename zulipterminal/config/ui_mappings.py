@@ -39,11 +39,11 @@ STATE_ICON: Dict[UserStatus, str] = {
 }
 
 
-StreamAccessType = Literal["public", "private", "web-public"]
+StreamAccessType = Literal["public", "direct", "web-public"]
 
 STREAM_ACCESS_TYPE = {
     "public": {"description": "Public", "icon": STREAM_MARKER_PUBLIC},
-    "private": {"description": "Private", "icon": STREAM_MARKER_PRIVATE},
+    "direct": {"description": "direct", "icon": STREAM_MARKER_PRIVATE},
     "web-public": {"description": "Web public", "icon": STREAM_MARKER_WEB_PUBLIC},
 }
 

@@ -341,8 +341,8 @@ def test_display_error_if_present(
     "req, narrow, footer_updated",
     [
         case(
-            {"type": "private", "to": [1], "content": "bar"},
-            [["is", "private"]],
+            {"type": "direct", "to": [1], "content": "bar"},
+            [["is", "direct"]],
             False,
             id="all_direct__dm__not_notified",
         ),
@@ -359,7 +359,7 @@ def test_display_error_if_present(
             id="direct_conv__other_dm__notified",
         ),
         case(
-            {"type": "private", "to": [4], "content": ":party_parrot:"},
+            {"type": "direct", "to": [4], "content": ":party_parrot:"},
             [
                 [
                     "dm-with",
@@ -405,7 +405,7 @@ def test_display_error_if_present(
             id="starred__stream__notified",
         ),
         case(
-            {"type": "private", "to": [1], "content": "fist_bump"},
+            {"type": "direct", "to": [1], "content": "fist_bump"},
             [["is", "mentioned"]],
             True,
             id="mentioned__direct_no_mention__notified",

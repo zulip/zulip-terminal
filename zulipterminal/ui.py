@@ -289,7 +289,7 @@ class View(urwid.WidgetWrap):
                         title=saved_draft["subject"],
                         stream_id=stream_id,
                     )
-                elif saved_draft["type"] == "private":
+                elif saved_draft["type"] == "direct":
                     recipient_user_ids = saved_draft["to"]
                     self.write_box.direct_box_view(
                         recipient_user_ids=recipient_user_ids,

@@ -360,9 +360,9 @@ class Model:
             elif len(narrow) == 2:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
-        elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
-        elif narrow[0][0] == "pm-with":
+        elif narrow[0][1] == "direct":
+            ids = index["direct_msg_ids"]
+        elif narrow[0][0] == "dm-with":
             recipients = self.recipients
             ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
@@ -1246,7 +1246,7 @@ class Model:
         if stream.get("is_web_public", False):
             return "web-public"
         if stream["invite_only"]:
-            return "private"
+            return "direct"
         return "public"
 
     def is_pinned_stream(self, stream_id: int) -> bool:
@@ -1440,7 +1440,7 @@ class Model:
         recipient = ""
         content = message["content"]
         hidden_content = False
-        if message["type"] == "private":
+        if message["type"] == "direct":
             recipient = "you"
             if len(message["display_recipient"]) > 2:
                 extra_targets = [recipient] + [

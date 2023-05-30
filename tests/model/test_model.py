@@ -373,9 +373,9 @@ class TestModel:
         [
             ([], False),
             ([["search", "FOO"]], True),
-            ([["is", "private"]], False),
-            ([["is", "private"], ["search", "FOO"]], True),
-            ([["search", "FOO"], ["is", "private"]], True),
+            ([["is", "direct"]], False),
+            ([["is", "direct"], ["search", "FOO"]], True),
+            ([["search", "FOO"], ["is", "direct"]], True),
             ([["stream", "PTEST"]], False),
             ([["stream", "PTEST"], ["search", "FOO"]], True),
             ([["stream", "7"], ["topic", "Test"]], False),
@@ -463,7 +463,7 @@ class TestModel:
                 {"topic_msg_ids": {1: {"BOO": {0, 1}}}},
                 set(),
             ),
-            ([["is", "private"]], {"private_msg_ids": {0, 1}}, {0, 1}),
+            ([["is", "direct"]], {"direct_msg_ids": {0, 1}}, {0, 1}),
             (
                 [["dm-with", "FOO@zulip.com"]],
                 {"direct_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
@@ -760,7 +760,7 @@ class TestModel:
 
         result = model.send_private_message(recipients, content)
 
-        req = dict(type="private", to=recipients, content=content)
+        req = dict(type="direct", to=recipients, content=content)
         self.client.send_message.assert_called_once_with(req)
 
         assert result == return_value
@@ -1514,7 +1514,7 @@ class TestModel:
         self, model, general_stream, secret_stream, web_public_stream
     ):
         assert model.stream_access_type(general_stream["stream_id"]) == "public"
-        assert model.stream_access_type(secret_stream["stream_id"]) == "private"
+        assert model.stream_access_type(secret_stream["stream_id"]) == "direct"
         assert model.stream_access_type(web_public_stream["stream_id"]) == "web-public"
 
     @pytest.mark.parametrize(
@@ -1777,11 +1777,11 @@ class TestModel:
                 id="stream_to_all_messages",
             ),
             case(
-                {"type": "private", "id": 1},
-                [["is", "private"]],
+                {"type": "direct", "id": 1},
+                [["is", "direct"]],
                 frozenset(),
                 ["msg_w"],
-                id="private_to_all_private",
+                id="direct_to_all_direct",
             ),
             case(
                 {
@@ -1824,7 +1824,7 @@ class TestModel:
             ),
             case(
                 {
-                    "type": "private",
+                    "type": "direct",
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 5}],
                 },
@@ -1834,7 +1834,7 @@ class TestModel:
                 id="user_dm_x_appears_in_narrow_with_x",
             ),
             case(
-                {"type": "private", "id": 1},
+                {"type": "direct", "id": 1},
                 [["is", "search"]],
                 frozenset(),
                 [],
@@ -1842,7 +1842,7 @@ class TestModel:
             ),
             case(
                 {
-                    "type": "private",
+                    "type": "direct",
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 3212}],
                 },
@@ -1951,10 +1951,10 @@ class TestModel:
                 True,
                 [],
             ),  # message_fixture sender_id is 5140
-            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream", "private"]),
-            (5179, {"flags": []}, False, ["private"]),
+            (5179, {"flags": ["mentioned"]}, False, ["stream", "direct"]),
+            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "direct"]),
+            (5179, {"flags": []}, True, ["stream", "direct"]),
+            (5179, {"flags": []}, False, ["direct"]),
         ],
         ids=[
             "not_notified_since_self_message",
@@ -1989,7 +1989,7 @@ class TestModel:
             who = message_fixture["type"]
             if who == "stream":
                 target = "PTEST -> Test"
-            elif who == "private":
+            elif who == "direct":
                 target = "you"
                 if len(message_fixture["display_recipient"]) > 2:
                     target += ", Bar Bar"

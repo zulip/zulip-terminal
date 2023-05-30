@@ -30,7 +30,7 @@ MAX_MESSAGE_LENGTH: Final = 10000
 ###############################################################################
 # Core message types (used in Composition and Message below)
 
-DirectMessageString = Literal["private"]
+DirectMessageString = Literal["direct"]
 StreamMessageString = Literal["stream"]
 
 MessageType = Union[DirectMessageString, StreamMessageString]
@@ -442,7 +442,7 @@ class TypingEvent(TypedDict):
     sender: _TypingEventUser
 
     # Unused as yet
-    # Pre Zulip 4.0, always present; now only present if message_type == "private"
+    # Pre Zulip 4.0, always present; now only present if message_type == "direct"
     # recipients: List[_TypingEventUser]
     # NOTE: These fields are all new in Zulip 4.0 / ZFL 58, if client capability sent
     # message_type: NotRequired[MessageType]

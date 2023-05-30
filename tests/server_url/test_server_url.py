@@ -59,7 +59,7 @@ def test_encode_stream(
             "https://foo.bar.com",
             {
                 "id": 24284,
-                "type": "private",
+                "type": "direct",
                 "display_recipient": [
                     {
                         "id": 12,

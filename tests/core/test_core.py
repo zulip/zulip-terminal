@@ -284,7 +284,7 @@ class TestController:
 
         controller.narrow_to_all_dm()  # FIXME: Add id narrowing test
 
-        assert controller.model.narrow == [["is", "private"]]
+        assert controller.model.narrow == [["is", "direct"]]
         controller.view.message_view.log.clear.assert_called_once_with()
 
         widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]

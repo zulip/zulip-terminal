@@ -1255,7 +1255,7 @@ class TestWriteBox:
                 STREAM_MARKER_WEB_PUBLIC,
                 "#ddd",
             ),
-            ("Secret stream", 99, True, "private", STREAM_MARKER_PRIVATE, "#ccc"),
+            ("Secret stream", 99, True, "direct", STREAM_MARKER_PRIVATE, "#ccc"),
             ("Stream 1", 1, True, "public", STREAM_MARKER_PUBLIC, "#b0a5fd"),
             ("Stream 0", 0, False, None, INVALID_MARKER, "general_bar"),
         ],
@@ -1630,7 +1630,7 @@ class TestWriteBox:
             case(
                 "CONTAINER_HEADER",
                 "HEADER_BOX_RECIPIENT",
-                "private",
+                "direct",
                 True,
                 False,
                 "CONTAINER_MESSAGE",
@@ -1640,7 +1640,7 @@ class TestWriteBox:
             case(
                 "CONTAINER_MESSAGE",
                 "MESSAGE_BOX_BODY",
-                "private",
+                "direct",
                 True,
                 False,
                 "CONTAINER_HEADER",
@@ -1716,7 +1716,7 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "msg_type, expected_box_size",
         [
-            ("private", 1),
+            ("direct", 1),
             ("stream", 4),
             ("stream_edit", 5),
         ],

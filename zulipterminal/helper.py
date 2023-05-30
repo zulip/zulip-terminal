@@ -356,7 +356,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'subject': '',
                 'subject_links': [],
                 'sender_id': 73,
-                'type': 'private',
+                'type': 'direct',
                 'reactions': [],
                 'display_recipient': [
                     {
@@ -416,8 +416,8 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             if narrow[0][1] == "mentioned" and msg_has_mention:
                 index["mentioned_msg_ids"].add(msg["id"])
 
-            if msg["type"] == "private":
-                index["private_msg_ids"].add(msg["id"])
+            if msg["type"] == "direct":
+                index["direct_msg_ids"].add(msg["id"])
                 recipients = frozenset(
                     {recipient["id"] for recipient in msg["display_recipient"]}
                 )

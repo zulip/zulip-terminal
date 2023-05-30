@@ -478,7 +478,7 @@ def extra_stream_msg_template() -> Message:
 @pytest.fixture
 def dm_template() -> Message:
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
-    return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
+    return msg_template_factory(537287, "direct", 1520918736, recipients=recipients)
 
 
 @pytest.fixture
@@ -486,7 +486,7 @@ def group_dm_template() -> Message:
     recipients = display_recipient_factory(
         [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
     )
-    return msg_template_factory(537288, "private", 1520918737, recipients=recipients)
+    return msg_template_factory(537288, "direct", 1520918737, recipients=recipients)
 
 
 @pytest.fixture(params=["dm_template", "group_dm_template"])

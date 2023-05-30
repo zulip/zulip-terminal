@@ -401,7 +401,7 @@ class TestView:
                 "content": "this is a stream message content",
             },
             {
-                "type": "private",
+                "type": "direct",
                 "to": [1, 2],
                 "content": "this is a direct message content",
             },

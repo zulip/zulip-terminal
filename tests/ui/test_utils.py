@@ -13,9 +13,9 @@ MODULE = "zulipterminal.ui_tools.utils"
 @pytest.mark.parametrize(
     "msg, narrow, muted_streams, is_muted_topic_return_value, muted",
     [
-        (  # PM TEST
+        (  # DM TEST
             {
-                "type": "private",
+                "type": "direct",
                 # ...
             },
             [],

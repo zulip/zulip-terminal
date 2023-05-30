@@ -33,7 +33,7 @@ class TestMessageBox:
         "message_type, set_fields",
         [
             ("stream", [("stream_name", ""), ("stream_id", None), ("topic_name", "")]),
-            ("private", [("email", ""), ("user_id", None)]),
+            ("direct", [("email", ""), ("user_id", None)]),
         ],
     )
     def test_init(self, mocker, message_type, set_fields):
@@ -65,9 +65,9 @@ class TestMessageBox:
         with pytest.raises(RuntimeError):
             MessageBox(message, self.model, None)
 
-    def test_private_message_to_self(self, mocker):
+    def test_direct_message_to_self(self, mocker):
         message = dict(
-            type="private",
+            type="direct",
             display_recipient=[
                 {"full_name": "Foo Foo", "email": "foo@zulip.com", "id": None}
             ],
@@ -733,7 +733,7 @@ class TestMessageBox:
                     "client": "ZulipTerminal",
                     "content_type": "text/html",
                     "reactions": [],
-                    "type": "private",
+                    "type": "direct",
                     "is_me_message": False,
                     "flags": ["read"],
                     "sender_email": "iago@zulip.com",
@@ -811,7 +811,7 @@ class TestMessageBox:
         [
             {"display_recipient": "Verona offtopic"},
             {"subject": "Test topic (previous)"},
-            {"type": "private"},
+            {"type": "direct"},
         ],
         ids=[
             "different_stream_before",
@@ -843,7 +843,7 @@ class TestMessageBox:
         [
             {
                 "id": 4,
-                "type": "private",
+                "type": "direct",
                 "sender_email": "iago@zulip.com",
                 "sender_id": 5,
                 "display_recipient": [
@@ -908,8 +908,8 @@ class TestMessageBox:
                 f"PTEST {STREAM_TOPIC_SEPARATOR}",
                 ("bar", [("s#bd6", "PTEST"), ("s#bd6", ": topic narrow")]),
             ),
-            ([["is", "private"]], 1, "You and ", "All direct messages"),
-            ([["is", "private"]], 2, "You and ", "All direct messages"),
+            ([["is", "direct"]], 1, "You and ", "All direct messages"),
+            ([["is", "direct"]], 2, "You and ", "All direct messages"),
             (
                 [["dm-with", "boo@zulip.com"]],
                 1,
@@ -1173,14 +1173,14 @@ class TestMessageBox:
                 {"sender_id": 2, "timestamp": 45, "subject": "test"},
                 True,
                 60,
-                {"stream": False, "private": False},
-                {"stream": False, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": False, "direct": False},
                 {
                     "stream": (
                         " You can't edit messages sent by other users"
                         " that already have a topic."
                     ),
-                    "private": " You can't edit direct messages sent by other users.",
+                    "direct": " You can't edit direct messages sent by other users.",
                 },
                 id="msg_sent_by_other_user_with_topic",
             ),
@@ -1188,14 +1188,14 @@ class TestMessageBox:
                 {"sender_id": 1, "timestamp": 1, "subject": "test"},
                 True,
                 60,
-                {"stream": False, "private": False},
-                {"stream": True, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": True, "direct": False},
                 {
                     "stream": (
                         " Only topic editing allowed."
                         " Time Limit for editing the message body has been exceeded."
                     ),
-                    "private": " Time Limit for editing the message has been exceeded.",
+                    "direct": " Time Limit for editing the message has been exceeded.",
                 },
                 id="topic_edit_only_after_time_limit",
             ),
@@ -1203,11 +1203,11 @@ class TestMessageBox:
                 {"sender_id": 1, "timestamp": 45, "subject": "test"},
                 False,
                 60,
-                {"stream": False, "private": False},
-                {"stream": False, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": False, "direct": False},
                 {
                     "stream": " Editing sent message is disabled.",
-                    "private": " Editing sent message is disabled.",
+                    "direct": " Editing sent message is disabled.",
                 },
                 id="realm_editing_not_allowed",
             ),
@@ -1215,32 +1215,32 @@ class TestMessageBox:
                 {"sender_id": 1, "timestamp": 45, "subject": "test"},
                 True,
                 60,
-                {"stream": True, "private": True},
-                {"stream": True, "private": True},
-                {"stream": None, "private": None},
+                {"stream": True, "direct": True},
+                {"stream": True, "direct": True},
+                {"stream": None, "direct": None},
                 id="realm_editing_allowed_and_within_time_limit",
             ),
             case(
                 {"sender_id": 1, "timestamp": 1, "subject": "test"},
                 True,
                 0,
-                {"stream": True, "private": True},
-                {"stream": True, "private": True},
-                {"stream": None, "private": None},
+                {"stream": True, "direct": True},
+                {"stream": True, "direct": True},
+                {"stream": None, "direct": None},
                 id="no_msg_body_edit_limit",
             ),
             case(
                 {"sender_id": 1, "timestamp": 1, "subject": "(no topic)"},
                 True,
                 60,
-                {"stream": False, "private": False},
-                {"stream": True, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": True, "direct": False},
                 {
                     "stream": (
                         " Only topic editing allowed."
                         " Time Limit for editing the message body has been exceeded."
                     ),
-                    "private": " Time Limit for editing the message has been exceeded.",
+                    "direct": " Time Limit for editing the message has been exceeded.",
                 },
                 id="msg_sent_by_me_with_no_topic",
             ),
@@ -1248,14 +1248,14 @@ class TestMessageBox:
                 {"sender_id": 2, "timestamp": 1, "subject": "(no topic)"},
                 True,
                 60,
-                {"stream": False, "private": False},
-                {"stream": True, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": True, "direct": False},
                 {
                     "stream": (
                         " Only topic editing is allowed."
                         " This is someone else's message but with (no topic)."
                     ),
-                    "private": " You can't edit direct messages sent by other users.",
+                    "direct": " You can't edit direct messages sent by other users.",
                 },
                 id="msg_sent_by_other_with_no_topic",
             ),
@@ -1263,11 +1263,11 @@ class TestMessageBox:
                 {"sender_id": 1, "timestamp": 1, "subject": "(no topic)"},
                 False,
                 60,
-                {"stream": False, "private": False},
-                {"stream": False, "private": False},
+                {"stream": False, "direct": False},
+                {"stream": False, "direct": False},
                 {
                     "stream": " Editing sent message is disabled.",
-                    "private": " Editing sent message is disabled.",
+                    "direct": " Editing sent message is disabled.",
                 },
                 id="realm_editing_not_allowed_for_no_topic",
             ),
@@ -1275,9 +1275,9 @@ class TestMessageBox:
                 {"sender_id": 1, "timestamp": 45, "subject": "(no topic)"},
                 True,
                 0,
-                {"stream": True, "private": True},
-                {"stream": True, "private": True},
-                {"stream": None, "private": None},
+                {"stream": True, "direct": True},
+                {"stream": True, "direct": True},
+                {"stream": None, "direct": None},
                 id="no_msg_body_edit_limit_with_no_topic",
             ),
         ],
@@ -1295,7 +1295,7 @@ class TestMessageBox:
         expect_footer_text,
         key,
     ):
-        if message_fixture["type"] == "private":
+        if message_fixture["type"] == "direct":
             to_vary_in_each_message["subject"] = ""
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         message_type = varied_message["type"]
