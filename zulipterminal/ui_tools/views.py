@@ -604,9 +604,9 @@ class MiddleColumnView(urwid.Frame):
                 recipient_emails=[email],
                 contextual_message_id=dm,
             )
-        elif is_command_key("PRIVATE_MESSAGE", key):
-            # Create new PM message
-            self.footer.private_box_view()
+        elif is_command_key("DIRECT_MESSAGE", key):
+            # Create new DM message
+            self.footer.direct_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key

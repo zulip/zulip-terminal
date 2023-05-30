@@ -121,7 +121,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'New message to a stream',
         'key_category': 'msg_actions',
     },
-    'PRIVATE_MESSAGE': {
+    'DIRECT_MESSAGE': {
         'keys': ['x'],
         'help_text': 'New message to a person or group of people',
         'key_category': 'msg_actions',

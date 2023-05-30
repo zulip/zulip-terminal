@@ -810,7 +810,7 @@ class WriteBox(urwid.Pile):
             return key
         elif is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
-                if self.compose_box_status == "open_with_private":
+                if self.compose_box_status == "open_with_direct":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )

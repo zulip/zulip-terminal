@@ -753,12 +753,12 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
-    def test_send_private_message(
+    def test_send_direct_message(
         self, mocker, model, recipients, response, return_value, content="hi!"
     ):
         self.client.send_message = mocker.Mock(return_value=response)
 
-        result = model.send_private_message(recipients, content)
+        result = model.send_direct_message(recipients, content)
 
         req = dict(type="direct", to=recipients, content=content)
         self.client.send_message.assert_called_once_with(req)
