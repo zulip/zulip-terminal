@@ -72,7 +72,7 @@ class StreamTypingNotification(TypedDict):
 #   https://zulip.com/api/send-message
 
 
-class PrivateComposition(TypedDict):
+class DirectComposition(TypedDict):
     type: DirectMessageString
     content: str
     to: List[int]  # User ids
@@ -85,7 +85,7 @@ class StreamComposition(TypedDict):
     subject: str  # TODO: Migrate to using topic
 
 
-Composition = Union[PrivateComposition, StreamComposition]
+Composition = Union[DirectComposition, StreamComposition]
 
 ###############################################################################
 # Parameters to pass in request to:
@@ -105,7 +105,7 @@ class MessagesFlagChange(TypedDict):
 #   https://zulip.com/api/update-message
 
 
-class PrivateMessageUpdateRequest(TypedDict):
+class DirectMessageUpdateRequest(TypedDict):
     message_id: int
     content: str
 
@@ -129,7 +129,7 @@ class StreamMessageUpdateRequest(TypedDict):
     # stream_id: int
 
 
-MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateRequest]
+MessageUpdateRequest = Union[DirectMessageUpdateRequest, StreamMessageUpdateRequest]
 
 ###############################################################################
 # Parameter to pass in request to:

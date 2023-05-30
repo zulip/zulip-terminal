@@ -39,8 +39,8 @@ from zulipterminal.api_types import (
     EditPropagateMode,
     Event,
     MessagesFlagChange,
-    PrivateComposition,
-    PrivateMessageUpdateRequest,
+    DirectComposition,
+    DirectMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
     StreamComposition,
@@ -529,8 +529,8 @@ class Model:
 
     def send_direct_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
-            composition = PrivateComposition(
-                type="private",
+            composition = DirectComposition(
+                type="direct",
                 to=recipients,
                 content=content,
             )
@@ -557,8 +557,8 @@ class Model:
             notify_if_message_sent_outside_narrow(composition, self.controller)
         return message_was_sent
 
-    def update_private_message(self, msg_id: int, content: str) -> bool:
-        request: PrivateMessageUpdateRequest = {
+    def update_direct_message(self, msg_id: int, content: str) -> bool:
+        request: DirectMessageUpdateRequest = {
             "message_id": msg_id,
             "content": content,
         }

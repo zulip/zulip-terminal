@@ -17,7 +17,7 @@ from zulipterminal.api_types import (
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
     Composition,
-    PrivateComposition,
+    DirectComposition,
     StreamComposition,
 )
 from zulipterminal.config.keys import (
@@ -817,8 +817,8 @@ class WriteBox(urwid.Pile):
                     if not all_valid:
                         return key
                     self.update_recipients(self.to_write_box)
-                    this_draft: Composition = PrivateComposition(
-                        type="private",
+                    this_draft: Composition = DirectComposition(
+                        type="direct",
                         to=self.recipient_user_ids,
                         content=self.msg_write_box.edit_text,
                     )
