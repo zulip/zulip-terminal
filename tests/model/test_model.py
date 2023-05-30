@@ -120,7 +120,7 @@ class TestModel:
         assert "user_settings" not in initial_data  # we add it in tests
 
         if sptn is not None:
-            initial_data["user_settings"] = {"send_private_typing_notifications": sptn}
+            initial_data["user_settings"] = {"send_direct_typing_notifications": sptn}
 
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register = mocker.Mock(return_value=initial_data)
@@ -128,7 +128,7 @@ class TestModel:
         model = Model(self.controller)
 
         assert model.user_settings() == UserSettings(
-            send_private_typing_notifications=expected_sptn_value,
+            send_direct_typing_notifications=expected_sptn_value,
             twenty_four_hour_time=initial_data["twenty_four_hour_time"],
             pm_content_in_desktop_notifications=initial_data[
                 "pm_content_in_desktop_notifications"
@@ -137,7 +137,7 @@ class TestModel:
 
     def test_user_settings_expected_contents(self, model):
         expected_keys = {
-            "send_private_typing_notifications",
+            "send_direct_typing_notifications",
             "twenty_four_hour_time",
             "pm_content_in_desktop_notifications",
         }
@@ -714,7 +714,7 @@ class TestModel:
         mock_api_query = mocker.patch(
             CONTROLLER + ".client.set_typing_status", return_value=response
         )
-        model._user_settings["send_private_typing_notifications"] = True
+        model._user_settings["send_direct_typing_notifications"] = True
 
         model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
 
@@ -736,7 +736,7 @@ class TestModel:
     def test_send_typing_status_avoided_due_to_user_setting(
         self, mocker, model, status, recipient_user_ids
     ):
-        model._user_settings["send_private_typing_notifications"] = False
+        model._user_settings["send_direct_typing_notifications"] = False
 
         mock_api_query = mocker.patch(CONTROLLER + ".client.set_typing_status")
 
@@ -770,11 +770,11 @@ class TestModel:
                 req, self.controller
             )
 
-    def test_send_private_message_with_no_recipients(
+    def test_send_direct_message_with_no_recipients(
         self, model, content="hi!", recipients=[]
     ):
         with pytest.raises(RuntimeError):
-            model.send_private_message(recipients, content)
+            model.send_direct_message(recipients, content)
 
     @pytest.mark.parametrize(
         "response, return_value",
@@ -815,12 +815,12 @@ class TestModel:
             ({"result": "some_failure"}, False),
         ],
     )
-    def test_update_private_message(
+    def test_update_direct_message(
         self, mocker, model, response, return_value, content="hi!", msg_id=1
     ):
         self.client.update_message = mocker.Mock(return_value=response)
 
-        result = model.update_private_message(msg_id, content)
+        result = model.update_direct_message(msg_id, content)
 
         req = dict(message_id=msg_id, content=content)
         self.client.update_message.assert_called_once_with(req)
@@ -1958,10 +1958,10 @@ class TestModel:
         ],
         ids=[
             "not_notified_since_self_message",
-            "notified_stream_and_private_since_directly_mentioned",
-            "notified_stream_and_private_since_wildcard_mentioned",
+            "notified_stream_and_direct_since_directly_mentioned",
+            "notified_stream_and_direct_since_wildcard_mentioned",
             "notified_stream_since_stream_has_desktop_notifications",
-            "notified_private_since_private_message",
+            "notified_direct_since_direct_message",
         ],
     )
     def test_notify_users_calling_msg_type(
@@ -2061,7 +2061,7 @@ class TestModel:
 
     @pytest.mark.parametrize(
         "hide_content, expected_content",
-        [(True, "New direct message from Foo Foo"), (False, "private content here.")],
+        [(True, "New direct message from Foo Foo"), (False, "direct content here.")],
     )
     def test_notify_users_hides_PM_content_based_on_user_setting(
         self, mocker, model, private_message_fixture, hide_content, expected_content
@@ -2069,7 +2069,7 @@ class TestModel:
         notify = mocker.patch(MODULE + ".notify")
         model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
 
-        message = private_message_fixture
+        message = direct_message_fixture
         message["user_id"] = 5179
         message["flags"] = []
 
@@ -3600,7 +3600,7 @@ class TestModel:
 
     @pytest.mark.parametrize("value", [True, False])
     def test__handle_user_settings_event(self, mocker, model, value):
-        setting = "send_private_typing_notifications"
+        setting = "send_direct_typing_notifications"
         event = {
             "type": "user_settings",
             "op": "update",

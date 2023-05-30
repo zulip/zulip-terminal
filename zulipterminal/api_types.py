@@ -159,7 +159,7 @@ class SubscriptionSettingChange(TypedDict):
 #   https://zulip.com/api/get-events#message
 #   https://zulip.com/api/get-message  (unused)
 
-## TODO: Improve this typing to split private and stream message data
+## TODO: Improve this typing to split direct and stream message data
 
 
 class Message(TypedDict, total=False):
@@ -482,7 +482,7 @@ class UpdateRealmEmojiEvent(TypedDict):
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#user_settings-update
 # This is specifically only those supported by ZT
-SupportedUserSettings = Literal["send_private_typing_notifications"]
+SupportedUserSettings = Literal["send_direct_typing_notifications"]
 
 
 class UpdateUserSettingsEvent(TypedDict):

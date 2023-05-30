@@ -70,7 +70,7 @@ class WriteBox(urwid.Pile):
 
         # Used to indicate user's compose status, "closed" by default
         self.compose_box_status: Literal[
-            "open_with_private", "open_with_stream", "closed"
+            "open_with_direct", "open_with_stream", "closed"
         ]
 
         # If editing a message, its state - otherwise None
@@ -167,7 +167,7 @@ class WriteBox(urwid.Pile):
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
         if (
-            self.compose_box_status == "open_with_private"
+            self.compose_box_status == "open_with_direct"
             and self.typing_recipient_user_ids
             and self.sent_start_typing_status
         ):
@@ -178,14 +178,14 @@ class WriteBox(urwid.Pile):
             self.idle_status_tracking = False
             self.sent_start_typing_status = False
 
-    def private_box_view(
+    def direct_box_view(
         self,
         *,
         recipient_user_ids: Optional[List[int]] = None,
     ) -> None:
         self.set_editor_mode()
 
-        self.compose_box_status = "open_with_private"
+        self.compose_box_status = "open_with_direct"
 
         if recipient_user_ids:
             self._set_regular_and_typing_recipient_user_ids(recipient_user_ids)
@@ -289,7 +289,7 @@ class WriteBox(urwid.Pile):
             recipient_name, recipient_email, invalid_text = cleaned_recipient_list[0]
             # Discard invalid_text as part of tidying up the recipient.
 
-            if recipient_email and self.model.is_valid_private_recipient(
+            if recipient_email and self.model.is_valid_direct_recipient(
                 recipient_email, recipient_name
             ):
                 tidied_recipients.append(f"{recipient_name} <{recipient_email}>")
@@ -405,7 +405,7 @@ class WriteBox(urwid.Pile):
         self._set_stream_write_box_style(None, caption)
 
     def _set_stream_write_box_style(self, widget: ReadlineEdit, new_text: str) -> None:
-        # FIXME: Refactor when we have ~ Model.is_private_stream
+        # FIXME: Refactor when we have ~ Model.is_direct_stream
         stream_marker = INVALID_MARKER
         color = "general_bar"
         if self.model.is_valid_stream(new_text):
@@ -752,7 +752,7 @@ class WriteBox(urwid.Pile):
                     )
             else:
                 if self.msg_edit_state is not None:
-                    success = self.model.update_private_message(
+                    success = self.model.update_direct_message(
                         content=self.msg_write_box.edit_text,
                         msg_id=self.msg_edit_state.message_id,
                     )
@@ -764,7 +764,7 @@ class WriteBox(urwid.Pile):
                         return key
                     self.update_recipients(self.to_write_box)
                     if self.recipient_user_ids:
-                        success = self.model.send_private_message(
+                        success = self.model.send_direct_message(
                             recipients=self.recipient_user_ids,
                             content=self.msg_write_box.edit_text,
                         )
@@ -785,7 +785,7 @@ class WriteBox(urwid.Pile):
                     topic_name=self.title_write_box.edit_text,
                     contextual_message_id=None,
                 )
-            elif self.compose_box_status == "open_with_private":
+            elif self.compose_box_status == "open_with_direct":
                 self.recipient_emails = [
                     self.model.user_id_email_dict[user_id]
                     for user_id in self.recipient_user_ids

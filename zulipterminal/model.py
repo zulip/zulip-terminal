@@ -92,7 +92,7 @@ def sort_streams(streams: List[StreamData]) -> None:
 
 
 class UserSettings(TypedDict):
-    send_private_typing_notifications: bool
+    send_direct_typing_notifications: bool
     twenty_four_hour_time: bool
     pm_content_in_desktop_notifications: bool
 
@@ -220,10 +220,10 @@ class Model:
         user_settings = self.initial_data.get("user_settings", None)
         # TODO: Support multiple settings locations via settings migration #1108
         self._user_settings = UserSettings(
-            send_private_typing_notifications=(
+            send_direct_typing_notifications=(
                 True
                 if user_settings is None
-                else user_settings["send_private_typing_notifications"]
+                else user_settings["send_direct_typing_notifications"]
             ),  # ZFL 105, Zulip 5.0
             twenty_four_hour_time=self.initial_data["twenty_four_hour_time"],
             pm_content_in_desktop_notifications=self.initial_data[
@@ -518,7 +518,7 @@ class Model:
     def send_typing_status_by_user_ids(
         self, recipient_user_ids: List[int], *, status: TypingStatusChange
     ) -> None:
-        if not self.user_settings()["send_private_typing_notifications"]:
+        if not self.user_settings()["send_direct_typing_notifications"]:
             return
         if recipient_user_ids:
             request: DirectTypingNotification = {"to": recipient_user_ids, "op": status}
@@ -527,7 +527,7 @@ class Model:
         else:
             raise RuntimeError("Empty recipient list.")
 
-    def send_private_message(self, recipients: List[int], content: str) -> bool:
+    def send_direct_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
             composition = PrivateComposition(
                 type="private",
@@ -1376,7 +1376,7 @@ class Model:
 
     def _handle_typing_event(self, event: Event) -> None:
         """
-        Handle typing notifications (in private messages)
+        Handle typing notifications (in direct messages)
         """
         assert event["type"] == "typing"
 
@@ -1410,7 +1410,7 @@ class Model:
             else:
                 raise RuntimeError("Unknown typing event operation")
 
-    def is_valid_private_recipient(
+    def is_valid_direct_recipient(
         self,
         recipient_email: str,
         recipient_name: str,

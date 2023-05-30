@@ -947,7 +947,7 @@ class TestMiddleColumnView:
         mid_col_view.model.get_next_unread_pm.return_value = None
         mid_col_view.footer = mocker.Mock()
         return_value = mid_col_view.keypress(size, key)
-        mid_col_view.footer.private_box_view.assert_called_once_with()
+        mid_col_view.footer.direct_box_view.assert_called_once_with()
         assert mid_col_view.footer.focus_position == 0
         assert return_value == key
 

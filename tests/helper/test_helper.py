@@ -253,13 +253,13 @@ def test_powerset(
             {
                 "all_msg": 8,
                 "streams": {99: 1},
-                "unread_topics": {(99, "Some private unread topic"): 1},
+                "unread_topics": {(99, "Some direct unread topic"): 1},
                 "all_mentions": 0,
             },
         ),
         (
             {1000},
-            [["Secret stream", "Some private unread topic"]],
+            [["Secret stream", "Some direct unread topic"]],
             {
                 "all_msg": 8,
                 "streams": {1000: 3},
@@ -270,8 +270,8 @@ def test_powerset(
         ({1}, [], {"all_mentions": 0}),
     ],
     ids=[
-        "mute_private_stream_mute_general_stream_topic",
-        "mute_general_stream_mute_private_stream_topic",
+        "mute_direct_stream_mute_general_stream_topic",
+        "mute_general_stream_mute_direct_stream_topic",
         "no_mute_some_other_stream_muted",
     ],
 )
@@ -350,13 +350,13 @@ def test_display_error_if_present(
             {"type": "private", "to": [4, 5], "content": "Hi"},
             [["pm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
             False,
-            id="group_private_conv__same_group_pm__not_notified",
+            id="group_direct_conv__same_group_dm__not_notified",
         ),
         case(
             {"type": "private", "to": [4, 5], "content": "Hi"},
             [["pm-with", "welcome-bot@zulip.com"]],
             True,
-            id="private_conv__other_pm__notified",
+            id="direct_conv__other_dm__notified",
         ),
         case(
             {"type": "private", "to": [4], "content": ":party_parrot:"},
@@ -368,7 +368,7 @@ def test_display_error_if_present(
                 ]
             ],
             True,
-            id="private_conv__other_pm2__notified",
+            id="direct_conv__other_dm2__notified",
         ),
         case(
             {"type": "stream", "to": "ZT", "subject": "1", "content": "foo"},
@@ -408,7 +408,7 @@ def test_display_error_if_present(
             {"type": "private", "to": [1], "content": "fist_bump"},
             [["is", "mentioned"]],
             True,
-            id="mentioned__private_no_mention__notified",
+            id="mentioned__direct_no_mention__notified",
         ),
         case(
             {"type": "stream", "to": "PTEST", "subject": "TEST", "content": "Test"},

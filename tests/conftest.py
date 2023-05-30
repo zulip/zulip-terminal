@@ -230,19 +230,19 @@ def general_stream() -> Dict[str, Any]:
     }
 
 
-# This is a private stream;
+# This is a direct stream;
 # only description/stream_id/invite_only/name/color vary from above
 @pytest.fixture
 def secret_stream() -> Dict[str, Any]:
     return {
-        "description": "Some private stream",
+        "description": "Some direct stream",
         "stream_id": 99,
         "pin_to_top": False,
         "invite_only": True,
         "name": "Secret stream",
         "date_created": 1472047124,
         "email_address": "secret@example.com",
-        "rendered_description": "Some private stream",
+        "rendered_description": "Some direct stream",
         "color": "#ccc",  # Color in '#xxx' format
         "is_muted": False,
         "audible_notifications": False,
@@ -426,7 +426,7 @@ def msg_template_factory(
     """
     Generate message template for all types of messages(stream/PM/group)
     """
-    # TODO: Separate Message into distinct types for stream and private messages.
+    # TODO: Separate Message into distinct types for stream and direct messages.
     message = Message(
         id=msg_id,
         sender_full_name="Foo Foo",
@@ -741,7 +741,7 @@ def initial_data(
                 },
                 {
                     "stream_id": 99,
-                    "topic": "Some private unread topic",
+                    "topic": "Some direct unread topic",
                     "unread_message_ids": [7],
                     "sender_ids": [1, 2],
                 },
@@ -1145,7 +1145,7 @@ def streams() -> List[Dict[str, Any]]:
             "id": 99,
             "color": "#ccc",
             "invite_only": True,
-            "description": "Some private stream",
+            "description": "Some direct stream",
         },
         {
             "name": "Some general stream",
@@ -1227,7 +1227,7 @@ def classified_unread_counts() -> Dict[str, Any]:
         "all_pms": 8,
         "unread_topics": {
             (1000, "Some general unread topic"): 3,
-            (99, "Some private unread topic"): 1,
+            (99, "Some direct unread topic"): 1,
         },
         "unread_pms": {
             1: 2,

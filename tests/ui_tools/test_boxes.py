@@ -81,7 +81,7 @@ class TestWriteBox:
         self, mocker: MockerFixture, write_box: WriteBox
     ) -> None:
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
-        write_box.private_box_view(recipient_user_ids=[])
+        write_box.direct_box_view(recipient_user_ids=[])
         # Set idle_status_tracking to True to avoid setting off the
         # idleness tracker function.
         write_box.idle_status_tracking = True
@@ -184,7 +184,7 @@ class TestWriteBox:
         write_box.model.send_typing_status_by_user_ids = mocker.Mock()
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.model.user_id = logged_on_user["user_id"]
-        write_box.private_box_view(recipient_user_ids=user_ids)
+        write_box.direct_box_view(recipient_user_ids=user_ids)
         # Set idle_status_tracking to True to avoid setting off the
         # idleness tracker function.
         write_box.idle_status_tracking = True
@@ -207,24 +207,24 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
-    def test_not_calling_send_private_message_without_recipients(
+    def test_not_calling_send_direct_message_without_recipients(
         self,
         key: str,
         mocker: MockerFixture,
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
-        write_box.model.send_private_message = mocker.Mock()
-        write_box.private_box_view(recipient_user_ids=[])
+        write_box.model.send_direct_message = mocker.Mock()
+        write_box.direct_box_view(recipient_user_ids=[])
         write_box.msg_write_box.edit_text = "random text"
 
         size = widget_size(write_box)
         write_box.keypress(size, key)
 
-        assert not write_box.model.send_private_message.called
+        assert not write_box.model.send_direct_message.called
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test__compose_attributes_reset_for_private_compose(
+    def test__compose_attributes_reset_for_direct_compose(
         self,
         key: str,
         mocker: MockerFixture,
@@ -234,7 +234,7 @@ class TestWriteBox:
     ) -> None:
         mocker.patch("urwid.connect_signal")
         write_box.model.user_id_email_dict = user_id_email_dict
-        write_box.private_box_view(recipient_user_ids=[11])
+        write_box.direct_box_view(recipient_user_ids=[11])
         write_box.msg_write_box.edit_text = "random text"
 
         size = widget_size(write_box)
@@ -322,8 +322,8 @@ class TestWriteBox:
         raw_recipients: str,
         tidied_recipients: str,
     ) -> None:
-        write_box.model.is_valid_private_recipient = mocker.Mock(return_value=True)
-        write_box.private_box_view()
+        write_box.model.is_valid_direct_recipient = mocker.Mock(return_value=True)
+        write_box.direct_box_view()
         assert write_box.to_write_box is not None
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
@@ -360,8 +360,8 @@ class TestWriteBox:
         raw_recipients: str,
         invalid_recipients: str,
     ) -> None:
-        write_box.model.is_valid_private_recipient = mocker.Mock(return_value=False)
-        write_box.private_box_view()
+        write_box.model.is_valid_direct_recipient = mocker.Mock(return_value=False)
+        write_box.direct_box_view()
         assert write_box.to_write_box is not None
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_RECIPIENT
@@ -412,7 +412,7 @@ class TestWriteBox:
         expected_recipient_emails: List[str],
         expected_recipient_user_ids: List[int],
     ) -> None:
-        write_box.private_box_view()
+        write_box.direct_box_view()
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
@@ -1062,7 +1062,7 @@ class TestWriteBox:
         user_id_email_dict: Dict[int, str],
     ) -> None:
         write_box.model.user_id_email_dict = user_id_email_dict
-        write_box.private_box_view(recipient_user_ids=[1])
+        write_box.direct_box_view(recipient_user_ids=[1])
         assert write_box.to_write_box is not None
         write_box.to_write_box.set_edit_text(text)
         write_box.to_write_box.set_edit_pos(len(text))
@@ -1261,7 +1261,7 @@ class TestWriteBox:
         ],
         ids=[
             "web_public_stream",
-            "private_stream",
+            "direct_stream",
             "public_stream",
             "invalid_stream_name",
         ],
@@ -1277,7 +1277,7 @@ class TestWriteBox:
         stream_dict: Dict[int, Any],
         expected_color: str,
     ) -> None:
-        # FIXME: Refactor when we have ~ Model.is_private_stream
+        # FIXME: Refactor when we have ~ Model.is_direct_stream
         write_box.model.stream_dict = stream_dict
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
@@ -1677,7 +1677,7 @@ class TestWriteBox:
             else:
                 write_box.stream_box_view(stream_id)
         else:
-            write_box.private_box_view()
+            write_box.direct_box_view()
         size = widget_size(write_box)
 
         def focus_val(x: str) -> int:
@@ -1721,7 +1721,7 @@ class TestWriteBox:
             ("stream_edit", 5),
         ],
         ids=[
-            "private_message",
+            "direct_message",
             "stream_message",
             "stream_edit_message",
         ],
@@ -1742,7 +1742,7 @@ class TestWriteBox:
         elif msg_type == "stream_edit":
             write_box.stream_box_edit_view(1000)
         else:
-            write_box.private_box_view(recipient_user_ids=[1])
+            write_box.direct_box_view(recipient_user_ids=[1])
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
 

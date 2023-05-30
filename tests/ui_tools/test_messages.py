@@ -79,13 +79,13 @@ class TestMessageBox:
         )
         self.model.user_email = "foo@zulip.com"
         mocker.patch(
-            MODULE + ".MessageBox._is_private_message_to_self", return_value=True
+            MODULE + ".MessageBox._is_direct_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
-        msg_box._is_private_message_to_self.assert_called_once_with()
+        msg_box._is_direct_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "content, expected_markup",
@@ -1135,10 +1135,10 @@ class TestMessageBox:
             "all_messages_narrow",
             "stream_narrow",
             "topic_narrow",
-            "private_conversation_narrow",
+            "direct_conversation_narrow",
             "starred_messages_narrow",
             "mentions_narrow",
-            "private_messages_narrow",
+            "direct_messages_narrow",
         ],
     )
     def test_keypress_STREAM_MESSAGE(

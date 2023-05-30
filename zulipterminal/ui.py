@@ -291,7 +291,7 @@ class View(urwid.WidgetWrap):
                     )
                 elif saved_draft["type"] == "private":
                     recipient_user_ids = saved_draft["to"]
-                    self.write_box.private_box_view(
+                    self.write_box.direct_box_view(
                         recipient_user_ids=recipient_user_ids,
                     )
                 content = saved_draft["content"]
