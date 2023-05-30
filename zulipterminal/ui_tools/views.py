@@ -49,7 +49,7 @@ from zulipterminal.ui_tools.buttons import (
     HomeButton,
     MentionedButton,
     MessageLinkButton,
-    PMButton,
+    DMButton,
     StarredButton,
     StreamButton,
     TopicButton,
@@ -594,10 +594,10 @@ class MiddleColumnView(urwid.Frame):
                 topic_name=topic,
             )
             return key
-        elif is_command_key("NEXT_UNREAD_PM", key):
-            # narrow to next unread pm
-            pm = self.model.get_next_unread_pm()
-            if pm is None:
+        elif is_command_key("NEXT_UNREAD_DM", key):
+            # narrow to next unread dm
+            dm = self.model.get_next_unread_dm()
+            if dm is None:
                 return key
             email = self.model.user_id_email_dict[dm]
             self.controller.narrow_to_user(

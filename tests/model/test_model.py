@@ -2063,8 +2063,8 @@ class TestModel:
         "hide_content, expected_content",
         [(True, "New direct message from Foo Foo"), (False, "direct content here.")],
     )
-    def test_notify_users_hides_PM_content_based_on_user_setting(
-        self, mocker, model, private_message_fixture, hide_content, expected_content
+    def test_notify_users_hides_DM_content_based_on_user_setting(
+        self, mocker, model, direct_message_fixture, hide_content, expected_content
     ):
         notify = mocker.patch(MODULE + ".notify")
         model._user_settings["dm_content_in_desktop_notifications"] = not hide_content

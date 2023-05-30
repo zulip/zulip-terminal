@@ -188,7 +188,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Narrow to all messages',
         'key_category': 'navigation',
     },
-    'ALL_PM': {
+    'ALL_DM': {
         'keys': ['P'],
         'help_text': 'Narrow to all direct messages',
         'key_category': 'navigation',
@@ -208,7 +208,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Next unread topic',
         'key_category': 'navigation',
     },
-    'NEXT_UNREAD_PM': {
+    'NEXT_UNREAD_DM': {
         'keys': ['p'],
         'help_text': 'Next unread direct message',
         'key_category': 'navigation',

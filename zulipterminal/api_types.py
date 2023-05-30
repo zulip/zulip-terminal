@@ -495,7 +495,7 @@ class UpdateUserSettingsEvent(TypedDict):
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#update_global_notifications
 # This is specifically only those supported by ZT
-SupportedGlobalNotificationSettings = Literal["pm_content_in_desktop_notifications"]
+SupportedGlobalNotificationSettings = Literal["dm_content_in_desktop_notifications"]
 
 
 class UpdateGlobalNotificationsEvent(TypedDict):

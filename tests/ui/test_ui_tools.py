@@ -928,8 +928,8 @@ class TestMiddleColumnView:
             contextual_message_id=1,
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_no_pm(
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_DM"))
+    def test_keypress_NEXT_UNREAD_DM_no_dm(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)

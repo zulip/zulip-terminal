@@ -384,7 +384,7 @@ class Model:
                 self.narrow[0][1] == "mentioned"
                 and bool({"mentioned", "wildcard_mentioned"} & set(message["flags"]))
             )
-            # All-PMs
+            # All-DMs
             # FIXME Buggy condition?
             or (self.narrow[0][1] == message["type"] and len(self.narrow) == 1)
             # stream or stream+topic
@@ -400,7 +400,7 @@ class Model:
                     )
                 )
             )
-            # PM-with
+            # DM-with
             or (
                 self.narrow[0][0] == "dm-with"
                 and message["type"] == "direct"
