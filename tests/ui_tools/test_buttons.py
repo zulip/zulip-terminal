@@ -10,10 +10,10 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
     DecodedStream,
+    DMButton,
     EmojiButton,
     MessageLinkButton,
     ParsedNarrowLink,
-    DMButton,
     StarredButton,
     StreamButton,
     TopButton,

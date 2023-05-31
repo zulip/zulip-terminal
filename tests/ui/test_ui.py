@@ -436,9 +436,7 @@ class TestView:
         view.model.session_draft_message.return_value = draft
         view.model.user_id_email_dict = {1: "foo@zulip.com", 2: "bar@gmail.com"}
         mocked_stream_box_view = mocker.patch.object(view.write_box, "stream_box_view")
-        mocked_direct_box_view = mocker.patch.object(
-            view.write_box, "direct_box_view"
-        )
+        mocked_direct_box_view = mocker.patch.object(view.write_box, "direct_box_view")
 
         size = widget_size(view)
         view.keypress(size, key)

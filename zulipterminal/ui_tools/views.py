@@ -45,11 +45,11 @@ from zulipterminal.helper import (
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    DMButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
     MessageLinkButton,
-    DMButton,
     StarredButton,
     StreamButton,
     TopicButton,
