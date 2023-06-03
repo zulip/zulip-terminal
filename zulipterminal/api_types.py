@@ -6,7 +6,7 @@ Types from the Zulip API, translated into python, to improve type checking
 
 from typing import Any, Dict, List, Optional, Union
 
-from typing_extensions import Final, Literal, NotRequired, TypedDict
+from typing_extensions import Final, Literal, NotRequired, TypedDict, final
 
 # These are documented in the zulip package (python-zulip-api repo)
 from zulip import EditPropagateMode  # one/all/later
@@ -398,31 +398,78 @@ class ReactionEvent(TypedDict):
 
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#realm_user-add and -remove
-class RealmUserEventPerson(TypedDict):
-    user_id: int
 
+
+@final
+class RealmUserUpdateName(TypedDict):
+    user_id: int
     full_name: str
 
+
+@final
+class RealmUserUpdateAvatar(TypedDict):
+    user_id: int
     avatar_url: str
     avatar_source: str
     avatar_url_medium: str
     avatar_version: int
 
+
+@final
+class RealmUserUpdateTimeZone(TypedDict):
+    user_id: int
     # NOTE: This field will be removed in future as it is redundant with the user_id
     # email: str
     timezone: str
 
+
+@final
+class RealmUserUpdateBotOwner(TypedDict):
+    user_id: int
     bot_owner_id: int
 
+
+@final
+class RealmUserUpdateRole(TypedDict):
+    user_id: int
     role: int
 
+
+@final
+class RealmUserUpdateBillingRole(TypedDict):
+    user_id: int
     is_billing_admin: bool  # New in ZFL 73 (Zulip 5.0)
 
+
+@final
+class RealmUserUpdateDeliveryEmail(TypedDict):
+    user_id: int
     delivery_email: str  # NOTE: Only sent to admins
 
-    # custom_profile_field: Dict  # TODO: Requires checking before implementation
 
+@final
+class RealmUserUpdateCustomProfileField(TypedDict):
+    # TODO: Requires checking before implementation
+    user_id: int
+    custom_profile_field: Dict[str, Any]
+
+
+@final
+class RealmUserUpdateEmail(TypedDict):
+    user_id: int
     new_email: str
+
+
+RealmUserEventPerson = Union[
+    RealmUserUpdateName,
+    RealmUserUpdateAvatar,
+    RealmUserUpdateTimeZone,
+    RealmUserUpdateBotOwner,
+    RealmUserUpdateRole,
+    RealmUserUpdateBillingRole,
+    RealmUserUpdateDeliveryEmail,
+    RealmUserUpdateEmail,
+]
 
 
 class RealmUserEvent(TypedDict):
