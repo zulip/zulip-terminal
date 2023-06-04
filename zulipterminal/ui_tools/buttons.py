@@ -210,16 +210,26 @@ class StreamButton(TopButton):
         self.count = count
         self.view = view
 
+        # FIXME: This section should be moved to a general palette-extension method
+        # which is triggered when streams are initially loaded and when colors are
+        # adjusted, or new streams added
         for entry in view.palette:
             if entry[0] is None:
+                # NOTE: entry is generated at runtime, so length is dynamic
+                # entry[5] is 256-color background entry
+                # entry[2] is 16-color background entry
                 background = entry[5] if len(entry) > 4 else entry[2]
                 inverse_text = background if background else "black"
                 break
+        # These tuples represent (new) Urwid palette entries for the stream color:
+        #   (style_name, 16-color fg, 16-color bg, mono, 256+color fg, 256+color bg)
+        # The normalized color becomes a named style (eg. "#abc") for colored foreground
         view.palette.append(
-            (self.color, "", "", "bold", f"{self.color}, bold", background)
+            (f"{self.color}", "", "", "bold", f"{self.color}, bold", background)
         )
+        # The s-prefixed style name (eg "s#abc") is used for inverted styling
         view.palette.append(
-            ("s" + self.color, "", "", "standout", inverse_text, self.color)
+            (f"s{self.color}", "", "", "standout", inverse_text, self.color)
         )
 
         stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
