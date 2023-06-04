@@ -209,7 +209,7 @@ class StreamButton(TopButton):
                 # entry[5] is 256-color background entry
                 # entry[2] is 16-color background entry
                 background = entry[5] if len(entry) > 4 else entry[2]
-                inverse_text = background if background else "black"
+                inverse_text = "black" if background in ["default", ""] else background
                 break
         view.palette.append(
             (f"{self.color}", "", "", "bold", f"{self.color}, bold", background)
