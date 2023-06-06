@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 from urwid import Widget
 
-from zulipterminal.api_types import Message, MessageType
+from zulipterminal.api_types import Message, MessageType, Stream, Subscription
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
     keys_for_command,
@@ -280,6 +280,21 @@ def web_public_stream() -> Dict[str, Any]:
         "history_public_to_subscribers": False,
         "is_web_public": True,
     }
+
+
+@pytest.fixture
+def get_stream_from_id_fixture(
+    stream_id: int,
+    stream_dict: Dict[int, Any],
+    unsubscribed_streams_fixture: Dict[int, Subscription],
+    never_subscribed_streams_fixture: Dict[int, Stream],
+) -> Union[Subscription, Stream, Any]:
+    if stream_id in stream_dict:
+        return stream_dict[stream_id]
+    elif stream_id in unsubscribed_streams_fixture:
+        return unsubscribed_streams_fixture[stream_id]
+    else:
+        return never_subscribed_streams_fixture[stream_id]
 
 
 @pytest.fixture
@@ -1186,6 +1201,61 @@ def user_id(logged_on_user: Dict[str, Any]) -> int:
     according to current Fixtures.
     """
     return logged_on_user["user_id"]
+
+
+@pytest.fixture
+def unsubscribed_streams_fixture() -> Dict[int, Subscription]:
+    unsubscribed_streams: Dict[int, Subscription] = {}
+    for i in range(3, 5):
+        unsubscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "color": "#b0a5fd",
+            "pin_to_top": False,
+            "stream_id": i,
+            "is_muted": False,
+            "audible_notifications": False,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "desktop_notifications": False,
+            "stream_weekly_traffic": 0,
+            "push_notifications": False,
+            "message_retention_days": i + 30,
+            "email_address": f"stream{i}@example.com",
+            "email_notifications": False,
+            "wildcard_mentions_notify": False,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(unsubscribed_streams)
+
+
+@pytest.fixture
+def never_subscribed_streams_fixture() -> Dict[int, Stream]:
+    never_subscribed_streams: Dict[int, Stream] = {}
+    for i in range(5, 7):
+        never_subscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "stream_id": i,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "stream_weekly_traffic": 0,
+            "message_retention_days": i + 30,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(never_subscribed_streams)
 
 
 @pytest.fixture

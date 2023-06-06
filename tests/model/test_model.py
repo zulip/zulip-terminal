@@ -1663,6 +1663,122 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "name": "Some general stream",
+                    "date_created": None,
+                    "invite_only": False,
+                    "color": "#baf",  # Color in '#xxxxxx' format
+                    "pin_to_top": False,
+                    "stream_id": 1000,
+                    "is_muted": False,
+                    "audible_notifications": False,
+                    "description": "General Stream",
+                    "rendered_description": "General Stream",
+                    "is_old_stream": True,
+                    "desktop_notifications": False,
+                    "stream_weekly_traffic": 0,
+                    "push_notifications": False,
+                    "email_address": "general@example.comm",
+                    "message_retention_days": None,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                },
+            ),
+            case(
+                3,
+                {
+                    "name": "Stream 3",
+                    "date_created": 1472047127,
+                    "invite_only": False,
+                    "color": "#b0a5fd",
+                    "pin_to_top": False,
+                    "stream_id": 3,
+                    "is_muted": False,
+                    "audible_notifications": False,
+                    "description": "A description of stream 3",
+                    "rendered_description": "A description of stream 3",
+                    "desktop_notifications": False,
+                    "stream_weekly_traffic": 0,
+                    "push_notifications": False,
+                    "message_retention_days": 33,
+                    "email_address": "stream3@example.com",
+                    "email_notifications": False,
+                    "wildcard_mentions_notify": False,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                    "is_announcement_only": True,
+                    "stream_post_policy": 0,
+                    "is_web_public": True,
+                    "first_message_id": None,
+                },
+            ),
+            case(
+                5,
+                {
+                    "name": "Stream 5",
+                    "date_created": 1472047129,
+                    "invite_only": False,
+                    "stream_id": 5,
+                    "description": "A description of stream 5",
+                    "rendered_description": "A description of stream 5",
+                    "stream_weekly_traffic": 0,
+                    "message_retention_days": 35,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                    "is_announcement_only": True,
+                    "stream_post_policy": 0,
+                    "is_web_public": True,
+                    "first_message_id": None,
+                },
+            ),
+        ],
+    )
+    def test_get_stream_from_id(
+        self,
+        model,
+        stream_id,
+        expected_value,
+        stream_dict,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+    ):
+        model.stream_dict = stream_dict
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        assert model._get_stream_from_id(stream_id) == expected_value
+
+    def test_get_stream_from_id_nonexistent_stream(
+        self,
+        model,
+        stream_dict,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+        stream_id=231,  # id 231 does not belong to any stream
+    ):
+        model.stream_dict = stream_dict
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        with pytest.raises(RuntimeError):
+            model._get_stream_from_id(stream_id)
+
+    def test_get_all_stream_ids(
+        self,
+        model,
+        stream_dict,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+        expected_value=[1000, 99, 999, 1, 2, 3, 4, 5, 6],
+    ):
+        model.stream_dict = stream_dict
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        assert model.get_all_stream_ids() == expected_value
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
