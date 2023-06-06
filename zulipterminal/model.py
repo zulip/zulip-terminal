@@ -1192,6 +1192,9 @@ class Model:
         id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
         return id_list
 
+    def get_all_subscription_ids(self) -> List[int]:
+        return list(self.stream_dict)
+
     def get_stream_name(self, stream_id: int) -> Optional[str]:
         return self._get_stream_from_id(stream_id).get("name")
 

@@ -2279,6 +2279,15 @@ class TestModel:
         assert model.get_stream_rendered_description(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    def test_get_all_subscription_ids(
+        self,
+        model,
+        stream_dict,
+        expected_value=[1000, 99, 999, 1, 2],
+    ):
+        model.stream_dict = stream_dict
+        assert model.get_all_subscription_ids() == expected_value
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
