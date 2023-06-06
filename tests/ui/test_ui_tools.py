@@ -889,6 +889,7 @@ class TestMiddleColumnView:
         mocker.patch(MIDCOLVIEW + ".focus_position")
 
         mid_col_view.model.stream_dict = {1: {"name": "stream"}}
+        mid_col_view.model.get_stream_name.return_value = "stream"
         mid_col_view.model.get_next_unread_topic.return_value = (1, "topic")
 
         return_value = mid_col_view.keypress(size, key)

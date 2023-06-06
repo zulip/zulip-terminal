@@ -887,7 +887,7 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream_name = self.get_stream_name(stream_id)
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
@@ -979,7 +979,7 @@ class Model:
                 sub
                 for _, stream in self.stream_dict.items()
                 for sub in stream["subscribers"]
-                if stream["name"] == stream_name
+                if self.get_stream_name(stream["stream_id"]) == stream_name
                 if sub != self.user_id
             ]
 
@@ -1192,6 +1192,9 @@ class Model:
         id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
         return id_list
 
+    def get_stream_name(self, stream_id: int) -> Optional[str]:
+        return self._get_stream_from_id(stream_id).get("name")
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1270,8 +1273,8 @@ class Model:
         display_error_if_present(response, self.controller)
 
     def stream_id_from_name(self, stream_name: str) -> int:
-        for stream_id, stream in self.stream_dict.items():
-            if stream["name"] == stream_name:
+        for stream_id in self.get_all_stream_ids():
+            if self.get_stream_name(stream_id) == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
 
@@ -1457,8 +1460,8 @@ class Model:
         )
 
     def is_valid_stream(self, stream_name: str) -> bool:
-        for stream in self.stream_dict.values():
-            if stream["name"] == stream_name:
+        for stream_id in self.get_all_stream_ids():
+            if self.get_stream_name(stream_id) == stream_name:
                 return True
         return False
 

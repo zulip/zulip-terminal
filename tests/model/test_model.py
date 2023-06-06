@@ -1779,6 +1779,32 @@ class TestModel:
         model._never_subscribed_streams = never_subscribed_streams_fixture
         assert model.get_all_stream_ids() == expected_value
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "Some general stream",
+            ),
+            case(
+                3,
+                "Stream 3",
+            ),
+            case(
+                5,
+                "Stream 5",
+            ),
+        ],
+    )
+    def test_get_stream_name(
+        self, model, mocker, get_stream_from_id_fixture, stream_id, expected_value
+    ):
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_name(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

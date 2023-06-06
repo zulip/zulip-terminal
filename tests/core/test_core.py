@@ -136,6 +136,8 @@ class TestController:
                 "name": stream_name,
             }
         }
+        controller.model._unsubscribed_streams = {}
+        controller.model._never_subscribed_streams = {}
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -189,6 +191,8 @@ class TestController:
                 "name": stream_name,
             }
         }
+        controller.model._unsubscribed_streams = {}
+        controller.model._never_subscribed_streams = {}
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 

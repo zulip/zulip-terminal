@@ -443,6 +443,7 @@ class TestTopicButton:
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
         params = dict(controller=controller, count=count)
+        controller.model.get_stream_name.return_value = stream_name
 
         topic_button = TopicButton(
             stream_id=stream_id, topic=title, view=view, **params
@@ -883,6 +884,7 @@ class TestMessageLinkButton:
             "is_user_subscribed_to_stream",
             "is_valid_stream",
             "stream_id_from_name_return_value",
+            "get_stream_name",
             "expected_parsed_link",
             "expected_error",
         ],
@@ -894,6 +896,7 @@ class TestMessageLinkButton:
                 True,
                 None,
                 None,
+                "Stream 1",
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
@@ -906,6 +909,7 @@ class TestMessageLinkButton:
                 False,
                 None,
                 None,
+                None,
                 ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
                 "The stream seems to be either unknown or unsubscribed",
             ),
@@ -916,6 +920,7 @@ class TestMessageLinkButton:
                 None,
                 True,
                 1,
+                "Stream 1",
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
@@ -928,6 +933,7 @@ class TestMessageLinkButton:
                 None,
                 False,
                 None,
+                "foo",
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=None, stream_name="foo")
                 ),
@@ -948,10 +954,12 @@ class TestMessageLinkButton:
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         stream_id_from_name_return_value: Optional[int],
+        get_stream_name: Optional[str],
         expected_parsed_link: ParsedNarrowLink,
         expected_error: str,
     ) -> None:
         self.controller.model.stream_dict = stream_dict
+        self.controller.model.get_stream_name.return_value = get_stream_name
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
         )
