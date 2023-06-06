@@ -1973,6 +1973,89 @@ class TestModel:
         assert model.is_stream_web_public(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "message_retention_days": None,
+                },
+                None,
+            ),
+            case(
+                3,
+                {
+                    "message_retention_days": 33,
+                },
+                33,
+            ),
+            case(
+                5,
+                {
+                    "message_retention_days": 35,
+                },
+                35,
+            ),
+        ],
+    )
+    def test_get_stream_message_retention_days(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_message_retention_days(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary",
+        [
+            case(
+                1000,
+                {
+                    "message_retention_days": None,
+                },
+            ),
+            case(
+                3,
+                {
+                    "message_retention_days": 33,
+                },
+            ),
+            case(
+                5,
+                {
+                    "message_retention_days": 35,
+                },
+            ),
+        ],
+    )
+    def test_set_stream_message_retention_days(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        value_to_be_changed=30,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+
+        model.set_stream_message_retention_days(stream_id, value_to_be_changed)
+        model._get_stream_from_id.assert_called_once()
+        assert model.get_stream_message_retention_days(stream_id) == 30
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

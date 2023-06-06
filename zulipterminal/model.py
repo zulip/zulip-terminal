@@ -261,11 +261,11 @@ class Model:
         self.cached_retention_text: Dict[int, str] = {}
         realm_message_retention_days = self.initial_data["realm_message_retention_days"]
         if self.server_feature_level is None or self.server_feature_level < 17:
-            for stream in self.stream_dict.values():
-                stream["message_retention_days"] = None
+            for stream_id in self.get_all_stream_ids():
+                self.set_stream_message_retention_days(stream_id, None)
 
-        for stream in self.stream_dict.values():
-            message_retention_days = stream["message_retention_days"]
+        for stream_id in self.get_all_stream_ids():
+            message_retention_days = self.get_stream_message_retention_days(stream_id)
             is_organization_default = message_retention_days is None
             final_msg_retention_days = (
                 realm_message_retention_days
@@ -275,7 +275,7 @@ class Model:
             message_retention_response = self.message_retention_days_response(
                 final_msg_retention_days, is_organization_default
             )
-            self.cached_retention_text[stream["stream_id"]] = message_retention_response
+            self.cached_retention_text[stream_id] = message_retention_response
 
     def get_focus_in_current_narrow(self) -> Optional[int]:
         """
@@ -1206,6 +1206,14 @@ class Model:
 
     def is_stream_web_public(self, stream_id: int) -> bool:
         return self._get_stream_from_id(stream_id)["is_web_public"]
+
+    def get_stream_message_retention_days(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id).get("message_retention_days")
+
+    def set_stream_message_retention_days(
+        self, stream_id: int, value: Optional[int]
+    ) -> None:
+        self._get_stream_from_id(stream_id)["message_retention_days"] = value
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
