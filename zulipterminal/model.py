@@ -1215,6 +1215,9 @@ class Model:
     ) -> None:
         self._get_stream_from_id(stream_id)["message_retention_days"] = value
 
+    def is_stream_invite_only(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["invite_only"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1301,10 +1304,9 @@ class Model:
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
         if stream_id not in self.stream_dict:
             raise RuntimeError("Invalid stream id.")
-        stream = self.stream_dict[stream_id]
         if self.is_stream_web_public(stream_id):
             return "web-public"
-        if stream["invite_only"]:
+        if self.is_stream_invite_only(stream_id):
             return "private"
         return "public"
 
