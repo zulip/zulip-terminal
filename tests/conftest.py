@@ -416,6 +416,20 @@ def never_subscribed_streams_fixture() -> List[Stream]:
 
 
 @pytest.fixture
+def all_stream_ids(
+    streams_fixture: List[Subscription],
+    unsubscribed_streams_fixture: List[Subscription],
+    never_subscribed_streams_fixture: List[Stream],
+) -> List[int]:
+    return [
+        stream["stream_id"]
+        for stream in streams_fixture
+        + unsubscribed_streams_fixture
+        + never_subscribed_streams_fixture
+    ]
+
+
+@pytest.fixture
 def realm_emojis() -> Dict[str, Dict[str, Any]]:
     # Omitting source_url, author_id (server version 3.0),
     # author (server version < 3.0) since they are not used.

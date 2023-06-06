@@ -1290,6 +1290,32 @@ class Model:
             stream["stream_id"]: stream for stream in never_subscribed_streams
         }
 
+    def _get_stream_from_id(self, stream_id: int) -> Stream:
+        if stream_id in self.stream_dict:
+            return cast(Stream, self.stream_dict[stream_id])
+        elif stream_id in self._unsubscribed_streams:
+            return cast(Stream, self._unsubscribed_streams[stream_id])
+        elif stream_id in self._never_subscribed_streams:
+            return self._never_subscribed_streams[stream_id]
+        else:
+            raise RuntimeError(f"Stream with id {stream_id} does not exist!")
+
+    def _get_subscription_from_id(self, subscription_id: int) -> Subscription:
+        if subscription_id in self.stream_dict:
+            return self.stream_dict[subscription_id]
+        elif subscription_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[subscription_id]
+        else:
+            raise RuntimeError(
+                f"Stream with id {subscription_id} does not exist or never subscribed to!"  # noqa: E501
+            )
+
+    def get_all_stream_ids(self) -> List[int]:
+        id_list = list(self.stream_dict)
+        id_list.extend(stream_id for stream_id in self._unsubscribed_streams)
+        id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
+        return id_list
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
