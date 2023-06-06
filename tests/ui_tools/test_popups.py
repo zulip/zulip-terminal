@@ -1297,6 +1297,9 @@ class TestStreamInfoView:
         stream_id = general_stream["stream_id"]
         model.stream_dict = {stream_id: general_stream}
         model.stream_dict[stream_id].update(to_vary_in_stream_data)
+        model.get_stream_date_created.return_value = to_vary_in_stream_data[
+            "date_created"
+        ]
         model.cached_retention_text = {stream_id: cached_message_retention_text}
         model.server_feature_level = server_feature_level
 

@@ -1847,6 +1847,89 @@ class TestModel:
         assert model.get_stream_subscribers(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "date_created": None,
+                },
+                None,
+            ),
+            case(
+                3,
+                {
+                    "date_created": 1472047124,
+                },
+                1472047124,
+            ),
+            case(
+                5,
+                {
+                    "date_created": 1472423124,
+                },
+                1472423124,
+            ),
+        ],
+    )
+    def test_get_stream_date_created(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_date_created(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary",
+        [
+            case(
+                1000,
+                {
+                    "date_created": None,
+                },
+            ),
+            case(
+                3,
+                {
+                    "date_created": 1472047124,
+                },
+            ),
+            case(
+                5,
+                {
+                    "date_created": 1472423124,
+                },
+            ),
+        ],
+    )
+    def test_set_stream_date_created(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        value_to_be_changed=1400000000,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+
+        model.set_stream_date_created(stream_id, value_to_be_changed)
+        model._get_stream_from_id.assert_called_once()
+        assert model.get_stream_date_created(stream_id) == 1400000000
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

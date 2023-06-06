@@ -1271,7 +1271,7 @@ class StreamInfoView(PopUpView):
         stream = controller.model.stream_dict[stream_id]
 
         # New in feature level 30, server version 4.0
-        stream_creation_date = stream["date_created"]
+        stream_creation_date = controller.model.get_stream_date_created(self.stream_id)
         date_created = (
             [
                 (

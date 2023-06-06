@@ -193,8 +193,8 @@ class Model:
         # level 30, server version 4. For consistency we add this field
         # on server iterations even before this with value of None.
         if self.server_feature_level is None or self.server_feature_level < 30:
-            for stream in self.stream_dict.values():
-                stream["date_created"] = None
+            for stream_id in self.get_all_stream_ids():
+                self.set_stream_date_created(stream_id, None)
 
         self.normalize_and_cache_message_retention_text()
 
@@ -1197,6 +1197,12 @@ class Model:
 
     def get_stream_subscribers(self, stream_id: int) -> List[int]:
         return self._get_stream_from_id(stream_id)["subscribers"]
+
+    def get_stream_date_created(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id).get("date_created")
+
+    def set_stream_date_created(self, stream_id: int, value: Optional[int]) -> None:
+        self._get_stream_from_id(stream_id)["date_created"] = value
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
