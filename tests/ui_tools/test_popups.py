@@ -1174,6 +1174,9 @@ class TestStreamInfoView:
 
         self.controller.model.stream_dict = {self.stream_id: general_stream}
         self.controller.model.stream_access_type.return_value = "public"
+        self.controller.model.get_stream_subscribers.return_value = general_stream[
+            "subscribers"
+        ]
 
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 

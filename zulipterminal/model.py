@@ -971,15 +971,15 @@ class Model:
 
             return [
                 sub
-                for sub in self.stream_dict[stream_id]["subscribers"]
+                for sub in self.get_stream_subscribers(stream_id)
                 if sub != self.user_id
             ]
         else:
             return [
                 sub
-                for _, stream in self.stream_dict.items()
-                for sub in stream["subscribers"]
-                if self.get_stream_name(stream["stream_id"]) == stream_name
+                for stream_id in self.get_all_stream_ids()
+                for sub in self.get_stream_subscribers(stream_id)
+                if self.get_stream_name(stream_id) == stream_name
                 if sub != self.user_id
             ]
 
@@ -1195,6 +1195,9 @@ class Model:
     def get_stream_name(self, stream_id: int) -> Optional[str]:
         return self._get_stream_from_id(stream_id).get("name")
 
+    def get_stream_subscribers(self, stream_id: int) -> List[int]:
+        return self._get_stream_from_id(stream_id)["subscribers"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1406,7 +1409,7 @@ class Model:
 
             for stream_id in stream_ids:
                 if self.is_user_subscribed_to_stream(stream_id):
-                    subscribers = self.stream_dict[stream_id]["subscribers"]
+                    subscribers = self.get_stream_subscribers(stream_id)
                     if event["op"] == "peer_add":
                         subscribers.extend(user_ids)
                     else:

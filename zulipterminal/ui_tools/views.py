@@ -1300,7 +1300,7 @@ class StreamInfoView(PopUpView):
             else:
                 stream_policy = STREAM_POST_POLICY[1]
 
-        total_members = len(stream["subscribers"])
+        total_members = len(controller.model.get_stream_subscribers(self.stream_id))
 
         stream_access_type = controller.model.stream_access_type(stream_id)
         type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
