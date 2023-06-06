@@ -11,6 +11,7 @@ from zulipterminal.api_types import (
     CustomProfileField,
     Message,
     MessageType,
+    Stream,
     Subscription,
 )
 from zulipterminal.config.keys import (
@@ -357,6 +358,61 @@ def streams_fixture(
             }
         )
     return deepcopy(streams)
+
+
+@pytest.fixture
+def unsubscribed_streams_fixture() -> Dict[int, Subscription]:
+    unsubscribed_streams: Dict[int, Subscription] = {}
+    for i in range(3, 5):
+        unsubscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "color": "#b0a5fd",
+            "pin_to_top": False,
+            "stream_id": i,
+            "is_muted": False,
+            "audible_notifications": False,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "desktop_notifications": False,
+            "stream_weekly_traffic": 0,
+            "push_notifications": False,
+            "message_retention_days": i + 30,
+            "email_address": f"stream{i}@example.com",
+            "email_notifications": False,
+            "wildcard_mentions_notify": False,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(unsubscribed_streams)
+
+
+@pytest.fixture
+def never_subscribed_streams_fixture() -> Dict[int, Stream]:
+    never_subscribed_streams: Dict[int, Stream] = {}
+    for i in range(5, 7):
+        never_subscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "stream_id": i,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "stream_weekly_traffic": 0,
+            "message_retention_days": i + 30,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(never_subscribed_streams)
 
 
 @pytest.fixture
@@ -1453,7 +1509,7 @@ def user_id(logged_on_user: Dict[str, Any]) -> int:
 
 
 @pytest.fixture
-def stream_dict(streams_fixture: List[Subscription]) -> Dict[int, Subscription]:
+def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
     return {stream["stream_id"]: stream for stream in streams_fixture}
 
 
