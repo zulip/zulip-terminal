@@ -1204,6 +1204,9 @@ class Model:
     def set_stream_date_created(self, stream_id: int, value: Optional[int]) -> None:
         self._get_stream_from_id(stream_id)["date_created"] = value
 
+    def is_stream_web_public(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["is_web_public"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1291,7 +1294,7 @@ class Model:
         if stream_id not in self.stream_dict:
             raise RuntimeError("Invalid stream id.")
         stream = self.stream_dict[stream_id]
-        if stream.get("is_web_public", False):
+        if self.is_stream_web_public(stream_id):
             return "web-public"
         if stream["invite_only"]:
             return "private"

@@ -1676,6 +1676,7 @@ class TestModel:
                     "pin_to_top": False,
                     "stream_id": 1000,
                     "is_muted": False,
+                    "is_web_public": False,
                     "audible_notifications": False,
                     "description": "General Stream",
                     "rendered_description": "General Stream",
@@ -1929,6 +1930,48 @@ class TestModel:
         model.set_stream_date_created(stream_id, value_to_be_changed)
         model._get_stream_from_id.assert_called_once()
         assert model.get_stream_date_created(stream_id) == 1400000000
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "is_web_public": False,
+                },
+                False,
+            ),
+            case(
+                3,
+                {
+                    "is_web_public": True,
+                },
+                True,
+            ),
+            case(
+                5,
+                {
+                    "is_web_public": False,
+                },
+                False,
+            ),
+        ],
+    )
+    def test_is_stream_web_public(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.is_stream_web_public(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
 
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))

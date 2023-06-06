@@ -216,6 +216,7 @@ def general_stream() -> Dict[str, Any]:
         "pin_to_top": False,
         "stream_id": 1000,
         "is_muted": False,
+        "is_web_public": False,
         "audible_notifications": False,
         "description": "General Stream",
         "rendered_description": "General Stream",
@@ -245,6 +246,7 @@ def secret_stream() -> Dict[str, Any]:
         "rendered_description": "Some private stream",
         "color": "#ccc",  # Color in '#xxx' format
         "is_muted": False,
+        "is_web_public": False,
         "audible_notifications": False,
         "is_old_stream": True,
         "desktop_notifications": False,
@@ -325,6 +327,7 @@ def streams_fixture(
                 "email_address": f"stream{i}@example.com",
                 "subscribers": [1001, 11, 12],
                 "history_public_to_subscribers": True,
+                "is_web_public": False,
             }
         )
     return deepcopy(streams)
