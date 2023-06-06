@@ -2279,6 +2279,21 @@ class TestModel:
         assert model.get_stream_rendered_description(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1,
+                "#baf",
+            ),
+        ],
+    )
+    def test_get_subscription_color(
+        self, model, stream_dict, stream_id, expected_value
+    ):
+        model.stream_dict = stream_dict
+        assert model.get_subscription_color(stream_id) == expected_value
+
     def test_get_all_subscription_ids(
         self,
         model,

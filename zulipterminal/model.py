@@ -1236,6 +1236,13 @@ class Model:
     def get_stream_rendered_description(self, stream_id: int) -> str:
         return self._get_stream_from_id(stream_id)["rendered_description"]
 
+    def get_subscription_color(self, stream_id: int) -> Optional[str]:
+        if stream_id in self.stream_dict:
+            return self.stream_dict[stream_id]["color"]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]["color"]
+        return None
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

@@ -1284,6 +1284,7 @@ class TestWriteBox:
     ) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
         write_box.model.stream_dict = stream_dict
+        write_box.model.get_subscription_color.return_value = expected_color
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
         write_box.model.stream_access_type.return_value = stream_access_type
