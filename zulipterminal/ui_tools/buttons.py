@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from urllib.parse import urljoin, urlparse
 
 import urwid
+import urwidgets
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
@@ -442,7 +443,12 @@ class MessageLinkButton(urwid.Button):
         Overrides the existing button widget for custom styling.
         """
         # Set cursor position next to len(caption) to avoid the cursor.
-        icon = urwid.SelectableIcon(caption, cursor_position=len(caption) + 1)
+        icon = urwid.Pile(
+            widget_list=[
+                urwid.SelectableIcon(caption, cursor_position=len(caption) + 1),
+                urwidgets.Hyperlink(uri=self.link),
+            ]
+        )
         self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
 
     def handle_link(self, *_: Any) -> None:

@@ -1599,7 +1599,7 @@ class MsgInfoView(PopUpView):
         for index, link in enumerate(links):
             text, link_index, _ = links[link]
             if text:
-                caption = f"{link_index}: {text}\n{link}"
+                caption = f"{link_index}: {text}"
             else:
                 caption = f"{link_index}: {link}"
             link_width = max(link_width, len(max(caption.split("\n"), key=len)))
