@@ -133,6 +133,11 @@ class InvalidThemeColorCode(Exception):
     pass
 
 
+class MissingThemeAttributeError(Exception):
+    def __init__(self, attribute: str) -> None:
+        super().__init__(f"Theme is missing required attribute '{attribute}'")
+
+
 def all_themes() -> List[str]:
     return list(THEMES.keys())
 
@@ -158,13 +163,19 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
 
 
 def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
-    theme_styles = THEMES[theme_name].STYLES
-    theme_colors = THEMES[theme_name].Color
+    theme_module = THEMES[theme_name]
+
+    try:
+        theme_colors = theme_module.Color
+    except AttributeError:
+        raise MissingThemeAttributeError("Color") from None
     validate_colors(theme_colors, color_depth)
+
+    theme_styles = theme_module.STYLES
     urwid_theme = parse_themefile(theme_styles, color_depth)
 
     try:
-        theme_meta = THEMES[theme_name].META
+        theme_meta = theme_module.META
         add_pygments_style(theme_meta, urwid_theme)
     except AttributeError:
         pass
