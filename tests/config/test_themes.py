@@ -13,6 +13,7 @@ from zulipterminal.config.themes import (
     REQUIRED_STYLES,
     THEMES,
     InvalidThemeColorCode,
+    MissingThemeAttributeError,
     ThemeSpec,
     add_pygments_style,
     all_themes,
@@ -175,6 +176,22 @@ def test_generate_theme(
 
     assert len(generated_theme) == len(theme_styles)
     assert (single_style, "", "", "", "a", "b") in generated_theme
+
+
+def test_generate_theme__no_Color_in_theme(
+    mocker: MockerFixture,
+    fake_theme_name: str = "fake_theme",
+    depth: int = 256,
+    style: str = "somestyle",
+) -> None:
+    class FakeTheme:
+        pass
+
+    mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
+
+    with pytest.raises(MissingThemeAttributeError) as e:
+        generate_theme(fake_theme_name, depth)
+    assert str(e.value) == "Theme is missing required attribute 'Color'"
 
 
 @pytest.mark.parametrize(
