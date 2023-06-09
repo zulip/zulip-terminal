@@ -146,7 +146,10 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     complete = {
         name
         for name, theme in THEMES.items()
+        if getattr(theme, "Color", None)
+        if getattr(theme, "STYLES", None)
         if set(theme.STYLES) == set(REQUIRED_STYLES)
+        if getattr(theme, "META", None)
         if set(theme.META) == set(REQUIRED_META)
         for meta, conf in theme.META.items()
         if set(conf) == set(REQUIRED_META.get(meta, {}))
