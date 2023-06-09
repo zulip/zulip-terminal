@@ -187,7 +187,11 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         pygments_data = theme_meta.get("pygments", None)
         if pygments_data is None:
             raise MissingThemeAttributeError('META["pygments"]') from None
-        add_pygments_style(pygments_data, urwid_theme)
+        pygments_styles = generate_pygments_styles(pygments_data)
+    else:
+        pygments_styles = []
+
+    urwid_theme.extend(pygments_styles)
 
     return urwid_theme
 
@@ -248,7 +252,7 @@ def parse_themefile(
     return urwid_theme
 
 
-def add_pygments_style(pygments: Dict[str, Any], urwid_theme: ThemeSpec) -> None:
+def generate_pygments_styles(pygments: Dict[str, Any]) -> ThemeSpec:
     """
     This function adds pygments styles for use in syntax
     highlighting of code blocks and inline code.
@@ -270,6 +274,7 @@ def add_pygments_style(pygments: Dict[str, Any], urwid_theme: ThemeSpec) -> None
     term16_styles = term16.styles
     term16_bg = term16.background_color
 
+    theme_styles_from_pygments: ThemeSpec = []
     for token, css_class in STANDARD_TYPES.items():
         if css_class in pygments_overrides:
             pygments_styles[token] = pygments_overrides[css_class]
@@ -298,4 +303,5 @@ def add_pygments_style(pygments: Dict[str, Any], urwid_theme: ThemeSpec) -> None
             pygments_styles[token],
             pygments_bg,
         )
-        urwid_theme.append(new_style)
+        theme_styles_from_pygments.append(new_style)
+    return theme_styles_from_pygments
