@@ -1,5 +1,4 @@
 import re
-from copy import deepcopy
 from enum import Enum
 from typing import Any, Dict, Optional, Tuple
 
@@ -17,9 +16,9 @@ from zulipterminal.config.themes import (
     InvalidThemeColorCode,
     MissingThemeAttributeError,
     ThemeSpec,
-    add_pygments_style,
     all_themes,
     complete_and_incomplete_themes,
+    generate_pygments_styles,
     generate_theme,
     parse_themefile,
     valid_16_color_codes,
@@ -324,19 +323,14 @@ def test_parse_themefile(
         )
     ],
 )
-def test_add_pygments_style(
+def test_generate_pygments_styles(
     mocker: MockerFixture, pygments_data: Dict[str, Any], expected_styles: ThemeSpec
 ) -> None:
-    urwid_theme: ThemeSpec = [(None, "#xxx", "#yyy")]
-    original_urwid_theme = deepcopy(urwid_theme)
+    pygments_styles = generate_pygments_styles(pygments_data)
 
-    add_pygments_style(pygments_data, urwid_theme)
-
-    # Check if original exists
-    assert original_urwid_theme[0] in urwid_theme
     # Check for overrides(k,sd) and inheriting styles (kr)
     for style in expected_styles:
-        assert style in urwid_theme
+        assert style in pygments_styles
 
 
 def test_validate_colors(color_depth: int = 16) -> None:
