@@ -178,7 +178,7 @@ def test_generate_theme(
     assert (single_style, "", "", "", "a", "b") in generated_theme
 
 
-def test_generate_theme__no_Color_in_theme(
+def test_generate_theme__missing_attributes_in_theme(
     mocker: MockerFixture,
     fake_theme_name: str = "fake_theme",
     depth: int = 256,
@@ -189,9 +189,21 @@ def test_generate_theme__no_Color_in_theme(
 
     mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
 
+    # No attributes (STYLES or META) - flag missing Color
     with pytest.raises(MissingThemeAttributeError) as e:
         generate_theme(fake_theme_name, depth)
     assert str(e.value) == "Theme is missing required attribute 'Color'"
+
+    # Color but missing STYLES - flag missing STYLES
+    class FakeColor(Enum):
+        COLOR_1 = "a a #"
+        COLOR_2 = "k b #"
+
+    FakeTheme.Color = FakeColor  # type: ignore [attr-defined]
+
+    with pytest.raises(MissingThemeAttributeError) as e:
+        generate_theme(fake_theme_name, depth)
+    assert str(e.value) == "Theme is missing required attribute 'STYLES'"
 
 
 @pytest.mark.parametrize(
