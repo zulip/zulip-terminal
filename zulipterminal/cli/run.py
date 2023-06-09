@@ -18,7 +18,7 @@ from urwid import display_common, set_encoding
 
 from zulipterminal.api_types import ServerSettings
 from zulipterminal.config.themes import (
-    InvalidThemeColorCode,
+    ThemeError,
     aliased_themes,
     all_themes,
     complete_and_incomplete_themes,
@@ -571,7 +571,7 @@ def main(options: Optional[List[str]] = None) -> None:
         zt_logger.info("\n\n%s\n\n", e)
         zt_logger.exception(e)
         exit_with_error(f"\nError connecting to Zulip server: {e}.")
-    except InvalidThemeColorCode as e:
+    except ThemeError as e:
         # Acts as separator between logs
         zt_logger.info("\n\n%s\n\n", e)
         zt_logger.exception(e)
