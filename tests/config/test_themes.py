@@ -102,7 +102,10 @@ def test_complete_and_incomplete_themes__bundled_theme_output() -> None:
     "missing, expected_complete",
     [
         case({}, True, id="keys_complete"),
+        case({"Color": None}, False, id="Color_absent"),
+        case({"STYLES": None}, False, id="STYLES_absent"),
         case({"STYLES": "incomplete_style"}, False, id="STYLES_incomplete"),
+        case({"META": None}, False, id="META_absent"),
         case({"META": {}}, False, id="META_empty"),
         case({"META": {"pygments": {}}}, False, id="META_pygments_empty"),
     ],
@@ -136,6 +139,8 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
     for field, action in missing.items():
         if action == "incomplete_style":
             setattr(FakeTheme, field, incomplete_style)
+        elif action is None:
+            delattr(FakeTheme, field)
         else:
             setattr(FakeTheme, field, action)
 
