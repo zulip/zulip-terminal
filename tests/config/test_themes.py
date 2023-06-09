@@ -17,6 +17,7 @@ from zulipterminal.config.themes import (
     add_pygments_style,
     all_themes,
     complete_and_incomplete_themes,
+    generate_theme,
     parse_themefile,
     valid_16_color_codes,
     validate_colors,
@@ -150,6 +151,30 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
         assert complete_and_incomplete_themes() == ([fake_theme_name], [])
     else:
         assert complete_and_incomplete_themes() == ([], [fake_theme_name])
+
+
+def test_generate_theme(
+    mocker: MockerFixture,
+    fake_theme_name: str = "fake_theme",
+    depth: int = 256,  # Only test one depth; others covered in parse_themefile tests
+    single_style: str = "somestyle",
+) -> None:
+    class FakeColor(Enum):
+        COLOR_1 = "a a #"
+        COLOR_2 = "k b #"
+
+    theme_styles = {single_style: (FakeColor.COLOR_1, FakeColor.COLOR_2)}
+
+    class FakeTheme:
+        STYLES = theme_styles
+        Color = FakeColor  # Required for validate_colors
+
+    mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
+
+    generated_theme = generate_theme(fake_theme_name, depth)
+
+    assert len(generated_theme) == len(theme_styles)
+    assert (single_style, "", "", "", "a", "b") in generated_theme
 
 
 @pytest.mark.parametrize(
