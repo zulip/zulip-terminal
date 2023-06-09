@@ -279,21 +279,8 @@ def test_add_pygments_style(
         assert style in urwid_theme
 
 
-# Validate 16-color-codes
-@pytest.mark.parametrize(
-    "color_depth, theme_name",
-    [
-        (16, "zt_dark"),
-        (16, "gruvbox_dark"),
-        (16, "gruvbox_light"),
-        (16, "zt_light"),
-        (16, "zt_blue"),
-    ],
-)
-def test_validate_colors(theme_name: str, color_depth: int) -> None:
-    theme = THEMES[theme_name]
-
-    header_text = f"Invalid 16-color codes in theme '{theme_name}':\n"
+def test_validate_colors(color_depth: int = 16) -> None:
+    header_text = "Invalid 16-color codes found in this theme:\n"
 
     # No invalid colors
     class Color(Enum):
@@ -303,8 +290,7 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         GRAY_244 = "dark_gray       h244      #928374"
         LIGHT2 = "white           h250      #d5c4a1"
 
-    theme.Color = Color
-    validate_colors(theme_name, 16)
+    validate_colors(Color, color_depth)
 
     # One invalid color
     class Color1(Enum):
@@ -314,9 +300,8 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         GRAY_244 = "dark_gray       h244      #928374"
         LIGHT2 = "white           h250      #d5c4a1"
 
-    theme.Color = Color1
     with pytest.raises(InvalidThemeColorCode) as e:
-        validate_colors(theme_name, 16)
+        validate_colors(Color1, color_depth)
     assert str(e.value) == header_text + "- DARK0_HARD = blac"
 
     # Two invalid colors
@@ -327,9 +312,8 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         GRAY_244 = "dark_gra       h244      #928374"
         LIGHT2 = "white           h250      #d5c4a1"
 
-    theme.Color = Color2
     with pytest.raises(InvalidThemeColorCode) as e:
-        validate_colors(theme_name, 16)
+        validate_colors(Color2, color_depth)
     assert (
         str(e.value) == header_text + "- DARK0_HARD = blac\n" + "- GRAY_244 = dark_gra"
     )
@@ -342,9 +326,8 @@ def test_validate_colors(theme_name: str, color_depth: int) -> None:
         GRAY_244 = "dark_gra       h244      #928374"
         LIGHT2 = "whit           h250      #d5c4a1"
 
-    theme.Color = Color3
     with pytest.raises(InvalidThemeColorCode) as e:
-        validate_colors(theme_name, 16)
+        validate_colors(Color3, color_depth)
     assert (
         str(e.value)
         == header_text
