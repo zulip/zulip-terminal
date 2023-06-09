@@ -129,11 +129,15 @@ valid_16_color_codes = [
 ]
 
 
-class InvalidThemeColorCode(Exception):
+class ThemeError(Exception):
     pass
 
 
-class MissingThemeAttributeError(Exception):
+class InvalidThemeColorCode(ThemeError):
+    pass
+
+
+class MissingThemeAttributeError(ThemeError):
     def __init__(self, attribute: str) -> None:
         super().__init__(f"Theme is missing required attribute '{attribute}'")
 
