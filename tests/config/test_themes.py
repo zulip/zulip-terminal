@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import pytest
 from pygments.styles.perldoc import PerldocStyle
+from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
@@ -21,6 +22,8 @@ from zulipterminal.config.themes import (
     validate_colors,
 )
 
+
+MODULE = "zulipterminal.config.themes"
 
 expected_complete_themes = {
     "zt_dark",
@@ -86,13 +89,62 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
         assert all(theme_meta[metadata][c] for c in config)
 
 
-def test_complete_and_incomplete_themes() -> None:
+def test_complete_and_incomplete_themes__bundled_theme_output() -> None:
     # These are sorted to ensure reproducibility
     result = (
         sorted(expected_complete_themes),
         sorted(set(THEMES) - expected_complete_themes),
     )
     assert result == complete_and_incomplete_themes()
+
+
+@pytest.mark.parametrize(
+    "missing, expected_complete",
+    [
+        case({}, True, id="keys_complete"),
+        case({"STYLES": "incomplete_style"}, False, id="STYLES_incomplete"),
+        case({"META": {}}, False, id="META_empty"),
+        case({"META": {"pygments": {}}}, False, id="META_pygments_empty"),
+    ],
+)
+def test_complete_and_incomplete_themes__single_theme_completeness(
+    mocker: MockerFixture,
+    missing: Dict[str, Any],
+    expected_complete: bool,
+    style: str = "s",
+    fake_theme_name: str = "sometheme",
+) -> None:
+    class FakeColor(Enum):
+        COLOR_1 = "a a #"
+        COLOR_2 = "k b #"
+
+    class FakeTheme:
+        Color = FakeColor
+        STYLES = {
+            style: (FakeColor.COLOR_1, FakeColor.COLOR_2) for style in REQUIRED_STYLES
+        }
+        META = {
+            "pygments": {
+                "styles": None,
+                "background": None,
+                "overrides": None,
+            }
+        }
+
+    incomplete_style = {style: (FakeColor.COLOR_1, FakeColor.COLOR_2)}
+
+    for field, action in missing.items():
+        if action == "incomplete_style":
+            setattr(FakeTheme, field, incomplete_style)
+        else:
+            setattr(FakeTheme, field, action)
+
+    mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
+
+    if expected_complete:
+        assert complete_and_incomplete_themes() == ([fake_theme_name], [])
+    else:
+        assert complete_and_incomplete_themes() == ([], [fake_theme_name])
 
 
 @pytest.mark.parametrize(
