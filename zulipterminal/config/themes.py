@@ -171,7 +171,10 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         raise MissingThemeAttributeError("Color") from None
     validate_colors(theme_colors, color_depth)
 
-    theme_styles = theme_module.STYLES
+    try:
+        theme_styles = theme_module.STYLES
+    except AttributeError:
+        raise MissingThemeAttributeError("STYLES") from None
     urwid_theme = parse_themefile(theme_styles, color_depth)
 
     try:
