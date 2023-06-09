@@ -1,7 +1,6 @@
 """
 Styles and their colour mappings in each theme, with helper functions
 """
-
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pygments.token import STANDARD_TYPES
@@ -160,7 +159,8 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
 
 def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
     theme_styles = THEMES[theme_name].STYLES
-    validate_colors(theme_name, color_depth)
+    theme_colors = THEMES[theme_name].Color
+    validate_colors(theme_colors, color_depth)
     urwid_theme = parse_themefile(theme_styles, color_depth)
 
     try:
@@ -172,17 +172,18 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
     return urwid_theme
 
 
-def validate_colors(theme_name: str, color_depth: int) -> None:
+# color_enum can be one of many enums satisfying the specification
+# There is currently no generic enum type
+def validate_colors(color_enum: Any, color_depth: int) -> None:
     """
     This function validates color-codes for a given theme, given colors are in `Color`.
 
     If any color is not in accordance with urwid default 16-color codes then the
     function raises InvalidThemeColorCode with the invalid colors.
     """
-    theme_colors = THEMES[theme_name].Color
     failure_text = []
     if color_depth == 16:
-        for color in theme_colors:
+        for color in color_enum:
             color_16code = color.value.split()[0]
             if color_16code not in valid_16_color_codes:
                 invalid_16_color_code = str(color.name)
@@ -191,7 +192,7 @@ def validate_colors(theme_name: str, color_depth: int) -> None:
             return
         else:
             text = "\n".join(
-                [f"Invalid 16-color codes in theme '{theme_name}':"] + failure_text
+                ["Invalid 16-color codes found in this theme:"] + failure_text
             )
             raise InvalidThemeColorCode(text)
 
