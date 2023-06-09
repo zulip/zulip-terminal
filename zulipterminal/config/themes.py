@@ -183,7 +183,7 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
 
     try:
         theme_meta = theme_module.META
-        add_pygments_style(theme_meta, urwid_theme)
+        add_pygments_style(theme_meta["pygments"], urwid_theme)
     except AttributeError:
         pass
 
@@ -246,7 +246,7 @@ def parse_themefile(
     return urwid_theme
 
 
-def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> None:
+def add_pygments_style(pygments: Dict[str, Any], urwid_theme: ThemeSpec) -> None:
     """
     This function adds pygments styles for use in syntax
     highlighting of code blocks and inline code.
@@ -261,7 +261,6 @@ def add_pygments_style(theme_meta: Dict[str, Any], urwid_theme: ThemeSpec) -> No
         used to override certain pygments styles to match to urwid format.
         It can also be used to customize the syntax style.
     """
-    pygments = theme_meta["pygments"]
     pygments_styles = pygments["styles"]
     pygments_bg = pygments["background"]
     pygments_overrides = pygments["overrides"]

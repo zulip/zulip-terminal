@@ -282,17 +282,15 @@ def test_parse_themefile(
 
 
 @pytest.mark.parametrize(
-    "theme_meta, expected_styles",
+    "pygments_data, expected_styles",
     [
         (
             {
-                "pygments": {
-                    "styles": PerldocStyle().styles,
-                    "background": "#def",
-                    "overrides": {
-                        "k": "#abc",
-                        "sd": "#123, bold",
-                    },
+                "styles": PerldocStyle().styles,
+                "background": "#def",
+                "overrides": {
+                    "k": "#abc",
+                    "sd": "#123, bold",
                 },
             },
             [
@@ -318,12 +316,12 @@ def test_parse_themefile(
     ],
 )
 def test_add_pygments_style(
-    mocker: MockerFixture, theme_meta: Dict[str, Any], expected_styles: ThemeSpec
+    mocker: MockerFixture, pygments_data: Dict[str, Any], expected_styles: ThemeSpec
 ) -> None:
     urwid_theme: ThemeSpec = [(None, "#xxx", "#yyy")]
     original_urwid_theme = deepcopy(urwid_theme)
 
-    add_pygments_style(theme_meta, urwid_theme)
+    add_pygments_style(pygments_data, urwid_theme)
 
     # Check if original exists
     assert original_urwid_theme[0] in urwid_theme
