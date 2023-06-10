@@ -1227,6 +1227,9 @@ class Model:
     def is_stream_history_public_to_subscribers(self, stream_id: int) -> bool:
         return self._get_stream_from_id(stream_id)["history_public_to_subscribers"]
 
+    def get_stream_weekly_traffic(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id)["stream_weekly_traffic"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

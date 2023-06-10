@@ -1309,6 +1309,9 @@ class TestStreamInfoView:
         model.is_stream_announcement_only.return_value = to_vary_in_stream_data.get(
             "is_announcement_only"
         )
+        model.get_stream_weekly_traffic.return_value = general_stream.get(
+            "stream_weekly_traffic"
+        )
         model.cached_retention_text = {stream_id: cached_message_retention_text}
         model.server_feature_level = server_feature_level
 

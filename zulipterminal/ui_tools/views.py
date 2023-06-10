@@ -1317,7 +1317,7 @@ class StreamInfoView(PopUpView):
         self.stream_email = stream["email_address"]
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
 
-        weekly_traffic = stream["stream_weekly_traffic"]
+        weekly_traffic = controller.model.get_stream_weekly_traffic(self.stream_id)
         weekly_msg_count = (
             "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
         )
