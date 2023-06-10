@@ -1314,7 +1314,7 @@ class StreamInfoView(PopUpView):
             else "Not Public to Users"
         )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
-        self.stream_email = stream["email_address"]
+        self.stream_email = controller.model.get_subscription_email(self.stream_id)
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
 
         weekly_traffic = controller.model.get_stream_weekly_traffic(self.stream_id)

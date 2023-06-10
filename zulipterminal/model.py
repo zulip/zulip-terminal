@@ -1243,6 +1243,14 @@ class Model:
             return self._unsubscribed_streams[stream_id]["color"]
         return None
 
+    def get_subscription_email(self, stream_id: int) -> Optional[str]:
+        if stream_id in self.stream_dict:
+            return self.stream_dict[stream_id]["email_address"]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]["email_address"]
+        else:
+            raise RuntimeError(f"Stream with id {stream_id} is not subscribed to!")
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

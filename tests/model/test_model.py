@@ -2294,6 +2294,45 @@ class TestModel:
         model.stream_dict = stream_dict
         assert model.get_subscription_color(stream_id) == expected_value
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "general@example.comm",
+            ),
+            case(
+                3,
+                "stream3@example.com",
+            ),
+        ],
+    )
+    def test_get_subscription_email(
+        self,
+        model,
+        stream_dict,
+        unsubscribed_streams_fixture,
+        stream_id,
+        expected_value,
+    ):
+        model.stream_dict = stream_dict
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        assert model.get_subscription_email(stream_id) == expected_value
+
+    def test_get_subscription_email_not_subscribed(
+        self,
+        model,
+        stream_dict,
+        unsubscribed_streams_fixture,
+        stream_id=5,
+    ):
+        model.stream_dict = stream_dict
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        with pytest.raises(
+            RuntimeError, match=f"Stream with id {stream_id} is not subscribed to!"
+        ):
+            model.get_subscription_email(stream_id)
+
     def test_get_all_subscription_ids(
         self,
         model,
