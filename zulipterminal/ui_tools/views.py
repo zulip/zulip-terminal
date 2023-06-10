@@ -1297,7 +1297,7 @@ class StreamInfoView(PopUpView):
                 controller.model.get_stream_post_policy(self.stream_id)
             ]
         else:
-            if stream.get("is_announcement_only"):
+            if controller.model.is_stream_announcement_only(self.stream_id):
                 stream_policy = STREAM_POST_POLICY[2]
             else:
                 stream_policy = STREAM_POST_POLICY[1]

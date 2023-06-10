@@ -1221,6 +1221,9 @@ class Model:
     def get_stream_post_policy(self, stream_id: int) -> Optional[int]:
         return self._get_stream_from_id(stream_id).get("stream_post_policy")
 
+    def is_stream_announcement_only(self, stream_id: int) -> Optional[bool]:
+        return self._get_stream_from_id(stream_id).get("is_announcement_only")
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

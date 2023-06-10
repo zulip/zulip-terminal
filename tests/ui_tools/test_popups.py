@@ -1306,6 +1306,9 @@ class TestStreamInfoView:
         model.get_stream_post_policy.return_value = to_vary_in_stream_data.get(
             "stream_post_policy"
         )
+        model.is_stream_announcement_only.return_value = to_vary_in_stream_data.get(
+            "is_announcement_only"
+        )
         model.cached_retention_text = {stream_id: cached_message_retention_text}
         model.server_feature_level = server_feature_level
 

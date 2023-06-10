@@ -2131,6 +2131,46 @@ class TestModel:
         assert model.get_stream_post_policy(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {},
+                None,
+            ),
+            case(
+                3,
+                {
+                    "is_announcement_only": False,
+                },
+                False,
+            ),
+            case(
+                5,
+                {
+                    "is_announcement_only": True,
+                },
+                True,
+            ),
+        ],
+    )
+    def test_is_stream_announcement_only(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.is_stream_announcement_only(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
