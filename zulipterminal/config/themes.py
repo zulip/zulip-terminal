@@ -181,11 +181,13 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         raise MissingThemeAttributeError("STYLES") from None
     urwid_theme = parse_themefile(theme_styles, color_depth)
 
-    try:
-        theme_meta = theme_module.META
-        add_pygments_style(theme_meta["pygments"], urwid_theme)
-    except AttributeError:
-        pass
+    # META is not required, but if present should contain pygments data
+    theme_meta = getattr(theme_module, "META", None)
+    if theme_meta is not None:
+        pygments_data = theme_meta.get("pygments", None)
+        if pygments_data is None:
+            raise MissingThemeAttributeError('META["pygments"]') from None
+        add_pygments_style(pygments_data, urwid_theme)
 
     return urwid_theme
 
