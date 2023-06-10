@@ -2248,6 +2248,37 @@ class TestModel:
         assert model.get_stream_weekly_traffic(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "General Stream",
+            ),
+            case(
+                3,
+                "A description of stream 3",
+            ),
+            case(
+                5,
+                "A description of stream 5",
+            ),
+        ],
+    )
+    def test_get_stream_rendered_description(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        expected_value,
+    ):
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_rendered_description(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

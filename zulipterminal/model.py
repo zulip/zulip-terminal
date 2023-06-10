@@ -1230,6 +1230,9 @@ class Model:
     def get_stream_weekly_traffic(self, stream_id: int) -> Optional[int]:
         return self._get_stream_from_id(stream_id)["stream_weekly_traffic"]
 
+    def get_stream_rendered_description(self, stream_id: int) -> str:
+        return self._get_stream_from_id(stream_id)["rendered_description"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

@@ -1176,6 +1176,9 @@ class TestStreamInfoView:
         self.controller.model.get_stream_post_policy.return_value = general_stream.get(
             "stream_post_policy"
         )
+        self.controller.model.get_stream_rendered_description.return_value = (
+            general_stream.get("rendered_description")
+        )
         self.controller.model.stream_access_type.return_value = "public"
         self.controller.model.get_stream_subscribers.return_value = general_stream[
             "subscribers"
@@ -1362,7 +1365,7 @@ class TestStreamInfoView:
         self, rendered_description: str, expected_markup: Tuple[None, Any]
     ) -> None:
         model = self.controller.model
-        model.stream_dict[self.stream_id]["rendered_description"] = rendered_description
+        model.get_stream_rendered_description.return_value = rendered_description
 
         stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
