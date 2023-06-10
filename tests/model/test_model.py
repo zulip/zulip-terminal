@@ -2171,6 +2171,43 @@ class TestModel:
         assert model.is_stream_announcement_only(stream_id) == expected_value
         model._get_stream_from_id.assert_called_once()
 
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                3,
+                {
+                    "history_public_to_subscribers": False,
+                },
+                False,
+            ),
+            case(
+                5,
+                {
+                    "history_public_to_subscribers": True,
+                },
+                True,
+            ),
+        ],
+    )
+    def test_is_stream_history_public_to_subscribers(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert (
+            model.is_stream_history_public_to_subscribers(stream_id) == expected_value
+        )
+        model._get_stream_from_id.assert_called_once()
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

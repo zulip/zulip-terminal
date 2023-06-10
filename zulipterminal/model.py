@@ -1224,6 +1224,9 @@ class Model:
     def is_stream_announcement_only(self, stream_id: int) -> Optional[bool]:
         return self._get_stream_from_id(stream_id).get("is_announcement_only")
 
+    def is_stream_history_public_to_subscribers(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["history_public_to_subscribers"]
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

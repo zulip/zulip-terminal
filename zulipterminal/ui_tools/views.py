@@ -1310,7 +1310,7 @@ class StreamInfoView(PopUpView):
 
         availability_of_history = (
             "Public to Users"
-            if stream["history_public_to_subscribers"]
+            if controller.model.is_stream_history_public_to_subscribers(self.stream_id)
             else "Not Public to Users"
         )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
