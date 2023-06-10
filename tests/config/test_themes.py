@@ -229,6 +229,15 @@ def test_generate_theme__missing_attributes_in_theme(
         generate_theme(fake_theme_name, depth)
     assert str(e.value) == "Theme is missing required attribute 'STYLES'"
 
+    # Color, STYLES and META, but no pygments data in META
+    not_all_styles = {style: (FakeColor.COLOR_1, FakeColor.COLOR_2)}
+    FakeTheme.STYLES = not_all_styles  # type: ignore [attr-defined]
+    FakeTheme.META = {}  # type: ignore [attr-defined]
+
+    with pytest.raises(MissingThemeAttributeError) as e:
+        generate_theme(fake_theme_name, depth)
+    assert str(e.value) == """Theme is missing required attribute 'META["pygments"]'"""
+
 
 @pytest.mark.parametrize(
     "color_depth, expected_urwid_theme",
