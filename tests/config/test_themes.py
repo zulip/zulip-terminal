@@ -4,7 +4,9 @@ from enum import Enum
 from typing import Any, Dict, Optional, Tuple
 
 import pytest
+from pygments.styles.material import MaterialStyle
 from pygments.styles.perldoc import PerldocStyle
+from pygments.token import STANDARD_TYPES
 from pytest import param as case
 from pytest_mock import MockerFixture
 
@@ -154,8 +156,27 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
         assert complete_and_incomplete_themes() == ([], [fake_theme_name])
 
 
-def test_generate_theme(
+@pytest.mark.parametrize(
+    "META, expected_pygments_length",
+    [
+        case(None, 0, id="META_absent"),
+        case(
+            {
+                "pygments": {
+                    "styles": MaterialStyle().styles,
+                    "background": "h80",
+                    "overrides": {},
+                }
+            },
+            len(STANDARD_TYPES),
+            id="META_with_valid_values",
+        ),
+    ],
+)
+def test_generate_theme__has_required_attributes(
     mocker: MockerFixture,
+    META: Optional[Dict[str, Dict[str, Any]]],
+    expected_pygments_length: int,
     fake_theme_name: str = "fake_theme",
     depth: int = 256,  # Only test one depth; others covered in parse_themefile tests
     single_style: str = "somestyle",
@@ -170,11 +191,14 @@ def test_generate_theme(
         STYLES = theme_styles
         Color = FakeColor  # Required for validate_colors
 
+    if META is not None:
+        FakeTheme.META = META  # type: ignore [attr-defined]
+
     mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
 
     generated_theme = generate_theme(fake_theme_name, depth)
 
-    assert len(generated_theme) == len(theme_styles)
+    assert len(generated_theme) == len(theme_styles) + expected_pygments_length
     assert (single_style, "", "", "", "a", "b") in generated_theme
 
 
