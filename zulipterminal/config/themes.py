@@ -187,6 +187,9 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         pygments_data = theme_meta.get("pygments", None)
         if pygments_data is None:
             raise MissingThemeAttributeError('META["pygments"]') from None
+        for key in REQUIRED_META["pygments"]:
+            if pygments_data.get(key) is None:
+                raise MissingThemeAttributeError(f'META["pygments"]["{key}"]') from None
         pygments_styles = generate_pygments_styles(pygments_data)
     else:
         pygments_styles = []
