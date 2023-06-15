@@ -185,7 +185,6 @@ select = [
     "PLW", # pylint warning
     "RUF100", # Checks noqa rules are used
     "SIM", # SIMplify
-    "T20", # prinT present
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
     "YTT", # Year TwentyTwenty (flake8-2020), sys.version checks

@@ -68,6 +68,7 @@ MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
 def detected_platform() -> str:
+    print(f"{PLATFORM} ({PLATFORM_DETAIL})")
     return PLATFORM
 
 
