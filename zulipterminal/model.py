@@ -174,7 +174,7 @@ class Model:
 
         self.users = self.get_all_users()
 
-        self.stream_dict: Dict[int, Subscription] = {}
+        self._subscribed_streams: Dict[int, Subscription] = {}
         self._unsubscribed_streams: Dict[int, Subscription] = {}
         self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()
@@ -1177,8 +1177,8 @@ class Model:
         }
 
     def _get_stream_from_id(self, stream_id: int) -> Union[Subscription, Stream]:
-        if stream_id in self.stream_dict:
-            return self.stream_dict[stream_id]
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]
         elif stream_id in self._unsubscribed_streams:
             return self._unsubscribed_streams[stream_id]
         elif stream_id in self._never_subscribed_streams:
@@ -1187,13 +1187,13 @@ class Model:
             raise RuntimeError(f"Stream with id {stream_id} does not exist!")
 
     def get_all_stream_ids(self) -> List[int]:
-        id_list = list(self.stream_dict)
+        id_list = list(self._subscribed_streams)
         id_list.extend(stream_id for stream_id in self._unsubscribed_streams)
         id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
         return id_list
 
     def get_all_subscription_ids(self) -> List[int]:
-        return list(self.stream_dict)
+        return list(self._subscribed_streams)
 
     def get_stream_name(self, stream_id: int) -> Optional[str]:
         return self._get_stream_from_id(stream_id).get("name")
@@ -1237,15 +1237,15 @@ class Model:
         return self._get_stream_from_id(stream_id)["rendered_description"]
 
     def get_subscription_color(self, stream_id: int) -> Optional[str]:
-        if stream_id in self.stream_dict:
-            return self.stream_dict[stream_id]["color"]
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]["color"]
         elif stream_id in self._unsubscribed_streams:
             return self._unsubscribed_streams[stream_id]["color"]
         return None
 
     def get_subscription_email(self, stream_id: int) -> Optional[str]:
-        if stream_id in self.stream_dict:
-            return self.stream_dict[stream_id]["email_address"]
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]["email_address"]
         elif stream_id in self._unsubscribed_streams:
             return self._unsubscribed_streams[stream_id]["email_address"]
         else:
@@ -1274,7 +1274,7 @@ class Model:
             # different formats
             subscription["color"] = canonicalize_color(subscription["color"])
 
-            self.stream_dict[subscription["stream_id"]] = subscription
+            self._subscribed_streams[subscription["stream_id"]] = subscription
             stream_data = make_reduced_stream_data(subscription)
             if subscription["pin_to_top"]:
                 new_pinned_streams.append(stream_data)
@@ -1335,7 +1335,7 @@ class Model:
         raise RuntimeError("Invalid stream name.")
 
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
-        if stream_id not in self.stream_dict:
+        if stream_id not in self._subscribed_streams:
             raise RuntimeError("Invalid stream id.")
         if self.is_stream_web_public(stream_id):
             return "web-public"
@@ -1375,7 +1375,7 @@ class Model:
         display_error_if_present(response, self.controller)
 
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
-        return stream_id in self.stream_dict
+        return stream_id in self._subscribed_streams
 
     def _handle_subscription_event(self, event: Event) -> None:
         """

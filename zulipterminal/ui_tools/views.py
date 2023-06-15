@@ -1268,7 +1268,7 @@ class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, stream_id: int) -> None:
         self.stream_id = stream_id
         self.controller = controller
-        stream = controller.model.stream_dict[stream_id]
+        stream = controller.model._subscribed_streams[stream_id]
 
         # New in feature level 30, server version 4.0
         stream_creation_date = controller.model.get_stream_date_created(self.stream_id)

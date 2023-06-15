@@ -743,7 +743,7 @@ class TestMessageBox:
         ],
     )
     def test_main_view(self, mocker, message, last_message):
-        self.model.stream_dict = {
+        self.model._subscribed_streams = {
             5: {
                 "color": "#bd6",
             },
@@ -822,7 +822,7 @@ class TestMessageBox:
     def test_main_view_generates_stream_header(
         self, mocker, message, to_vary_in_last_message
     ):
-        self.model.stream_dict = {
+        self.model._subscribed_streams = {
             5: {
                 "color": "#bd6",
             },
@@ -953,7 +953,7 @@ class TestMessageBox:
         assert_search_bar,
         stream_color="#bd6",
     ):
-        self.model.stream_dict = {
+        self.model._subscribed_streams = {
             205: {
                 "color": stream_color,
             },

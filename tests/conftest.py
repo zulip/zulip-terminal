@@ -299,12 +299,12 @@ def web_public_stream() -> Subscription:
 @pytest.fixture
 def get_stream_from_id_fixture(
     stream_id: int,
-    stream_dict: Dict[int, Subscription],
+    _subscribed_streams: Dict[int, Subscription],
     unsubscribed_streams_fixture: Dict[int, Subscription],
     never_subscribed_streams_fixture: Dict[int, Stream],
 ) -> Union[Subscription, Stream]:
-    if stream_id in stream_dict:
-        return stream_dict[stream_id]
+    if stream_id in _subscribed_streams:
+        return _subscribed_streams[stream_id]
     elif stream_id in unsubscribed_streams_fixture:
         return unsubscribed_streams_fixture[stream_id]
     else:
@@ -1278,7 +1278,7 @@ def never_subscribed_streams_fixture() -> Dict[int, Stream]:
 
 
 @pytest.fixture
-def stream_dict(streams_fixture: List[Subscription]) -> Dict[int, Subscription]:
+def _subscribed_streams(streams_fixture: List[Subscription]) -> Dict[int, Subscription]:
     return {stream["stream_id"]: stream for stream in streams_fixture}
 
 

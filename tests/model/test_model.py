@@ -61,14 +61,14 @@ class TestModel:
         unicode_emojis,
         realm_emojis_data,
         zulip_emoji,
-        stream_dict,
+        _subscribed_streams,
     ):
         assert hasattr(model, "controller")
         assert hasattr(model, "client")
         assert model.narrow == []
         assert model._have_last_message == {}
         assert model.stream_id is None
-        assert model.stream_dict == stream_dict
+        assert model._subscribed_streams == _subscribed_streams
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model._last_unread_topic is None
@@ -266,7 +266,7 @@ class TestModel:
 
     @pytest.mark.parametrize(
         [
-            "to_vary_in_stream_dict",
+            "to_vary_in__subscribed_streams",
             "realm_msg_retention_days",
             "feature_level",
             "expect_msg_retention_text",
@@ -311,21 +311,23 @@ class TestModel:
     def test_normalize_and_cache_message_retention_text(
         self,
         model,
-        stream_dict,
-        to_vary_in_stream_dict,
+        _subscribed_streams,
+        to_vary_in__subscribed_streams,
         realm_msg_retention_days,
         feature_level,
         expect_msg_retention_text,
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
         model.initial_data["realm_message_retention_days"] = realm_msg_retention_days
-        for stream_id in to_vary_in_stream_dict:
-            model.stream_dict[stream_id].update(to_vary_in_stream_dict[stream_id])
+        for stream_id in to_vary_in__subscribed_streams:
+            model._subscribed_streams[stream_id].update(
+                to_vary_in__subscribed_streams[stream_id]
+            )
 
         model.normalize_and_cache_message_retention_text()
 
-        for stream_id in to_vary_in_stream_dict:
+        for stream_id in to_vary_in__subscribed_streams:
             assert (
                 model.cached_retention_text[stream_id]
                 == expect_msg_retention_text[stream_id]
@@ -438,11 +440,11 @@ class TestModel:
         ],
     )
     def test_set_narrow_not_already_set(
-        self, model, initial_narrow, narrow, good_args, user_dict, stream_dict
+        self, model, initial_narrow, narrow, good_args, user_dict, _subscribed_streams
     ):
         model.narrow = initial_narrow
         model.user_dict = user_dict
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         assert not model.set_narrow(**good_args)
         assert model.narrow != initial_narrow
         assert model.narrow == narrow
@@ -1748,11 +1750,11 @@ class TestModel:
         model,
         stream_id,
         expected_value,
-        stream_dict,
+        _subscribed_streams,
         unsubscribed_streams_fixture,
         never_subscribed_streams_fixture,
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._unsubscribed_streams = unsubscribed_streams_fixture
         model._never_subscribed_streams = never_subscribed_streams_fixture
         assert model._get_stream_from_id(stream_id) == expected_value
@@ -1760,12 +1762,12 @@ class TestModel:
     def test_get_stream_from_id_nonexistent_stream(
         self,
         model,
-        stream_dict,
+        _subscribed_streams,
         unsubscribed_streams_fixture,
         never_subscribed_streams_fixture,
         stream_id=231,  # id 231 does not belong to any stream
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._unsubscribed_streams = unsubscribed_streams_fixture
         model._never_subscribed_streams = never_subscribed_streams_fixture
         with pytest.raises(RuntimeError):
@@ -1774,12 +1776,12 @@ class TestModel:
     def test_get_all_stream_ids(
         self,
         model,
-        stream_dict,
+        _subscribed_streams,
         unsubscribed_streams_fixture,
         never_subscribed_streams_fixture,
         expected_value=[1000, 99, 999, 1, 2, 3, 4, 5, 6],
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._unsubscribed_streams = unsubscribed_streams_fixture
         model._never_subscribed_streams = never_subscribed_streams_fixture
         assert model.get_all_stream_ids() == expected_value
@@ -2297,9 +2299,9 @@ class TestModel:
         ],
     )
     def test_get_subscription_color(
-        self, model, stream_dict, stream_id, expected_value
+        self, model, _subscribed_streams, stream_id, expected_value
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         assert model.get_subscription_color(stream_id) == expected_value
 
     @pytest.mark.parametrize(
@@ -2318,23 +2320,23 @@ class TestModel:
     def test_get_subscription_email(
         self,
         model,
-        stream_dict,
+        _subscribed_streams,
         unsubscribed_streams_fixture,
         stream_id,
         expected_value,
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._unsubscribed_streams = unsubscribed_streams_fixture
         assert model.get_subscription_email(stream_id) == expected_value
 
     def test_get_subscription_email_not_subscribed(
         self,
         model,
-        stream_dict,
+        _subscribed_streams,
         unsubscribed_streams_fixture,
         stream_id=5,
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._unsubscribed_streams = unsubscribed_streams_fixture
         with pytest.raises(
             RuntimeError, match=f"Stream with id {stream_id} is not subscribed to!"
@@ -2344,10 +2346,10 @@ class TestModel:
     def test_get_all_subscription_ids(
         self,
         model,
-        stream_dict,
+        _subscribed_streams,
         expected_value=[1000, 99, 999, 1, 2],
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         assert model.get_all_subscription_ids() == expected_value
 
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
@@ -2366,9 +2368,10 @@ class TestModel:
 
         model._subscribe_to_streams(subs)
 
-        assert len(model.stream_dict)
+        assert len(model._subscribed_streams)
         assert all(
-            msg_id == msg["stream_id"] for msg_id, msg in model.stream_dict.items()
+            msg_id == msg["stream_id"]
+            for msg_id, msg in model._subscribed_streams.items()
         )
         assert model.muted_streams == muted
         assert model.pinned_streams == []  # FIXME generalize/parametrize
@@ -4130,7 +4133,7 @@ class TestModel:
         self,
         model,
         mocker,
-        stream_dict,
+        _subscribed_streams,
         event,
         feature_level,
         stream_id,
@@ -4138,12 +4141,12 @@ class TestModel:
     ):
         event["type"] = "subscription"
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        new_subscribers = model.stream_dict[stream_id]["subscribers"]
+        new_subscribers = model._subscribed_streams[stream_id]["subscribers"]
         assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize(
@@ -4162,16 +4165,16 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_to_unsubscribed_streams(
-        self, model, mocker, stream_dict, event, feature_level
+        self, model, mocker, _subscribed_streams, event, feature_level
     ):
         event["type"] = "subscription"
 
-        model.stream_dict = deepcopy(stream_dict)
+        model._subscribed_streams = deepcopy(_subscribed_streams)
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        assert model.stream_dict == stream_dict
+        assert model._subscribed_streams == _subscribed_streams
 
     # NOTE: This only applies to feature level 34/35+
     @pytest.mark.parametrize(
@@ -4190,17 +4193,23 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_multiple_users_one_stream(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
+        self,
+        model,
+        mocker,
+        _subscribed_streams,
+        event,
+        feature_level,
+        expected_subscribers,
     ):
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [2]
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        new_subscribers = model.stream_dict[stream_ids[0]]["subscribers"]
+        new_subscribers = model._subscribed_streams[stream_ids[0]]["subscribers"]
         assert new_subscribers == expected_subscribers
 
     # NOTE: This only applies to feature level 34/35+
@@ -4220,18 +4229,24 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_one_user_multiple_streams(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
+        self,
+        model,
+        mocker,
+        _subscribed_streams,
+        event,
+        feature_level,
+        expected_subscribers,
     ):
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [1, 2]
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
         for stream_id in stream_ids:
-            new_subscribers = model.stream_dict[stream_id]["subscribers"]
+            new_subscribers = model._subscribed_streams[stream_id]["subscribers"]
             assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize(
@@ -4344,9 +4359,9 @@ class TestModel:
         ids=["muted_stream", "unmuted_stream", "unmuted_stream_nostreamsmuted"],
     )
     def test_is_muted_stream(
-        self, muted_streams, stream_id, is_muted, stream_dict, model
+        self, muted_streams, stream_id, is_muted, _subscribed_streams, model
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.muted_streams = muted_streams
         assert model.is_muted_stream(stream_id) == is_muted
 
@@ -4364,9 +4379,9 @@ class TestModel:
         ],
     )
     def test_is_visual_notifications_enabled(
-        self, visual_notified_streams, stream_id, is_enabled, stream_dict, model
+        self, visual_notified_streams, stream_id, is_enabled, _subscribed_streams, model
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.visual_notified_streams = visual_notified_streams
 
         assert model.is_visual_notifications_enabled(stream_id) == is_enabled
@@ -4381,9 +4396,9 @@ class TestModel:
         ],
     )
     def test_is_muted_topic(
-        self, topic, is_muted, stream_dict, model, processed_muted_topics
+        self, topic, is_muted, _subscribed_streams, model, processed_muted_topics
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._muted_topics = processed_muted_topics
 
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
@@ -4496,9 +4511,9 @@ class TestModel:
         model._last_unread_topic = last_unread_topic
 
         # Minimal extra streams for muted stream testing (should not exist otherwise)
-        assert {3, 4} & set(model.stream_dict) == set()
-        model.stream_dict[3] = {"name": "Stream 3"}
-        model.stream_dict[4] = {"name": "Stream 4"}
+        assert {3, 4} & set(model._subscribed_streams) == set()
+        model._subscribed_streams[3] = {"name": "Stream 3"}
+        model._subscribed_streams[4] = {"name": "Stream 4"}
         model.muted_streams = {3}
 
         # date data unimportant (if present)
@@ -4546,9 +4561,9 @@ class TestModel:
         ],
     )
     def test_is_user_subscribed_to_stream(
-        self, model, stream_dict, stream_id, expected_response
+        self, model, _subscribed_streams, stream_id, expected_response
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
 
         return_value = model.is_user_subscribed_to_stream(stream_id)
 

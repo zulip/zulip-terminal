@@ -132,10 +132,10 @@ class TestController:
         controller.model.narrow = []
         controller.model.index = index_stream
         controller.view.message_view = mocker.patch("urwid.ListBox")
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             stream_id: general_stream,
         }
-        controller.model.stream_dict[stream_id].update(
+        controller.model._subscribed_streams[stream_id].update(
             {
                 "color": "#ffffff",
                 "name": stream_name,
@@ -191,10 +191,10 @@ class TestController:
         controller.model.index = index_multiple_topic_msg
         controller.model.stream_id = initial_stream_id
         controller.view.message_view = mocker.patch("urwid.ListBox")
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             stream_id: general_stream,
         }
-        controller.model.stream_dict[stream_id].update(
+        controller.model._subscribed_streams[stream_id].update(
             {
                 "color": "#ffffff",
                 "name": stream_name,
@@ -267,10 +267,10 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             205: general_stream,
         }
-        controller.model.stream_dict[205].update(
+        controller.model._subscribed_streams[205].update(
             {
                 "color": "#ffffff",
             }
@@ -323,10 +323,10 @@ class TestController:
         # FIXME: Expand upon is_muted_topic().
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             205: general_stream,
         }
-        controller.model.stream_dict[205].update(
+        controller.model._subscribed_streams[205].update(
             {
                 "color": "#ffffff",
             }
@@ -357,10 +357,10 @@ class TestController:
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             205: general_stream,
         }
-        controller.model.stream_dict[205].update(
+        controller.model._subscribed_streams[205].update(
             {
                 "color": "#ffffff",
             }

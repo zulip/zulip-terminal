@@ -666,7 +666,7 @@ class TestTopicsView:
     ):
         mocker.patch(SUBDIR + ".buttons.TopButton.__init__", return_value=None)
         set_focus_valign = mocker.patch(VIEWS + ".urwid.ListBox.set_focus_valign")
-        topic_view.view.controller.model.stream_dict = {86: {"name": "PTEST"}}
+        topic_view.view.controller.model._subscribed_streams = {86: {"name": "PTEST"}}
         topic_view.view.controller.model.is_muted_topic = mocker.Mock(
             return_value=False
         )
@@ -888,7 +888,7 @@ class TestMiddleColumnView:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
 
-        mid_col_view.model.stream_dict = {1: {"name": "stream"}}
+        mid_col_view.model._subscribed_streams = {1: {"name": "stream"}}
         mid_col_view.model.get_stream_name.return_value = "stream"
         mid_col_view.model.get_next_unread_topic.return_value = (1, "topic")
 

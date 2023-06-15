@@ -434,7 +434,7 @@ class TestTopicButton:
         is_resolved: bool,
     ) -> None:
         controller = mocker.Mock()
-        controller.model.stream_dict = {
+        controller.model._subscribed_streams = {
             205: {"name": "PTEST"},
             86: {"name": "Django"},
             14: {"name": "GSoC"},
@@ -487,7 +487,7 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value
         )
-        controller.model.stream_dict = {205: {"name": stream_name}}
+        controller.model._subscribed_streams = {205: {"name": stream_name}}
         view = mocker.Mock()
         TopicButton(
             stream_id=205,
@@ -859,14 +859,14 @@ class TestMessageLinkButton:
     )
     def test__validate_narrow_link(
         self,
-        stream_dict: Dict[int, Subscription],
+        _subscribed_streams: Dict[int, Subscription],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
         expected_error: str,
     ) -> None:
-        self.controller.model.stream_dict = stream_dict
+        self.controller.model._subscribed_streams = _subscribed_streams
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
         )
@@ -949,7 +949,7 @@ class TestMessageLinkButton:
     )
     def test__validate_and_patch_stream_data(
         self,
-        stream_dict: Dict[int, Subscription],
+        _subscribed_streams: Dict[int, Subscription],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
@@ -958,7 +958,7 @@ class TestMessageLinkButton:
         expected_parsed_link: ParsedNarrowLink,
         expected_error: str,
     ) -> None:
-        self.controller.model.stream_dict = stream_dict
+        self.controller.model._subscribed_streams = _subscribed_streams
         self.controller.model.get_stream_name.return_value = get_stream_name
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value

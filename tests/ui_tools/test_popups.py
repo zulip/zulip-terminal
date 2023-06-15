@@ -1172,7 +1172,7 @@ class TestStreamInfoView:
         self.controller.model.server_feature_level = 40
         self.controller.model.cached_retention_text = {self.stream_id: "10"}
 
-        self.controller.model.stream_dict = {self.stream_id: general_stream}
+        self.controller.model._subscribed_streams = {self.stream_id: general_stream}
         self.controller.model.get_stream_post_policy.return_value = general_stream.get(
             "stream_post_policy"
         )
@@ -1301,8 +1301,8 @@ class TestStreamInfoView:
     ) -> None:
         model = self.controller.model
         stream_id = general_stream["stream_id"]
-        model.stream_dict = {stream_id: general_stream}
-        model.stream_dict[stream_id].update(to_vary_in_stream_data)
+        model._subscribed_streams = {stream_id: general_stream}
+        model._subscribed_streams[stream_id].update(to_vary_in_stream_data)
         model.get_stream_date_created.return_value = to_vary_in_stream_data[
             "date_created"
         ]
