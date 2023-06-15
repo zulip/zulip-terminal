@@ -1680,7 +1680,6 @@ class TestModel:
                     "audible_notifications": False,
                     "description": "General Stream",
                     "rendered_description": "General Stream",
-                    "is_old_stream": True,
                     "desktop_notifications": False,
                     "stream_weekly_traffic": 0,
                     "push_notifications": False,
@@ -1688,6 +1687,11 @@ class TestModel:
                     "message_retention_days": None,
                     "subscribers": [1001, 11, 12],
                     "history_public_to_subscribers": True,
+                    "is_announcement_only": False,
+                    "stream_post_policy": 0,
+                    "first_message_id": 1,
+                    "email_notifications": False,
+                    "wildcard_mentions_notify": False,
                 },
             ),
             case(
@@ -2096,8 +2100,10 @@ class TestModel:
         [
             case(
                 1000,
-                {},
-                None,
+                {
+                    "stream_post_policy": 0,
+                },
+                0,
             ),
             case(
                 3,
@@ -2136,8 +2142,10 @@ class TestModel:
         [
             case(
                 1000,
-                {},
-                None,
+                {
+                    "is_announcement_only": True,
+                },
+                True,
             ),
             case(
                 3,

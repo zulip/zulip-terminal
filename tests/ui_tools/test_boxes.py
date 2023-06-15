@@ -7,6 +7,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
 
+from zulipterminal.api_types import Subscription
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
@@ -153,7 +154,7 @@ class TestWriteBox:
         is_valid_stream: bool,
         required_typeahead: Optional[str],
         topics: List[str],
-        stream_dict: Dict[int, Dict[str, Any]],
+        stream_dict: Dict[int, Subscription],
     ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         write_box.model.is_valid_stream.return_value = is_valid_stream
@@ -573,7 +574,7 @@ class TestWriteBox:
         state: Optional[int],
         footer_text: List[Any],
         text: str,
-        stream_dict: Dict[int, Dict[str, Any]],
+        stream_dict: Dict[int, Subscription],
     ) -> None:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
@@ -940,7 +941,7 @@ class TestWriteBox:
         text: str,
         state_and_required_typeahead: Dict[int, Optional[str]],
         stream_categories: Dict[str, Any],
-        stream_dict: Dict[int, Dict[str, Any]],
+        stream_dict: Dict[int, Subscription],
     ) -> None:
         streams_to_pin = (
             [{"name": stream_name} for stream_name in stream_categories["pinned"]]
@@ -1279,7 +1280,7 @@ class TestWriteBox:
         is_valid_stream: bool,
         stream_access_type: StreamAccessType,
         expected_marker: str,
-        stream_dict: Dict[int, Any],
+        stream_dict: Dict[int, Subscription],
         expected_color: str,
     ) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream

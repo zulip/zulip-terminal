@@ -174,7 +174,7 @@ class Model:
 
         self.users = self.get_all_users()
 
-        self.stream_dict: Dict[int, Any] = {}
+        self.stream_dict: Dict[int, Subscription] = {}
         self._unsubscribed_streams: Dict[int, Subscription] = {}
         self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()

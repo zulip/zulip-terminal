@@ -5,7 +5,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import AttrMap, Overlay, Widget
 
-from zulipterminal.api_types import Message
+from zulipterminal.api_types import Message, Subscription
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
@@ -859,7 +859,7 @@ class TestMessageLinkButton:
     )
     def test__validate_narrow_link(
         self,
-        stream_dict: Dict[int, Any],
+        stream_dict: Dict[int, Subscription],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
@@ -949,7 +949,7 @@ class TestMessageLinkButton:
     )
     def test__validate_and_patch_stream_data(
         self,
-        stream_dict: Dict[int, Any],
+        stream_dict: Dict[int, Subscription],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
