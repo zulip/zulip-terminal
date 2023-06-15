@@ -37,7 +37,7 @@ def detected_python_short() -> str:
 
 # PLATFORM DETECTION
 SupportedPlatforms = Literal["Linux", "MacOS", "WSL"]
-AllPlatforms = Literal[SupportedPlatforms, "unsupported"]
+AllPlatforms = Literal[SupportedPlatforms, "Unsupported"]
 
 raw_platform = platform.system()
 
@@ -48,7 +48,7 @@ if raw_platform == "Linux":
 elif raw_platform == "Darwin":
     PLATFORM = "MacOS"
 else:
-    PLATFORM = "unsupported"
+    PLATFORM = "Unsupported"
 
 
 # PLATFORM DEPENDENT HELPERS
