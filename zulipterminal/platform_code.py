@@ -74,18 +74,17 @@ def detected_platform() -> str:
     return PLATFORM
 
 
-class Screen(urwid.raw_display.Screen):
+class WSLScreen(urwid.raw_display.Screen):
     def write(self, data: Any) -> None:
-        if PLATFORM == "WSL":
-            # replace urwid's SI/SO, which produce artifacts under WSL.
-            # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
-            # Above link describes the change.
-            data = re.sub("[\x0e\x0f]", "", data)
+        # replace urwid's SI/SO, which produce artifacts under WSL.
+        # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
+        # Above link describes the change.
+        data = re.sub("[\x0e\x0f]", "", data)
         super().write(data)
 
 
-def generate_screen() -> Screen:
-    return Screen()
+def generate_screen() -> urwid.raw_display.Screen:
+    return WSLScreen() if PLATFORM == "WSL" else urwid.raw_display.Screen()
 
 
 def notify(title: str, text: str) -> str:
