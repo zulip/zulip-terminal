@@ -43,6 +43,7 @@ from zulipterminal.api_types import (
     PrivateMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
+    RemovedSubscription,
     Stream,
     StreamComposition,
     StreamMessageUpdateRequest,
@@ -1306,6 +1307,33 @@ class Model:
         self.visual_notified_streams = self.visual_notified_streams.union(
             new_visual_notified_streams
         )
+
+    def _unsubscribe_from_streams(
+        self, subscriptions: List[RemovedSubscription]
+    ) -> None:
+        for subscription in subscriptions:
+            stream_id = subscription["stream_id"]
+
+            if stream_id in self._subscribed_streams:
+                self._unsubscribed_streams[stream_id] = self._subscribed_streams[
+                    stream_id
+                ]
+                del self._subscribed_streams[stream_id]
+
+            self.pinned_streams[:] = [
+                stream
+                for stream in self.pinned_streams
+                if stream.get("id") != stream_id
+            ]
+            self.unpinned_streams[:] = [
+                stream
+                for stream in self.unpinned_streams
+                if stream.get("id") != stream_id
+            ]
+            if stream_id in self.muted_streams:
+                self.muted_streams.remove(stream_id)
+            if stream_id in self.visual_notified_streams:
+                self.visual_notified_streams.remove(stream_id)
 
     def _group_info_from_realm_user_groups(
         self, groups: List[Dict[str, Any]]

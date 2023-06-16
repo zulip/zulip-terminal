@@ -415,6 +415,11 @@ class RealmUserEvent(TypedDict):
 # (also -peer_add and -peer_remove; FIXME: -add & -remove are not yet supported)
 
 
+class RemovedSubscription(TypedDict):
+    stream_id: int
+    # name: str  # Currently not used
+
+
 # Update of personal properties
 class SubscriptionUpdateEvent(SubscriptionSettingChange):
     type: Literal["subscription"]

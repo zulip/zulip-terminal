@@ -1724,7 +1724,7 @@ class TestModel:
                     "desktop_notifications": False,
                     "stream_weekly_traffic": 0,
                     "push_notifications": False,
-                    "message_retention_days": 33,
+                    "message_retention_days": None,
                     "email_address": "stream3@example.com",
                     "email_notifications": False,
                     "wildcard_mentions_notify": False,
@@ -1746,7 +1746,7 @@ class TestModel:
                     "description": "A description of stream 5",
                     "rendered_description": "A description of stream 5",
                     "stream_weekly_traffic": 0,
-                    "message_retention_days": 35,
+                    "message_retention_days": None,
                     "subscribers": [1001, 11, 12],
                     "history_public_to_subscribers": True,
                     "is_announcement_only": True,
@@ -2419,6 +2419,25 @@ class TestModel:
         )
         model._subscribe_to_streams(stream)
         assert stream[0]["stream_id"] not in model._never_subscribed_streams
+
+    def test__unsubscribe_from_streams(
+        self,
+        model,
+        streams_fixture,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+
+        model._unsubscribe_from_streams(streams_fixture)
+        assert len(model._subscribed_streams.items()) == 0
+        assert all(
+            stream_id in model._unsubscribed_streams
+            for stream_id, stream in _subscribed_streams.items()
+        )
 
     def test__handle_message_event_with_Falsey_log(
         self, mocker, model, message_fixture

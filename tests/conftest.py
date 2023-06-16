@@ -665,6 +665,8 @@ def initial_data(
     logged_on_user: Dict[str, Any],
     users_fixture: List[Dict[str, Any]],
     streams_fixture: List[Dict[str, Subscription]],
+    unsubscribed_streams_fixture: Dict[int, Subscription],
+    never_subscribed_streams_fixture: Dict[int, Stream],
     realm_emojis: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
     """
@@ -675,24 +677,8 @@ def initial_data(
         "email": logged_on_user["email"],
         "user_id": logged_on_user["user_id"],
         "realm_name": "Test Organization Name",
-        "unsubscribed": [
-            {
-                "audible_notifications": False,
-                "description": "announce",
-                "stream_id": 7,
-                "is_old_stream": True,
-                "desktop_notifications": False,
-                "pin_to_top": False,
-                "stream_weekly_traffic": 0,
-                "invite_only": False,
-                "name": "announce",
-                "push_notifications": False,
-                "email_address": "",
-                "color": "#bfd56f",
-                "is_muted": False,
-                "history_public_to_subscribers": True,
-            }
-        ],
+        "unsubscribed": unsubscribed_streams_fixture.values(),
+        "never_subscribed": never_subscribed_streams_fixture.values(),
         "result": "success",
         "queue_id": "1522420755:786",
         "realm_users": users_fixture,
@@ -741,24 +727,6 @@ def initial_data(
         "subscriptions": streams_fixture,
         "msg": "",
         "max_message_id": 552761,
-        "never_subscribed": [
-            {
-                "invite_only": False,
-                "description": "Announcements from the Zulip GCI Mentors",
-                "stream_id": 87,
-                "name": "GCI announce",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-            {
-                "invite_only": False,
-                "description": "General discussion",
-                "stream_id": 74,
-                "name": "GCI general",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-        ],
         "unread_msgs": {
             "pms": [
                 {"sender_id": 1, "unread_message_ids": [1, 2]},
