@@ -2390,6 +2390,36 @@ class TestModel:
         assert len(model.unpinned_streams)  # FIXME generalize/parametrize
         assert model.visual_notified_streams == visual_notification_enabled
 
+    def test__subscribe_to_streams_removes_from_non_subscribed_streams(
+        self,
+        model,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+    ):
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+
+        stream = [unsubscribed_streams_fixture[3]]
+        model._subscribe_to_streams(stream)
+        assert stream[0]["stream_id"] not in model._unsubscribed_streams
+
+        stream = [never_subscribed_streams_fixture[5]]
+        stream[0].update(
+            {
+                "desktop_notifications": True,
+                "email_notifications": False,
+                "wildcard_mentions_notify": True,
+                "push_notifications": False,
+                "audible_notifications": True,
+                "pin_to_top": False,
+                "email_address": "email@email.com",
+                "is_muted": False,
+                "color": "#ffffff",
+            }
+        )
+        model._subscribe_to_streams(stream)
+        assert stream[0]["stream_id"] not in model._never_subscribed_streams
+
     def test__handle_message_event_with_Falsey_log(
         self, mocker, model, message_fixture
     ):

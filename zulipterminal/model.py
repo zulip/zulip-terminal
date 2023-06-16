@@ -1277,16 +1277,23 @@ class Model:
             # different formats
             subscription["color"] = canonicalize_color(subscription["color"])
 
-            self._subscribed_streams[subscription["stream_id"]] = subscription
+            stream_id = subscription["stream_id"]
+
+            if stream_id in self._unsubscribed_streams:
+                del self._unsubscribed_streams[stream_id]
+            elif stream_id in self._never_subscribed_streams:
+                del self._never_subscribed_streams[stream_id]
+            self._subscribed_streams[stream_id] = subscription
+
             stream_data = make_reduced_stream_data(subscription)
             if subscription["pin_to_top"]:
                 new_pinned_streams.append(stream_data)
             else:
                 new_unpinned_streams.append(stream_data)
             if subscription["is_muted"]:
-                new_muted_streams.add(subscription["stream_id"])
+                new_muted_streams.add(stream_id)
             if subscription["desktop_notifications"]:
-                new_visual_notified_streams.add(subscription["stream_id"])
+                new_visual_notified_streams.add(stream_id)
 
         if new_pinned_streams:
             self.pinned_streams.extend(new_pinned_streams)
