@@ -27,8 +27,8 @@ from zulipterminal.config.ui_sizes import (
 )
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
-from zulipterminal.platform_code import PLATFORM
-from zulipterminal.ui import Screen, View
+from zulipterminal.platform_code import PLATFORM, generate_screen
+from zulipterminal.ui import View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -98,7 +98,7 @@ class Controller:
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
-        screen = Screen()
+        screen = generate_screen()
         screen.set_terminal_properties(colors=self.color_depth)
         self.loop = urwid.MainLoop(self.view, self.theme, screen=screen)
 
