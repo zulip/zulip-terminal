@@ -2,6 +2,7 @@
 Detection of supported platforms & platform-specific functions
 """
 
+import os
 import platform
 import re
 import subprocess
@@ -87,6 +88,15 @@ def generate_screen() -> urwid.raw_display.Screen:
     return WSLScreen() if PLATFORM == "WSL" else urwid.raw_display.Screen()
 
 
+def check_running_in_GUI_environment() -> str:
+    if PLATFORM == "Linux" and not os.environ.get("DISPLAY") and os.environ.get("TERM"):
+        return (
+            "No DISPLAY environment variable specified. "
+            "This could likely mean the ZT host is running without a GUI."
+        )
+    return ""
+
+
 def notify(title: str, text: str) -> str:
     command_list = None
     if PLATFORM == "MacOS":
@@ -117,7 +127,7 @@ def notify(title: str, text: str) -> str:
     return ""
 
 
-def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
+def successful_GUI_return_code() -> int:
     """
     Returns success return code for GUI commands, which are OS specific.
     """
