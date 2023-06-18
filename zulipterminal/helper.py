@@ -801,8 +801,6 @@ def download_media(
         controller.report_success([" Downloaded ", ("bold", media_name)])
         return normalized_file_path(local_path)
 
-    return ""
-
 
 @asynch
 def open_media(controller: Any, tool: str, media_path: str) -> None:
