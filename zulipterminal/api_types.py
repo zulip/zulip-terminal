@@ -500,11 +500,11 @@ class SubscriptionPeerAddRemoveEvent(TypedDict):
     type: Literal["subscription"]
     op: Literal["peer_add", "peer_remove"]
 
-    stream_id: int
-    stream_ids: List[int]  # NOTE: replaces 'stream_id' in ZFL 35
+    stream_id: NotRequired[int]
+    stream_ids: NotRequired[List[int]]  # NOTE: replaces 'stream_id' in ZFL 35
 
-    user_id: int
-    user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
+    user_id: NotRequired[int]
+    user_ids: NotRequired[List[int]]  # NOTE: replaces 'user_id' in ZFL 35
 
 
 # -----------------------------------------------------------------------------
