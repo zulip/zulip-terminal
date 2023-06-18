@@ -119,16 +119,8 @@ class Controller:
         # Exceptions shouldn't occur before the pipe is set
         assert hasattr(self, "_exception_pipe")
 
-        if isinstance(exc_info, tuple):
-            self._exception_info = exc_info
-            self._critical_exception = critical
-        else:
-            self._exception_info = (
-                RuntimeError,
-                f"Invalid cross-thread exception info '{exc_info}'",
-                None,
-            )
-            self._critical_exception = True
+        self._exception_info = exc_info
+        self._critical_exception = critical
         os.write(self._exception_pipe, b"1")
 
     def is_in_editor_mode(self) -> bool:
