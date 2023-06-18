@@ -64,6 +64,9 @@ warn_no_return = true
 disallow_untyped_globals = true
 disallow_redefinition = true
 
+# Warnings not in strict
+warn_unreachable = true
+
 # Options to make the checking stricter, as included in mypy --strict
 # (in order of mypy --help docs for --strict)
 warn_unused_configs = true
