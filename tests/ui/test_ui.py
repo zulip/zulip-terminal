@@ -419,7 +419,7 @@ class TestView:
         self,
         view: View,
         mocker: MockerFixture,
-        draft: Composition,
+        draft: Optional[Composition],
         key: str,
         autohide: bool,
         widget_size: Callable[[Widget], urwid_Box],

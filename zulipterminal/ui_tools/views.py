@@ -1110,9 +1110,9 @@ class UserInfoView(PopUpView):
         controller: Any, user_id: int
     ) -> Tuple[Dict[str, str], Dict[str, str]]:
         # Get user data from model
-        data: TidiedUserInfo = controller.model.get_user_info(user_id)
+        data: Optional[TidiedUserInfo] = controller.model.get_user_info(user_id)
 
-        display_custom_profile_data = {}
+        display_custom_profile_data: Dict[str, str] = {}
         if not data:
             display_data = {
                 "Name": "(Unavailable)",
