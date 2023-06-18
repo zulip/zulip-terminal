@@ -47,7 +47,24 @@ scripts_are_modules = true
 show_traceback = true
 cache_dir = ".mypy_cache"
 
-# Options to make the checking stricter, as would be mypy --strict
+# Non-strict dynamic typing (unlikely to be enabled)
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_any_explicit = false  # May be useful to improve checking of non-UI files
+
+# Optional handling (mypy defaults)
+no_implicit_optional = true
+strict_optional = true
+
+# Warnings (mypy defaults)
+warn_no_return = true
+
+# Misc strictness (mypy defaults)
+disallow_untyped_globals = true
+disallow_redefinition = true
+
+# Options to make the checking stricter, as included in mypy --strict
 # (in order of mypy --help docs for --strict)
 warn_unused_configs = true
 disallow_any_generics = true
@@ -57,16 +74,18 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 disallow_untyped_decorators = false
-no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = false
 no_implicit_reexport = false
 strict_equality = true
+strict_concatenate = true
 
-# These are now defaults and we could remove them
-warn_no_return = true
-strict_optional = true
+enable_error_code = [
+    "truthy-iterable",
+    "ignore-without-code",
+    "unused-awaitable",  # Even if await unused, it may be in future
+]
 
 # If a library is typed, that's fine, otherwise don't worry
 ignore_missing_imports = true
