@@ -34,6 +34,7 @@ linting_deps = [
 typing_deps = [
     "lxml-stubs",
     "mypy~=1.3.0",
+    "types-beautifulsoup4",
     "types-pygments",
     "types-python-dateutil",
     "types-tzlocal",
