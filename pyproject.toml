@@ -90,9 +90,26 @@ enable_error_code = [
     "unused-awaitable",  # Even if await unused, it may be in future
 ]
 
-# Follow imports to look for typing information, ignoring if not present
-# NOTE: If imports are not present and ignored, all types are set to be Any
+# Follow imports to look for typing information, erroring if not present
 follow_imports = "normal"
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+# Libraries used in main application, for which typing is unavailable
+# NOTE: When missing imports are ignored, all types are set to be Any
+module = [
+    "urwid.*",         # Minimal typing of this is in urwid_types.py
+    "urwid_readline",  # Typing this likely depends on typing urwid
+    "pyperclip",       # Hasn't been updated in some time, unlikely to be typed
+    "pudb",            # This is barely used & could be optional/dev dependency
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Development-only tools, for which typing is unavailable
+module = [
+    "gitlint.*",  # This lack of typing should only impact our custom rules
+]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
