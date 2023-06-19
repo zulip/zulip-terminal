@@ -383,7 +383,7 @@ class MessageBox(urwid.Pile):
                 # if/elif/else chain below for improving legibility.
                 tag = element.name
                 tag_attrs = element.attrs
-                tag_classes = tag_attrs.get("class", [])
+                tag_classes: List[str] = element.get_attribute_list("class", [])
                 tag_text = element.text
 
             if isinstance(element, NavigableString):
@@ -402,7 +402,7 @@ class MessageBox(urwid.Pile):
                     markup.append(unrendered_template.format(text))
             elif tag == "img" and tag_classes == ["emoji"]:
                 # CUSTOM EMOJIS AND ZULIP_EXTRA_EMOJI
-                emoji_name = tag_attrs.get("title", [])
+                emoji_name: str = tag_attrs.get("title", "")
                 markup.append(("msg_emoji", f":{emoji_name}:"))
             elif tag in unrendered_tags:
                 # UNRENDERED SIMPLE TAGS
@@ -814,7 +814,7 @@ class MessageBox(urwid.Pile):
             time_mentions=list(),
         )  # type: Dict[str, Any]
 
-        if body and body.find(name="blockquote"):
+        if isinstance(body, Tag) and body.find(name="blockquote"):
             metadata["bq_len"] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
         markup, message_links, time_mentions = cls.soup2markup(body, metadata)
