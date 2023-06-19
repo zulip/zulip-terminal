@@ -7,7 +7,10 @@ from pathlib import Path, PurePath
 
 
 try:
-    from zulipterminal.unicode_emoji_dict import EMOJI_NAME_MAPS
+    # Ignored for type-checking, as it is a temporary file, deleted at the end of file
+    from zulipterminal.unicode_emoji_dict import (  # type: ignore [import]
+        EMOJI_NAME_MAPS,
+    )
 except ModuleNotFoundError:
     print(
         "ERROR: Could not find downloaded unicode emoji\n"
