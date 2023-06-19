@@ -90,7 +90,9 @@ enable_error_code = [
     "unused-awaitable",  # Even if await unused, it may be in future
 ]
 
-# If a library is typed, that's fine, otherwise don't worry
+# Follow imports to look for typing information, ignoring if not present
+# NOTE: If imports are not present and ignored, all types are set to be Any
+follow_imports = "normal"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
@@ -167,8 +169,6 @@ select = [
 "tests/model/test_model.py" = ["ANN"]
 "tests/ui/test_ui_tools.py" = ["ANN"]
 "tests/ui_tools/test_messages.py" = ["ANN"]
-# ANN: This tool is an old variation from zulip/zulip and is only updated where necessary
-"tools/lister.py" = ["ANN"]
 # E501: Ignore length in tools for now (and otherwise where noqa specified)
 # T20: Expect print output from CLI from tools
 "tools/*" = ["E501", "T20"]

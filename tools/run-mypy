@@ -15,7 +15,6 @@ EXCLUDE_FILES = [
     "tools/fetch-pull-request",
     "tools/fetch-rebase-pull-request",
     "tools/check-branch",
-    "tools/lister.py",  # Came from zulip/zulip, now in zulint?
 ]
 
 python_project_folders = ["zulipterminal", "tests", "tools"]
@@ -96,9 +95,7 @@ for file_path in python_files:
 
 mypy_command = "mypy"
 
-extra_args = [
-    "--follow-imports=silent",
-]
+extra_args: List[str] = []
 
 # run mypy
 status = 0

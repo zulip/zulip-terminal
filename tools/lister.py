@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Sequence, Union
 
 
 def get_ftype(fpath: str, use_shebang: bool) -> str:
@@ -33,14 +33,14 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
 
 
 def list_files(
-    targets=[],
-    ftypes=[],
-    use_shebang=True,
-    modified_only=False,
-    exclude=[],
-    group_by_ftype=False,
-    extless_only=False,
-):
+    targets: Sequence[str] = [],
+    ftypes: Sequence[str] = [],
+    use_shebang: bool = True,
+    modified_only: bool = False,
+    exclude: Sequence[str] = [],
+    group_by_ftype: bool = False,
+    extless_only: bool = False,
+) -> Union[Dict[str, List[str]], List[str]]:
     """
     List files tracked by git.
     Returns a list of files which are either in targets or in directories in
@@ -74,7 +74,7 @@ def list_files(
         os.path.abspath(os.path.join(repository_root, fpath)) for fpath in exclude
     ]
 
-    cmdline = ["git", "ls-files"] + targets
+    cmdline = ["git", "ls-files", *targets]
     if modified_only:
         cmdline.append("-m")
 
