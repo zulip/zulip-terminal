@@ -85,6 +85,7 @@ strict_equality = true
 strict_concatenate = true
 
 enable_error_code = [
+    "truthy-bool",
     "truthy-iterable",
     "ignore-without-code",
     "unused-awaitable",  # Even if await unused, it may be in future
