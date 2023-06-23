@@ -79,7 +79,7 @@ class ModListWalker(urwid.SimpleFocusListWalker):
     def _set_focus(self, index: int) -> None:
         # This method is called when directly setting focus via
         # self.focus = focus_position
-        if not self:
+        if not self:  # type: ignore[truthy-bool]  # Implemented in base class
             self._focus = 0
             return
         if index < 0 or index >= len(self):
@@ -132,7 +132,7 @@ class MessageView(urwid.ListBox):
         self.old_loading = True
 
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
-        if self.log:
+        if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
             top_message_id = self.log[0].original_widget.message["id"]
             ids_to_keep.remove(top_message_id)  # update this id
             no_update_baseline = {top_message_id}
@@ -144,7 +144,7 @@ class MessageView(urwid.ListBox):
 
         # Only update if more messages are provided
         if ids_to_process != no_update_baseline:
-            if self.log:
+            if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
                 self.log.remove(self.log[0])  # avoid duplication when updating
 
             message_list = create_msg_box_list(self.model, ids_to_process)
@@ -164,7 +164,7 @@ class MessageView(urwid.ListBox):
         current_ids = self.model.get_message_ids_in_current_narrow()
         self.model.get_messages(num_before=0, num_after=30, anchor=anchor)
         new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
-        if self.log:
+        if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
             last_message = self.log[-1].original_widget.message
         else:
             last_message = None
