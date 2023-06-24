@@ -1887,8 +1887,9 @@ class Model:
         """
         assert event["type"] == "user_settings"
         # We only expect these to be "update" event operations
+        assert event["op"] == "update"
         # Update the setting (property) to the value, but only if already initialized
-        if event["op"] == "update" and event["property"] in self._user_settings:
+        if event["property"] in self._user_settings:
             setting = event["property"]
             self._user_settings[setting] = event["value"]
 
