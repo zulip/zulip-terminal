@@ -39,6 +39,7 @@ from zulipterminal.api_types import (
     DirectTypingNotification,
     EditPropagateMode,
     Event,
+    Message,
     MessagesFlagChange,
     PrivateComposition,
     PrivateMessageUpdateRequest,
@@ -62,7 +63,6 @@ from zulipterminal.config.ui_mappings import (
 )
 from zulipterminal.helper import (
     CustomProfileData,
-    Message,
     NamedEmojiData,
     StreamData,
     TidiedUserInfo,

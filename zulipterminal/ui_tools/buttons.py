@@ -10,12 +10,12 @@ from urllib.parse import urljoin, urlparse
 import urwid
 from typing_extensions import TypedDict
 
-from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode
+from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode, Message
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
-from zulipterminal.helper import Message, StreamData, hash_util_decode, process_media
+from zulipterminal.helper import StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 

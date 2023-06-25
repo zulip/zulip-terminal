@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER,
@@ -24,7 +25,7 @@ from zulipterminal.config.symbols import (
     TIME_MENTION_MARKER,
 )
 from zulipterminal.config.ui_mappings import STATE_ICON
-from zulipterminal.helper import Message, get_unused_fence
+from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
