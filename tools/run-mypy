@@ -17,7 +17,12 @@ EXCLUDE_FILES = [
     "tools/check-branch",
 ]
 
-python_project_folders = ["zulipterminal", "tests", "tools"]
+project_mypy_args: Dict[str, List[str]] = {
+    "zulipterminal": [],
+    "tests": [],
+    "tools": [],
+}
+python_project_folders = list(project_mypy_args)
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
@@ -101,8 +106,9 @@ extra_args: List[str] = []
 status = 0
 for repo, python_files in repo_python_files.items():
     print(f"Running mypy for `{repo}`.", flush=True)
+    repo_args = project_mypy_args[repo]
     if python_files:
-        result = subprocess.call([mypy_command] + extra_args + python_files)
+        result = subprocess.call([mypy_command] + extra_args + repo_args + python_files)
         if result != 0:
             status = result
     else:
