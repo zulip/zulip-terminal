@@ -10,7 +10,7 @@ import pytz
 import urwid
 from typing_extensions import Literal
 
-from zulipterminal.api_types import EditPropagateMode
+from zulipterminal.api_types import EditPropagateMode, Message
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
@@ -35,7 +35,6 @@ from zulipterminal.config.ui_mappings import (
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
-    Message,
     TidiedUserInfo,
     asynch,
     match_emoji,
