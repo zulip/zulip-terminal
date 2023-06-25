@@ -15,6 +15,13 @@ from zulip import MessageFlag  # superset of below, may only be changed indirect
 from zulip import ModifiableMessageFlag  # directly modifiable read/starred/collapsed
 
 
+# This marks imported names that are intended for importing elsewhere
+__all__ = [
+    "EditPropagateMode",
+    "EmojiType",
+]
+
+
 RESOLVED_TOPIC_PREFIX = "✔ "
 
 ###############################################################################

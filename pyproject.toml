@@ -80,7 +80,7 @@ disallow_untyped_decorators = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_return_any = false
-no_implicit_reexport = false
+no_implicit_reexport = true  # NOTE: Disabled explicitly for tests/ in run-mypy
 strict_equality = true
 strict_concatenate = true
 

@@ -19,7 +19,7 @@ EXCLUDE_FILES = [
 
 project_mypy_args: Dict[str, List[str]] = {
     "zulipterminal": [],
-    "tests": [],
+    "tests": ["--implicit-reexport"],
     "tools": [],
 }
 python_project_folders = list(project_mypy_args)
