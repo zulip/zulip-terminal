@@ -9,6 +9,7 @@ from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
+    DIRECT_MESSAGE_MARKER,
     QUOTED_TEXT_MARKER,
     STATUS_INACTIVE,
     STREAM_MARKER_PUBLIC,
@@ -901,8 +902,8 @@ class TestMessageBox:
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 "All messages",
             ),
-            ([], 1, "You and ", "All messages"),
-            ([], 2, "You and ", "All messages"),
+            ([], 1, f" {DIRECT_MESSAGE_MARKER} You and ", "All messages"),
+            ([], 2, f" {DIRECT_MESSAGE_MARKER} You and ", "All messages"),
             (
                 [["stream", "PTEST"]],
                 0,
@@ -915,18 +916,28 @@ class TestMessageBox:
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR}",
                 ("bar", [("s#bd6", "PTEST"), ("s#bd6", ": topic narrow")]),
             ),
-            ([["is", "private"]], 1, "You and ", "All direct messages"),
-            ([["is", "private"]], 2, "You and ", "All direct messages"),
+            (
+                [["is", "private"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "All direct messages",
+            ),
+            (
+                [["is", "private"]],
+                2,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "All direct messages",
+            ),
             (
                 [["pm-with", "boo@zulip.com"]],
                 1,
-                "You and ",
+                f" {DIRECT_MESSAGE_MARKER} You and ",
                 "Direct message conversation",
             ),
             (
                 [["pm-with", "boo@zulip.com, bar@zulip.com"]],
                 2,
-                "You and ",
+                f" {DIRECT_MESSAGE_MARKER} You and ",
                 "Group direct message conversation",
             ),
             (
@@ -935,9 +946,24 @@ class TestMessageBox:
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 "Starred messages",
             ),
-            ([["is", "starred"]], 1, "You and ", "Starred messages"),
-            ([["is", "starred"]], 2, "You and ", "Starred messages"),
-            ([["is", "starred"], ["search", "FOO"]], 1, "You and ", "Starred messages"),
+            (
+                [["is", "starred"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Starred messages",
+            ),
+            (
+                [["is", "starred"]],
+                2,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Starred messages",
+            ),
+            (
+                [["is", "starred"], ["search", "FOO"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Starred messages",
+            ),
             (
                 [["search", "FOO"]],
                 0,
@@ -950,9 +976,24 @@ class TestMessageBox:
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 "Mentions",
             ),
-            ([["is", "mentioned"]], 1, "You and ", "Mentions"),
-            ([["is", "mentioned"]], 2, "You and ", "Mentions"),
-            ([["is", "mentioned"], ["search", "FOO"]], 1, "You and ", "Mentions"),
+            (
+                [["is", "mentioned"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Mentions",
+            ),
+            (
+                [["is", "mentioned"]],
+                2,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Mentions",
+            ),
+            (
+                [["is", "mentioned"], ["search", "FOO"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                "Mentions",
+            ),
         ],
     )
     def test_msg_generates_search_and_header_bar(

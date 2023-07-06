@@ -18,6 +18,7 @@ from tzlocal import get_localzone
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.symbols import (
+    DIRECT_MESSAGE_MARKER,
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
     QUOTED_TEXT_MARKER,
@@ -177,7 +178,11 @@ class MessageBox(urwid.Pile):
     def private_header(self) -> Any:
         title_markup = (
             "header",
-            [("general_narrow", "You and "), ("general_narrow", self.recipients_names)],
+            [
+                ("general_narrow", f" {DIRECT_MESSAGE_MARKER} "),
+                ("general_narrow", "You and "),
+                ("general_narrow", self.recipients_names),
+            ],
         )
         title = urwid.Text(title_markup)
         header = urwid.Columns(
