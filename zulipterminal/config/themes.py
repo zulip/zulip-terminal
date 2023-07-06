@@ -173,8 +173,13 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
     return sorted(complete), sorted(incomplete)
 
 
-def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
-    theme_module = THEMES[theme_name]
+def generate_theme(
+    name: str,
+    *,
+    color_depth: int,
+    transparent_background: bool,
+) -> ThemeSpec:
+    theme_module = THEMES[name]
 
     try:
         theme_colors = theme_module.Color
@@ -205,7 +210,12 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         background_color = Background.COLOR
         pygments_styles = []
 
-    urwid_theme = parse_themefile(theme_styles, color_depth, background_color)
+    urwid_theme = parse_themefile(
+        theme_styles,
+        color_depth,
+        background_color,
+        transparent_background,
+    )
     urwid_theme.extend(pygments_styles)
 
     return urwid_theme
@@ -240,13 +250,15 @@ def parse_themefile(
     theme_styles: Dict[Optional[str], Tuple[Any, Any]],
     color_depth: int,
     background_color: Any,
+    transparent_background: bool,
 ) -> ThemeSpec:
     urwid_theme = []
     for style_name, (fg_name, bg_name) in theme_styles.items():
         fg_code16, fg_code256, fg_code24, *fg_props = fg_name.value.split()
 
-        # If background (bg) is specific enum, use specified background_color instead
-        if bg_name == Background.COLOR:
+        # Background.COLOR is transparent
+        # => Replace with background_color, unless transparency is requested
+        if bg_name == Background.COLOR and not transparent_background:
             bg_name = background_color  # noqa: PLW2901  # overwrite loop variable
 
         bg_code16, bg_code256, bg_code24, *bg_props = bg_name.value.split()

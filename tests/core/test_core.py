@@ -44,7 +44,9 @@ class TestController:
 
         self.config_file = "path/to/zuliprc"
         self.theme_name = "zt_dark"
-        self.theme = generate_theme("zt_dark", 256)
+        self.theme = generate_theme(
+            "zt_dark", color_depth=256, transparent_background=False
+        )
         self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False

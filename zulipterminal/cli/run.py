@@ -559,7 +559,11 @@ def main(options: Optional[List[str]] = None) -> None:
         color_depth_str = zterm["color-depth"].value
         color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
 
-        theme_data = generate_theme(theme_to_use.value, color_depth)
+        theme_data = generate_theme(
+            theme_to_use.value,
+            color_depth=color_depth,
+            transparent_background=False,
+        )
 
         # Translate valid strings for boolean values into True/False
         boolean_settings: Dict[str, bool] = dict()
