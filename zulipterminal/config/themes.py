@@ -165,9 +165,9 @@ def complete_and_incomplete_themes() -> Tuple[List[str], List[str]]:
         if getattr(theme, "STYLES", None)
         if set(theme.STYLES) == set(REQUIRED_STYLES)
         if getattr(theme, "META", None)
-        if set(theme.META) == set(REQUIRED_META)
-        for meta, conf in theme.META.items()
-        if set(conf) == set(REQUIRED_META.get(meta, {}))
+        if set(theme.META).issuperset(set(REQUIRED_META))
+        for meta, conf in REQUIRED_META.items()
+        if set(conf) == set(theme.META.get(meta, {}))
     }
     incomplete = set(THEMES) - complete
     return sorted(complete), sorted(incomplete)
