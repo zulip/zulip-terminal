@@ -51,6 +51,7 @@ class TestController:
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
         self.exit_confirmation = True
+        self.transparency_enabled = False
         self.maximum_footlinks = 3
         result = Controller(
             config_file=self.config_file,
@@ -64,6 +65,7 @@ class TestController:
                 autohide=self.autohide,
                 notify=self.notify_enabled,
                 exit_confirmation=self.exit_confirmation,
+                transparency=self.transparency_enabled,
             ),
         )
         result.view.message_view = mocker.Mock()  # set in View.__init__
