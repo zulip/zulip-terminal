@@ -62,6 +62,7 @@ VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
     "autohide": ("autohide", "no_autohide"),
     "notify": ("enabled", "disabled"),
     "exit_confirmation": ("enabled", "disabled"),
+    "transparency": ("enabled", "disabled"),
 }
 
 COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
@@ -80,6 +81,7 @@ DEFAULT_SETTINGS = {
     "color-depth": "256",
     "maximum-footlinks": "3",
     "exit_confirmation": "enabled",
+    "transparency": "disabled",
 }
 assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
@@ -87,6 +89,7 @@ assert DEFAULT_SETTINGS["color-depth"] in COLOR_DEPTH_ARGS_TO_DEPTHS
 assert (
     DEFAULT_SETTINGS["exit_confirmation"] in VALID_BOOLEAN_SETTINGS["exit_confirmation"]
 )
+assert DEFAULT_SETTINGS["transparency"] in VALID_BOOLEAN_SETTINGS["transparency"]
 
 
 def in_color(color: str, text: str) -> str:
@@ -153,6 +156,22 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "--explore",
         action="store_true",
         help="do not mark messages as read in the session",
+    )
+
+    transparency_group = parser.add_mutually_exclusive_group()
+    transparency_group.add_argument(
+        "--transparency",
+        dest="transparency",
+        action="store_const",
+        const="enabled",
+        help="enable transparent background (if supported by theme and terminal)",
+    )
+    transparency_group.add_argument(
+        "--no-transparency",
+        dest="transparency",
+        action="store_const",
+        const="disabled",
+        help="disable transparent background",
     )
 
     notify_group = parser.add_mutually_exclusive_group()
@@ -496,6 +515,11 @@ def main(options: Optional[List[str]] = None) -> None:
             theme_to_use = SettingData(real_theme_name, theme_to_use.source)
 
         ### Load overrides & validate remaining settings
+        if args.transparency:
+            zterm["transparency"] = SettingData(
+                args.transparency, ConfigSource.COMMANDLINE
+            )
+
         if args.autohide:
             zterm["autohide"] = SettingData(args.autohide, ConfigSource.COMMANDLINE)
 
@@ -553,22 +577,27 @@ def main(options: Optional[List[str]] = None) -> None:
             print_setting("maximum footlinks value", zterm["maximum-footlinks"])
         print_setting("color depth setting", zterm["color-depth"])
         print_setting("notify setting", zterm["notify"])
+        print_setting("transparency setting", zterm["transparency"])
 
         ### Generate data not output to user, but into Controller
+        # Translate valid strings for boolean values into True/False
+        boolean_settings: Dict[str, bool] = dict()
+        for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
+            boolean_settings[setting] = zterm[setting].value == valid_values[0]
+
         # Generate urwid palette
         color_depth_str = zterm["color-depth"].value
         color_depth = COLOR_DEPTH_ARGS_TO_DEPTHS[color_depth_str]
+        transparency_enabled = boolean_settings["transparency"]
 
         theme_data = generate_theme(
             theme_to_use.value,
             color_depth=color_depth,
-            transparent_background=False,
+            transparent_background=transparency_enabled,
         )
 
-        # Translate valid strings for boolean values into True/False
-        boolean_settings: Dict[str, bool] = dict()
-        for setting, valid_boolean_values in VALID_BOOLEAN_SETTINGS.items():
-            boolean_settings[setting] = zterm[setting].value == valid_boolean_values[0]
+        # Avoid passing this to the Controller
+        boolean_settings.pop("transparency")
 
         Controller(
             config_file=zuliprc_path,

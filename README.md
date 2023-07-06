@@ -246,6 +246,11 @@ notify=disabled
 
 ## Color-depth: set to one of 1 (for monochrome), 16, 256, or 24bit
 color-depth=256
+
+## Transparency: set to 'enabled' to allow background transparency
+## This is highly dependent on a suitable terminal emulator, and support in the selected theme
+## Terminal emulators without this feature may show an arbitrary solid background color
+transparency=disabled
 ```
 
 > **NOTE:** Most of these configuration settings may be specified on the
