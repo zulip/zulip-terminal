@@ -35,12 +35,12 @@ from zulipterminal.api_types import (
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
     Composition,
+    DirectComposition,
+    DirectMessageUpdateRequest,
     DirectTypingNotification,
     EditPropagateMode,
     Event,
     MessagesFlagChange,
-    PrivateComposition,
-    PrivateMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
     StreamComposition,
@@ -92,9 +92,9 @@ def sort_streams(streams: List[StreamData]) -> None:
 
 
 class UserSettings(TypedDict):
-    send_private_typing_notifications: bool
+    send_direct_typing_notifications: bool
     twenty_four_hour_time: bool
-    pm_content_in_desktop_notifications: bool
+    dm_content_in_desktop_notifications: bool
 
 
 class Model:
@@ -112,7 +112,7 @@ class Model:
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
         self._last_unread_topic = None
-        self.last_unread_pm = None
+        self.last_unread_dm = None
 
         self.user_id = -1
         self.user_email = ""
@@ -220,14 +220,14 @@ class Model:
         user_settings = self.initial_data.get("user_settings", None)
         # TODO: Support multiple settings locations via settings migration #1108
         self._user_settings = UserSettings(
-            send_private_typing_notifications=(
+            send_direct_typing_notifications=(
                 True
                 if user_settings is None
-                else user_settings["send_private_typing_notifications"]
+                else user_settings["send_direct_typing_notifications"]
             ),  # ZFL 105, Zulip 5.0
             twenty_four_hour_time=self.initial_data["twenty_four_hour_time"],
-            pm_content_in_desktop_notifications=self.initial_data[
-                "pm_content_in_desktop_notifications"
+            dm_content_in_desktop_notifications=self.initial_data[
+                "dm_content_in_desktop_notifications"
             ],
         )
 
@@ -291,8 +291,8 @@ class Model:
         *,
         stream: Optional[str] = None,
         topic: Optional[str] = None,
-        pms: bool = False,
-        pm_with: Optional[str] = None,
+        dms: bool = False,
+        dm_with: Optional[str] = None,
         starred: bool = False,
         mentioned: bool = False,
     ) -> bool:
@@ -301,8 +301,8 @@ class Model:
             frozenset(): [],
             frozenset(["stream"]): [["stream", stream]],
             frozenset(["stream", "topic"]): [["stream", stream], ["topic", topic]],
-            frozenset(["pms"]): [["is", "private"]],
-            frozenset(["pm_with"]): [["pm-with", pm_with]],
+            frozenset(["dms"]): [["is", "direct"]],
+            frozenset(["dm_with"]): [["dm-with", dm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
         }
@@ -316,8 +316,8 @@ class Model:
         if new_narrow != self.narrow:
             self.narrow = new_narrow
 
-            if pm_with is not None and new_narrow[0][0] == "pm-with":
-                users = pm_with.split(", ")
+            if dm_with is not None and new_narrow[0][0] == "dm-with":
+                users = dm_with.split(", ")
                 self.recipients = frozenset(
                     [self.user_dict[user]["user_id"] for user in users] + [self.user_id]
                 )
@@ -360,11 +360,11 @@ class Model:
             elif len(narrow) == 2:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
-        elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
-        elif narrow[0][0] == "pm-with":
+        elif narrow[0][1] == "direct":
+            ids = index["direct_msg_ids"]
+        elif narrow[0][0] == "dm-with":
             recipients = self.recipients
-            ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
+            ids = index["direct_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":
@@ -384,7 +384,7 @@ class Model:
                 self.narrow[0][1] == "mentioned"
                 and bool({"mentioned", "wildcard_mentioned"} & set(message["flags"]))
             )
-            # All-PMs
+            # All-DMs
             # FIXME Buggy condition?
             or (self.narrow[0][1] == message["type"] and len(self.narrow) == 1)
             # stream or stream+topic
@@ -400,10 +400,10 @@ class Model:
                     )
                 )
             )
-            # PM-with
+            # DM-with
             or (
-                self.narrow[0][0] == "pm-with"
-                and message["type"] == "private"
+                self.narrow[0][0] == "dm-with"
+                and message["type"] == "direct"
                 and len(self.narrow) == 1
                 and self.recipients
                 == frozenset([user["id"] for user in message["display_recipient"]])
@@ -518,7 +518,7 @@ class Model:
     def send_typing_status_by_user_ids(
         self, recipient_user_ids: List[int], *, status: TypingStatusChange
     ) -> None:
-        if not self.user_settings()["send_private_typing_notifications"]:
+        if not self.user_settings()["send_direct_typing_notifications"]:
             return
         if recipient_user_ids:
             request: DirectTypingNotification = {"to": recipient_user_ids, "op": status}
@@ -527,10 +527,10 @@ class Model:
         else:
             raise RuntimeError("Empty recipient list.")
 
-    def send_private_message(self, recipients: List[int], content: str) -> bool:
+    def send_direct_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
-            composition = PrivateComposition(
-                type="private",
+            composition = DirectComposition(
+                type="direct",
                 to=recipients,
                 content=content,
             )
@@ -557,8 +557,8 @@ class Model:
             notify_if_message_sent_outside_narrow(composition, self.controller)
         return message_was_sent
 
-    def update_private_message(self, msg_id: int, content: str) -> bool:
-        request: PrivateMessageUpdateRequest = {
+    def update_direct_message(self, msg_id: int, content: str) -> bool:
+        request: DirectMessageUpdateRequest = {
             "message_id": msg_id,
             "content": content,
         }
@@ -903,19 +903,19 @@ class Model:
                 next_topic = True
         return None
 
-    def get_next_unread_pm(self) -> Optional[int]:
-        pms = list(self.unread_counts["unread_pms"].keys())
-        next_pm = False
-        for pm in pms:
-            if next_pm is True:
-                self.last_unread_pm = pm
-                return pm
-            if pm == self.last_unread_pm:
-                next_pm = True
-        if len(pms) > 0:
-            pm = pms[0]
-            self.last_unread_pm = pm
-            return pm
+    def get_next_unread_dm(self) -> Optional[int]:
+        dms = list(self.unread_counts["unread_dms"].keys())
+        next_dm = False
+        for dm in dms:
+            if next_dm is True:
+                self.last_unread_dm = dm
+                return dm
+            if dm == self.last_unread_dm:
+                next_dm = True
+        if len(dms) > 0:
+            dm = dms[0]
+            self.last_unread_dm = dm
+            return dm
         return None
 
     def _fetch_initial_data(self) -> None:
@@ -1246,7 +1246,7 @@ class Model:
         if stream.get("is_web_public", False):
             return "web-public"
         if stream["invite_only"]:
-            return "private"
+            return "direct"
         return "public"
 
     def is_pinned_stream(self, stream_id: int) -> bool:
@@ -1376,7 +1376,7 @@ class Model:
 
     def _handle_typing_event(self, event: Event) -> None:
         """
-        Handle typing notifications (in private messages)
+        Handle typing notifications (in direct messages)
         """
         assert event["type"] == "typing"
 
@@ -1389,11 +1389,11 @@ class Model:
         sender_email = event["sender"]["email"]
         sender_id = event["sender"]["user_id"]
 
-        # If the user is in pm narrow with the person typing
+        # If the user is in dm narrow with the person typing
         # and the person typing isn't the user themselves
         if (
             len(narrow) == 1
-            and narrow[0][0] == "pm-with"
+            and narrow[0][0] == "dm-with"
             and sender_email in narrow[0][1].split(",")
             and sender_id != self.user_id
         ):
@@ -1410,7 +1410,7 @@ class Model:
             else:
                 raise RuntimeError("Unknown typing event operation")
 
-    def is_valid_private_recipient(
+    def is_valid_direct_recipient(
         self,
         recipient_email: str,
         recipient_name: str,
@@ -1440,7 +1440,7 @@ class Model:
         recipient = ""
         content = message["content"]
         hidden_content = False
-        if message["type"] == "private":
+        if message["type"] == "direct":
             recipient = "you"
             if len(message["display_recipient"]) > 2:
                 extra_targets = [recipient] + [
@@ -1449,7 +1449,7 @@ class Model:
                     if recip["id"] not in (self.user_id, message["sender_id"])
                 ]
                 recipient = ", ".join(extra_targets)
-            if not self.user_settings()["pm_content_in_desktop_notifications"]:
+            if not self.user_settings()["dm_content_in_desktop_notifications"]:
                 content = f"New direct message from {message['sender_full_name']}"
                 hidden_content = True
         elif message["type"] == "stream":
@@ -1837,7 +1837,7 @@ class Model:
     def _handle_update_global_notifications_event(self, event: Event) -> None:
         assert event["type"] == "update_global_notifications"
         to_update = event["notification_name"]
-        if to_update == "pm_content_in_desktop_notifications":
+        if to_update == "dm_content_in_desktop_notifications":
             self._user_settings[to_update] = event["setting"]
 
     def _handle_update_display_settings_event(self, event: Event) -> None:

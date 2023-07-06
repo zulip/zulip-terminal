@@ -228,12 +228,12 @@ class TestController:
 
         controller.narrow_to_user(recipient_emails=emails)
 
-        assert controller.model.narrow == [["pm-with", user_email]]
+        assert controller.model.narrow == [["dm-with", user_email]]
         controller.view.message_view.log.clear.assert_called_once_with()
         recipients = frozenset([controller.model.user_id, user_id])
         assert controller.model.recipients == recipients
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
-        id_list = index_user["private_msg_ids_by_user_ids"][recipients]
+        id_list = index_user["direct_msg_ids_by_user_ids"][recipients]
         assert {widget.original_widget.message["id"]} == id_list
 
     @pytest.mark.parametrize(
@@ -273,7 +273,7 @@ class TestController:
         assert msg_ids == id_list
         assert final_focus_msg_id == expected_final_focus_msg_id
 
-    def test_narrow_to_all_pm(
+    def test_narrow_to_all_dm(
         self, mocker: MockerFixture, controller: Controller, index_user: Index
     ) -> None:
         controller.model.narrow = []
@@ -282,13 +282,13 @@ class TestController:
         controller.model.user_id = 1
         controller.model.user_email = "some@email"
 
-        controller.narrow_to_all_pm()  # FIXME: Add id narrowing test
+        controller.narrow_to_all_dm()  # FIXME: Add id narrowing test
 
-        assert controller.model.narrow == [["is", "private"]]
+        assert controller.model.narrow == [["is", "direct"]]
         controller.view.message_view.log.clear.assert_called_once_with()
 
         widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
-        id_list = index_user["private_msg_ids"]
+        id_list = index_user["direct_msg_ids"]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
 
@@ -474,8 +474,8 @@ class TestController:
             ([["search", "BOO"]], [["search", "FOO"]]),
             ([["stream", "PTEST"]], [["stream", "PTEST"], ["search", "FOO"]]),
             (
-                [["pm-with", "foo@zulip.com"], ["search", "BOO"]],
-                [["pm-with", "foo@zulip.com"], ["search", "FOO"]],
+                [["dm-with", "foo@zulip.com"], ["search", "BOO"]],
+                [["dm-with", "foo@zulip.com"], ["search", "FOO"]],
             ),
             (
                 [["stream", "PTEST"], ["topic", "RDS"]],
@@ -486,7 +486,7 @@ class TestController:
             "Default_all_msg_search",
             "redo_default_search",
             "search_within_stream",
-            "pm_search_again",
+            "dm_search_again",
             "search_within_topic_narrow",
         ],
     )
@@ -551,8 +551,8 @@ class TestController:
     @pytest.mark.parametrize(
         "active_conversation_info",
         [
-            case({"sender_name": "hamlet"}, id="in_pm_narrow_with_sender_typing:start"),
-            case({}, id="in_pm_narrow_with_sender_typing:stop"),
+            case({"sender_name": "hamlet"}, id="in_dm_narrow_with_sender_typing:start"),
+            case({}, id="in_dm_narrow_with_sender_typing:stop"),
         ],
     )
     def test_show_typing_notification(

@@ -72,7 +72,7 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model._last_unread_topic is None
-        assert model.last_unread_pm is None
+        assert model.last_unread_dm is None
         model.get_messages.assert_called_once_with(
             num_before=30, num_after=10, anchor=None
         )
@@ -120,7 +120,7 @@ class TestModel:
         assert "user_settings" not in initial_data  # we add it in tests
 
         if sptn is not None:
-            initial_data["user_settings"] = {"send_private_typing_notifications": sptn}
+            initial_data["user_settings"] = {"send_direct_typing_notifications": sptn}
 
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register = mocker.Mock(return_value=initial_data)
@@ -128,18 +128,18 @@ class TestModel:
         model = Model(self.controller)
 
         assert model.user_settings() == UserSettings(
-            send_private_typing_notifications=expected_sptn_value,
+            send_direct_typing_notifications=expected_sptn_value,
             twenty_four_hour_time=initial_data["twenty_four_hour_time"],
-            pm_content_in_desktop_notifications=initial_data[
-                "pm_content_in_desktop_notifications"
+            dm_content_in_desktop_notifications=initial_data[
+                "dm_content_in_desktop_notifications"
             ],
         )
 
     def test_user_settings_expected_contents(self, model):
         expected_keys = {
-            "send_private_typing_notifications",
+            "send_direct_typing_notifications",
             "twenty_four_hour_time",
-            "pm_content_in_desktop_notifications",
+            "dm_content_in_desktop_notifications",
         }
         settings = model.user_settings()
         assert set(settings) == expected_keys
@@ -338,9 +338,9 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm-with", "FOO@zulip.com"]],
-            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
-            [["is", "private"]],
+            [["dm-with", "FOO@zulip.com"]],
+            [["dm-with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["is", "direct"]],
             [["is", "starred"]],
         ],
     )
@@ -356,9 +356,9 @@ class TestModel:
             [],
             [["stream", "hello world"]],
             [["stream", "hello world"], ["topic", "what's it all about?"]],
-            [["pm-with", "FOO@zulip.com"]],
-            [["pm-with", "Foo@zulip.com, Bar@zulip.com"]],
-            [["is", "private"]],
+            [["dm-with", "FOO@zulip.com"]],
+            [["dm-with", "Foo@zulip.com, Bar@zulip.com"]],
+            [["is", "direct"]],
             [["is", "starred"]],
         ],
     )
@@ -373,9 +373,9 @@ class TestModel:
         [
             ([], False),
             ([["search", "FOO"]], True),
-            ([["is", "private"]], False),
-            ([["is", "private"], ["search", "FOO"]], True),
-            ([["search", "FOO"], ["is", "private"]], True),
+            ([["is", "direct"]], False),
+            ([["is", "direct"], ["search", "FOO"]], True),
+            ([["search", "FOO"], ["is", "direct"]], True),
             ([["stream", "PTEST"]], False),
             ([["stream", "PTEST"], ["search", "FOO"]], True),
             ([["stream", "7"], ["topic", "Test"]], False),
@@ -392,9 +392,9 @@ class TestModel:
         "bad_args",
         [
             dict(topic="some topic"),
-            dict(stream="foo", pm_with="someone"),
-            dict(topic="blah", pm_with="someone"),
-            dict(pm_with="someone", topic="foo"),
+            dict(stream="foo", dm_with="someone"),
+            dict(topic="blah", dm_with="someone"),
+            dict(dm_with="someone", topic="foo"),
         ],
     )
     def test_set_narrow_bad_input(self, model, bad_args):
@@ -412,8 +412,8 @@ class TestModel:
             ),
             ([["is", "starred"]], dict(starred=True)),
             ([["is", "mentioned"]], dict(mentioned=True)),
-            ([["is", "private"]], dict(pms=True)),
-            ([["pm-with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
+            ([["is", "direct"]], dict(dms=True)),
+            ([["dm-with", "FOO@zulip.com"]], dict(dm_with="FOO@zulip.com")),
         ],
     )
     def test_set_narrow_already_set(self, model, narrow, good_args):
@@ -433,8 +433,8 @@ class TestModel:
             ),
             ([], [["is", "starred"]], dict(starred=True)),
             ([], [["is", "mentioned"]], dict(mentioned=True)),
-            ([], [["is", "private"]], dict(pms=True)),
-            ([], [["pm-with", "FOOBOO@gmail.com"]], dict(pm_with="FOOBOO@gmail.com")),
+            ([], [["is", "direct"]], dict(dms=True)),
+            ([], [["dm-with", "FOOBOO@gmail.com"]], dict(dm_with="FOOBOO@gmail.com")),
         ],
     )
     def test_set_narrow_not_already_set(
@@ -463,16 +463,16 @@ class TestModel:
                 {"topic_msg_ids": {1: {"BOO": {0, 1}}}},
                 set(),
             ),
-            ([["is", "private"]], {"private_msg_ids": {0, 1}}, {0, 1}),
+            ([["is", "direct"]], {"direct_msg_ids": {0, 1}}, {0, 1}),
             (
-                [["pm-with", "FOO@zulip.com"]],
-                {"private_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
+                [["dm-with", "FOO@zulip.com"]],
+                {"direct_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
                 {0, 1},
             ),
             (
-                [["pm-with", "FOO@zulip.com"]],
+                [["dm-with", "FOO@zulip.com"]],
                 {  # Covers recipient empty-set case
-                    "private_msg_ids_by_user_ids": {
+                    "direct_msg_ids_by_user_ids": {
                         frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
                     }
                 },
@@ -714,7 +714,7 @@ class TestModel:
         mock_api_query = mocker.patch(
             CONTROLLER + ".client.set_typing_status", return_value=response
         )
-        model._user_settings["send_private_typing_notifications"] = True
+        model._user_settings["send_direct_typing_notifications"] = True
 
         model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
 
@@ -736,7 +736,7 @@ class TestModel:
     def test_send_typing_status_avoided_due_to_user_setting(
         self, mocker, model, status, recipient_user_ids
     ):
-        model._user_settings["send_private_typing_notifications"] = False
+        model._user_settings["send_direct_typing_notifications"] = False
 
         mock_api_query = mocker.patch(CONTROLLER + ".client.set_typing_status")
 
@@ -753,14 +753,14 @@ class TestModel:
         ],
     )
     @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
-    def test_send_private_message(
+    def test_send_direct_message(
         self, mocker, model, recipients, response, return_value, content="hi!"
     ):
         self.client.send_message = mocker.Mock(return_value=response)
 
-        result = model.send_private_message(recipients, content)
+        result = model.send_direct_message(recipients, content)
 
-        req = dict(type="private", to=recipients, content=content)
+        req = dict(type="direct", to=recipients, content=content)
         self.client.send_message.assert_called_once_with(req)
 
         assert result == return_value
@@ -770,11 +770,11 @@ class TestModel:
                 req, self.controller
             )
 
-    def test_send_private_message_with_no_recipients(
+    def test_send_direct_message_with_no_recipients(
         self, model, content="hi!", recipients=[]
     ):
         with pytest.raises(RuntimeError):
-            model.send_private_message(recipients, content)
+            model.send_direct_message(recipients, content)
 
     @pytest.mark.parametrize(
         "response, return_value",
@@ -815,12 +815,12 @@ class TestModel:
             ({"result": "some_failure"}, False),
         ],
     )
-    def test_update_private_message(
+    def test_update_direct_message(
         self, mocker, model, response, return_value, content="hi!", msg_id=1
     ):
         self.client.update_message = mocker.Mock(return_value=response)
 
-        result = model.update_private_message(msg_id, content)
+        result = model.update_direct_message(msg_id, content)
 
         req = dict(message_id=msg_id, content=content)
         self.client.update_message.assert_called_once_with(req)
@@ -1514,7 +1514,7 @@ class TestModel:
         self, model, general_stream, secret_stream, web_public_stream
     ):
         assert model.stream_access_type(general_stream["stream_id"]) == "public"
-        assert model.stream_access_type(secret_stream["stream_id"]) == "private"
+        assert model.stream_access_type(secret_stream["stream_id"]) == "direct"
         assert model.stream_access_type(web_public_stream["stream_id"]) == "web-public"
 
     @pytest.mark.parametrize(
@@ -1777,11 +1777,11 @@ class TestModel:
                 id="stream_to_all_messages",
             ),
             case(
-                {"type": "private", "id": 1},
-                [["is", "private"]],
+                {"type": "direct", "id": 1},
+                [["is", "direct"]],
                 frozenset(),
                 ["msg_w"],
-                id="private_to_all_private",
+                id="direct_to_all_direct",
             ),
             case(
                 {
@@ -1824,17 +1824,17 @@ class TestModel:
             ),
             case(
                 {
-                    "type": "private",
+                    "type": "direct",
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 5}],
                 },
-                [["pm-with", "notification-bot@zulip.com"]],
+                [["dm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 ["msg_w"],
-                id="user_pm_x_appears_in_narrow_with_x",
+                id="user_dm_x_appears_in_narrow_with_x",
             ),
             case(
-                {"type": "private", "id": 1},
+                {"type": "direct", "id": 1},
                 [["is", "search"]],
                 frozenset(),
                 [],
@@ -1842,14 +1842,14 @@ class TestModel:
             ),
             case(
                 {
-                    "type": "private",
+                    "type": "direct",
                     "id": 1,
                     "display_recipient": [{"id": 5827}, {"id": 3212}],
                 },
-                [["pm-with", "notification-bot@zulip.com"]],
+                [["dm-with", "notification-bot@zulip.com"]],
                 frozenset({5827, 5}),
                 [],
-                id="user_pm_x_does_not_appear_in_narrow_without_x",
+                id="user_dm_x_does_not_appear_in_narrow_without_x",
             ),
             case(
                 {
@@ -1951,17 +1951,17 @@ class TestModel:
                 True,
                 [],
             ),  # message_fixture sender_id is 5140
-            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream", "private"]),
-            (5179, {"flags": []}, False, ["private"]),
+            (5179, {"flags": ["mentioned"]}, False, ["stream", "direct"]),
+            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "direct"]),
+            (5179, {"flags": []}, True, ["stream", "direct"]),
+            (5179, {"flags": []}, False, ["direct"]),
         ],
         ids=[
             "not_notified_since_self_message",
-            "notified_stream_and_private_since_directly_mentioned",
-            "notified_stream_and_private_since_wildcard_mentioned",
+            "notified_stream_and_direct_since_directly_mentioned",
+            "notified_stream_and_direct_since_wildcard_mentioned",
             "notified_stream_since_stream_has_desktop_notifications",
-            "notified_private_since_private_message",
+            "notified_direct_since_direct_message",
         ],
     )
     def test_notify_users_calling_msg_type(
@@ -1989,7 +1989,7 @@ class TestModel:
             who = message_fixture["type"]
             if who == "stream":
                 target = "PTEST -> Test"
-            elif who == "private":
+            elif who == "direct":
                 target = "you"
                 if len(message_fixture["display_recipient"]) > 2:
                     target += ", Bar Bar"
@@ -2061,15 +2061,15 @@ class TestModel:
 
     @pytest.mark.parametrize(
         "hide_content, expected_content",
-        [(True, "New direct message from Foo Foo"), (False, "private content here.")],
+        [(True, "New direct message from Foo Foo"), (False, "direct content here.")],
     )
-    def test_notify_users_hides_PM_content_based_on_user_setting(
-        self, mocker, model, private_message_fixture, hide_content, expected_content
+    def test_notify_users_hides_DM_content_based_on_user_setting(
+        self, mocker, model, direct_message_fixture, hide_content, expected_content
     ):
         notify = mocker.patch(MODULE + ".notify")
-        model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
+        model._user_settings["dm_content_in_desktop_notifications"] = not hide_content
 
-        message = private_message_fixture
+        message = direct_message_fixture
         message["user_id"] = 5179
         message["flags"] = []
 
@@ -2984,10 +2984,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="not_in_pm_narrow",
+                id="not_in_dm_narrow",
             ),
             case(
-                [["pm-with", "othello@zulip.com"]],
+                [["dm-with", "othello@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3000,10 +3000,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="not_in_pm_narrow_with_sender",
+                id="not_in_dm_narrow_with_sender",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3016,10 +3016,10 @@ class TestModel:
                 False,
                 {"sender_name": "hamlet"},
                 True,
-                id="in_pm_narrow_with_sender_typing:start",
+                id="in_dm_narrow_with_sender_typing:start",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3032,10 +3032,10 @@ class TestModel:
                 True,
                 {"sender_name": "hamlet"},
                 False,
-                id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
+                id="in_dm_narrow_with_sender_typing:start_while_animation_in_progress",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
@@ -3048,10 +3048,10 @@ class TestModel:
                 True,
                 {},
                 False,
-                id="in_pm_narrow_with_sender_typing:stop",
+                id="in_dm_narrow_with_sender_typing:stop",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3064,10 +3064,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_other_myself_typing:start",
+                id="in_dm_narrow_with_other_myself_typing:start",
             ),
             case(
-                [["pm-with", "hamlet@zulip.com"]],
+                [["dm-with", "hamlet@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3080,10 +3080,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_other_myself_typing:stop",
+                id="in_dm_narrow_with_other_myself_typing:stop",
             ),
             case(
-                [["pm-with", "iago@zulip.com"]],
+                [["dm-with", "iago@zulip.com"]],
                 {
                     "op": "start",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3093,10 +3093,10 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_oneself:start",
+                id="in_dm_narrow_with_oneself:start",
             ),
             case(
-                [["pm-with", "iago@zulip.com"]],
+                [["dm-with", "iago@zulip.com"]],
                 {
                     "op": "stop",
                     "sender": {"user_id": 5, "email": "iago@zulip.com"},
@@ -3106,7 +3106,7 @@ class TestModel:
                 False,
                 {},
                 False,
-                id="in_pm_narrow_with_oneself:stop",
+                id="in_dm_narrow_with_oneself:stop",
             ),
         ],
     )
@@ -3600,7 +3600,7 @@ class TestModel:
 
     @pytest.mark.parametrize("value", [True, False])
     def test__handle_user_settings_event(self, mocker, model, value):
-        setting = "send_private_typing_notifications"
+        setting = "send_direct_typing_notifications"
         event = {
             "type": "user_settings",
             "op": "update",
@@ -3611,8 +3611,8 @@ class TestModel:
         assert model.user_settings()[setting] == value
 
     @pytest.mark.parametrize("setting", [True, False])
-    def test_update_pm_content_in_desktop_notifications(self, mocker, model, setting):
-        setting_name = "pm_content_in_desktop_notifications"
+    def test_update_dm_content_in_desktop_notifications(self, mocker, model, setting):
+        setting_name = "dm_content_in_desktop_notifications"
         event = {
             "type": "update_global_notifications",
             "notification_name": setting_name,
@@ -3828,24 +3828,24 @@ class TestModel:
 
         assert unread_topic == next_unread_topic
 
-    def test_get_next_unread_pm(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm(self, model):
+        model.unread_counts = {"unread_dms": {1: 1, 2: 1}}
+        return_value = model.get_next_unread_dm()
         assert return_value == 1
-        assert model.last_unread_pm == 1
+        assert model.last_unread_dm == 1
 
-    def test_get_next_unread_pm_again(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        model.last_unread_pm = 1
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm_again(self, model):
+        model.unread_counts = {"unread_dms": {1: 1, 2: 1}}
+        model.last_unread_dm = 1
+        return_value = model.get_next_unread_dm()
         assert return_value == 2
-        assert model.last_unread_pm == 2
+        assert model.last_unread_dm == 2
 
-    def test_get_next_unread_pm_no_unread(self, model):
-        model.unread_counts = {"unread_pms": {}}
-        return_value = model.get_next_unread_pm()
+    def test_get_next_unread_dm_no_unread(self, model):
+        model.unread_counts = {"unread_dms": {}}
+        return_value = model.get_next_unread_dm()
         assert return_value is None
-        assert model.last_unread_pm is None
+        assert model.last_unread_dm is None
 
     @pytest.mark.parametrize(
         "stream_id, expected_response",

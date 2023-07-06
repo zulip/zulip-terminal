@@ -129,15 +129,15 @@ class HomeButton(TopButton):
         )
 
 
-class PMButton(TopButton):
+class DMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages  [{primary_key_for_command('ALL_PM')}]"
+        button_text = f"Direct messages  [{primary_key_for_command('ALL_DM')}]"
 
         super().__init__(
             controller=controller,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=controller.narrow_to_all_dm,
             count=count,
         )
 
@@ -288,7 +288,7 @@ class UserButton(TopButton):
             recipient_emails=[self.email],
         )
         self._view.body.focus.original_widget.set_focus("footer")
-        self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
+        self._view.write_box.direct_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("USER_INFO", key):

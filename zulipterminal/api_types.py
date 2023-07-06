@@ -30,7 +30,7 @@ MAX_MESSAGE_LENGTH: Final = 10000
 ###############################################################################
 # Core message types (used in Composition and Message below)
 
-DirectMessageString = Literal["private"]
+DirectMessageString = Literal["direct"]
 StreamMessageString = Literal["stream"]
 
 MessageType = Union[DirectMessageString, StreamMessageString]
@@ -72,7 +72,7 @@ class StreamTypingNotification(TypedDict):
 #   https://zulip.com/api/send-message
 
 
-class PrivateComposition(TypedDict):
+class DirectComposition(TypedDict):
     type: DirectMessageString
     content: str
     to: List[int]  # User ids
@@ -85,7 +85,7 @@ class StreamComposition(TypedDict):
     subject: str  # TODO: Migrate to using topic
 
 
-Composition = Union[PrivateComposition, StreamComposition]
+Composition = Union[DirectComposition, StreamComposition]
 
 ###############################################################################
 # Parameters to pass in request to:
@@ -105,7 +105,7 @@ class MessagesFlagChange(TypedDict):
 #   https://zulip.com/api/update-message
 
 
-class PrivateMessageUpdateRequest(TypedDict):
+class DirectMessageUpdateRequest(TypedDict):
     message_id: int
     content: str
 
@@ -129,7 +129,7 @@ class StreamMessageUpdateRequest(TypedDict):
     # stream_id: int
 
 
-MessageUpdateRequest = Union[PrivateMessageUpdateRequest, StreamMessageUpdateRequest]
+MessageUpdateRequest = Union[DirectMessageUpdateRequest, StreamMessageUpdateRequest]
 
 ###############################################################################
 # Parameter to pass in request to:
@@ -159,7 +159,7 @@ class SubscriptionSettingChange(TypedDict):
 #   https://zulip.com/api/get-events#message
 #   https://zulip.com/api/get-message  (unused)
 
-## TODO: Improve this typing to split private and stream message data
+## TODO: Improve this typing to split direct and stream message data
 
 
 class Message(TypedDict, total=False):
@@ -442,7 +442,7 @@ class TypingEvent(TypedDict):
     sender: _TypingEventUser
 
     # Unused as yet
-    # Pre Zulip 4.0, always present; now only present if message_type == "private"
+    # Pre Zulip 4.0, always present; now only present if message_type == "direct"
     # recipients: List[_TypingEventUser]
     # NOTE: These fields are all new in Zulip 4.0 / ZFL 58, if client capability sent
     # message_type: NotRequired[MessageType]
@@ -482,7 +482,7 @@ class UpdateRealmEmojiEvent(TypedDict):
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#user_settings-update
 # This is specifically only those supported by ZT
-SupportedUserSettings = Literal["send_private_typing_notifications"]
+SupportedUserSettings = Literal["send_direct_typing_notifications"]
 
 
 class UpdateUserSettingsEvent(TypedDict):
@@ -495,7 +495,7 @@ class UpdateUserSettingsEvent(TypedDict):
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#update_global_notifications
 # This is specifically only those supported by ZT
-SupportedGlobalNotificationSettings = Literal["pm_content_in_desktop_notifications"]
+SupportedGlobalNotificationSettings = Literal["dm_content_in_desktop_notifications"]
 
 
 class UpdateGlobalNotificationsEvent(TypedDict):

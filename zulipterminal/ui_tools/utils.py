@@ -58,8 +58,8 @@ def create_msg_box_list(
 
 # The SIM114 warnings are ignored here since combining the branches would be less clear
 def is_muted(msg: Message, model: Any) -> bool:
-    # PMs cannot be muted
-    if msg["type"] == "private":  # noqa: SIM114
+    # DMs cannot be muted
+    if msg["type"] == "direct":  # noqa: SIM114
         return False
     # In a topic narrow
     elif len(model.narrow) == 2:
@@ -72,7 +72,7 @@ def is_muted(msg: Message, model: Any) -> bool:
 
 
 def is_unsubscribed_message(msg: Message, model: Any) -> bool:
-    if msg["type"] == "private":
+    if msg["type"] == "direct":
         return False
     if not model.is_user_subscribed_to_stream(msg["stream_id"]):
         return True

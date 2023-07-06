@@ -121,7 +121,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'New message to a stream',
         'key_category': 'msg_actions',
     },
-    'PRIVATE_MESSAGE': {
+    'DIRECT_MESSAGE': {
         'keys': ['x'],
         'help_text': 'New message to a person or group of people',
         'key_category': 'msg_actions',
@@ -188,7 +188,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Narrow to all messages',
         'key_category': 'navigation',
     },
-    'ALL_PM': {
+    'ALL_DM': {
         'keys': ['P'],
         'help_text': 'Narrow to all direct messages',
         'key_category': 'navigation',
@@ -208,7 +208,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Next unread topic',
         'key_category': 'navigation',
     },
-    'NEXT_UNREAD_PM': {
+    'NEXT_UNREAD_DM': {
         'keys': ['p'],
         'help_text': 'Next unread direct message',
         'key_category': 'navigation',

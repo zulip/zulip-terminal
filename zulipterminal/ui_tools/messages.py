@@ -76,14 +76,14 @@ class MessageBox(urwid.Pile):
             self.stream_name = self.message["display_recipient"]
             self.stream_id = self.message["stream_id"]
             self.topic_name = self.message["subject"]
-        elif self.message["type"] == "private":
+        elif self.message["type"] == "direct":
             self.email = self.message["sender_email"]
             self.user_id = self.message["sender_id"]
         else:
             raise RuntimeError("Invalid message type")
 
-        if self.message["type"] == "private":
-            if self._is_private_message_to_self():
+        if self.message["type"] == "direct":
+            if self._is_direct_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
                 self.recipient_emails = [self.model.user_email]
@@ -111,7 +111,7 @@ class MessageBox(urwid.Pile):
 
     def need_recipient_header(self) -> bool:
         # Prevent redundant information in recipient bar
-        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
+        if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "dm-with":
             return False
         if len(self.model.narrow) == 2 and self.model.narrow[1][0] == "topic":
             return False
@@ -123,7 +123,7 @@ class MessageBox(urwid.Pile):
                 and self.topic_name == last_msg["subject"]
                 and self.stream_name == last_msg["display_recipient"]
             )
-        elif self.message["type"] == "private":
+        elif self.message["type"] == "direct":
             recipient_ids = [
                 {
                     recipient["id"]
@@ -136,12 +136,12 @@ class MessageBox(urwid.Pile):
             return not (
                 len(recipient_ids) == 2
                 and recipient_ids[0] == recipient_ids[1]
-                and last_msg["type"] == "private"
+                and last_msg["type"] == "direct"
             )
         else:
             raise RuntimeError("Invalid message type")
 
-    def _is_private_message_to_self(self) -> bool:
+    def _is_direct_message_to_self(self) -> bool:
         recipient_list = self.message["display_recipient"]
         return (
             len(recipient_list) == 1
@@ -170,7 +170,7 @@ class MessageBox(urwid.Pile):
         header.markup = stream_title_markup
         return header
 
-    def private_header(self) -> Any:
+    def direct_header(self) -> Any:
         title_markup = (
             "header",
             [("general_narrow", "You and "), ("general_narrow", self.recipients_names)],
@@ -190,7 +190,7 @@ class MessageBox(urwid.Pile):
         if self.message["type"] == "stream":
             return self.stream_header()
         else:
-            return self.private_header()
+            return self.direct_header()
 
     def top_search_bar(self) -> Any:
         curr_narrow = self.model.narrow
@@ -203,7 +203,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
             text_to_fill = "All messages"
-        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "direct":
             text_to_fill = "All direct messages"
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
             text_to_fill = "Starred messages"
@@ -890,8 +890,8 @@ class MessageBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("REPLY_MESSAGE", key):
-            if self.message["type"] == "private":
-                self.model.controller.view.write_box.private_box_view(
+            if self.message["type"] == "direct":
+                self.model.controller.view.write_box.direct_box_view(
                     recipient_user_ids=self.recipient_ids,
                 )
             elif self.message["type"] == "stream":
@@ -909,7 +909,7 @@ class MessageBox(urwid.Pile):
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
         elif is_command_key("STREAM_NARROW", key):
-            if self.message["type"] == "private":
+            if self.message["type"] == "direct":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
                     contextual_message_id=self.message["id"],
@@ -921,9 +921,9 @@ class MessageBox(urwid.Pile):
                 )
         elif is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
-            if self.message["type"] == "private":
-                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
-                    self.model.controller.narrow_to_all_pm(
+            if self.message["type"] == "direct":
+                if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "dm-with":
+                    self.model.controller.narrow_to_all_dm(
                         contextual_message_id=self.message["id"],
                     )
                 else:
@@ -944,7 +944,7 @@ class MessageBox(urwid.Pile):
                         contextual_message_id=self.message["id"],
                     )
         elif is_command_key("TOPIC_NARROW", key):
-            if self.message["type"] == "private":
+            if self.message["type"] == "direct":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
                     contextual_message_id=self.message["id"],
@@ -961,7 +961,7 @@ class MessageBox(urwid.Pile):
             )
         elif is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
-            self.model.controller.view.write_box.private_box_view(
+            self.model.controller.view.write_box.direct_box_view(
                 recipient_user_ids=[self.message["sender_id"]],
             )
         elif is_command_key("MENTION_REPLY", key):
@@ -1002,7 +1002,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
-            # For private messages, subject = "" (empty string)
+            # For direct messages, subject = "" (empty string)
             # This also handles the realm_message_content_edit_limit_seconds == 0 case
             if (
                 self.message["sender_id"] != self.model.user_id
@@ -1038,7 +1038,7 @@ class MessageBox(urwid.Pile):
                     ]
                     # Don't allow editing message body if time-limit exceeded.
                     if time_since_msg_sent >= edit_time_limit:
-                        if self.message["type"] == "private":
+                        if self.message["type"] == "direct":
                             self.model.controller.report_error(
                                 [
                                     " Time Limit for editing the message"
@@ -1074,13 +1074,13 @@ class MessageBox(urwid.Pile):
                         )
                         return key
                 else:
-                    # The remaining case is of a private message not belonging to user.
+                    # The remaining case is of a direct message not belonging to user.
                     # Which should be already handled by the topmost if block
                     raise RuntimeError(
                         "Reached unexpected block. This should be handled at the top."
                     )
 
-            if self.message["type"] == "private":
+            if self.message["type"] == "direct":
                 self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             elif self.message["type"] == "stream":
                 self.model.controller.view.write_box.stream_box_edit_view(

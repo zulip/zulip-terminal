@@ -911,15 +911,15 @@ class TestMiddleColumnView:
         assert mid_col_view.controller.narrow_to_topic.called is False
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_stream(
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_DM"))
+    def test_keypress_NEXT_UNREAD_DM_stream(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
 
         mid_col_view.model.user_id_email_dict = {1: "EMAIL"}
-        mid_col_view.model.get_next_unread_pm.return_value = 1
+        mid_col_view.model.get_next_unread_dm.return_value = 1
 
         mid_col_view.keypress(size, key)
 
@@ -928,26 +928,26 @@ class TestMiddleColumnView:
             contextual_message_id=1,
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_no_pm(
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_DM"))
+    def test_keypress_NEXT_UNREAD_DM_no_dm(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mid_col_view.model.get_next_unread_pm.return_value = None
+        mid_col_view.model.get_next_unread_dm.return_value = None
 
         return_value = mid_col_view.keypress(size, key)
 
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
-    def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
+    @pytest.mark.parametrize("key", keys_for_command("DIRECT_MESSAGE"))
+    def test_keypress_DIRECT_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
-        mid_col_view.model.get_next_unread_pm.return_value = None
+        mid_col_view.model.get_next_unread_dm.return_value = None
         mid_col_view.footer = mocker.Mock()
         return_value = mid_col_view.keypress(size, key)
-        mid_col_view.footer.private_box_view.assert_called_once_with()
+        mid_col_view.footer.direct_box_view.assert_called_once_with()
         assert mid_col_view.footer.focus_position == 0
         assert return_value == key
 
@@ -962,7 +962,7 @@ class TestRightColumnView:
         self.thread = mocker.patch(VIEWS + ".threading")
         self.super = mocker.patch(VIEWS + ".urwid.Frame.__init__")
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
-            "unread_pms": {
+            "unread_dms": {
                 1: 1,
                 2: 1,
             }
@@ -1097,7 +1097,7 @@ class TestLeftColumnView:
         self.view.model = mocker.Mock()
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
             "all_msg": 2,
-            "all_pms": 0,
+            "all_dms": 0,
             "streams": {
                 86: 1,
                 14: 1,
@@ -1121,7 +1121,7 @@ class TestLeftColumnView:
     def test_menu_view(self, mocker):
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
-        pm_button = mocker.patch(VIEWS + ".PMButton")
+        dm_button = mocker.patch(VIEWS + ".DMButton")
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
@@ -1130,7 +1130,7 @@ class TestLeftColumnView:
         home_button.assert_called_once_with(
             controller=left_col_view.controller, count=2
         )
-        pm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
+        dm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
         starred_button.assert_called_once_with(
             controller=left_col_view.controller, count=3
         )

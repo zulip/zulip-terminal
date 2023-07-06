@@ -59,7 +59,7 @@ def test_encode_stream(
             "https://foo.bar.com",
             {
                 "id": 24284,
-                "type": "private",
+                "type": "direct",
                 "display_recipient": [
                     {
                         "id": 12,
@@ -72,7 +72,7 @@ def test_encode_stream(
                     },
                 ],
             },
-            "https://foo.bar.com/#narrow/pm-with/12,144,249-pm/near/24284",
+            "https://foo.bar.com/#narrow/dm-with/12,144,249-dm/near/24284",
         ),
     ],
 )

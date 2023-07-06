@@ -401,15 +401,15 @@ class TestView:
                 "content": "this is a stream message content",
             },
             {
-                "type": "private",
+                "type": "direct",
                 "to": [1, 2],
-                "content": "this is a private message content",
+                "content": "this is a direct message content",
             },
             None,
         ],
         ids=[
             "stream_draft_composition",
-            "private_draft_composition",
+            "direct_draft_composition",
             "no_draft_composition",
         ],
     )
@@ -436,9 +436,7 @@ class TestView:
         view.model.session_draft_message.return_value = draft
         view.model.user_id_email_dict = {1: "foo@zulip.com", 2: "bar@gmail.com"}
         mocked_stream_box_view = mocker.patch.object(view.write_box, "stream_box_view")
-        mocked_private_box_view = mocker.patch.object(
-            view.write_box, "private_box_view"
-        )
+        mocked_direct_box_view = mocker.patch.object(view.write_box, "direct_box_view")
 
         size = widget_size(view)
         view.keypress(size, key)
@@ -449,7 +447,7 @@ class TestView:
                     caption=draft["to"], title=draft["subject"], stream_id=10
                 )
             else:
-                mocked_private_box_view.assert_called_once_with(
+                mocked_direct_box_view.assert_called_once_with(
                     recipient_user_ids=draft["to"],
                 )
 

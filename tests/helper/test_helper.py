@@ -79,7 +79,7 @@ def test_index_messages_narrow_user(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm-with", "boo@zulip.com"]]
+    model.narrow = [["dm-with", "boo@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -99,7 +99,7 @@ def test_index_messages_narrow_user_multiple(
     messages = messages_successful_response["messages"]
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
-    model.narrow = [["pm-with", "boo@zulip.com, bar@zulip.com"]]
+    model.narrow = [["dm-with", "boo@zulip.com, bar@zulip.com"]]
     model.is_search_narrow.return_value = False
     model.user_id = 5140
     model.user_dict = {
@@ -177,7 +177,7 @@ def test_index_starred(
     model.narrow = [["is", "starred"]]
     model.is_search_narrow.return_value = False
     expected_index: Dict[str, Any] = dict(
-        empty_index, private_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
+        empty_index, direct_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
     )
     for msg_id, msg in expected_index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
@@ -210,7 +210,7 @@ def test_index_mentioned_messages(
     model.is_search_narrow.return_value = False
     expected_index: Dict[str, Any] = dict(
         empty_index,
-        private_msg_ids={537287, 537288},
+        direct_msg_ids={537287, 537288},
         mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
     )
 
@@ -253,13 +253,13 @@ def test_powerset(
             {
                 "all_msg": 8,
                 "streams": {99: 1},
-                "unread_topics": {(99, "Some private unread topic"): 1},
+                "unread_topics": {(99, "Some direct unread topic"): 1},
                 "all_mentions": 0,
             },
         ),
         (
             {1000},
-            [["Secret stream", "Some private unread topic"]],
+            [["Secret stream", "Some direct unread topic"]],
             {
                 "all_msg": 8,
                 "streams": {1000: 3},
@@ -270,8 +270,8 @@ def test_powerset(
         ({1}, [], {"all_mentions": 0}),
     ],
     ids=[
-        "mute_private_stream_mute_general_stream_topic",
-        "mute_general_stream_mute_private_stream_topic",
+        "mute_direct_stream_mute_general_stream_topic",
+        "mute_general_stream_mute_direct_stream_topic",
         "no_mute_some_other_stream_muted",
     ],
 )
@@ -341,34 +341,34 @@ def test_display_error_if_present(
     "req, narrow, footer_updated",
     [
         case(
-            {"type": "private", "to": [1], "content": "bar"},
-            [["is", "private"]],
+            {"type": "direct", "to": [1], "content": "bar"},
+            [["is", "direct"]],
             False,
-            id="all_private__pm__not_notified",
+            id="all_direct__dm__not_notified",
         ),
         case(
-            {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
+            {"type": "direct", "to": [4, 5], "content": "Hi"},
+            [["dm-with", "welcome-bot@zulip.com, notification-bot@zulip.com"]],
             False,
-            id="group_private_conv__same_group_pm__not_notified",
+            id="group_direct_conv__same_group_dm__not_notified",
         ),
         case(
-            {"type": "private", "to": [4, 5], "content": "Hi"},
-            [["pm-with", "welcome-bot@zulip.com"]],
+            {"type": "direct", "to": [4, 5], "content": "Hi"},
+            [["dm-with", "welcome-bot@zulip.com"]],
             True,
-            id="private_conv__other_pm__notified",
+            id="direct_conv__other_dm__notified",
         ),
         case(
-            {"type": "private", "to": [4], "content": ":party_parrot:"},
+            {"type": "direct", "to": [4], "content": ":party_parrot:"},
             [
                 [
-                    "pm-with",
+                    "dm-with",
                     "person1@example.com, person2@example.com, "
                     "welcome-bot@zulip.com",
                 ]
             ],
             True,
-            id="private_conv__other_pm2__notified",
+            id="direct_conv__other_dm2__notified",
         ),
         case(
             {"type": "stream", "to": "ZT", "subject": "1", "content": "foo"},
@@ -405,10 +405,10 @@ def test_display_error_if_present(
             id="starred__stream__notified",
         ),
         case(
-            {"type": "private", "to": [1], "content": "fist_bump"},
+            {"type": "direct", "to": [1], "content": "fist_bump"},
             [["is", "mentioned"]],
             True,
-            id="mentioned__private_no_mention__notified",
+            id="mentioned__direct_no_mention__notified",
         ),
         case(
             {"type": "stream", "to": "PTEST", "subject": "TEST", "content": "Test"},

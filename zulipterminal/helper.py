@@ -83,8 +83,8 @@ class Index(TypedDict):
     all_msg_ids: Set[int]
     starred_msg_ids: Set[int]
     mentioned_msg_ids: Set[int]
-    private_msg_ids: Set[int]
-    private_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
+    direct_msg_ids: Set[int]
+    direct_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
     stream_msg_ids_by_stream_id: Dict[int, Set[int]]
     topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
@@ -100,8 +100,8 @@ initial_index = Index(
     all_msg_ids=set(),
     starred_msg_ids=set(),
     mentioned_msg_ids=set(),
-    private_msg_ids=set(),
-    private_msg_ids_by_user_ids=defaultdict(set),
+    direct_msg_ids=set(),
+    direct_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
@@ -114,11 +114,11 @@ initial_index = Index(
 
 class UnreadCounts(TypedDict):
     all_msg: int
-    all_pms: int
+    all_dms: int
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
-    unread_pms: Dict[int, int]  # sender_id
-    unread_huddles: Dict[FrozenSet[int], int]  # Group pms
+    unread_dms: Dict[int, int]  # sender_id
+    unread_huddles: Dict[FrozenSet[int], int]  # Group dms
     streams: Dict[int, int]  # stream_id
 
 
@@ -171,11 +171,11 @@ def _set_count_in_model(
                 unread_counts["unread_topics"], (stream_id, message["subject"])
             )
             update_unreads(unread_counts["streams"], stream_id)
-        # self-pm has only one display_recipient
-        # 1-1 pms have 2 display_recipient
+        # self-dm has only one display_recipient
+        # 1-1 dms have 2 display_recipient
         elif len(message["display_recipient"]) <= 2:
-            update_unreads(unread_counts["unread_pms"], message["sender_id"])
-        else:  # If it's a group pm
+            update_unreads(unread_counts["unread_dms"], message["sender_id"])
+        else:  # If it's a group dm
             update_unreads(
                 unread_counts["unread_huddles"],
                 frozenset(
@@ -192,7 +192,7 @@ def _set_count_in_view(
 ) -> None:
     """
     This function for the most part contains the logic for setting the
-    count in the UI buttons. The later buttons (all_msg, all_pms)
+    count in the UI buttons. The later buttons (all_msg, all_dms)
     additionally set the current count in the model and make use of the
     same in the UI.
     """
@@ -203,7 +203,7 @@ def _set_count_in_view(
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
     user_buttons_list = controller.view.user_w.users_btn_list
     all_msg = controller.view.home_button
-    all_pm = controller.view.pm_button
+    all_dm = controller.view.dm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
         user_id = message["sender_id"]
@@ -242,8 +242,8 @@ def _set_count_in_view(
                 if user_button.user_id == user_id:
                     user_button.update_count(user_button.count + new_count)
                     break
-            unread_counts["all_pms"] += new_count
-            all_pm.update_count(unread_counts["all_pms"])
+            unread_counts["all_dms"] += new_count
+            all_dm.update_count(unread_counts["all_dms"])
 
         if add_to_counts:
             unread_counts["all_msg"] += new_count
@@ -287,7 +287,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     ...
                 }
         },
-        'private_msg_ids_by_user_ids': {
+        'direct_msg_ids_by_user_ids': {
             (3, 7): {  # user_ids frozenset
                 51234,
                 56454,
@@ -310,7 +310,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             23423,
             ...
         },
-        'private_msg_ids': {
+        'direct_msg_ids': {
             22334,
             23423,
             ...
@@ -346,7 +346,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
         'messages': {
             # all the messages mapped to their id
             # for easy retrieval of message from id
-            45645: {  # PRIVATE
+            45645: {  # DIRECT
                 'id': 4290,
                 'timestamp': 1521817473,
                 'content': 'Hi @**Cordelia Lear**',
@@ -356,7 +356,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 'subject': '',
                 'subject_links': [],
                 'sender_id': 73,
-                'type': 'private',
+                'type': 'direct',
                 'reactions': [],
                 'display_recipient': [
                     {
@@ -416,19 +416,19 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             if narrow[0][1] == "mentioned" and msg_has_mention:
                 index["mentioned_msg_ids"].add(msg["id"])
 
-            if msg["type"] == "private":
-                index["private_msg_ids"].add(msg["id"])
+            if msg["type"] == "direct":
+                index["direct_msg_ids"].add(msg["id"])
                 recipients = frozenset(
                     {recipient["id"] for recipient in msg["display_recipient"]}
                 )
 
-                if narrow[0][0] == "pm-with":
+                if narrow[0][0] == "dm-with":
                     narrow_emails = [
                         model.user_dict[email]["user_id"]
                         for email in narrow[0][1].split(", ")
                     ] + [model.user_id]
                     if recipients == frozenset(narrow_emails):
-                        index["private_msg_ids_by_user_ids"][recipients].add(msg["id"])
+                        index["direct_msg_ids_by_user_ids"][recipients].add(msg["id"])
 
             if msg["type"] == "stream" and msg["stream_id"] == model.stream_id:
                 index["stream_msg_ids_by_stream_id"][msg["stream_id"]].add(msg["id"])
@@ -447,15 +447,15 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:
-    # TODO: support group pms
+    # TODO: support group dms
     unread_msg_counts = model.initial_data["unread_msgs"]
 
     unread_counts = UnreadCounts(
         all_msg=0,
-        all_pms=0,
+        all_dms=0,
         all_mentions=0,
         unread_topics=dict(),
-        unread_pms=dict(),
+        unread_dms=dict(),
         unread_huddles=dict(),
         streams=defaultdict(int),
     )
@@ -463,11 +463,11 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     mentions_count = len(unread_msg_counts["mentions"])
     unread_counts["all_mentions"] += mentions_count
 
-    for pm in unread_msg_counts["pms"]:
-        count = len(pm["unread_message_ids"])
-        unread_counts["unread_pms"][pm["sender_id"]] = count
+    for dm in unread_msg_counts["dms"]:
+        count = len(dm["unread_message_ids"])
+        unread_counts["unread_dms"][dm["sender_id"]] = count
         unread_counts["all_msg"] += count
-        unread_counts["all_pms"] += count
+        unread_counts["all_dms"] += count
 
     for stream in unread_msg_counts["streams"]:
         count = len(stream["unread_message_ids"])
@@ -486,14 +486,14 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         if stream_id not in model.muted_streams:
             unread_counts["all_msg"] += count
 
-    # store unread count of group pms in `unread_huddles`
-    for group_pm in unread_msg_counts["huddles"]:
-        count = len(group_pm["unread_message_ids"])
-        user_ids = group_pm["user_ids_string"].split(",")
+    # store unread count of group dms in `unread_huddles`
+    for group_dm in unread_msg_counts["huddles"]:
+        count = len(group_dm["unread_message_ids"])
+        user_ids = group_dm["user_ids_string"].split(",")
         user_ids = frozenset(map(int, user_ids))
         unread_counts["unread_huddles"][user_ids] = count
         unread_counts["all_msg"] += count
-        unread_counts["all_pms"] += count
+        unread_counts["all_dms"] += count
 
     return unread_counts
 
@@ -683,13 +683,13 @@ def notify_if_message_sent_outside_narrow(
         stream_narrow = [["stream", message["to"]]]
         topic_narrow = stream_narrow + [["topic", message["subject"]]]
         check_narrow_and_notify(stream_narrow, topic_narrow, controller)
-    elif message["type"] == "private":
-        pm_narrow = [["is", "private"]]
+    elif message["type"] == "direct":
+        dm_narrow = [["is", "direct"]]
         recipient_emails = [
             controller.model.user_id_email_dict[user_id] for user_id in message["to"]
         ]
-        pm_with_narrow = [["pm-with", ", ".join(recipient_emails)]]
-        check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
+        dm_with_narrow = [["dm-with", ", ".join(recipient_emails)]]
+        check_narrow_and_notify(dm_narrow, dm_with_narrow, controller)
 
 
 def hash_util_decode(string: str) -> str:
