@@ -596,9 +596,6 @@ def main(options: Optional[List[str]] = None) -> None:
             transparent_background=transparency_enabled,
         )
 
-        # Avoid passing this to the Controller
-        boolean_settings.pop("transparency")
-
         Controller(
             config_file=zuliprc_path,
             maximum_footlinks=maximum_footlinks,

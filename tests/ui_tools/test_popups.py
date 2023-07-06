@@ -201,6 +201,7 @@ class TestAboutView:
             autohide_enabled=False,
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
+            transparency_enabled=False,
         )
 
     @pytest.mark.parametrize(
@@ -243,6 +244,7 @@ class TestAboutView:
             autohide_enabled=False,
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
+            transparency_enabled=False,
         )
 
         assert len(about_view.feature_level_content) == (
