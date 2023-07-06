@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pygments.token import STANDARD_TYPES, _TokenType
 
-from zulipterminal.config.color import term16
+from zulipterminal.config.color import Background, term16
 from zulipterminal.themes import gruvbox_dark, gruvbox_light, zt_blue, zt_dark, zt_light
 
 
@@ -186,11 +186,14 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
         theme_styles = theme_module.STYLES
     except AttributeError:
         raise MissingThemeAttributeError("STYLES") from None
-    urwid_theme = parse_themefile(theme_styles, color_depth)
 
     # META is not required, but if present should contain pygments data
     theme_meta = getattr(theme_module, "META", None)
     if theme_meta is not None:
+        # FIXME: Is META now required? Or only if Background.COLOR present?
+        # If used in styles and background is not specified, transparent by default!
+        background_color = theme_meta.get("background", Background.COLOR)
+
         pygments_data = theme_meta.get("pygments", None)
         if pygments_data is None:
             raise MissingThemeAttributeError('META["pygments"]') from None
@@ -199,8 +202,10 @@ def generate_theme(theme_name: str, color_depth: int) -> ThemeSpec:
                 raise MissingThemeAttributeError(f'META["pygments"]["{key}"]') from None
         pygments_styles = generate_pygments_styles(pygments_data)
     else:
+        background_color = Background.COLOR
         pygments_styles = []
 
+    urwid_theme = parse_themefile(theme_styles, color_depth, background_color)
     urwid_theme.extend(pygments_styles)
 
     return urwid_theme
@@ -232,11 +237,18 @@ def validate_colors(color_enum: Any, color_depth: int) -> None:
 
 
 def parse_themefile(
-    theme_styles: Dict[Optional[str], Tuple[Any, Any]], color_depth: int
+    theme_styles: Dict[Optional[str], Tuple[Any, Any]],
+    color_depth: int,
+    background_color: Any,
 ) -> ThemeSpec:
     urwid_theme = []
     for style_name, (fg_name, bg_name) in theme_styles.items():
         fg_code16, fg_code256, fg_code24, *fg_props = fg_name.value.split()
+
+        # If background (bg) is specific enum, use specified background_color instead
+        if bg_name == Background.COLOR:
+            bg_name = background_color  # noqa: PLW2901  # overwrite loop variable
+
         bg_code16, bg_code256, bg_code24, *bg_props = bg_name.value.split()
 
         new_style: StyleSpec

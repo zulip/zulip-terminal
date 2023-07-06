@@ -9,6 +9,7 @@ from pygments.token import STANDARD_TYPES, _TokenType
 from pytest import param as case
 from pytest_mock import MockerFixture
 
+from zulipterminal.config.color import Background
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
@@ -86,7 +87,8 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     # Check if color used in STYLE exists in Color.
     for style_name, style_conf in theme_styles.items():
         fg, bg = style_conf
-        assert fg in theme_colors and bg in theme_colors
+        assert fg in theme_colors
+        assert bg in theme_colors or bg in Background
     # Check completeness of META
     expected_META = {"pygments": ["styles", "background", "overrides"]}
     for metadata, config in expected_META.items():
@@ -303,7 +305,10 @@ def test_parse_themefile(
 
     req_styles = {"s1": "", "s2": "bold"}
     mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
-    assert parse_themefile(theme_styles, color_depth) == expected_urwid_theme
+    assert (
+        parse_themefile(theme_styles, color_depth, Color.DARK_MAGENTA)
+        == expected_urwid_theme
+    )
 
 
 @pytest.mark.parametrize(
