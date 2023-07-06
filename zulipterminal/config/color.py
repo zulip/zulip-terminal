@@ -25,6 +25,12 @@ from pygments.token import (
 
 
 # fmt: off
+# Background is treated as transparent by default
+# This avoids the need for a dummy default color
+class Background(Enum):
+    COLOR         = 'default         default    default'
+
+
 # NOTE: The 24bit color codes use 256 color which can be
 # enhanced to be truly 24bit.
 # NOTE: The 256code format can be moved to h0-255 to
