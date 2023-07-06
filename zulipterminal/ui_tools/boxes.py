@@ -412,8 +412,7 @@ class WriteBox(urwid.Pile):
             stream_id = self.model.stream_id_from_name(new_text)
             stream_access_type = self.model.stream_access_type(stream_id)
             stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
-            stream = self.model.stream_dict[stream_id]
-            color = stream["color"]
+            color = self.model.get_subscription_color(stream_id)
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
             (color, stream_marker)
         )
@@ -618,7 +617,7 @@ class WriteBox(urwid.Pile):
         )
 
         muted_streams = [
-            self.model.stream_dict[stream_id]["name"]
+            self.model.get_stream_name(stream_id)
             for stream_id in self.model.muted_streams
         ]
         matching_muted_streams = [
@@ -637,12 +636,10 @@ class WriteBox(urwid.Pile):
             else:
                 matched_streams.append(matching_muted_stream)
 
-        current_stream = self.model.stream_dict.get(self.stream_id, None)
-        if current_stream is not None:
-            current_stream_name = current_stream["name"]
-            if current_stream_name in matched_streams:
-                matched_streams.remove(current_stream_name)
-                matched_streams.insert(0, current_stream_name)
+        current_stream_name = self.model.get_stream_name(self.stream_id)
+        if current_stream_name is not None and current_stream_name in matched_streams:
+            matched_streams.remove(current_stream_name)
+            matched_streams.insert(0, current_stream_name)
 
         matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
         return matched_stream_typeaheads, matched_streams

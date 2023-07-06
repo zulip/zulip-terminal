@@ -570,8 +570,9 @@ class MiddleColumnView(urwid.Frame):
             # For new streams with no previous conversation.
             if self.footer.focus is None:
                 stream_id = self.model.stream_id
-                stream_dict = self.model.stream_dict
-                self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
+                self.footer.stream_box_view(
+                    caption=self.model.get_stream_name(stream_id)
+                )
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key
@@ -590,7 +591,7 @@ class MiddleColumnView(urwid.Frame):
                 return key
             stream_id, topic = stream_topic
             self.controller.narrow_to_topic(
-                stream_name=self.model.stream_dict[stream_id]["name"],
+                stream_name=self.model.get_stream_name(stream_id),
                 topic_name=topic,
             )
             return key
@@ -1267,10 +1268,10 @@ class StreamInfoView(PopUpView):
     def __init__(self, controller: Any, stream_id: int) -> None:
         self.stream_id = stream_id
         self.controller = controller
-        stream = controller.model.stream_dict[stream_id]
+        stream = controller.model._subscribed_streams[stream_id]
 
         # New in feature level 30, server version 4.0
-        stream_creation_date = stream["date_created"]
+        stream_creation_date = controller.model.get_stream_date_created(self.stream_id)
         date_created = (
             [
                 (
@@ -1291,15 +1292,17 @@ class StreamInfoView(PopUpView):
             )
         ]
 
-        if "stream_post_policy" in stream:
-            stream_policy = STREAM_POST_POLICY[stream["stream_post_policy"]]
+        if controller.model.get_stream_post_policy(self.stream_id):
+            stream_policy = STREAM_POST_POLICY[
+                controller.model.get_stream_post_policy(self.stream_id)
+            ]
         else:
-            if stream.get("is_announcement_only"):
+            if controller.model.is_stream_announcement_only(self.stream_id):
                 stream_policy = STREAM_POST_POLICY[2]
             else:
                 stream_policy = STREAM_POST_POLICY[1]
 
-        total_members = len(stream["subscribers"])
+        total_members = len(controller.model.get_stream_subscribers(self.stream_id))
 
         stream_access_type = controller.model.stream_access_type(stream_id)
         type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
@@ -1307,20 +1310,20 @@ class StreamInfoView(PopUpView):
 
         availability_of_history = (
             "Public to Users"
-            if stream["history_public_to_subscribers"]
+            if controller.model.is_stream_history_public_to_subscribers(self.stream_id)
             else "Not Public to Users"
         )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
-        self.stream_email = stream["email_address"]
+        self.stream_email = controller.model.get_subscription_email(self.stream_id)
         email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
 
-        weekly_traffic = stream["stream_weekly_traffic"]
+        weekly_traffic = controller.model.get_stream_weekly_traffic(self.stream_id)
         weekly_msg_count = (
             "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
         )
 
         title = f"{stream_marker} {stream['name']}"
-        rendered_desc = stream["rendered_description"]
+        rendered_desc = controller.model.get_stream_rendered_description(self.stream_id)
         self.markup_desc, message_links, _ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,

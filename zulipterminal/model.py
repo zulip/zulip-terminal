@@ -43,6 +43,7 @@ from zulipterminal.api_types import (
     PrivateMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
+    Stream,
     StreamComposition,
     StreamMessageUpdateRequest,
     Subscription,
@@ -173,11 +174,18 @@ class Model:
 
         self.users = self.get_all_users()
 
-        self.stream_dict: Dict[int, Any] = {}
+        self._subscribed_streams: Dict[int, Subscription] = {}
+        self._unsubscribed_streams: Dict[int, Subscription] = {}
+        self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
         self.visual_notified_streams: Set[int] = set()
+
+        self._register_non_subscribed_streams(
+            unsubscribed_streams=self.initial_data["unsubscribed"],
+            never_subscribed_streams=self.initial_data["never_subscribed"],
+        )
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
@@ -185,8 +193,8 @@ class Model:
         # level 30, server version 4. For consistency we add this field
         # on server iterations even before this with value of None.
         if self.server_feature_level is None or self.server_feature_level < 30:
-            for stream in self.stream_dict.values():
-                stream["date_created"] = None
+            for stream_id in self.get_all_stream_ids():
+                self.set_stream_date_created(stream_id, None)
 
         self.normalize_and_cache_message_retention_text()
 
@@ -253,11 +261,11 @@ class Model:
         self.cached_retention_text: Dict[int, str] = {}
         realm_message_retention_days = self.initial_data["realm_message_retention_days"]
         if self.server_feature_level is None or self.server_feature_level < 17:
-            for stream in self.stream_dict.values():
-                stream["message_retention_days"] = None
+            for stream_id in self.get_all_stream_ids():
+                self.set_stream_message_retention_days(stream_id, None)
 
-        for stream in self.stream_dict.values():
-            message_retention_days = stream["message_retention_days"]
+        for stream_id in self.get_all_stream_ids():
+            message_retention_days = self.get_stream_message_retention_days(stream_id)
             is_organization_default = message_retention_days is None
             final_msg_retention_days = (
                 realm_message_retention_days
@@ -267,7 +275,7 @@ class Model:
             message_retention_response = self.message_retention_days_response(
                 final_msg_retention_days, is_organization_default
             )
-            self.cached_retention_text[stream["stream_id"]] = message_retention_response
+            self.cached_retention_text[stream_id] = message_retention_response
 
     def get_focus_in_current_narrow(self) -> Optional[int]:
         """
@@ -879,7 +887,7 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream_name = self.get_stream_name(stream_id)
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
@@ -963,15 +971,15 @@ class Model:
 
             return [
                 sub
-                for sub in self.stream_dict[stream_id]["subscribers"]
+                for sub in self.get_stream_subscribers(stream_id)
                 if sub != self.user_id
             ]
         else:
             return [
                 sub
-                for _, stream in self.stream_dict.items()
-                for sub in stream["subscribers"]
-                if stream["name"] == stream_name
+                for stream_id in self.get_all_stream_ids()
+                for sub in self.get_stream_subscribers(stream_id)
+                if self.get_stream_name(stream_id) == stream_name
                 if sub != self.user_id
             ]
 
@@ -1156,6 +1164,93 @@ class Model:
 
         return self.user_dict[user_email]["full_name"]
 
+    def _register_non_subscribed_streams(
+        self,
+        unsubscribed_streams: List[Subscription],
+        never_subscribed_streams: List[Stream],
+    ) -> None:
+        self._unsubscribed_streams = {
+            stream["stream_id"]: stream for stream in unsubscribed_streams
+        }
+        self._never_subscribed_streams = {
+            stream["stream_id"]: stream for stream in never_subscribed_streams
+        }
+
+    def _get_stream_from_id(self, stream_id: int) -> Union[Subscription, Stream]:
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]
+        elif stream_id in self._never_subscribed_streams:
+            return self._never_subscribed_streams[stream_id]
+        else:
+            raise RuntimeError(f"Stream with id {stream_id} does not exist!")
+
+    def get_all_stream_ids(self) -> List[int]:
+        id_list = list(self._subscribed_streams)
+        id_list.extend(stream_id for stream_id in self._unsubscribed_streams)
+        id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
+        return id_list
+
+    def get_all_subscription_ids(self) -> List[int]:
+        return list(self._subscribed_streams)
+
+    def get_stream_name(self, stream_id: int) -> Optional[str]:
+        return self._get_stream_from_id(stream_id).get("name")
+
+    def get_stream_subscribers(self, stream_id: int) -> List[int]:
+        return self._get_stream_from_id(stream_id)["subscribers"]
+
+    def get_stream_date_created(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id).get("date_created")
+
+    def set_stream_date_created(self, stream_id: int, value: Optional[int]) -> None:
+        self._get_stream_from_id(stream_id)["date_created"] = value
+
+    def is_stream_web_public(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["is_web_public"]
+
+    def get_stream_message_retention_days(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id).get("message_retention_days")
+
+    def set_stream_message_retention_days(
+        self, stream_id: int, value: Optional[int]
+    ) -> None:
+        self._get_stream_from_id(stream_id)["message_retention_days"] = value
+
+    def is_stream_invite_only(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["invite_only"]
+
+    def get_stream_post_policy(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id).get("stream_post_policy")
+
+    def is_stream_announcement_only(self, stream_id: int) -> Optional[bool]:
+        return self._get_stream_from_id(stream_id).get("is_announcement_only")
+
+    def is_stream_history_public_to_subscribers(self, stream_id: int) -> bool:
+        return self._get_stream_from_id(stream_id)["history_public_to_subscribers"]
+
+    def get_stream_weekly_traffic(self, stream_id: int) -> Optional[int]:
+        return self._get_stream_from_id(stream_id)["stream_weekly_traffic"]
+
+    def get_stream_rendered_description(self, stream_id: int) -> str:
+        return self._get_stream_from_id(stream_id)["rendered_description"]
+
+    def get_subscription_color(self, stream_id: int) -> Optional[str]:
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]["color"]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]["color"]
+        return None
+
+    def get_subscription_email(self, stream_id: int) -> Optional[str]:
+        if stream_id in self._subscribed_streams:
+            return self._subscribed_streams[stream_id]["email_address"]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]["email_address"]
+        else:
+            raise RuntimeError(f"Stream with id {stream_id} is not subscribed to!")
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1179,7 +1274,7 @@ class Model:
             # different formats
             subscription["color"] = canonicalize_color(subscription["color"])
 
-            self.stream_dict[subscription["stream_id"]] = subscription
+            self._subscribed_streams[subscription["stream_id"]] = subscription
             stream_data = make_reduced_stream_data(subscription)
             if subscription["pin_to_top"]:
                 new_pinned_streams.append(stream_data)
@@ -1234,18 +1329,17 @@ class Model:
         display_error_if_present(response, self.controller)
 
     def stream_id_from_name(self, stream_name: str) -> int:
-        for stream_id, stream in self.stream_dict.items():
-            if stream["name"] == stream_name:
+        for stream_id in self.get_all_stream_ids():
+            if self.get_stream_name(stream_id) == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
 
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
-        if stream_id not in self.stream_dict:
+        if stream_id not in self._subscribed_streams:
             raise RuntimeError("Invalid stream id.")
-        stream = self.stream_dict[stream_id]
-        if stream.get("is_web_public", False):
+        if self.is_stream_web_public(stream_id):
             return "web-public"
-        if stream["invite_only"]:
+        if self.is_stream_invite_only(stream_id):
             return "private"
         return "public"
 
@@ -1281,7 +1375,7 @@ class Model:
         display_error_if_present(response, self.controller)
 
     def is_user_subscribed_to_stream(self, stream_id: int) -> bool:
-        return stream_id in self.stream_dict
+        return stream_id in self._subscribed_streams
 
     def _handle_subscription_event(self, event: Event) -> None:
         """
@@ -1367,7 +1461,7 @@ class Model:
 
             for stream_id in stream_ids:
                 if self.is_user_subscribed_to_stream(stream_id):
-                    subscribers = self.stream_dict[stream_id]["subscribers"]
+                    subscribers = self.get_stream_subscribers(stream_id)
                     if event["op"] == "peer_add":
                         subscribers.extend(user_ids)
                     else:
@@ -1421,8 +1515,8 @@ class Model:
         )
 
     def is_valid_stream(self, stream_name: str) -> bool:
-        for stream in self.stream_dict.values():
-            if stream["name"] == stream_name:
+        for stream_id in self.get_all_stream_ids():
+            if self.get_stream_name(stream_id) == stream_name:
                 return True
         return False
 

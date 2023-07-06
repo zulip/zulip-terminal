@@ -61,14 +61,14 @@ class TestModel:
         unicode_emojis,
         realm_emojis_data,
         zulip_emoji,
-        stream_dict,
+        _subscribed_streams,
     ):
         assert hasattr(model, "controller")
         assert hasattr(model, "client")
         assert model.narrow == []
         assert model._have_last_message == {}
         assert model.stream_id is None
-        assert model.stream_dict == stream_dict
+        assert model._subscribed_streams == _subscribed_streams
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model._last_unread_topic is None
@@ -266,7 +266,7 @@ class TestModel:
 
     @pytest.mark.parametrize(
         [
-            "to_vary_in_stream_dict",
+            "to_vary_in__subscribed_streams",
             "realm_msg_retention_days",
             "feature_level",
             "expect_msg_retention_text",
@@ -311,21 +311,23 @@ class TestModel:
     def test_normalize_and_cache_message_retention_text(
         self,
         model,
-        stream_dict,
-        to_vary_in_stream_dict,
+        _subscribed_streams,
+        to_vary_in__subscribed_streams,
         realm_msg_retention_days,
         feature_level,
         expect_msg_retention_text,
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
         model.initial_data["realm_message_retention_days"] = realm_msg_retention_days
-        for stream_id in to_vary_in_stream_dict:
-            model.stream_dict[stream_id].update(to_vary_in_stream_dict[stream_id])
+        for stream_id in to_vary_in__subscribed_streams:
+            model._subscribed_streams[stream_id].update(
+                to_vary_in__subscribed_streams[stream_id]
+            )
 
         model.normalize_and_cache_message_retention_text()
 
-        for stream_id in to_vary_in_stream_dict:
+        for stream_id in to_vary_in__subscribed_streams:
             assert (
                 model.cached_retention_text[stream_id]
                 == expect_msg_retention_text[stream_id]
@@ -438,11 +440,11 @@ class TestModel:
         ],
     )
     def test_set_narrow_not_already_set(
-        self, model, initial_narrow, narrow, good_args, user_dict, stream_dict
+        self, model, initial_narrow, narrow, good_args, user_dict, _subscribed_streams
     ):
         model.narrow = initial_narrow
         model.user_dict = user_dict
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         assert not model.set_narrow(**good_args)
         assert model.narrow != initial_narrow
         assert model.narrow == narrow
@@ -1663,6 +1665,693 @@ class TestModel:
         assert model.user_dict == user_dict
         assert model.users == user_list
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "name": "Some general stream",
+                    "date_created": None,
+                    "invite_only": False,
+                    "color": "#baf",  # Color in '#xxxxxx' format
+                    "pin_to_top": False,
+                    "stream_id": 1000,
+                    "is_muted": False,
+                    "is_web_public": False,
+                    "audible_notifications": False,
+                    "description": "General Stream",
+                    "rendered_description": "General Stream",
+                    "desktop_notifications": False,
+                    "stream_weekly_traffic": 0,
+                    "push_notifications": False,
+                    "email_address": "general@example.comm",
+                    "message_retention_days": None,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                    "is_announcement_only": False,
+                    "stream_post_policy": 0,
+                    "first_message_id": 1,
+                    "email_notifications": False,
+                    "wildcard_mentions_notify": False,
+                },
+            ),
+            case(
+                3,
+                {
+                    "name": "Stream 3",
+                    "date_created": 1472047127,
+                    "invite_only": False,
+                    "color": "#b0a5fd",
+                    "pin_to_top": False,
+                    "stream_id": 3,
+                    "is_muted": False,
+                    "audible_notifications": False,
+                    "description": "A description of stream 3",
+                    "rendered_description": "A description of stream 3",
+                    "desktop_notifications": False,
+                    "stream_weekly_traffic": 0,
+                    "push_notifications": False,
+                    "message_retention_days": 33,
+                    "email_address": "stream3@example.com",
+                    "email_notifications": False,
+                    "wildcard_mentions_notify": False,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                    "is_announcement_only": True,
+                    "stream_post_policy": 0,
+                    "is_web_public": True,
+                    "first_message_id": None,
+                },
+            ),
+            case(
+                5,
+                {
+                    "name": "Stream 5",
+                    "date_created": 1472047129,
+                    "invite_only": False,
+                    "stream_id": 5,
+                    "description": "A description of stream 5",
+                    "rendered_description": "A description of stream 5",
+                    "stream_weekly_traffic": 0,
+                    "message_retention_days": 35,
+                    "subscribers": [1001, 11, 12],
+                    "history_public_to_subscribers": True,
+                    "is_announcement_only": True,
+                    "stream_post_policy": 0,
+                    "is_web_public": True,
+                    "first_message_id": None,
+                },
+            ),
+        ],
+    )
+    def test_get_stream_from_id(
+        self,
+        model,
+        stream_id,
+        expected_value,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        assert model._get_stream_from_id(stream_id) == expected_value
+
+    def test_get_stream_from_id_nonexistent_stream(
+        self,
+        model,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+        stream_id=231,  # id 231 does not belong to any stream
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        with pytest.raises(RuntimeError):
+            model._get_stream_from_id(stream_id)
+
+    def test_get_all_stream_ids(
+        self,
+        model,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        never_subscribed_streams_fixture,
+        expected_value=[1000, 99, 999, 1, 2, 3, 4, 5, 6],
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        model._never_subscribed_streams = never_subscribed_streams_fixture
+        assert model.get_all_stream_ids() == expected_value
+
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "Some general stream",
+            ),
+            case(
+                3,
+                "Stream 3",
+            ),
+            case(
+                5,
+                "Stream 5",
+            ),
+        ],
+    )
+    def test_get_stream_name(
+        self, model, mocker, get_stream_from_id_fixture, stream_id, expected_value
+    ):
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_name(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "subscribers": [1001, 11, 12],
+                },
+                [1001, 11, 12],
+            ),
+            case(
+                3,
+                {
+                    "subscribers": [1001, 11, 12, 13],
+                },
+                [1001, 11, 12, 13],
+            ),
+            case(
+                5,
+                {
+                    "subscribers": [1001, 14],
+                },
+                [1001, 14],
+            ),
+        ],
+    )
+    def test_get_stream_subscribers(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_subscribers(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "date_created": None,
+                },
+                None,
+            ),
+            case(
+                3,
+                {
+                    "date_created": 1472047124,
+                },
+                1472047124,
+            ),
+            case(
+                5,
+                {
+                    "date_created": 1472423124,
+                },
+                1472423124,
+            ),
+        ],
+    )
+    def test_get_stream_date_created(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_date_created(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary",
+        [
+            case(
+                1000,
+                {
+                    "date_created": None,
+                },
+            ),
+            case(
+                3,
+                {
+                    "date_created": 1472047124,
+                },
+            ),
+            case(
+                5,
+                {
+                    "date_created": 1472423124,
+                },
+            ),
+        ],
+    )
+    def test_set_stream_date_created(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        value_to_be_changed=1400000000,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+
+        model.set_stream_date_created(stream_id, value_to_be_changed)
+        model._get_stream_from_id.assert_called_once()
+        assert model.get_stream_date_created(stream_id) == 1400000000
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "is_web_public": False,
+                },
+                False,
+            ),
+            case(
+                3,
+                {
+                    "is_web_public": True,
+                },
+                True,
+            ),
+            case(
+                5,
+                {
+                    "is_web_public": False,
+                },
+                False,
+            ),
+        ],
+    )
+    def test_is_stream_web_public(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.is_stream_web_public(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "message_retention_days": None,
+                },
+                None,
+            ),
+            case(
+                3,
+                {
+                    "message_retention_days": 33,
+                },
+                33,
+            ),
+            case(
+                5,
+                {
+                    "message_retention_days": 35,
+                },
+                35,
+            ),
+        ],
+    )
+    def test_get_stream_message_retention_days(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_message_retention_days(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary",
+        [
+            case(
+                1000,
+                {
+                    "message_retention_days": None,
+                },
+            ),
+            case(
+                3,
+                {
+                    "message_retention_days": 33,
+                },
+            ),
+            case(
+                5,
+                {
+                    "message_retention_days": 35,
+                },
+            ),
+        ],
+    )
+    def test_set_stream_message_retention_days(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        value_to_be_changed=30,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+
+        model.set_stream_message_retention_days(stream_id, value_to_be_changed)
+        model._get_stream_from_id.assert_called_once()
+        assert model.get_stream_message_retention_days(stream_id) == 30
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "invite_only": False,
+                },
+                False,
+            ),
+            case(
+                3,
+                {
+                    "invite_only": True,
+                },
+                True,
+            ),
+        ],
+    )
+    def test_is_stream_invite_only(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.is_stream_invite_only(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "stream_post_policy": 0,
+                },
+                0,
+            ),
+            case(
+                3,
+                {
+                    "stream_post_policy": 1,
+                },
+                1,
+            ),
+            case(
+                5,
+                {
+                    "stream_post_policy": 3,
+                },
+                3,
+            ),
+        ],
+    )
+    def test_get_stream_post_policy(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_post_policy(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {
+                    "is_announcement_only": True,
+                },
+                True,
+            ),
+            case(
+                3,
+                {
+                    "is_announcement_only": False,
+                },
+                False,
+            ),
+            case(
+                5,
+                {
+                    "is_announcement_only": True,
+                },
+                True,
+            ),
+        ],
+    )
+    def test_is_stream_announcement_only(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.is_stream_announcement_only(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                3,
+                {
+                    "history_public_to_subscribers": False,
+                },
+                False,
+            ),
+            case(
+                5,
+                {
+                    "history_public_to_subscribers": True,
+                },
+                True,
+            ),
+        ],
+    )
+    def test_is_stream_history_public_to_subscribers(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert (
+            model.is_stream_history_public_to_subscribers(stream_id) == expected_value
+        )
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, to_vary, expected_value",
+        [
+            case(
+                1000,
+                {"stream_weekly_traffic": 100},
+                100,
+            ),
+            case(
+                3,
+                {
+                    "stream_weekly_traffic": 5,
+                },
+                5,
+            ),
+            case(
+                5,
+                {
+                    "stream_weekly_traffic": None,
+                },
+                None,
+            ),
+        ],
+    )
+    def test_get_stream_weekly_traffic(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        to_vary,
+        expected_value,
+    ):
+        get_stream_from_id_fixture.update(to_vary)
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_weekly_traffic(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "General Stream",
+            ),
+            case(
+                3,
+                "A description of stream 3",
+            ),
+            case(
+                5,
+                "A description of stream 5",
+            ),
+        ],
+    )
+    def test_get_stream_rendered_description(
+        self,
+        model,
+        mocker,
+        get_stream_from_id_fixture,
+        stream_id,
+        expected_value,
+    ):
+        mocker.patch(
+            MODEL + "._get_stream_from_id", return_value=get_stream_from_id_fixture
+        )
+        assert model.get_stream_rendered_description(stream_id) == expected_value
+        model._get_stream_from_id.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1,
+                "#baf",
+            ),
+        ],
+    )
+    def test_get_subscription_color(
+        self, model, _subscribed_streams, stream_id, expected_value
+    ):
+        model._subscribed_streams = _subscribed_streams
+        assert model.get_subscription_color(stream_id) == expected_value
+
+    @pytest.mark.parametrize(
+        "stream_id, expected_value",
+        [
+            case(
+                1000,
+                "general@example.comm",
+            ),
+            case(
+                3,
+                "stream3@example.com",
+            ),
+        ],
+    )
+    def test_get_subscription_email(
+        self,
+        model,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        stream_id,
+        expected_value,
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        assert model.get_subscription_email(stream_id) == expected_value
+
+    def test_get_subscription_email_not_subscribed(
+        self,
+        model,
+        _subscribed_streams,
+        unsubscribed_streams_fixture,
+        stream_id=5,
+    ):
+        model._subscribed_streams = _subscribed_streams
+        model._unsubscribed_streams = unsubscribed_streams_fixture
+        with pytest.raises(
+            RuntimeError, match=f"Stream with id {stream_id} is not subscribed to!"
+        ):
+            model.get_subscription_email(stream_id)
+
+    def test_get_all_subscription_ids(
+        self,
+        model,
+        _subscribed_streams,
+        expected_value=[1000, 99, 999, 1, 2],
+    ):
+        model._subscribed_streams = _subscribed_streams
+        assert model.get_all_subscription_ids() == expected_value
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
@@ -1679,9 +2368,10 @@ class TestModel:
 
         model._subscribe_to_streams(subs)
 
-        assert len(model.stream_dict)
+        assert len(model._subscribed_streams)
         assert all(
-            msg_id == msg["stream_id"] for msg_id, msg in model.stream_dict.items()
+            msg_id == msg["stream_id"]
+            for msg_id, msg in model._subscribed_streams.items()
         )
         assert model.muted_streams == muted
         assert model.pinned_streams == []  # FIXME generalize/parametrize
@@ -3443,7 +4133,7 @@ class TestModel:
         self,
         model,
         mocker,
-        stream_dict,
+        _subscribed_streams,
         event,
         feature_level,
         stream_id,
@@ -3451,12 +4141,12 @@ class TestModel:
     ):
         event["type"] = "subscription"
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        new_subscribers = model.stream_dict[stream_id]["subscribers"]
+        new_subscribers = model._subscribed_streams[stream_id]["subscribers"]
         assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize(
@@ -3475,16 +4165,16 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_to_unsubscribed_streams(
-        self, model, mocker, stream_dict, event, feature_level
+        self, model, mocker, _subscribed_streams, event, feature_level
     ):
         event["type"] = "subscription"
 
-        model.stream_dict = deepcopy(stream_dict)
+        model._subscribed_streams = deepcopy(_subscribed_streams)
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        assert model.stream_dict == stream_dict
+        assert model._subscribed_streams == _subscribed_streams
 
     # NOTE: This only applies to feature level 34/35+
     @pytest.mark.parametrize(
@@ -3503,17 +4193,23 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_multiple_users_one_stream(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
+        self,
+        model,
+        mocker,
+        _subscribed_streams,
+        event,
+        feature_level,
+        expected_subscribers,
     ):
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [2]
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
-        new_subscribers = model.stream_dict[stream_ids[0]]["subscribers"]
+        new_subscribers = model._subscribed_streams[stream_ids[0]]["subscribers"]
         assert new_subscribers == expected_subscribers
 
     # NOTE: This only applies to feature level 34/35+
@@ -3533,18 +4229,24 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_one_user_multiple_streams(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
+        self,
+        model,
+        mocker,
+        _subscribed_streams,
+        event,
+        feature_level,
+        expected_subscribers,
     ):
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [1, 2]
 
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.server_feature_level = feature_level
 
         model._handle_subscription_event(event)
 
         for stream_id in stream_ids:
-            new_subscribers = model.stream_dict[stream_id]["subscribers"]
+            new_subscribers = model._subscribed_streams[stream_id]["subscribers"]
             assert new_subscribers == expected_subscribers
 
     @pytest.mark.parametrize(
@@ -3657,9 +4359,9 @@ class TestModel:
         ids=["muted_stream", "unmuted_stream", "unmuted_stream_nostreamsmuted"],
     )
     def test_is_muted_stream(
-        self, muted_streams, stream_id, is_muted, stream_dict, model
+        self, muted_streams, stream_id, is_muted, _subscribed_streams, model
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.muted_streams = muted_streams
         assert model.is_muted_stream(stream_id) == is_muted
 
@@ -3677,9 +4379,9 @@ class TestModel:
         ],
     )
     def test_is_visual_notifications_enabled(
-        self, visual_notified_streams, stream_id, is_enabled, stream_dict, model
+        self, visual_notified_streams, stream_id, is_enabled, _subscribed_streams, model
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model.visual_notified_streams = visual_notified_streams
 
         assert model.is_visual_notifications_enabled(stream_id) == is_enabled
@@ -3694,9 +4396,9 @@ class TestModel:
         ],
     )
     def test_is_muted_topic(
-        self, topic, is_muted, stream_dict, model, processed_muted_topics
+        self, topic, is_muted, _subscribed_streams, model, processed_muted_topics
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
         model._muted_topics = processed_muted_topics
 
         return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
@@ -3809,9 +4511,9 @@ class TestModel:
         model._last_unread_topic = last_unread_topic
 
         # Minimal extra streams for muted stream testing (should not exist otherwise)
-        assert {3, 4} & set(model.stream_dict) == set()
-        model.stream_dict[3] = {"name": "Stream 3"}
-        model.stream_dict[4] = {"name": "Stream 4"}
+        assert {3, 4} & set(model._subscribed_streams) == set()
+        model._subscribed_streams[3] = {"name": "Stream 3"}
+        model._subscribed_streams[4] = {"name": "Stream 4"}
         model.muted_streams = {3}
 
         # date data unimportant (if present)
@@ -3859,9 +4561,9 @@ class TestModel:
         ],
     )
     def test_is_user_subscribed_to_stream(
-        self, model, stream_dict, stream_id, expected_response
+        self, model, _subscribed_streams, stream_id, expected_response
     ):
-        model.stream_dict = stream_dict
+        model._subscribed_streams = _subscribed_streams
 
         return_value = model.is_user_subscribed_to_stream(stream_id)
 
