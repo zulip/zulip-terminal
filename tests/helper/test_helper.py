@@ -4,7 +4,7 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
-from zulipterminal.api_types import Composition
+from zulipterminal.api_types import Composition, Subscription
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Index,
@@ -278,18 +278,21 @@ def test_powerset(
 def test_classify_unread_counts(
     mocker: MockerFixture,
     initial_data: Dict[str, Any],
-    stream_dict: Dict[int, Dict[str, Any]],
+    _subscribed_streams: Dict[int, Subscription],
     classified_unread_counts: Dict[str, Any],
     muted_topics: List[List[str]],
     muted_streams: Set[int],
     vary_in_unreads: Dict[str, Any],
 ) -> None:
     model = mocker.Mock()
-    model.stream_dict = stream_dict
+    model._subscribed_streams = _subscribed_streams
     model.initial_data = initial_data
     model.is_muted_topic = mocker.Mock(
         side_effect=(
-            lambda stream_id, topic: [model.stream_dict[stream_id]["name"], topic]
+            lambda stream_id, topic: [
+                model._subscribed_streams[stream_id]["name"],
+                topic,
+            ]
             in muted_topics
         )
     )

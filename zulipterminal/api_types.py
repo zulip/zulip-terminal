@@ -197,21 +197,36 @@ class Message(TypedDict, total=False):
 
 
 ###############################################################################
-# In "subscriptions" response from:
+# In "subscriptions", "unsubscribed", and "never_subscribed" responses from:
 #   https://zulip.com/api/register-queue
 # Also directly from:
 #   https://zulip.com/api/get-events#subscription-add
 #   https://zulip.com/api/get-subscriptions (unused)
 
 
-class Subscription(TypedDict):
+class Stream(TypedDict):
     stream_id: int
     name: str
     description: str
     rendered_description: str
-    date_created: int  # NOTE: new in Zulip 4.0 / ZFL 30
+    date_created: Optional[int]  # NOTE: new in Zulip 4.0 / ZFL 30
     invite_only: bool
     subscribers: List[int]
+
+    is_announcement_only: bool  # Deprecated in Zulip 3.0 -> stream_post_policy
+    stream_post_policy: int  # NOTE: new in Zulip 3.0 / ZFL 1
+
+    is_web_public: bool
+    message_retention_days: Optional[int]  # NOTE: new in Zulip 3.0 / ZFL 17
+    history_public_to_subscribers: bool
+    first_message_id: Optional[int]
+    stream_weekly_traffic: Optional[int]
+
+    # Deprecated fields
+    # in_home_view: bool  # Replaced by is_muted in Zulip 2.1; still present in updates
+
+
+class Subscription(Stream):
     desktop_notifications: Optional[bool]
     email_notifications: Optional[bool]
     wildcard_mentions_notify: Optional[bool]
@@ -222,19 +237,8 @@ class Subscription(TypedDict):
 
     is_muted: bool
 
-    is_announcement_only: bool  # Deprecated in Zulip 3.0 -> stream_post_policy
-    stream_post_policy: int  # NOTE: new in Zulip 3.0 / ZFL 1
-
-    is_web_public: bool
-    role: int  # NOTE: new in Zulip 4.0 / ZFL 31
+    role: NotRequired[int]  # NOTE: new in Zulip 4.0 / ZFL 31
     color: str
-    message_retention_days: Optional[int]  # NOTE: new in Zulip 3.0 / ZFL 17
-    history_public_to_subscribers: bool
-    first_message_id: Optional[int]
-    stream_weekly_traffic: Optional[int]
-
-    # Deprecated fields
-    # in_home_view: bool  # Replaced by is_muted in Zulip 2.1; still present in updates
 
 
 ###############################################################################
@@ -411,6 +415,11 @@ class RealmUserEvent(TypedDict):
 # (also -peer_add and -peer_remove; FIXME: -add & -remove are not yet supported)
 
 
+class RemovedSubscription(TypedDict):
+    stream_id: int
+    # name: str  # Currently not used
+
+
 # Update of personal properties
 class SubscriptionUpdateEvent(SubscriptionSettingChange):
     type: Literal["subscription"]
@@ -427,6 +436,18 @@ class SubscriptionPeerAddRemoveEvent(TypedDict):
 
     user_id: int
     user_ids: List[int]  # NOTE: replaces 'user_id' in ZFL 35
+
+
+class SubscriptionAddEvent(TypedDict):
+    type: Literal["subscription"]
+    op: Literal["add"]
+    subscriptions: List[Subscription]
+
+
+class SubscriptionRemoveEvent(TypedDict):
+    type: Literal["subscription"]
+    op: Literal["remove"]
+    subscriptions: List[RemovedSubscription]
 
 
 # -----------------------------------------------------------------------------
@@ -523,6 +544,8 @@ Event = Union[
     UpdateMessagesLocationEvent,
     ReactionEvent,
     SubscriptionUpdateEvent,
+    SubscriptionAddEvent,
+    SubscriptionRemoveEvent,
     SubscriptionPeerAddRemoveEvent,
     TypingEvent,
     UpdateMessageFlagsEvent,

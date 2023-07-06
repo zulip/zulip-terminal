@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 from urwid import Widget
 
-from zulipterminal.api_types import Message, MessageType
+from zulipterminal.api_types import Message, MessageType, Stream, Subscription
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
     keys_for_command,
@@ -207,7 +207,7 @@ def logged_on_user() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def general_stream() -> Dict[str, Any]:
+def general_stream() -> Subscription:
     return {
         "name": "Some general stream",
         "date_created": 1472091253,
@@ -216,10 +216,10 @@ def general_stream() -> Dict[str, Any]:
         "pin_to_top": False,
         "stream_id": 1000,
         "is_muted": False,
+        "is_web_public": False,
         "audible_notifications": False,
         "description": "General Stream",
         "rendered_description": "General Stream",
-        "is_old_stream": True,
         "desktop_notifications": False,
         "stream_weekly_traffic": 0,
         "push_notifications": False,
@@ -227,13 +227,18 @@ def general_stream() -> Dict[str, Any]:
         "message_retention_days": 10,
         "subscribers": [1001, 11, 12],
         "history_public_to_subscribers": True,
+        "is_announcement_only": False,
+        "stream_post_policy": 0,
+        "first_message_id": 1,
+        "email_notifications": False,
+        "wildcard_mentions_notify": False,
     }
 
 
 # This is a private stream;
 # only description/stream_id/invite_only/name/color vary from above
 @pytest.fixture
-def secret_stream() -> Dict[str, Any]:
+def secret_stream() -> Subscription:
     return {
         "description": "Some private stream",
         "stream_id": 99,
@@ -245,20 +250,25 @@ def secret_stream() -> Dict[str, Any]:
         "rendered_description": "Some private stream",
         "color": "#ccc",  # Color in '#xxx' format
         "is_muted": False,
+        "is_web_public": False,
         "audible_notifications": False,
-        "is_old_stream": True,
         "desktop_notifications": False,
         "stream_weekly_traffic": 0,
         "message_retention_days": -1,
         "push_notifications": False,
         "subscribers": [1001, 11],
         "history_public_to_subscribers": False,
+        "is_announcement_only": False,
+        "stream_post_policy": 0,
+        "first_message_id": 1,
+        "email_notifications": False,
+        "wildcard_mentions_notify": False,
     }
 
 
 # Like public stream but with is_web_public=True
 @pytest.fixture
-def web_public_stream() -> Dict[str, Any]:
+def web_public_stream() -> Subscription:
     return {
         "description": "Some web public stream",
         "stream_id": 999,
@@ -271,7 +281,6 @@ def web_public_stream() -> Dict[str, Any]:
         "color": "#ddd",  # Color in '#xxx' format
         "is_muted": False,
         "audible_notifications": False,
-        "is_old_stream": True,
         "desktop_notifications": False,
         "stream_weekly_traffic": 0,
         "message_retention_days": -1,
@@ -279,15 +288,35 @@ def web_public_stream() -> Dict[str, Any]:
         "subscribers": [1001, 11],
         "history_public_to_subscribers": False,
         "is_web_public": True,
+        "is_announcement_only": False,
+        "stream_post_policy": 0,
+        "first_message_id": 1,
+        "email_notifications": False,
+        "wildcard_mentions_notify": False,
     }
 
 
 @pytest.fixture
+def get_stream_from_id_fixture(
+    stream_id: int,
+    _subscribed_streams: Dict[int, Subscription],
+    unsubscribed_streams_fixture: Dict[int, Subscription],
+    never_subscribed_streams_fixture: Dict[int, Stream],
+) -> Union[Subscription, Stream]:
+    if stream_id in _subscribed_streams:
+        return _subscribed_streams[stream_id]
+    elif stream_id in unsubscribed_streams_fixture:
+        return unsubscribed_streams_fixture[stream_id]
+    else:
+        return never_subscribed_streams_fixture[stream_id]
+
+
+@pytest.fixture
 def streams_fixture(
-    general_stream: Dict[str, Any],
-    secret_stream: Dict[str, Any],
-    web_public_stream: Dict[str, Any],
-) -> List[Dict[str, Any]]:
+    general_stream: Subscription,
+    secret_stream: Subscription,
+    web_public_stream: Subscription,
+) -> List[Subscription]:
     streams = [general_stream, secret_stream, web_public_stream]
     for i in range(1, 3):
         streams.append(
@@ -302,7 +331,6 @@ def streams_fixture(
                 "audible_notifications": False,
                 "description": f"A description of stream {i}",
                 "rendered_description": f"A description of stream {i}",
-                "is_old_stream": True,
                 "desktop_notifications": False,
                 "stream_weekly_traffic": 0,
                 "push_notifications": False,
@@ -310,6 +338,12 @@ def streams_fixture(
                 "email_address": f"stream{i}@example.com",
                 "subscribers": [1001, 11, 12],
                 "history_public_to_subscribers": True,
+                "is_web_public": False,
+                "is_announcement_only": False,
+                "stream_post_policy": 0,
+                "first_message_id": 1,
+                "email_notifications": False,
+                "wildcard_mentions_notify": False,
             }
         )
     return deepcopy(streams)
@@ -630,7 +664,9 @@ def mentioned_messages_combination(request: Any) -> Tuple[Set[int], Set[int]]:
 def initial_data(
     logged_on_user: Dict[str, Any],
     users_fixture: List[Dict[str, Any]],
-    streams_fixture: List[Dict[str, Any]],
+    streams_fixture: List[Dict[str, Subscription]],
+    unsubscribed_streams_fixture: Dict[int, Subscription],
+    never_subscribed_streams_fixture: Dict[int, Stream],
     realm_emojis: Dict[str, Dict[str, Any]],
 ) -> Dict[str, Any]:
     """
@@ -641,24 +677,8 @@ def initial_data(
         "email": logged_on_user["email"],
         "user_id": logged_on_user["user_id"],
         "realm_name": "Test Organization Name",
-        "unsubscribed": [
-            {
-                "audible_notifications": False,
-                "description": "announce",
-                "stream_id": 7,
-                "is_old_stream": True,
-                "desktop_notifications": False,
-                "pin_to_top": False,
-                "stream_weekly_traffic": 0,
-                "invite_only": False,
-                "name": "announce",
-                "push_notifications": False,
-                "email_address": "",
-                "color": "#bfd56f",
-                "is_muted": False,
-                "history_public_to_subscribers": True,
-            }
-        ],
+        "unsubscribed": unsubscribed_streams_fixture.values(),
+        "never_subscribed": never_subscribed_streams_fixture.values(),
         "result": "success",
         "queue_id": "1522420755:786",
         "realm_users": users_fixture,
@@ -707,24 +727,6 @@ def initial_data(
         "subscriptions": streams_fixture,
         "msg": "",
         "max_message_id": 552761,
-        "never_subscribed": [
-            {
-                "invite_only": False,
-                "description": "Announcements from the Zulip GCI Mentors",
-                "stream_id": 87,
-                "name": "GCI announce",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-            {
-                "invite_only": False,
-                "description": "General discussion",
-                "stream_id": 74,
-                "name": "GCI general",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-        ],
         "unread_msgs": {
             "pms": [
                 {"sender_id": 1, "unread_message_ids": [1, 2]},
@@ -1189,7 +1191,62 @@ def user_id(logged_on_user: Dict[str, Any]) -> int:
 
 
 @pytest.fixture
-def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
+def unsubscribed_streams_fixture() -> Dict[int, Subscription]:
+    unsubscribed_streams: Dict[int, Subscription] = {}
+    for i in range(3, 5):
+        unsubscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "color": "#b0a5fd",
+            "pin_to_top": False,
+            "stream_id": i,
+            "is_muted": False,
+            "audible_notifications": False,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "desktop_notifications": False,
+            "stream_weekly_traffic": 0,
+            "push_notifications": False,
+            "message_retention_days": i + 30,
+            "email_address": f"stream{i}@example.com",
+            "email_notifications": False,
+            "wildcard_mentions_notify": False,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(unsubscribed_streams)
+
+
+@pytest.fixture
+def never_subscribed_streams_fixture() -> Dict[int, Stream]:
+    never_subscribed_streams: Dict[int, Stream] = {}
+    for i in range(5, 7):
+        never_subscribed_streams[i] = {
+            "name": f"Stream {i}",
+            "date_created": 1472047124 + i,
+            "invite_only": False,
+            "stream_id": i,
+            "description": f"A description of stream {i}",
+            "rendered_description": f"A description of stream {i}",
+            "stream_weekly_traffic": 0,
+            "message_retention_days": i + 30,
+            "subscribers": [1001, 11, 12],
+            "history_public_to_subscribers": True,
+            "is_announcement_only": True,
+            "stream_post_policy": 0,
+            "is_web_public": True,
+            "first_message_id": None,
+        }
+    return deepcopy(never_subscribed_streams)
+
+
+@pytest.fixture
+def _subscribed_streams(streams_fixture: List[Subscription]) -> Dict[int, Subscription]:
     return {stream["stream_id"]: stream for stream in streams_fixture}
 
 

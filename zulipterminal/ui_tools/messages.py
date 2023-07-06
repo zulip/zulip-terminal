@@ -150,7 +150,7 @@ class MessageBox(urwid.Pile):
 
     def stream_header(self) -> Any:
         assert self.stream_id is not None
-        color = self.model.stream_dict[self.stream_id]["color"]
+        color = self.model.get_subscription_color(self.stream_id)
         bar_color = f"s{color}"
         stream_title_markup = (
             "bar",
@@ -211,7 +211,7 @@ class MessageBox(urwid.Pile):
             text_to_fill = "Mentions"
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
-            bar_color = self.model.stream_dict[self.stream_id]["color"]
+            bar_color = self.model.get_subscription_color(self.stream_id)
             bar_color = f"s{bar_color}"
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (

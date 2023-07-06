@@ -1172,8 +1172,17 @@ class TestStreamInfoView:
         self.controller.model.server_feature_level = 40
         self.controller.model.cached_retention_text = {self.stream_id: "10"}
 
-        self.controller.model.stream_dict = {self.stream_id: general_stream}
+        self.controller.model._subscribed_streams = {self.stream_id: general_stream}
+        self.controller.model.get_stream_post_policy.return_value = general_stream.get(
+            "stream_post_policy"
+        )
+        self.controller.model.get_stream_rendered_description.return_value = (
+            general_stream.get("rendered_description")
+        )
         self.controller.model.stream_access_type.return_value = "public"
+        self.controller.model.get_stream_subscribers.return_value = general_stream[
+            "subscribers"
+        ]
 
         self.stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
@@ -1292,8 +1301,20 @@ class TestStreamInfoView:
     ) -> None:
         model = self.controller.model
         stream_id = general_stream["stream_id"]
-        model.stream_dict = {stream_id: general_stream}
-        model.stream_dict[stream_id].update(to_vary_in_stream_data)
+        model._subscribed_streams = {stream_id: general_stream}
+        model._subscribed_streams[stream_id].update(to_vary_in_stream_data)
+        model.get_stream_date_created.return_value = to_vary_in_stream_data[
+            "date_created"
+        ]
+        model.get_stream_post_policy.return_value = to_vary_in_stream_data.get(
+            "stream_post_policy"
+        )
+        model.is_stream_announcement_only.return_value = to_vary_in_stream_data.get(
+            "is_announcement_only"
+        )
+        model.get_stream_weekly_traffic.return_value = general_stream.get(
+            "stream_weekly_traffic"
+        )
         model.cached_retention_text = {stream_id: cached_message_retention_text}
         model.server_feature_level = server_feature_level
 
@@ -1344,7 +1365,7 @@ class TestStreamInfoView:
         self, rendered_description: str, expected_markup: Tuple[None, Any]
     ) -> None:
         model = self.controller.model
-        model.stream_dict[self.stream_id]["rendered_description"] = rendered_description
+        model.get_stream_rendered_description.return_value = rendered_description
 
         stream_info_view = StreamInfoView(self.controller, self.stream_id)
 
