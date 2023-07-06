@@ -37,7 +37,6 @@ class Background(Enum):
 # make use of the complete range instead of only 216 colors.
 class DefaultColor(Enum):
     # color       =  16code          256code    24code
-    DEFAULT       = 'default         default    default'
     BLACK         = 'black           g19        g19'
     DARK_RED      = 'dark_red        #a00       #a00'
     DARK_GREEN    = 'dark_green      #080       #080'
