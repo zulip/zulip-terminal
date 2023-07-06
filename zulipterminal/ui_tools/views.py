@@ -1091,6 +1091,7 @@ class AboutView(PopUpView):
         maximum_footlinks: int,
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
+        transparency_enabled: bool,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1113,6 +1114,7 @@ class AboutView(PopUpView):
                         "Exit confirmation",
                         "enabled" if exit_confirmation_enabled else "disabled",
                     ),
+                    ("Transparency", "enabled" if transparency_enabled else "disabled"),
                 ],
             ),
             (
