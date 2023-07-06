@@ -111,6 +111,7 @@ def test_complete_and_incomplete_themes__bundled_theme_output() -> None:
         case({"META": None}, False, id="META_absent"),
         case({"META": {}}, False, id="META_empty"),
         case({"META": {"pygments": {}}}, False, id="META_pygments_empty"),
+        case({"META": "extra_field"}, True, id="META_with_extra_field"),
     ],
 )
 def test_complete_and_incomplete_themes__single_theme_completeness(
@@ -129,7 +130,7 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
         STYLES = {
             style: (FakeColor.COLOR_1, FakeColor.COLOR_2) for style in REQUIRED_STYLES
         }
-        META = {
+        META: Dict[str, Any] = {
             "pygments": {
                 "styles": None,
                 "background": None,
@@ -142,6 +143,8 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
     for field, action in missing.items():
         if action == "incomplete_style":
             setattr(FakeTheme, field, incomplete_style)
+        elif action == "extra_field":
+            FakeTheme.META["extra_field"] = 5  # Non-iterable misc data
         elif action is None:
             delattr(FakeTheme, field)
         else:
