@@ -322,8 +322,9 @@ class StreamsViewDivider(urwid.Divider):
 class StreamPanel(urwid.Pile):
     def __init__(self, submenu_view: List[Any], view: Any) -> None:
         self.view = view
+        count = self.view.model.unread_counts.get("all_stream_msg", 0)
         self.view.stream_button = StreamPanelButton(
-            controller=self.view.controller, count=0
+            controller=self.view.controller, count=count
         )
         self._contents = [
             ("pack", self.view.stream_button),
