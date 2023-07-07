@@ -1469,6 +1469,7 @@ def classified_unread_counts() -> Dict[str, Any]:
     return {
         "all_msg": 12,
         "all_pms": 8,
+        "all_stream_msg": 4,
         "unread_topics": {
             (1000, "Some general unread topic"): 3,
             (99, "Some private unread topic"): 1,
