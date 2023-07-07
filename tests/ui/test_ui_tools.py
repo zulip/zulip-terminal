@@ -1156,6 +1156,7 @@ class TestLeftColumnView:
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
+        mocker.patch(VIEWS + ".urwid.LineBox")
         mocker.patch(VIEWS + ".StreamButton.mark_muted")
         left_col_view = LeftColumnView(self.view)
         home_button.assert_called_once_with(
@@ -1167,15 +1168,20 @@ class TestLeftColumnView:
         )
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))
-    def test_streams_view(self, mocker, streams, pinned):
+    def test_stream_panel(self, mocker, streams, pinned):
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
         stream_button = mocker.patch(VIEWS + ".StreamButton")
+        stream_panel_button = mocker.patch(VIEWS + ".StreamPanelButton")
         mocker.patch(VIEWS + ".StreamsView")
         mocker.patch(VIEWS + ".urwid.LineBox")
         divider = mocker.patch(VIEWS + ".StreamsViewDivider")
 
         LeftColumnView(self.view)
+
+        stream_panel_button.assert_called_once_with(
+            controller=self.view.controller, count=mocker.ANY
+        )
 
         if pinned:
             assert divider.called

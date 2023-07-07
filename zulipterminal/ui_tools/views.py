@@ -52,6 +52,7 @@ from zulipterminal.ui_tools.buttons import (
     PMButton,
     StarredButton,
     StreamButton,
+    StreamPanelButton,
     TopicButton,
     UserButton,
 )
@@ -315,6 +316,21 @@ class StreamsViewDivider(urwid.Divider):
         self.stream_id = -1
         self.stream_name = ""
         super().__init__(div_char=PINNED_STREAMS_DIVIDER)
+
+
+class StreamPanel(urwid.Pile):
+    def __init__(self, submenu_view: List[Any], view: Any) -> None:
+        self.view = view
+        self.view.stream_button = StreamPanelButton(
+            controller=self.view.controller, count=0
+        )
+        self._contents = [
+            ("pack", self.view.stream_button),
+            ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
+            submenu_view,
+        ]
+
+        super().__init__(self.contents, focus_item=2)
 
 
 class StreamsView(urwid.Frame):
@@ -782,9 +798,13 @@ class LeftColumnView(urwid.Pile):
         self.controller = view.controller
         self.menu_v = self.menu_view()
         self.stream_v = self.streams_view()
-
+        self.stream_panel = self.streams_panel(self.stream_v)
         self.is_in_topic_view = False
-        contents = [(4, self.menu_v), self.stream_v]
+        contents = [
+            (4, self.menu_v),
+            ("pack", urwid.Divider(COLUMN_TITLE_BAR_LINE)),
+            self.stream_panel,
+        ]
         super().__init__(contents)
 
     def menu_view(self) -> Any:
@@ -812,6 +832,10 @@ class LeftColumnView(urwid.Pile):
         ]
         w = urwid.ListBox(urwid.SimpleFocusListWalker(menu_btn_list))
         return w
+
+    def streams_panel(self, submenu_view: Any) -> Any:
+        self.view.stream_p = StreamPanel(submenu_view, self.view)
+        return self.view.stream_p
 
     def streams_view(self) -> Any:
         streams_btn_list = [
@@ -844,20 +868,7 @@ class LeftColumnView(urwid.Pile):
         }
 
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
-        w = urwid.LineBox(
-            self.view.stream_w,
-            title="Streams",
-            title_attr="column_title",
-            tlcorner=COLUMN_TITLE_BAR_LINE,
-            tline=COLUMN_TITLE_BAR_LINE,
-            trcorner=COLUMN_TITLE_BAR_LINE,
-            blcorner="",
-            rline="",
-            lline="",
-            bline="",
-            brcorner="",
-        )
-        return w
+        return self.view.stream_w
 
     def topics_view(self, stream_button: Any) -> Any:
         stream_id = stream_button.stream_id
@@ -876,20 +887,7 @@ class LeftColumnView(urwid.Pile):
         ]
 
         self.view.topic_w = TopicsView(topics_btn_list, self.view, stream_button)
-        w = urwid.LineBox(
-            self.view.topic_w,
-            title="Topics",
-            title_attr="column_title",
-            tlcorner=COLUMN_TITLE_BAR_LINE,
-            tline=COLUMN_TITLE_BAR_LINE,
-            trcorner=COLUMN_TITLE_BAR_LINE,
-            blcorner="",
-            rline="",
-            lline="",
-            bline="",
-            brcorner="",
-        )
-        return w
+        return self.view.topic_w
 
     def is_in_topic_view_with_stream_id(self, stream_id: int) -> bool:
         return (
@@ -904,12 +902,14 @@ class LeftColumnView(urwid.Pile):
 
     def show_stream_view(self) -> None:
         self.is_in_topic_view = False
-        self.contents[1] = (self.stream_v, self.options(height_type="weight"))
+        self.stream_panel = self.streams_panel(self.stream_v)
+        self.contents[2] = (self.stream_panel, self.options(height_type="weight"))
 
     def show_topic_view(self, stream_button: Any) -> None:
         self.is_in_topic_view = True
-        self.contents[1] = (
-            self.topics_view(stream_button),
+        self.stream_panel = self.streams_panel(self.topics_view(stream_button))
+        self.contents[2] = (
+            self.stream_panel,
             self.options(height_type="weight"),
         )
 
@@ -917,7 +917,8 @@ class LeftColumnView(urwid.Pile):
         if is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
-            self.focus_position = 1
+            self.focus_position = 2
+            self.view.stream_p.focus_position = 2
             if self.is_in_topic_view:
                 self.view.topic_w.keypress(size, key)
             else:
