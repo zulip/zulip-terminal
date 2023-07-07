@@ -157,6 +157,18 @@ class PMButton(TopButton):
         )
 
 
+class StreamPanelButton(TopButton):
+    def __init__(self, *, controller: Any, count: int) -> None:
+        button_text = "Stream messages     "
+        super().__init__(
+            controller=controller,
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", ""),
+            show_function=lambda: None,
+            count=count,
+        )
+
+
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = (
