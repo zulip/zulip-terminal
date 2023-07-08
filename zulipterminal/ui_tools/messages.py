@@ -824,10 +824,8 @@ class MessageBox(urwid.Pile):
 
         clean: str
 
-        def replace_callback(match: Match[Union[str, str, str]]) -> str:
-            before = match.group(1)
-            word = match.group(2)
-            after = match.group(3)
+        def replace_callback(match: Union[Match[str]]) -> str:
+            before,word,after = match.group(1,2,3)
             offset = match.start()
             matched_content = match.string
             pre_match = matched_content[:offset]
@@ -840,8 +838,7 @@ class MessageBox(urwid.Pile):
         for word in alerted_list:
             clean = "".join(alert_regex_replacements.get(c, c) for c in word)
             regex = f"({before_punctuation})({clean})({after_punctuation})"
-            regex1 = re.compile(regex, re.IGNORECASE)
-            content = re.sub(regex1, replace_callback, content)
+            content = re.sub(regex, replace_callback, content, flags=re.IGNORECASE)
 
         return content
 
@@ -857,6 +854,8 @@ class MessageBox(urwid.Pile):
         Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],
     ]:
+        #This method is translated from web/src/aler_tword.js of zulip/zulip
+
         if alert_word_present:
             content = cls.transform_content_alert_words(content, alerted_list)
 
