@@ -105,5 +105,6 @@ setup(
         "pytz>=2022.7.1",
         "tzlocal>=2.1",
         "pyperclip>=1.8.1",
+        "urwidgets>=0.1,<0.2",
     ],
 )
