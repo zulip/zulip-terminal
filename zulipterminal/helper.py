@@ -30,7 +30,7 @@ from typing import (
 from urllib.parse import unquote
 
 import requests
-from typing_extensions import ParamSpec, TypedDict
+from typing_extensions import Literal, ParamSpec, TypedDict
 
 from zulipterminal.api_types import Composition, EmojiType, Message
 from zulipterminal.config.keys import primary_key_for_command
@@ -39,12 +39,14 @@ from zulipterminal.config.regexes import (
     REGEX_COLOR_6_DIGIT,
     REGEX_QUOTED_FENCE_LENGTH,
 )
-from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.platform_code import (
     PLATFORM,
     normalized_file_path,
     successful_GUI_return_code,
 )
+
+
+StreamAccessType = Literal["public", "private", "web-public"]
 
 
 class StreamData(TypedDict):
@@ -84,6 +86,9 @@ class TidiedUserInfo(TypedDict):
     # Below fields are only meaningful if is_bot == True
     bot_type: Optional[int]
     bot_owner_name: str
+
+
+UserStatus = Literal["active", "idle", "offline", "inactive", "bot"]
 
 
 class Index(TypedDict):

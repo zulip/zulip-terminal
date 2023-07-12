@@ -4,8 +4,6 @@ Relationships between state/API data and presentation in the UI
 
 from typing import Dict
 
-from typing_extensions import Literal
-
 from zulipterminal.api_types import EditPropagateMode
 from zulipterminal.config.symbols import (
     BOT_MARKER,
@@ -17,6 +15,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_PUBLIC,
     STREAM_MARKER_WEB_PUBLIC,
 )
+from zulipterminal.helper import StreamAccessType, UserStatus
 
 
 EDIT_MODE_CAPTIONS: Dict[EditPropagateMode, str] = {
@@ -24,9 +23,6 @@ EDIT_MODE_CAPTIONS: Dict[EditPropagateMode, str] = {
     "change_later": "Also change later messages to this topic",
     "change_all": "Also change previous and following messages to this topic",
 }
-
-
-UserStatus = Literal["active", "idle", "offline", "inactive", "bot"]
 
 # Mapping that binds user activity status to corresponding markers.
 # NOTE: Ordering of keys affects display order
@@ -39,9 +35,7 @@ STATE_ICON: Dict[UserStatus, str] = {
 }
 
 
-StreamAccessType = Literal["public", "private", "web-public"]
-
-STREAM_ACCESS_TYPE = {
+STREAM_ACCESS_TYPE: Dict[StreamAccessType, Dict[str, str]] = {
     "public": {"description": "Public", "icon": STREAM_MARKER_PUBLIC},
     "private": {"description": "Private", "icon": STREAM_MARKER_PRIVATE},
     "web-public": {"description": "Web public", "icon": STREAM_MARKER_WEB_PUBLIC},
