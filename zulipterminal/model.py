@@ -168,12 +168,13 @@ class Model:
         # lose any updates while messages are being fetched.
         self._fetch_initial_data()
 
-        self._all_users_by_id: Dict[int, RealmUser] = {}
-        self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
-
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
 
+        self.user_dict: Dict[str, Dict[str, Any]] = {}
+        self.user_id_email_dict: Dict[int, str] = {}
+        self._all_users_by_id: Dict[int, RealmUser] = {}
+        self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
         self.users = self.get_all_users()
 
         self.stream_dict: Dict[int, Any] = {}
@@ -1093,8 +1094,8 @@ class Model:
 
         # Construct a dict of each user in the realm to look up by email
         # and a user-id to email mapping
-        self.user_dict: Dict[str, Dict[str, Any]] = dict()
-        self.user_id_email_dict: Dict[int, str] = dict()
+        self.user_dict = dict()
+        self.user_id_email_dict = dict()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
                 self._all_users_by_id[self.user_id] = user
