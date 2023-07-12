@@ -58,10 +58,12 @@ from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import EDIT_TOPIC_POLICY, ROLE_BY_ID, STATE_ICON
 from zulipterminal.helper import (
     CustomProfileData,
+    MinimalUserData,
     NamedEmojiData,
     StreamAccessType,
     StreamData,
     TidiedUserInfo,
+    UserStatus,
     asynch,
     canonicalize_color,
     classify_unread_counts,
@@ -167,11 +169,11 @@ class Model:
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
 
-        self.user_dict: Dict[str, Dict[str, Any]] = {}
+        self.user_dict: Dict[str, MinimalUserData] = {}
         self.user_id_email_dict: Dict[int, str] = {}
         self._all_users_by_id: Dict[int, RealmUser] = {}
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
-        self.users = self._update_users_data_from_initial_data()
+        self.users: List[MinimalUserData] = self._update_users_data_from_initial_data()
 
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
@@ -1062,7 +1064,7 @@ class Model:
             last_active="",
         )
 
-        bot_owner: Optional[Union[RealmUser, Dict[str, Any]]] = None
+        bot_owner: Optional[Union[RealmUser, MinimalUserData]] = None
 
         if api_user_data.get("bot_owner_id", None):
             bot_owner = self._all_users_by_id.get(api_user_data["bot_owner_id"], None)
@@ -1084,7 +1086,7 @@ class Model:
 
         return user_info
 
-    def _update_users_data_from_initial_data(self) -> List[Dict[str, Any]]:
+    def _update_users_data_from_initial_data(self) -> List[MinimalUserData]:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data["presences"]
 
@@ -1095,7 +1097,7 @@ class Model:
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
                 self._all_users_by_id[self.user_id] = user
-                current_user = {
+                current_user: MinimalUserData = {
                     "full_name": user["full_name"],
                     "email": user["email"],
                     "user_id": user["user_id"],
@@ -1103,6 +1105,8 @@ class Model:
                 }
                 continue
             email = user["email"]
+
+            status: UserStatus
             if user["is_bot"]:
                 # Bot has no dynamic status, so avoid presence lookup
                 status = "bot"
@@ -1128,7 +1132,7 @@ class Model:
                 * If there are several ClientPresence objects with the greatest
                 * UserStatus, an arbitrary one is chosen.
                 """
-                aggregate_status = "offline"
+                aggregate_status: UserStatus = "offline"
                 for client in presences[email].items():
                     client_name = client[0]
                     status = client[1]["status"]

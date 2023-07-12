@@ -91,6 +91,13 @@ class TidiedUserInfo(TypedDict):
 UserStatus = Literal["active", "idle", "offline", "inactive", "bot"]
 
 
+class MinimalUserData(TypedDict):
+    full_name: str
+    email: str
+    user_id: int
+    status: UserStatus
+
+
 class Index(TypedDict):
     pointer: Dict[str, Optional[int]]  # narrow_str, message_id (or no data)
     # Various sets of downloaded message ids (all, starred, ...)

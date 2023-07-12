@@ -17,7 +17,12 @@ from zulipterminal.config.keys import (
     keys_for_command,
     primary_key_for_command,
 )
-from zulipterminal.helper import CustomProfileData, Index, TidiedUserInfo
+from zulipterminal.helper import (
+    CustomProfileData,
+    Index,
+    MinimalUserData,
+    TidiedUserInfo,
+)
 from zulipterminal.helper import initial_index as helper_initial_index
 from zulipterminal.ui_tools.buttons import StreamButton, TopicButton, UserButton
 from zulipterminal.ui_tools.messages import MessageBox
@@ -1227,7 +1232,7 @@ def error_response() -> Dict[str, str]:
 
 
 @pytest.fixture
-def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+def user_dict(logged_on_user: Dict[str, Any]) -> Dict[str, MinimalUserData]:
     """
     User_dict created according to `initial_data` fixture.
     """
