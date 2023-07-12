@@ -55,15 +55,11 @@ from zulipterminal.api_types import (
 )
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
-from zulipterminal.config.ui_mappings import (
-    EDIT_TOPIC_POLICY,
-    ROLE_BY_ID,
-    STATE_ICON,
-    StreamAccessType,
-)
+from zulipterminal.config.ui_mappings import EDIT_TOPIC_POLICY, ROLE_BY_ID, STATE_ICON
 from zulipterminal.helper import (
     CustomProfileData,
     NamedEmojiData,
+    StreamAccessType,
     StreamData,
     TidiedUserInfo,
     asynch,
