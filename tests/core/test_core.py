@@ -222,7 +222,14 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_id = 5140
         controller.model.user_email = "some@email"
-        controller.model.user_dict = {user_email: {"user_id": user_id}}
+        controller.model.user_dict = {
+            user_email: {
+                "user_id": user_id,
+                "full_name": "",
+                "email": "",
+                "status": "active",
+            }
+        }
 
         emails = [user_email]
 

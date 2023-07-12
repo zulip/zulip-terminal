@@ -15,7 +15,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
-from zulipterminal.helper import Index
+from zulipterminal.helper import Index, MinimalUserData
 from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
 from zulipterminal.urwid_types import urwid_Size
 
@@ -40,7 +40,7 @@ class TestWriteBox:
         user_groups_fixture: List[Dict[str, Any]],
         streams_fixture: List[Dict[str, Any]],
         unicode_emojis: "OrderedDict[str, Dict[str, Any]]",
-        user_dict: Dict[str, Dict[str, Any]],
+        user_dict: Dict[str, MinimalUserData],
     ) -> WriteBox:
         self.view.model.active_emoji_data = unicode_emojis
         self.view.model.all_emoji_names = list(unicode_emojis.keys())
