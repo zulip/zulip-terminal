@@ -173,7 +173,8 @@ class Model:
         self.user_id_email_dict: Dict[int, str] = {}
         self._all_users_by_id: Dict[int, RealmUser] = {}
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
-        self.users: List[MinimalUserData] = self._update_users_data_from_initial_data()
+        self.users: List[MinimalUserData] = []
+        self._update_users_data_from_initial_data()
 
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
@@ -435,7 +436,7 @@ class Model:
             response = self._notify_server_of_presence()
             if response["result"] == "success":
                 self.initial_data["presences"] = response["presences"]
-                self.users = self._update_users_data_from_initial_data()
+                self._update_users_data_from_initial_data()
                 if hasattr(self.controller, "view"):
                     view = self.controller.view
                     view.users_view.update_user_list(user_list=self.users)
@@ -1086,7 +1087,7 @@ class Model:
 
         return user_info
 
-    def _update_users_data_from_initial_data(self) -> List[MinimalUserData]:
+    def _update_users_data_from_initial_data(self) -> None:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data["presences"]
 
@@ -1202,7 +1203,7 @@ class Model:
         self.user_dict[current_user["email"]] = current_user
         self.user_id_email_dict[self.user_id] = current_user["email"]
 
-        return user_list
+        self.users = user_list
 
     def user_name_from_id(self, user_id: int) -> str:
         """
