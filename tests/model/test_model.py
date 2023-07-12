@@ -44,7 +44,7 @@ class TestModel:
     def model(self, mocker, initial_data, user_profile, unicode_emojis):
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register.return_value = initial_data
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         # NOTE: PATCH WHERE USED NOT WHERE DEFINED
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
@@ -192,7 +192,7 @@ class TestModel:
             MODEL + "._register_desired_events", return_value="Invalid API key"
         )
 
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
@@ -210,7 +210,7 @@ class TestModel:
             MODEL + "._register_desired_events", side_effect=ZulipError(exception_text)
         )
 
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
@@ -1283,7 +1283,7 @@ class TestModel:
         num_after=10,
     ):
         self.client.register.return_value = initial_data
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
@@ -1406,7 +1406,7 @@ class TestModel:
 
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
@@ -1434,7 +1434,7 @@ class TestModel:
     ):
         # Initialize Model
         self.client.register.return_value = initial_data
-        mocker.patch(MODEL + "._update_users_data_from_initial_data", return_value=[])
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
         self.classify_unread_counts = mocker.patch(
             MODULE + ".classify_unread_counts", return_value=[]
