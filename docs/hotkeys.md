@@ -76,6 +76,7 @@
 ## Composing a Message
 |Command|Key Combination|
 | :--- | :---: |
+|Upload file|<kbd>ctrl</kbd> + <kbd>o</kbd>|
 |Cycle through recipient and content boxes|<kbd>tab</kbd>|
 |Send a message|<kbd>ctrl</kbd> + <kbd>d</kbd> / <kbd>meta</kbd> + <kbd>enter</kbd>|
 |Save current message as a draft|<kbd>meta</kbd> + <kbd>s</kbd>|
