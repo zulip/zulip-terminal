@@ -29,12 +29,14 @@ from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
+from zulipterminal.ui_tools.boxes import WriteBox
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView,
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    FileUploadView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -273,6 +275,10 @@ class Controller:
             time_mentions,
         )
         self.show_pop_up(msg_info_view, "area:msg")
+
+    def show_file_upload_popup(self, write_box: WriteBox) -> None:
+        file_upload_view = FileUploadView(self, write_box, "Upload File")
+        self.show_pop_up(file_upload_view, "area:msg")
 
     def show_emoji_picker(self, message: Message) -> None:
         all_emoji_units = [
