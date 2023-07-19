@@ -177,7 +177,7 @@ class Model:
         self.users: List[MinimalUserData] = []
         self._update_users_data_from_initial_data()
 
-        self.stream_dict: Dict[int, Any] = {}
+        self.stream_dict: Dict[int, Subscription] = {}
         self._unsubscribed_streams: Dict[int, Subscription] = {}
         self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()
