@@ -890,7 +890,7 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream_name = self.stream_property(stream_id, "name")
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
