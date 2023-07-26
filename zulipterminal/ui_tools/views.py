@@ -24,6 +24,8 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
+    POPUP_CONTENT_BORDER,
+    POPUP_TOP_LINE,
     SECTION_DIVIDER_LINE,
 )
 from zulipterminal.config.ui_mappings import (
@@ -947,6 +949,21 @@ class TabView(urwid.WidgetWrap):
 # FIXME: This type could be improved, as Any isn't too explicit and clear.
 # (this was previously str, but some types passed in can be more complex)
 PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
+
+
+class PopUpFrame(urwid.AttrMap):
+    def __init__(self, body: Any, title: str, style: str) -> None:
+        text = urwid.Text(title, align="center")
+        title_map = urwid.AttrMap(urwid.Filler(text), style)
+        title_box_adapter = urwid.BoxAdapter(title_map, height=1)
+        title_top = urwid.AttrMap(urwid.Divider(POPUP_TOP_LINE), "popup_border")
+        frame_title = urwid.Pile([title_top, title_box_adapter])
+
+        content = urwid.LineBox(body, **POPUP_CONTENT_BORDER)
+
+        titled_content = urwid.Frame(body=content, header=frame_title)
+
+        super().__init__(titled_content, "popup_border")
 
 
 class PopUpView(urwid.Frame):
