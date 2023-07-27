@@ -957,6 +957,7 @@ class PopUpView(urwid.Frame):
         command: str,
         requested_width: int,
         title: str,
+        *,
         header: Optional[Any] = None,
         footer: Optional[Any] = None,
     ) -> None:
@@ -1294,7 +1295,9 @@ class MarkdownHelpView(PopUpView):
             [("", rendered_menu_content)], column_widths
         )
 
-        super().__init__(controller, body, "MARKDOWN_HELP", popup_width, title, header)
+        super().__init__(
+            controller, body, "MARKDOWN_HELP", popup_width, title, header=header
+        )
 
 
 PopUpConfirmationViewLocation = Literal["top-left", "center"]
@@ -1932,8 +1935,8 @@ class FullRenderedMsgView(PopUpView):
             "MSG_INFO",
             max_cols,
             title,
-            urwid.Pile(msg_box.header),
-            urwid.Pile(msg_box.footer),
+            header=urwid.Pile(msg_box.header),
+            footer=urwid.Pile(msg_box.footer),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
@@ -1984,8 +1987,8 @@ class FullRawMsgView(PopUpView):
             "MSG_INFO",
             max_cols,
             title,
-            urwid.Pile(msg_box.header),
-            urwid.Pile(msg_box.footer),
+            header=urwid.Pile(msg_box.header),
+            footer=urwid.Pile(msg_box.footer),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:

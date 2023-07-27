@@ -119,8 +119,8 @@ class TestPopUpView:
             self.command,
             self.width,
             self.title,
-            self.header,
-            self.footer,
+            header=self.header,
+            footer=self.footer,
         )
 
     def test_init(self, mocker: MockerFixture) -> None:
