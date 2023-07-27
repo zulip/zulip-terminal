@@ -492,7 +492,8 @@ class Controller:
                 "?",
             ]
         )
-        self.loop.widget = PopUpConfirmationView(self, question, callback)
+        popup = PopUpConfirmationView(self, question, callback)
+        self.show_pop_up(popup, "area:msg")
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -519,7 +520,9 @@ class Controller:
             "center",
         )
         save_draft = partial(self.model.save_draft, draft)
-        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
+
+        popup = PopUpConfirmationView(self, question, save_draft)
+        self.show_pop_up(popup, "area:msg")
 
     def stream_muting_confirmation_popup(
         self, stream_id: int, stream_name: str
@@ -531,7 +534,8 @@ class Controller:
             "center",
         )
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
-        self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+        popup = PopUpConfirmationView(self, question, mute_this_stream)
+        self.show_pop_up(popup, "area:msg")
 
     def exit_compose_confirmation_popup(self) -> None:
         question = urwid.Text(
@@ -543,8 +547,9 @@ class Controller:
             "center",
         )
         write_box = self.view.write_box
+
         popup_view = PopUpConfirmationView(self, question, write_box.exit_compose_box)
-        self.loop.widget = popup_view
+        self.show_pop_up(popup_view, "area:msg")
 
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
         try:
@@ -659,9 +664,10 @@ class Controller:
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
         )
+
         popup_view = PopUpConfirmationView(self, question, self.deregister_client)
-        self.loop.widget = popup_view
-        self.loop.run()
+        self.show_pop_up(popup_view, "area:msg")
+        self.loop.run()  # Appears necessary to return control from signal handler
 
     def _raise_exception(self, *args: Any, **kwargs: Any) -> Literal[True]:
         if self._exception_info is not None:

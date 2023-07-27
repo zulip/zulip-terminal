@@ -477,6 +477,9 @@ class TestController:
         stream_name: str = "PTEST",
     ) -> None:
         pop_up = mocker.patch(MODULE + ".PopUpConfirmationView")
+        pop_up.return_value.width = 30
+        pop_up.return_value.height = 6
+
         text = mocker.patch(MODULE + ".urwid.Text")
         partial = mocker.patch(MODULE + ".partial")
         controller.model.muted_streams = muted_streams
@@ -484,7 +487,7 @@ class TestController:
 
         controller.stream_muting_confirmation_popup(stream_id, stream_name)
 
-        text.assert_called_with(
+        text.assert_any_call(
             ("bold", f"Confirm {action} of stream '{stream_name}' ?"),
             "center",
         )

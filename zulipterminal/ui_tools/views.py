@@ -1318,7 +1318,7 @@ class MarkdownHelpView(PopUpView):
         )
 
 
-class PopUpConfirmationView(urwid.Overlay):
+class PopUpConfirmationView(urwid.Frame):
     def __init__(
         self,
         controller: Any,
@@ -1334,22 +1334,17 @@ class PopUpConfirmationView(urwid.Overlay):
         display_widget = urwid.GridFlow([yes, no], 3, 5, 1, "center")
         wrapped_widget = urwid.WidgetWrap(display_widget)
         widgets = [question, urwid.Divider(), wrapped_widget]
-        prompt = urwid.LineBox(urwid.ListBox(urwid.SimpleFocusListWalker(widgets)))
+        prompt = urwid.ListBox(urwid.SimpleFocusListWalker(widgets))
+
+        self.title = None
 
         max_cols, max_rows = controller.maximum_popup_dimensions()
-        # +2 to compensate for the LineBox characters.
-        width = min(max_cols, max(question.pack()[0], len("Yes"), len("No"))) + 2
-        height = min(max_rows, sum(widget.rows((width,)) for widget in widgets)) + 2
-
-        urwid.Overlay.__init__(
-            self,
-            prompt,
-            self.controller.view,
-            align="center",
-            valign="middle",
-            width=width,
-            height=height,
+        self.width = min(max_cols, max(question.pack()[0], len("Yes"), len("No")))
+        self.height = min(
+            max_rows, sum(widget.rows((self.width,)) for widget in widgets)
         )
+
+        super().__init__(prompt)
 
     def exit_popup_yes(self, args: Any) -> None:
         self.success_callback()
