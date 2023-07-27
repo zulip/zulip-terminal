@@ -222,15 +222,21 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
+        if to_show.title is not None:
+            # +2 to height, due to title enhancement
+            # TODO: Ideally this would be in PopUpFrame
+            extra_height = 2
+        else:
+            extra_height = 0
+
         self.loop.widget = urwid.Overlay(
             PopUpFrame(to_show, to_show.title, style),
             self.view,
             align="center",
             valign="middle",
             # +2 to both of the following, due to LineBox
-            # +2 to height, due to title enhancement
             width=to_show.width + 2,
-            height=to_show.height + 4,
+            height=to_show.height + 2 + extra_height,
         )
 
     def is_any_popup_open(self) -> bool:
