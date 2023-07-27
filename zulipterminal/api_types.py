@@ -216,7 +216,11 @@ class Stream(TypedDict):
     name: str
     description: str
     rendered_description: str
-    date_created: int  # NOTE: new in Zulip 4.0 / ZFL 30
+
+    # NOTE: Server data may not contain this field, in which case ZT adds it
+    # and sets it to None.
+    date_created: NotRequired[Optional[int]]
+
     invite_only: bool
     subscribers: List[int]
 
@@ -244,8 +248,10 @@ class Subscription(Stream):
 
     is_muted: bool
 
-    role: int  # NOTE: new in Zulip 4.0 / ZFL 31
     color: str
+
+    # Deprecated fields
+    # role: int  # Removed in Zulip 6.0 (feature level 133)
 
 
 ###############################################################################
