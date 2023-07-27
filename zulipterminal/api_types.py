@@ -216,12 +216,18 @@ class Stream(TypedDict):
     name: str
     description: str
     rendered_description: str
-    date_created: int  # NOTE: new in Zulip 4.0 / ZFL 30
+
+    # NOTE: new in Zulip 4.0 / ZFL 30, server data may not contain this field,
+    # in which case ZT adds it and sets it to None.
+    date_created: NotRequired[Optional[int]]
+
     invite_only: bool
     subscribers: List[int]
 
     is_announcement_only: bool  # Deprecated in Zulip 3.0 -> stream_post_policy
-    stream_post_policy: int  # NOTE: new in Zulip 3.0 / ZFL 1
+
+    # NOTE: new in Zulip 3.0 / ZFL 1, server versions < 3.0 may not contain this field
+    stream_post_policy: NotRequired[int]
 
     is_web_public: bool
     message_retention_days: Optional[int]  # NOTE: new in Zulip 3.0 / ZFL 17
@@ -241,11 +247,15 @@ class Subscription(Stream):
 
     is_muted: bool
 
-    role: int  # NOTE: new in Zulip 4.0 / ZFL 31
     color: str
 
     # Deprecated fields
+
     # in_home_view: bool  # Replaced by is_muted in Zulip 2.1; still present in updates
+
+    # Introduced in Zulip 4.0 / ZFL 31, removed in Zulip 6.0 / ZFL 133;
+    # not actively used by ZT or Zulip web
+    # role: int
 
 
 ###############################################################################
