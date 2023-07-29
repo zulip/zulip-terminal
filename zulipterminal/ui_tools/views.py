@@ -36,7 +36,6 @@ from zulipterminal.config.ui_mappings import (
     STREAM_ACCESS_TYPE,
     STREAM_POST_POLICY,
 )
-from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
     TidiedUserInfo,
     asynch,
@@ -1319,16 +1318,12 @@ class MarkdownHelpView(PopUpView):
         )
 
 
-PopUpConfirmationViewLocation = Literal["top-left", "center"]
-
-
 class PopUpConfirmationView(urwid.Overlay):
     def __init__(
         self,
         controller: Any,
         question: Any,
         success_callback: Callable[[], None],
-        location: PopUpConfirmationViewLocation = "top-left",
     ) -> None:
         self.controller = controller
         self.success_callback = success_callback
@@ -1341,26 +1336,17 @@ class PopUpConfirmationView(urwid.Overlay):
         widgets = [question, urwid.Divider(), wrapped_widget]
         prompt = urwid.LineBox(urwid.ListBox(urwid.SimpleFocusListWalker(widgets)))
 
-        if location == "top-left":
-            align = "left"
-            valign = "top"
-            width = LEFT_WIDTH + 1
-            height = 8
-        else:
-            align = "center"
-            valign = "middle"
-
-            max_cols, max_rows = controller.maximum_popup_dimensions()
-            # +2 to compensate for the LineBox characters.
-            width = min(max_cols, max(question.pack()[0], len("Yes"), len("No"))) + 2
-            height = min(max_rows, sum(widget.rows((width,)) for widget in widgets)) + 2
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        # +2 to compensate for the LineBox characters.
+        width = min(max_cols, max(question.pack()[0], len("Yes"), len("No"))) + 2
+        height = min(max_rows, sum(widget.rows((width,)) for widget in widgets)) + 2
 
         urwid.Overlay.__init__(
             self,
             prompt,
             self.controller.view,
-            align=align,
-            valign=valign,
+            align="center",
+            valign="middle",
             width=width,
             height=height,
         )

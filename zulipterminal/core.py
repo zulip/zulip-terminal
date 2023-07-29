@@ -492,9 +492,7 @@ class Controller:
                 "?",
             ]
         )
-        self.loop.widget = PopUpConfirmationView(
-            self, question, callback, location="center"
-        )
+        self.loop.widget = PopUpConfirmationView(self, question, callback)
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -521,9 +519,7 @@ class Controller:
             "center",
         )
         save_draft = partial(self.model.save_draft, draft)
-        self.loop.widget = PopUpConfirmationView(
-            self, question, save_draft, location="center"
-        )
+        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
 
     def stream_muting_confirmation_popup(
         self, stream_id: int, stream_name: str
@@ -547,9 +543,7 @@ class Controller:
             "center",
         )
         write_box = self.view.write_box
-        popup_view = PopUpConfirmationView(
-            self, question, write_box.exit_compose_box, location="center"
-        )
+        popup_view = PopUpConfirmationView(self, question, write_box.exit_compose_box)
         self.loop.widget = popup_view
 
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
@@ -665,9 +659,7 @@ class Controller:
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
         )
-        popup_view = PopUpConfirmationView(
-            self, question, self.deregister_client, location="center"
-        )
+        popup_view = PopUpConfirmationView(self, question, self.deregister_client)
         self.loop.widget = popup_view
         self.loop.run()
 
