@@ -190,6 +190,36 @@ class TestModel:
 
         assert model._muted_topics == locally_processed_data
 
+    @pytest.mark.parametrize(
+        "server_response, ids, zulip_feature_level",
+        [
+            (
+                [
+                    {"id": 32323, "timestamp": 1726810359},
+                    {"id": 37372, "timestamp": 214214214},
+                ],
+                {32323, 37372},
+                48,
+            ),
+            ([], set(), 0),
+        ],
+        ids=[
+            "zulip_feature_level:48",
+            "zulip_feature_level:0",
+        ],
+    )
+    def test_init_muted_users(
+        self, mocker, initial_data, server_response, ids, zulip_feature_level
+    ):
+        mocker.patch(MODEL + ".get_messages", return_value="")
+        initial_data["zulip_feature_level"] = zulip_feature_level
+        initial_data["muted_users"] = server_response
+        self.client.register = mocker.Mock(return_value=initial_data)
+
+        model = Model(self.controller)
+
+        assert model._muted_users == ids
+
     def test_init_InvalidAPIKey_response(self, mocker, initial_data):
         # Both network calls indicate the same response
         mocker.patch(MODEL + ".get_messages", return_value="Invalid API key")
@@ -262,6 +292,7 @@ class TestModel:
             "realm_emoji",
             "custom_profile_fields",
             "zulip_version",
+            "muted_users",
         ]
         model.client.register.assert_called_once_with(
             event_types=event_types,

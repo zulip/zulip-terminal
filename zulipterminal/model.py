@@ -145,6 +145,7 @@ class Model:
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
+            "muted_users",
         ]
 
         # Events desired with their corresponding callback
@@ -208,6 +209,11 @@ class Model:
             )
             for stream_name, topic, *date_muted in muted_topics
         }
+        # NOTE: muted_users also contains timestamps, but we only store the user IDs
+        # muted_users was added in ZFL 48, Zulip 4.0
+        self._muted_users: Set[int] = set()
+        if self.server_feature_level >= 48:
+            self._update_muted_users(self.initial_data["muted_users"])
 
         groups = self.initial_data["realm_user_groups"]
         self.user_group_by_id: Dict[int, Dict[str, Any]] = {}
@@ -1203,6 +1209,9 @@ class Model:
             )
 
         return user_info
+
+    def _update_muted_users(self, muted_users: List[Dict[int, int]]) -> None:
+        self._muted_users = {muted_user["id"] for muted_user in muted_users}
 
     def _update_users_data_from_initial_data(self) -> None:
         # Dict which stores the active/idle status of users (by email)
