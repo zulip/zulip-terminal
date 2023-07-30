@@ -145,6 +145,7 @@ class Model:
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
+            "muted_users",
         ]
 
         # Events desired with their corresponding callback
@@ -204,6 +205,10 @@ class Model:
             )
             for stream_name, topic, *date_muted in muted_topics
         }
+
+        self.muted_users = [
+            muted_user["id"] for muted_user in self.initial_data["muted_users"]
+        ]
 
         groups = self.initial_data["realm_user_groups"]
         self.user_group_by_id: Dict[int, Dict[str, Any]] = {}
