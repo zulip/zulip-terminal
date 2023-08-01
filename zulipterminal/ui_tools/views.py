@@ -950,7 +950,7 @@ class TabView(urwid.WidgetWrap):
 PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
 
 
-class PopUpFrame(urwid.AttrMap):
+class PopUpFrame(urwid.WidgetDecoration, urwid.WidgetWrap):
     def __init__(self, body: Any, title: Optional[str], style: str) -> None:
         content = urwid.LineBox(body, **POPUP_CONTENT_BORDER)
 
@@ -964,7 +964,10 @@ class PopUpFrame(urwid.AttrMap):
         else:
             titled_content = urwid.Frame(body=content)
 
-        super().__init__(titled_content, "popup_border")
+        styled = urwid.AttrMap(titled_content, "popup_border")
+
+        urwid.WidgetDecoration.__init__(self, body)
+        urwid.WidgetWrap.__init__(self, styled)
 
 
 class PopUpView(urwid.Frame):
