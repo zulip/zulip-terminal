@@ -54,6 +54,9 @@ class View(urwid.WidgetWrap):
     def associate_stream_with_topic(self, stream_id: int, topic_name: str) -> None:
         self.stream_topic_map[stream_id] = topic_name
 
+    def saved_topic_in_stream_id(self, stream_id: int) -> Optional[str]:
+        return self.stream_topic_map.get(stream_id, None)
+
     def left_column_view(self) -> Any:
         tab = TabView(
             f"{AUTOHIDE_TAB_LEFT_ARROW} STREAMS & TOPICS {AUTOHIDE_TAB_LEFT_ARROW}"
