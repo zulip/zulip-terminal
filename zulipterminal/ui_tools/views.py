@@ -428,12 +428,23 @@ class TopicsView(urwid.Frame):
                 urwid.Divider(SECTION_DIVIDER_LINE),
             ]
         )
+        self.list_box.focus_position = self._focus_position_for_topic_name()
         super().__init__(
             self.list_box,
             header=self.header_list,
         )
         self.search_lock = threading.Lock()
         self.empty_search = False
+
+    def _focus_position_for_topic_name(self) -> int:
+        saved_topic_state = self.view.saved_topic_in_stream_id(
+            self.stream_button.stream_id
+        )
+        if saved_topic_state is not None:
+            for index, topic in enumerate(self.log):
+                if topic.topic_name == saved_topic_state:
+                    return index
+        return 0
 
     @asynch
     def update_topics(self, search_box: Any, new_text: str) -> None:
