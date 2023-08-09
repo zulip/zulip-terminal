@@ -161,8 +161,10 @@ class Model:
             "user_settings": self._handle_user_settings_event,
             "realm_emoji": self._handle_update_emoji_event,
             "realm_user": self._handle_realm_user_event,
+            "muted_users": self._handle_muted_users_event,
         }
 
+        self.muted_users: List[int] = list()
         self.initial_data: Dict[str, Any] = {}
 
         # Register to the queue before initializing further so that we don't
@@ -1549,6 +1551,13 @@ class Model:
                 text,
             )
         return ""
+
+    def _handle_muted_users_event(self, event: Event) -> None:
+        """
+        Handle muting/unmuting of users
+        """
+        assert event["type"] == "muted_users"
+        self.muted_users = [user["id"] for user in event["muted_users"]]
 
     def _handle_message_event(self, event: Event) -> None:
         """
