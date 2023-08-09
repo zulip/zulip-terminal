@@ -275,6 +275,7 @@ class TestModel:
             "user_settings",
             "realm_emoji",
             "realm_user",
+            "muted_users",
         ]
         fetch_event_types = [
             "realm",

@@ -613,6 +613,16 @@ class UpdateDisplaySettingsEvent(TypedDict):
     setting: bool
 
 
+class MutedUser(TypedDict):
+    user_id: int
+    timestamp: int
+
+
+class MutedUserEvent(TypedDict):
+    type: Literal["muted_users"]
+    muted_users: List[MutedUser]
+
+
 # -----------------------------------------------------------------------------
 Event = Union[
     MessageEvent,
@@ -628,6 +638,7 @@ Event = Union[
     UpdateUserSettingsEvent,
     UpdateGlobalNotificationsEvent,
     RealmUserEvent,
+    MutedUserEvent,
 ]
 
 ###############################################################################
