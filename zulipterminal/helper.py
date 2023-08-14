@@ -100,6 +100,7 @@ class Index(TypedDict):
     edited_messages: Set[int]  # {message_id, ...}
     topics: Dict[int, List[str]]  # {topic names, ...}
     search: Set[int]  # {message_id, ...}
+    muted_messages: Set[int]
     # Downloaded message data by message id
     messages: Dict[int, Message]
 
@@ -116,6 +117,7 @@ initial_index = Index(
     edited_messages=set(),
     topics=defaultdict(list),
     search=set(),
+    muted_messages=set(),
     # mypy bug: https://github.com/python/mypy/issues/7217
     messages=defaultdict(lambda: Message()),
 )
@@ -406,6 +408,8 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     narrow = model.narrow
     for msg in messages:
+        if msg["sender_id"] in model.muted_users:
+            index["muted_messages"].add(msg["id"])
         if "edit_history" in msg:
             index["edited_messages"].add(msg["id"])
 

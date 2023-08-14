@@ -170,6 +170,7 @@ class Model:
         # Register to the queue before initializing further so that we don't
         # lose any updates while messages are being fetched.
         self._fetch_initial_data()
+        self.muted_users = self.initial_data["muted_users"]
 
         self._all_users_by_id: Dict[int, RealmUser] = {}
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
@@ -884,6 +885,9 @@ class Model:
 
     def is_muted_stream(self, stream_id: int) -> bool:
         return stream_id in self.muted_streams
+
+    def is_muted_user(self, user_id: int) -> bool:
+        return user_id in self.muted_users
 
     def is_muted_topic(self, stream_id: int, topic: str) -> bool:
         """
