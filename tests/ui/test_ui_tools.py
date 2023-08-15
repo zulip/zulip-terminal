@@ -639,9 +639,9 @@ class TestTopicsView:
             topic_view.view, "saved_topic_in_stream_id", return_value=saved_topic_state
         )
 
-        topic_view.list_box.focus_position = topic_view._focus_position_for_topic_name()
+        new_focus_index = topic_view._focus_position_for_topic_name()
 
-        assert topic_view.list_box.focus_position == expected_focus_index
+        assert new_focus_index == expected_focus_index
 
     @pytest.mark.parametrize(
         "new_text, expected_log",
