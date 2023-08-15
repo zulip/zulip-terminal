@@ -433,7 +433,7 @@ class TopicsView(urwid.Frame):
         )
         if saved_topic_state is not None:
             for index, topic in enumerate(self.log):
-                if topic.topic_name is saved_topic_state:
+                if topic.topic_name == saved_topic_state:
                     return index
         return 0
 
