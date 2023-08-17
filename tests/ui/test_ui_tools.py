@@ -1043,6 +1043,7 @@ class TestRightColumnView:
     )
     def test_users_view(self, users, users_btn_len, editor_mode, status, mocker):
         self.view.users = [{"user_id": 1, "status": status}]
+        self.view.model.muted_users = []
         self.view.controller.is_in_editor_mode = lambda: editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
