@@ -412,14 +412,20 @@ class EmojiButton(TopButton):
         self.update_check_mark(is_reaction_added)
 
 
-class DecodedStream(TypedDict):
-    stream_id: Optional[int]
-    stream_name: Optional[str]
+class DecodedStreamPartial(TypedDict, total=False):
+    stream_id: int
+    stream_name: str
+
+
+class DecodedStreamAbsolute(TypedDict):
+    stream_id: int
+    stream_name: str
 
 
 class ParsedNarrowLink(TypedDict, total=False):
     narrow: str
-    stream: DecodedStream
+    stream_partial: DecodedStreamPartial
+    stream_absolute: DecodedStreamAbsolute
     topic_name: str
     message_id: Optional[int]
 
@@ -459,7 +465,7 @@ class MessageLinkButton(urwid.Button):
             process_media(self.controller, self.link)
 
     @staticmethod
-    def _decode_stream_data(encoded_stream_data: str) -> DecodedStream:
+    def _decode_stream_data(encoded_stream_data: str) -> DecodedStreamPartial:
         """
         Returns a dict with optional stream ID and stream name.
         """
@@ -469,11 +475,11 @@ class MessageLinkButton(urwid.Button):
             # Given how encode_stream() in zerver/lib/url_encoding.py
             # replaces ' ' with '-' in the stream name, skip extracting the
             # stream name to avoid any ambiguity.
-            return DecodedStream(stream_id=int(stream_id), stream_name=None)
+            return DecodedStreamPartial(stream_id=int(stream_id))
         else:
             # Deprecated links did not start with the stream ID.
             stream_name = hash_util_decode(encoded_stream_data)
-            return DecodedStream(stream_id=None, stream_name=stream_name)
+            return DecodedStreamPartial(stream_name=stream_name)
 
     @staticmethod
     def _decode_message_id(message_id: str) -> Optional[int]:
@@ -506,7 +512,7 @@ class MessageLinkButton(urwid.Button):
 
         if len_fragments == 3 and fragments[1] == "stream":
             stream_data = cls._decode_stream_data(fragments[2])
-            parsed_link = dict(narrow="stream", stream=stream_data)
+            parsed_link = dict(narrow="stream", stream_partial=stream_data)
 
         elif (
             len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "topic"
@@ -514,14 +520,14 @@ class MessageLinkButton(urwid.Button):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
             parsed_link = dict(
-                narrow="stream:topic", stream=stream_data, topic_name=topic_name
+                narrow="stream:topic", stream_partial=stream_data, topic_name=topic_name
             )
 
         elif len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "near":
             stream_data = cls._decode_stream_data(fragments[2])
             message_id = cls._decode_message_id(fragments[4])
             parsed_link = dict(
-                narrow="stream:near", stream=stream_data, message_id=message_id
+                narrow="stream:near", stream_partial=stream_data, message_id=message_id
             )
 
         elif (
@@ -535,20 +541,20 @@ class MessageLinkButton(urwid.Button):
             message_id = cls._decode_message_id(fragments[6])
             parsed_link = dict(
                 narrow="stream:topic:near",
-                stream=stream_data,
+                stream_partial=stream_data,
                 topic_name=topic_name,
                 message_id=message_id,
             )
 
         return parsed_link
 
-    def _validate_and_patch_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
+    def _validate_stream_data(self, parsed_link: ParsedNarrowLink) -> str:
         """
-        Validates stream data and patches the optional value in the nested
-        DecodedStream dict.
+        Validates stream data and returns either an empty string for a successful
+        validation or an appropriate validation error.
         """
-        stream_id = parsed_link["stream"]["stream_id"]
-        stream_name = parsed_link["stream"]["stream_name"]
+        stream_id = parsed_link["stream_partial"].get("stream_id", None)
+        stream_name = parsed_link["stream_partial"].get("stream_name", None)
         assert (stream_id is None and stream_name is not None) or (
             stream_id is not None and stream_name is None
         )
@@ -562,13 +568,22 @@ class MessageLinkButton(urwid.Button):
             # report whether the stream id is invalid instead.
             return "The stream seems to be either unknown or unsubscribed"
 
-        # Patch the optional value.
-        if not stream_id:
-            stream_id = cast(int, model.stream_id_from_name(stream_name))
-            parsed_link["stream"]["stream_id"] = stream_id
-        else:
-            stream_name = cast(str, model.stream_dict[stream_id]["name"])
-            parsed_link["stream"]["stream_name"] = stream_name
+        return ""
+
+    def _validate_topic_data(self, parsed_link: ParsedNarrowLink) -> str:
+        """
+        Validates topic data and returns either an empty string for a successful
+        validation or an appropriate validation error.
+        """
+        stream_id = parsed_link["stream_partial"].get("stream_id", None)
+        stream_name = parsed_link["stream_partial"].get("stream_name", None)
+        topic_name = parsed_link["topic_name"]
+
+        if not stream_id:  # Primarily for valid deprecated links
+            stream_id = cast(int, self.model.stream_id_from_name(stream_name))
+
+        if topic_name not in self.model.topics_in_stream(stream_id):
+            return "Invalid topic name"
 
         return ""
 
@@ -581,18 +596,16 @@ class MessageLinkButton(urwid.Button):
             return "The narrow link seems to be either broken or unsupported"
 
         # Validate stream data.
-        if "stream" in parsed_link:
-            error = self._validate_and_patch_stream_data(parsed_link)
+        if "stream_partial" in parsed_link:
+            error = self._validate_stream_data(parsed_link)
             if error:
                 return error
 
         # Validate topic name.
         if "topic_name" in parsed_link:
-            topic_name = parsed_link["topic_name"]
-            stream_id = parsed_link["stream"]["stream_id"]
-
-            if topic_name not in self.model.topics_in_stream(stream_id):
-                return "Invalid topic name"
+            error = self._validate_topic_data(parsed_link)
+            if error:
+                return error
 
         # Validate message ID for near.
         if "near" in parsed_link["narrow"]:
@@ -603,6 +616,29 @@ class MessageLinkButton(urwid.Button):
 
         return ""
 
+    def _patch_narrow_link(self, parsed_link: ParsedNarrowLink) -> None:
+        """
+        Patches the validated narrow link data.
+        """
+        model = self.model
+
+        if "stream_partial" in parsed_link:
+            stream_id = parsed_link["stream_partial"].get("stream_id", -1)
+            stream_name = parsed_link["stream_partial"].get("stream_name", "")
+
+            # Patch the optional value.
+            if stream_id < 0:
+                stream_id = cast(int, model.stream_id_from_name(stream_name))
+            else:
+                stream_name = cast(str, model.stream_dict[stream_id]["name"])
+
+            parsed_link["stream_absolute"] = DecodedStreamAbsolute(
+                stream_id=stream_id, stream_name=stream_name
+            )
+
+            # Remove the partial stream data at this point
+            del parsed_link["stream_partial"]
+
     def _switch_narrow_to(self, parsed_link: ParsedNarrowLink) -> None:
         """
         Switches narrow via narrow_to_* methods.
@@ -610,21 +646,21 @@ class MessageLinkButton(urwid.Button):
         narrow = parsed_link["narrow"]
         if narrow == "stream":
             self.controller.narrow_to_stream(
-                stream_name=parsed_link["stream"]["stream_name"],
+                stream_name=parsed_link["stream_absolute"]["stream_name"],
             )
         elif narrow == "stream:near":
             self.controller.narrow_to_stream(
-                stream_name=parsed_link["stream"]["stream_name"],
+                stream_name=parsed_link["stream_absolute"]["stream_name"],
                 contextual_message_id=parsed_link["message_id"],
             )
         elif narrow == "stream:topic":
             self.controller.narrow_to_topic(
-                stream_name=parsed_link["stream"]["stream_name"],
+                stream_name=parsed_link["stream_absolute"]["stream_name"],
                 topic_name=parsed_link["topic_name"],
             )
         elif narrow == "stream:topic:near":
             self.controller.narrow_to_topic(
-                stream_name=parsed_link["stream"]["stream_name"],
+                stream_name=parsed_link["stream_absolute"]["stream_name"],
                 topic_name=parsed_link["topic_name"],
                 contextual_message_id=parsed_link["message_id"],
             )
@@ -640,6 +676,7 @@ class MessageLinkButton(urwid.Button):
         if error:
             self.controller.report_error([f" {error}"])
         else:
+            self._patch_narrow_link(parsed_link)
             self._switch_narrow_to(parsed_link)
 
             # Exit pop-up if MessageLinkButton exists in one.

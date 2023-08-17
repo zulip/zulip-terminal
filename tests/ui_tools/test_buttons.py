@@ -9,7 +9,8 @@ from zulipterminal.api_types import Message
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
-    DecodedStream,
+    DecodedStreamAbsolute,
+    DecodedStreamPartial,
     EmojiButton,
     MessageLinkButton,
     ParsedNarrowLink,
@@ -621,8 +622,8 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "stream_data, expected_response",
         [
-            ("206-zulip-terminal", DecodedStream(stream_id=206, stream_name=None)),
-            ("Stream.201", DecodedStream(stream_id=None, stream_name="Stream 1")),
+            ("206-zulip-terminal", DecodedStreamPartial(stream_id=206)),
+            ("Stream.201", DecodedStreamPartial(stream_name="Stream 1")),
         ],
         ids=[
             "stream_data_current_version",
@@ -630,7 +631,7 @@ class TestMessageLinkButton:
         ],
     )
     def test__decode_stream_data(
-        self, stream_data: str, expected_response: DecodedStream
+        self, stream_data: str, expected_response: DecodedStreamPartial
     ) -> None:
         return_value = MessageLinkButton._decode_stream_data(stream_data)
 
@@ -653,64 +654,74 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "link, expected_parsed_link",
         [
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1",
                 ParsedNarrowLink(
-                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                    narrow="stream", stream_partial=DecodedStreamPartial(stream_id=1)
                 ),
+                id="modern_stream_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/Stream.201",
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),
+                id="deprecated_stream_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo.20bar",
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="foo bar",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
+                id="topic_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/near/1",
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
+                id="stream_near_narrow_link",
             ),
-            (
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/1",
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="foo",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
+                id="topic_near_narrow_link",
             ),
-            (SERVER_URL + "/#narrow/foo", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1//near/", ParsedNarrowLink()),
-            (
+            case(
+                SERVER_URL + "/#narrow/foo",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_1",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_2",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_3",
+            ),
+            case(
+                SERVER_URL + "/#narrow/stream/1-Stream-1//near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_4",
+            ),
+            case(
                 SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/",
                 ParsedNarrowLink(),
+                id="invalid_narrow_link_5",
             ),
-        ],
-        ids=[
-            "modern_stream_narrow_link",
-            "deprecated_stream_narrow_link",
-            "topic_narrow_link",
-            "stream_near_narrow_link",
-            "topic_near_narrow_link",
-            "invalid_narrow_link_1",
-            "invalid_narrow_link_2",
-            "invalid_narrow_link_3",
-            "invalid_narrow_link_4",
-            "invalid_narrow_link_5",
         ],
     )
     def test__parse_narrow_link(
@@ -726,14 +737,16 @@ class TestMessageLinkButton:
             "is_user_subscribed_to_stream",
             "is_valid_stream",
             "topics_in_stream",
+            "stream_id_from_name",
             "expected_error",
         ],
         [
             case(
                 ParsedNarrowLink(
-                    narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
+                    narrow="stream", stream_partial=DecodedStreamPartial(stream_id=1)
                 ),
                 True,
+                None,
                 None,
                 None,
                 "",
@@ -742,9 +755,10 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=462, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=462),
                 ),
                 False,
+                None,
                 None,
                 None,
                 "The stream seems to be either unknown or unsubscribed",
@@ -753,21 +767,23 @@ class TestMessageLinkButton:
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),
                 None,
                 True,
                 None,
+                1,
                 "",
                 id="valid_deprecated_stream_narrow_parsed_link",
             ),
             case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=None, stream_name="foo"),
+                    stream_partial=DecodedStreamPartial(stream_name="foo"),
                 ),
                 None,
                 False,
+                None,
                 None,
                 "The stream seems to be either unknown or unsubscribed",
                 id="invalid_deprecated_stream_narrow_parsed_link",
@@ -776,33 +792,62 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Valid",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
                 ["Valid"],
+                None,
                 "",
-                id="valid_topic_narrow_parsed_link",
+                id="valid_modern_topic_narrow_parsed_link",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="Valid",
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
+                ),
+                True,
+                True,
+                ["Valid"],
+                1,
+                "",
+                id="valid_deprecated_topic_narrow_parsed_link",
             ),
             case(
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Invalid",
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
                 [],
+                None,
                 "Invalid topic name",
-                id="invalid_topic_narrow_parsed_link",
+                id="invalid_modern_topic_narrow_parsed_link",
+            ),
+            case(
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="Invalid",
+                    stream_partial=DecodedStreamPartial(stream_name="foo"),
+                ),
+                None,
+                False,
+                [],
+                None,
+                "The stream seems to be either unknown or unsubscribed",
+                id="invalid_deprecated_topic_narrow_parsed_link",
             ),
             case(
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
+                None,
                 None,
                 None,
                 "",
@@ -812,9 +857,10 @@ class TestMessageLinkButton:
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=None,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
+                None,
                 None,
                 None,
                 "Invalid message ID",
@@ -825,11 +871,12 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="Valid",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
                 ["Valid"],
+                None,
                 "",
                 id="valid_topic_near_narrow_parsed_link",
             ),
@@ -838,16 +885,18 @@ class TestMessageLinkButton:
                     narrow="stream:topic:near",
                     topic_name="Valid",
                     message_id=None,
-                    stream=DecodedStream(stream_id=1, stream_name=None),
+                    stream_partial=DecodedStreamPartial(stream_id=1),
                 ),
                 True,
                 None,
                 ["Valid"],
+                None,
                 "Invalid message ID",
                 id="invalid_topic_near_narrow_parsed_link",
             ),
             case(
                 ParsedNarrowLink(),
+                None,
                 None,
                 None,
                 None,
@@ -863,14 +912,19 @@ class TestMessageLinkButton:
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
+        stream_id_from_name: Optional[int],
         expected_error: str,
     ) -> None:
         self.controller.model.stream_dict = stream_dict
+
+        # FIXME: Mimic/Patch these model helpers with probably more justification?
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
         )
         self.controller.model.is_valid_stream.return_value = is_valid_stream
         self.controller.model.topics_in_stream.return_value = topics_in_stream
+        self.controller.model.stream_id_from_name.return_value = stream_id_from_name
+
         mocked_button = self.message_link_button()
 
         return_value = mocked_button._validate_narrow_link(parsed_link)
@@ -880,137 +934,104 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         [
             "parsed_link",
-            "is_user_subscribed_to_stream",
-            "is_valid_stream",
             "stream_id_from_name_return_value",
             "expected_parsed_link",
-            "expected_error",
         ],
         [
-            (
+            case(
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name=None)
+                    stream_partial=DecodedStreamPartial(stream_id=1)
                 ),  # ...
-                True,
-                None,
                 None,
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
-                "",
+                id="stream_data_with_stream_id",
             ),
-            (
+            case(
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=462, stream_name=None)
+                    stream_partial=DecodedStreamPartial(stream_name="Stream 1"),
                 ),  # ...
-                False,
-                None,
-                None,
-                ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
-                "The stream seems to be either unknown or unsubscribed",
-            ),
-            (
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="Stream 1")
-                ),  # ...
-                None,
-                True,
                 1,
                 ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1")
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
-                "",
+                id="stream_data_with_stream_name",
             ),
-            (
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
-                ),  # ...
-                None,
-                False,
-                None,
-                ParsedNarrowLink(
-                    stream=DecodedStream(stream_id=None, stream_name="foo")
-                ),
-                "The stream seems to be either unknown or unsubscribed",
-            ),
-        ],
-        ids=[
-            "valid_stream_data_with_stream_id",
-            "invalid_stream_data_with_stream_id",
-            "valid_stream_data_with_stream_name",
-            "invalid_stream_data_with_stream_name",
         ],
     )
-    def test__validate_and_patch_stream_data(
+    def test__patch_narrow_link(
         self,
         stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
-        is_user_subscribed_to_stream: Optional[bool],
-        is_valid_stream: Optional[bool],
         stream_id_from_name_return_value: Optional[int],
         expected_parsed_link: ParsedNarrowLink,
-        expected_error: str,
     ) -> None:
         self.controller.model.stream_dict = stream_dict
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
         )
-        self.controller.model.is_user_subscribed_to_stream.return_value = (
-            is_user_subscribed_to_stream
-        )
-        self.controller.model.is_valid_stream.return_value = is_valid_stream
         mocked_button = self.message_link_button()
 
-        error = mocked_button._validate_and_patch_stream_data(parsed_link)
+        mocked_button._patch_narrow_link(parsed_link)
 
         assert parsed_link == expected_parsed_link
-        assert error == expected_error
 
     @pytest.mark.parametrize(
         "parsed_link, narrow_to_stream_called, narrow_to_topic_called",
         [
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream",
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 True,
                 False,
+                id="stream_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="Foo",
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 False,
                 True,
+                id="topic_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 True,
                 False,
+                id="stream_near_narrow",
             ),
-            (
+            case(
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="Foo",
                     message_id=1,
-                    stream=DecodedStream(stream_id=1, stream_name="Stream 1"),
+                    stream_absolute=DecodedStreamAbsolute(
+                        stream_id=1, stream_name="Stream 1"
+                    ),
                 ),
                 False,
                 True,
+                id="topic_near_narrow",
             ),
-        ],
-        ids=[
-            "stream_narrow",
-            "topic_narrow",
-            "stream_near_narrow",
-            "topic_near_narrow",
         ],
     )
     def test__switch_narrow_to(
