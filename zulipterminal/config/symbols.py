@@ -8,10 +8,17 @@ Terminal characters used to mark particular elements of the user interface
 # Suffix comments indicate: unicode name, codepoint (unicode block, version if not v1.1)
 
 INVALID_MARKER = "✗"  # BALLOT X, U+2717 (Dingbats)
+
+ALL_MESSAGES_MARKER = "≡"  # IDENTICAL TO, U+2261 (Mathematical operators)
+MENTIONED_MESSAGES_MARKER = "@"
+STARRED_MESSAGES_MARKER = "*"
+
 DIRECT_MESSAGE_MARKER = "§"  # SECTION SIGN, U+00A7 (Latin-1 supplement)
+
 STREAM_MARKER_PRIVATE = "P"
 STREAM_MARKER_PUBLIC = "#"
 STREAM_MARKER_WEB_PUBLIC = "⊚"  # CIRCLED RING OPERATOR, U+229A (Mathematical operators)
+
 STREAM_TOPIC_SEPARATOR = "▶"  # BLACK RIGHT-POINTING TRIANGLE, U+25B6 (Geometric shapes)
 
 # Range of block options for consideration: '█', '▓', '▒', '░'
