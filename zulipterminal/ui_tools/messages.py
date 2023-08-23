@@ -89,13 +89,14 @@ class MessageBox(urwid.Pile):
                 self.recipient_emails = [self.model.user_email]
                 self.recipient_ids = [self.model.user_id]
             else:
-                self.recipients_names = ", ".join(
-                    [
-                        recipient["full_name"]
-                        for recipient in self.message["display_recipient"]
-                        if recipient["email"] != self.model.user_email
-                    ]
-                )
+                self.recipients_list = []
+                for recipient in self.message["display_recipient"]:
+                    if recipient["email"] != self.model.user_email:
+                        if self.message["id"] in self.model.index["muted_messages"]:
+                            self.recipients_list.append("muted_user")
+                        else:
+                            self.recipients_list.append(recipient["full_name"])
+                self.recipients_names = ", ".join(self.recipients_list)
                 self.recipient_emails = [
                     recipient["email"]
                     for recipient in self.message["display_recipient"]
@@ -672,7 +673,10 @@ class MessageBox(urwid.Pile):
             text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
-                text["author"] = ("msg_sender", message["this"]["author"])
+                if self.message["id"] in self.model.index["muted_messages"]:
+                    text["author"] = ("msg_sender", "muted_user")
+                else:
+                    text["author"] = ("msg_sender", message["this"]["author"])
 
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
@@ -714,10 +718,18 @@ class MessageBox(urwid.Pile):
                 "/me", f"<strong>{self.message['sender_full_name']}</strong>", 1
             )
 
+        muted_message_text = "This message was hidden because you have muted the sender"
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
-        )
+        if self.message["id"] in self.model.index["muted_messages"]:
+            content, self.message_links, self.time_mentions = (
+                (None, muted_message_text),
+                {},
+                [],
+            )
+        else:
+            content, self.message_links, self.time_mentions = self.transform_content(
+                self.message["content"], self.model.server_url
+            )
         self.content.set_text(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:

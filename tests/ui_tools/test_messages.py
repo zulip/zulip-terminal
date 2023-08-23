@@ -39,6 +39,7 @@ class TestMessageBox:
     def test_init(self, mocker, message_type, set_fields):
         mocker.patch.object(MessageBox, "main_view")
         message = dict(
+            id=3,
             display_recipient=[
                 {"id": 7, "email": "boo@zulip.com", "full_name": "Boo is awesome"}
             ],
