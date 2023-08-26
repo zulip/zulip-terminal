@@ -678,6 +678,15 @@ class TestMessageLinkButton:
                 id="topic_narrow_link",
             ),
             case(
+                "/#narrow/stream/1-Stream-1/subject/foo.20bar",
+                ParsedNarrowLink(
+                    narrow="stream:topic",
+                    topic_name="foo bar",
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
+                id="subject_narrow_link",
+            ),
+            case(
                 "/#narrow/stream/1-Stream-1/near/1",
                 ParsedNarrowLink(
                     narrow="stream:near",
@@ -697,6 +706,16 @@ class TestMessageLinkButton:
                 id="topic_near_narrow_link",
             ),
             case(
+                "/#narrow/stream/1-Stream-1/subject/foo/near/1",
+                ParsedNarrowLink(
+                    narrow="stream:topic:near",
+                    topic_name="foo",
+                    message_id=1,
+                    stream=DecodedStream(stream_id=1, stream_name=None),
+                ),
+                id="subject_near_narrow_link",
+            ),
+            case(
                 "/#narrow/foo",
                 ParsedNarrowLink(),
                 id="invalid_narrow_link_1",
@@ -712,14 +731,24 @@ class TestMessageLinkButton:
                 id="invalid_narrow_link_3",
             ),
             case(
-                "/#narrow/stream/1-Stream-1//near/",
+                "/#narrow/stream/1-Stream-1/subject/",
                 ParsedNarrowLink(),
                 id="invalid_narrow_link_4",
             ),
             case(
-                "/#narrow/stream/1-Stream-1/topic/foo/near/",
+                "/#narrow/stream/1-Stream-1//near/",
                 ParsedNarrowLink(),
                 id="invalid_narrow_link_5",
+            ),
+            case(
+                "/#narrow/stream/1-Stream-1/topic/foo/near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_6",
+            ),
+            case(
+                "/#narrow/stream/1-Stream-1/subject/foo/near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_7",
             ),
         ],
     )
