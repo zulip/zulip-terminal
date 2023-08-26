@@ -653,70 +653,80 @@ class TestMessageLinkButton:
     @pytest.mark.parametrize(
         "link, expected_parsed_link",
         [
-            (
-                SERVER_URL + "/#narrow/stream/1-Stream-1",
+            case(
+                "/#narrow/stream/1-Stream-1",
                 ParsedNarrowLink(
                     narrow="stream", stream=DecodedStream(stream_id=1, stream_name=None)
                 ),
+                id="modern_stream_narrow_link",
             ),
-            (
-                SERVER_URL + "/#narrow/stream/Stream.201",
+            case(
+                "/#narrow/stream/Stream.201",
                 ParsedNarrowLink(
                     narrow="stream",
                     stream=DecodedStream(stream_id=None, stream_name="Stream 1"),
                 ),
+                id="deprecated_stream_narrow_link",
             ),
-            (
-                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo.20bar",
+            case(
+                "/#narrow/stream/1-Stream-1/topic/foo.20bar",
                 ParsedNarrowLink(
                     narrow="stream:topic",
                     topic_name="foo bar",
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="topic_narrow_link",
             ),
-            (
-                SERVER_URL + "/#narrow/stream/1-Stream-1/near/1",
+            case(
+                "/#narrow/stream/1-Stream-1/near/1",
                 ParsedNarrowLink(
                     narrow="stream:near",
                     message_id=1,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="stream_near_narrow_link",
             ),
-            (
-                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/1",
+            case(
+                "/#narrow/stream/1-Stream-1/topic/foo/near/1",
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="foo",
                     message_id=1,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
+                id="topic_near_narrow_link",
             ),
-            (SERVER_URL + "/#narrow/foo", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1/topic/", ParsedNarrowLink()),
-            (SERVER_URL + "/#narrow/stream/1-Stream-1//near/", ParsedNarrowLink()),
-            (
-                SERVER_URL + "/#narrow/stream/1-Stream-1/topic/foo/near/",
+            case(
+                "/#narrow/foo",
                 ParsedNarrowLink(),
+                id="invalid_narrow_link_1",
             ),
-        ],
-        ids=[
-            "modern_stream_narrow_link",
-            "deprecated_stream_narrow_link",
-            "topic_narrow_link",
-            "stream_near_narrow_link",
-            "topic_near_narrow_link",
-            "invalid_narrow_link_1",
-            "invalid_narrow_link_2",
-            "invalid_narrow_link_3",
-            "invalid_narrow_link_4",
-            "invalid_narrow_link_5",
+            case(
+                "/#narrow/stream/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_2",
+            ),
+            case(
+                "/#narrow/stream/1-Stream-1/topic/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_3",
+            ),
+            case(
+                "/#narrow/stream/1-Stream-1//near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_4",
+            ),
+            case(
+                "/#narrow/stream/1-Stream-1/topic/foo/near/",
+                ParsedNarrowLink(),
+                id="invalid_narrow_link_5",
+            ),
         ],
     )
     def test__parse_narrow_link(
         self, link: str, expected_parsed_link: ParsedNarrowLink
     ) -> None:
-        return_value = MessageLinkButton._parse_narrow_link(link)
+        return_value = MessageLinkButton._parse_narrow_link(SERVER_URL + link)
 
         assert return_value == expected_parsed_link
 
