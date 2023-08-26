@@ -493,12 +493,17 @@ class MessageLinkButton(urwid.Button):
         """
         # NOTE: The optional stream_id link version is deprecated. The extended
         # support is for old messages.
+        # NOTE: Support for narrow links with subject instead of topic is also added
         # We expect the fragment to be one of the following types:
         # a. narrow/stream/[{stream_id}-]{stream-name}
         # b. narrow/stream/[{stream_id}-]{stream-name}/near/{message_id}
         # c. narrow/stream/[{stream_id}-]{stream-name}/topic/
         #    {encoded.20topic.20name}
-        # d. narrow/stream/[{stream_id}-]{stream-name}/topic/
+        # d. narrow/stream/[{stream_id}-]{stream-name}/subject/
+        #    {encoded.20topic.20name}
+        # e. narrow/stream/[{stream_id}-]{stream-name}/topic/
+        #    {encoded.20topic.20name}/near/{message_id}
+        # f. narrow/stream/[{stream_id}-]{stream-name}/subject/
         #    {encoded.20topic.20name}/near/{message_id}
         fragments = urlparse(link.rstrip("/")).fragment.split("/")
         len_fragments = len(fragments)
@@ -509,7 +514,9 @@ class MessageLinkButton(urwid.Button):
             parsed_link = dict(narrow="stream", stream=stream_data)
 
         elif (
-            len_fragments == 5 and fragments[1] == "stream" and fragments[3] == "topic"
+            len_fragments == 5
+            and fragments[1] == "stream"
+            and (fragments[3] == "topic" or fragments[3] == "subject")
         ):
             stream_data = cls._decode_stream_data(fragments[2])
             topic_name = hash_util_decode(fragments[4])
@@ -527,7 +534,7 @@ class MessageLinkButton(urwid.Button):
         elif (
             len_fragments == 7
             and fragments[1] == "stream"
-            and fragments[3] == "topic"
+            and (fragments[3] == "topic" or fragments[3] == "subject")
             and fragments[5] == "near"
         ):
             stream_data = cls._decode_stream_data(fragments[2])
