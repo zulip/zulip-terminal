@@ -4,6 +4,7 @@ Defines the `Model`, fetching and storing data retrieved from the Zulip server
 
 import itertools
 import json
+import os
 import time
 from collections import defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
@@ -560,10 +561,16 @@ class Model:
             notify_if_message_sent_outside_narrow(composition, self.controller)
         return message_was_sent
 
-    def get_file_upload_uri(self, file_location: str) -> str:
-        with open(file_location, "rb") as fp:
-            result = self.client.upload_file(fp)
-        return result["uri"]
+    def get_file_upload_uri(self, file_location: str) -> Optional[str]:
+        if os.path.exists(file_location):
+            with open(file_location, "rb") as fp:
+                result = self.client.upload_file(fp)
+                if result["result"] == "success":
+                    return result["uri"]
+                else:
+                    return None
+        else:
+            return None
 
     def update_private_message(self, msg_id: int, content: str) -> bool:
         request: PrivateMessageUpdateRequest = {
