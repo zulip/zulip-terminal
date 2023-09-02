@@ -488,7 +488,7 @@ class TestStreamsView:
         assert stream_view.streams_btn_list == self.streams_btn_list
         assert stream_view.stream_search_box
         self.stream_search_box.assert_called_once_with(
-            stream_view, "SEARCH_STREAMS", stream_view.update_streams
+            stream_view, "SEARCH_STREAMS", stream_view.update_streams, label="streams"
         )
 
     @pytest.mark.parametrize(
@@ -605,7 +605,7 @@ class TestTopicsView:
         assert topic_view.view == self.view
         assert topic_view.topic_search_box
         self.topic_search_box.assert_called_once_with(
-            topic_view, "SEARCH_TOPICS", topic_view.update_topics
+            topic_view, "SEARCH_TOPICS", topic_view.update_topics, label="topics"
         )
         self.header_list.assert_called_once_with(
             [
