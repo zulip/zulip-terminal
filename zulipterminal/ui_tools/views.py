@@ -341,7 +341,10 @@ class StreamsView(urwid.Frame):
         self.focus_index_before_search = 0
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(
-            self, "SEARCH_STREAMS", self.update_streams
+            self,
+            "SEARCH_STREAMS",
+            self.update_streams,
+            label="streams",
         )
         super().__init__(
             list_box,
@@ -435,7 +438,10 @@ class TopicsView(urwid.Frame):
         self.focus_index_before_search = 0
         self.list_box = urwid.ListBox(self.log)
         self.topic_search_box = PanelSearchBox(
-            self, "SEARCH_TOPICS", self.update_topics
+            self,
+            "SEARCH_TOPICS",
+            self.update_topics,
+            label="topics",
         )
         self.header_list = urwid.Pile(
             [

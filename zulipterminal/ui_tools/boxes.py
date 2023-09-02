@@ -965,11 +965,22 @@ class PanelSearchBox(urwid.Edit):
     """
 
     def __init__(
-        self, panel_view: Any, search_command: str, update_function: Callable[..., None]
+        self,
+        panel_view: Any,
+        search_command: str,
+        update_function: Callable[..., None],
+        label: Optional[str] = None,
     ) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = f" Search [{', '.join(keys_for_command(search_command))}]: "
+        if label:
+            self.search_text = (
+                f" Search {label} [{', '.join(keys_for_command(search_command))}]: "
+            )
+        else:
+            self.search_text = (
+                f" Search [{', '.join(keys_for_command(search_command))}]: "
+            )
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
