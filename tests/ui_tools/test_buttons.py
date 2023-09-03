@@ -687,30 +687,30 @@ class TestMessageLinkButton:
                 id="subject_narrow_link",
             ),
             case(
-                "/#narrow/stream/1-Stream-1/near/1",
+                "/#narrow/stream/1-Stream-1/near/987",
                 ParsedNarrowLink(
                     narrow="stream:near",
-                    message_id=1,
+                    message_id=987,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 id="stream_near_narrow_link",
             ),
             case(
-                "/#narrow/stream/1-Stream-1/topic/foo/near/1",
+                "/#narrow/stream/1-Stream-1/topic/foo/near/789",
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="foo",
-                    message_id=1,
+                    message_id=789,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 id="topic_near_narrow_link",
             ),
             case(
-                "/#narrow/stream/1-Stream-1/subject/foo/near/1",
+                "/#narrow/stream/1-Stream-1/subject/foo/near/654",
                 ParsedNarrowLink(
                     narrow="stream:topic:near",
                     topic_name="foo",
-                    message_id=1,
+                    message_id=654,
                     stream=DecodedStream(stream_id=1, stream_name=None),
                 ),
                 id="subject_near_narrow_link",
