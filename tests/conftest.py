@@ -869,6 +869,15 @@ def clean_custom_profile_data_fixture() -> List[CustomProfileData]:
 
 
 @pytest.fixture
+def sorted_recent_dms_fixture() -> List[Dict[str, Any]]:
+    return [
+        {"max_message_id": 4, "user_ids": []},
+        {"max_message_id": 3, "user_ids": [2]},
+        {"max_message_id": 2, "user_ids": [1]},
+    ]
+
+
+@pytest.fixture
 def initial_data(
     logged_on_user: Dict[str, Any],
     users_fixture: List[Dict[str, Any]],
@@ -1050,6 +1059,11 @@ def initial_data(
         "zulip_feature_level": MINIMUM_SUPPORTED_SERVER_VERSION[1],
         "starred_messages": [1117554, 1117558, 1117574],
         "custom_profile_fields": custom_profile_fields_fixture,
+        "recent_private_conversations": [
+            {"max_message_id": 4, "user_ids": []},
+            {"max_message_id": 2, "user_ids": [1]},
+            {"max_message_id": 3, "user_ids": [2]},
+        ],
     }
 
 

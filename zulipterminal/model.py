@@ -142,6 +142,7 @@ class Model:
             "user_settings",
             "realm_emoji",
             "custom_profile_fields",
+            "recent_private_conversations",
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
@@ -179,6 +180,11 @@ class Model:
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
         self.users: List[MinimalUserData] = []
         self._update_users_data_from_initial_data()
+
+        self.recent_dms: List[Dict[str, Any]] = self.initial_data[
+            "recent_private_conversations"
+        ]
+        self._sort_recent_dms()
 
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
@@ -1334,6 +1340,15 @@ class Model:
             raise RuntimeError("Invalid user ID.")
 
         return self.user_dict[user_email]["full_name"]
+
+    def _sort_recent_dms(self) -> None:
+        """
+        Sorts the list of recent direct message conversations.
+        """
+        self.recent_dms.sort(
+            key=lambda conversation: conversation["max_message_id"],
+            reverse=True,
+        )
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
