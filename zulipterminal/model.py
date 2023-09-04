@@ -1284,6 +1284,28 @@ class Model:
             reverse=True,
         )
 
+    def _update_recent_dms(self, message: Message) -> None:
+        """
+        Updates the list of recent direct message conversations.
+        """
+        msg_id = message["id"]
+        user_ids = [recipient["id"] for recipient in message["display_recipient"]]
+        user_ids.remove(self.user_id)
+        replaced = False
+        for dm in self.recent_dms:
+            if set(dm["user_ids"]) == set(user_ids) and msg_id > dm["max_message_id"]:
+                dm["max_message_id"] = msg_id
+                replaced = True
+                break
+        if not replaced:
+            self.recent_dms.append(
+                {
+                    "user_ids": user_ids,
+                    "max_message_id": msg_id,
+                }
+            )
+        self._sort_recent_dms()
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1644,6 +1666,8 @@ class Model:
                         message["stream_id"], message["subject"], message["sender_id"]
                     )
                     self.controller.update_screen()
+        elif message["type"] == "private":
+            self._update_recent_dms(message)
 
         # We can notify user regardless of whether UI is rendered or not,
         # but depend upon the UI to indicate failures.
