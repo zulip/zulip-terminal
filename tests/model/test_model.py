@@ -1921,6 +1921,7 @@ class TestModel:
         )
         model.notify_user = mocker.Mock()
         event = {"type": "message", "message": message_fixture}
+        model.user_id = 5140
 
         model._handle_message_event(event)
 
@@ -1940,6 +1941,7 @@ class TestModel:
         )
         model.notify_user = mocker.Mock()
         event = {"type": "message", "message": message_fixture}
+        model.user_id = 5140
 
         model._handle_message_event(event)
 
@@ -1967,6 +1969,7 @@ class TestModel:
             "message": message_fixture,
             "flags": ["read", "mentioned"],
         }
+        model.user_id = 5140
 
         model._handle_message_event(event)
 
@@ -2096,6 +2099,7 @@ class TestModel:
         mocker.patch(MODULE + ".index_messages", return_value={})
         mocker.patch(MODULE + ".create_msg_box_list", return_value=["msg_w"])
         set_count = mocker.patch(MODULE + ".set_count")
+        mocker.patch(MODEL + "._update_recent_dms")
         self.controller.view.message_view = mocker.Mock(log=[])
         (
             self.controller.view.left_panel.is_in_topic_view_with_stream_id.return_value
