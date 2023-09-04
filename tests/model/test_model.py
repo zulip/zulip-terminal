@@ -63,6 +63,7 @@ class TestModel:
         realm_emojis_data,
         zulip_emoji,
         stream_dict,
+        sorted_recent_dms_fixture,
     ):
         assert hasattr(model, "controller")
         assert hasattr(model, "client")
@@ -88,6 +89,7 @@ class TestModel:
         assert model.users == []
         self.classify_unread_counts.assert_called_once_with(model)
         assert model.unread_counts == []
+        assert model.recent_dms == sorted_recent_dms_fixture
         assert model.active_emoji_data == OrderedDict(
             sorted(
                 {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
@@ -255,6 +257,7 @@ class TestModel:
             "user_settings",
             "realm_emoji",
             "custom_profile_fields",
+            "recent_private_conversations",
             "zulip_version",
         ]
         model.client.register.assert_called_once_with(
