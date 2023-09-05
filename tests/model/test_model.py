@@ -1,5 +1,7 @@
 import copy
 import json
+import os
+import tempfile
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, List, Optional, Tuple
@@ -809,6 +811,49 @@ class TestModel:
             self.notify_if_message_sent_outside_narrow.assert_called_once_with(
                 req, self.controller
             )
+
+    @pytest.mark.parametrize(
+        "file_name, upload_result, expected_result",
+        [
+            case(
+                "existing_file.txt",
+                {"result": "success", "uri": "http://example.com/success_uri"},
+                "http://example.com/success_uri",
+                id="exisiting_file_with_successful_response",
+            ),
+            case(
+                "existing_file.txt",
+                {"result": "failure", "error_message": "Upload failed"},
+                None,
+                id="exisiting_file_with_unsuccessful_response",
+            ),
+            case(
+                "non_existing_file.txt",
+                None,
+                None,
+                id="non_exisiting_file_with_no_response",
+            ),
+        ],
+    )
+    def test_get_file_upload_uri(
+        self, mocker, model, file_name, upload_result, expected_result
+    ):
+        self.client.upload_file = mocker.Mock(return_value=upload_result)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            if upload_result is not None:
+                temp_file_path = os.path.join(temp_dir, file_name)
+                with open(temp_file_path, "w") as temp_file:
+                    temp_file.write("Test content")
+            else:
+                temp_file_path = f"random_path/{file_name}"
+
+            result = model.get_file_upload_uri(temp_file_path)
+
+        if upload_result is not None:
+            self.client.upload_file.assert_called_once()
+        else:
+            self.client.upload_file.assert_not_called()
+        assert result == expected_result
 
     @pytest.mark.parametrize(
         "response, return_value",
