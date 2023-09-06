@@ -308,20 +308,32 @@ class MessageView(urwid.ListBox):
 
 
 class DMPanel(urwid.Pile):
-    def __init__(self, submenu_view: List[Any], view: Any) -> None:
+    def __init__(
+        self,
+        submenu_view: Optional[List[Any]],
+        view: Any,
+        show_function: Callable[[], Any],
+    ) -> None:
         self.view = view
         count = self.view.model.unread_counts.get("all_pms", 0)
         self.view.pm_button = DMPanelButton(
-            controller=self.view.controller, count=count
+            controller=self.view.controller, count=count, show_function=show_function
         )
 
-        self._contents = [
-            ("pack", self.view.pm_button),
-            ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
-            submenu_view,
-        ]
+        if submenu_view:
+            self._contents = [
+                    ("pack", self.view.pm_button),
+                    ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
+                    submenu_view,
+                ]
+            focus_item = 2
+        else:
+            self._contents = [
+                ("pack", self.view.pm_button),
+            ]
+            focus_item = 0
 
-        super().__init__(self.contents)
+        super().__init__(self.contents, focus_item=focus_item)
 
 
 class DMView(urwid.Frame):
@@ -348,19 +360,35 @@ class StreamsViewDivider(urwid.Divider):
 
 
 class StreamPanel(urwid.Pile):
-    def __init__(self, submenu_view: List[Any], view: Any) -> None:
+    def __init__(
+        self,
+        submenu_view: Optional[List[Any]],
+        view: Any,
+        show_function: Callable[[], Any],
+    ) -> None:
         self.view = view
         count = self.view.model.unread_counts.get("all_stream_msg", 0)
         self.view.stream_button = StreamPanelButton(
-            controller=self.view.controller, count=count
+            controller=self.view.controller,
+            count=count,
+            show_function=show_function,
         )
-        self._contents = [
-            ("pack", self.view.stream_button),
-            ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
-            submenu_view,
-        ]
 
-        super().__init__(self.contents, focus_item=2)
+        if submenu_view:
+            self._contents = [
+                    ("pack", self.view.stream_button),
+                    ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
+                    submenu_view,
+                ]
+            focus_item = 2
+        else:
+            self._contents = [
+                ("pack", self.view.stream_button),
+                ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
+            ]
+            focus_item = 0
+
+        super().__init__(self.contents, focus_item=focus_item)
 
 
 class StreamsView(urwid.Frame):
@@ -834,14 +862,15 @@ class LeftColumnView(urwid.Pile):
         self.controller = view.controller
         self.menu_v = self.menu_view()
         self.dm_v = self.dms_view()
-        self.dm_panel = self.dms_panel(self.dm_v)
+        self.dm_panel = self.dms_panel(None)
         self.stream_v = self.streams_view()
         self.stream_panel = self.streams_panel(self.stream_v)
         self.is_in_topic_view = False
+        self.is_in_dm_panel_view = False
         contents = [
             (3, self.menu_v),
             ("pack", urwid.Divider(COLUMN_TITLE_BAR_LINE)),
-            self.dm_panel,
+            ("pack", self.dm_panel),
             ("pack", urwid.Divider(COLUMN_TITLE_BAR_LINE)),
             self.stream_panel,
         ]
@@ -870,11 +899,15 @@ class LeftColumnView(urwid.Pile):
         return w
 
     def streams_panel(self, submenu_view: Any) -> Any:
-        self.view.stream_p = StreamPanel(submenu_view, self.view)
+        self.view.stream_p = StreamPanel(
+            submenu_view, self.view, show_function=self.show_stream_panel
+        )
         return self.view.stream_p
 
     def dms_panel(self, submenu_view: Any) -> Any:
-        self.view.dm_p = DMPanel(submenu_view, self.view)
+        self.view.dm_p = DMPanel(
+            submenu_view, self.view, show_function=self.show_dm_panel
+        )
         return self.view.dm_p
 
     def dms_view(self) -> Any:
@@ -1013,10 +1046,26 @@ class LeftColumnView(urwid.Pile):
             self.options(height_type="weight"),
         )
 
+    def show_dm_panel(self) -> None:
+        self.dm_panel = self.dms_panel(self.dm_v)
+        self.contents[2] = (self.dm_panel, self.options(height_type="weight"))
+        self.stream_panel = self.streams_panel(None)
+        self.contents[4] = (self.stream_panel, self.options(height_type="pack"))
+        self.focus_position = 2
+        self.is_in_dm_panel_view = True
+
+    def show_stream_panel(self) -> None:
+        self.stream_panel = self.streams_panel(self.stream_v)
+        self.contents[4] = (self.stream_panel, self.options(height_type="weight"))
+        self.dm_panel = self.dms_panel(None)
+        self.contents[2] = (self.dm_panel, self.options(height_type="pack"))
+        self.focus_position = 4
+        self.is_in_dm_panel_view = False
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_STREAMS", key) or is_command_key(
+        if (is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
-        ):
+        )) and not self.is_in_dm_panel_view:
             self.focus_position = 4
             self.view.stream_p.focus_position = 2
             if self.is_in_topic_view:
@@ -1026,6 +1075,10 @@ class LeftColumnView(urwid.Pile):
             return key
         elif is_command_key("GO_RIGHT", key):
             self.view.show_left_panel(visible=False)
+        elif is_command_key("ALL_PM", key):
+            self.show_dm_panel()
+        elif key == "S":
+            self.show_stream_panel()
         return super().keypress(size, key)
 
 
