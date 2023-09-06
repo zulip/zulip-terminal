@@ -142,7 +142,9 @@ class HomeButton(TopButton):
 
 
 class DMPanelButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+    def __init__(
+        self, *, controller: Any, count: int, show_function: Callable[[], Any]
+    ) -> None:
         button_text = f"Direct messages  [{primary_key_for_command('ALL_PM')}]"
 
         super().__init__(
@@ -150,21 +152,29 @@ class DMPanelButton(TopButton):
             label_markup=(None, button_text),
             prefix_markup=("title", DIRECT_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=show_function,
             count=count,
         )
 
+    def activate(self, key: Any) -> None:
+        self.show_function()
+
 
 class StreamPanelButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = "Stream messages     "
+    def __init__(
+        self, *, controller: Any, count: int, show_function: Callable[[], Any]
+    ) -> None:
+        button_text = "Stream messages  [S]"
         super().__init__(
             controller=controller,
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
-            show_function=lambda: None,
+            show_function=show_function,
             count=count,
         )
+
+    def activate(self, key: Any) -> None:
+        self.show_function()
 
 
 class MentionedButton(TopButton):
