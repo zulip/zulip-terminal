@@ -3,7 +3,7 @@ Fixed sizes of UI elements
 """
 
 TAB_WIDTH = 3
-LEFT_WIDTH = 29
+LEFT_WIDTH = 31
 RIGHT_WIDTH = 23
 
 # These affect popup width-scaling, dependent upon window width
