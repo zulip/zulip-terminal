@@ -13,7 +13,14 @@ from typing_extensions import TypedDict
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode, Message
 from zulipterminal.config.keys import is_command_key, primary_key_for_command
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
-from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
+from zulipterminal.config.symbols import (
+    ALL_MESSAGES_MARKER,
+    CHECK_MARK,
+    DIRECT_MESSAGE_MARKER,
+    MENTIONED_MESSAGES_MARKER,
+    MUTE_MARKER,
+    STARRED_MESSAGES_MARKER,
+)
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
@@ -122,6 +129,7 @@ class HomeButton(TopButton):
 
         super().__init__(
             controller=controller,
+            prefix_markup=("title", ALL_MESSAGES_MARKER),
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_messages,
@@ -136,6 +144,7 @@ class PMButton(TopButton):
         super().__init__(
             controller=controller,
             label_markup=(None, button_text),
+            prefix_markup=("title", DIRECT_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_pm,
             count=count,
@@ -148,6 +157,7 @@ class MentionedButton(TopButton):
 
         super().__init__(
             controller=controller,
+            prefix_markup=("title", MENTIONED_MESSAGES_MARKER),
             label_markup=(None, button_text),
             suffix_markup=("unread_count", ""),
             show_function=controller.narrow_to_all_mentions,
@@ -161,6 +171,7 @@ class StarredButton(TopButton):
 
         super().__init__(
             controller=controller,
+            prefix_markup=("title", STARRED_MESSAGES_MARKER),
             label_markup=(None, button_text),
             suffix_markup=("starred_count", ""),
             show_function=controller.narrow_to_all_starred,
