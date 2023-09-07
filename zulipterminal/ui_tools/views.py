@@ -305,6 +305,31 @@ class MessageView(urwid.ListBox):
         self.model.mark_message_ids_as_read(read_msg_ids)
 
 
+class DMPanel(urwid.Pile):
+    def __init__(self, submenu_view: List[Any], view: Any) -> None:
+        self.view = view
+        count = self.view.model.unread_counts.get("all_pms", 0)
+        self.view.pm_button = PMButton(controller=self.view.controller, count=count)
+
+        self._contents = [
+            ("pack", self.view.pm_button),
+            ("pack", urwid.Divider(div_char=SECTION_DIVIDER_LINE)),
+            submenu_view,
+        ]
+
+        super().__init__(self.contents)
+
+
+class DMView(urwid.Frame):
+    def __init__(self, dm_btn_list: List[Any], view: Any) -> None:
+        self.view = view
+        self.log = urwid.SimpleFocusListWalker(dm_btn_list)
+        self.dm_btn_list = dm_btn_list
+        self.focus_index_before_search = 0
+        list_box = urwid.ListBox(self.log)
+        super().__init__(list_box)
+
+
 class StreamsViewDivider(urwid.Divider):
     """
     A custom urwid.Divider to visually separate pinned and unpinned streams.
