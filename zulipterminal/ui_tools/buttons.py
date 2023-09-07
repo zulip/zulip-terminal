@@ -26,7 +26,11 @@ from zulipterminal.config.symbols import (
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
 )
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
+from zulipterminal.config.ui_mappings import (
+    EDIT_MODE_CAPTIONS,
+    STATE_ICON,
+    STREAM_ACCESS_TYPE,
+)
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
@@ -283,6 +287,38 @@ class StreamButton(TopButton):
         elif is_command_key("STREAM_INFO", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
+
+
+class DMButton(TopButton):
+    def __init__(
+        self,
+        *,
+        dm_data: Dict[str, Any],
+        controller: Any,
+        view: Any,
+        state_marker: str,
+        color: Optional[str] = None,
+        count: int,
+    ) -> None:
+        self.model = controller.model
+        self.count = count
+        self.view = view
+        self.users: str = dm_data["users"]
+        self.user_emails: List[str] = dm_data["emails"]
+        self.dm_type: str = dm_data["type"]
+
+        narrow_function = partial(
+            controller.narrow_to_user,
+            recipient_emails=self.user_emails,
+        )
+        super().__init__(
+            controller=controller,
+            prefix_markup=(color, state_marker),
+            label_markup=(None, self.users),
+            suffix_markup=("unread_count", count),
+            show_function=narrow_function,
+            count=count,
+        )
 
 
 class UserButton(TopButton):
