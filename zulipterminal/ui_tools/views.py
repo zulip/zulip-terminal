@@ -46,6 +46,7 @@ from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    DMButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
@@ -830,11 +831,15 @@ class LeftColumnView(urwid.Pile):
         self.view = view
         self.controller = view.controller
         self.menu_v = self.menu_view()
+        self.dm_v = self.dms_view()
+        self.dm_panel = self.dms_panel(self.dm_v)
         self.stream_v = self.streams_view()
         self.stream_panel = self.streams_panel(self.stream_v)
         self.is_in_topic_view = False
         contents = [
-            (4, self.menu_v),
+            (3, self.menu_v),
+            ("pack", urwid.Divider(COLUMN_TITLE_BAR_LINE)),
+            self.dm_panel,
             ("pack", urwid.Divider(COLUMN_TITLE_BAR_LINE)),
             self.stream_panel,
         ]
@@ -843,9 +848,6 @@ class LeftColumnView(urwid.Pile):
     def menu_view(self) -> Any:
         count = self.model.unread_counts.get("all_msg", 0)
         self.view.home_button = HomeButton(controller=self.controller, count=count)
-
-        count = self.model.unread_counts.get("all_pms", 0)
-        self.view.pm_button = PMButton(controller=self.controller, count=count)
 
         self.view.mentioned_button = MentionedButton(
             controller=self.controller,
@@ -859,7 +861,6 @@ class LeftColumnView(urwid.Pile):
         )
         menu_btn_list = [
             self.view.home_button,
-            self.view.pm_button,
             self.view.mentioned_button,
             self.view.starred_button,
         ]
@@ -869,6 +870,70 @@ class LeftColumnView(urwid.Pile):
     def streams_panel(self, submenu_view: Any) -> Any:
         self.view.stream_p = StreamPanel(submenu_view, self.view)
         return self.view.stream_p
+
+    def dms_panel(self, submenu_view: Any) -> Any:
+        self.view.dm_p = DMPanel(submenu_view, self.view)
+        return self.view.dm_p
+
+    def dms_view(self) -> Any:
+
+        def get_dm_unread_count(user_ids):
+            if len(user_ids) == 1:
+                count = self.model.unread_counts["unread_pms"].get(
+                    user_ids[0], 0
+                )
+            else:
+                user_ids.append(self.model.user_id)
+                count = self.model.unread_counts["unread_huddles"].get(
+                    frozenset(user_ids), 0
+                )
+            return count
+
+        def get_dm_state_marker_and_color(user_emails):
+            if len(user_emails) == 1:
+                user = user_emails[0]
+                user_dict = self.model.user_dict
+                status = user_dict[user]["status"]
+            else:
+                status = "offline"
+
+            state_marker = STATE_ICON[status]
+            color = f"user_{status}"
+            return state_marker, color
+
+        dm_btn_list = []
+        dm_list = self.model.recent_dms
+        for dm in dm_list:
+            user_emails = []
+            user_names = []
+            non_existing_user = False
+            for user_id in dm["user_ids"]:
+                try:
+                    user_names.append(str(self.model.user_name_from_id(user_id)))
+                    user_emails.append(self.model.user_id_email_dict[user_id])
+                except RuntimeError:
+                    non_existing_user = True
+            if non_existing_user is False:
+                users = ", ".join(user_names)
+                dm_data = {
+                    "users": users,
+                    "emails": user_emails,
+                    "type": "dm" if len(dm["user_ids"]) == 1 else "group_dm",
+                }
+                count = get_dm_unread_count(dm["user_ids"])
+                state_marker, color = get_dm_state_marker_and_color(user_emails)
+                dm_btn_list.append(
+                    DMButton(
+                        dm_data=dm_data,
+                        controller=self.controller,
+                        view=self.view,
+                        state_marker=state_marker,
+                        color=color,
+                        count=count,
+                    )
+                )
+        self.view.dm_w = DMView(dm_btn_list, self.view)
+        return self.view.dm_w
 
     def streams_view(self) -> Any:
         streams_btn_list = [
@@ -936,12 +1001,12 @@ class LeftColumnView(urwid.Pile):
     def show_stream_view(self) -> None:
         self.is_in_topic_view = False
         self.stream_panel = self.streams_panel(self.stream_v)
-        self.contents[2] = (self.stream_panel, self.options(height_type="weight"))
+        self.contents[4] = (self.stream_panel, self.options(height_type="weight"))
 
     def show_topic_view(self, stream_button: Any) -> None:
         self.is_in_topic_view = True
         self.stream_panel = self.streams_panel(self.topics_view(stream_button))
-        self.contents[2] = (
+        self.contents[4] = (
             self.stream_panel,
             self.options(height_type="weight"),
         )
@@ -950,7 +1015,7 @@ class LeftColumnView(urwid.Pile):
         if is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
-            self.focus_position = 2
+            self.focus_position = 4
             self.view.stream_p.focus_position = 2
             if self.is_in_topic_view:
                 self.view.topic_w.keypress(size, key)
