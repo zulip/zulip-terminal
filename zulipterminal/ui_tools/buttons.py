@@ -148,7 +148,7 @@ class HomeButton(TopButton):
         )
 
 
-class PMButton(TopButton):
+class DMPanelButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
 

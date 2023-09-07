@@ -47,11 +47,11 @@ from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
     DMButton,
+    DMPanelButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
     MessageLinkButton,
-    PMButton,
     StarredButton,
     StreamButton,
     StreamPanelButton,
@@ -311,7 +311,9 @@ class DMPanel(urwid.Pile):
     def __init__(self, submenu_view: List[Any], view: Any) -> None:
         self.view = view
         count = self.view.model.unread_counts.get("all_pms", 0)
-        self.view.pm_button = PMButton(controller=self.view.controller, count=count)
+        self.view.pm_button = DMPanelButton(
+            controller=self.view.controller, count=count
+        )
 
         self._contents = [
             ("pack", self.view.pm_button),
