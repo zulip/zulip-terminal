@@ -911,7 +911,13 @@ class Model:
                 self.stream_id_from_name(self.narrow[0][1]),
                 self.narrow[1][1],
             )
-        unread_topics = sort_unread_topics(self.unread_counts["unread_topics"])
+        left_panel_stream_list = [
+            stream["id"] for stream in (self.pinned_streams + self.unpinned_streams)
+        ]
+        unread_topics = sort_unread_topics(
+            self.unread_counts["unread_topics"],
+            left_panel_stream_list,
+        )
         next_topic = False
         stream_start: Optional[Tuple[int, str]] = None
         if current_topic is None:
@@ -922,7 +928,8 @@ class Model:
             # is to be returned. This does not modify the original unread topics
             # data, and is just used to compute the next unmuted topic to be returned.
             unread_topics = sort_unread_topics(
-                {**self.unread_counts["unread_topics"], current_topic: 0}
+                {**self.unread_counts["unread_topics"], current_topic: 0},
+                left_panel_stream_list,
             )
         # loop over unread_topics list twice for the case that last_unread_topic was
         # the last valid unread_topic in unread_topics list.
