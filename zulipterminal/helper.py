@@ -166,9 +166,17 @@ def asynch(func: Callable[ParamT, None]) -> Callable[ParamT, None]:
 
 
 def sort_unread_topics(
-    unread_topics: Dict[Tuple[int, str], int]
+    unread_topics: Dict[Tuple[int, str], int], stream_list: List[int]
 ) -> List[Tuple[int, str]]:
-    return sorted(unread_topics.keys())
+    return sorted(
+        unread_topics.keys(),
+        key=lambda stream_topic: (
+            stream_list.index(stream_topic[0])
+            if stream_topic[0] in stream_list
+            else len(stream_list),
+            stream_topic[1],
+        ),
+    )
 
 
 def _set_count_in_model(
