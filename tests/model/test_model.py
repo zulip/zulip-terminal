@@ -4016,6 +4016,12 @@ class TestModel:
                 (1, "topic1"),
                 id="unread_present_in_same_stream_wrap_around",
             ),
+            case(
+                {(1, "topic1"), (5, "topic5"), (2, "topic2")},
+                (2, "topic2"),
+                (5, "topic5"),
+                id="streams_sorted_according_to_left_panel",
+            ),
         ],
     )
     def test_next_unread_topic_from_message(
@@ -4034,6 +4040,20 @@ class TestModel:
         model.stream_dict[3] = {"name": "Stream 3"}
         model.stream_dict[4] = {"name": "Stream 4"}
         model.muted_streams = {3}
+
+        # Extra stream for stream sort testing (should not exist otherwise)
+        assert 5 not in model.stream_dict
+        model.stream_dict[5] = {"name": "First Stream"}
+
+        model.pinned_streams = [
+            {"name": "First Stream", "id": 5},
+            {"name": "Stream 1", "id": 1},
+            {"name": "Stream 2", "id": 2},
+        ]
+        model.unpinned_streams = [
+            {"name": "Stream 3", "id": 3},
+            {"name": "Stream 4", "id": 4},
+        ]
 
         # date data unimportant (if present)
         model._muted_topics = {
@@ -4073,6 +4093,15 @@ class TestModel:
         model.unread_counts = {
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
+        model.pinned_streams = [
+            {"name": "Stream 1", "id": 1},
+            {"name": "Stream 2", "id": 2},
+        ]
+        model.unpinned_streams = [
+            {"name": "Stream 3", "id": 3},
+            {"name": "Stream 4", "id": 4},
+        ]
+
         model.stream_id_from_name = mocker.Mock(return_value=narrow_stream_id)
         model.narrow = empty_narrow
 

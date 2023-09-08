@@ -256,7 +256,7 @@ def test_powerset(
         ),
         case(
             {(999, "topic3"): 1, (1000, "topic2"): 1, (1, "topic1"): 1},
-            [(1, "topic1"), (999, "topic3"), (1000, "topic2")],
+            [(1000, "topic2"), (1, "topic1"), (999, "topic3")],
             id="multiple_unread_topics",
         ),
         case(
@@ -266,7 +266,7 @@ def test_powerset(
                 (1000, "topic4"): 3,
                 (1, "topic1"): 1,
             },
-            [(1, "topic1"), (999, "topic3"), (1000, "topic2"), (1000, "topic4")],
+            [(1000, "topic2"), (1000, "topic4"), (1, "topic1"), (999, "topic3")],
             id="multiple_unread_topics_in_same_stream",
         ),
     ],
@@ -274,8 +274,10 @@ def test_powerset(
 def test_sort_unread_topics(
     unread_topics: Dict[Tuple[int, str], int],
     expected_value: List[Tuple[int, str]],
+    streams: List[Dict[str, Any]],
 ) -> None:
-    assert sort_unread_topics(unread_topics) == expected_value
+    stream_list = [stream["id"] for stream in streams]
+    assert sort_unread_topics(unread_topics, stream_list) == expected_value
 
 
 @pytest.mark.parametrize(
