@@ -32,6 +32,10 @@ show_missing = true
 # See crate-ci/typos#744 and crate-ci/typos#773
 "O_WRONLY" = "O_WRONLY"
 
+[tool.typos.default.extend-words]
+# Allow iterm terminal emulator (ideally only per-file)
+"iterm" = "iterm"
+
 [tool.isort]
 py_version = 37
 # Use black for the default settings (with adjustments listed below)

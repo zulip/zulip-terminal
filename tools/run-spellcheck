@@ -32,7 +32,6 @@ EXCLUDE_FILES = [
     "tests/ui_tools/test_boxes.py",  # Word prefixes as part of autocomplete test
     "tests/config/test_themes.py",  # Wrong words as part of theme syntax test
     "tests/model/test_model.py",  # 2nd not recognized crate-ci/typos#466
-    "docs/FAQ.md",  # iterm2 is proper noun [term, item, interm]
     "tools/run-spellcheck",  # Exclude ourself due to notes
 ]
 
