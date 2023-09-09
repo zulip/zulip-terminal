@@ -28,6 +28,10 @@ precision = 1
 skip_covered = true
 show_missing = true
 
+[tool.typos.default.extend-identifiers]
+# See crate-ci/typos#744 and crate-ci/typos#773
+"O_WRONLY" = "O_WRONLY"
+
 [tool.isort]
 py_version = 37
 # Use black for the default settings (with adjustments listed below)
