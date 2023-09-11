@@ -421,7 +421,7 @@ class TestWriteBox:
             ),
         ],
     )
-    def test_update_recipients(
+    def test_update_recipients_from_emails_in_widget(
         self,
         write_box: WriteBox,
         header: str,
@@ -432,7 +432,7 @@ class TestWriteBox:
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
-        write_box.update_recipients(write_box.to_write_box)
+        write_box.update_recipients_from_emails_in_widget(write_box.to_write_box)
 
         assert write_box.recipient_emails == expected_recipient_emails
         assert write_box.recipient_user_ids == expected_recipient_user_ids
