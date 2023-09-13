@@ -590,8 +590,8 @@ class MiddleColumnView(urwid.Frame):
             # For new streams with no previous conversation.
             if self.footer.focus is None:
                 stream_id = self.model.stream_id
-                stream_dict = self.model.stream_dict
-                self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
+                stream_name = self.model.stream_name_from_id(stream_id)
+                self.footer.stream_box_view(caption=stream_name)
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key
@@ -621,7 +621,7 @@ class MiddleColumnView(urwid.Frame):
 
             stream_id, topic = stream_topic
             self.controller.narrow_to_topic(
-                stream_name=self.model.stream_dict[stream_id]["name"],
+                stream_name=self.model.stream_name_from_id(stream_id),
                 topic_name=topic,
             )
             return key

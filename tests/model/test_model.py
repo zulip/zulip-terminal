@@ -1923,6 +1923,29 @@ class TestModel:
         model._never_subscribed_streams = never_subscribed_streams
         assert model.get_all_stream_ids() == all_stream_ids
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_stream_name",
+        [
+            case(
+                1000,
+                "Some general stream",
+                id="Subscribed stream",
+            ),
+            case(
+                3,
+                "Stream 3",
+                id="Unsubscribed stream",
+            ),
+            case(
+                5,
+                "Stream 5",
+                id="Never subscribed stream",
+            ),
+        ],
+    )
+    def test_stream_name_from_id(self, model, stream_id, expected_stream_name):
+        assert model.stream_name_from_id(stream_id) == expected_stream_name
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

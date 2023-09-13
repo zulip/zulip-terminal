@@ -618,7 +618,7 @@ class WriteBox(urwid.Pile):
         )
 
         muted_streams = [
-            self.model.stream_dict[stream_id]["name"]
+            self.model.stream_name_from_id(stream_id)
             for stream_id in self.model.muted_streams
         ]
         matching_muted_streams = [
@@ -637,9 +637,8 @@ class WriteBox(urwid.Pile):
             else:
                 matched_streams.append(matching_muted_stream)
 
-        current_stream = self.model.stream_dict.get(self.stream_id, None)
-        if current_stream is not None:
-            current_stream_name = current_stream["name"]
+        if self.stream_id in self.model.get_all_stream_ids():
+            current_stream_name = self.model.stream_name_from_id(self.stream_id)
             if current_stream_name in matched_streams:
                 matched_streams.remove(current_stream_name)
                 matched_streams.insert(0, current_stream_name)

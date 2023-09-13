@@ -890,7 +890,7 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream_name = self.stream_name_from_id(stream_id)
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
@@ -1315,6 +1315,10 @@ class Model:
         id_list.extend(stream_id for stream_id in self._unsubscribed_streams)
         id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
         return id_list
+
+    def stream_name_from_id(self, stream_id: int) -> str:
+        stream = self._get_stream_from_id(stream_id)
+        return stream["name"]
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
