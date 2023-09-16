@@ -619,10 +619,18 @@ class Controller:
     def deregister_client(self) -> None:
         queue_id = self.model.queue_id
         self.client.deregister(queue_id, 1.0)
+        sys.exit(0)
 
     def exit_handler(self, signum: int, frame: Any) -> None:
-        self.deregister_client()
-        sys.exit(0)
+        question = urwid.Text(
+            ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
+            "center",
+        )
+        popup_view = PopUpConfirmationView(
+            self, question, self.deregister_client, location="center"
+        )
+        self.loop.widget = popup_view
+        self.loop.run()
 
     def _raise_exception(self, *args: Any, **kwargs: Any) -> Literal[True]:
         if self._exception_info is not None:
