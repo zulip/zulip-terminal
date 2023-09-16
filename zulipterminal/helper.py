@@ -165,6 +165,12 @@ def asynch(func: Callable[ParamT, None]) -> Callable[ParamT, None]:
     return wrapper
 
 
+def sort_unread_topics(
+    unread_topics: Dict[Tuple[int, str], int]
+) -> List[Tuple[int, str]]:
+    return sorted(unread_topics.keys())
+
+
 def _set_count_in_model(
     new_count: int, changed_messages: List[Message], unread_counts: UnreadCounts
 ) -> None:

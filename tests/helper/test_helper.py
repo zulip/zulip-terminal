@@ -19,6 +19,7 @@ from zulipterminal.helper import (
     open_media,
     powerset,
     process_media,
+    sort_unread_topics,
 )
 
 
@@ -242,6 +243,39 @@ def test_powerset(
     expected_powerset: List[Any],
 ) -> None:
     assert powerset(iterable, map_func) == expected_powerset
+
+
+@pytest.mark.parametrize(
+    "unread_topics, expected_value",
+    [
+        case({}, [], id="no_unread_topics"),
+        case(
+            {(99, "topic1"): 1},
+            [(99, "topic1")],
+            id="single_unread_topic",
+        ),
+        case(
+            {(999, "topic3"): 1, (1000, "topic2"): 1, (1, "topic1"): 1},
+            [(1, "topic1"), (999, "topic3"), (1000, "topic2")],
+            id="multiple_unread_topics",
+        ),
+        case(
+            {
+                (999, "topic3"): 1,
+                (1000, "topic2"): 1,
+                (1000, "topic4"): 3,
+                (1, "topic1"): 1,
+            },
+            [(1, "topic1"), (999, "topic3"), (1000, "topic2"), (1000, "topic4")],
+            id="multiple_unread_topics_in_same_stream",
+        ),
+    ],
+)
+def test_sort_unread_topics(
+    unread_topics: Dict[Tuple[int, str], int],
+    expected_value: List[Tuple[int, str]],
+) -> None:
+    assert sort_unread_topics(unread_topics) == expected_value
 
 
 @pytest.mark.parametrize(
