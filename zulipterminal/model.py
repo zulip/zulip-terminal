@@ -2,7 +2,6 @@
 Defines the `Model`, fetching and storing data retrieved from the Zulip server
 """
 
-import bisect
 import itertools
 import json
 import time
@@ -73,6 +72,7 @@ from zulipterminal.helper import (
     initial_index,
     notify_if_message_sent_outside_narrow,
     set_count,
+    sort_unread_topics,
 )
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -911,7 +911,7 @@ class Model:
                 self.stream_id_from_name(self.narrow[0][1]),
                 self.narrow[1][1],
             )
-        unread_topics = sorted(self.unread_counts["unread_topics"].keys())
+        unread_topics = sort_unread_topics(self.unread_counts["unread_topics"])
         next_topic = False
         stream_start: Optional[Tuple[int, str]] = None
         if current_topic is None:
@@ -921,7 +921,9 @@ class Model:
             # current_topic is not in unread_topics, and the next unmuted topic
             # is to be returned. This does not modify the original unread topics
             # data, and is just used to compute the next unmuted topic to be returned.
-            bisect.insort(unread_topics, current_topic)
+            unread_topics = sort_unread_topics(
+                {**self.unread_counts["unread_topics"], current_topic: 0}
+            )
         # loop over unread_topics list twice for the case that last_unread_topic was
         # the last valid unread_topic in unread_topics list.
         for unread_topic in unread_topics * 2:
