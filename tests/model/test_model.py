@@ -1946,6 +1946,24 @@ class TestModel:
     def test_stream_name_from_id(self, model, stream_id, expected_stream_name):
         assert model.stream_name_from_id(stream_id) == expected_stream_name
 
+    @pytest.mark.parametrize(
+        "stream_id, expected_stream_color",
+        [
+            case(
+                1000,
+                "#baf",
+                id="Subscribed stream",
+            ),
+            case(
+                3,
+                "#baf",
+                id="Unsubscribed stream",
+            ),
+        ],
+    )
+    def test_subscription_color_from_id(self, model, stream_id, expected_stream_color):
+        assert model.subscription_color_from_id(stream_id) == expected_stream_color
+
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(

@@ -412,8 +412,7 @@ class WriteBox(urwid.Pile):
             stream_id = self.model.stream_id_from_name(new_text)
             stream_access_type = self.model.stream_access_type(stream_id)
             stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
-            stream = self.model.stream_dict[stream_id]
-            color = stream["color"]
+            color = self.model.subscription_color_from_id(stream_id)
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(
             (color, stream_marker)
         )

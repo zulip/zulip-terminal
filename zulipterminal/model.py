@@ -1320,6 +1320,10 @@ class Model:
         stream = self._get_stream_from_id(stream_id)
         return stream["name"]
 
+    def subscription_color_from_id(self, subscription_id: int) -> str:
+        subscription = self._get_subscription_from_id(subscription_id)
+        return canonicalize_color(subscription["color"])
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.

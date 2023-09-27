@@ -1026,11 +1026,7 @@ class TestMessageBox:
         assert_header_bar,
         assert_search_bar,
     ):
-        self.model.stream_dict = {
-            205: {
-                "color": "#bd6",
-            },
-        }
+        self.model.subscription_color_from_id.return_value = "#bd6"
         self.model.narrow = msg_narrow
         messages = messages_successful_response["messages"]
         current_message = messages[msg_type]

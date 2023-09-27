@@ -1282,7 +1282,9 @@ class TestWriteBox:
         expected_color: str,
     ) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
-        write_box.model.stream_dict = stream_dict
+        write_box.model.subscription_color_from_id.side_effect = lambda x: stream_dict[
+            x
+        ]["color"]
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
         write_box.model.stream_access_type.return_value = stream_access_type

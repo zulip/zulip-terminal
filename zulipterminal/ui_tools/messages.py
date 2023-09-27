@@ -155,7 +155,7 @@ class MessageBox(urwid.Pile):
 
     def stream_header(self) -> Any:
         assert self.stream_id is not None
-        color = self.model.stream_dict[self.stream_id]["color"]
+        color = self.model.subscription_color_from_id(self.stream_id)
         bar_color = f"s{color}"
         stream_access_type = self.model.stream_access_type(self.stream_id)
         stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
@@ -224,7 +224,7 @@ class MessageBox(urwid.Pile):
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
 
-            bar_color = self.model.stream_dict[self.stream_id]["color"]
+            bar_color = self.model.subscription_color_from_id(self.stream_id)
             bar_color = f"s{bar_color}"
             stream_access_type = self.model.stream_access_type(self.stream_id)
             stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
