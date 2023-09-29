@@ -3007,6 +3007,7 @@ class TestModel:
     @pytest.mark.parametrize(
         (
             "narrow, event, is_notification_in_progress,"
+            "current_active_conversation_info,"
             "expected_active_conversation_info, expected_show_typing_notification,"
         ),
         [
@@ -3018,6 +3019,7 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
                 {},
                 False,
                 id="not_in_pm_narrow",
@@ -3035,6 +3037,7 @@ class TestModel:
                 },
                 False,
                 {},
+                {},
                 False,
                 id="not_in_pm_narrow_with_sender",
             ),
@@ -3050,6 +3053,7 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
                 {4: "hamlet"},
                 True,
                 id="in_pm_narrow_with_sender_typing:start",
@@ -3066,6 +3070,7 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                {},
                 {4: "hamlet"},
                 False,
                 id="in_pm_narrow_with_sender_typing:start_while_animation_in_progress",
@@ -3082,6 +3087,7 @@ class TestModel:
                     "id": 0,
                 },
                 True,
+                {4: "hamlet"},
                 {},
                 False,
                 id="in_pm_narrow_with_sender_typing:stop",
@@ -3099,6 +3105,7 @@ class TestModel:
                 },
                 False,
                 {},
+                {},
                 False,
                 id="in_pm_narrow_with_other_myself_typing:start",
             ),
@@ -3115,6 +3122,7 @@ class TestModel:
                 },
                 False,
                 {},
+                {},
                 False,
                 id="in_pm_narrow_with_other_myself_typing:stop",
             ),
@@ -3127,6 +3135,7 @@ class TestModel:
                     "id": 0,
                 },
                 False,
+                {},
                 {},
                 False,
                 id="in_pm_narrow_with_oneself:start",
@@ -3141,6 +3150,7 @@ class TestModel:
                 },
                 False,
                 {},
+                {},
                 False,
                 id="in_pm_narrow_with_oneself:stop",
             ),
@@ -3153,15 +3163,19 @@ class TestModel:
         narrow,
         event,
         is_notification_in_progress,
+        current_active_conversation_info,
         expected_active_conversation_info,
         expected_show_typing_notification,
     ):
         event["type"] = "typing"
 
         model.narrow = narrow
-        model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
+        model.user_dict = {
+            "hamlet@zulip.com": {"full_name": "hamlet"},
+            "claudius@zulip.com": {"full_name": "claudius"},
+        }
         model.user_id = 5  # Iago's user_id
-        model.controller.active_conversation_info = {}
+        model.controller.active_conversation_info = current_active_conversation_info
         model.controller.is_typing_notification_in_progress = (
             is_notification_in_progress
         )

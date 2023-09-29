@@ -2,7 +2,7 @@ import os
 import webbrowser
 from platform import platform
 from threading import Thread, Timer
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, List, Optional, Set, Tuple
 
 import pyperclip
 import pytest
@@ -558,7 +558,7 @@ class TestController:
     @pytest.mark.parametrize(
         "active_conversation_info",
         [
-            case({"sender_name": "hamlet"}, id="in_pm_narrow_with_sender_typing:start"),
+            case({4: "hamlet@zulip.com"}, id="in_pm_narrow_with_sender_typing:start"),
             case({}, id="in_pm_narrow_with_sender_typing:stop"),
         ],
     )
@@ -566,29 +566,119 @@ class TestController:
         self,
         mocker: MockerFixture,
         controller: Controller,
-        active_conversation_info: Dict[str, str],
+        active_conversation_info: Any,
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
         mocker.patch(MODULE + ".time.sleep")
         controller.active_conversation_info = active_conversation_info
+        USER_DICT = "user_dict"
+        setattr(
+            controller.model,
+            USER_DICT,
+            {
+                "hamlet@zulip.com": {"full_name": "hamlet"},
+                "iago@zulip.com": {"full_name": "iago"},
+                "verona@zulip.com": {"full_name": "verona"},
+                "fan@zulip.com": {"full_name": "fan"},
+            },
+        )
+        length = len(active_conversation_info)
+        active_conversation_info = ", ".join(active_conversation_info.values())
 
         def mock_typing() -> None:
-            controller.active_conversation_info = {}
+            controller.active_conversation_info = dict()
 
         Timer(0.1, mock_typing).start()
         Thread(controller.show_typing_notification()).start()
 
         if active_conversation_info:
-            set_footer_text.assert_has_calls(
-                [
-                    mocker.call([("footer_contrast", " hamlet "), " is typing"]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing."]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing.."]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
-                ]
-            )
-            set_footer_text.assert_called_with()
-        else:
-            set_footer_text.assert_called_once_with()
+            if length == 1:
+                set_footer_text.assert_has_calls(
+                    [
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " is typing"),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " is typing."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " is typing.."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " is typing..."),
+                            ]
+                        ),
+                    ]
+                )
+            elif length < 4:
+                set_footer_text.assert_has_calls(
+                    [
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " are typing"),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " are typing."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " are typing.."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", f"{active_conversation_info} "),
+                                ("footer", " are typing..."),
+                            ]
+                        ),
+                    ]
+                )
+            else:
+                set_footer_text.assert_has_calls(
+                    [
+                        mocker.call(
+                            [
+                                ("footer_contrast", "Multiple people "),
+                                ("footer", " are typing"),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", "Multiple people "),
+                                ("footer", " are typing."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", "Multiple people "),
+                                ("footer", " are typing.."),
+                            ]
+                        ),
+                        mocker.call(
+                            [
+                                ("footer_contrast", "Multiple people "),
+                                ("footer", " is typing..."),
+                            ]
+                        ),
+                    ]
+                )
+                set_footer_text.assert_called_with()
         assert controller.is_typing_notification_in_progress is False
-        assert controller.active_conversation_info == {}
+        assert controller.active_conversation_info == dict()

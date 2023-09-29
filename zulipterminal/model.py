@@ -1507,7 +1507,7 @@ class Model:
         if (
             len(narrow) == 1
             and narrow[0][0] == "pm-with"
-            and sender_email in narrow[0][1].split(",")
+            and sender_email in narrow[0][1].split(", ")
             and sender_id != self.user_id
         ):
             if event["op"] == "start":
@@ -1518,7 +1518,7 @@ class Model:
                     controller.show_typing_notification()
 
             elif event["op"] == "stop":
-                controller.active_conversation_info = {}
+                controller.active_conversation_info.pop(sender_id)
 
             else:
                 raise RuntimeError("Unknown typing event operation")
