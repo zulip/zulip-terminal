@@ -48,6 +48,7 @@ class TestController:
         self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
+        self.exit_confirmation = True
         self.maximum_footlinks = 3
         result = Controller(
             config_file=self.config_file,
@@ -60,6 +61,7 @@ class TestController:
             **dict(
                 autohide=self.autohide,
                 notify=self.notify_enabled,
+                exit_confirmation=self.exit_confirmation,
             ),
         )
         result.view.message_view = mocker.Mock()  # set in View.__init__

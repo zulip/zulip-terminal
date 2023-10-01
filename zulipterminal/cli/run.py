@@ -61,6 +61,7 @@ requests_logger.setLevel(logging.DEBUG)
 VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
     "autohide": ("autohide", "no_autohide"),
     "notify": ("enabled", "disabled"),
+    "exit_confirmation": ("enabled", "disabled"),
 }
 
 COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
@@ -78,10 +79,14 @@ DEFAULT_SETTINGS = {
     "footlinks": "enabled",
     "color-depth": "256",
     "maximum-footlinks": "3",
+    "exit_confirmation": "enabled",
 }
 assert DEFAULT_SETTINGS["autohide"] in VALID_BOOLEAN_SETTINGS["autohide"]
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
 assert DEFAULT_SETTINGS["color-depth"] in COLOR_DEPTH_ARGS_TO_DEPTHS
+assert (
+    DEFAULT_SETTINGS["exit_confirmation"] in VALID_BOOLEAN_SETTINGS["exit_confirmation"]
+)
 
 
 def in_color(color: str, text: str) -> str:
@@ -537,6 +542,7 @@ def main(options: Optional[List[str]] = None) -> None:
                 incomplete_theme_text += "      (all themes are incomplete)"
             print(in_color("yellow", incomplete_theme_text))
         print_setting("autohide setting", zterm["autohide"])
+        print_setting("exit confirmation setting", zterm["exit_confirmation"])
         if zterm["footlinks"].source == ConfigSource.ZULIPRC:
             print_setting(
                 "maximum footlinks value",

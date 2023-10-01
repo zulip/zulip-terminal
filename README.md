@@ -232,6 +232,9 @@ theme=zt_dark
 ## Autohide: set to 'autohide' to hide the left & right panels except when they're focused
 autohide=no_autohide
 
+## Exit Confirmation: set to 'disabled' to exit directly with no warning popup first
+exit_confirmation=enabled
+
 ## Footlinks: set to 'disabled' to hide footlinks; 'enabled' will show the first 3 per message
 ## For more flexibility, comment-out this value, and un-comment maximum-footlinks below
 footlinks=enabled

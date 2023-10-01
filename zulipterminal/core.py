@@ -70,12 +70,14 @@ class Controller:
         in_explore_mode: bool,
         autohide: bool,
         notify: bool,
+        exit_confirmation: bool,
     ) -> None:
         self.theme_name = theme_name
         self.theme = theme
         self.color_depth = color_depth
         self.in_explore_mode = in_explore_mode
         self.autohide = autohide
+        self.exit_confirmation = exit_confirmation
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
 
@@ -107,7 +109,12 @@ class Controller:
         self._exception_pipe = self.loop.watch_pipe(self._raise_exception)
 
         # Register new ^C handler
-        signal.signal(signal.SIGINT, self.exit_handler)
+        signal.signal(
+            signal.SIGINT,
+            self.prompting_exit_handler
+            if self.exit_confirmation
+            else self.no_prompt_exit_handler,
+        )
 
     def raise_exception_in_main_thread(
         self, exc_info: ExceptionInfo, *, critical: bool
@@ -621,7 +628,10 @@ class Controller:
         self.client.deregister(queue_id, 1.0)
         sys.exit(0)
 
-    def exit_handler(self, signum: int, frame: Any) -> None:
+    def no_prompt_exit_handler(self, signum: int, frame: Any) -> None:
+        self.deregister_client()
+
+    def prompting_exit_handler(self, signum: int, frame: Any) -> None:
         question = urwid.Text(
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
