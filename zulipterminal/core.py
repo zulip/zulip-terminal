@@ -27,6 +27,7 @@ from zulipterminal.config.ui_sizes import (
 )
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
+from zulipterminal.platform_code import notify
 from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -572,6 +573,12 @@ class Controller:
     def narrow_to_stream(
         self, *, stream_name: str, contextual_message_id: Optional[int] = None
     ) -> None:
+        stream_id = self.model.stream_id_from_name(stream_name)
+        topics = self.model.topics_in_stream(stream_id=stream_id)
+        # notify(str(topics),str(topics))
+        self.view.left_panel.update_stream_view_topic(stream_id)
+        self.view.left_panel.show_stream_view()
+        # POI - stream narrow function 
         self._narrow_to(anchor=contextual_message_id, stream=stream_name)
 
     def narrow_to_topic(
