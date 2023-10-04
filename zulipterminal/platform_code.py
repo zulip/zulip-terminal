@@ -13,15 +13,29 @@ SupportedPlatforms = Literal["Linux", "MacOS", "WSL"]
 AllPlatforms = Literal[SupportedPlatforms, "unsupported"]
 
 raw_platform = platform.system()
+print(raw_platform)
+print(platform.release())
 
 PLATFORM: AllPlatforms
 
 if raw_platform == "Linux":
     PLATFORM = "WSL" if "microsoft" in platform.release().lower() else "Linux"
+    # platform.release() seems to give kernel version - hence microsoft for WSL?
+    # TODO: In future we can use freedesktop_os_release() (python 3.10)
+    extra = f"kernel {platform.release()}"
 elif raw_platform == "Darwin":
     PLATFORM = "MacOS"
+    # platform.release() gives kernel version, but this gives OS & architecture
+    mac_ver = platform.mac_ver()
+    extra = f"{mac_ver[0]} on {mac_ver[2]}"
+elif raw_platform == "Windows":
+    PLATFORM = "unsupported"
+    # platform.win32_ver() gives more information as a tuple
+    # Note that this includes Windows here, since it is not a supported native platform
+    extra = f"Windows {platform.release()}"
 else:
     PLATFORM = "unsupported"
+    extra = platform.release()
 
 
 # PLATFORM DEPENDENT HELPERS
@@ -29,6 +43,7 @@ MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
 def detected_platform() -> str:
+    print(f"{PLATFORM} ({extra})")
     return PLATFORM
 
 

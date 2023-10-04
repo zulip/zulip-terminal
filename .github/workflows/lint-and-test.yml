@@ -207,6 +207,7 @@ jobs:
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.x', OS: macos-latest, NAME: "CPython 3.x [latest] (macos)", EXPECT: "MacOS"}
+          - {PYTHON: '3.x', OS: windows-latest, NAME: "CPython 3.x [latest] (windows)", EXPECT: "unsupported"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
     runs-on: ${{ matrix.env.OS }}
