@@ -45,6 +45,7 @@ from zulipterminal.api_types import (
     PrivateMessageUpdateRequest,
     RealmEmojiData,
     RealmUser,
+    Stream,
     StreamComposition,
     StreamMessageUpdateRequest,
     Subscription,
@@ -177,10 +178,17 @@ class Model:
         self._update_users_data_from_initial_data()
 
         self.stream_dict: Dict[int, Any] = {}
+        self._unsubscribed_streams: Dict[int, Subscription] = {}
+        self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
         self.visual_notified_streams: Set[int] = set()
+
+        self._register_non_subscribed_streams(
+            unsubscribed_streams=self.initial_data["unsubscribed"],
+            never_subscribed_streams=self.initial_data["never_subscribed"],
+        )
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
@@ -1268,6 +1276,19 @@ class Model:
             raise RuntimeError("Invalid user ID.")
 
         return self.user_dict[user_email]["full_name"]
+
+    def _register_non_subscribed_streams(
+        self,
+        unsubscribed_streams: List[Subscription],
+        never_subscribed_streams: List[Stream],
+    ) -> None:
+        self._unsubscribed_streams = {
+            subscription["stream_id"]: subscription
+            for subscription in unsubscribed_streams
+        }
+        self._never_subscribed_streams = {
+            stream["stream_id"]: stream for stream in never_subscribed_streams
+        }
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:

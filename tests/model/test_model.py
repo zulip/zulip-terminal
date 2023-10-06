@@ -63,6 +63,8 @@ class TestModel:
         realm_emojis_data,
         zulip_emoji,
         stream_dict,
+        unsubscribed_streams,
+        never_subscribed_streams,
     ):
         assert hasattr(model, "controller")
         assert hasattr(model, "client")
@@ -70,6 +72,8 @@ class TestModel:
         assert model._have_last_message == {}
         assert model.stream_id is None
         assert model.stream_dict == stream_dict
+        assert model._unsubscribed_streams == unsubscribed_streams
+        assert model._never_subscribed_streams == never_subscribed_streams
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model.last_unread_pm is None

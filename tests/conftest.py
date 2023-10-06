@@ -11,6 +11,8 @@ from zulipterminal.api_types import (
     CustomProfileField,
     Message,
     MessageType,
+    Stream,
+    Subscription,
 )
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
@@ -337,6 +339,65 @@ def streams_fixture(
             }
         )
     return deepcopy(streams)
+
+
+@pytest.fixture
+def unsubscribed_streams_fixture() -> List[Subscription]:
+    unsubscribed_streams: List[Subscription] = []
+    for i in range(3, 5):
+        unsubscribed_streams.append(
+            {
+                "name": f"Stream {i}",
+                "date_created": 1472047124 + i,
+                "invite_only": False,
+                "color": "#b0a5fd",
+                "pin_to_top": False,
+                "stream_id": i,
+                "is_muted": False,
+                "audible_notifications": False,
+                "description": f"A description of stream {i}",
+                "rendered_description": f"A description of stream {i}",
+                "desktop_notifications": False,
+                "stream_weekly_traffic": 0,
+                "push_notifications": False,
+                "message_retention_days": i + 30,
+                "email_address": f"stream{i}@example.com",
+                "email_notifications": False,
+                "wildcard_mentions_notify": False,
+                "subscribers": [1001, 11, 12],
+                "history_public_to_subscribers": True,
+                "is_announcement_only": True,
+                "stream_post_policy": 0,
+                "is_web_public": True,
+                "first_message_id": None,
+            }
+        )
+    return deepcopy(unsubscribed_streams)
+
+
+@pytest.fixture
+def never_subscribed_streams_fixture() -> List[Stream]:
+    never_subscribed_streams: List[Stream] = []
+    for i in range(5, 7):
+        never_subscribed_streams.append(
+            {
+                "name": f"Stream {i}",
+                "date_created": 1472047124 + i,
+                "invite_only": False,
+                "stream_id": i,
+                "description": f"A description of stream {i}",
+                "rendered_description": f"A description of stream {i}",
+                "stream_weekly_traffic": 0,
+                "message_retention_days": i + 30,
+                "subscribers": [1001, 11, 12],
+                "history_public_to_subscribers": True,
+                "is_announcement_only": True,
+                "stream_post_policy": 0,
+                "is_web_public": True,
+                "first_message_id": None,
+            }
+        )
+    return deepcopy(never_subscribed_streams)
 
 
 @pytest.fixture
@@ -873,6 +934,8 @@ def initial_data(
     logged_on_user: Dict[str, Any],
     users_fixture: List[Dict[str, Any]],
     streams_fixture: List[Dict[str, Any]],
+    unsubscribed_streams_fixture: List[Subscription],
+    never_subscribed_streams_fixture: List[Stream],
     realm_emojis: Dict[str, Dict[str, Any]],
     custom_profile_fields_fixture: List[Dict[str, Union[str, int]]],
 ) -> Dict[str, Any]:
@@ -884,24 +947,7 @@ def initial_data(
         "email": logged_on_user["email"],
         "user_id": logged_on_user["user_id"],
         "realm_name": "Test Organization Name",
-        "unsubscribed": [
-            {
-                "audible_notifications": False,
-                "description": "announce",
-                "stream_id": 7,
-                "is_old_stream": True,
-                "desktop_notifications": False,
-                "pin_to_top": False,
-                "stream_weekly_traffic": 0,
-                "invite_only": False,
-                "name": "announce",
-                "push_notifications": False,
-                "email_address": "",
-                "color": "#bfd56f",
-                "is_muted": False,
-                "history_public_to_subscribers": True,
-            }
-        ],
+        "unsubscribed": unsubscribed_streams_fixture,
         "result": "success",
         "queue_id": "1522420755:786",
         "realm_users": users_fixture,
@@ -950,24 +996,7 @@ def initial_data(
         "subscriptions": streams_fixture,
         "msg": "",
         "max_message_id": 552761,
-        "never_subscribed": [
-            {
-                "invite_only": False,
-                "description": "Announcements from the Zulip GCI Mentors",
-                "stream_id": 87,
-                "name": "GCI announce",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-            {
-                "invite_only": False,
-                "description": "General discussion",
-                "stream_id": 74,
-                "name": "GCI general",
-                "is_old_stream": True,
-                "stream_weekly_traffic": 0,
-            },
-        ],
+        "never_subscribed": never_subscribed_streams_fixture,
         "unread_msgs": {
             "pms": [
                 {"sender_id": 1, "unread_message_ids": [1, 2]},
@@ -1435,6 +1464,26 @@ def user_id(logged_on_user: Dict[str, Any]) -> int:
 @pytest.fixture
 def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
     return {stream["stream_id"]: stream for stream in streams_fixture}
+
+
+@pytest.fixture
+def unsubscribed_streams(
+    unsubscribed_streams_fixture: List[Subscription],
+) -> Dict[int, Subscription]:
+    return {
+        unsubscribed_stream["stream_id"]: unsubscribed_stream
+        for unsubscribed_stream in unsubscribed_streams_fixture
+    }
+
+
+@pytest.fixture
+def never_subscribed_streams(
+    never_subscribed_streams_fixture: List[Stream],
+) -> Dict[int, Stream]:
+    return {
+        never_subscribed_stream["stream_id"]: never_subscribed_stream
+        for never_subscribed_stream in never_subscribed_streams_fixture
+    }
 
 
 @pytest.fixture(
