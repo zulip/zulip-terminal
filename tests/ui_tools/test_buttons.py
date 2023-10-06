@@ -434,11 +434,6 @@ class TestTopicButton:
         is_resolved: bool,
     ) -> None:
         controller = mocker.Mock()
-        controller.model.stream_dict = {
-            205: {"name": "PTEST"},
-            86: {"name": "Django"},
-            14: {"name": "GSoC"},
-        }
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
@@ -488,7 +483,6 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value
         )
-        controller.model.stream_dict = {205: {"name": stream_name}}
         view = mocker.Mock()
         TopicButton(
             stream_id=205,
@@ -899,14 +893,12 @@ class TestMessageLinkButton:
     )
     def test__validate_narrow_link(
         self,
-        stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
         expected_error: str,
     ) -> None:
-        self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
         )

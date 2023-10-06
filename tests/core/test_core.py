@@ -134,10 +134,9 @@ class TestController:
         controller.model.narrow = []
         controller.model.index = index_stream
         controller.view.message_view = mocker.patch("urwid.ListBox")
-        controller.model.stream_dict = {
-            stream_id: general_stream,
-        }
-        controller.model.stream_dict[stream_id]["name"] = stream_name
+        mocker.patch(MODEL + ".stream_name_from_id", return_value=stream_name)
+        mocker.patch(MODEL + ".stream_id_from_name", return_value=stream_id)
+        mocker.patch(MODEL + ".is_user_subscribed_to_stream", return_value=True)
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -186,10 +185,9 @@ class TestController:
         controller.model.index = index_multiple_topic_msg
         controller.model.stream_id = initial_stream_id
         controller.view.message_view = mocker.patch("urwid.ListBox")
-        controller.model.stream_dict = {
-            stream_id: general_stream,
-        }
-        controller.model.stream_dict[stream_id]["name"] = stream_name
+        mocker.patch(MODEL + ".stream_name_from_id", return_value=stream_name)
+        mocker.patch(MODEL + ".stream_id_from_name", return_value=stream_id)
+        mocker.patch(MODEL + ".is_user_subscribed_to_stream", return_value=True)
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -263,9 +261,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
-        controller.model.stream_dict = {
-            stream_id: general_stream,
-        }
+        mocker.patch(MODEL + ".is_user_subscribed_to_stream", return_value=True)
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -315,9 +311,7 @@ class TestController:
         # FIXME: Expand upon is_muted_topic().
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
-        controller.model.stream_dict = {
-            stream_id: general_stream,
-        }
+        mocker.patch(MODEL + ".is_user_subscribed_to_stream", return_value=True)
         controller.view.message_view = mocker.patch("urwid.ListBox")
 
         controller.narrow_to_all_starred()  # FIXME: Add id narrowing test
@@ -345,9 +339,7 @@ class TestController:
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
-        controller.model.stream_dict = {
-            stream_id: general_stream,
-        }
+        mocker.patch(MODEL + ".is_user_subscribed_to_stream", return_value=True)
         controller.view.message_view = mocker.patch("urwid.ListBox")
 
         controller.narrow_to_all_mentions()  # FIXME: Add id narrowing test

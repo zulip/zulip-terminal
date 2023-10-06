@@ -695,7 +695,6 @@ class TestTopicsView:
     ):
         mocker.patch(SUBDIR + ".buttons.TopButton.__init__", return_value=None)
         set_focus_valign = mocker.patch(VIEWS + ".urwid.ListBox.set_focus_valign")
-        topic_view.view.controller.model.stream_dict = {86: {"name": "PTEST"}}
         topic_view.view.controller.model.is_muted_topic = mocker.Mock(
             return_value=False
         )
