@@ -154,10 +154,11 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
 
 
 @pytest.fixture
-def platform_mocker(mocker: MockerFixture) -> Callable[[str], List[str]]:
-    def factory(platform: str) -> List[str]:
+def platform_mocker(mocker: MockerFixture) -> Callable[[str, str], List[str]]:
+    def factory(platform: str, python: str) -> List[str]:
         mocker.patch(MODULE + ".detected_platform", return_value=platform)
-        return [f"Detected platform: {platform}"]
+        mocker.patch(MODULE + ".detected_python_in_full", return_value=python)
+        return ["Detected:", f" - platform: {platform}", f" - python: {python}"]
 
     return factory
 
@@ -174,16 +175,17 @@ def minimal_zuliprc(tmp_path: Path) -> str:
 def test_valid_zuliprc_but_no_connection(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    platform_mocker: Callable[[str], List[str]],
+    platform_mocker: Callable[[str, str], List[str]],
     minimal_zuliprc: str,
     server_connection_error: str = "some_error",
     platform: str = "some_platform",
+    python: str = "3.99 (Zython) [cool]",
 ) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
         side_effect=ServerConnectionFailure(server_connection_error),
     )
-    expected_platform_output = platform_mocker(platform)
+    expected_platform_output = platform_mocker(platform, python)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc])
@@ -218,13 +220,14 @@ def test_valid_zuliprc_but_no_connection(
 def test_warning_regarding_incomplete_theme(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    platform_mocker: Callable[[str], List[str]],
+    platform_mocker: Callable[[str, str], List[str]],
     minimal_zuliprc: str,
     bad_theme: str,
     expected_complete_incomplete_themes: Tuple[List[str], List[str]],
     expected_warning: str,
     server_connection_error: str = "sce",
     platform: str = "some_platform",
+    python: str = "3.99 (Zython) [cool]",
 ) -> None:
     mocker.patch(
         CONTROLLER + ".__init__",
@@ -238,7 +241,7 @@ def test_warning_regarding_incomplete_theme(
     )
     mocker.patch(MODULE + ".generate_theme")
 
-    expected_platform_output = platform_mocker(platform)
+    expected_platform_output = platform_mocker(platform, python)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", minimal_zuliprc, "-t", bad_theme])
@@ -441,12 +444,13 @@ def parameterized_zuliprc(tmp_path: Path) -> Callable[[Dict[str, str]], str]:
 def test_successful_main_function_with_config(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    platform_mocker: Callable[[str], List[str]],
+    platform_mocker: Callable[[str, str], List[str]],
     parameterized_zuliprc: Callable[[Dict[str, str]], str],
     config_key: str,
     config_value: str,
     footlinks_output: str,
     platform: str = "some_platform",
+    python: str = "3.99 (Zython) [cool]",
 ) -> None:
     config = {
         "theme": "default",
@@ -460,7 +464,7 @@ def test_successful_main_function_with_config(
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
     mocker.patch(CONTROLLER + ".main", return_value=None)
 
-    expected_platform_output = platform_mocker(platform)
+    expected_platform_output = platform_mocker(platform, python)
 
     with pytest.raises(SystemExit):
         main(["-c", zuliprc])
@@ -496,18 +500,19 @@ def test_successful_main_function_with_config(
 def test_main_error_with_invalid_zuliprc_options(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
-    platform_mocker: Callable[[str], List[str]],
+    platform_mocker: Callable[[str, str], List[str]],
     parameterized_zuliprc: Callable[[Dict[str, str]], str],
     zulip_config: Dict[str, str],
     error_message: str,
     platform: str = "some_platform",
+    python: str = "3.99 (Zython) [cool]",
 ) -> None:
     zuliprc = parameterized_zuliprc(zulip_config)
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
     mocker.patch(MODULE + ".detected_platform", return_value=platform)
     mocker.patch(CONTROLLER + ".main", return_value=None)
 
-    expected_platform_output = platform_mocker(platform)
+    expected_platform_output = platform_mocker(platform, python)
 
     with pytest.raises(SystemExit) as e:
         main(["-c", zuliprc])

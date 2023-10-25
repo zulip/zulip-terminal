@@ -26,7 +26,7 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.platform_code import detected_platform
+from zulipterminal.platform_code import detected_platform, detected_python_in_full
 from zulipterminal.version import ZT_VERSION
 
 
@@ -430,7 +430,11 @@ def main(options: Optional[List[str]] = None) -> None:
     else:
         zuliprc_path = "~/zuliprc"
 
-    print(f"Detected platform: {detected_platform()}")
+    print(
+        "Detected:"
+        f"\n - platform: {detected_platform()}"
+        f"\n - python: {detected_python_in_full()}"
+    )
 
     try:
         zterm = parse_zuliprc(zuliprc_path)
