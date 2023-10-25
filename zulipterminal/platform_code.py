@@ -4,8 +4,24 @@ Detection of supported platforms & platform-specific functions
 
 import platform
 import subprocess
+from typing import Tuple
 
 from typing_extensions import Literal
+
+
+# PYTHON DETECTION
+def detected_python() -> Tuple[str, str, str]:
+    return (
+        platform.python_version(),
+        platform.python_implementation(),
+        platform.python_branch(),
+    )
+
+
+def detected_python_in_full() -> str:
+    version, implementation, branch = detected_python()
+    branch_text = f"[{branch}]" if branch else ""
+    return f"{version} ({implementation}) {branch_text}"
 
 
 # PLATFORM DETECTION
