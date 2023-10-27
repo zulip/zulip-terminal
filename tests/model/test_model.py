@@ -3154,6 +3154,126 @@ class TestModel:
                 False,
                 id="in_pm_narrow_with_oneself:stop",
             ),
+            case(
+                [
+                    [
+                        "pm-with",
+                        "hamlet@zulip.com",
+                        "claudius@zulip.com",
+                        "iago@zulip.com",
+                    ]
+                ],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                False,
+                {},
+                {4: "hamlet"},
+                True,
+                id="in_group_pm_narrow_with_sender_typing:start",
+            ),
+            case(
+                [
+                    [
+                        "pm-with",
+                        "hamlet@zulip.com",
+                        "claudius@zulip.com",
+                        "iago@zulip.com",
+                    ]
+                ],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 4, "email": "hamlet@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 5, "email": "iago@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {4: "hamlet"},
+                {},
+                False,
+                id="in_group_pm_narrow,sender_typing:stop"
+                "_while animation is in progress",
+            ),
+            case(
+                [["pm-with", "hamlet@zulip.com, claudius@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 6, "email": "claudius@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 6, "email": "claudius@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {4: "hamlet"},
+                {4: "hamlet", 6: "claudius"},
+                False,
+                id="in_group_pm_narrow,second_sender_typing:start"
+                "_while animation in progress",
+            ),
+            case(
+                [["pm-with", "hamlet@zulip.com, claudius@zulip.com"]],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 6, "email": "claudius@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 6, "email": "claudius@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {4: "hamlet", 6: "claudius"},
+                {4: "hamlet"},
+                False,
+                id="in_group_pm_narrow,second_sender_typing:stop"
+                "_while animation in progress",
+            ),
+            case(
+                [["pm-with", "hamlet@zulip.com, claudius@zulip.com,iago@zulip.com"]],
+                {
+                    "op": "start",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 6, "email": "claudius@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {4: "hamlet", 6: "claudius"},
+                {4: "hamlet", 6: "claudius"},
+                False,
+                id="in_group_pm_narrow,user_typing:start"
+                "_while animation in progress",
+            ),
+            case(
+                [["pm-with", "hamlet@zulip.com, claudius@zulip.com,iago@zulip.com"]],
+                {
+                    "op": "stop",
+                    "sender": {"user_id": 5, "email": "iago@zulip.com"},
+                    "recipients": [
+                        {"user_id": 4, "email": "hamlet@zulip.com"},
+                        {"user_id": 6, "email": "claudius@zulip.com"},
+                    ],
+                    "id": 0,
+                },
+                True,
+                {4: "hamlet", 6: "claudius"},
+                {4: "hamlet", 6: "claudius"},
+                False,
+                id="in_group_pm_narrow,usertyping:stop_" "while animation in progress",
+            ),
         ],
     )
     def test__handle_typing_event(
