@@ -560,6 +560,18 @@ class TestController:
         [
             case({4: "hamlet@zulip.com"}, id="in_pm_narrow_with_sender_typing:start"),
             case({}, id="in_pm_narrow_with_sender_typing:stop"),
+            case(
+                {1: "iago@zulip.com", 4: "hamlet@zulip.com"},
+                id="in_group_pm_narrow_1_member_active",
+            ),
+            case(
+                {1: "iago@zulip.com", 2: "verona@zulip.com"},
+                id="in_group_pm_where_3_members_active",
+            ),
+            case(
+                {1: "iago@zulip.com", 2: "verona@zulip.com", 3: "fan@zulip.com"},
+                id="in_group_pm_where_4_members_active",
+            ),
         ],
     )
     def test_show_typing_notification(
