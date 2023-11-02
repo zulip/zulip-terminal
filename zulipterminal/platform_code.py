@@ -24,6 +24,17 @@ def detected_python_in_full() -> str:
     return f"{version} ({implementation}) {branch_text}"
 
 
+def detected_python_short() -> str:
+    """Concise output for comparison in CI (CPython implied in version)"""
+    version, implementation, _ = detected_python()
+    short_version = version[: version.rfind(".")]
+    if implementation == "CPython":
+        return short_version
+    if implementation == "PyPy":
+        return f"pypy-{short_version}"
+    raise NotImplementedError
+
+
 # PLATFORM DETECTION
 SupportedPlatforms = Literal["Linux", "MacOS", "WSL"]
 AllPlatforms = Literal[SupportedPlatforms, "unsupported"]

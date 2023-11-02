@@ -209,6 +209,7 @@ jobs:
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
+      PYTHON: ${{ matrix.env.PYTHON }}
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
@@ -230,6 +231,8 @@ jobs:
         run: sudo apt install libxml2-dev libxslt1-dev
       - name: Ensure regular package installs from checkout
         run: pip install .
+      - name: Check we detect the python environment correctly
+        run: python -c "from zulipterminal.platform_code import detected_python_short; import os; e, d = os.environ['PYTHON'], detected_python_short(); assert d == e, f'{d} != {e}'"
       - name: Check we detect the platform correctly
         run: python -c "from zulipterminal.platform_code import detected_platform; import os; e, d = os.environ['EXPECT'], detected_platform(); assert d == e, f'{d} != {e}'"
       - name: Install test dependencies
