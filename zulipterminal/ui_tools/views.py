@@ -41,6 +41,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
+from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1103,6 +1104,10 @@ class AboutView(PopUpView):
                     ("Color depth", str(color_depth)),
                     ("Notifications", "enabled" if notify_enabled else "disabled"),
                 ],
+            ),
+            (
+                "Detected environment",
+                [("Platform", PLATFORM), ("Python", detected_python_in_full())],
             ),
         ]
 
