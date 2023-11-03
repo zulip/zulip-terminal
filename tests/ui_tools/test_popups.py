@@ -259,6 +259,7 @@ class TestAboutView:
             "Application",
             "Server",
             "Application Configuration",
+            "Detected environment",
         ]
 
 
