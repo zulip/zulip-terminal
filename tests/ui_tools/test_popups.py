@@ -187,7 +187,6 @@ class TestAboutView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(LISTWALKER, return_value=[])
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
 
         self.about_view = AboutView(
@@ -247,6 +246,20 @@ class TestAboutView:
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
         )
+
+    def test_categories(self) -> None:
+        categories = [
+            widget.text
+            for widget in self.about_view.log
+            if isinstance(widget, Text)
+            and len(widget.attrib)
+            and "popup_category" in widget.attrib[0][0]
+        ]
+        assert categories == [
+            "Application",
+            "Server",
+            "Application Configuration",
+        ]
 
 
 class TestUserInfoView:
