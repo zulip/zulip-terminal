@@ -1086,6 +1086,7 @@ class AboutView(PopUpView):
         autohide_enabled: bool,
         maximum_footlinks: int,
         notify_enabled: bool,
+        exit_confirmation_enabled: bool,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1103,6 +1104,10 @@ class AboutView(PopUpView):
                     ("Maximum footlinks", str(maximum_footlinks)),
                     ("Color depth", str(color_depth)),
                     ("Notifications", "enabled" if notify_enabled else "disabled"),
+                    (
+                        "Exit confirmation",
+                        "enabled" if exit_confirmation_enabled else "disabled",
+                    ),
                 ],
             ),
             (
