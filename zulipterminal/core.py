@@ -307,6 +307,7 @@ class Controller:
                 notify_enabled=self.notify_enabled,
                 autohide_enabled=self.autohide,
                 maximum_footlinks=self.maximum_footlinks,
+                exit_confirmation_enabled=self.exit_confirmation,
             ),
             "area:help",
         )
