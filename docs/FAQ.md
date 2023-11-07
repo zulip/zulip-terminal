@@ -106,6 +106,7 @@ We have reports of success on the following terminal emulators:
 * Terminator (https://github.com/gnome-terminator/terminator)
 * iterm2 (https://iterm2.com/) **Mac only**
 * mosh (https://mosh.org/)
+* Alaccrity (https://github.com/alacritty/alacritty)
 
 Issues have been reported with the following:
 
