@@ -532,6 +532,21 @@ class Controller:
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
         self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
 
+    def exit_compose_confirmation_popup(self) -> None:
+        question = urwid.Text(
+            (
+                "bold",
+                "Please confirm that you wish to exit the compose box.\n"
+                "(You can save the message as a draft upon returning to compose)",
+            ),
+            "center",
+        )
+        write_box = self.view.write_box
+        popup_view = PopUpConfirmationView(
+            self, question, write_box.exit_compose_box, location="center"
+        )
+        self.loop.widget = popup_view
+
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
         try:
             pyperclip.copy(text)
