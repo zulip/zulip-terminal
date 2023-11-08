@@ -54,6 +54,9 @@ from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.urwid_types import urwid_Size
 
 
+CONFIRMATION_MSG_LENGTH = 15
+
+
 class _MessageEditState(NamedTuple):
     message_id: int
     old_topic: str
@@ -710,6 +713,12 @@ class WriteBox(urwid.Pile):
 
         return emoji_typeahead, emojis
 
+    def exit_compose_box(self) -> None:
+        self._set_compose_attributes_to_defaults()
+        self.view.controller.exit_editor_mode()
+        self.main_view(False)
+        self.view.middle_column.set_focus("body")
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
@@ -801,10 +810,10 @@ class WriteBox(urwid.Pile):
                     )
         elif is_command_key("GO_BACK", key):
             self.send_stop_typing_status()
-            self._set_compose_attributes_to_defaults()
-            self.view.controller.exit_editor_mode()
-            self.main_view(False)
-            self.view.middle_column.set_focus("body")
+            if len(self.msg_write_box.edit_text) >= CONFIRMATION_MSG_LENGTH:
+                self.view.controller.exit_compose_confirmation_popup()
+            else:
+                self.exit_compose_box()
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
