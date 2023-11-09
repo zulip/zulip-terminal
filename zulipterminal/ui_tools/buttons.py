@@ -469,6 +469,8 @@ class MessageLinkButton(urwid.Button):
             if self.controller.is_any_popup_open():
                 self.controller.exit_popup()
             process_media(self.controller, self.link)
+        elif self.link.startswith(("https://", "http://")):
+            self.controller.open_in_browser(self.link)
 
     @staticmethod
     def _decode_stream_data(encoded_stream_data: str) -> DecodedStream:
