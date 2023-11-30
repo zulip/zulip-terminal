@@ -928,7 +928,7 @@ class MessageSearchBox(urwid.Pile):
         self.search_bar = urwid.Columns(
             [
                 ("pack", self.conversation_focus),
-                ("pack", urwid.Text("  ")),
+                ("pack", urwid.Text(" ")),
                 self.text_box,
             ]
         )
