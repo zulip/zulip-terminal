@@ -214,13 +214,13 @@ class MessageBox(urwid.Pile):
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
-            text_to_fill = f" {ALL_MESSAGES_MARKER} All messages"
+            text_to_fill = f" {ALL_MESSAGES_MARKER} All messages "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
-            text_to_fill = f" {DIRECT_MESSAGE_MARKER} All direct messages"
+            text_to_fill = f" {DIRECT_MESSAGE_MARKER} All direct messages "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
-            text_to_fill = f" {STARRED_MESSAGES_MARKER} Starred messages"
+            text_to_fill = f" {STARRED_MESSAGES_MARKER} Starred messages "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
-            text_to_fill = f" {MENTIONED_MESSAGES_MARKER} Mentions"
+            text_to_fill = f" {MENTIONED_MESSAGES_MARKER} Mentions "
         elif self.message["type"] == "stream":
             assert self.stream_id is not None
 
@@ -231,17 +231,19 @@ class MessageBox(urwid.Pile):
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (
                     "bar",  # type: ignore[assignment]
-                    (bar_color, f" {stream_icon} {self.stream_name}: topic narrow"),
+                    (bar_color, f" {stream_icon} {self.stream_name}: topic narrow "),
                 )
             else:
                 text_to_fill = (
                     "bar",  # type: ignore[assignment]
-                    (bar_color, f" {stream_icon} {self.stream_name}"),
+                    (bar_color, f" {stream_icon} {self.stream_name} "),
                 )
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
-            text_to_fill = f" {DIRECT_MESSAGE_MARKER} Group direct message conversation"
+            text_to_fill = (
+                f" {DIRECT_MESSAGE_MARKER} Group direct message conversation "
+            )
         else:
-            text_to_fill = f" {DIRECT_MESSAGE_MARKER} Direct message conversation"
+            text_to_fill = f" {DIRECT_MESSAGE_MARKER} Direct message conversation "
 
         if is_search_narrow:
             title_markup = (
