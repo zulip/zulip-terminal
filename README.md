@@ -246,6 +246,9 @@ notify=disabled
 
 ## Color-depth: set to one of 1 (for monochrome), 16, 256, or 24bit
 color-depth=256
+
+## Custom Keybindings: keybindings can be customized for user preferences (see elsewhere for default)
+custom_keybindings={"GO_UP"='b'}
 ```
 
 > **NOTE:** Most of these configuration settings may be specified on the
