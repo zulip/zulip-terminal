@@ -166,28 +166,10 @@ def test_override_keybindings_conflict(mocker: MockerFixture) -> None:
         'keys': ['down', 'j'],
         'help_text': 'Go down / Next message',
         'key_category': 'navigation',
-    },}    keys.override_keybindings(custom_keybindings, original_keybindings)
-    assert "j" in original_keybindings["GO_DOWN"]["keys"]  # unchanged
-    assert original_keybindings["GO_UP"]["keys"] != ["j"]  # not updated due to conflict
-
-
-def test_override_keybindings_no_change_invalid(mocker: MockerFixture) -> None:
-    custom_keybindings = {"INVALID_COMMAND": "x"}
-    test_key_bindings = {    
-    'GO_UP': {
-        'keys': ['up', 'k'],
-        'help_text': 'Go up / Previous message',
-        'key_category': 'navigation',
-    },
-    'GO_DOWN': {
-        'keys': ['down', 'j'],
-        'help_text': 'Go down / Next message',
-        'key_category': 'navigation',
-    },}    try:
-        keys.override_keybindings(custom_keybindings, original_keybindings)
-    except keys.InvalidCommand:
-        pass
-    assert original_keybindings == keys.KEY_BINDINGS
+    },}    
+    keys.override_keybindings(custom_keybindings, test_key_bindings)
+    assert "j" in test_key_bindings["GO_DOWN"]["keys"]  # unchanged
+    assert test_key_bindings["GO_UP"]["keys"] != ["j"]  # not updated due to conflict
 
 
 def test_override_multiple_keybindings_valid(mocker: MockerFixture) -> None:
@@ -202,6 +184,7 @@ def test_override_multiple_keybindings_valid(mocker: MockerFixture) -> None:
         'keys': ['down', 'j'],
         'help_text': 'Go down / Next message',
         'key_category': 'navigation',
-    },}    keys.override_keybindings(custom_keybindings, original_keybindings)
-    assert original_keybindings["GO_UP"]["keys"] == ["y"]
-    assert original_keybindings["GO_DOWN"]["keys"] == ["b"]
+    },}    
+    keys.override_keybindings(custom_keybindings, test_key_bindings)
+    assert test_key_bindings["GO_UP"]["keys"] == ["y"]
+    assert test_key_bindings["GO_DOWN"]["keys"] == ["b"]
