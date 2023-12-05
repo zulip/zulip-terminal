@@ -559,7 +559,11 @@ def main(options: Optional[List[str]] = None) -> None:
         print_setting("notify setting", zterm["notify"])
 
         if "custom_keybindings" in zterm: 
-            override_keybindings(zterm["custom_keybindings"], KEY_BINDINGS)
+            custom_keybindings_str = zterm["custom_keybindings"].value
+            _, key_value_pairs = custom_keybindings_str.split('=')
+            # Split each pair and convert to a dictionary
+            custom_keybindings = dict(pair.split(':') for pair in key_value_pairs.split(', '))
+            override_keybindings(custom_keybindings, KEY_BINDINGS)
 
         ### Generate data not output to user, but into Controller
         # Generate urwid palette
