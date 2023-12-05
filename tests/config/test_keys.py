@@ -3,7 +3,7 @@ from typing import Any, Dict
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.config import keys, KeyBinding
+from zulipterminal.config import keys
 
 
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
@@ -116,7 +116,7 @@ def test_updated_urwid_command_map() -> None:
 
 def test_override_keybindings_valid(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "y"}
-    test_key_bindings: Dict[str, KeyBinding] = {
+    test_key_bindings: Dict[str, keys.KeyBinding] = {
         "GO_UP": {
             "keys": ["up", "k"],
             "help_text": "Go up / Previous message",
@@ -140,7 +140,7 @@ def test_override_keybindings_valid(mocker: MockerFixture) -> None:
 
 def test_override_keybindings_invalid_command(mocker: MockerFixture) -> None:
     custom_keybindings = {"INVALID_COMMAND": "x"}
-    test_key_bindings: Dict[str, KeyBinding] = {
+    test_key_bindings: Dict[str, keys.KeyBinding] = {
         "GO_UP": {
             "keys": ["up", "k"],
             "help_text": "Go up / Previous message",
@@ -158,7 +158,7 @@ def test_override_keybindings_invalid_command(mocker: MockerFixture) -> None:
 
 def test_override_keybindings_conflict(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "j"}  # 'j' is originally for GO_DOWN
-    test_key_bindings: Dict[str, KeyBinding] = {
+    test_key_bindings: Dict[str, keys.KeyBinding] = {
         "GO_UP": {
             "keys": ["up", "k"],
             "help_text": "Go up / Previous message",
@@ -177,7 +177,7 @@ def test_override_keybindings_conflict(mocker: MockerFixture) -> None:
 
 def test_override_multiple_keybindings_valid(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "y", "GO_DOWN": "b"}  # 'y' and 'b' are unused
-    test_key_bindings: Dict[str, KeyBinding] = {
+    test_key_bindings: Dict[str, keys.KeyBinding] = {
         "GO_UP": {
             "keys": ["up", "k"],
             "help_text": "Go up / Previous message",
