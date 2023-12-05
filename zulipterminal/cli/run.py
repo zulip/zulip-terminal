@@ -17,6 +17,7 @@ import requests
 from urwid import display_common, set_encoding
 
 from zulipterminal.api_types import ServerSettings
+from zulipterminal.config.keys import KEY_BINDINGS, override_keybindings
 from zulipterminal.config.themes import (
     ThemeError,
     aliased_themes,
@@ -29,10 +30,6 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform, detected_python_in_full
 from zulipterminal.version import ZT_VERSION
 
-from zulipterminal.config.keys import (
-    override_keybindings,
-    KEY_BINDINGS,
-)
 
 class ConfigSource(Enum):
     DEFAULT = "from default config"
