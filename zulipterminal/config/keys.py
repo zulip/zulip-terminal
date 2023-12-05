@@ -508,7 +508,7 @@ def override_keybindings(
     if conflicts:
         # Handle unresolved conflicts, e.g., by warning the user
         for cmd, conflicting_cmd in conflicts.items():
-            print(f"Warning: Key conflict between '{cmd}' and '{conflicting_cmd}'.")
+            raise InvalidCommand(f"Warning: Conflict '{cmd}' and '{conflicting_cmd}'.")
         return
 
     # Apply changes

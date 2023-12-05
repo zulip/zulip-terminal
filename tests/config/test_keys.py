@@ -3,7 +3,7 @@ from typing import Any, Dict
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.config import keys
+from zulipterminal.config import keys, KeyBinding
 
 
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
@@ -116,20 +116,21 @@ def test_updated_urwid_command_map() -> None:
 
 def test_override_keybindings_valid(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "y"}
-    test_key_bindings = {    
-    'GO_UP': {
-        'keys': ['up', 'k'],
-        'help_text': 'Go up / Previous message',
-        'key_category': 'navigation',
-    },
-    'GO_DOWN': {
-        'keys': ['down', 'j'],
-        'help_text': 'Go down / Next message',
-        'key_category': 'navigation',
-    },}
-    
+    test_key_bindings: Dict[str, KeyBinding] = {
+        "GO_UP": {
+            "keys": ["up", "k"],
+            "help_text": "Go up / Previous message",
+            "key_category": "navigation",
+        },
+        "GO_DOWN": {
+            "keys": ["down", "j"],
+            "help_text": "Go down / Next message",
+            "key_category": "navigation",
+        },
+    }
+
     # Mock the KEY_BINDINGS to use the test copy
-    mocker.patch.object(keys, 'KEY_BINDINGS', test_key_bindings)
+    mocker.patch.object(keys, "KEY_BINDINGS", test_key_bindings)
 
     # Now this will modify the test copy, not the original
     keys.override_keybindings(custom_keybindings, test_key_bindings)
@@ -139,34 +140,36 @@ def test_override_keybindings_valid(mocker: MockerFixture) -> None:
 
 def test_override_keybindings_invalid_command(mocker: MockerFixture) -> None:
     custom_keybindings = {"INVALID_COMMAND": "x"}
-    test_key_bindings = {    
-    'GO_UP': {
-        'keys': ['up', 'k'],
-        'help_text': 'Go up / Previous message',
-        'key_category': 'navigation',
-    },
-    'GO_DOWN': {
-        'keys': ['down', 'j'],
-        'help_text': 'Go down / Next message',
-        'key_category': 'navigation',
-    },}
+    test_key_bindings: Dict[str, KeyBinding] = {
+        "GO_UP": {
+            "keys": ["up", "k"],
+            "help_text": "Go up / Previous message",
+            "key_category": "navigation",
+        },
+        "GO_DOWN": {
+            "keys": ["down", "j"],
+            "help_text": "Go down / Next message",
+            "key_category": "navigation",
+        },
+    }
     with pytest.raises(keys.InvalidCommand):
         keys.override_keybindings(custom_keybindings, test_key_bindings)
 
 
 def test_override_keybindings_conflict(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "j"}  # 'j' is originally for GO_DOWN
-    test_key_bindings = {    
-    'GO_UP': {
-        'keys': ['up', 'k'],
-        'help_text': 'Go up / Previous message',
-        'key_category': 'navigation',
-    },
-    'GO_DOWN': {
-        'keys': ['down', 'j'],
-        'help_text': 'Go down / Next message',
-        'key_category': 'navigation',
-    },}    
+    test_key_bindings: Dict[str, KeyBinding] = {
+        "GO_UP": {
+            "keys": ["up", "k"],
+            "help_text": "Go up / Previous message",
+            "key_category": "navigation",
+        },
+        "GO_DOWN": {
+            "keys": ["down", "j"],
+            "help_text": "Go down / Next message",
+            "key_category": "navigation",
+        },
+    }
     keys.override_keybindings(custom_keybindings, test_key_bindings)
     assert "j" in test_key_bindings["GO_DOWN"]["keys"]  # unchanged
     assert test_key_bindings["GO_UP"]["keys"] != ["j"]  # not updated due to conflict
@@ -174,17 +177,18 @@ def test_override_keybindings_conflict(mocker: MockerFixture) -> None:
 
 def test_override_multiple_keybindings_valid(mocker: MockerFixture) -> None:
     custom_keybindings = {"GO_UP": "y", "GO_DOWN": "b"}  # 'y' and 'b' are unused
-    test_key_bindings = {    
-    'GO_UP': {
-        'keys': ['up', 'k'],
-        'help_text': 'Go up / Previous message',
-        'key_category': 'navigation',
-    },
-    'GO_DOWN': {
-        'keys': ['down', 'j'],
-        'help_text': 'Go down / Next message',
-        'key_category': 'navigation',
-    },}    
+    test_key_bindings: Dict[str, KeyBinding] = {
+        "GO_UP": {
+            "keys": ["up", "k"],
+            "help_text": "Go up / Previous message",
+            "key_category": "navigation",
+        },
+        "GO_DOWN": {
+            "keys": ["down", "j"],
+            "help_text": "Go down / Next message",
+            "key_category": "navigation",
+        },
+    }
     keys.override_keybindings(custom_keybindings, test_key_bindings)
     assert test_key_bindings["GO_UP"]["keys"] == ["y"]
     assert test_key_bindings["GO_DOWN"]["keys"] == ["b"]
