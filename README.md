@@ -248,7 +248,7 @@ notify=disabled
 color-depth=256
 
 ## Custom Keybindings: keybindings can be customized for user preferences (see elsewhere for default)
-custom_hotkeys=GO_UP:G, GO_DOWN:B
+custom_hotkeys=GO_UP:G, GO_DOWN:-
 ```
 
 > **NOTE:** Most of these configuration settings may be specified on the
