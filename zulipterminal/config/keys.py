@@ -471,6 +471,49 @@ def commands_for_random_tips() -> List[KeyBinding]:
     ]
 
 
+def override_keybindings(
+    custom_keybindings: Dict[str, str], existing_keybindings: Dict[str, KeyBinding]
+) -> None:
+    reverse_key_map = {
+        key: cmd
+        for cmd, binding in existing_keybindings.items()
+        for key in binding["keys"]
+    }
+    requested_changes = {}
+    conflicts = {}
+
+    # Collect requested changes and detect conflicts
+    for command, new_key in custom_keybindings.items():
+        if command not in existing_keybindings:
+            raise InvalidCommand(f"Invalid command {command} in custom keybindings")
+
+        current_keys = existing_keybindings[command]["keys"]
+        if new_key not in current_keys:
+            requested_changes[command] = new_key
+            if new_key in reverse_key_map and reverse_key_map[new_key] != command:
+                conflicting_cmd = reverse_key_map[new_key]
+                conflicts[command] = conflicting_cmd
+
+    # Resolve direct swaps
+    for command, new_key in custom_keybindings.items():
+        if command in conflicts:
+            conflicting_cmd = conflicts[command]
+            if (
+                conflicting_cmd in custom_keybindings
+                and custom_keybindings[conflicting_cmd] in current_keys
+            ):
+                del conflicts[command]
+                del conflicts[conflicting_cmd]
+
+    if conflicts:
+        # Handle unresolved conflicts, e.g., by warning the user
+        return
+
+    # Apply changes
+    for command, new_key in requested_changes.items():
+        existing_keybindings[command]["keys"] = [new_key]
+
+
 # Refer urwid/command_map.py
 # Adds alternate keys for standard urwid navigational commands.
 for zt_cmd, urwid_cmd in ZT_TO_URWID_CMD_MAPPING.items():
