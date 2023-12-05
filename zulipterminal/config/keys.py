@@ -470,8 +470,15 @@ def commands_for_random_tips() -> List[KeyBinding]:
         if not key_binding.get("excluded_from_random_tips", False)
     ]
 
-def override_keybindings(custom_keybindings: Dict[str, str], existing_keybindings: Dict[str, KeyBinding]):
-    reverse_key_map = {key: cmd for cmd, binding in existing_keybindings.items() for key in binding['keys']}
+
+def override_keybindings(
+    custom_keybindings: Dict[str, str], existing_keybindings: Dict[str, KeyBinding]
+) -> None:
+    reverse_key_map = {
+        key: cmd
+        for cmd, binding in existing_keybindings.items()
+        for key in binding["keys"]
+    }
     requested_changes = {}
     conflicts = {}
 
@@ -480,7 +487,7 @@ def override_keybindings(custom_keybindings: Dict[str, str], existing_keybinding
         if command not in existing_keybindings:
             raise InvalidCommand(f"Invalid command {command} in custom keybindings")
 
-        current_keys = existing_keybindings[command]['keys']
+        current_keys = existing_keybindings[command]["keys"]
         if new_key not in current_keys:
             requested_changes[command] = new_key
             if new_key in reverse_key_map and reverse_key_map[new_key] != command:
@@ -491,7 +498,10 @@ def override_keybindings(custom_keybindings: Dict[str, str], existing_keybinding
     for command, new_key in custom_keybindings.items():
         if command in conflicts:
             conflicting_cmd = conflicts[command]
-            if conflicting_cmd in custom_keybindings and custom_keybindings[conflicting_cmd] in current_keys:
+            if (
+                conflicting_cmd in custom_keybindings
+                and custom_keybindings[conflicting_cmd] in current_keys
+            ):
                 del conflicts[command]
                 del conflicts[conflicting_cmd]
 
@@ -503,9 +513,7 @@ def override_keybindings(custom_keybindings: Dict[str, str], existing_keybinding
 
     # Apply changes
     for command, new_key in requested_changes.items():
-        existing_keybindings[command]['keys'] = [new_key]
-
-
+        existing_keybindings[command]["keys"] = [new_key]
 
 
 # Refer urwid/command_map.py

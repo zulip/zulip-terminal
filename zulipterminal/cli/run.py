@@ -555,11 +555,13 @@ def main(options: Optional[List[str]] = None) -> None:
         print_setting("color depth setting", zterm["color-depth"])
         print_setting("notify setting", zterm["notify"])
 
-        if "custom_keybindings" in zterm: 
+        if "custom_keybindings" in zterm:
             custom_keybindings_str = zterm["custom_keybindings"].value
-            _, key_value_pairs = custom_keybindings_str.split('=')
+            _, key_value_pairs = custom_keybindings_str.split("=")
             # Split each pair and convert to a dictionary
-            custom_keybindings = dict(pair.split(':') for pair in key_value_pairs.split(', '))
+            custom_keybindings = dict(
+                pair.split(":") for pair in key_value_pairs.split(", ")
+            )
             override_keybindings(custom_keybindings, KEY_BINDINGS)
 
         ### Generate data not output to user, but into Controller
