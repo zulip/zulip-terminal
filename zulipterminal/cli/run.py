@@ -29,6 +29,10 @@ from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform, detected_python_in_full
 from zulipterminal.version import ZT_VERSION
 
+from zulipterminal.config.keys import (
+    override_keybindings,
+    KEY_BINDINGS,
+)
 
 class ConfigSource(Enum):
     DEFAULT = "from default config"
@@ -553,6 +557,9 @@ def main(options: Optional[List[str]] = None) -> None:
             print_setting("maximum footlinks value", zterm["maximum-footlinks"])
         print_setting("color depth setting", zterm["color-depth"])
         print_setting("notify setting", zterm["notify"])
+
+        if "custom_keybindings" in zterm: 
+            override_keybindings(zterm["custom_keybindings"], KEY_BINDINGS)
 
         ### Generate data not output to user, but into Controller
         # Generate urwid palette
