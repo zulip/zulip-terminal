@@ -114,6 +114,11 @@ class TestMessageBox:
                 [("msg_mention", "@A Group")],
                 id="group-mention",
             ),
+            case(
+                '<span class="topic-mention">@topic',
+                [("msg_mention", "@topic")],
+                id="topic-mention",
+            ),
             case("<code>some code", [("pygments:w", "some code")], id="inline-code"),
             case(
                 '<div class="codehilite" data-code-language="python">'

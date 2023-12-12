@@ -442,9 +442,10 @@ class MessageBox(urwid.Pile):
 
                 markup.append(("msg_math", tag_text))
             elif tag == "span" and (
-                {"user-group-mention", "user-mention"} & set(tag_classes)
+                {"user-group-mention", "user-mention", "topic-mention"}
+                & set(tag_classes)
             ):
-                # USER MENTIONS & USER-GROUP MENTIONS
+                # USER, USER-GROUP & TOPIC MENTIONS
                 markup.append(("msg_mention", tag_text))
             elif tag == "a":
                 # LINKS
