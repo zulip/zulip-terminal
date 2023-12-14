@@ -1381,11 +1381,13 @@ class StreamInfoView(PopUpView):
         )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
 
-        # FIXME: This field was removed from the subscription data in Zulip 7.5 / ZFL226
-        #   We should use the new /streams/{stream_id}/email_address endpoint instead
-        self._stream_email = stream.get("email_address", None)
-        if self._stream_email is None:
+        # This field was removed from the subscription data in Zulip 7.5 / ZFL226
+        # Using the new /streams/{stream_id}/email_address endpoint
+        # if field isn't present in subscription data
+        self._stream_email = controller.model.stream_copy_text(stream_id)
+        if self._stream_email == "":
             stream_copy_text = "< Stream email is unavailable >"
+            self._stream_email = None
         else:
             email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
             stream_copy_text = f"Press {email_keys} to copy Stream email address"

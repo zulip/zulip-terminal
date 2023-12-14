@@ -1398,9 +1398,11 @@ class TestStreamInfoView:
         general_stream: Dict[str, Any],
         stream_email_present: bool,
         expected_copy_text: str,
+        mocker: MockerFixture,
     ) -> None:
         if not stream_email_present:
             del general_stream["email_address"]
+            self.controller.model.stream_copy_text.return_value = ""
 
         model = self.controller.model
         stream_id = general_stream["stream_id"]
