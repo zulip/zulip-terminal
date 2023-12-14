@@ -1506,7 +1506,9 @@ class StreamInfoView(PopUpView):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
-        elif is_command_key("COPY_STREAM_EMAIL", key):
+        elif (
+            is_command_key("COPY_STREAM_EMAIL", key) and self._stream_email is not None
+        ):
             self.controller.copy_to_clipboard(self._stream_email, "Stream email")
         return super().keypress(size, key)
 
