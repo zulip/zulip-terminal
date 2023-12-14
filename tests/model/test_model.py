@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
+from pytest_mock import MockerFixture
 from zulip import Client, ZulipError
 
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
@@ -564,25 +565,73 @@ class TestModel:
         assert model.index["topics"][stream_id] is not return_value
 
     @pytest.mark.parametrize(
-        "email_address_stream_dict, expected_return_value",
+        "response, expected_return_value",
         [
-            ({"email_address": "username@example.com"}, "username@example.com"),
-            ({}, None),
+            (
+                {"result": "success", "msg": "", "email": "username@example.com"},
+                "username@example.com",
+            ),
+            (
+                {"result": "error", "msg": "Invalid stream ID", "code": "BAD_REQUEST"},
+                None,
+            ),
+        ],
+        ids=["valid_email_returned", "no_email_returned"],
+    )
+    def test__fetch_stream_email_from_endpoint(
+        self,
+        mocker: MockerFixture,
+        model: Any,
+        response: Dict[str, str],
+        expected_return_value: Optional[str],
+        stream_id: int = 1,
+    ) -> None:
+        self.client.call_endpoint = mocker.Mock(return_value=response)
+
+        result = model._fetch_stream_email_from_endpoint(stream_id)
+
+        self.client.call_endpoint.assert_called_once_with(
+            f"/streams/{stream_id}/email_address", method="GET"
+        )
+        assert result == expected_return_value
+
+    @pytest.mark.parametrize(
+        "email_address_stream_dict, email_fetch_response, "
+        "expected_fetched, expected_return_value",
+        [
+            (
+                {"email_address": "username@example.com"},
+                None,
+                False,
+                "username@example.com",
+            ),
+            ({}, "username@example.com", True, "username@example.com"),
+            ({}, None, True, None),
         ],
         ids=[
             "email_present_in_dict:ZFL<226",
-            "email_absent_from_dict:ZFL>=226",
+            "email_absent_from_dict_and_fetched_ok:ZFL>=226",
+            "email_absent_from_dict_and_fetch_failed:ZFL>=226",
         ],
     )
     def test_get_stream_email_address(
         self,
+        mocker: MockerFixture,
         model: Any,
         email_address_stream_dict: Dict[str, str],
+        email_fetch_response: Optional[str],
+        expected_fetched: bool,
         expected_return_value: Optional[str],
         stream_id: int = 1,
     ) -> None:
         model.stream_dict[stream_id] = email_address_stream_dict
+        model._fetch_stream_email_from_endpoint = mocker.Mock(
+            return_value=email_fetch_response
+        )
+
         result = model.get_stream_email_address(stream_id)
+
+        assert model._fetch_stream_email_from_endpoint.called == expected_fetched
         assert result == expected_return_value
 
     # pre server v3 provide user_id or id as a property within user key

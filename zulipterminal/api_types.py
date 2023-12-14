@@ -237,7 +237,7 @@ class Subscription(TypedDict):
     push_notifications: Optional[bool]
     audible_notifications: Optional[bool]
     pin_to_top: bool
-    email_address: str
+    email_address: NotRequired[str]  # Replaced by new endpoint in Zulip 7.5 (ZFL 226)
 
     is_muted: bool
 
