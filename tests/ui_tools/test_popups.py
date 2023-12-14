@@ -1379,6 +1379,24 @@ class TestStreamInfoView:
         # + 3(checkboxes) + [2-5](fields, depending upon server_feature_level)
         assert stream_info_view.height == expected_height
 
+    def test_stream_info_content__sections(self) -> None:
+        assert len(self.stream_info_view._stream_info_content) == 2
+
+        stream_details, stream_settings = self.stream_info_view._stream_info_content
+        assert stream_details[0] == "Stream Details"
+        assert stream_settings[0] == "Stream settings"
+
+    def test_stream_info_content__email_copy_text(
+        self, general_stream: Dict[str, Any]
+    ) -> None:
+        stream_details, _ = self.stream_info_view._stream_info_content
+        stream_details_data = stream_details[1]
+
+        assert (
+            "Stream email",
+            "Press 'c' to copy Stream email address",
+        ) in stream_details_data
+
     @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
     def test_keypress_copy_stream_email(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
