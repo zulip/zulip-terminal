@@ -2,7 +2,7 @@ import copy
 import json
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import param as case
@@ -562,6 +562,28 @@ class TestModel:
         assert model._fetch_topics_in_streams.called == fetched
         assert model.index["topics"][stream_id] == return_value
         assert model.index["topics"][stream_id] is not return_value
+
+    @pytest.mark.parametrize(
+        "email_address_stream_dict, expected_return_value",
+        [
+            ({"email_address": "username@example.com"}, "username@example.com"),
+            ({}, None),
+        ],
+        ids=[
+            "email_present_in_dict:ZFL<226",
+            "email_absent_from_dict:ZFL>=226",
+        ],
+    )
+    def test_get_stream_email_address(
+        self,
+        model: Any,
+        email_address_stream_dict: Dict[str, str],
+        expected_return_value: Optional[str],
+        stream_id: int = 1,
+    ) -> None:
+        model.stream_dict[stream_id] = email_address_stream_dict
+        result = model.get_stream_email_address(stream_id)
+        assert result == expected_return_value
 
     # pre server v3 provide user_id or id as a property within user key
     # post server v3 provide user_id as a property outside the user key
