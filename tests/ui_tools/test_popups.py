@@ -1414,17 +1414,27 @@ class TestStreamInfoView:
 
         assert ("Stream email", expected_copy_text) in stream_details_data
 
+    @pytest.mark.parametrize("normalized_email_address", ("user@example.com", None))
     @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
     def test_keypress_copy_stream_email(
-        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+        self,
+        key: str,
+        normalized_email_address: Optional[str],
+        widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
         size = widget_size(self.stream_info_view)
+        # This patches inside the object, which is fragile but tests the logic
+        # Note that the assert uses the same variable
+        self.stream_info_view._stream_email = normalized_email_address
 
         self.stream_info_view.keypress(size, key)
 
-        self.controller.copy_to_clipboard.assert_called_once_with(
-            self.stream_info_view._stream_email, "Stream email"
-        )
+        if normalized_email_address is not None:
+            self.controller.copy_to_clipboard.assert_called_once_with(
+                self.stream_info_view._stream_email, "Stream email"
+            )
+        else:
+            self.controller.copy_to_clipboard.assert_not_called()
 
     @pytest.mark.parametrize(
         "rendered_description, expected_markup",
