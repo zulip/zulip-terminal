@@ -1386,16 +1386,33 @@ class TestStreamInfoView:
         assert stream_details[0] == "Stream Details"
         assert stream_settings[0] == "Stream settings"
 
+    @pytest.mark.parametrize(
+        "stream_email_present, expected_copy_text",
+        [
+            (False, "< Stream email is unavailable >"),
+            (True, "Press 'c' to copy Stream email address"),
+        ],
+    )
     def test_stream_info_content__email_copy_text(
-        self, general_stream: Dict[str, Any]
+        self,
+        general_stream: Dict[str, Any],
+        stream_email_present: bool,
+        expected_copy_text: str,
     ) -> None:
-        stream_details, _ = self.stream_info_view._stream_info_content
+        if not stream_email_present:
+            del general_stream["email_address"]
+
+        model = self.controller.model
+        stream_id = general_stream["stream_id"]
+        model.stream_dict = {stream_id: general_stream}
+
+        # Custom, to enable variation of stream data before creation
+        stream_info_view = StreamInfoView(self.controller, stream_id)
+
+        stream_details, _ = stream_info_view._stream_info_content
         stream_details_data = stream_details[1]
 
-        assert (
-            "Stream email",
-            "Press 'c' to copy Stream email address",
-        ) in stream_details_data
+        assert ("Stream email", expected_copy_text) in stream_details_data
 
     @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
     def test_keypress_copy_stream_email(
@@ -1406,7 +1423,7 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
 
         self.controller.copy_to_clipboard.assert_called_once_with(
-            self.stream_info_view.stream_email, "Stream email"
+            self.stream_info_view._stream_email, "Stream email"
         )
 
     @pytest.mark.parametrize(
