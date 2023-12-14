@@ -1393,7 +1393,8 @@ class StreamInfoView(PopUpView):
         )
         desc = urwid.Text(self.markup_desc)
 
-        stream_info_content = [
+        # NOTE: This is treated as a member to make it easier to test
+        self._stream_info_content = [
             (
                 "Stream Details",
                 [
@@ -1420,7 +1421,7 @@ class StreamInfoView(PopUpView):
         ]  # type: PopUpViewTableContent
 
         popup_width, column_widths = self.calculate_table_widths(
-            stream_info_content, len(title)
+            self._stream_info_content, len(title)
         )
 
         muted_setting = urwid.CheckBox(
@@ -1473,7 +1474,7 @@ class StreamInfoView(PopUpView):
                 ),
             ]
         self.widgets = self.make_table_with_categories(
-            stream_info_content, column_widths
+            self._stream_info_content, column_widths
         )
 
         # Stream description.
