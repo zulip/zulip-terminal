@@ -1436,6 +1436,7 @@ class TestStreamInfoView:
     ) -> None:
         if not stream_email_present:
             del general_stream["email_address"]
+            self.controller.model.get_stream_email_address.return_value = None
 
         model = self.controller.model
         stream_id = general_stream["stream_id"]
