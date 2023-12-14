@@ -906,16 +906,30 @@ class Model:
 
         return list(self.index["topics"][stream_id])
 
+    def _fetch_stream_email_from_endpoint(self, stream_id: int) -> Optional[str]:
+        """
+        Endpoint added in Zulip 7.5 (ZFL 226)
+        """
+        url = f"/streams/{stream_id}/email_address"
+
+        response = self.client.call_endpoint(url, method="GET")
+
+        if response.get("result") == "success":
+            email_address = response.get("email", "")
+            return str(email_address)
+        return None
+
     def get_stream_email_address(self, stream_id: int) -> Optional[str]:
         """
         Returns the stream email address, or None if it is unavailable.
+        Beyond Zulip 7.5 / ZFL226, this requires a call to the server.
         """
         if stream_id not in self.stream_dict:
             raise RuntimeError("Invalid stream id.")
         stream = self.stream_dict[stream_id]
-        # FIXME: This field was removed from the subscription data in Zulip 7.5 / ZFL226
-        #   We should use the new /streams/{stream_id}/email_address endpoint instead
         stream_email = stream.get("email_address", None)
+        if stream_email is None:
+            stream_email = self._fetch_stream_email_from_endpoint(stream_id)
         return stream_email
 
     @staticmethod
