@@ -1377,8 +1377,15 @@ class StreamInfoView(PopUpView):
             else "Not Public to Users"
         )
         member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
-        self.stream_email = stream["email_address"]
-        email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
+
+        # FIXME: This field was removed from the subscription data in Zulip 7.5 / ZFL226
+        #   We should use the new /streams/{stream_id}/email_address endpoint instead
+        self._stream_email = stream.get("email_address", None)
+        if self._stream_email is None:
+            stream_copy_text = "< Stream email is unavailable >"
+        else:
+            email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
+            stream_copy_text = f"Press {email_keys} to copy Stream email address"
 
         weekly_traffic = stream["stream_weekly_traffic"]
         weekly_msg_count = (
@@ -1409,10 +1416,7 @@ class StreamInfoView(PopUpView):
                         "Stream Members",
                         f"{total_members} (Press {member_keys} to view list)",
                     ),
-                    (
-                        "Stream email",
-                        f"Press {email_keys} to copy Stream email address",
-                    ),
+                    ("Stream email", stream_copy_text),
                     ("History of Stream", f"{availability_of_history}"),
                     ("Posting Policy", f"{stream_policy}"),
                 ],
@@ -1503,7 +1507,7 @@ class StreamInfoView(PopUpView):
         if is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
         elif is_command_key("COPY_STREAM_EMAIL", key):
-            self.controller.copy_to_clipboard(self.stream_email, "Stream email")
+            self.controller.copy_to_clipboard(self._stream_email, "Stream email")
         return super().keypress(size, key)
 
 
