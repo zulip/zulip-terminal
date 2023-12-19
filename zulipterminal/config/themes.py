@@ -3,7 +3,7 @@ Styles and their colour mappings in each theme, with helper functions
 """
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pygments.token import STANDARD_TYPES
+from pygments.token import STANDARD_TYPES, _TokenType
 
 from zulipterminal.config.color import term16
 from zulipterminal.themes import gruvbox_dark, gruvbox_light, zt_blue, zt_dark, zt_light
@@ -127,6 +127,13 @@ valid_16_color_codes = [
     "light_gray",
     "white",
 ]
+
+# These are style_translations for translating pygments styles into
+# urwid-compatible styles
+STYLE_TRANSLATIONS = {
+    " ": ",",
+    "italic": "italics",
+}
 
 
 class ThemeError(Exception):
@@ -255,6 +262,19 @@ def parse_themefile(
     return urwid_theme
 
 
+def generate_urwid_compatible_pygments_styles(
+    pygments_styles: Dict[_TokenType, str],
+    style_translations: Dict[str, str] = STYLE_TRANSLATIONS,
+) -> Dict[_TokenType, str]:
+    urwid_compatible_styles = {}
+    for token, style in pygments_styles.items():
+        updated_style = style
+        for old_value, new_value in style_translations.items():
+            updated_style = updated_style.replace(old_value, new_value)
+        urwid_compatible_styles[token] = updated_style
+    return urwid_compatible_styles
+
+
 def generate_pygments_styles(pygments: Dict[str, Any]) -> ThemeSpec:
     """
     This function adds pygments styles for use in syntax
@@ -278,6 +298,8 @@ def generate_pygments_styles(pygments: Dict[str, Any]) -> ThemeSpec:
     term16_bg = term16.background_color
 
     theme_styles_from_pygments: ThemeSpec = []
+    pygments_styles = generate_urwid_compatible_pygments_styles(pygments_styles)
+
     for token, css_class in STANDARD_TYPES.items():
         if css_class in pygments_overrides:
             pygments_styles[token] = pygments_overrides[css_class]
