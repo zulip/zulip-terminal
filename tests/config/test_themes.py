@@ -5,13 +5,14 @@ from typing import Any, Dict, Optional, Tuple
 import pytest
 from pygments.styles.material import MaterialStyle
 from pygments.styles.perldoc import PerldocStyle
-from pygments.token import STANDARD_TYPES
+from pygments.token import STANDARD_TYPES, _TokenType
 from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
+    STYLE_TRANSLATIONS,
     THEMES,
     InvalidThemeColorCode,
     MissingThemeAttributeError,
@@ -20,6 +21,7 @@ from zulipterminal.config.themes import (
     complete_and_incomplete_themes,
     generate_pygments_styles,
     generate_theme,
+    generate_urwid_compatible_pygments_styles,
     parse_themefile,
     valid_16_color_codes,
     validate_colors,
@@ -402,3 +404,65 @@ def test_validate_colors(color_depth: int = 16) -> None:
         + "- GRAY_244 = dark_gra\n"
         + "- LIGHT2 = whit"
     )
+
+
+@pytest.mark.parametrize(
+    "pygments_styles, expected_styles, style_translations",
+    [
+        case(
+            {},
+            {},
+            STYLE_TRANSLATIONS,
+            id="empty_input",
+        ),
+        case(
+            {
+                "token1": "style1",
+                "token2": "style2",
+            },
+            {
+                "token1": "style1",
+                "token2": "style2",
+            },
+            {},
+            id="empty_translations",
+        ),
+        case(
+            {
+                "token1": "bold italic",  # pygments/pygments#2444
+                "token2": "italic bold",  # + order shouldn't matter
+                "token3": "italic #abc",  # + italic should work with color
+            },
+            {
+                "token1": "bold,italics",
+                "token2": "italics,bold",
+                "token3": "italics,#abc",
+            },
+            STYLE_TRANSLATIONS,
+            id="default_translations",
+        ),
+        case(
+            {
+                "token1": "style italic",
+                "token2": "#abc",
+            },
+            {
+                "token1": "newstyle italic",
+                "token2": "#abc",
+            },
+            {"style": "newstyle"},
+            id="custom_translations",
+        ),
+    ],
+)
+def test_generate_urwid_compatible_pygments_styles(
+    pygments_styles: Dict[_TokenType, str],  # NOTE: placeholder string values used
+    expected_styles: Dict[_TokenType, str],  #       in parametrized dict keys
+    style_translations: Dict[str, str],
+) -> None:
+    generated_styles = generate_urwid_compatible_pygments_styles(
+        pygments_styles, style_translations
+    )
+
+    assert set(expected_styles) == set(generated_styles)  # keys unchanged
+    assert sorted(expected_styles.items()) == sorted(generated_styles.items())
