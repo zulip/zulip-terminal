@@ -100,7 +100,7 @@ setup(
         "urwid_readline>=0.13",
         "beautifulsoup4>=4.11.1",
         "lxml~=4.9.2",
-        "pygments~=2.15.1",
+        "pygments>=2.14.0,<2.18.0",
         "typing_extensions~=4.5.0",
         "python-dateutil>=2.8.2",
         "pytz>=2022.7.1",
