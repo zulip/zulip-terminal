@@ -591,7 +591,10 @@ class MiddleColumnView(urwid.Frame):
             if self.footer.focus is None:
                 stream_id = self.model.stream_id
                 stream_dict = self.model.stream_dict
-                self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
+                if stream_id is None:
+                    self.footer.stream_box_view(0)
+                else:
+                    self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key
