@@ -528,6 +528,8 @@ class Controller:
         try:
             pyperclip.copy(text)
             clipboard_text = pyperclip.paste()
+            # Replacing \r\n with \n to account for carriage return when using WSL
+            clipboard_text = clipboard_text.replace("\r\n", "\n")
             if clipboard_text == text:
                 self.report_success([f"{text_category} copied successfully"])
             else:
