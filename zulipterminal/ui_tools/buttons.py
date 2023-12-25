@@ -686,6 +686,73 @@ class MessageLinkButton(urwid.Button):
                 self.controller.exit_popup()
 
 
+class CodeBlockButton(urwid.Button):
+    def __init__(
+        self,
+        *,
+        controller: Any,
+        caption: str,
+        code_block_list: List[Tuple[str, str]],
+        display_attr: Optional[str],
+        index: int,
+    ) -> None:
+        self.controller = controller
+        self.model = self.controller.model
+        self.view = self.controller.view
+        self.caption = caption
+        self.code_block_list = code_block_list
+        self.index = index
+
+        super().__init__("")
+
+        self.extract_display_code(code_block_list)
+        if self.display_code:
+            self.code_block_width = len(max(self.display_code, key=len))
+        self.update_widget(self.display_code, display_attr)
+        urwid.connect_signal(
+            self, "click", lambda button: self.copy_to_clipboard(code_block_list)
+        )
+
+    def update_widget(
+        self, display_code: List[Tuple[str, str]], display_attr: Optional[str] = None
+    ) -> None:
+        """
+        Overrides the existing button widget for custom styling.
+        """
+        # Set cursor position next to length of code to avoid the cursor.
+        icon = urwid.SelectableIcon(
+            display_code,
+            cursor_position=len("".join([code[1] for code in display_code])) + 1,
+        )
+        self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+
+    def copy_to_clipboard(self, code_block_list: List[Tuple[str, str]]) -> None:
+        block = code_block_list[:]
+        self.copy_code = "".join(snip[1] for snip in block)
+        self.controller.copy_to_clipboard(self.copy_code, f"Code Block {self.index}")
+
+    def extract_display_code(self, code_block_list: List[Tuple[str, str]]) -> None:
+        """
+        Extracts and assigns two lines of code from code_block_list
+        to summarize and display on the button.
+        """
+        block = code_block_list[:]
+        no_of_lines = 0
+        for index, snip in enumerate(block):
+            no_of_lines += 1 if "\n" in snip[1] else 0
+            if no_of_lines == 2:
+                self.display_code = block[:index] + [("pygments:w", "...")]
+                break
+        if no_of_lines < 2:
+            self.display_code = block
+        if self.display_code:
+            self.display_code[-1] = (
+                self.display_code[-1][0],
+                self.display_code[-1][1].rstrip("\n"),
+            )
+        self.display_code = [("pygments:w", self.caption)] + self.display_code
+
+
 class EditModeButton(urwid.Button):
     def __init__(self, *, controller: Any, width: int) -> None:
         self.controller = controller
