@@ -268,6 +268,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
     ) -> None:
         msg_info_view = MsgInfoView(
             self,
@@ -276,6 +277,7 @@ class Controller:
             topic_links,
             message_links,
             time_mentions,
+            code_blocks,
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -347,6 +349,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
     ) -> None:
         self.show_pop_up(
             FullRenderedMsgView(
@@ -355,6 +358,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                code_blocks,
                 f"Full rendered message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -366,6 +370,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
     ) -> None:
         self.show_pop_up(
             FullRawMsgView(
@@ -374,6 +379,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                code_blocks,
                 f"Full raw message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -385,6 +391,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
     ) -> None:
         self.show_pop_up(
             EditHistoryView(
@@ -393,6 +400,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                code_blocks,
                 f"Edit History {SCROLL_PROMPT}",
             ),
             "area:msg",

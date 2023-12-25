@@ -443,6 +443,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide full raw message',
         'key_category': 'msg_info',
     },
+    'COPY_CODE_BLOCK': {
+        'keys': ['c'],
+        'help_text':
+            'Copy code block to clipboard (from message information)',
+        'excluded_from_random_tips': True,
+        'key_category': 'msg_actions'
+    },
     'NEW_HINT': {
         'keys': ['tab'],
         'help_text': 'New footer hotkey hint',

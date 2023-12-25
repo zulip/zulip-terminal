@@ -752,6 +752,13 @@ class CodeBlockButton(urwid.Button):
             )
         self.display_code = [("pygments:w", self.caption)] + self.display_code
 
+    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if is_command_key("COPY_CODE_BLOCK", key):
+            urwid.emit_signal(
+                self, "click", lambda button: self.copy_to_clipboard(self.block_list)
+            )
+        return super().keypress(size, key)
+
 
 class EditModeButton(urwid.Button):
     def __init__(self, *, controller: Any, width: int) -> None:
