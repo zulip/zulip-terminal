@@ -468,6 +468,7 @@ class TestFullRenderedMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
             title="Full Rendered Message",
         )
 
@@ -520,6 +521,7 @@ class TestFullRenderedMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
 
 
@@ -544,6 +546,7 @@ class TestFullRawMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
             title="Full Raw Message",
         )
 
@@ -596,6 +599,7 @@ class TestFullRawMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
 
 
@@ -619,6 +623,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
             title="Edit History",
         )
 
@@ -667,6 +672,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
 
     @pytest.mark.parametrize(
@@ -944,6 +950,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture: Message) -> None:
@@ -962,6 +969,7 @@ class TestMsgInfoView:
             topic_links=topic_links,
             message_links=message_links,
             time_mentions=list(),
+            code_blocks=list(),
         )
         msg_links = msg_info_view.button_widgets
         assert msg_links == [message_links, topic_links]
@@ -1010,6 +1018,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1021,6 +1030,7 @@ class TestMsgInfoView:
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
+                code_blocks=list(),
             )
         else:
             self.controller.show_edit_history.assert_not_called()
@@ -1039,6 +1049,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1049,6 +1060,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
 
     @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
@@ -1065,6 +1077,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1075,6 +1088,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
         )
 
     @pytest.mark.parametrize(
@@ -1176,6 +1190,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
         # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
@@ -1228,6 +1243,118 @@ class TestMsgInfoView:
         assert link_w._wrapped_widget.focus_map == expected_focus_map
         assert link_w._wrapped_widget.attr_map == expected_attr_map
         assert link_width == expected_link_width
+
+    @pytest.mark.parametrize(
+        [
+            "initial_code_block",
+            "expected_code",
+            "expected_attr_map",
+            "expected_focus_map",
+        ],
+        [
+            (
+                [
+                    (
+                        "Python",
+                        [
+                            ("pygments:k", "def"),
+                            ("pygments:w", " "),
+                            ("pygments:nf", "main"),
+                            ("pygments:p", "()"),
+                            ("pygments:w", "\n  "),
+                            ("pygments:nb", "print"),
+                            ("pygments:p", "("),
+                            ("pygments:s2", '"Hello"'),
+                            ("pygments:p", ")"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+                '1: Python\ndef main()\n  print("Hello")...',
+                {None: "popup_contrast"},
+                {None: "selected"},
+            ),
+            (
+                [
+                    (
+                        "JavaScript",
+                        [
+                            ("pygments:nx", "console"),
+                            ("pygments:p", "."),
+                            ("pygments:nx", "log"),
+                            ("pygments:p", "("),
+                            ("pygments:s2", '"Hello, world!"'),
+                            ("pygments:p", ");"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+                '1: JavaScript\nconsole.log("Hello, world!");',
+                {None: "popup_contrast"},
+                {None: "selected"},
+            ),
+            (
+                [
+                    (
+                        "C++",
+                        [
+                            ("pygments:cp", "#include"),
+                            ("pygments:w", " "),
+                            ("pygments:cpf", "<iostream>"),
+                            ("pygments:w", "\n\n"),
+                            ("pygments:kt", "int"),
+                            ("pygments:w", " "),
+                            ("pygments:nf", "main"),
+                            ("pygments:p", "()"),
+                            ("pygments:w", " "),
+                            ("pygments:p", "{"),
+                            ("pygments:w", "\n"),
+                            ("pygments:w", "    "),
+                            ("pygments:n", "std"),
+                            ("pygments:o", "::"),
+                            ("pygments:n", "cout"),
+                            ("pygments:w", " "),
+                            ("pygments:o", "<<"),
+                            ("pygments:w", " "),
+                            ("pygments:s", '"Hello World!"'),
+                            ("pygments:p", ";"),
+                            ("pygments:w", "\n"),
+                            ("pygments:w", "    "),
+                            ("pygments:k", "return"),
+                            ("pygments:w", " "),
+                            ("pygments:mi", "0"),
+                            ("pygments:p", ";"),
+                            ("pygments:w", "\n"),
+                            ("pygments:p", "}"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+                "1: C++\n#include <iostream>\n\nint main() {...",
+                {None: "popup_contrast"},
+                {None: "selected"},
+            ),
+        ],
+        ids=[
+            "with_python_code_block_two_lines",
+            "with_javascript_code_block_one_line",
+            "with_cpp_code_block_more_than_two_lines",
+        ],
+    )
+    def test_create_code_block_buttons(
+        self,
+        initial_code_block: List[Tuple[str, List[Tuple[str, str]]]],
+        expected_code: str,
+        expected_attr_map: Dict[None, str],
+        expected_focus_map: Dict[None, str],
+    ) -> None:
+        [code_w], _ = self.msg_info_view.create_code_block_buttons(
+            self.controller, initial_code_block
+        )
+
+        assert code_w._wrapped_widget.original_widget.text == expected_code
+        assert code_w._wrapped_widget.focus_map == expected_focus_map
+        assert code_w._wrapped_widget.attr_map == expected_attr_map
 
 
 class TestStreamInfoView:
