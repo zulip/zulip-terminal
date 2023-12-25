@@ -563,6 +563,13 @@ class Controller:
         try:
             pyperclip.copy(text)
             clipboard_text = pyperclip.paste()
+
+            # Replace '\r\n' (CRLF) with '\n' for consistent comparison in WSL.
+            # os.linesep() cannot be used since WSL has '\n' line endings (POSIX) and
+            # the '\r\n' line endings are due to interaction with Windows clipboard.
+            if PLATFORM == "WSL":
+                clipboard_text = clipboard_text.replace("\r\n", "\n")
+
             if clipboard_text == text:
                 self.report_success([f"{text_category} copied successfully"])
             else:
