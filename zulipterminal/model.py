@@ -530,12 +530,13 @@ class Model:
         else:
             raise RuntimeError("Empty recipient list.")
 
-    def send_private_message(self, recipients: List[int], content: str) -> bool:
+    def send_private_message(self, recipients: List[int], content: str,read_by_sender: bool =True) -> bool:
         if recipients:
             composition = PrivateComposition(
                 type="private",
                 to=recipients,
                 content=content,
+                read_by_sender=read_by_sender,
             )
             response = self.client.send_message(composition)
             display_error_if_present(response, self.controller)
@@ -546,12 +547,13 @@ class Model:
         else:
             raise RuntimeError("Empty recipients list.")
 
-    def send_stream_message(self, stream: str, topic: str, content: str) -> bool:
+    def send_stream_message(self, stream: str, topic: str, content: str,read_by_sender: bool =True) -> bool:
         composition = StreamComposition(
             type="stream",
             to=stream,
             subject=topic,
             content=content,
+            read_by_sender=read_by_sender,
         )
         response = self.client.send_message(composition)
         display_error_if_present(response, self.controller)

@@ -755,11 +755,11 @@ class TestModel:
     )
     @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
     def test_send_private_message(
-        self, mocker, model, recipients, response, return_value, content="hi!"
+        self, mocker, model, recipients, response, return_value, content="hi!",read_by_sender=True
     ):
         self.client.send_message = mocker.Mock(return_value=response)
 
-        result = model.send_private_message(recipients, content)
+        result = model.send_private_message(recipients, content,read_by_sender)
 
         req = dict(type="private", to=recipients, content=content)
         self.client.send_message.assert_called_once_with(req)
@@ -772,10 +772,10 @@ class TestModel:
             )
 
     def test_send_private_message_with_no_recipients(
-        self, model, content="hi!", recipients=[]
+        self, model, content="hi!", recipients=[],read_by_sender=True
     ):
         with pytest.raises(RuntimeError):
-            model.send_private_message(recipients, content)
+            model.send_private_message(recipients, content, read_by_sender)
 
     @pytest.mark.parametrize(
         "response, return_value",
@@ -793,10 +793,11 @@ class TestModel:
         content="hi!",
         stream="foo",
         topic="bar",
+        read_by_sender=True,
     ):
         self.client.send_message = mocker.Mock(return_value=response)
 
-        result = model.send_stream_message(stream, topic, content)
+        result = model.send_stream_message(stream, topic, content, read_by_sender)
 
         req = dict(type="stream", to=stream, subject=topic, content=content)
         self.client.send_message.assert_called_once_with(req)
