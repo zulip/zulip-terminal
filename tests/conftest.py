@@ -559,7 +559,7 @@ def messages_successful_response(
     params=SUPPORTED_SERVER_VERSIONS,
     ids=(lambda param: "server_version:{}-server_feature_level:{}".format(*param)),
 )
-def zulip_version(request: Any) -> Tuple[str, Optional[int]]:
+def zulip_version(request: Any) -> Tuple[str, int]:
     """
     Fixture to test different components based on the server version and the
     feature level.
@@ -1449,7 +1449,7 @@ def stream_dict(streams_fixture: List[Dict[str, Any]]) -> Dict[int, Any]:
         },
     ],
     ids=[
-        "zulip_feature_level:None",
+        "zulip_feature_level:0",
         "zulip_feature_level:1",
     ],
 )

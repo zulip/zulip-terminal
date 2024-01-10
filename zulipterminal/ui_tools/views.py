@@ -1083,7 +1083,7 @@ class AboutView(PopUpView):
         *,
         zt_version: str,
         server_version: str,
-        server_feature_level: Optional[int],
+        server_feature_level: int,
         theme_name: str,
         color_depth: int,
         autohide_enabled: bool,
