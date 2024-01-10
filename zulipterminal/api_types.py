@@ -653,7 +653,6 @@ class ServerSettings(TypedDict):
     # Added in Zulip 2.1.0
     external_authentication_methods: List[ExternalAuthenticationMethod]
 
-    # TODO Refactor ZFL to default to zero
     zulip_feature_level: NotRequired[int]  # New in Zulip 3.0, ZFL 1
     zulip_version: str
     zulip_merge_base: NotRequired[str]  # New in Zulip 5.0, ZFL 88

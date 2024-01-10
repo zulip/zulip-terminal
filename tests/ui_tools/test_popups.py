@@ -222,7 +222,7 @@ class TestAboutView:
         assert not self.controller.exit_popup.called
 
     def test_feature_level_content(
-        self, mocker: MockerFixture, zulip_version: Tuple[str, Optional[int]]
+        self, mocker: MockerFixture, zulip_version: Tuple[str, int]
     ) -> None:
         self.controller = mocker.Mock()
         mocker.patch.object(
@@ -1282,16 +1282,16 @@ class TestStreamInfoView:
             case(
                 {"date_created": None, "is_announcement_only": True},
                 "74 [Organization default]",
-                None,
+                0,
                 17,
-                id="ZFL=None_no_date_created__no_retention_days__admins_only",
+                id="ZFL=0_no_date_created__no_retention_days__admins_only",
             ),
             case(
                 {"date_created": None, "is_announcement_only": False},
                 "74 [Organization default]",
-                None,
+                0,
                 16,
-                id="ZFL=None_no_date_created__no_retention_days__anyone_can_type",
+                id="ZFL=0_no_date_created__no_retention_days__anyone_can_type",
             ),
             case(
                 {"date_created": None, "stream_post_policy": 1},
@@ -1363,7 +1363,7 @@ class TestStreamInfoView:
         general_stream: Dict[str, Any],
         to_vary_in_stream_data: Dict[str, Optional[int]],
         cached_message_retention_text: str,
-        server_feature_level: Optional[int],
+        server_feature_level: int,
         expected_height: int,
     ) -> None:
         model = self.controller.model

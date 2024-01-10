@@ -167,7 +167,7 @@ class Model:
         self._fetch_initial_data()
 
         self.server_version = self.initial_data["zulip_version"]
-        self.server_feature_level = self.initial_data.get("zulip_feature_level")
+        self.server_feature_level: int = self.initial_data.get("zulip_feature_level", 0)
 
         self.user_dict: Dict[str, MinimalUserData] = {}
         self.user_id_email_dict: Dict[int, str] = {}
@@ -186,8 +186,8 @@ class Model:
 
         # NOTE: The date_created field of stream has been added in feature
         # level 30, server version 4. For consistency we add this field
-        # on server iterations even before this with value of None.
-        if self.server_feature_level is None or self.server_feature_level < 30:
+        # on earlier server iterations with the value of None.
+        if self.server_feature_level < 30:
             for stream in self.stream_dict.values():
                 stream["date_created"] = None
 
@@ -200,7 +200,7 @@ class Model:
         assert set(map(len, muted_topics)) in (set(), {2}, {3})
         self._muted_topics: Dict[Tuple[str, str], Optional[int]] = {
             (stream_name, topic): (
-                None if self.server_feature_level is None else date_muted[0]
+                None if self.server_feature_level == 0 else date_muted[0]
             )
             for stream_name, topic, *date_muted in muted_topics
         }
@@ -255,7 +255,7 @@ class Model:
         # sream_id in model.cached_retention_text. This will be displayed in the UI.
         self.cached_retention_text: Dict[int, str] = {}
         realm_message_retention_days = self.initial_data["realm_message_retention_days"]
-        if self.server_feature_level is None or self.server_feature_level < 17:
+        if self.server_feature_level < 17:
             for stream in self.stream_dict.values():
                 stream["message_retention_days"] = None
 
@@ -586,7 +586,7 @@ class Model:
         if content is not None:
             request["content"] = content
 
-        if self.server_feature_level is not None and self.server_feature_level >= 9:
+        if self.server_feature_level >= 9:
             request["send_notification_to_old_thread"] = notify_old
             request["send_notification_to_new_thread"] = notify_new
 
@@ -1799,7 +1799,7 @@ class Model:
         Handle change to message flags (eg. starred, read)
         """
         assert event["type"] == "update_message_flags"
-        if self.server_feature_level is None or self.server_feature_level < 32:
+        if self.server_feature_level < 32:
             operation = event["operation"]
         else:
             operation = event["op"]
