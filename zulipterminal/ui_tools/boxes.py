@@ -820,6 +820,7 @@ class WriteBox(urwid.Pile):
                         type="private",
                         to=self.recipient_user_ids,
                         content=self.msg_write_box.edit_text,
+                        read_by_sender=True,
                     )
                 elif self.compose_box_status == "open_with_stream":
                     this_draft = StreamComposition(
@@ -827,6 +828,7 @@ class WriteBox(urwid.Pile):
                         to=self.stream_write_box.edit_text,
                         content=self.msg_write_box.edit_text,
                         subject=self.title_write_box.edit_text,
+                        read_by_sender=True,
                     )
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:

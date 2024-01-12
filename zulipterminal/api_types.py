@@ -93,6 +93,7 @@ class PrivateComposition(TypedDict):
     type: DirectMessageString
     content: str
     to: List[int]  # User ids
+    read_by_sender: bool  # New in ZFL 236, Zulip 8.0
 
 
 class StreamComposition(TypedDict):
@@ -100,6 +101,7 @@ class StreamComposition(TypedDict):
     content: str
     to: str  # stream name  # TODO: Migrate to using int (stream id)
     subject: str  # TODO: Migrate to using topic
+    read_by_sender: bool  # New in ZFL 236, Zulip 8.0
 
 
 Composition = Union[PrivateComposition, StreamComposition]

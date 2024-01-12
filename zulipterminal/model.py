@@ -541,6 +541,7 @@ class Model:
                 type="private",
                 to=recipients,
                 content=content,
+                read_by_sender=True,
             )
             response = self.client.send_message(composition)
             display_error_if_present(response, self.controller)
@@ -557,6 +558,7 @@ class Model:
             to=stream,
             subject=topic,
             content=content,
+            read_by_sender=True,
         )
         response = self.client.send_message(composition)
         display_error_if_present(response, self.controller)
