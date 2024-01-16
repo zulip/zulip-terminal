@@ -26,8 +26,8 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'setup.py'
-      - name: Install with type-checking tools, stubs & test libraries
-        run: pip install .[typing,testing]
+      - name: Install with type-checking tools, stubs & minimal test libraries
+        run: pip install .[typing,testing_minimal]
       - name: Run mypy
         run: ./tools/run-mypy
 
@@ -60,9 +60,9 @@ jobs:
           python-version: 3.7
           cache: 'pip'
           cache-dependency-path: 'setup.py'
-      - name: Install with linting tools
+      - name: Install with linting tools & minimal test libraries
         # NOTE: Install pytest so that isort recognizes it as a known library
-        run: pip install .[linting] && pip install pytest
+        run: pip install .[linting,minimal_testing]
       - name: Run isort
         run: ./tools/run-isort-check
 
