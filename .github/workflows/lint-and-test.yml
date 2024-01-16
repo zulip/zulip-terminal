@@ -134,6 +134,35 @@ jobs:
       - name: Run lint-docstring
         run: ./tools/lint-docstring
 
+  gitlint:
+    runs-on: ubuntu-latest
+    name: Lint - Commit text format (gitlint)
+    steps:
+      - name: 'PR commits +1'
+        if: github.event_name == 'pull_request'
+        run: echo "PR_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
+      - name: 'Checkout PR branch and all PR commits'
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: ${{ env.PR_FETCH_DEPTH }}
+      - uses: actions/setup-python@v4
+        if: github.event_name == 'pull_request'
+        with:
+          python-version: 3.7
+          cache: 'pip'
+          cache-dependency-path: 'setup.py'
+      - name: Install with gitlint
+        if: github.event_name == 'pull_request'
+        run: pip install .[gitlint]
+      - name: Run gitlint
+        if: github.event_name == 'pull_request'
+        run:
+          git fetch https://github.com/zulip/zulip-terminal main;
+          gitlint --commits FETCH_HEAD..${{ github.event.pull_request.head.sha }}
+
   base_pytest:
     runs-on: ubuntu-latest
     name: Install & test - CPython 3.7 (ubuntu), codecov
@@ -172,6 +201,7 @@ jobs:
       - hotkeys
       - docstrings
       - base_pytest
+      - gitlint
     steps:
       - uses: actions/checkout@v3
         if: github.event_name == 'pull_request'
