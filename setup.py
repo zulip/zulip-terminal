@@ -17,11 +17,16 @@ def long_description():
         return "\n".join(source.splitlines()[1:])
 
 
-testing_deps = [
+testing_minimal_deps = [
     "pytest~=7.2.0",
-    "pytest-cov~=4.0.0",
     "pytest-mock~=3.10.0",
 ]
+
+testing_plugin_deps = [
+    "pytest-cov~=4.0.0",
+]
+
+testing_deps = testing_minimal_deps + testing_plugin_deps
 
 linting_deps = [
     "isort~=5.11.0",
@@ -90,6 +95,7 @@ setup(
     extras_require={
         "dev": testing_deps + linting_deps + typing_deps + dev_helper_deps,
         "testing": testing_deps,
+        "testing_minimal": testing_minimal_deps,
         "linting": linting_deps,
         "typing": typing_deps,
     },
