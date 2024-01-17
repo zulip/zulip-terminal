@@ -36,6 +36,10 @@ linting_deps = [
     "typos~=1.16.11",
 ]
 
+gitlint_deps = [
+    "gitlint~=0.18.0",
+]
+
 typing_deps = [
     "lxml-stubs",
     "mypy~=1.3.0",
@@ -47,10 +51,9 @@ typing_deps = [
     "types-requests",
 ]
 
-dev_helper_deps = [
+helper_deps = [
     "pudb==2022.1.1",
     "snakeviz>=2.1.1",
-    "gitlint~=0.18.0",
 ]
 
 setup(
@@ -93,10 +96,11 @@ setup(
         ],
     },
     extras_require={
-        "dev": testing_deps + linting_deps + typing_deps + dev_helper_deps,
+        "dev": testing_deps + linting_deps + typing_deps + helper_deps + gitlint_deps,
         "testing": testing_deps,
         "testing_minimal": testing_minimal_deps,
         "linting": linting_deps,
+        "gitlint": gitlint_deps,
         "typing": typing_deps,
     },
     tests_require=testing_deps,
