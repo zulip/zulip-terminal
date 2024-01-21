@@ -82,6 +82,7 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 
 
 OFFLINE_THRESHOLD_SECS = 140
+PRESENCE_PING_INTERVAL_SECS = 60
 
 
 class ServerConnectionFailure(Exception):
@@ -171,6 +172,9 @@ class Model:
 
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level = self.initial_data.get("zulip_feature_level")
+
+        self._server_offline_threshold()
+        self._server_presence_ping_interval()
 
         self.user_dict: Dict[str, MinimalUserData] = {}
         self.user_id_email_dict: Dict[int, str] = {}
@@ -445,7 +449,7 @@ class Model:
                     view = self.controller.view
                     view.users_view.update_user_list(user_list=self.users)
                     view.middle_column.update_message_list_status_markers()
-            time.sleep(60)
+            time.sleep(self.server_presence_ping_interval)
 
     @asynch
     def toggle_message_reaction(
@@ -812,6 +816,25 @@ class Model:
         self.typing_started_expiry_period = self.initial_data.get(
             "server_typing_started_expiry_period_milliseconds",
             TYPING_STARTED_EXPIRY_PERIOD,
+        )
+
+    def _server_offline_threshold(self) -> None:
+        """
+        Stores how old a presence timestamp for a given user can be
+        before the user should be displayed as offline by clients.
+        This field was added in server version 7.0, ZFL 164.
+        """
+        self.server_offline_threshold = self.initial_data.get(
+            "server_presence_offline_threshold_seconds", OFFLINE_THRESHOLD_SECS
+        )
+
+    def _server_presence_ping_interval(self) -> None:
+        """
+        Stores how often the client should send presence requests to server.
+        This field was added in server version 7.0, ZFL 164.
+        """
+        self.server_presence_ping_interval = self.initial_data.get(
+            "server_presence_ping_interval_seconds", PRESENCE_PING_INTERVAL_SECS
         )
 
     @staticmethod
@@ -1202,7 +1225,7 @@ class Model:
                 *
                 * Out of the ClientPresence objects found in `presence`, we
                 * consider only those with a timestamp newer than
-                * OFFLINE_THRESHOLD_SECS; then of
+                * self.server_offline_threshold; then of
                 * those, return the one that has the greatest UserStatus, where
                 * `active` > `idle` > `offline`.
                 *
@@ -1216,7 +1239,7 @@ class Model:
                     timestamp = client[1]["timestamp"]
                     if client_name == "aggregated":
                         continue
-                    elif (time.time() - timestamp) < OFFLINE_THRESHOLD_SECS:
+                    elif (time.time() - timestamp) < self.server_offline_threshold:
                         if status == "active":
                             aggregate_status = "active"
                         if status == "idle" and aggregate_status != "active":
