@@ -460,6 +460,12 @@ $ pipenv install --dev
 $ pipenv run pip3 install -e '.[dev]'
 ```
 
+4. Connect the gitlint commit-message hook
+
+```
+$ pipenv run gitlint install-hook
+```
+
 #### Pip
 
 1. Manually create & activate a virtual environment; any method should work,
@@ -473,12 +479,18 @@ $ pipenv run pip3 install -e '.[dev]'
 $ pip3 install -e '.[dev]'
 ```
 
+3. Connect the gitlint commit-message hook
+```
+$ gitlint install-hook
+```
+
 #### make/pip
 
 This is the newest and simplest approach, if you have `make` installed:
 
 1. `make` (sets up an installed virtual environment in `zt_venv` in the current directory)
 2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+3. `gitlint install-hook` (connect the gitlint commit-message hook)
 
 ### Development tasks
 
