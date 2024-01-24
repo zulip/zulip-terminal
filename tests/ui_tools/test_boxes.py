@@ -153,11 +153,11 @@ class TestWriteBox:
         is_valid_stream: bool,
         required_typeahead: Optional[str],
         topics: List[str],
-        stream_dict: Dict[int, Dict[str, Any]],
+        all_stream_ids: List[int],
     ) -> None:
         write_box.model.topics_in_stream.return_value = topics
         write_box.model.is_valid_stream.return_value = is_valid_stream
-        write_box.model.stream_dict = stream_dict
+        write_box.model.get_all_stream_ids.return_value = all_stream_ids
         write_box.model.muted_streams = set()
         typeahead_string = write_box.generic_autocomplete(text, state)
 
@@ -573,12 +573,12 @@ class TestWriteBox:
         state: Optional[int],
         footer_text: List[Any],
         text: str,
-        stream_dict: Dict[int, Dict[str, Any]],
+        all_stream_ids: List[int],
     ) -> None:
         write_box.view.set_typeahead_footer = mocker.patch(
             "zulipterminal.ui.View.set_typeahead_footer"
         )
-        write_box.model.stream_dict = stream_dict
+        write_box.model.get_all_stream_ids.return_value = all_stream_ids
         write_box.model.muted_streams = set()
         write_box.generic_autocomplete(text, state)
 
@@ -941,6 +941,7 @@ class TestWriteBox:
         state_and_required_typeahead: Dict[int, Optional[str]],
         stream_categories: Dict[str, Any],
         stream_dict: Dict[int, Dict[str, Any]],
+        all_stream_ids: List[int],
     ) -> None:
         streams_to_pin = (
             [{"name": stream_name} for stream_name in stream_categories["pinned"]]
@@ -951,12 +952,15 @@ class TestWriteBox:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
         write_box.stream_id = stream_categories.get("current_stream", None)
-        write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = {
             stream["stream_id"]
             for stream in stream_dict.values()
             if stream["name"] in stream_categories.get("muted", set())
         }
+        write_box.model.get_all_stream_ids.return_value = all_stream_ids
+        write_box.model.stream_name_from_id.side_effect = lambda x: stream_dict[x][
+            "name"
+        ]
         states = state_and_required_typeahead.keys()
         required_typeaheads = list(state_and_required_typeahead.values())
         typeahead_strings = [
@@ -1278,7 +1282,9 @@ class TestWriteBox:
         expected_color: str,
     ) -> None:
         # FIXME: Refactor when we have ~ Model.is_private_stream
-        write_box.model.stream_dict = stream_dict
+        write_box.model.subscription_color_from_id.side_effect = lambda x: stream_dict[
+            x
+        ]["color"]
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_id_from_name.return_value = stream_id
         write_box.model.stream_access_type.return_value = stream_access_type

@@ -317,7 +317,7 @@ class TopicButton(TopButton):
         view: Any,
         count: int,
     ) -> None:
-        self.stream_name = controller.model.stream_dict[stream_id]["name"]
+        self.stream_name = controller.model.stream_name_from_id(stream_id)
         self.topic_name = topic
         self.stream_id = stream_id
         self.model = controller.model
@@ -586,7 +586,7 @@ class MessageLinkButton(urwid.Button):
             stream_id = cast(int, model.stream_id_from_name(stream_name))
             parsed_link["stream"]["stream_id"] = stream_id
         else:
-            stream_name = cast(str, model.stream_dict[stream_id]["name"])
+            stream_name = cast(str, model.stream_name_from_id(stream_id))
             parsed_link["stream"]["stream_name"] = stream_name
 
         return ""

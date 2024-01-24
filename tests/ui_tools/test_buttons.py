@@ -434,15 +434,12 @@ class TestTopicButton:
         is_resolved: bool,
     ) -> None:
         controller = mocker.Mock()
-        controller.model.stream_dict = {
-            205: {"name": "PTEST"},
-            86: {"name": "Django"},
-            14: {"name": "GSoC"},
-        }
         controller.model.is_muted_topic = mocker.Mock(return_value=False)
         view = mocker.Mock()
         top_button = mocker.patch(MODULE + ".TopButton.__init__")
         params = dict(controller=controller, count=count)
+
+        controller.model.stream_name_from_id.return_value = stream_name
 
         topic_button = TopicButton(
             stream_id=stream_id, topic=title, view=view, **params
@@ -486,7 +483,6 @@ class TestTopicButton:
         controller.model.is_muted_topic = mocker.Mock(
             return_value=is_muted_topic_return_value
         )
-        controller.model.stream_dict = {205: {"name": stream_name}}
         view = mocker.Mock()
         TopicButton(
             stream_id=205,
@@ -897,14 +893,12 @@ class TestMessageLinkButton:
     )
     def test__validate_narrow_link(
         self,
-        stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         topics_in_stream: Optional[List[str]],
         expected_error: str,
     ) -> None:
-        self.controller.model.stream_dict = stream_dict
         self.controller.model.is_user_subscribed_to_stream.return_value = (
             is_user_subscribed_to_stream
         )
@@ -922,6 +916,7 @@ class TestMessageLinkButton:
             "is_user_subscribed_to_stream",
             "is_valid_stream",
             "stream_id_from_name_return_value",
+            "stream_name_from_id_return_value",
             "expected_parsed_link",
             "expected_error",
         ],
@@ -933,6 +928,7 @@ class TestMessageLinkButton:
                 True,
                 None,
                 None,
+                "Stream 1",
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
@@ -945,6 +941,7 @@ class TestMessageLinkButton:
                 False,
                 None,
                 None,
+                None,
                 ParsedNarrowLink(stream=DecodedStream(stream_id=462, stream_name=None)),
                 "The stream seems to be either unknown or unsubscribed",
             ),
@@ -955,6 +952,7 @@ class TestMessageLinkButton:
                 None,
                 True,
                 1,
+                None,
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=1, stream_name="Stream 1")
                 ),
@@ -967,6 +965,7 @@ class TestMessageLinkButton:
                 None,
                 False,
                 None,
+                "foo",
                 ParsedNarrowLink(
                     stream=DecodedStream(stream_id=None, stream_name="foo")
                 ),
@@ -982,15 +981,14 @@ class TestMessageLinkButton:
     )
     def test__validate_and_patch_stream_data(
         self,
-        stream_dict: Dict[int, Any],
         parsed_link: ParsedNarrowLink,
         is_user_subscribed_to_stream: Optional[bool],
         is_valid_stream: Optional[bool],
         stream_id_from_name_return_value: Optional[int],
+        stream_name_from_id_return_value: Optional[str],
         expected_parsed_link: ParsedNarrowLink,
         expected_error: str,
     ) -> None:
-        self.controller.model.stream_dict = stream_dict
         self.controller.model.stream_id_from_name.return_value = (
             stream_id_from_name_return_value
         )
@@ -999,6 +997,10 @@ class TestMessageLinkButton:
         )
         self.controller.model.is_valid_stream.return_value = is_valid_stream
         mocked_button = self.message_link_button()
+
+        mocked_button.model.stream_name_from_id.return_value = (
+            stream_name_from_id_return_value
+        )
 
         error = mocked_button._validate_and_patch_stream_data(parsed_link)
 

@@ -754,11 +754,6 @@ class TestMessageBox:
         ],
     )
     def test_main_view(self, mocker, message, last_message):
-        self.model.stream_dict = {
-            5: {
-                "color": "#bd6",
-            },
-        }
         MessageBox(message, self.model, last_message)
 
     @pytest.mark.parametrize(
@@ -833,11 +828,6 @@ class TestMessageBox:
     def test_main_view_generates_stream_header(
         self, mocker, message, to_vary_in_last_message
     ):
-        self.model.stream_dict = {
-            5: {
-                "color": "#bd6",
-            },
-        }
         last_message = dict(message, **to_vary_in_last_message)
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
@@ -1026,11 +1016,7 @@ class TestMessageBox:
         assert_header_bar,
         assert_search_bar,
     ):
-        self.model.stream_dict = {
-            205: {
-                "color": "#bd6",
-            },
-        }
+        self.model.subscription_color_from_id.return_value = "#bd6"
         self.model.narrow = msg_narrow
         messages = messages_successful_response["messages"]
         current_message = messages[msg_type]
