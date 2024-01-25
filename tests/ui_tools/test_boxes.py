@@ -1,11 +1,14 @@
 import datetime
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional
+from unittest import mock
 
 import pytest
+import urwid
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
@@ -405,7 +408,7 @@ class TestWriteBox:
             ),
         ],
     )
-    def test_update_recipients(
+    def test_update_recipients_from_emails_in_widget(
         self,
         write_box: WriteBox,
         header: str,
@@ -416,7 +419,7 @@ class TestWriteBox:
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
-        write_box.update_recipients(write_box.to_write_box)
+        write_box.update_recipients_from_emails_in_widget(write_box.to_write_box)
 
         assert write_box.recipient_emails == expected_recipient_emails
         assert write_box.recipient_user_ids == expected_recipient_user_ids
@@ -1677,7 +1680,10 @@ class TestWriteBox:
             else:
                 write_box.stream_box_view(stream_id)
         else:
-            write_box.private_box_view()
+            if not message_being_edited:
+                write_box.private_box_view()
+            else:
+                write_box.private_box_edit_view()
         size = widget_size(write_box)
 
         def focus_val(x: str) -> int:
@@ -1702,6 +1708,123 @@ class TestWriteBox:
             assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(  # noqa: SIM300
                 expected_focus_col_name
             )
+
+    def test_private_box_view(
+        self,
+        mocker: MockerFixture,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        recipient_user_ids = [11]
+
+        write_box = WriteBox(self.view)
+        write_box.to_write_box = mocker.MagicMock(spec=ReadlineEdit)
+        enable_autocomplete = mocker.patch.object(ReadlineEdit, "enable_autocomplete")
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+        connect_signal_mock = mocker.patch.object(urwid, "connect_signal")
+        write_box.private_box_view(recipient_user_ids=recipient_user_ids)
+        enable_autocomplete.assert_has_calls(
+            [
+                mock.call(
+                    func=write_box._to_box_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+                mock.call(
+                    func=write_box.generic_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+            ]
+        )
+        connect_signal_mock.assert_called_once()
+        assert isinstance(write_box.to_write_box, ReadlineEdit)
+        assert write_box.to_write_box.text == "To: Human 1 <person1@example.com>"
+
+    def test_private_box_edit_view(
+        self,
+        mocker: MockerFixture,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        recipient_user_ids = [11]
+        write_box = WriteBox(self.view)
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+        connect_signal_mock = mocker.patch.object(urwid, "connect_signal")
+        enable_autocomplete_mock = mocker.patch.object(
+            ReadlineEdit, "enable_autocomplete"
+        )
+        write_box.private_box_edit_view(recipient_user_ids=recipient_user_ids)
+        enable_autocomplete_mock.assert_has_calls(
+            [
+                mock.call(
+                    func=write_box.generic_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+            ]
+        )
+        connect_signal_mock.assert_not_called()
+        assert isinstance(write_box.to_write_box, urwid.Text)
+        assert write_box.to_write_box.text == "To: Human 1 <person1@example.com>"
+
+    def test__setup_common_private_compose(self, mocker: MockerFixture) -> None:
+        write_box = WriteBox(self.view)
+        write_box.to_write_box = mocker.MagicMock()
+        write_box.msg_write_box = mocker.MagicMock()
+
+        enable_autocomplete_mock = mocker.patch.object(
+            ReadlineEdit, "enable_autocomplete"
+        )
+        write_box._setup_common_private_compose()
+        connect_signal_mock = mocker.patch.object(urwid, "connect_signal")
+        assert hasattr(write_box, "msg_write_box")
+        connect_signal_mock.assert_not_called()
+        enable_autocomplete_mock.assert_called_once()
+
+        enable_autocomplete_mock.assert_has_calls(
+            [
+                mock.call(
+                    func=write_box.generic_autocomplete,
+                    key=primary_key_for_command("AUTOCOMPLETE"),
+                    key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+                ),
+            ]
+        )
+        assert write_box.focus_position == 1
+
+    @pytest.mark.parametrize(
+        "recipient_user_ids, expected_recipient_emails, expected_recipient_info",
+        [
+            (
+                [11, 12],
+                ["person1@example.com", "person2@example.com"],
+                "Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+            ),
+            ([11], ["person1@example.com"], "Human 1 <person1@example.com>"),
+            ([], [], ""),
+        ],
+    )
+    def test_update_recipients_from_user_ids(
+        self,
+        recipient_user_ids: List[int],
+        expected_recipient_emails: List[str],
+        expected_recipient_info: str,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        write_box = WriteBox(self.view)
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+
+        write_box.recipient_info = write_box.update_recipients_from_user_ids(
+            recipient_user_ids
+        )
+
+        assert write_box.recipient_emails == expected_recipient_emails
+        assert write_box.recipient_info == expected_recipient_info
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
