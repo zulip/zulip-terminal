@@ -98,7 +98,7 @@ setup(
     extras_require={
         "dev": testing_deps + linting_deps + typing_deps + helper_deps + gitlint_deps,
         "testing": testing_deps,
-        "testing_minimal": testing_minimal_deps,
+        "testing-minimal": testing_minimal_deps,  # extra must be hyphenated
         "linting": linting_deps,
         "gitlint": gitlint_deps,
         "typing": typing_deps,
