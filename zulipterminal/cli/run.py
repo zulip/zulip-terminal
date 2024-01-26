@@ -513,11 +513,11 @@ def main(options: Optional[List[str]] = None) -> None:
         )
 
         # Validate remaining settings
-        for setting, valid_values in valid_remaining_settings.items():
-            if zterm[setting].value not in valid_values:
+        for setting, valid_remaining_values in valid_remaining_settings.items():
+            if zterm[setting].value not in valid_remaining_values:
                 helper_text = (
                     ["Valid values are:"]
-                    + [f"  {option}" for option in valid_values]
+                    + [f"  {option}" for option in valid_remaining_values]
                     + [f"Specify the {setting} option in zuliprc file."]
                 )
                 exit_with_error(
@@ -563,8 +563,8 @@ def main(options: Optional[List[str]] = None) -> None:
 
         # Translate valid strings for boolean values into True/False
         boolean_settings: Dict[str, bool] = dict()
-        for setting, valid_values in VALID_BOOLEAN_SETTINGS.items():
-            boolean_settings[setting] = zterm[setting].value == valid_values[0]
+        for setting, valid_boolean_values in VALID_BOOLEAN_SETTINGS.items():
+            boolean_settings[setting] = zterm[setting].value == valid_boolean_values[0]
 
         Controller(
             config_file=zuliprc_path,
