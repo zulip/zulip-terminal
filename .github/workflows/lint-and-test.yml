@@ -16,6 +16,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  LINTING_PYTHON_VERSION: 3.7
+
 jobs:
   mypy:
     runs-on: ubuntu-latest
@@ -26,7 +29,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with type-checking tools, stubs & minimal test libraries
@@ -43,7 +46,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with linting tools
@@ -60,7 +63,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with linting tools & minimal test libraries
@@ -78,7 +81,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with linting tools
@@ -95,7 +98,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with linting tools
@@ -112,7 +115,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Minimal install
@@ -129,7 +132,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Minimal install
@@ -154,7 +157,7 @@ jobs:
       - uses: actions/setup-python@v5
         if: github.event_name == 'pull_request'
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with gitlint
@@ -215,7 +218,7 @@ jobs:
       - uses: actions/setup-python@v5
         if: github.event_name == 'pull_request'
         with:
-          python-version: 3.7
+          python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Run check-branch
