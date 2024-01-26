@@ -90,7 +90,8 @@ warn_unused_ignores = true
 warn_return_any = false
 no_implicit_reexport = true  # NOTE: Disabled explicitly for tests/ in run-mypy
 strict_equality = true
-strict_concatenate = true
+
+extra_checks = true
 
 enable_error_code = [
     "redundant-expr",
