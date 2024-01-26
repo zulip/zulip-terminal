@@ -42,7 +42,7 @@ gitlint_deps = [
 
 typing_deps = [
     "lxml-stubs",
-    "mypy~=1.4.0",
+    "mypy~=1.5.0",
     "types-beautifulsoup4",
     "types-pygments",
     "types-python-dateutil",
