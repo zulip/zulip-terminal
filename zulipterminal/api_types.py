@@ -50,10 +50,10 @@ MessageType = Union[DirectMessageString, StreamMessageString]
 #
 # NOTE: `to` field could be email until ZFL 11/3.0; ids were possible from 2.0+
 
-# Timing parameters for when notifications should occur
-TYPING_STARTED_WAIT_PERIOD: Final = 10
-TYPING_STOPPED_WAIT_PERIOD: Final = 5
-TYPING_STARTED_EXPIRY_PERIOD: Final = 15  # TODO: Needs implementation in ZT
+# Timing parameters for when notifications should occur (in milliseconds)
+TYPING_STARTED_WAIT_PERIOD: Final = 10000
+TYPING_STOPPED_WAIT_PERIOD: Final = 5000
+TYPING_STARTED_EXPIRY_PERIOD: Final = 15000  # TODO: Needs implementation in ZT
 
 TypingStatusChange = Literal["start", "stop"]
 
