@@ -7,6 +7,11 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
 
+from zulipterminal.api_types import (
+    TYPING_STARTED_EXPIRY_PERIOD,
+    TYPING_STARTED_WAIT_PERIOD,
+    TYPING_STOPPED_WAIT_PERIOD,
+)
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
@@ -50,6 +55,9 @@ class TestWriteBox:
         write_box.model.max_stream_name_length = 60
         write_box.model.max_topic_length = 60
         write_box.model.max_message_length = 10000
+        write_box.model.typing_started_wait_period = TYPING_STARTED_WAIT_PERIOD
+        write_box.model.typing_stopped_wait_period = TYPING_STOPPED_WAIT_PERIOD
+        write_box.model.typing_started_expiry_period = TYPING_STARTED_EXPIRY_PERIOD
         write_box.model.user_group_names = [
             groups["name"] for groups in user_groups_fixture
         ]

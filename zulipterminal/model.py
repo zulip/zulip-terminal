@@ -34,6 +34,9 @@ from zulipterminal.api_types import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
+    TYPING_STARTED_EXPIRY_PERIOD,
+    TYPING_STARTED_WAIT_PERIOD,
+    TYPING_STOPPED_WAIT_PERIOD,
     Composition,
     CustomFieldValue,
     DirectTypingNotification,
@@ -214,6 +217,7 @@ class Model:
         self._draft: Optional[Composition] = None
 
         self._store_content_length_restrictions()
+        self._store_typing_duration_settings()
 
         self.active_emoji_data, self.all_emoji_names = self.generate_all_emoji_data(
             self.initial_data["realm_emoji"]
@@ -790,6 +794,14 @@ class Model:
         self.max_message_length = self.initial_data.get(
             "max_message_length", MAX_MESSAGE_LENGTH
         )
+
+    def _store_typing_duration_settings(self) -> None:
+        """
+        Store typing duration fields in model
+        """
+        self.typing_started_wait_period = TYPING_STARTED_WAIT_PERIOD
+        self.typing_stopped_wait_period = TYPING_STOPPED_WAIT_PERIOD
+        self.typing_started_expiry_period = TYPING_STARTED_EXPIRY_PERIOD
 
     @staticmethod
     def modernize_message_response(message: Message) -> Message:
