@@ -13,13 +13,7 @@ import urwid
 from typing_extensions import Literal
 from urwid_readline import ReadlineEdit
 
-from zulipterminal.api_types import (
-    TYPING_STARTED_WAIT_PERIOD,
-    TYPING_STOPPED_WAIT_PERIOD,
-    Composition,
-    PrivateComposition,
-    StreamComposition,
-)
+from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
 from zulipterminal.config.keys import (
     is_command_key,
     keys_for_command,
@@ -237,8 +231,12 @@ class WriteBox(urwid.Pile):
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
 
-        start_period_delta = timedelta(milliseconds=TYPING_STARTED_WAIT_PERIOD)
-        stop_period_delta = timedelta(milliseconds=TYPING_STOPPED_WAIT_PERIOD)
+        start_period_delta = timedelta(
+            milliseconds=self.model.typing_started_wait_period
+        )
+        stop_period_delta = timedelta(
+            milliseconds=self.model.typing_stopped_wait_period
+        )
 
         def on_type_send_status(edit: object, new_edit_text: str) -> None:
             if new_edit_text and self.typing_recipient_user_ids:

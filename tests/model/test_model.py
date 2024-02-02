@@ -14,6 +14,9 @@ from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
+    TYPING_STARTED_EXPIRY_PERIOD,
+    TYPING_STARTED_WAIT_PERIOD,
+    TYPING_STOPPED_WAIT_PERIOD,
     Model,
     ServerConnectionFailure,
     UserSettings,
@@ -1390,6 +1393,15 @@ class TestModel:
             assert model.max_stream_name_length == MAX_STREAM_NAME_LENGTH
             assert model.max_topic_length == MAX_TOPIC_NAME_LENGTH
             assert model.max_message_length == MAX_MESSAGE_LENGTH
+
+    def test__store_typing_duration_settings__default_values(self, model, initial_data):
+        model.initial_data = initial_data
+
+        model._store_typing_duration_settings()
+
+        assert model.typing_started_wait_period == TYPING_STARTED_WAIT_PERIOD
+        assert model.typing_stopped_wait_period == TYPING_STOPPED_WAIT_PERIOD
+        assert model.typing_started_expiry_period == TYPING_STARTED_EXPIRY_PERIOD
 
     def test_get_message_false_first_anchor(
         self,
