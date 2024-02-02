@@ -50,6 +50,8 @@ MessageType = Union[DirectMessageString, StreamMessageString]
 #
 # NOTE: `to` field could be email until ZFL 11/3.0; ids were possible from 2.0+
 
+# In ZFL 204, these values were made server-configurable
+# Before this feature level, these values were fixed as follows:
 # Timing parameters for when notifications should occur (in milliseconds)
 TYPING_STARTED_WAIT_PERIOD: Final = 10000
 TYPING_STOPPED_WAIT_PERIOD: Final = 5000

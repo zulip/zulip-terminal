@@ -1403,6 +1403,36 @@ class TestModel:
         assert model.typing_stopped_wait_period == TYPING_STOPPED_WAIT_PERIOD
         assert model.typing_started_expiry_period == TYPING_STARTED_EXPIRY_PERIOD
 
+    def test__store_typing_duration_settings__with_values(
+        self,
+        model,
+        initial_data,
+        feature_level=204,
+        typing_started_wait=7500,
+        typing_stopped_wait=3000,
+        typing_started_expiry=10000,
+    ):
+        # Ensure inputs are not the defaults, to avoid the test accidentally passing
+        assert typing_started_wait != TYPING_STARTED_WAIT_PERIOD
+        assert typing_stopped_wait != TYPING_STOPPED_WAIT_PERIOD
+        assert typing_started_expiry != TYPING_STARTED_EXPIRY_PERIOD
+
+        to_vary_in_initial_data = {
+            "server_typing_started_wait_period_milliseconds": typing_started_wait,
+            "server_typing_stopped_wait_period_milliseconds": typing_stopped_wait,
+            "server_typing_started_expiry_period_milliseconds": typing_started_expiry,
+        }
+
+        initial_data.update(to_vary_in_initial_data)
+        model.initial_data = initial_data
+        model.server_feature_level = feature_level
+
+        model._store_typing_duration_settings()
+
+        assert model.typing_started_wait_period == typing_started_wait
+        assert model.typing_stopped_wait_period == typing_stopped_wait
+        assert model.typing_started_expiry_period == typing_started_expiry
+
     def test_get_message_false_first_anchor(
         self,
         mocker,
