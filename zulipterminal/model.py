@@ -797,11 +797,22 @@ class Model:
 
     def _store_typing_duration_settings(self) -> None:
         """
-        Store typing duration fields in model
+        Store typing duration fields in model.
+        In ZFL 204, these values were made server-configurable.
+        Uses default values if not received from server.
         """
-        self.typing_started_wait_period = TYPING_STARTED_WAIT_PERIOD
-        self.typing_stopped_wait_period = TYPING_STOPPED_WAIT_PERIOD
-        self.typing_started_expiry_period = TYPING_STARTED_EXPIRY_PERIOD
+        self.typing_started_wait_period = self.initial_data.get(
+            "server_typing_started_wait_period_milliseconds",
+            TYPING_STARTED_WAIT_PERIOD,
+        )
+        self.typing_stopped_wait_period = self.initial_data.get(
+            "server_typing_stopped_wait_period_milliseconds",
+            TYPING_STOPPED_WAIT_PERIOD,
+        )
+        self.typing_started_expiry_period = self.initial_data.get(
+            "server_typing_started_expiry_period_milliseconds",
+            TYPING_STARTED_EXPIRY_PERIOD,
+        )
 
     @staticmethod
     def modernize_message_response(message: Message) -> Message:
