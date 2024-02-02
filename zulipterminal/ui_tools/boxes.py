@@ -237,8 +237,8 @@ class WriteBox(urwid.Pile):
         ]
         self.focus_position = self.FOCUS_CONTAINER_MESSAGE
 
-        start_period_delta = timedelta(seconds=TYPING_STARTED_WAIT_PERIOD)
-        stop_period_delta = timedelta(seconds=TYPING_STOPPED_WAIT_PERIOD)
+        start_period_delta = timedelta(milliseconds=TYPING_STARTED_WAIT_PERIOD)
+        stop_period_delta = timedelta(milliseconds=TYPING_STOPPED_WAIT_PERIOD)
 
         def on_type_send_status(edit: object, new_edit_text: str) -> None:
             if new_edit_text and self.typing_recipient_user_ids:
