@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -90,7 +90,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -107,7 +107,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -148,7 +148,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: ${{ env.PR_FETCH_DEPTH }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         if: github.event_name == 'pull_request'
         with:
           python-version: 3.7
@@ -171,7 +171,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Python version
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.7
           cache: 'pip'
@@ -209,7 +209,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         if: github.event_name == 'pull_request'
         with:
           python-version: 3.7
@@ -247,7 +247,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Python version ${{ matrix.env.PYTHON }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.env.PYTHON }}
           cache: 'pip'
