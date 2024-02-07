@@ -4263,6 +4263,21 @@ class TestModel:
         with pytest.raises(RuntimeError, match="Invalid user ID."):
             model.user_name_from_id(user_id)
 
+    @pytest.mark.parametrize(
+        "user_name, user_name_counter, is_duplicate",
+        [
+            case("Alice", {"Greg": 2}, False, id="username_does_not_exist"),
+            case("Alice", {"Alice": 1}, False, id="username_is_not_duplicate"),
+            case("Greg", {"Greg": 2}, True, id="username_is_duplicate"),
+        ],
+    )
+    def test_is_user_name_duplicate(
+        self, model, user_name, user_name_counter, is_duplicate
+    ):
+        model.user_name_counter = user_name_counter
+        return_value = model.is_user_name_duplicate(user_name)
+        assert return_value == is_duplicate
+
     def test_generate_all_emoji_data(
         self,
         mocker,
