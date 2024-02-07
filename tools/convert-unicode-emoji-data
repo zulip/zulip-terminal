@@ -8,7 +8,7 @@ from pathlib import Path, PurePath
 
 try:
     # Ignored for type-checking, as it is a temporary file, deleted at the end of file
-    from zulipterminal.unicode_emoji_dict import (  # type: ignore [import]
+    from zulipterminal.unicode_emoji_dict import (  # type: ignore [import-not-found,import-untyped,unused-ignore]
         EMOJI_NAME_MAPS,
     )
 except ModuleNotFoundError:
