@@ -405,6 +405,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide full raw message (from message information)',
         'key_category': 'msg_actions',
     },
+    'COPY_MESSAGE': {
+        'keys': ['c'],
+        'help_text':'Copy message content to clipboard (from message information)',
+        'key_category': 'msg_actions',
+    },
 }
 # fmt: on
 
