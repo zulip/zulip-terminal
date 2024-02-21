@@ -1571,6 +1571,9 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
         )
+        read_receipt_keys = "[{}]".format(
+            ", ".join(map(str, keys_for_command("READ_RECEIPTS")))
+        )
         msg_info = [
             (
                 "",
@@ -1591,6 +1594,11 @@ class MsgInfoView(PopUpView):
                 ("Full raw message", full_raw_message_keys),
             ],
         )
+
+        # Only show 'View read receipts' option if ZFL>=137
+        if controller.model.server_feature_level >= 137:
+            viewing_actions[1].append(("View read receipts", read_receipt_keys))
+
         msg_info.append(viewing_actions)
         # Only show the 'Edit History' label for edited messages.
 
@@ -1713,6 +1721,14 @@ class MsgInfoView(PopUpView):
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
             self.controller.show_full_raw_message(
+                message=self.msg,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        elif is_command_key("READ_RECEIPTS", key):
+            self.controller.show_read_receipts(
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
