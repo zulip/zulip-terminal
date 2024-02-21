@@ -42,6 +42,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
+    ReadReceiptView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -365,6 +366,25 @@ class Controller:
                 message_links,
                 time_mentions,
                 "Full raw message (up/down scrolls)",
+            ),
+            "area:msg",
+        )
+
+    def show_read_receipts(
+        self,
+        message: Message,
+        topic_links: "Dict[str, Tuple[str, int, bool]]",
+        message_links: "Dict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        self.show_pop_up(
+            ReadReceiptView(
+                self,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                "Read receipts (up/down scrolls)",
             ),
             "area:msg",
         )
