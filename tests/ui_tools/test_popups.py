@@ -24,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
     PopUpView,
+    ReadReceiptView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -597,6 +598,62 @@ class TestFullRawMsgView:
             message_links=OrderedDict(),
             time_mentions=list(),
         )
+
+
+class TestReadReceiptView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture, msg_box: MessageBox) -> None:
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        self.controller.model.fetch_message_read_receipt_user_ids = mocker.Mock(
+            return_value="[3,7,9]"
+        )
+        self.controller.model.user_name_from_id = mocker.Mock(
+            return_value="['Alice','John','Charlie']"
+        )
+        mocker.patch(MODULE + ".MessageBox", return_value=msg_box)
+        # NOTE: Given that the ReadReceiptView just uses the message ID from
+        # the message data currently, message_fixture is not used to avoid
+        # adding extra test runs unnecessarily.
+        self.message = Message(id=1)
+        self.read_receipt = ReadReceiptView(
+            controller=self.controller,
+            message=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+            title="Read Receipts",
+        )
+
+    def test_init(self, msg_box: MessageBox) -> None:
+        assert self.read_receipt.title == "Read Receipts"
+        assert self.read_receipt.controller == self.controller
+        assert self.read_receipt.message == self.message
+        assert self.read_receipt.topic_links == OrderedDict()
+        assert self.read_receipt.message_links == OrderedDict()
+        assert self.read_receipt.time_mentions == list()
+
+    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    def test_keypress_exit_popup(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.read_receipt)
+
+        self.read_receipt.keypress(size, key)
+
+        assert self.controller.exit_popup.called
+
+    def test_keypress_exit_popup_invalid_key(
+        self, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.read_receipt)
+        key = "a"
+
+        self.read_receipt.keypress(size, key)
+
+        assert not self.controller.exit_popup.called
 
 
 class TestEditHistoryView:

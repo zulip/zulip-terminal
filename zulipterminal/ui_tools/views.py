@@ -1970,6 +1970,58 @@ class FullRawMsgView(PopUpView):
         return super().keypress(size, key)
 
 
+class ReadReceiptView(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        message: Message,
+        topic_links: "Dict[str, Tuple[str, int, bool]]",
+        message_links: "Dict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+        title: str,
+    ) -> None:
+        self.controller = controller
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        model = controller.model
+
+        # Get read receipt user ids list
+        message_read_user_ids = model.fetch_message_read_receipt_user_ids(message["id"])
+        user_names = [model.user_name_from_id(id) for id in message_read_user_ids]
+        sorted_user_names = sorted(user_names)
+        msg_read_list = [("", [(name, "") for name in sorted_user_names])]
+        header = [
+            (
+                "pack",
+                urwid.Text(
+                    f"This message has been read by {len(user_names)} people.\n"
+                ),
+            )
+        ]
+        popup_width, column_width = self.calculate_table_widths(
+            msg_read_list, len(title)
+        )
+        widgets = self.make_table_with_categories(msg_read_list, column_width)
+
+        super().__init__(
+            controller, widgets, "MSG_INFO", popup_width + 6, title, urwid.Pile(header)
+        )
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("GO_BACK", key) or is_command_key("READ_RECEIPTS", key):
+            self.controller.show_msg_info(
+                msg=self.message,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        return super().keypress(size, key)
+
+
 class EmojiPickerView(PopUpView):
     """
     Displays Emoji Picker view for messages.
