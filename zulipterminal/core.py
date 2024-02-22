@@ -414,11 +414,14 @@ class Controller:
             # Suppress stdout and stderr when opening browser
             with suppress_output():
                 browser_controller.open(url)
+
+                # MacOS using Python version < 3.11 has no "name" attribute
+                # - https://github.com/python/cpython/issues/82828
+                # - https://github.com/python/cpython/issues/87590
+                # Use a default value if missing, for macOS, and potential later issues
+                browser_name = getattr(browser_controller, "name", "default browser")
                 self.report_success(
-                    [
-                        "The link was successfully opened using "
-                        f"{browser_controller.name}"
-                    ]
+                    [f"The link was successfully opened using {browser_name}"]
                 )
         except webbrowser.Error as e:
             # Set a footer text if no runnable browser is located
