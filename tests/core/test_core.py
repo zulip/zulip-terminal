@@ -406,15 +406,24 @@ class TestController:
         assert popup.call_args_list[0][0][1] == "area:error"
 
     @pytest.mark.parametrize(
-        "url",
+        "url, webbrowser_name, expected_webbrowser_name",
         [
-            "https://chat.zulip.org/#narrow/stream/test",
-            "https://chat.zulip.org/user_uploads/sent/abcd/efg.png",
-            "https://github.com/",
+            ("https://chat.zulip.org/#narrow/stream/test", "chrome", "chrome"),
+            (
+                "https://chat.zulip.org/user_uploads/sent/abcd/efg.png",
+                "mozilla",
+                "mozilla",
+            ),
+            ("https://github.com/", None, "default browser"),
         ],
     )
     def test_open_in_browser_success(
-        self, mocker: MockerFixture, controller: Controller, url: str
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        url: str,
+        webbrowser_name: Optional[str],
+        expected_webbrowser_name: str,
     ) -> None:
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
@@ -422,11 +431,16 @@ class TestController:
         mock_get = mocker.patch(MODULE + ".webbrowser.get")
         mock_open = mock_get.return_value.open
 
+        if webbrowser_name is None:
+            del mock_get.return_value.name
+        else:
+            mock_get.return_value.name = webbrowser_name
+
         controller.open_in_browser(url)
 
         mock_open.assert_called_once_with(url)
         mocked_report_success.assert_called_once_with(
-            [f"The link was successfully opened using {mock_get.return_value.name}"]
+            [f"The link was successfully opened using {expected_webbrowser_name}"]
         )
 
     def test_open_in_browser_fail__no_browser_controller(
