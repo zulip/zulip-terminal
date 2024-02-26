@@ -1136,7 +1136,11 @@ class UserInfoView(PopUpView):
         user_details = [
             (key, value) for key, value in display_data.items() if key != "Name"
         ]
-        user_view_content = [(display_data["Name"], user_details)]
+        display_full_name = controller.model.user_name_from_id(user_id)
+        if controller.model.is_guest_user(user_id):
+            display_full_name += " (guest)"
+
+        user_view_content = [(display_full_name, user_details)]
 
         if display_custom_profile_data:
             user_view_content.extend(
@@ -1525,7 +1529,14 @@ class StreamMembersView(PopUpView):
         model = controller.model
 
         user_ids = model.get_other_subscribers_in_stream(stream_id=stream_id)
-        user_names = [model.user_name_from_id(id) for id in user_ids]
+        user_names = [
+            (
+                model.user_name_from_id(id) + " (guest)"
+                if model.is_guest_user(id)
+                else model.user_name_from_id(id)
+            )
+            for id in user_ids
+        ]
         sorted_user_names = sorted(user_names)
         sorted_user_names.insert(0, model.user_full_name)
         title = "Stream Members (up/down scrolls)"
@@ -1573,12 +1584,17 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
         )
+
+        sender_name_with_guest_suffix = msg["sender_full_name"]
+        if controller.model.is_guest_user(msg["sender_id"]):
+            sender_name_with_guest_suffix += " (guest)"
+
         msg_info = [
             (
                 "",
                 [
                     ("Date & Time", date_and_time),
-                    ("Sender", msg["sender_full_name"]),
+                    ("Sender", sender_name_with_guest_suffix),
                     ("Sender's Email ID", msg["sender_email"]),
                 ],
             )
