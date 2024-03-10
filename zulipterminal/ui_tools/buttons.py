@@ -269,6 +269,7 @@ class UserButton(TopButton):
         color: Optional[str] = None,
         count: int,
         is_current_user: bool = False,
+        is_guest: bool = False,
     ) -> None:
         # Properties accessed externally
         self.email = user["email"]
@@ -290,6 +291,11 @@ class UserButton(TopButton):
         if is_current_user:
             self.suffix_style = "current_user"
             self.suffix_text = "(you)"
+            self.update_widget()
+
+        if is_guest:
+            self.suffix_style = "current_user"
+            self.suffix_text = "(guest)"
             self.update_widget()
 
     def _narrow_with_compose(self) -> None:

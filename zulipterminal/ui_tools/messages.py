@@ -91,16 +91,24 @@ class MessageBox(urwid.Pile):
             if self._is_private_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
+                self.recipients_names += (
+                    " (guest)" if self.model.is_guest_user(recipient["id"]) else ""
+                )
                 self.recipient_emails = [self.model.user_email]
                 self.recipient_ids = [self.model.user_id]
             else:
                 self.recipients_names = ", ".join(
                     [
-                        recipient["full_name"]
+                        (
+                            recipient["full_name"] + " (guest)"
+                            if self.model.is_guest_user(recipient["id"])
+                            else ""
+                        )
                         for recipient in self.message["display_recipient"]
                         if recipient["email"] != self.model.user_email
                     ]
                 )
+
                 self.recipient_emails = [
                     recipient["email"]
                     for recipient in self.message["display_recipient"]
@@ -683,11 +691,15 @@ class MessageBox(urwid.Pile):
         any_differences = any(different.values())
 
         if any_differences:  # Construct content_header, if needed
-            text_keys = ("author", "star", "time", "status")
+            text_keys = ("author", "suffix", "star", "time", "status")
             text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("msg_sender", message["this"]["author"])
+                if "sender_id" in self.message and self.model.is_guest_user(
+                    self.message["sender_id"]
+                ):
+                    text["suffix"] = ("guest_suffix", "(guest)")
 
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
@@ -713,7 +725,8 @@ class MessageBox(urwid.Pile):
             content_header = urwid.Columns(
                 [
                     ("pack", urwid.Text(text["status"])),
-                    ("weight", 10, urwid.Text(text["author"])),
+                    ("pack", urwid.Text(text["author"])),
+                    ("weight", 10, urwid.Text(text["suffix"])),
                     (26, urwid.Text(text["time"], align="right")),
                     (1, urwid.Text(text["star"], align="right")),
                 ],
