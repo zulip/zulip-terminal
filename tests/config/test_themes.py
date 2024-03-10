@@ -9,6 +9,7 @@ from pygments.token import STANDARD_TYPES, _TokenType
 from pytest import param as case
 from pytest_mock import MockerFixture
 
+from zulipterminal.config.color import Background
 from zulipterminal.config.regexes import REGEX_COLOR_VALID_FORMATS
 from zulipterminal.config.themes import (
     REQUIRED_STYLES,
@@ -86,7 +87,8 @@ def test_builtin_theme_completeness(theme_name: str) -> None:
     # Check if color used in STYLE exists in Color.
     for style_name, style_conf in theme_styles.items():
         fg, bg = style_conf
-        assert fg in theme_colors and bg in theme_colors
+        assert fg in theme_colors
+        assert bg in theme_colors or bg in Background
     # Check completeness of META
     expected_META = {"pygments": ["styles", "background", "overrides"]}
     for metadata, config in expected_META.items():
@@ -113,6 +115,7 @@ def test_complete_and_incomplete_themes__bundled_theme_output() -> None:
         case({"META": None}, False, id="META_absent"),
         case({"META": {}}, False, id="META_empty"),
         case({"META": {"pygments": {}}}, False, id="META_pygments_empty"),
+        case({"META": "extra_field"}, True, id="META_with_extra_field"),
     ],
 )
 def test_complete_and_incomplete_themes__single_theme_completeness(
@@ -131,7 +134,7 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
         STYLES = {
             style: (FakeColor.COLOR_1, FakeColor.COLOR_2) for style in REQUIRED_STYLES
         }
-        META = {
+        META: Dict[str, Any] = {
             "pygments": {
                 "styles": None,
                 "background": None,
@@ -144,6 +147,8 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
     for field, action in missing.items():
         if action == "incomplete_style":
             setattr(FakeTheme, field, incomplete_style)
+        elif action == "extra_field":
+            FakeTheme.META["extra_field"] = 5  # Non-iterable misc data
         elif action is None:
             delattr(FakeTheme, field)
         else:
@@ -197,7 +202,9 @@ def test_generate_theme__has_required_attributes(
 
     mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
 
-    generated_theme = generate_theme(fake_theme_name, depth)
+    generated_theme = generate_theme(
+        fake_theme_name, color_depth=depth, transparent_background=False
+    )
 
     assert len(generated_theme) == len(theme_styles) + expected_pygments_length
     assert (single_style, "", "", "", "a", "b") in generated_theme
@@ -214,9 +221,11 @@ def test_generate_theme__missing_attributes_in_theme(
 
     mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
 
+    kwargs: Dict[str, Any] = dict(color_depth=depth, transparent_background=False)
+
     # No attributes (STYLES or META) - flag missing Color
     with pytest.raises(MissingThemeAttributeError) as e:
-        generate_theme(fake_theme_name, depth)
+        generate_theme(fake_theme_name, **kwargs)
     assert str(e.value) == "Theme is missing required attribute 'Color'"
 
     # Color but missing STYLES - flag missing STYLES
@@ -227,7 +236,7 @@ def test_generate_theme__missing_attributes_in_theme(
     FakeTheme.Color = FakeColor  # type: ignore [attr-defined]
 
     with pytest.raises(MissingThemeAttributeError) as e:
-        generate_theme(fake_theme_name, depth)
+        generate_theme(fake_theme_name, **kwargs)
     assert str(e.value) == "Theme is missing required attribute 'STYLES'"
 
     # Color, STYLES and META, but no pygments data in META
@@ -236,7 +245,7 @@ def test_generate_theme__missing_attributes_in_theme(
     FakeTheme.META = {}  # type: ignore [attr-defined]
 
     with pytest.raises(MissingThemeAttributeError) as e:
-        generate_theme(fake_theme_name, depth)
+        generate_theme(fake_theme_name, **kwargs)
     assert str(e.value) == """Theme is missing required attribute 'META["pygments"]'"""
 
     # Color, STYLES and META, but incomplete pygments in META
@@ -245,7 +254,7 @@ def test_generate_theme__missing_attributes_in_theme(
     }
 
     with pytest.raises(MissingThemeAttributeError) as e:
-        generate_theme(fake_theme_name, depth)
+        generate_theme(fake_theme_name, **kwargs)
     assert (
         str(e.value)
         == """Theme is missing required attribute 'META["pygments"]["overrides"]'"""
@@ -300,7 +309,10 @@ def test_parse_themefile(
 
     req_styles = {"s1": "", "s2": "bold"}
     mocker.patch.dict("zulipterminal.config.themes.REQUIRED_STYLES", req_styles)
-    assert parse_themefile(theme_styles, color_depth) == expected_urwid_theme
+    assert (
+        parse_themefile(theme_styles, color_depth, Color.DARK_MAGENTA, False)
+        == expected_urwid_theme
+    )
 
 
 @pytest.mark.parametrize(

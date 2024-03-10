@@ -68,6 +68,7 @@ class Controller:
         color_depth: int,
         debug_path: Optional[str],
         in_explore_mode: bool,
+        transparency: bool,
         autohide: bool,
         notify: bool,
         exit_confirmation: bool,
@@ -76,6 +77,7 @@ class Controller:
         self.theme = theme
         self.color_depth = color_depth
         self.in_explore_mode = in_explore_mode
+        self.transparency_enabled = transparency
         self.autohide = autohide
         self.exit_confirmation = exit_confirmation
         self.notify_enabled = notify
@@ -308,6 +310,7 @@ class Controller:
                 autohide_enabled=self.autohide,
                 maximum_footlinks=self.maximum_footlinks,
                 exit_confirmation_enabled=self.exit_confirmation,
+                transparency_enabled=self.transparency_enabled,
             ),
             "area:help",
         )

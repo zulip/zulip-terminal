@@ -21,7 +21,6 @@ from zulipterminal.config.color import color_properties
 
 class GruvBoxColor(Enum):
     # color          =  16code          256code   24code
-    DEFAULT          = 'default         default   default'
 
     # Only or primarily dark mode - grayscales
     # - generally background
