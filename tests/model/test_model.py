@@ -242,6 +242,7 @@ class TestModel:
             "user_settings",
             "realm_emoji",
             "realm_user",
+            "muted_users",
         ]
         fetch_event_types = [
             "realm",
@@ -259,6 +260,7 @@ class TestModel:
             "realm_emoji",
             "custom_profile_fields",
             "zulip_version",
+            "muted_users",
         ]
         model.client.register.assert_called_once_with(
             event_types=event_types,
