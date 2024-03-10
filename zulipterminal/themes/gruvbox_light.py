@@ -69,6 +69,7 @@ STYLES = {
     'area:error'       : (Color.LIGHT0_HARD,            Color.FADED_RED),
     'area:user'        : (Color.LIGHT0_HARD,            Color.FADED_YELLOW),
     'search_error'     : (Color.FADED_RED,              Color.LIGHT0_HARD),
+    'active_narrow'    : (Color.LIGHT0_HARD,            Color.FADED_GREEN),
     'task:success'     : (Color.LIGHT0_HARD,            Color.FADED_GREEN),
     'task:error'       : (Color.LIGHT0_HARD,            Color.FADED_RED),
     'task:warning'     : (Color.LIGHT0_HARD,            Color.NEUTRAL_PURPLE),
