@@ -738,14 +738,20 @@ class MessageBox(urwid.Pile):
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7
             left_padding = 1
+            label_text = "EDITED"
+        elif self.message["id"] in self.model.index["moved_messages"]:
+            edited_label_size = 6
+            left_padding = 2
+            label_text = "MOVED"
         else:
             edited_label_size = 0
             left_padding = 8
+            label_text = "EDITED"
 
         wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
-                    (edited_label_size, urwid.Text("EDITED")),
+                    (edited_label_size, urwid.Text(label_text)),
                     urwid.LineBox(
                         urwid.Columns(
                             [

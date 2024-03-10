@@ -8,6 +8,7 @@ from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import primary_key_for_command
 from zulipterminal.helper import (
     Index,
+    analyse_edit_history,
     canonicalize_color,
     classify_unread_counts,
     display_error_if_present,
@@ -110,6 +111,133 @@ def test_index_messages_narrow_user_multiple(
         "bar@zulip.com": {"user_id": 5180},
     }
     assert index_messages(messages, model, model.index) == index_user_multiple
+
+
+@pytest.mark.parametrize(
+    ("content_changed, stream_changed, old_topic, current_topic, expected_result"),
+    [
+        case(
+            False,
+            True,
+            None,
+            None,
+            {"edited_messages": {12345}, "moved_messages": set()},
+            id="only_stream_changed",
+        ),
+        case(
+            True,
+            False,
+            None,
+            None,
+            {"edited_messages": {12345}, "moved_messages": set()},
+            id="only_content_changed",
+        ),
+        case(
+            True,
+            True,
+            "Topic B",
+            "Topic C",
+            {"edited_messages": {12345}, "moved_messages": set()},
+            id="both_stream_and_content_changed",
+        ),
+        case(
+            True,
+            False,
+            "Topic B",
+            "Topic C",
+            {"edited_messages": {12345}, "moved_messages": set()},
+            id="both_content_and_topic_changed",
+        ),
+        case(
+            False,
+            False,
+            "Topic D",
+            "Topic E",
+            {"edited_messages": set(), "moved_messages": {12345}},
+            id="actual_topic_change",
+        ),
+        case(
+            False,
+            True,
+            "Topic F",
+            "Topic G",
+            {"edited_messages": {12345}, "moved_messages": set()},
+            id="topic_and_stream_changed",
+        ),
+        case(
+            False,
+            False,
+            "✔ Topic I",
+            "✔ Topic J",
+            {"edited_messages": set(), "moved_messages": {12345}},
+            id="topic_changed_from_resolved_to resolved_but_different_topic",
+        ),
+        case(
+            False,
+            False,
+            "Topic K",
+            "Topic L",
+            {"edited_messages": set(), "moved_messages": {12345}},
+            id="topic_changed_when_both_are_unresolved",
+        ),
+        case(
+            False,
+            False,
+            "✔ Topic M",
+            "Topic M",
+            {"edited_messages": set(), "moved_messages": set()},
+            id="only_resolved_topic_to_unresolved_topic",
+        ),
+        case(
+            False,
+            False,
+            "Topic M",
+            "✔ Topic M",
+            {"edited_messages": set(), "moved_messages": set()},
+            id="only_unresolved_topic_to_resolved_topic",
+        ),
+        case(
+            False,
+            False,
+            "✔ Topic N",
+            "Topic M",
+            {"edited_messages": set(), "moved_messages": {12345}},
+            id="resolved_topic_to_changed_unresolved_topic",
+        ),
+        case(
+            False,
+            False,
+            "Topic M",
+            "✔ Topic N",
+            {"edited_messages": set(), "moved_messages": {12345}},
+            id="unresolved_topic_to_changed_resolved_topic",
+        ),
+    ],
+)
+def test_analyse_edit_history(
+    content_changed: bool,
+    stream_changed: bool,
+    current_topic: str,
+    old_topic: str,
+    expected_result: Dict[str, Any],
+    initial_index: Index,
+) -> None:
+    msg_id = 12345
+    expected_index = dict(
+        initial_index,
+        edited_messages=expected_result["edited_messages"],
+        moved_messages=expected_result["moved_messages"],
+    )
+    analyse_edit_history(
+        msg_id,
+        initial_index,
+        content_changed,
+        stream_changed,
+        current_topic,
+        old_topic,
+    )
+
+    assert initial_index == expected_index
 
 
 @pytest.mark.parametrize(
