@@ -64,6 +64,7 @@
 |View current message in browser (from message information)|<kbd>v</kbd>|
 |Show/hide full rendered message (from message information)|<kbd>f</kbd>|
 |Show/hide full raw message (from message information)|<kbd>r</kbd>|
+|Copy message content to clipboard (from message information)|<kbd>c</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
