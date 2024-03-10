@@ -231,7 +231,7 @@ depending on the type of link:
   from message content such as `#**announce>terminal releases**`)
   * the active narrow will be changed to the stream or topic (from version 0.6.0)
 - *External links* (eg. a website, file from a website)
-  * no internal action is supported at this time
+  * open in browser if it is a website, otherwise no internal action is supported at this time
 
 Any method supported by your terminal emulator to select and copy text should
 also be suitable to extract these links.
