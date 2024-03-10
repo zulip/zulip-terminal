@@ -126,6 +126,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'New message to a person or group of people',
         'key_category': 'msg_actions',
     },
+    'FILE_UPLOAD': {
+        'keys': ['ctrl o'],
+        'help_text': 'Upload file',
+        'key_category': 'msg_compose',
+    },
     'CYCLE_COMPOSE_FOCUS': {
         'keys': ['tab'],
         'help_text': 'Cycle through recipient and content boxes',
