@@ -83,6 +83,7 @@
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>ctrl</kbd> + <kbd>r</kbd>|
 |Narrow to compose box message recipient|<kbd>meta</kbd> + <kbd>.</kbd>|
+|Open the message in external editor|<kbd>ctrl</kbd> + <kbd>o</kbd>|
 |Jump to the beginning of line|<kbd>ctrl</kbd> + <kbd>a</kbd>|
 |Jump to the end of line|<kbd>ctrl</kbd> + <kbd>e</kbd>|
 |Jump backward one word|<kbd>meta</kbd> + <kbd>b</kbd>|
