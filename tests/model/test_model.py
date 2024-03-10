@@ -14,6 +14,7 @@ from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
+    OFFLINE_THRESHOLD_SECS,
     TYPING_STARTED_EXPIRY_PERIOD,
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
@@ -1439,6 +1440,41 @@ class TestModel:
         assert model.typing_started_wait_period == typing_started_wait
         assert model.typing_stopped_wait_period == typing_stopped_wait
         assert model.typing_started_expiry_period == typing_started_expiry
+
+    @pytest.mark.parametrize(
+        "feature_level, to_vary_in_initial_data",
+        [
+            (None, {}),
+            (157, {}),
+            (
+                164,
+                {
+                    "server_presence_offline_threshold_seconds": 200,
+                },
+            ),
+        ],
+        ids=[
+            "Zulip_2.1.x_ZFL_None_hard_coded",
+            "Zulip_6.2.x_ZFL_157_hard_coded",
+            "Zulip_7.0.x_ZFL_164_server_provided",
+        ],
+    )
+    def test_server_offline_threshold(
+        self, model, initial_data, feature_level, to_vary_in_initial_data
+    ):
+        initial_data.update(to_vary_in_initial_data)
+        model.initial_data = initial_data
+        model.server_feature_level = feature_level
+
+        model._server_offline_threshold()
+
+        if to_vary_in_initial_data:
+            assert (
+                model.server_offline_threshold
+                == to_vary_in_initial_data["server_presence_offline_threshold_seconds"]
+            )
+        else:
+            assert model.server_offline_threshold == OFFLINE_THRESHOLD_SECS
 
     def test_get_message_false_first_anchor(
         self,
