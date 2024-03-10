@@ -891,6 +891,34 @@ class Model:
 
         return list(self.index["topics"][stream_id])
 
+    def _fetch_stream_email_address(self, stream_id: int) -> str:
+        """
+        Fetch stream's email address with specified stream_id and
+        returns stream_email_address as a String.
+        Endpoint added in Zulip 7.5 (ZFL 226)
+        """
+        url = f"/streams/{stream_id}/email_address"
+
+        response = self.client.call_endpoint(url, method="GET")
+
+        if response.get("result") == "success":
+            email_address = response.get("email", "")
+            return str(email_address)
+        return "invalid"
+
+    def stream_copy_text(self, stream_id: int) -> str:
+        """
+        Attempts to retrieve stream email from stream_dict, fetching
+        from method if unavailable. (Retains handling across server versions).
+        """
+        stream = self.stream_dict[stream_id]
+        stream_email = stream.get("email_address", None)
+        if stream_email is None:
+            stream_email = self._fetch_stream_email_address(stream_id)
+        if stream_email == "invalid" or stream_email is None:
+            stream_email = ""
+        return stream_email
+
     @staticmethod
     def exception_safe_result(future: "Future[str]") -> str:
         try:

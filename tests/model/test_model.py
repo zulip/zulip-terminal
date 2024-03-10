@@ -561,6 +561,55 @@ class TestModel:
         assert model.index["topics"][stream_id] == return_value
         assert model.index["topics"][stream_id] is not return_value
 
+    @pytest.mark.parametrize(
+        "response, return_value",
+        [
+            (
+                {"result": "success", "msg": "", "email": "username@example.com"},
+                "username@example.com",
+            ),
+            (
+                {"result": "error", "msg": "Invalid stream ID", "code": "BAD_REQUEST"},
+                "invalid",
+            ),
+        ],
+    )
+    def test__fetch_stream_email_address(
+        self, mocker, response, model, return_value, stream_id=1
+    ) -> None:
+        self.client.call_endpoint = mocker.Mock(return_value=response)
+
+        result = model._fetch_stream_email_address(stream_id)
+
+        self.client.call_endpoint.assert_called_once_with(
+            f"/streams/{stream_id}/email_address", method="GET"
+        )
+        assert result == return_value
+
+    @pytest.mark.parametrize(
+        "stream, fetched, response, return_value",
+        [
+            (
+                {"email_address": "username@example.com"},
+                False,
+                {},
+                "username@example.com",
+            ),
+            ({}, True, "username@example.com", "username@example.com"),
+            ({}, True, "invalid", ""),
+        ],
+    )
+    def test_stream_copy_text(
+        self, mocker, model, stream, fetched, response, return_value, stream_id=1
+    ):
+        model.stream_dict[stream_id] = stream
+        model._fetch_stream_email_address = mocker.Mock(return_value=response)
+
+        result = model.stream_copy_text(stream_id)
+
+        assert model._fetch_stream_email_address.called == fetched
+        assert result == return_value
+
     # pre server v3 provide user_id or id as a property within user key
     # post server v3 provide user_id as a property outside the user key
     @pytest.mark.parametrize("user_key", ["user_id", "id", None])
