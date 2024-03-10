@@ -143,6 +143,7 @@ class Model:
             "user_settings",
             "realm_emoji",
             "custom_profile_fields",
+            "recent_private_conversations",
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
@@ -178,6 +179,11 @@ class Model:
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
         self.users: List[MinimalUserData] = []
         self._update_users_data_from_initial_data()
+
+        self.recent_dms: List[Dict[str, Any]] = self.initial_data[
+            "recent_private_conversations"
+        ]
+        self._sort_recent_dms()
 
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
@@ -1292,6 +1298,37 @@ class Model:
 
         return self.user_dict[user_email]["full_name"]
 
+    def _sort_recent_dms(self) -> None:
+        """
+        Sorts the list of recent direct message conversations.
+        """
+        self.recent_dms.sort(
+            key=lambda conversation: conversation["max_message_id"],
+            reverse=True,
+        )
+
+    def _update_recent_dms(self, message: Message) -> None:
+        """
+        Updates the list of recent direct message conversations.
+        """
+        msg_id = message["id"]
+        user_ids = [recipient["id"] for recipient in message["display_recipient"]]
+        user_ids.remove(self.user_id)
+        replaced = False
+        for dm in self.recent_dms:
+            if set(dm["user_ids"]) == set(user_ids) and msg_id > dm["max_message_id"]:
+                dm["max_message_id"] = msg_id
+                replaced = True
+                break
+        if not replaced:
+            self.recent_dms.append(
+                {
+                    "user_ids": user_ids,
+                    "max_message_id": msg_id,
+                }
+            )
+        self._sort_recent_dms()
+
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
             # stream_id has been changed to id.
@@ -1652,6 +1689,8 @@ class Model:
                         message["stream_id"], message["subject"], message["sender_id"]
                     )
                     self.controller.update_screen()
+        elif message["type"] == "private":
+            self._update_recent_dms(message)
 
         # We can notify user regardless of whether UI is rendered or not,
         # but depend upon the UI to indicate failures.
