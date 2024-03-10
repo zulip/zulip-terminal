@@ -64,6 +64,7 @@
 |View current message in browser (from message information)|<kbd>v</kbd>|
 |Show/hide full rendered message (from message information)|<kbd>f</kbd>|
 |Show/hide full raw message (from message information)|<kbd>r</kbd>|
+|Show/hide read receipts of message (from message information)|<kbd>ctrl</kbd> + <kbd>r</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|

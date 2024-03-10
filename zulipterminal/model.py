@@ -854,6 +854,23 @@ class Model:
         display_error_if_present(response, self.controller)
         return list()
 
+    def fetch_message_read_receipt_user_ids(
+        self, message_id: int
+    ) -> Union[None, str, List[int]]:
+        """
+        Fetches user IDs of users who've read a message using its ID.
+        If fails to fetch due to being unable to retrieve ZFL, returns None
+        """
+        if self.server_feature_level is not None and self.server_feature_level >= 137:
+            response = self.client.call_endpoint(
+                f"/messages/{message_id}/read_receipts", method="GET"
+            )
+            if response["result"] == "success":
+                return response["user_ids"]
+        else:
+            raise RuntimeError("Unsupported server feature level.")
+        return None
+
     def fetch_raw_message_content(self, message_id: int) -> Optional[str]:
         """
         Fetches raw message content of a message using its ID.

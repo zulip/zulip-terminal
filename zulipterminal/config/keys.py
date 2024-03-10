@@ -405,6 +405,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide full raw message (from message information)',
         'key_category': 'msg_actions',
     },
+    'READ_RECEIPTS': {
+        'keys': ['ctrl r'],
+        'help_text': 'Show/hide read receipts of message (from message information)',
+        'key_category': 'msg_actions',
+    },
 }
 # fmt: on
 
