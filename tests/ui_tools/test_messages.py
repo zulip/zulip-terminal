@@ -7,6 +7,9 @@ from bs4 import BeautifulSoup
 from pytest import param as case
 from urwid import Columns, Divider, Padding, Text
 
+from typing import List, Tuple, Any, Union, Optional, Dict
+from pytest_mock import MockerFixture
+
 from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
@@ -30,19 +33,24 @@ SERVER_URL = "https://chat.zulip.zulip"
 
 class TestMessageBox:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, initial_index):
+    def mock_external_classes(self, mocker: MockerFixture, initial_index: int) -> None:
         self.model = mocker.MagicMock()
         self.model.index = initial_index
         self.model.stream_access_type.return_value = "public"
 
     @pytest.mark.parametrize(
-        "message_type, set_fields",
+        "message_type: str, set_fields:  List[Tuple[str, Any]]",
         [
             ("stream", [("stream_name", ""), ("stream_id", None), ("topic_name", "")]),
             ("private", [("email", ""), ("user_id", None)]),
         ],
     )
-    def test_init(self, mocker, message_type, set_fields):
+    def test_init(
+        self,
+        mocker: MockerFixture,
+        message_type: str,
+        set_fields: List[Tuple[str, Any]],
+    ) -> None:
         mocker.patch.object(MessageBox, "main_view")
         message = dict(
             display_recipient=[
@@ -94,7 +102,7 @@ class TestMessageBox:
         msg_box._is_private_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize(
-        "content, expected_markup",
+        "content: str, expected_markup: Tuple",
         [
             case("", [], id="empty"),
             case("<p>hi</p>", ["", "hi"], id="p"),
@@ -671,7 +679,9 @@ class TestMessageBox:
             ),
         ],
     )
-    def test_soup2markup(self, content, expected_markup, mocker):
+    def test_soup2markup(
+        self, content: str, expected_markup: str, mocker: MockerFixture
+    ):
         mocker.patch(
             MODULE + ".get_localzone", return_value=pytz.timezone("Asia/Kolkata")
         )
@@ -688,7 +698,7 @@ class TestMessageBox:
         assert markup == [""] + expected_markup
 
     @pytest.mark.parametrize(
-        "message, last_message",
+        "message: Dict[str, Any], last_message: Optional[Dict[str, Any]]",
         [
             (
                 {
@@ -753,7 +763,12 @@ class TestMessageBox:
             ),
         ],
     )
-    def test_main_view(self, mocker, message, last_message):
+    def test_main_view(
+        self,
+        mocker: MockerFixture,
+        message: Dict[str, Any],
+        last_message: Optional[Dict[str, Any]],
+    ) -> None:
         self.model.stream_dict = {
             5: {
                 "color": "#bd6",
@@ -762,7 +777,7 @@ class TestMessageBox:
         MessageBox(message, self.model, last_message)
 
     @pytest.mark.parametrize(
-        "message",
+        "message: Dict[str, Any]",
         [
             {
                 "id": 4,
@@ -780,7 +795,7 @@ class TestMessageBox:
         ],
     )
     @pytest.mark.parametrize(
-        "content, is_me_message",
+        "content: str, is_me_message: bool",
         [
             ("<p>/me is excited!</p>", True),
             ("<p>/me is excited! /me is not excited.</p>", True),
@@ -788,7 +803,9 @@ class TestMessageBox:
             ("<p>/me is excited!</p>", False),
         ],
     )
-    def test_main_view_renders_slash_me(self, mocker, message, content, is_me_message):
+    def test_main_view_renders_slash_me(
+        self, mocker, message: Dict[str, Any], content: str, is_me_message: bool
+    ) -> None:
         mocker.patch(MODULE + ".urwid.Text")
         message["content"] = content
         message["is_me_message"] = is_me_message
@@ -800,7 +817,7 @@ class TestMessageBox:
         )
 
     @pytest.mark.parametrize(
-        "message",
+        "message: Dict[str, Any]",
         [
             {
                 "id": 4,
@@ -818,7 +835,7 @@ class TestMessageBox:
         ],
     )
     @pytest.mark.parametrize(
-        "to_vary_in_last_message",
+        "to_vary_in_last_message: Dict[str, str]",
         [
             {"display_recipient": "Verona offtopic"},
             {"subject": "Test topic (previous)"},
@@ -831,8 +848,11 @@ class TestMessageBox:
         ],
     )
     def test_main_view_generates_stream_header(
-        self, mocker, message, to_vary_in_last_message
-    ):
+        self,
+        mocker: MockerFixture,
+        message: Dict[str, Any],
+        to_vary_in_last_message: bool,
+    ) -> None:
         self.model.stream_dict = {
             5: {
                 "color": "#bd6",
@@ -850,7 +870,7 @@ class TestMessageBox:
         assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize(
-        "message",
+        "message: Dict[str,Any]",
         [
             {
                 "id": 4,
@@ -871,7 +891,7 @@ class TestMessageBox:
         ],
     )
     @pytest.mark.parametrize(
-        "to_vary_in_last_message",
+        "to_vary_in_last_message: Dict[str,str]",
         [
             {
                 "display_recipient": [
@@ -888,8 +908,11 @@ class TestMessageBox:
         ],
     )
     def test_main_view_generates_PM_header(
-        self, mocker, message, to_vary_in_last_message
-    ):
+        self,
+        mocker: MockerFixture,
+        message: Dict[str, Any],
+        to_vary_in_last_message: bool,
+    ) -> None:
         last_message = dict(message, **to_vary_in_last_message)
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
@@ -902,7 +925,7 @@ class TestMessageBox:
         assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize(
-        "msg_narrow, msg_type, assert_header_bar, assert_search_bar",
+        "msg_narrow: List[str], msg_type: int, assert_header_bar: str, assert_search_bar: Union[str, Tuple[str, List[Tuple[str, str]]]]",
         [
             (
                 [],
@@ -1019,13 +1042,13 @@ class TestMessageBox:
     )
     def test_msg_generates_search_and_header_bar(
         self,
-        mocker,
+        mocker: MockerFixture,
         messages_successful_response,
-        msg_type,
-        msg_narrow,
-        assert_header_bar,
-        assert_search_bar,
-    ):
+        msg_type: int,
+        msg_narrow: List[str],
+        assert_header_bar: str,
+        assert_search_bar: Union[str, Tuple[str, List[Tuple[str, str]]]],
+    ) -> None:
         self.model.stream_dict = {
             205: {
                 "color": "#bd6",
@@ -1043,7 +1066,7 @@ class TestMessageBox:
 
     # Assume recipient (PM/stream/topic) header is unchanged below
     @pytest.mark.parametrize(
-        "message",
+        "message: Dict[str, Any]",
         [
             {
                 "id": 4,
@@ -1061,15 +1084,17 @@ class TestMessageBox:
         ],
     )
     @pytest.mark.parametrize(
-        "current_year", [2018, 2019, 2050], ids=["now_2018", "now_2019", "now_2050"]
+        "current_year: int",
+        [2018, 2019, 2050],
+        ids=["now_2018", "now_2019", "now_2050"],
     )
     @pytest.mark.parametrize(
-        "starred_msg",
+        "starred_msg: str",
         ["this", "last", "neither"],
         ids=["this_starred", "last_starred", "no_stars"],
     )
     @pytest.mark.parametrize(
-        "expected_header, to_vary_in_last_message",
+        "expected_header: List[Any], to_vary_in_last_message: Dict[str, Any]",
         [
             (
                 [STATUS_INACTIVE, "alice", " ", "DAYDATETIME"],
@@ -1086,12 +1111,12 @@ class TestMessageBox:
     )
     def test_main_view_content_header_without_header(
         self,
-        mocker,
-        message,
-        expected_header,
-        current_year,
-        starred_msg,
-        to_vary_in_last_message,
+        mocker: MockerFixture,
+        message: Dict[str, Any],
+        expected_header: List[Any],
+        current_year: int,
+        starred_msg: str,
+        to_vary_in_last_message: Dict[str, Any],
     ):
         mocked_date = mocker.patch(MODULE + ".date")
         mocked_date.today.return_value = date(current_year, 1, 1)
@@ -1130,7 +1155,7 @@ class TestMessageBox:
         assert isinstance(view_components[1], Padding)
 
     @pytest.mark.parametrize(
-        "to_vary_in_each_message",
+        "to_vary_in_each_message: Dict[str, Any]",
         [
             {"sender_full_name": "bob"},
             {"timestamp": 1532103779},
@@ -1147,8 +1172,11 @@ class TestMessageBox:
         ],
     )
     def test_main_view_compact_output(
-        self, mocker, message_fixture, to_vary_in_each_message
-    ):
+        self,
+        mocker: MockerFixture,
+        message_fixture: Dict[str, Any],
+        to_vary_in_each_message: Dict[str, Any],
+    ) -> None:
         message_fixture.update({"id": 4})
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, varied_message)
@@ -1170,7 +1198,7 @@ class TestMessageBox:
             assert label[1][1] == 7
 
     @pytest.mark.parametrize(
-        "to_vary_in_last_message, update_required",
+        "to_vary_in_last_message:  Dict[str, Any], update_required: bool",
         [
             ({"sender_full_name": "Unique name (won't be in next message)"}, True),
             ({}, False),
@@ -1182,10 +1210,10 @@ class TestMessageBox:
     )
     def test_update_message_author_status(
         self,
-        message_fixture,
-        update_required,
-        to_vary_in_last_message,
-    ):
+        message_fixture: Dict[str, Any],
+        update_required: bool,
+        to_vary_in_last_message: Dict[str, Any],
+    ) -> None:
         message = message_fixture
         last_msg = dict(message, **to_vary_in_last_message)
 
@@ -1193,9 +1221,9 @@ class TestMessageBox:
 
         assert msg_box.update_message_author_status() == update_required
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
+    @pytest.mark.parametrize("key: str", keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize(
-        "narrow, expect_to_prefill",
+        "narrow:  List[List[str]], expect_to_prefill: bool",
         [
             ([], False),
             ([["stream", "general"]], True),
@@ -1232,15 +1260,15 @@ class TestMessageBox:
         else:
             write_box.stream_box_view.assert_called_once_with(0)
 
-    @pytest.mark.parametrize("key", keys_for_command("EDIT_MESSAGE"))
+    @pytest.mark.parametrize("key: str", keys_for_command("EDIT_MESSAGE"))
     @pytest.mark.parametrize(
         [
-            "to_vary_in_each_message",
-            "realm_editing_allowed",
-            "msg_body_edit_limit",
-            "expect_msg_body_edit_enabled",
-            "expect_editing_to_succeed",
-            "expect_footer_text",
+            "to_vary_in_each_message: bool",
+            "realm_editing_allowed: bool",
+            "msg_body_edit_limit: int",
+            "expect_msg_body_edit_enabled: bool",
+            "expect_editing_to_succeed: bool",
+            "expect_footer_text: Optional[str]",
         ],
         [
             case(
@@ -1376,17 +1404,17 @@ class TestMessageBox:
     )
     def test_keypress_EDIT_MESSAGE(
         self,
-        mocker,
-        message_fixture,
-        widget_size,
-        to_vary_in_each_message,
-        realm_editing_allowed,
-        msg_body_edit_limit,
-        expect_msg_body_edit_enabled,
-        expect_editing_to_succeed,
-        expect_footer_text,
-        key,
-    ):
+        mocker: MockerFixture,
+        message_fixture: Dict[str, Any],
+        widget_size: Any,
+        to_vary_in_each_message: bool,
+        realm_editing_allowed: bool,
+        msg_body_edit_limit: int,
+        expect_msg_body_edit_enabled: bool,
+        expect_editing_to_succeed: bool,
+        expect_footer_text: Optional[str],
+        key: str,
+    ) -> None:
         if message_fixture["type"] == "private":
             to_vary_in_each_message["subject"] = ""
         varied_message = dict(message_fixture, **to_vary_in_each_message)
@@ -1430,7 +1458,7 @@ class TestMessageBox:
                 report_error.assert_called_once_with([expect_footer_text[message_type]])
 
     @pytest.mark.parametrize(
-        "raw_html, expected_content",
+        "raw_html: str, expected_content: str",
         [
             # Avoid reformatting to preserve quote result readability
             # fmt: off
@@ -1585,7 +1613,9 @@ class TestMessageBox:
             # fmt: on
         ],
     )
-    def test_transform_content(self, mocker, raw_html, expected_content):
+    def test_transform_content(
+        self, mocker, raw_html: str, expected_content: str
+    ) -> None:
         expected_content = expected_content.replace("{}", QUOTED_TEXT_MARKER)
 
         content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
@@ -1595,7 +1625,7 @@ class TestMessageBox:
 
     # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
     @pytest.mark.parametrize(
-        "to_vary_in_each_message, expected_text, expected_attributes",
+        "to_vary_in_each_message: bool, expected_text: str, expected_attributes: str",
         [
             case(
                 {
@@ -1827,7 +1857,7 @@ class TestMessageBox:
         assert reactions_view.original_widget.attrib == expected_attributes
 
     @pytest.mark.parametrize(
-        "message_links, expected_text, expected_attrib, expected_footlinks_width",
+        "message_links: OrderedDict[int, Dict[str, Any]], expected_text: str, expected_attrib: List[str], expected_footlinks_width: int",
         [
             case(
                 OrderedDict(
@@ -1919,8 +1949,12 @@ class TestMessageBox:
         ],
     )
     def test_footlinks_view(
-        self, message_links, expected_text, expected_attrib, expected_footlinks_width
-    ):
+        self,
+        message_links: OrderedDict[int, Dict[str, Any]],
+        expected_text: str,
+        expected_attrib: List[str],
+        expected_footlinks_width: int,
+    ) -> None:
         footlinks, footlinks_width = MessageBox.footlinks_view(
             message_links,
             maximum_footlinks=3,
@@ -1937,14 +1971,16 @@ class TestMessageBox:
             assert not hasattr(footlinks, "original_widget")
 
     @pytest.mark.parametrize(
-        "maximum_footlinks, expected_instance",
+        "maximum_footlinks: int, expected_instance: Optional[int]",
         [
             (0, type(None)),
             (1, Padding),
             (3, Padding),
         ],
     )
-    def test_footlinks_limit(self, maximum_footlinks, expected_instance):
+    def test_footlinks_limit(
+        self, maximum_footlinks: int, expected_instance: Optional[int]
+    ) -> None:
         message_links = OrderedDict(
             [
                 ("https://github.com/zulip/zulip-terminal", ("ZT", 1, True)),
@@ -1961,11 +1997,18 @@ class TestMessageBox:
         assert isinstance(footlinks, expected_instance)
 
     @pytest.mark.parametrize(
-        "key", keys_for_command("ENTER"), ids=lambda param: f"left_click-key:{param}"
+        "key: str",
+        keys_for_command("ENTER"),
+        ids=lambda param: f"left_click-key:{param}",
     )
     def test_mouse_event_left_click(
-        self, mocker, msg_box, key, widget_size, compose_box_is_open
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_box,
+        key: str,
+        widget_size,
+        compose_box_is_open: bool,
+    ) -> None:
         size = widget_size(msg_box)
         col = 1
         row = 1
