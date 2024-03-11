@@ -460,6 +460,22 @@ def primary_key_for_command(command: str) -> str:
     return keys_for_command(command).pop(0)
 
 
+def keyboard_key_for_urwid_key(urwid_key: str) -> str:
+    """
+    Returns a displayable user-centric format (the keyboard representation)
+    of the urwid key
+    """
+    keyboard_key = []
+    for key in urwid_key.split():
+        if key.isupper():
+            keyboard_key.append("Shift " + key)
+        elif key[0].islower():
+            keyboard_key.append(key.capitalize())
+        else:
+            keyboard_key.append(key)
+    return " ".join(keyboard_key)
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip

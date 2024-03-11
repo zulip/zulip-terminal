@@ -112,3 +112,21 @@ def test_updated_urwid_command_map() -> None:
             assert key in keys.keys_for_command(zt_cmd)
         except KeyError:
             pass
+
+
+@pytest.mark.parametrize(
+    "urwid_key, keyboard_key",
+    [
+        ("enter", "Enter"),
+        ("A", "Shift A"),
+        ("ctrl b", "Ctrl B"),
+        ("ctrl C", "Ctrl Shift C"),
+        ("meta d", "Meta D"),
+        ("page up", "Page Up"),
+        ("e", "E"),
+        (":", ":"),
+        ("esc", "Esc"),
+    ],
+)
+def test_keyboard_key_for_urwid_key(urwid_key: str, keyboard_key: str) -> None:
+    assert keys.keyboard_key_for_urwid_key(urwid_key) == keyboard_key
