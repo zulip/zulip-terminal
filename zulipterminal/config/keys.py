@@ -496,6 +496,23 @@ def keyboard_key_for_urwid_key(urwid_key: str) -> str:
     return " ".join(keyboard_key)
 
 
+def keyboard_keys_for_command(command: str) -> List[str]:
+    """
+    Returns the user-friendly keyboard keys for a given mapped command
+    """
+    keyboard_keys = []
+    for urwid_key in keys_for_command(command):
+        keyboard_keys.append(keyboard_key_for_urwid_key(urwid_key))
+    return keyboard_keys
+
+
+def primary_keyboard_key_for_command(command: str) -> str:
+    """
+    Keyboard Primary Key is the key that will be displayed eg. in the help menu
+    """
+    return keyboard_key_for_urwid_key(primary_key_for_command(command))
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
