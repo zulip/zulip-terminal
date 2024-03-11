@@ -460,6 +460,13 @@ def primary_key_for_command(command: str) -> str:
     return keys_for_command(command).pop(0)
 
 
+URWID_KEY_TO_KEYBOARD_KEY_MAPPING = {
+    "page up": "PgUp",
+    "page down": "PgDn",
+    "meta": "Alt",
+}
+
+
 def keyboard_key_for_urwid_key(urwid_key: str) -> str:
     """
     Returns a displayable user-centric format (the keyboard representation)
