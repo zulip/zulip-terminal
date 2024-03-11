@@ -467,11 +467,24 @@ URWID_KEY_TO_KEYBOARD_KEY_MAPPING = {
 }
 
 
+def substitute_selected_keyboard_keys(
+    key: str, mapping: Dict[str, str] = URWID_KEY_TO_KEYBOARD_KEY_MAPPING
+) -> str:
+    """
+    Applies mapping to render specific hotkeys in custom display format
+    """
+    for urwid_key, keyboard_key in mapping.items():
+        if urwid_key in key:
+            key = key.replace(urwid_key, keyboard_key)
+    return key
+
+
 def keyboard_key_for_urwid_key(urwid_key: str) -> str:
     """
     Returns a displayable user-centric format (the keyboard representation)
     of the urwid key
     """
+    urwid_key = substitute_selected_keyboard_keys(urwid_key)
     keyboard_key = []
     for key in urwid_key.split():
         if key.isupper():
