@@ -1390,7 +1390,7 @@ class TestStreamInfoView:
         "stream_email_present, expected_copy_text",
         [
             (False, "< Stream email is unavailable >"),
-            (True, "Press 'c' to copy Stream email address"),
+            (True, "Press 'C' to copy Stream email address"),
         ],
     )
     def test_stream_info_content__email_copy_text(
