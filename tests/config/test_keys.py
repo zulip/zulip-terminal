@@ -4,6 +4,13 @@ import pytest
 from pytest_mock import MockerFixture
 
 from zulipterminal.config import keys
+from zulipterminal.config.symbols import (
+    CTRL_KEY,
+    DOWN_ARROW,
+    ENTER_KEY,
+    META_KEY,
+    SHIFT_KEY,
+)
 
 
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
@@ -11,9 +18,9 @@ AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
 USED_KEYS = {key for values in keys.KEY_BINDINGS.values() for key in values["keys"]}
 
 COMMAND_TO_KEYBOARD_KEYS = [
-    ("NEXT_LINE", ["Down", "Ctrl N"]),
-    ("TOGGLE_STAR_STATUS", ["Ctrl S", "*"]),
-    ("ALL_PM", ["Shift P"]),
+    ("NEXT_LINE", [DOWN_ARROW, CTRL_KEY + " N"]),
+    ("TOGGLE_STAR_STATUS", [CTRL_KEY + " S", "*"]),
+    ("ALL_PM", [SHIFT_KEY + " P"]),
 ]
 
 
@@ -123,11 +130,11 @@ def test_updated_urwid_command_map() -> None:
 @pytest.mark.parametrize(
     "urwid_key, keyboard_key",
     [
-        ("enter", "Enter"),
-        ("A", "Shift A"),
-        ("ctrl b", "Ctrl B"),
-        ("ctrl C", "Ctrl Shift C"),
-        ("meta d", "Alt D"),
+        ("enter", ENTER_KEY),
+        ("A", SHIFT_KEY + " A"),
+        ("ctrl b", CTRL_KEY + " B"),
+        ("ctrl C", CTRL_KEY + " " + SHIFT_KEY + " C"),
+        ("meta d", META_KEY + "  D"),
         ("page up", "PgUp"),
         ("e", "E"),
         (":", ":"),

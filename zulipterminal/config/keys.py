@@ -16,6 +16,17 @@ from urwid.command_map import (
     command_map,
 )
 
+from zulipterminal.config.symbols import (
+    CTRL_KEY,
+    DOWN_ARROW,
+    ENTER_KEY,
+    LEFT_ARROW,
+    META_KEY,
+    RIGHT_ARROW,
+    SHIFT_KEY,
+    UP_ARROW,
+)
+
 
 class KeyBinding(TypedDict):
     keys: List[str]
@@ -463,7 +474,13 @@ def primary_key_for_command(command: str) -> str:
 URWID_KEY_TO_KEYBOARD_KEY_MAPPING = {
     "page up": "PgUp",
     "page down": "PgDn",
-    "meta": "Alt",
+    "meta": META_KEY,
+    "enter": ENTER_KEY,
+    "up": UP_ARROW,
+    "down": DOWN_ARROW,
+    "left": LEFT_ARROW,
+    "right": RIGHT_ARROW,
+    "ctrl": CTRL_KEY,
 }
 
 
@@ -487,8 +504,10 @@ def keyboard_key_for_urwid_key(urwid_key: str) -> str:
     urwid_key = substitute_selected_keyboard_keys(urwid_key)
     keyboard_key = []
     for key in urwid_key.split():
-        if key.isupper():
-            keyboard_key.append("Shift " + key)
+        if key == META_KEY:
+            keyboard_key.append(key + " ")
+        elif key.isupper():
+            keyboard_key.append(SHIFT_KEY + " " + key)
         elif key[0].islower():
             keyboard_key.append(key.capitalize())
         else:
