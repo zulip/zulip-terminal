@@ -15,15 +15,18 @@ from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
     is_command_key,
-    keys_for_command,
+    keyboard_key_for_urwid_key,
+    keyboard_keys_for_command,
     primary_key_for_command,
 )
 from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
 from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
+    DOWN_ARROW,
     PINNED_STREAMS_DIVIDER,
     SECTION_DIVIDER_LINE,
+    UP_ARROW,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -1227,7 +1230,17 @@ class HelpView(PopUpView):
             )
             key_bindings = []
             for binding in keys_in_category:
-                key_bindings.append((binding["help_text"], ", ".join(binding["keys"])))
+                key_bindings.append(
+                    (
+                        binding["help_text"],
+                        ", ".join(
+                            [
+                                keyboard_key_for_urwid_key(urwid_key)
+                                for urwid_key in binding["keys"]
+                            ]
+                        ),
+                    )
+                )
             help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
         popup_width, column_widths = self.calculate_table_widths(
@@ -1379,7 +1392,7 @@ class StreamInfoView(PopUpView):
             if stream["history_public_to_subscribers"]
             else "Not Public to Users"
         )
-        member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
+        member_keys = ", ".join(map(repr, keyboard_keys_for_command("STREAM_MEMBERS")))
 
         # FIXME: This field was removed from the subscription data in Zulip 7.5 / ZFL226
         #   We should use the new /streams/{stream_id}/email_address endpoint instead
@@ -1387,7 +1400,9 @@ class StreamInfoView(PopUpView):
         if self._stream_email is None:
             stream_copy_text = "< Stream email is unavailable >"
         else:
-            email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
+            email_keys = ", ".join(
+                map(repr, keyboard_keys_for_command("COPY_STREAM_EMAIL"))
+            )
             stream_copy_text = f"Press {email_keys} to copy Stream email address"
 
         weekly_traffic = stream["stream_weekly_traffic"]
@@ -1526,7 +1541,7 @@ class StreamMembersView(PopUpView):
         user_names = [model.user_name_from_id(id) for id in user_ids]
         sorted_user_names = sorted(user_names)
         sorted_user_names.insert(0, model.user_full_name)
-        title = "Stream Members (up/down scrolls)"
+        title = "Stream Members (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)"
 
         stream_users_content = [("", [(name, "") for name in sorted_user_names])]
         popup_width, column_width = self.calculate_table_widths(
@@ -1562,14 +1577,14 @@ class MsgInfoView(PopUpView):
             msg["timestamp"], show_seconds=True, show_year=True
         )
         view_in_browser_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("VIEW_IN_BROWSER")))
+            ", ".join(map(str, keyboard_keys_for_command("VIEW_IN_BROWSER")))
         )
 
         full_rendered_message_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("FULL_RENDERED_MESSAGE")))
+            ", ".join(map(str, keyboard_keys_for_command("FULL_RENDERED_MESSAGE")))
         )
         full_raw_message_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
+            ", ".join(map(str, keyboard_keys_for_command("FULL_RAW_MESSAGE")))
         )
         msg_info = [
             (
@@ -1601,7 +1616,9 @@ class MsgInfoView(PopUpView):
         if self.show_edit_history_label:
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
 
-            keys = "[{}]".format(", ".join(map(str, keys_for_command("EDIT_HISTORY"))))
+            keys = "[{}]".format(
+                ", ".join(map(str, keyboard_keys_for_command("EDIT_HISTORY")))
+            )
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
         if message_links:

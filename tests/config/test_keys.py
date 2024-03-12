@@ -1,14 +1,27 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 from pytest_mock import MockerFixture
 
 from zulipterminal.config import keys
+from zulipterminal.config.symbols import (
+    CTRL_KEY,
+    DOWN_ARROW,
+    ENTER_KEY,
+    META_KEY,
+    SHIFT_KEY,
+)
 
 
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
 
 USED_KEYS = {key for values in keys.KEY_BINDINGS.values() for key in values["keys"]}
+
+COMMAND_TO_KEYBOARD_KEYS = [
+    ("NEXT_LINE", [DOWN_ARROW, CTRL_KEY + " N"]),
+    ("TOGGLE_STAR_STATUS", [CTRL_KEY + " S", "*"]),
+    ("ALL_PM", [SHIFT_KEY + " P"]),
+]
 
 
 @pytest.fixture(params=keys.KEY_BINDINGS.keys())
@@ -112,3 +125,38 @@ def test_updated_urwid_command_map() -> None:
             assert key in keys.keys_for_command(zt_cmd)
         except KeyError:
             pass
+
+
+@pytest.mark.parametrize(
+    "urwid_key, keyboard_key",
+    [
+        ("enter", ENTER_KEY),
+        ("A", SHIFT_KEY + " A"),
+        ("ctrl b", CTRL_KEY + " B"),
+        ("ctrl C", CTRL_KEY + " " + SHIFT_KEY + " C"),
+        ("meta d", META_KEY + "  D"),
+        ("page up", "PgUp"),
+        ("e", "E"),
+        (":", ":"),
+        ("esc", "Esc"),
+    ],
+)
+def test_keyboard_key_for_urwid_key(urwid_key: str, keyboard_key: str) -> None:
+    assert keys.keyboard_key_for_urwid_key(urwid_key) == keyboard_key
+
+
+@pytest.mark.parametrize("command, keyboard_keys", COMMAND_TO_KEYBOARD_KEYS)
+def test_keyboard_keys_for_command(command: str, keyboard_keys: List[str]) -> None:
+    assert keys.keyboard_keys_for_command(command) == keyboard_keys
+
+
+@pytest.mark.parametrize("command, keyboard_keys", COMMAND_TO_KEYBOARD_KEYS)
+def test_primary_keyboard_key_for_command(
+    command: str, keyboard_keys: List[str]
+) -> None:
+    assert keys.primary_keyboard_key_for_command(command) == keyboard_keys[0]
+
+
+def test_keyboard_keys_for_command_invalid_command(invalid_command: str) -> None:
+    with pytest.raises(keys.InvalidCommand):
+        keys.keyboard_keys_for_command(invalid_command)

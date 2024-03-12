@@ -16,6 +16,17 @@ from urwid.command_map import (
     command_map,
 )
 
+from zulipterminal.config.symbols import (
+    CTRL_KEY,
+    DOWN_ARROW,
+    ENTER_KEY,
+    LEFT_ARROW,
+    META_KEY,
+    RIGHT_ARROW,
+    SHIFT_KEY,
+    UP_ARROW,
+)
+
 
 class KeyBinding(TypedDict):
     keys: List[str]
@@ -458,6 +469,67 @@ def primary_key_for_command(command: str) -> str:
     Primary Key is the key that will be displayed eg. in the UI
     """
     return keys_for_command(command).pop(0)
+
+
+URWID_KEY_TO_KEYBOARD_KEY_MAPPING = {
+    "page up": "PgUp",
+    "page down": "PgDn",
+    "meta": META_KEY,
+    "enter": ENTER_KEY,
+    "up": UP_ARROW,
+    "down": DOWN_ARROW,
+    "left": LEFT_ARROW,
+    "right": RIGHT_ARROW,
+    "ctrl": CTRL_KEY,
+}
+
+
+def substitute_selected_keyboard_keys(
+    key: str, mapping: Dict[str, str] = URWID_KEY_TO_KEYBOARD_KEY_MAPPING
+) -> str:
+    """
+    Applies mapping to render specific hotkeys in custom display format
+    """
+    for urwid_key, keyboard_key in mapping.items():
+        if urwid_key in key:
+            key = key.replace(urwid_key, keyboard_key)
+    return key
+
+
+def keyboard_key_for_urwid_key(urwid_key: str) -> str:
+    """
+    Returns a displayable user-centric format (the keyboard representation)
+    of the urwid key
+    """
+    urwid_key = substitute_selected_keyboard_keys(urwid_key)
+    keyboard_key = []
+    for key in urwid_key.split():
+        if key == META_KEY:
+            keyboard_key.append(key + " ")
+        elif key.isupper():
+            keyboard_key.append(SHIFT_KEY + " " + key)
+        elif key[0].islower():
+            keyboard_key.append(key.capitalize())
+        else:
+            keyboard_key.append(key)
+    return " ".join(keyboard_key)
+
+
+def keyboard_keys_for_command(command: str) -> List[str]:
+    """
+    Returns the user-friendly keyboard keys for a given mapped command
+    """
+    keyboard_keys = []
+    for urwid_key in keys_for_command(command):
+        keyboard_keys.append(keyboard_key_for_urwid_key(urwid_key))
+    return keyboard_keys
+
+
+def primary_keyboard_key_for_command(command: str) -> str:
+    """
+    Keyboard Primary Key is the key that will be displayed eg. in the help menu
+    """
+    return keyboard_key_for_urwid_key(primary_key_for_command(command))
 
 
 def commands_for_random_tips() -> List[KeyBinding]:

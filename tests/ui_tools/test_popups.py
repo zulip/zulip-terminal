@@ -8,6 +8,7 @@ from urwid import Columns, Pile, Text, Widget
 
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.symbols import DOWN_ARROW, UP_ARROW
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
 from zulipterminal.ui_tools.messages import MessageBox
@@ -297,7 +298,10 @@ class TestUserInfoView:
         )
 
         self.user_info_view = UserInfoView(
-            self.controller, 10000, "User Info (up/down scrolls)", "USER_INFO"
+            self.controller,
+            10000,
+            "User Info (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
+            "USER_INFO",
         )
 
     @pytest.mark.parametrize(
@@ -1390,7 +1394,7 @@ class TestStreamInfoView:
         "stream_email_present, expected_copy_text",
         [
             (False, "< Stream email is unavailable >"),
-            (True, "Press 'c' to copy Stream email address"),
+            (True, "Press 'C' to copy Stream email address"),
         ],
     )
     def test_stream_info_content__email_copy_text(

@@ -19,7 +19,12 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
-from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
+from zulipterminal.config.symbols import (
+    DOWN_ARROW,
+    POPUP_CONTENT_BORDER,
+    POPUP_TOP_LINE,
+    UP_ARROW,
+)
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
@@ -246,11 +251,15 @@ class Controller:
         self.loop.widget = self.view
 
     def show_help(self) -> None:
-        help_view = HelpView(self, "Help Menu (up/down scrolls)")
+        help_view = HelpView(
+            self, "Help Menu (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)"
+        )
         self.show_pop_up(help_view, "area:help")
 
     def show_markdown_help(self) -> None:
-        markdown_view = MarkdownHelpView(self, "Markdown Help Menu (up/down scrolls)")
+        markdown_view = MarkdownHelpView(
+            self, "Markdown Help Menu (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)"
+        )
         self.show_pop_up(markdown_view, "area:help")
 
     def show_topic_edit_mode(self, button: Any) -> None:
@@ -266,7 +275,7 @@ class Controller:
         msg_info_view = MsgInfoView(
             self,
             msg,
-            "Message Information (up/down scrolls)",
+            "Message Information (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
             topic_links,
             message_links,
             time_mentions,
@@ -315,7 +324,10 @@ class Controller:
     def show_user_info(self, user_id: int) -> None:
         self.show_pop_up(
             UserInfoView(
-                self, user_id, "User Information (up/down scrolls)", "USER_INFO"
+                self,
+                user_id,
+                "User Information (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
+                "USER_INFO",
             ),
             "area:user",
         )
@@ -325,7 +337,11 @@ class Controller:
             UserInfoView(
                 self,
                 user_id,
-                "Message Sender Information (up/down scrolls)",
+                "Message Sender Information ("
+                + UP_ARROW
+                + "/"
+                + DOWN_ARROW
+                + " scrolls)",
                 "MSG_SENDER_INFO",
             ),
             "area:user",
@@ -345,7 +361,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                "Full rendered message (up/down scrolls)",
+                "Full rendered message (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
             ),
             "area:msg",
         )
@@ -364,7 +380,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                "Full raw message (up/down scrolls)",
+                "Full raw message (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
             ),
             "area:msg",
         )
@@ -383,7 +399,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                "Edit History (up/down scrolls)",
+                "Edit History (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)",
             ),
             "area:msg",
         )
