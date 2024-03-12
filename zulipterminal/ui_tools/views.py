@@ -23,8 +23,10 @@ from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
 from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
+    DOWN_ARROW,
     PINNED_STREAMS_DIVIDER,
     SECTION_DIVIDER_LINE,
+    UP_ARROW,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -1539,7 +1541,7 @@ class StreamMembersView(PopUpView):
         user_names = [model.user_name_from_id(id) for id in user_ids]
         sorted_user_names = sorted(user_names)
         sorted_user_names.insert(0, model.user_full_name)
-        title = "Stream Members (up/down scrolls)"
+        title = "Stream Members (" + UP_ARROW + "/" + DOWN_ARROW + " scrolls)"
 
         stream_users_content = [("", [(name, "") for name in sorted_user_names])]
         popup_width, column_width = self.calculate_table_widths(
