@@ -1,5 +1,6 @@
 from collections import OrderedDict, defaultdict
 from datetime import date
+from typing import Any, Dict, List
 
 import pytest
 import pytz
@@ -1428,6 +1429,72 @@ class TestMessageBox:
                 )
             else:
                 report_error.assert_called_once_with([expect_footer_text[message_type]])
+
+    @pytest.mark.parametrize(
+        "submessages, expected_question, expected_voters_for_options",
+        [
+            (
+                [
+                    {
+                        "id": 10981,
+                        "message_id": 1813721,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "poll", "extra_data": {"question": "Can you view polls on Zulip Terminal?", "options": ["Yes", "No"]}}',  # noqa: E501
+                    },
+                    {
+                        "id": 10982,
+                        "message_id": 1813721,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"type":"vote","key":"canned,0","vote":1}',
+                    },
+                ],
+                "Can you view polls on Zulip Terminal?",
+                {"Yes": [27294], "No": []},
+            ),
+            (
+                [
+                    {
+                        "id": 10983,
+                        "message_id": 1813729,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "poll", "extra_data": {"question": "", "options": ["Option 1", "Option 2"]}}',  # noqa: E501
+                    }
+                ],
+                "",
+                {"Option 1": [27294], "Option 2": [27294]},
+            ),
+            (
+                [
+                    {
+                        "id": 10996,
+                        "message_id": 1813730,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "poll", "extra_data": {"question": "How is the weather today?", "options": []}}',  # noqa: E501
+                    }
+                ],
+                "How is the weather today?",
+                {},
+            ),
+        ],
+        ids=[
+            "poll_with_votes",
+            "poll_without_question",
+            "poll_without_options",
+        ],
+    )
+    def test_process_poll_data(
+        self,
+        submessages: Any,
+        expected_question: str,
+        expected_voters_for_options: Dict[str, List[int]],
+    ):
+        question, voters_for_options = MessageBox.process_poll_data(submessages)
+        assert question == expected_question
+        assert voters_for_options == expected_voters_for_options
 
     @pytest.mark.parametrize(
         "raw_html, expected_content",
