@@ -2,6 +2,7 @@
 UI to render a Zulip message for display, and respond contextually to actions
 """
 
+import json
 import typing
 from collections import defaultdict
 from datetime import date, datetime
@@ -728,6 +729,52 @@ class MessageBox(urwid.Pile):
             self.message["content"] = self.message["content"].replace(
                 "/me", f"<strong>{self.message['sender_full_name']}</strong>", 1
             )
+
+        # WIP: Implementation for POLL messages
+        if self.message["submessages"]:
+            question = ""
+            options = {}
+
+            for submessage in self.message["submessages"]:
+                content = submessage.get("content", {})
+                if isinstance(content, str):
+                    try:
+                        content = json.loads(content)
+                    except json.JSONDecodeError:
+                        continue
+
+                if "widget_type" in content and content["widget_type"] == "poll":
+                    question = content["extra_data"]["question"]
+                    options = {option: 0 for option in content["extra_data"]["options"]}
+                    break
+
+            if question:
+                for submessage in self.message["submessages"]:
+                    content = submessage.get("content", {})
+                    if isinstance(content, str):
+                        try:
+                            content = json.loads(content)
+                        except json.JSONDecodeError:
+                            continue
+
+                    if "type" in content and content["type"] == "vote":
+                        key = content["key"]
+                        if key.startswith("canned,"):
+                            index_str = key.split(",")[1]
+                            if index_str.isdigit():
+                                index = int(index_str)
+                                if index < len(options):
+                                    option = list(options.keys())[index]
+                                    if option in options:
+                                        options[option] += content["vote"]
+
+                self.message[
+                    "content"
+                ] = f"<strong>Poll Question: {question}</strong>\n"
+                for option, count in options.items():
+                    self.message["content"] += f"Option {option}: {count}\n"
+            else:
+                pass
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
