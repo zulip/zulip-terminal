@@ -112,3 +112,30 @@ def test_updated_urwid_command_map() -> None:
             assert key in keys.keys_for_command(zt_cmd)
         except KeyError:
             pass
+
+
+@pytest.mark.parametrize(
+    "urwid_key, display_key",
+    [
+        ("a", "a"),
+        ("B", "B"),
+        (":", ":"),
+        ("enter", "Enter"),
+        ("meta c", "Meta c"),
+        ("ctrl D", "Ctrl D"),
+        ("page up", "PgUp"),
+        ("ctrl page up", "Ctrl PgUp"),
+    ],
+    ids=[
+        "lowercase_alphabet_key",
+        "uppercase_alphabet_key",
+        "symbol_key",
+        "special_key",
+        "lowercase_alphabet_key_with_modifier_key",
+        "uppercase_alphabet_key_with_modifier_key",
+        "mapped_key",
+        "mapped_key_with_modifier_key",
+    ],
+)
+def test_display_key_for_urwid_key(urwid_key: str, display_key: str) -> None:
+    assert keys.display_key_for_urwid_key(urwid_key) == display_key
