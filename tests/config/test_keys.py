@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 from pytest_mock import MockerFixture
@@ -139,3 +139,25 @@ def test_updated_urwid_command_map() -> None:
 )
 def test_display_key_for_urwid_key(urwid_key: str, display_key: str) -> None:
     assert keys.display_key_for_urwid_key(urwid_key) == display_key
+
+
+COMMAND_TO_DISPLAY_KEYS = [
+    ("NEXT_LINE", ["Down", "Ctrl n"]),
+    ("TOGGLE_STAR_STATUS", ["Ctrl s", "*"]),
+    ("ALL_PM", ["P"]),
+]
+
+
+@pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
+def test_display_keys_for_command(command: str, display_keys: List[str]) -> None:
+    assert keys.display_keys_for_command(command) == display_keys
+
+
+@pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
+def test_primary_display_key_for_command(command: str, display_keys: List[str]) -> None:
+    assert keys.primary_display_key_for_command(command) == display_keys[0]
+
+
+def test_display_keys_for_command_invalid_command(invalid_command: str) -> None:
+    with pytest.raises(keys.InvalidCommand):
+        keys.display_keys_for_command(invalid_command)

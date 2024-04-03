@@ -482,6 +482,22 @@ def display_key_for_urwid_key(urwid_key: str) -> str:
     return " ".join(display_key)
 
 
+def display_keys_for_command(command: str) -> List[str]:
+    """
+    Returns the user-friendly display keys for a given mapped command
+    """
+    return [
+        display_key_for_urwid_key(urwid_key) for urwid_key in keys_for_command(command)
+    ]
+
+
+def primary_display_key_for_command(command: str) -> str:
+    """
+    Primary Display Key is the formatted display version of the primary key
+    """
+    return display_key_for_urwid_key(primary_key_for_command(command))
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
