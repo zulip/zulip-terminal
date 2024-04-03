@@ -460,6 +460,28 @@ def primary_key_for_command(command: str) -> str:
     return keys_for_command(command).pop(0)
 
 
+URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
+    "page up": "PgUp",
+    "page down": "PgDn",
+}
+
+
+def display_key_for_urwid_key(urwid_key: str) -> str:
+    """
+    Returns a displayable user-centric format of the urwid key.
+    """
+    for urwid_map_key, display_map_key in URWID_KEY_TO_DISPLAY_KEY_MAPPING.items():
+        if urwid_map_key in urwid_key:
+            urwid_key = urwid_key.replace(urwid_map_key, display_map_key)
+    display_key = [
+        keyboard_key.capitalize()
+        if len(keyboard_key) > 1 and keyboard_key[0].islower()
+        else keyboard_key
+        for keyboard_key in urwid_key.split()
+    ]
+    return " ".join(display_key)
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
