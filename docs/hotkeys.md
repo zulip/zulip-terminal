@@ -6,31 +6,31 @@
 |Command|Key Combination|
 | :--- | :---: |
 |Show/hide help menu|<kbd>?</kbd>|
-|Show/hide markdown help menu|<kbd>meta</kbd> + <kbd>m</kbd>|
-|Show/hide about menu|<kbd>meta</kbd> + <kbd>?</kbd>|
-|Go Back|<kbd>esc</kbd>|
+|Show/hide markdown help menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
+|Show/hide about menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
+|Go Back|<kbd>Esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
-|Redraw screen|<kbd>ctrl</kbd> + <kbd>l</kbd>|
-|Quit|<kbd>ctrl</kbd> + <kbd>c</kbd>|
+|Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
+|Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
 |View user information (From Users list)|<kbd>i</kbd>|
 
 ## Navigation
 |Command|Key Combination|
 | :--- | :---: |
-|Go up / Previous message|<kbd>up</kbd> / <kbd>k</kbd>|
-|Go down / Next message|<kbd>down</kbd> / <kbd>j</kbd>|
-|Go left|<kbd>left</kbd> / <kbd>h</kbd>|
-|Go right|<kbd>right</kbd> / <kbd>l</kbd>|
-|Scroll up|<kbd>page</kbd> + <kbd>up</kbd> / <kbd>K</kbd>|
-|Scroll down|<kbd>page</kbd> + <kbd>down</kbd> / <kbd>J</kbd>|
-|Go to bottom / Last message|<kbd>end</kbd> / <kbd>G</kbd>|
-|Narrow to all messages|<kbd>a</kbd> / <kbd>esc</kbd>|
+|Go up / Previous message|<kbd>Up</kbd> / <kbd>k</kbd>|
+|Go down / Next message|<kbd>Down</kbd> / <kbd>j</kbd>|
+|Go left|<kbd>Left</kbd> / <kbd>h</kbd>|
+|Go right|<kbd>Right</kbd> / <kbd>l</kbd>|
+|Scroll up|<kbd>PgUp</kbd> / <kbd>K</kbd>|
+|Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
+|Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
+|Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
 |Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
 |Narrow to messages in which you're mentioned|<kbd>#</kbd>|
 |Next unread topic|<kbd>n</kbd>|
 |Next unread direct message|<kbd>p</kbd>|
-|Perform current action|<kbd>enter</kbd>|
+|Perform current action|<kbd>Enter</kbd>|
 
 ## Searching
 |Command|Key Combination|
@@ -44,7 +44,7 @@
 ## Message actions
 |Command|Key Combination|
 | :--- | :---: |
-|Reply to the current message|<kbd>r</kbd> / <kbd>enter</kbd>|
+|Reply to the current message|<kbd>r</kbd> / <kbd>Enter</kbd>|
 |Reply mentioning the sender of the current message|<kbd>@</kbd>|
 |Reply quoting the current message text|<kbd>></kbd>|
 |Reply directly to the sender of the current message|<kbd>R</kbd>|
@@ -57,7 +57,7 @@
 |Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Toggle first emoji reaction on selected message|<kbd>=</kbd>|
 |Add/remove thumbs-up reaction to the current message|<kbd>+</kbd>|
-|Add/remove star status of the current message|<kbd>ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
+|Add/remove star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
@@ -77,25 +77,25 @@
 ## Composing a Message
 |Command|Key Combination|
 | :--- | :---: |
-|Cycle through recipient and content boxes|<kbd>tab</kbd>|
-|Send a message|<kbd>ctrl</kbd> + <kbd>d</kbd> / <kbd>meta</kbd> + <kbd>enter</kbd>|
-|Save current message as a draft|<kbd>meta</kbd> + <kbd>s</kbd>|
-|Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>ctrl</kbd> + <kbd>f</kbd>|
-|Cycle through autocomplete suggestions in reverse|<kbd>ctrl</kbd> + <kbd>r</kbd>|
-|Narrow to compose box message recipient|<kbd>meta</kbd> + <kbd>.</kbd>|
-|Jump to the beginning of line|<kbd>ctrl</kbd> + <kbd>a</kbd>|
-|Jump to the end of line|<kbd>ctrl</kbd> + <kbd>e</kbd>|
-|Jump backward one word|<kbd>meta</kbd> + <kbd>b</kbd>|
-|Jump forward one word|<kbd>meta</kbd> + <kbd>f</kbd>|
-|Delete previous character (to left)|<kbd>ctrl</kbd> + <kbd>h</kbd>|
-|Transpose characters|<kbd>ctrl</kbd> + <kbd>t</kbd>|
-|Cut forwards to the end of the line|<kbd>ctrl</kbd> + <kbd>k</kbd>|
-|Cut backwards to the start of the line|<kbd>ctrl</kbd> + <kbd>u</kbd>|
-|Cut forwards to the end of the current word|<kbd>meta</kbd> + <kbd>d</kbd>|
-|Cut backwards to the start of the current word|<kbd>ctrl</kbd> + <kbd>w</kbd>|
-|Paste last cut section|<kbd>ctrl</kbd> + <kbd>y</kbd>|
-|Undo last action|<kbd>ctrl</kbd> + <kbd>_</kbd>|
-|Jump to the previous line|<kbd>up</kbd> / <kbd>ctrl</kbd> + <kbd>p</kbd>|
-|Jump to the next line|<kbd>down</kbd> / <kbd>ctrl</kbd> + <kbd>n</kbd>|
-|Clear compose box|<kbd>ctrl</kbd> + <kbd>l</kbd>|
+|Cycle through recipient and content boxes|<kbd>Tab</kbd>|
+|Send a message|<kbd>Ctrl</kbd> + <kbd>d</kbd> / <kbd>Meta</kbd> + <kbd>Enter</kbd>|
+|Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
+|Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
+|Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
+|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|Jump to the beginning of line|<kbd>Ctrl</kbd> + <kbd>a</kbd>|
+|Jump to the end of line|<kbd>Ctrl</kbd> + <kbd>e</kbd>|
+|Jump backward one word|<kbd>Meta</kbd> + <kbd>b</kbd>|
+|Jump forward one word|<kbd>Meta</kbd> + <kbd>f</kbd>|
+|Delete previous character (to left)|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
+|Transpose characters|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
+|Cut forwards to the end of the line|<kbd>Ctrl</kbd> + <kbd>k</kbd>|
+|Cut backwards to the start of the line|<kbd>Ctrl</kbd> + <kbd>u</kbd>|
+|Cut forwards to the end of the current word|<kbd>Meta</kbd> + <kbd>d</kbd>|
+|Cut backwards to the start of the current word|<kbd>Ctrl</kbd> + <kbd>w</kbd>|
+|Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
+|Undo last action|<kbd>Ctrl</kbd> + <kbd>_</kbd>|
+|Jump to the previous line|<kbd>Up</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>|
+|Jump to the next line|<kbd>Down</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>|
+|Clear compose box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 
