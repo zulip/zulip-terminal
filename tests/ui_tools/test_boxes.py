@@ -12,7 +12,11 @@ from zulipterminal.api_types import (
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
 )
-from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.keys import (
+    keys_for_command,
+    primary_display_key_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
@@ -379,9 +383,12 @@ class TestWriteBox:
         expected_lines = [
             "Invalid recipient(s) - " + invalid_recipients,
             " - Use ",
-            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE")),
+            ("footer_contrast", primary_display_key_for_command("AUTOCOMPLETE")),
             " or ",
-            ("footer_contrast", primary_key_for_command("AUTOCOMPLETE_REVERSE")),
+            (
+                "footer_contrast",
+                primary_display_key_for_command("AUTOCOMPLETE_REVERSE"),
+            ),
             " to autocomplete.",
         ]
 
@@ -1760,8 +1767,8 @@ class TestPanelSearchBox:
 
     @pytest.fixture
     def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
-        # X is the return from keys_for_command("UNTESTED_TOKEN")
-        mocker.patch(MODULE + ".keys_for_command", return_value="X")
+        # X is the return from display_keys_for_command("UNTESTED_TOKEN")
+        mocker.patch(MODULE + ".display_keys_for_command", return_value="X")
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)

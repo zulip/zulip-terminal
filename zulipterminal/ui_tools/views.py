@@ -14,8 +14,9 @@ from zulipterminal.api_types import EditPropagateMode, Message
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
+    display_key_for_urwid_key,
+    display_keys_for_command,
     is_command_key,
-    keys_for_command,
     primary_key_for_command,
 )
 from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
@@ -1225,9 +1226,14 @@ class HelpView(PopUpView):
                 for binding in KEY_BINDINGS.values()
                 if binding["key_category"] == category
             )
-            key_bindings = []
-            for binding in keys_in_category:
-                key_bindings.append((binding["help_text"], ", ".join(binding["keys"])))
+            key_bindings = [
+                (
+                    binding["help_text"],
+                    ", ".join(map(display_key_for_urwid_key, binding["keys"])),
+                )
+                for binding in keys_in_category
+            ]
+
             help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
         popup_width, column_widths = self.calculate_table_widths(
@@ -1379,7 +1385,7 @@ class StreamInfoView(PopUpView):
             if stream["history_public_to_subscribers"]
             else "Not Public to Users"
         )
-        member_keys = ", ".join(map(repr, keys_for_command("STREAM_MEMBERS")))
+        member_keys = ", ".join(map(repr, display_keys_for_command("STREAM_MEMBERS")))
 
         # FIXME: This field was removed from the subscription data in Zulip 7.5 / ZFL226
         #   We should use the new /streams/{stream_id}/email_address endpoint instead
@@ -1387,7 +1393,9 @@ class StreamInfoView(PopUpView):
         if self._stream_email is None:
             stream_copy_text = "< Stream email is unavailable >"
         else:
-            email_keys = ", ".join(map(repr, keys_for_command("COPY_STREAM_EMAIL")))
+            email_keys = ", ".join(
+                map(repr, display_keys_for_command("COPY_STREAM_EMAIL"))
+            )
             stream_copy_text = f"Press {email_keys} to copy Stream email address"
 
         weekly_traffic = stream["stream_weekly_traffic"]
@@ -1562,14 +1570,14 @@ class MsgInfoView(PopUpView):
             msg["timestamp"], show_seconds=True, show_year=True
         )
         view_in_browser_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("VIEW_IN_BROWSER")))
+            ", ".join(map(str, display_keys_for_command("VIEW_IN_BROWSER")))
         )
 
         full_rendered_message_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("FULL_RENDERED_MESSAGE")))
+            ", ".join(map(str, display_keys_for_command("FULL_RENDERED_MESSAGE")))
         )
         full_raw_message_keys = "[{}]".format(
-            ", ".join(map(str, keys_for_command("FULL_RAW_MESSAGE")))
+            ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
         )
         msg_info = [
             (
@@ -1601,7 +1609,9 @@ class MsgInfoView(PopUpView):
         if self.show_edit_history_label:
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
 
-            keys = "[{}]".format(", ".join(map(str, keys_for_command("EDIT_HISTORY"))))
+            keys = "[{}]".format(
+                ", ".join(map(str, display_keys_for_command("EDIT_HISTORY")))
+            )
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
         if message_links:

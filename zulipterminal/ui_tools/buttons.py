@@ -11,7 +11,11 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode, Message
-from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.keys import (
+    is_command_key,
+    primary_display_key_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
@@ -125,7 +129,9 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"All messages     [{primary_key_for_command('ALL_MESSAGES')}]"
+        button_text = (
+            f"All messages     [{primary_display_key_for_command('ALL_MESSAGES')}]"
+        )
 
         super().__init__(
             controller=controller,
@@ -139,7 +145,7 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages  [{primary_key_for_command('ALL_PM')}]"
+        button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
@@ -153,7 +159,9 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Mentions         [{primary_key_for_command('ALL_MENTIONS')}]"
+        button_text = (
+            f"Mentions         [{primary_display_key_for_command('ALL_MENTIONS')}]"
+        )
 
         super().__init__(
             controller=controller,
@@ -167,7 +175,9 @@ class MentionedButton(TopButton):
 
 class StarredButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Starred messages [{primary_key_for_command('ALL_STARRED')}]"
+        button_text = (
+            f"Starred messages [{primary_display_key_for_command('ALL_STARRED')}]"
+        )
 
         super().__init__(
             controller=controller,

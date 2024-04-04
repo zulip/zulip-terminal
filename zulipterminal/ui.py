@@ -9,7 +9,11 @@ from typing import Any, Dict, List, Optional
 
 import urwid
 
-from zulipterminal.config.keys import commands_for_random_tips, is_command_key
+from zulipterminal.config.keys import (
+    commands_for_random_tips,
+    display_key_for_urwid_key,
+    is_command_key,
+)
 from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
     AUTOHIDE_TAB_LEFT_ARROW,
@@ -102,10 +106,13 @@ class View(urwid.WidgetWrap):
         if not allowed_commands:
             return ["Help(?): "]
         random_command = random.choice(allowed_commands)
+        random_command_display_keys = ", ".join(
+            [display_key_for_urwid_key(key) for key in random_command["keys"]]
+        )
         return [
             "Help(?): ",
-            ("footer_contrast", " " + ", ".join(random_command["keys"]) + " "),
-            " " + random_command["help_text"],
+            ("footer_contrast", f" {random_command_display_keys} "),
+            f" {random_command['help_text']}",
         ]
 
     @asynch
