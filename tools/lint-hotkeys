@@ -6,7 +6,11 @@ from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple
 
-from zulipterminal.config.keys import HELP_CATEGORIES, KEY_BINDINGS
+from zulipterminal.config.keys import (
+    HELP_CATEGORIES,
+    KEY_BINDINGS,
+    display_keys_for_command,
+)
 
 
 KEYS_FILE = (
@@ -129,8 +133,10 @@ def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     Get all help categories from KEYS_FILE
     """
     categories = defaultdict(list)
-    for item in KEY_BINDINGS.values():
-        categories[item["key_category"]].append((item["help_text"], item["keys"]))
+    for cmd, item in KEY_BINDINGS.items():
+        categories[item["key_category"]].append(
+            (item["help_text"], display_keys_for_command(cmd))
+        )
     return categories
 
 
