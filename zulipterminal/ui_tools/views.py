@@ -115,7 +115,7 @@ class MessageView(urwid.ListBox):
         self.log = ModListWalker(contents=self.main_view(), action=self.read_message)
 
         super().__init__(self.log)
-        self.set_focus(self.focus_msg)
+        # self.set_focus(self.focus_msg) #Commenting this to resolve issue 1226
         # if loading new/old messages - True
         self.old_loading = False
         self.new_loading = False
