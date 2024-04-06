@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
-from urwid import Columns, Pile, Text, Widget
+from urwid import AttrWrap, Columns, Pile, Text, Widget
 
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
@@ -24,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
     PopUpView,
+    PopUpViewTableContent,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -178,6 +179,42 @@ class TestPopUpView:
         self.pop_up_view.keypress(size, navigation_key)
 
         self.super_keypress.assert_called_once_with(size, navigation_key)
+
+    @pytest.mark.parametrize(
+        [
+            "contents",
+            "expected_widget_type",
+        ],
+        [
+            case(
+                [
+                    (
+                        "Viewing Actions",
+                        [
+                            ("Open in web browser", "[]"),
+                            ("Full rendered message", "[]"),
+                            ("Full raw message", "[]"),
+                        ],
+                    )
+                ],
+                [Text, AttrWrap, AttrWrap, AttrWrap],
+                id="heading_widget_with_row",
+            ),
+            case([("", "")], [], id="widget_with_str"),
+        ],
+    )
+    def test_make_table_with_categories__instances(
+        self,
+        contents: PopUpViewTableContent,
+        expected_widget_type: List[Any],
+    ) -> None:
+        popup_width, column_widths = self.pop_up_view.calculate_table_widths(
+            contents, len(self.title)
+        )
+        widgets = self.pop_up_view.make_table_with_categories(contents, column_widths)
+        assert len(widgets) == len(expected_widget_type)
+        for widget, expected_type in zip(widgets, expected_widget_type):
+            assert isinstance(widget, expected_type)
 
 
 class TestAboutView:
