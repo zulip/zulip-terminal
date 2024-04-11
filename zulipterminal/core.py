@@ -515,10 +515,17 @@ class Controller:
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
         question = urwid.Text(
-            "Save this message as a draft? (This will overwrite the existing draft.)"
+            (
+                "bold",
+                "Save this message as a draft? "
+                "(This will overwrite the existing draft.)",
+            ),
+            "center",
         )
         save_draft = partial(self.model.save_draft, draft)
-        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
+        self.loop.widget = PopUpConfirmationView(
+            self, question, save_draft, location="center"
+        )
 
     def stream_muting_confirmation_popup(
         self, stream_id: int, stream_name: str
