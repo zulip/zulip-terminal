@@ -1559,27 +1559,21 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize(
-        "key, current_typeahead_mode, expected_typeahead_mode, expect_footer_was_reset",
+        "key, current_typeahead_mode, expected_typeahead_mode",
         [
-            # footer does not reset
-            (primary_key_for_command("AUTOCOMPLETE"), False, False, False),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False, False),
-            (primary_key_for_command("AUTOCOMPLETE"), True, True, False),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True, False),
-            # footer resets
-            (primary_key_for_command("EXIT_COMPOSE"), True, False, True),
-            ("space", True, False, True),
-            ("k", True, False, True),
+            (primary_key_for_command("AUTOCOMPLETE"), False, False),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False),
+            (primary_key_for_command("AUTOCOMPLETE"), True, True),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True),
         ],
     )
-    def test_keypress_typeahead_mode_autocomplete_key(
+    def test__keypress_typeahead_mode_autocomplete_key_footer_no_reset(
         self,
         mocker: MockerFixture,
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
         current_typeahead_mode: bool,
         expected_typeahead_mode: bool,
-        expect_footer_was_reset: bool,
         key: str,
     ) -> None:
         write_box.msg_write_box = mocker.Mock(edit_text="")
@@ -1589,11 +1583,35 @@ class TestWriteBox:
         write_box.keypress(size, key)
 
         assert write_box.is_in_typeahead_mode == expected_typeahead_mode
-        if expect_footer_was_reset:
-            # We may prefer called-once in future, but the key part is that we do reset
-            assert self.view.set_footer_text.called
-        else:
-            assert not self.view.set_footer_text.called
+        assert not self.view.set_footer_text.called
+
+    @pytest.mark.parametrize(
+        "key, current_typeahead_mode, expected_typeahead_mode",
+        [
+            (primary_key_for_command("EXIT_COMPOSE"), True, False),
+            ("space", True, False),
+            ("k", True, False),
+        ],
+    )
+    def test__keypress_typeahead_mode_autocomplete_key_footer_reset(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        current_typeahead_mode: bool,
+        expected_typeahead_mode: bool,
+        key: str,
+    ) -> None:
+        write_box.msg_write_box = mocker.Mock(edit_text="")
+        write_box.is_in_typeahead_mode = current_typeahead_mode
+        size = widget_size(write_box)
+
+        write_box.keypress(size, key)
+
+        assert write_box.is_in_typeahead_mode == expected_typeahead_mode
+
+        # We may prefer called-once in future, but the key part is that we do reset
+        assert self.view.set_footer_text.called
 
     @pytest.mark.parametrize(
         [
