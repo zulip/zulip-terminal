@@ -709,6 +709,14 @@ class WriteBox(urwid.Pile):
 
         return emoji_typeahead, emojis
 
+    def append_uri_and_filename(self, file_name: str, uri: str) -> None:
+        edit_widget = self.contents[self.FOCUS_CONTAINER_MESSAGE][
+            self.FOCUS_MESSAGE_BOX_BODY
+        ]
+        edit_widget.edit_text += f"[{file_name}]({str(uri)})"
+        # Places the cursor after the URI
+        edit_widget.set_edit_pos(len(edit_widget.get_edit_text()))
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
@@ -717,6 +725,9 @@ class WriteBox(urwid.Pile):
             # set default footer when done with autocomplete
             self.is_in_typeahead_mode = False
             self.view.set_footer_text()
+
+        if is_command_key("FILE_UPLOAD", key):
+            self.model.controller.show_file_upload_popup(self)
 
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()

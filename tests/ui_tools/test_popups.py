@@ -1,15 +1,19 @@
 from collections import OrderedDict
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from unittest.mock import MagicMock
 
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
+from tests.ui_tools.test_boxes import TestWriteBox
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
+from zulipterminal.ui_tools.boxes import WriteBox
 from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -17,6 +21,7 @@ from zulipterminal.ui_tools.views import (
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    FileUploadView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -886,6 +891,90 @@ class TestMarkdownHelpView:
         self.markdown_help_view.keypress(size, key)
 
         assert self.controller.exit_popup.called
+
+
+class TestFileUploadView:
+    @pytest.fixture(scope="class")
+    def write_box(self) -> Any:
+        return TestWriteBox().write_box
+
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture, write_box: WriteBox) -> None:
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(LISTWALKER, return_value=[])
+        self.file_upload_view = FileUploadView(
+            self.controller, write_box, "Upload File"
+        )
+
+    def test_keypress_any_key(
+        self, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        key = "a"
+        size = widget_size(self.file_upload_view)
+        self.file_upload_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize("key", {*keys_for_command("GO_BACK")})
+    def test_keypress_exit_popup(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.file_upload_view)
+        self.file_upload_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    @pytest.mark.parametrize(
+        "file_location, expected_uri, expected_error_message",
+        [
+            case(
+                "example.txt",
+                "http://example.txt/uploaded_file",
+                None,
+                id="txt_file_with_successful_uri",
+            ),
+            case(
+                "example.pdf",
+                "http://example.pdf/uploaded_file",
+                None,
+                id="pdf_file_with_successful_uri",
+            ),
+            case(
+                "invalid.txt",
+                "",
+                ["ERROR: Unable to get the URI"],
+                id="invalid_txt_file_with_error",
+            ),
+            case(
+                "invalid.pdf",
+                "",
+                ["ERROR: Unable to get the URI"],
+                id="invalid_pdf_file_with_error",
+            ),
+        ],
+    )
+    def test__handle_file_upload(
+        self,
+        file_location: str,
+        expected_uri: str,
+        expected_error_message: Optional[str],
+    ) -> None:
+        self.file_upload_view.write_box = MagicMock()
+        self.controller.model.get_file_upload_uri.return_value = expected_uri
+
+        self.file_upload_view._handle_file_upload(file_location)
+
+        self.controller.model.get_file_upload_uri.assert_called_once_with(file_location)
+        if not expected_error_message:
+            file_name = Path(file_location).name
+            self.file_upload_view.write_box.append_uri_and_filename.assert_called_once_with(
+                file_name, self.file_upload_view.uri
+            )
+        else:
+            self.controller.append_uri_and_filename.assert_not_called()
+            self.controller.report_error.assert_called_with(expected_error_message)
+        self.controller.exit_popup.assert_called()
 
 
 class TestHelpView:

@@ -4,6 +4,7 @@ UI views for larger elements such as Streams, Messages, Topics, Help, etc
 
 import threading
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import pytz
@@ -44,7 +45,7 @@ from zulipterminal.helper import (
 )
 from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
-from zulipterminal.ui_tools.boxes import PanelSearchBox
+from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox
 from zulipterminal.ui_tools.buttons import (
     EmojiButton,
     HomeButton,
@@ -1242,6 +1243,44 @@ class HelpView(PopUpView):
         widgets = self.make_table_with_categories(help_menu_content, column_widths)
 
         super().__init__(controller, widgets, "HELP", popup_width, title)
+
+
+class FileUploadView(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        write_box: WriteBox,
+        title: str,
+    ) -> None:
+        self.controller = controller
+        self.model = controller.model
+        self.write_box = write_box
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        self.predefined_text = urwid.Text("Location : ")
+        self.file_location_edit = urwid.Edit()
+        columns = [self.predefined_text, self.file_location_edit]
+        super().__init__(
+            controller,
+            columns,
+            "GO_BACK",
+            max_cols,
+            title,
+        )
+
+    def _handle_file_upload(self, file_location: str) -> None:
+        self.uri = self.model.get_file_upload_uri(file_location)
+        if self.uri:
+            file_path = Path(file_location)
+            file_name = file_path.name
+            self.write_box.append_uri_and_filename(file_name, self.uri)
+        else:
+            self.controller.report_error(["ERROR: Unable to get the URI"])
+        self.controller.exit_popup()
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("ENTER", key):
+            self._handle_file_upload(self.file_location_edit.edit_text)
+        return super().keypress(size, key)
 
 
 class MarkdownHelpView(PopUpView):
