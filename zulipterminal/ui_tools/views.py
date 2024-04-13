@@ -1582,6 +1582,9 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
         )
+        copy_code_keys = "[{}]".format(
+            ", ".join(map(str, display_keys_for_command("COPY_CODE_BLOCK")))
+        )
         msg_info = [
             (
                 "",
@@ -1600,6 +1603,7 @@ class MsgInfoView(PopUpView):
                 ("Open in web browser", view_in_browser_keys),
                 ("Full rendered message", full_rendered_message_keys),
                 ("Full raw message", full_raw_message_keys),
+                ("Copy code block", copy_code_keys),
             ],
         )
         msg_info.append(viewing_actions)

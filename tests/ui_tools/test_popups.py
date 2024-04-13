@@ -1117,13 +1117,14 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 8
-        # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
+        expected_height = 9
+        # 3 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (display group header)
         # +1 (whitespace column)
         # +1 (view message in browser)
         # +1 (full rendered message)
         # +1 (full raw message)
+        # +1 (copy code block)
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -1192,9 +1193,9 @@ class TestMsgInfoView:
             list(),
             list(),
         )
-        # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
+        # 11 = 8 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 14
+        expected_height = 15
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
