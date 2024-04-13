@@ -142,7 +142,7 @@ def test_display_key_for_urwid_key(urwid_key: str, display_key: str) -> None:
 
 
 COMMAND_TO_DISPLAY_KEYS = [
-    ("NEXT_LINE", ["Down", "Ctrl n"]),
+    ("NEXT_LINE", [f"Down {keys.DIRECTION_TO_SYMBOL_MAP['Down']}", "Ctrl n"]),
     ("TOGGLE_STAR_STATUS", ["Ctrl s", "*"]),
     ("ALL_PM", ["P"]),
 ]
