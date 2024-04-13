@@ -92,6 +92,27 @@ def generate_hotkeys_file() -> None:
     print(f"Hot Keys list saved in {OUTPUT_FILE}")
 
 
+def format_key(key: str) -> str:
+    """
+    Format each key of a hotkey combination for display
+    """
+    if len(key) == 1:
+        if key.isupper():
+            return f"<kbd>Shift</kbd> + <kbd>{key}</kbd>"
+        return f"<kbd>{key.capitalize()}</kbd>"
+    return f"<kbd>{key}</kbd>"
+
+
+def format_key_combination(key_combination: str) -> str:
+    """
+    Format a hotkey combination for display
+    """
+    for symbol in ARROW_SYMBOLS:
+        if symbol in key_combination:
+            return f"<kbd>{key_combination}</kbd>"
+    return " + ".join([format_key(key) for key in key_combination.split()])
+
+
 def get_hotkeys_file_string() -> str:
     """
     Construct string in form for output to OUTPUT_FILE based on help text
@@ -111,11 +132,7 @@ def get_hotkeys_file_string() -> str:
         for help_text, key_combinations_list in categories[action]:
             various_key_combinations = " / ".join(
                 [
-                    f"<kbd>{key_combination}</kbd>"
-                    if any(symbol in key_combination for symbol in ARROW_SYMBOLS)
-                    else " + ".join(
-                        [f"<kbd>{key}</kbd>" for key in key_combination.split()]
-                    )
+                    format_key_combination(key_combination)
                     for key_combination in key_combinations_list
                 ]
             )
@@ -125,6 +142,10 @@ def get_hotkeys_file_string() -> str:
 
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
+    """
+    Read the existing OUTPUT_FILE into a string,
+    and compare if it matches the input string
+    """
     with open(OUTPUT_FILE) as output_file:
         content_is_identical = hotkeys_file_string == output_file.read()
     if content_is_identical:
