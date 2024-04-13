@@ -11,6 +11,7 @@ from zulipterminal.config.keys import (
     KEY_BINDINGS,
     display_keys_for_command,
 )
+from zulipterminal.config.symbols import ARROW_SYMBOLS
 
 
 KEYS_FILE = (
@@ -73,7 +74,9 @@ def lint_hotkeys_file() -> None:
     else:
         print("No hotkeys linting errors")
         if not output_file_matches_string(hotkeys_file_string):
-            print(f"Run './tools/{SCRIPT_NAME}' to update {OUTPUT_FILE_NAME} file")
+            print(
+                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
+            )
             error_flag = 1
     sys.exit(error_flag)
 
@@ -108,7 +111,11 @@ def get_hotkeys_file_string() -> str:
         for help_text, key_combinations_list in categories[action]:
             various_key_combinations = " / ".join(
                 [
-                    " + ".join([f"<kbd>{key}</kbd>" for key in key_combination.split()])
+                    f"<kbd>{key_combination}</kbd>"
+                    if any(symbol in key_combination for symbol in ARROW_SYMBOLS)
+                    else " + ".join(
+                        [f"<kbd>{key}</kbd>" for key in key_combination.split()]
+                    )
                     for key_combination in key_combinations_list
                 ]
             )

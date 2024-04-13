@@ -16,6 +16,8 @@ from urwid.command_map import (
     command_map,
 )
 
+from zulipterminal.config.symbols import DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW, UP_ARROW
+
 
 class KeyBinding(TypedDict):
     keys: List[str]
@@ -466,6 +468,14 @@ URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
 }
 
 
+DIRECTION_TO_SYMBOL_MAP = {
+    "Up": UP_ARROW,
+    "Down": DOWN_ARROW,
+    "Left": LEFT_ARROW,
+    "Right": RIGHT_ARROW,
+}
+
+
 def display_key_for_urwid_key(urwid_key: str) -> str:
     """
     Returns a displayable user-centric format of the urwid key.
@@ -479,6 +489,9 @@ def display_key_for_urwid_key(urwid_key: str) -> str:
         else keyboard_key
         for keyboard_key in urwid_key.split()
     ]
+    for direction, symbol in DIRECTION_TO_SYMBOL_MAP.items():
+        if direction in display_key:
+            display_key.append(symbol)
     return " ".join(display_key)
 
 

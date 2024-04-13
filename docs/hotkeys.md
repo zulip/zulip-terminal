@@ -17,10 +17,10 @@
 ## Navigation
 |Command|Key Combination|
 | :--- | :---: |
-|Go up / Previous message|<kbd>Up</kbd> / <kbd>k</kbd>|
-|Go down / Next message|<kbd>Down</kbd> / <kbd>j</kbd>|
-|Go left|<kbd>Left</kbd> / <kbd>h</kbd>|
-|Go right|<kbd>Right</kbd> / <kbd>l</kbd>|
+|Go up / Previous message|<kbd>Up ↑</kbd> / <kbd>k</kbd>|
+|Go down / Next message|<kbd>Down ↓</kbd> / <kbd>j</kbd>|
+|Go left|<kbd>Left ←</kbd> / <kbd>h</kbd>|
+|Go right|<kbd>Right →</kbd> / <kbd>l</kbd>|
 |Scroll up|<kbd>PgUp</kbd> / <kbd>K</kbd>|
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
@@ -95,7 +95,7 @@
 |Cut backwards to the start of the current word|<kbd>Ctrl</kbd> + <kbd>w</kbd>|
 |Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
 |Undo last action|<kbd>Ctrl</kbd> + <kbd>_</kbd>|
-|Jump to the previous line|<kbd>Up</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>|
-|Jump to the next line|<kbd>Down</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>|
+|Jump to the previous line|<kbd>Up ↑</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>|
+|Jump to the next line|<kbd>Down ↓</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>|
 |Clear compose box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 
