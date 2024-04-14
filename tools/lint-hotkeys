@@ -120,6 +120,10 @@ def get_hotkeys_file_string() -> str:
 
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
+    """
+    Read the content of the existing OUTPUT_FILE as a string
+    and check if it matches the newly generated hotkeys_file_string
+    """
     with open(OUTPUT_FILE) as output_file:
         content_is_identical = hotkeys_file_string == output_file.read()
     if content_is_identical:
