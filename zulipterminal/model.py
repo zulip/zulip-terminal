@@ -34,6 +34,8 @@ from zulipterminal.api_types import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
+    PRESENCE_OFFLINE_THRESHOLD_SECS,
+    PRESENCE_PING_INTERVAL_SECS,
     TYPING_STARTED_EXPIRY_PERIOD,
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
@@ -79,9 +81,6 @@ from zulipterminal.helper import (
 )
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
-
-
-OFFLINE_THRESHOLD_SECS = 140
 
 
 class ServerConnectionFailure(Exception):
@@ -445,7 +444,7 @@ class Model:
                     view = self.controller.view
                     view.users_view.update_user_list(user_list=self.users)
                     view.middle_column.update_message_list_status_markers()
-            time.sleep(60)
+            time.sleep(PRESENCE_PING_INTERVAL_SECS)
 
     @asynch
     def toggle_message_reaction(
@@ -1202,7 +1201,7 @@ class Model:
                 *
                 * Out of the ClientPresence objects found in `presence`, we
                 * consider only those with a timestamp newer than
-                * OFFLINE_THRESHOLD_SECS; then of
+                * PRESENCE_OFFLINE_THRESHOLD_SECS; then of
                 * those, return the one that has the greatest UserStatus, where
                 * `active` > `idle` > `offline`.
                 *
@@ -1216,7 +1215,7 @@ class Model:
                     timestamp = client[1]["timestamp"]
                     if client_name == "aggregated":
                         continue
-                    elif (time.time() - timestamp) < OFFLINE_THRESHOLD_SECS:
+                    elif (time.time() - timestamp) < PRESENCE_OFFLINE_THRESHOLD_SECS:
                         if status == "active":
                             aggregate_status = "active"
                         if status == "idle" and aggregate_status != "active":
