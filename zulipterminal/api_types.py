@@ -35,6 +35,14 @@ MAX_MESSAGE_LENGTH: Final = 10000
 
 
 ###############################################################################
+# These values are in the register response from ZFL 164
+# Before this feature level, they had the listed default (fixed) values
+
+PRESENCE_OFFLINE_THRESHOLD_SECS: Final = 140
+PRESENCE_PING_INTERVAL_SECS: Final = 60
+
+
+###############################################################################
 # Core message types (used in Composition and Message below)
 
 DirectMessageString = Literal["private"]
