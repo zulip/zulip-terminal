@@ -73,7 +73,9 @@ def lint_hotkeys_file() -> None:
     else:
         print("No hotkeys linting errors")
         if not output_file_matches_string(hotkeys_file_string):
-            print(f"Run './tools/{SCRIPT_NAME}' to update {OUTPUT_FILE_NAME} file")
+            print(
+                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
+            )
             error_flag = 1
     sys.exit(error_flag)
 
