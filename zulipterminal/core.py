@@ -410,6 +410,8 @@ class Controller:
         try:
             # Checks for a runnable browser in the system and returns
             # its browser controller, if found, else reports an error
+            term = os.environ.get("TERM")  # Saving the original value
+            del os.environ["TERM"]  # Temporarily deleting variable
             browser_controller = webbrowser.get()
             # Suppress stdout and stderr when opening browser
             with suppress_output():
@@ -424,6 +426,8 @@ class Controller:
                     [f"The link was successfully opened using {browser_name}"]
                 )
         except webbrowser.Error as e:
+            if isinstance(term, str):
+                os.environ["TERM"] = term  # resetting
             # Set a footer text if no runnable browser is located
             self.report_error([f"ERROR: {e}"])
 

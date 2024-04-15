@@ -427,6 +427,8 @@ class TestController:
     ) -> None:
         # Set DISPLAY environ to be able to run test in CI
         os.environ["DISPLAY"] = ":0"
+        # Set TERM environ to be able to check text-browsers
+        os.environ["TERM"] = "xterm-256color"
         mocked_report_success = mocker.patch(MODULE + ".Controller.report_success")
         mock_get = mocker.patch(MODULE + ".webbrowser.get")
         mock_open = mock_get.return_value.open
@@ -447,6 +449,7 @@ class TestController:
         self, mocker: MockerFixture, controller: Controller
     ) -> None:
         os.environ["DISPLAY"] = ":0"
+        os.environ["TERM"] = "xterm-256color"
         error = "No runnable browser found"
         mocked_report_error = mocker.patch(MODULE + ".Controller.report_error")
         mocker.patch(MODULE + ".webbrowser.get").side_effect = webbrowser.Error(error)
