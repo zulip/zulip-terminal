@@ -14,6 +14,8 @@ from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
+    PRESENCE_OFFLINE_THRESHOLD_SECS,
+    PRESENCE_PING_INTERVAL_SECS,
     TYPING_STARTED_EXPIRY_PERIOD,
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
@@ -1439,6 +1441,60 @@ class TestModel:
         assert model.typing_started_wait_period == typing_started_wait
         assert model.typing_stopped_wait_period == typing_stopped_wait
         assert model.typing_started_expiry_period == typing_started_expiry
+
+    @pytest.mark.parametrize(
+        "feature_level, to_vary_in_initial_data, "
+        "expected_offline_threshold, expected_presence_ping_interval",
+        [
+            (0, {}, PRESENCE_OFFLINE_THRESHOLD_SECS, PRESENCE_PING_INTERVAL_SECS),
+            (157, {}, PRESENCE_OFFLINE_THRESHOLD_SECS, PRESENCE_PING_INTERVAL_SECS),
+            (
+                164,
+                {
+                    "server_presence_offline_threshold_seconds": 200,
+                    "server_presence_ping_interval_seconds": 100,
+                },
+                200,
+                100,
+            ),
+        ],
+        ids=[
+            "Zulip_2.1_ZFL_0_hard_coded",
+            "Zulip_6.2_ZFL_157_hard_coded",
+            "Zulip_7.0_ZFL_164_server_provided",
+        ],
+    )
+    def test__store_server_presence_intervals(
+        self,
+        model,
+        initial_data,
+        feature_level,
+        to_vary_in_initial_data,
+        expected_offline_threshold,
+        expected_presence_ping_interval,
+    ):
+        # Ensure inputs are not the defaults, to avoid the test accidentally passing
+        assert (
+            to_vary_in_initial_data.get("server_presence_offline_threshold_seconds")
+            != PRESENCE_OFFLINE_THRESHOLD_SECS
+        )
+        assert (
+            to_vary_in_initial_data.get("server_presence_ping_interval_seconds")
+            != PRESENCE_PING_INTERVAL_SECS
+        )
+
+        initial_data.update(to_vary_in_initial_data)
+        model.initial_data = initial_data
+        model.server_feature_level = feature_level
+
+        model._store_server_presence_intervals()
+
+        assert (
+            model.server_presence_offline_threshold_secs == expected_offline_threshold
+        )
+        assert (
+            model.server_presence_ping_interval_secs == expected_presence_ping_interval
+        )
 
     def test_get_message_false_first_anchor(
         self,

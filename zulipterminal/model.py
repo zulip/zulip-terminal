@@ -171,6 +171,8 @@ class Model:
         self.server_version = self.initial_data["zulip_version"]
         self.server_feature_level: int = self.initial_data.get("zulip_feature_level", 0)
 
+        self._store_server_presence_intervals()
+
         self.user_dict: Dict[str, MinimalUserData] = {}
         self.user_id_email_dict: Dict[int, str] = {}
         self._all_users_by_id: Dict[int, RealmUser] = {}
@@ -444,7 +446,7 @@ class Model:
                     view = self.controller.view
                     view.users_view.update_user_list(user_list=self.users)
                     view.middle_column.update_message_list_status_markers()
-            time.sleep(PRESENCE_PING_INTERVAL_SECS)
+            time.sleep(self.server_presence_ping_interval_secs)
 
     @asynch
     def toggle_message_reaction(
@@ -811,6 +813,18 @@ class Model:
         self.typing_started_expiry_period = self.initial_data.get(
             "server_typing_started_expiry_period_milliseconds",
             TYPING_STARTED_EXPIRY_PERIOD,
+        )
+
+    def _store_server_presence_intervals(self) -> None:
+        """
+        In ZFL 164, these values were added to the register response.
+        Uses default values if not received.
+        """
+        self.server_presence_offline_threshold_secs = self.initial_data.get(
+            "server_presence_offline_threshold_seconds", PRESENCE_OFFLINE_THRESHOLD_SECS
+        )
+        self.server_presence_ping_interval_secs = self.initial_data.get(
+            "server_presence_ping_interval_seconds", PRESENCE_PING_INTERVAL_SECS
         )
 
     @staticmethod
@@ -1201,7 +1215,7 @@ class Model:
                 *
                 * Out of the ClientPresence objects found in `presence`, we
                 * consider only those with a timestamp newer than
-                * PRESENCE_OFFLINE_THRESHOLD_SECS; then of
+                * self.server_presence_offline_threshold_secs; then of
                 * those, return the one that has the greatest UserStatus, where
                 * `active` > `idle` > `offline`.
                 *
@@ -1215,7 +1229,9 @@ class Model:
                     timestamp = client[1]["timestamp"]
                     if client_name == "aggregated":
                         continue
-                    elif (time.time() - timestamp) < PRESENCE_OFFLINE_THRESHOLD_SECS:
+                    elif (
+                        time.time() - timestamp
+                    ) < self.server_presence_offline_threshold_secs:
                         if status == "active":
                             aggregate_status = "active"
                         if status == "idle" and aggregate_status != "active":
