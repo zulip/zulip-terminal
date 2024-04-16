@@ -305,7 +305,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'SEARCH_EMOJIS': {
         'keys': ['p'],
         'help_text': 'Search emojis from emoji picker',
-        'excluded_from_random_tips': True,
         'key_category': 'searching',
         'key_contexts': ['emoji_list'],
     },
@@ -356,7 +355,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'EDIT_HISTORY': {
         'keys': ['e'],
         'help_text': 'Show/hide edit history (from message information)',
-        'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
         'key_contexts': ['msg_info'],
     },
@@ -364,7 +362,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['v'],
         'help_text':
             'View current message in browser (from message information)',
-        'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
         'key_contexts': ['msg_info'],
     },
@@ -377,7 +374,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'STREAM_MEMBERS': {
         'keys': ['m'],
         'help_text': 'Show/hide stream members (from stream information)',
-        'excluded_from_random_tips': True,
         'key_category': 'stream_list',
         'key_contexts': ['stream_info'],
     },
@@ -385,7 +381,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['c'],
         'help_text':
             'Copy stream email to clipboard (from stream information)',
-        'excluded_from_random_tips': True,
         'key_category': 'stream_list',
         'key_contexts': ['stream_info'],
     },
