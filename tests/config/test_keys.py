@@ -76,23 +76,27 @@ def test_commands_for_random_tips(mocker: MockerFixture) -> None:
             "keys": ["a"],
             "help_text": "alpha",
             "key_category": "category 1",
+            "key_context": "context 1",
             "excluded_from_random_tips": True,
         },
         "BETA": {
             "keys": ["b"],
             "help_text": "beta",
             "key_category": "category 1",
+            "key_context": "context 1",
             "excluded_from_random_tips": False,
         },
         "GAMMA": {
             "keys": ["g"],
             "help_text": "gamma",
             "key_category": "category 1",
+            "key_context": "general",
         },
         "DELTA": {
             "keys": ["d"],
             "help_text": "delta",
             "key_category": "category 2",
+            "key_context": "context 2",
             "excluded_from_random_tips": True,
         },
     }
