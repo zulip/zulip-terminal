@@ -52,7 +52,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'GO_BACK': {
         'keys': ['esc'],
         'help_text': 'Go Back',
-        'excluded_from_random_tips': False,
         'key_category': 'general',
         'key_context': 'general',
     },
@@ -326,7 +325,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'EDIT_HISTORY': {
         'keys': ['e'],
         'help_text': 'Show/hide edit history (from message information)',
-        'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
         'key_context': 'msg_info_view',
     },
@@ -334,7 +332,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['v'],
         'help_text':
             'View current message in browser (from message information)',
-        'excluded_from_random_tips': True,
         'key_category': 'msg_actions',
         'key_context': 'msg_info_view',
     },
@@ -347,7 +344,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'STREAM_MEMBERS': {
         'keys': ['m'],
         'help_text': 'Show/hide stream members (from stream information)',
-        'excluded_from_random_tips': True,
         'key_category': 'stream_list',
         'key_context': 'stream_info_view',
     },
@@ -355,7 +351,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['c'],
         'help_text':
             'Copy stream email to clipboard (from stream information)',
-        'excluded_from_random_tips': True,
         'key_category': 'stream_list',
         'key_context': 'stream_info_view',
     },
