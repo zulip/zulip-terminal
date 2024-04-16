@@ -92,6 +92,7 @@ class TestView:
 
         view.frame.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is False
 
     def test_set_footer_text_specific_text(
         self, view: View, text: str = "blah"
@@ -100,6 +101,7 @@ class TestView:
 
         view.frame.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is True
 
     def test_set_footer_text_with_duration(
         self,
@@ -118,6 +120,7 @@ class TestView:
         )
         mock_sleep.assert_called_once_with(duration)
         assert view.controller.update_screen.call_count == 2
+        assert view._is_footer_event_running is False
 
     @pytest.mark.parametrize(
         "suggestions, state, truncated, footer_text",
