@@ -590,15 +590,21 @@ HELP_CONTEXTS: Dict[str, str] = {
 }
 
 
-def commands_for_random_tips() -> List[KeyBinding]:
+def commands_for_random_tips(context: str = "") -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
     """
-    return [
+    if not context or context not in HELP_CONTEXTS:
+        return commands_for_random_tips("general")
+    random_tips: List[KeyBinding] = [
         key_binding
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
+        and key_binding["key_context"] == context
     ]
+    if len(random_tips) == 0:
+        return commands_for_random_tips("general")
+    return random_tips
 
 
 # Refer urwid/command_map.py
