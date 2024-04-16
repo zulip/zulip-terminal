@@ -572,6 +572,24 @@ def primary_display_key_for_command(command: str) -> str:
     return display_key_for_urwid_key(primary_key_for_command(command))
 
 
+HELP_CONTEXTS: Dict[str, str] = {
+    "general": "General actions",
+    "editor": "Editor actions",  # urwid.Edit (PanelSearchBox)
+    "message_view_editor": "Message-column Editor actions",
+    # (MessageSearchBox, WriteBox) (overrides editor)
+    # Both editors in message_view use urwid_readline.ReadlineEdit
+    "write_box": "Compose-box actions",  # WriteBox
+    # (overrides message_view_editor and editor)
+    "stream_view": "Stream list actions",
+    "topic_view": "Topic list actions",
+    "user_view": "User list actions",
+    "message_view": "Message actions",
+    "stream_info_view": "Stream-Info Popup actions",
+    "msg_info_view": "Message-Info Popup actions",
+    "emoji_picker_view": "Emoji-picker Popup actions",
+}
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
