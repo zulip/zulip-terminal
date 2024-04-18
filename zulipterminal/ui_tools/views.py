@@ -1593,7 +1593,7 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
         )
-        msg_info = [
+        msg_info: PopUpViewTableContent = [
             (
                 "",
                 [
@@ -1603,6 +1603,9 @@ class MsgInfoView(PopUpView):
                 ],
             )
         ]
+
+        # msg_info is list thus allows append
+        assert isinstance(msg_info, list)
 
         # actions for message info popup
         viewing_actions = (
@@ -1629,7 +1632,18 @@ class MsgInfoView(PopUpView):
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
         if message_links:
-            msg_info.append(("Message Links", []))
+            interact_with_link_keys = "[{}]".format(
+                ", ".join(map(str, display_keys_for_command("ENTER")))
+            )
+            msg_info.append(
+                (
+                    (
+                        "Message Links",
+                        f"Interact with links {interact_with_link_keys}",
+                    ),
+                    [],
+                )
+            )
         if topic_links:
             msg_info.append(("Topic Links", []))
         if time_mentions:
