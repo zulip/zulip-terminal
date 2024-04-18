@@ -201,6 +201,11 @@ class TestPopUpView:
                 id="heading_widget_with_row",
             ),
             case([("", "")], [], id="widget_with_str"),
+            case(
+                [(("Message Links", "interact with links"), [])],
+                [Columns],
+                id="heading_widget_with_help_text",
+            ),
         ],
     )
     def test_make_table_with_categories__instances(

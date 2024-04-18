@@ -946,7 +946,9 @@ class TabView(urwid.WidgetWrap):
 
 # FIXME: This type could be improved, as Any isn't too explicit and clear.
 # (this was previously str, but some types passed in can be more complex)
-PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
+PopUpViewTableContent = Sequence[
+    Tuple[Union[str, Tuple[str, str]], Sequence[Union[str, Tuple[str, Any]]]]
+]
 
 
 class PopUpView(urwid.Frame):
@@ -1042,7 +1044,19 @@ class PopUpView(urwid.Frame):
             if category:
                 if len(widgets) > 0:  # Separate categories with newline.
                     widgets.append(urwid.Text(""))
-                widgets.append(urwid.Text(("popup_category", category)))
+                if isinstance(category, tuple):
+                    label, data = category
+                    widgets.append(
+                        urwid.Columns(
+                            [
+                                urwid.Text(("popup_category", label)),
+                                urwid.Text(("popup_category", f"{data} "), "right"),
+                            ],
+                            dividechars=dividechars,
+                        )
+                    )
+                else:
+                    widgets.append(urwid.Text(("popup_category", category)))
             for index, row in enumerate(content):
                 if isinstance(row, str) and row:
                     widgets.append(urwid.Text(row))
