@@ -1951,12 +1951,21 @@ class FullRawMsgView(PopUpView):
         msg_box = MessageBox(message, controller.model, None)
 
         # Get raw message content widget list
-        response = controller.model.fetch_raw_message_content(message["id"])
-
-        if response is None:
-            return
-
-        body_list = [urwid.Text(response)]
+        response = ("",)
+        try:
+            response = controller.model.fetch_raw_message_content(message["id"])
+            body_list = [urwid.Text(response)]
+        except Exception:
+            response = (
+                "An exception occurred:"
+                + "\n"
+                + "The application should continue functioning, but you "
+                + "may notice inconsistent behavior in this session.",
+            )
+            body_list = [urwid.Text(("area:error", response[0]))]
+            # response = ("area:error","Connection timed out. \nPlease try again later")
+            msg_box.header = []
+            msg_box.footer = []
 
         super().__init__(
             controller,
