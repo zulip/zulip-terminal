@@ -1516,6 +1516,20 @@ class TestModel:
                 None,
                 True,
             ),
+            (
+                {
+                    "result": "success",
+                    "raw_content": "An exception occurred:"
+                    + "\n"
+                    + "The application should continue functioning, but you "
+                    + "may notice inconsistent behavior in this session.",
+                },
+                "An exception occurred:"
+                + "\n"
+                + "The application should continue functioning, but you "
+                + "may notice inconsistent behavior in this session.",
+                False,
+            ),
         ],
     )
     def test_fetch_raw_message_content(
@@ -1527,11 +1541,14 @@ class TestModel:
         display_error_called,
         message_id=1,
     ):
-        self.client.get_raw_message.return_value = response
+        self.client.call_endpoint.return_value = response
 
         return_value = model.fetch_raw_message_content(message_id)
 
-        self.client.get_raw_message.assert_called_once_with(message_id)
+        self.client.call_endpoint.assert_called_once_with(
+            f"/messages/{message_id}", method="GET", timeout=5
+        )
+        # self.client.get_raw_message.assert_called_once_with(message_id)
         assert self.display_error_if_present.called == display_error_called
         assert return_value == expected_raw_content
 
