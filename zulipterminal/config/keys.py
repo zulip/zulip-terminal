@@ -220,7 +220,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_context': 'stream_view',
     },
     'ALL_MESSAGES': {
-        'keys': ['a', 'esc'],
+        'keys': ['a'],
         'help_text': 'Narrow to all messages',
         'key_category': 'navigation',
         'key_context': 'general',
