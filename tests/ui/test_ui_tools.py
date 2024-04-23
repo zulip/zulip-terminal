@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Callable, Tuple
+from typing import Callable, List, Tuple, Union
 from unittest.mock import PropertyMock
 
 import pytest
@@ -1311,6 +1311,62 @@ class TestLeftColumnView:
         mocker.patch("zulipterminal.ui.View.show_left_panel")
         left_col_view.keypress(size, key)
         context.assert_called_once_with("message_view")
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
+    @pytest.mark.parametrize(
+        "focus_path_value, update_context",
+        [
+            case([1, "body", 1, 1, 0], True, id="first_stream_button__autohide"),
+            case([1, 1, 0], True, id="first_stream_button__non_autohide"),
+            case([1, 1, 3], False, id="not_first_stream_button"),
+            case([1, "body", 1, 0, 3], False, id="menu_button__autohide"),
+            case([1, 0, 0], False, id="first_menu_button"),
+        ],
+    )
+    def test_keypress_GO_UP(
+        self,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key: str,
+        focus_path_value: List[Union[int, str]],
+        update_context: bool,
+    ):
+        left_col_view, size, context = keypress_test_setup
+        self.view.frame.body.get_focus_path.return_value = focus_path_value
+
+        left_col_view.keypress(size, key)
+
+        assert self.view.frame.body.get_focus_path.call_count == 2
+        self.view.frame.body.get_focus_path.assert_called_with()
+        if update_context:
+            context.assert_called_once_with("menu_view")
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
+    @pytest.mark.parametrize(
+        "focus_path_value, update_context",
+        [
+            case([1, "body", 0, 1, 0], False, id="non_menu__autohide"),
+            case([0, 1, 3], False, id="fourth_stream_button"),
+            case([1, "body", 0, 0, 3], True, id="stream__autohide"),
+            case([0, 0, 3], True, id="stream__non_autohide"),
+            case([0, 0, 0], False, id="not_last_menu_button"),
+        ],
+    )
+    def test_keypress_GO_DOWN(
+        self,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key: str,
+        focus_path_value: List[Union[int, str]],
+        update_context: bool,
+    ):
+        left_col_view, size, context = keypress_test_setup
+        self.view.frame.body.get_focus_path.return_value = focus_path_value
+
+        left_col_view.keypress(size, key)
+
+        self.view.frame.body.get_focus_path.assert_called_with()
+        assert self.view.frame.body.get_focus_path.call_count == 2
+        if update_context:
+            context.assert_called_once_with("stream_view")
 
 
 class TestTabView:

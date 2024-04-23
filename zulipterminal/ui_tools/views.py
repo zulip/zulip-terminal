@@ -940,6 +940,18 @@ class LeftColumnView(urwid.Pile):
         elif is_command_key("GO_RIGHT", key):
             self.view.context = "message_view"
             self.view.show_left_panel(visible=False)
+        elif (
+            is_command_key("GO_UP", key)
+            and self.view.frame.body.get_focus_path()[-3] == 1
+            and self.view.frame.body.get_focus_path()[-1] == 0
+        ):
+            self.view.context = "menu_view"
+        elif (
+            is_command_key("GO_DOWN", key)
+            and self.view.frame.body.get_focus_path()[-3] == 0
+            and self.view.frame.body.get_focus_path()[-1] == 3
+        ):
+            self.view.context = "stream_view"
         return super().keypress(size, key)
 
 
