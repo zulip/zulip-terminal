@@ -780,6 +780,7 @@ class RightColumnView(urwid.Frame):
             self.view.controller.update_screen()
             return key
         elif is_command_key("GO_LEFT", key):
+            self.view.context = "message_view"
             self.view.show_right_panel(visible=False)
         return super().keypress(size, key)
 
@@ -937,6 +938,7 @@ class LeftColumnView(urwid.Pile):
                 self.view.stream_w.keypress(size, key)
             return key
         elif is_command_key("GO_RIGHT", key):
+            self.view.context = "message_view"
             self.view.show_left_panel(visible=False)
         return super().keypress(size, key)
 

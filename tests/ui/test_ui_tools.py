@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Callable
+from typing import Callable, Tuple
 from unittest.mock import PropertyMock
 
 import pytest
@@ -1168,6 +1168,22 @@ class TestRightColumnView:
         right_col_view.set_focus.assert_called_once_with("body")
         assert right_col_view.user_search.reset_search_text.called
 
+    @pytest.mark.parametrize("key", keys_for_command("GO_LEFT"))
+    def test_keypress_GO_LEFT(
+        self,
+        mocker: MockerFixture,
+        right_col_view: RightColumnView,
+        widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        key,
+    ) -> None:
+        size = widget_size(right_col_view)
+        mocker.patch("zulipterminal.ui.View.show_right_panel")
+        mocker.patch("urwid.Frame.keypress")
+        context = mock_context(right_col_view.view)
+        right_col_view.keypress(size, key)
+        context.assert_called_once_with("message_view")
+
 
 class TestLeftColumnView:
     @pytest.fixture(autouse=True)
@@ -1268,6 +1284,33 @@ class TestLeftColumnView:
                 for topic, count in zip(topic_list, unread_count_list)
             ]
         )
+
+    @pytest.fixture
+    def keypress_test_setup(
+        self,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> Tuple[LeftColumnView, urwid_Box, PropertyMock]:
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        left_col_view = LeftColumnView(self.view)
+        size = widget_size(left_col_view)
+        context = mock_context(left_col_view.view)
+        mocker.patch(VIEWS + ".LeftColumnView.contents")
+        mocker.patch("urwid.Pile.keypress")
+        return left_col_view, size, context
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_RIGHT"))
+    def test_keypress_GO_RIGHT(
+        self,
+        mocker: MockerFixture,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key,
+    ) -> None:
+        left_col_view, size, context = keypress_test_setup
+        mocker.patch("zulipterminal.ui.View.show_left_panel")
+        left_col_view.keypress(size, key)
+        context.assert_called_once_with("message_view")
 
 
 class TestTabView:
