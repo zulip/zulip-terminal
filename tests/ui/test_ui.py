@@ -138,6 +138,40 @@ class TestView:
             view.frame.footer.set_text.assert_called_once_with(["some help text"])
             view.controller.update_screen.assert_called_once_with()
 
+    def test_update_context_non_empty(self, view: View, mocker: MockerFixture) -> None:
+        mock_set_footer_text = mocker.patch.object(view, "set_footer_text")
+        view._update_context("msg_info_view")
+        assert view._context == "msg_info_view"
+        mock_set_footer_text.assert_called_once_with(context_change=True)
+
+    @pytest.mark.parametrize(
+        "focus_position, panel_focus_position, context",
+        [
+            (0, 0, "general"),
+            (0, 1, "stream_view"),
+            (1, 0, "message_view"),
+            (2, 1, "user_view"),
+        ],
+    )
+    def test_update_context_empty(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        focus_position: int,
+        panel_focus_position: int,
+        context: str,
+    ) -> None:
+        mock_set_footer_text = mocker.patch.object(view, "set_footer_text")
+        mocker.patch.object(
+            view.frame.body,
+            "get_focus_path",
+            return_value=["body", focus_position, panel_focus_position, 0, 2],
+        )
+        view.body.focus_position = focus_position
+        view._update_context("")
+        assert view._context == context
+        mock_set_footer_text.assert_called_once_with(context_change=True)
+
     @pytest.mark.parametrize(
         "suggestions, state, truncated, footer_text",
         [

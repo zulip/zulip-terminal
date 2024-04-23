@@ -147,8 +147,20 @@ class View(urwid.WidgetWrap):
             self.set_footer_text()
 
     @asynch
-    def _update_context(self, context_value: str) -> None:
+    def _update_context(self, context_value: str = "") -> None:
         self._context = context_value
+        if self._context == "":
+            if self.body.focus_position == 2:
+                self._context = "user_view"
+            elif self.body.focus_position == 1:
+                self._context = "message_view"
+            elif (
+                self.body.focus_position == 0
+                and self.frame.body.get_focus_path()[-3] == 1
+            ):
+                self._context = "stream_view"
+            else:
+                self._context = "general"
         self.set_footer_text(context_change=True)
 
     context = property(lambda self: self._context, _update_context)
