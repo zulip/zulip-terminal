@@ -1,9 +1,12 @@
 from collections import OrderedDict
+from typing import Callable
+from unittest.mock import PropertyMock
 
 import pytest
 import urwid
 from pytest import param as case
-from urwid import Divider
+from pytest_mock import MockerFixture
+from urwid import Divider, Widget
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import STATUS_ACTIVE
@@ -854,13 +857,22 @@ class TestMiddleColumnView:
         self.super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
-    def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_SEARCH_MESSAGES(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch(MIDCOLVIEW + ".set_focus")
+        context = mock_context(mid_col_view.view)
 
         mid_col_view.keypress(size, key)
 
+        context.assert_called_once_with("message_view_editor")
         mid_col_view.controller.enter_editor_mode_with.assert_called_once_with(
             mid_col_view.search_box
         )
