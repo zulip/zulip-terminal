@@ -1,5 +1,6 @@
 import os
 import webbrowser
+from collections import OrderedDict
 from platform import platform
 from threading import Thread, Timer
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
@@ -11,6 +12,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
@@ -664,3 +666,39 @@ class TestController:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
         assert controller.active_conversation_info == {}
+
+    def test_show_stream_info(
+        self,
+        controller: Controller,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        stream_id: int = 205,
+    ) -> None:
+        context = mock_context(controller.view)
+        stream_view = mocker.patch(MODULE + ".StreamInfoView")
+        pop_up = mocker.patch(MODULE + ".Controller.show_pop_up")
+
+        controller.show_stream_info(stream_id)
+
+        stream_view.assert_called_once_with(controller, stream_id)
+        context.assert_called_once_with("stream_info_view")
+        pop_up.assert_called_once_with(stream_view(), "area:stream")
+
+    def test_show_msg_info(
+        self,
+        controller: Controller,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        message_fixture: Message,
+    ) -> None:
+        context = mock_context(controller.view)
+        msg_view = mocker.patch(MODULE + ".MsgInfoView")
+        pop_up = mocker.patch(MODULE + ".Controller.show_pop_up")
+        topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
+        message_links = OrderedDict([("image.jpg", ("image", 1, True))])
+
+        controller.show_msg_info(message_fixture, topic_links, message_links, list())
+
+        msg_view.assert_called_once()
+        context.assert_called_once_with("msg_info_view")
+        pop_up.assert_called_once_with(msg_view(), "area:msg")

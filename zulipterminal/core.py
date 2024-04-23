@@ -279,6 +279,7 @@ class Controller:
             message_links,
             time_mentions,
         )
+        self.view.context = "msg_info_view"
         self.show_pop_up(msg_info_view, "area:msg")
 
     def show_emoji_picker(self, message: Message) -> None:
@@ -293,6 +294,7 @@ class Controller:
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
+        self.view.context = "stream_info_view"
         self.show_pop_up(show_stream_view, "area:stream")
 
     def show_stream_members(self, stream_id: int) -> None:
