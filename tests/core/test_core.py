@@ -614,6 +614,19 @@ class TestController:
 
         assert popup_size == expected_popup_size
 
+    def test_exit_popup(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
+        context = mock_context(controller.view)
+
+        controller.loop = mocker.Mock()
+        controller.exit_popup()
+
+        context.assert_called_once_with("")
+
     @pytest.mark.parametrize(
         "active_conversation_info",
         [

@@ -250,6 +250,7 @@ class Controller:
         return isinstance(self.loop.widget, urwid.Overlay)
 
     def exit_popup(self) -> None:
+        self.view.context = ""
         self.loop.widget = self.view
 
     def show_help(self) -> None:
