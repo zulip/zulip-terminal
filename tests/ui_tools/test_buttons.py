@@ -1,4 +1,5 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from unittest.mock import PropertyMock
 
 import pytest
 from pytest import param as case
@@ -233,11 +234,15 @@ class TestStreamButton:
         stream_button: StreamButton,
         key: str,
         widget_size: Callable[[Widget], urwid_Size],
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
+        context = mock_context(stream_button.view)
+
         size = widget_size(stream_button)
         stream_button.view.left_panel = mocker.Mock()
         stream_button.keypress(size, key)
 
+        context.assert_called_with("topic_view")
         stream_button.view.left_panel.show_topic_view.assert_called_once_with(
             stream_button
         )
@@ -517,10 +522,13 @@ class TestTopicButton:
         topic_button: TopicButton,
         key: str,
         widget_size: Callable[[Widget], urwid_Size],
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
         size = widget_size(topic_button)
         topic_button.view.left_panel = mocker.Mock()
+        context = mock_context(topic_button.view)
         topic_button.keypress(size, key)
+        context.assert_called_with("stream_view")
         topic_button.view.left_panel.show_stream_view.assert_called_once_with()
 
 
