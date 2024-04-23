@@ -1,4 +1,5 @@
 from typing import Any, Callable, List, Optional
+from unittest.mock import PropertyMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -352,22 +353,37 @@ class TestView:
 
         super_keypress.assert_called_once_with(size, navigation_key)
 
-    @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
-    def test_keypress_ALL_MENTIONS(
+    @pytest.mark.parametrize(
+        "command, button_attr",
+        [
+            ("ALL_MENTIONS", "mentioned_button"),
+            ("ALL_STARRED", "starred_button"),
+            ("ALL_PM", "pm_button"),
+        ],
+    )
+    def test_keypress_menu_buttons(
         self,
         view: View,
         mocker: MockerFixture,
-        key: str,
         widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        command: str,
+        button_attr: str,
     ) -> None:
-        view.mentioned_button = mocker.Mock()
-        view.mentioned_button.activate = mocker.Mock()
+        button = mocker.Mock()
+        setattr(view, button_attr, button)
+        context = mock_context(view)
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
 
-        view.keypress(size, key)
+        for key in keys_for_command(command):
+            view.keypress(size, key)
 
-        view.mentioned_button.activate.assert_called_once_with(key)
+            context.assert_called_once_with("message_view")
+            button.activate.assert_called_once_with(key)
+
+            context.reset_mock()
+            button.activate.reset_mock()
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])

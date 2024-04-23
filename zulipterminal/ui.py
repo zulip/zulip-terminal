@@ -296,10 +296,13 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
+            self.context = "message_view"
             self.pm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
+            self.context = "message_view"
             self.starred_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
+            self.context = "message_view"
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
