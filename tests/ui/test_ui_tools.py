@@ -874,7 +874,7 @@ class TestMiddleColumnView:
 
         context.assert_called_once_with("message_view_editor")
         mid_col_view.controller.enter_editor_mode_with.assert_called_once_with(
-            mid_col_view.search_box
+            mid_col_view.search_box, is_readline_editor=True
         )
         mid_col_view.set_focus.assert_called_once_with("header")
 

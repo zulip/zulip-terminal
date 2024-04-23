@@ -135,11 +135,16 @@ class Controller:
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
 
-    def enter_editor_mode_with(self, editor: Any) -> None:
+    def enter_editor_mode_with(
+        self, editor: Any, is_readline_editor: bool = False
+    ) -> None:
         assert self._editor is None, "Already in editor mode"
+        if not is_readline_editor:
+            self.view.context = "editor"
         self._editor = editor
 
     def exit_editor_mode(self) -> None:
+        self.view.context = ""
         self._editor = None
 
     def current_editor(self) -> Any:

@@ -576,7 +576,10 @@ class MiddleColumnView(urwid.Frame):
 
         elif is_command_key("SEARCH_MESSAGES", key):
             self.view.context = "message_view_editor"
-            self.controller.enter_editor_mode_with(self.search_box)
+            self.controller.enter_editor_mode_with(
+                self.search_box,
+                is_readline_editor=True,
+            )
             self.set_focus("header")
             return key
 

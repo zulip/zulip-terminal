@@ -2,12 +2,14 @@ import os
 import webbrowser
 from platform import platform
 from threading import Thread, Timer
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from unittest.mock import PropertyMock
 
 import pyperclip
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
+from urwid import Widget
 
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
@@ -96,9 +98,13 @@ class TestController:
             controller.current_editor()
 
     def test_editor_mode_entered_from_initial(
-        self, mocker: MockerFixture, controller: Controller
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
         editor = mocker.Mock()
+        mock_context(controller.view)
 
         controller.enter_editor_mode_with(editor)
 
@@ -106,19 +112,56 @@ class TestController:
         assert controller.current_editor() == editor
 
     def test_editor_mode_error_on_multiple_enter(
-        self, mocker: MockerFixture, controller: Controller
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
+        mock_context(controller.view)
+
         controller.enter_editor_mode_with(mocker.Mock())
 
         with pytest.raises(AssertionError):
             controller.enter_editor_mode_with(mocker.Mock())
 
-    def test_editor_mode_exits_after_entering(
-        self, mocker: MockerFixture, controller: Controller
+    @pytest.mark.parametrize(
+        "is_readline_editor, expected_context",
+        [
+            (False, "editor"),
+            (True, None),
+        ],
+    )
+    def test_enter_editor_mode_with_different_readline_editor_values(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        is_readline_editor: bool,
+        expected_context: Optional[str],
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
-        controller.enter_editor_mode_with(mocker.Mock())
-        controller.exit_editor_mode()
+        context = mock_context(controller.view)
 
+        controller.enter_editor_mode_with(
+            editor=mocker.Mock(), is_readline_editor=is_readline_editor
+        )
+
+        if expected_context is not None:
+            context.assert_called_once_with(expected_context)
+        else:
+            context.assert_not_called()
+
+    def test_editor_mode_exits_after_entering(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
+        context = mock_context(controller.view)
+
+        controller.enter_editor_mode_with(mocker.Mock(), is_readline_editor=False)
+        context.assert_called_with("editor")
+        controller.exit_editor_mode()
+        context.assert_called_with("")
         assert not controller.is_in_editor_mode()
 
     def test_narrow_to_stream(
