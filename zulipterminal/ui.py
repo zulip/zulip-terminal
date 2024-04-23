@@ -49,6 +49,7 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
         self.stream_topic_map: Dict[int, str] = {}
+        self._context: str = "general"
         self._is_footer_event_running: bool = False
 
         self.message_view: Any = None
@@ -103,7 +104,7 @@ class View(urwid.WidgetWrap):
 
     def get_random_help(self) -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
-        allowed_commands = commands_for_random_tips()
+        allowed_commands = commands_for_random_tips(self.context)
         if not allowed_commands:
             return ["Help(?): "]
         random_command = random.choice(allowed_commands)
@@ -122,9 +123,12 @@ class View(urwid.WidgetWrap):
         text_list: Optional[List[Any]] = None,
         style: str = "footer",
         duration: Optional[float] = None,
+        context_change: Optional[bool] = False,
     ) -> None:
         # Avoid updating repeatedly (then pausing and showing default text)
         # This is simple, though doesn't avoid starting one thread for each call
+        if context_change and self._is_footer_event_running:
+            return
         if text_list == self._w.footer.text:
             return
 
@@ -141,6 +145,13 @@ class View(urwid.WidgetWrap):
             assert duration > 0
             time.sleep(duration)
             self.set_footer_text()
+
+    @asynch
+    def _update_context(self, context_value: str) -> None:
+        self._context = context_value
+        self.set_footer_text(context_change=True)
+
+    context = property(lambda self: self._context, _update_context)
 
     @asynch
     def set_typeahead_footer(
