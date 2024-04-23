@@ -651,6 +651,13 @@ class MiddleColumnView(urwid.Frame):
             return key
         elif is_command_key("GO_LEFT", key):
             self.view.show_left_panel(visible=True)
+            if self.view.frame.body.get_focus_path()[-3] == 1:
+                if self.view.left_panel.is_in_topic_view:
+                    self.view.context = "topic_view"
+                else:
+                    self.view.context = "stream_view"
+            else:
+                self.view.context = "general"
         elif is_command_key("GO_RIGHT", key):
             self.view.context = "user_view"
             self.view.show_right_panel(visible=True)

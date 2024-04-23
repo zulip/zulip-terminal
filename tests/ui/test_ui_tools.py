@@ -996,19 +996,36 @@ class TestMiddleColumnView:
         assert return_value == key
 
     @pytest.mark.parametrize(
-        "key, expected_context", [(primary_key_for_command("GO_RIGHT"), "user_view")]
+        "key, focus_path, is_in_topic_view, expected_context",
+        [
+            (
+                primary_key_for_command("GO_LEFT"),
+                [1, "body", 1, 0, 1],
+                False,
+                "stream_view",
+            ),
+            (primary_key_for_command("GO_LEFT"), [1, 1, 13], True, "topic_view"),
+            (primary_key_for_command("GO_LEFT"), [1, "body", 0, 0, 3], True, "general"),
+            (primary_key_for_command("GO_RIGHT"), [1, 1, 7], False, "user_view"),
+        ],
     )
-    def test_keypress_GO_RIGHT(
+    def test_keypress_GO_LEFT_OR_GO_RIGHT(
         self,
         mocker: MockerFixture,
         mid_col_view: MiddleColumnView,
         widget_size: Callable[[Widget], urwid_Box],
         mock_context: Callable[[Widget], PropertyMock],
-        key,
-        expected_context,
+        key: str,
+        focus_path,
+        is_in_topic_view: bool,
+        expected_context: str,
     ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch.object(
+            mid_col_view.view.frame.body, "get_focus_path", return_value=focus_path
+        )
+        mid_col_view.view.left_panel.is_in_topic_view = is_in_topic_view
         context = mock_context(mid_col_view.view)
         mid_col_view.keypress(size, key)
         context.assert_called_once_with(expected_context)
