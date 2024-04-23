@@ -24,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     TopicsView,
     UsersView,
 )
+from zulipterminal.urwid_types import urwid_Box
 
 
 SUBDIR = "zulipterminal.ui_tools"
@@ -993,6 +994,24 @@ class TestMiddleColumnView:
         mid_col_view.footer.private_box_view.assert_called_once_with()
         assert mid_col_view.footer.focus_position == 0
         assert return_value == key
+
+    @pytest.mark.parametrize(
+        "key, expected_context", [(primary_key_for_command("GO_RIGHT"), "user_view")]
+    )
+    def test_keypress_GO_RIGHT(
+        self,
+        mocker: MockerFixture,
+        mid_col_view: MiddleColumnView,
+        widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        key,
+        expected_context,
+    ) -> None:
+        size = widget_size(mid_col_view)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        context = mock_context(mid_col_view.view)
+        mid_col_view.keypress(size, key)
+        context.assert_called_once_with(expected_context)
 
 
 class TestRightColumnView:
