@@ -1,6 +1,7 @@
 import datetime
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional
+from unittest.mock import PropertyMock
 
 import pytest
 from pytest import param as case
@@ -225,10 +226,14 @@ class TestWriteBox:
         mocker: MockerFixture,
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
+        context = mock_context(write_box.view)
+
         write_box.model.send_private_message = mocker.Mock()
         write_box.private_box_view(recipient_user_ids=[])
         write_box.msg_write_box.edit_text = "random text"
+        context.assert_called_with("write_box")
 
         size = widget_size(write_box)
         write_box.keypress(size, key)

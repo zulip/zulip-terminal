@@ -142,6 +142,7 @@ class WriteBox(urwid.Pile):
             self.contents.clear()
 
     def set_editor_mode(self) -> None:
+        self.view.context = "write_box"
         self.view.controller.enter_editor_mode_with(self)
 
     def _set_regular_and_typing_recipient_user_ids(
