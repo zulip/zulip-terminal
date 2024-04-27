@@ -2124,11 +2124,25 @@ class EmojiPickerView(PopUpView):
             self.emoji_search.set_caption(" ")
             self.controller.enter_editor_mode_with(self.emoji_search)
             return key
-        elif is_command_key("GO_BACK", key) or is_command_key("ADD_REACTION", key):
+        elif is_command_key("ADD_REACTION", key):
             for emoji_code, emoji_name in self.selected_emojis.items():
                 self.controller.model.toggle_message_reaction(self.message, emoji_name)
             self.emoji_search.reset_search_text()
             self.controller.exit_editor_mode()
             self.controller.exit_popup()
+            return key
+        elif is_command_key("GO_BACK", key):
+            if self.controller.is_in_editor_mode():
+                if self.emoji_search.get_edit_text() == "":
+                    self.keypress(size, primary_key_for_command("ADD_REACTION"))
+                else:
+                    self.emoji_search.reset_search_text()
+            else:
+                selected_emoji_button = self.emojis_display[self.get_focus_path()[-1]]
+                if selected_emoji_button.is_selected(selected_emoji_button.emoji_name):
+                    self.keypress(size, primary_key_for_command("ADD_REACTION"))
+                else:
+                    self.set_focus("header")
+                    self.controller.enter_editor_mode_with(self.emoji_search)
             return key
         return super().keypress(size, key)
