@@ -1011,8 +1011,14 @@ class PopUpView(urwid.Frame):
         category_width = 0
         text_width = 0
         strip_widths = []
+        category_row_width = 0
         for category, content in contents:
             category_width = max(category_width, len(category))
+            if isinstance(category, tuple):
+                max_category_length = [
+                    len(max(text.split("\n"), key=len)) for text in category
+                ]
+                category_row_width = max(max_category_length)
             for row in content:
                 if isinstance(row, str):
                     # Measure the longest line if the text is separated by
@@ -1026,9 +1032,11 @@ class PopUpView(urwid.Frame):
                     ]
                     strip_widths.append(max_row_lengths)
         column_widths = [max(width) for width in zip(*strip_widths)]
-
         popup_width = max(
-            sum(column_widths) + dividechars, title_width, category_width, text_width
+            sum(column_widths, category_row_width) + dividechars,
+            title_width,
+            category_width,
+            text_width,
         )
         return (popup_width, column_widths)
 

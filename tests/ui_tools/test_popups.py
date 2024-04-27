@@ -203,6 +203,12 @@ class TestPopUpView:
                 id="heading_widget_with_row",
             ),
             case([("", "")], 17, [], id="widget_with_str"),
+            case(
+                [(("Message Links", "interact with links"), [])],
+                21,
+                [],
+                id="heading_widget_with_help_text",
+            ),
         ],
     )
     def test_calculate_table_widths(
