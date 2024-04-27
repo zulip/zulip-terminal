@@ -183,6 +183,43 @@ class TestPopUpView:
     @pytest.mark.parametrize(
         [
             "contents",
+            "expected_popup_width",
+            "expected_column_width",
+        ],
+        [
+            case(
+                [
+                    (
+                        "Viewing Actions",
+                        [
+                            ("Open in web browser", "[]"),
+                            ("Full rendered message", "[]"),
+                            ("Full raw message", "[]"),
+                        ],
+                    )
+                ],
+                25,
+                [21, 2],
+                id="heading_widget_with_row",
+            ),
+            case([("", "")], 17, [], id="widget_with_str"),
+        ],
+    )
+    def test_calculate_table_widths(
+        self,
+        contents: PopUpViewTableContent,
+        expected_popup_width: int,
+        expected_column_width: List[int],
+    ) -> None:
+        popup_width, column_width = self.pop_up_view.calculate_table_widths(
+            contents, len(self.title)
+        )
+        assert popup_width == expected_popup_width
+        assert column_width == expected_column_width
+
+    @pytest.mark.parametrize(
+        [
+            "contents",
             "expected_widget_type",
         ],
         [
