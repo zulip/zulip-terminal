@@ -26,6 +26,8 @@
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
 |Trigger the selected entry|<kbd>Enter</kbd> / <kbd>Space</kbd>|
+|Go to previous help category|<kbd>p</kbd>|
+|Go to next help category|<kbd>n</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
 |Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
