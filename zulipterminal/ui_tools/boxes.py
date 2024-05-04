@@ -964,7 +964,7 @@ class MessageSearchBox(urwid.Pile):
         return key
 
 
-class PanelSearchBox(urwid.Edit):
+class PanelSearchBox(ReadlineEdit):
     """
     Search Box to search panel views in real-time.
     """
