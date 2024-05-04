@@ -682,7 +682,7 @@ class RightColumnView(urwid.Frame):
             user_list is not None and search_box is None and new_text is None
         )  # _start_presence_updates.
 
-        # Return if the method is called by PanelSearchBox (urwid.Edit) while
+        # Return if the method is called by PanelSearchBox (ReadlineEdit) while
         # the search is inactive and user_list is None.
         # NOTE: The additional not user_list check is to not false trap
         # _start_presence_updates but allow it to update the user list.
