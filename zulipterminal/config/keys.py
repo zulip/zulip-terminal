@@ -18,6 +18,7 @@ from urwid.command_map import (
 
 
 READLINE_SUFFIX = "_READLINE"
+GENERAL_TERMINAL_SUFFIX = "_GENERAL_TERMINAL"
 
 
 class KeyBinding(TypedDict):
@@ -308,12 +309,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'excluded_from_random_tips': True,
         'key_category': 'stream_list',
     },
-    'REDRAW': {
+    'REDRAW' + GENERAL_TERMINAL_SUFFIX: {
         'keys': ['ctrl l'],
         'help_text': 'Redraw screen',
         'key_category': 'general',
     },
-    'QUIT': {
+    'QUIT' + GENERAL_TERMINAL_SUFFIX: {
         'keys': ['ctrl c'],
         'help_text': 'Quit',
         'key_category': 'general',

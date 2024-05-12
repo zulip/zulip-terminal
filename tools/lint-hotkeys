@@ -11,7 +11,10 @@ from zulipterminal.config.keys import (
     KEY_BINDINGS,
     display_keys_for_command,
 )
-from zulipterminal.config.regexes import REGEX_READLINE_COMMANDS
+from zulipterminal.config.regexes import (
+    REGEX_READLINE_COMMANDS,
+    REGEX_TERMINAL_COMMANDS,
+)
 
 
 # absolute path to zulip-terminal
@@ -51,6 +54,11 @@ def lint_all_external_commands() -> None:
         regex_pattern=REGEX_READLINE_COMMANDS,
         command_type="Urwid Readline",
         suffix="READLINE_SUFFIX",
+    )
+    lint_external_commands_by_type(
+        regex_pattern=REGEX_TERMINAL_COMMANDS,
+        command_type="General terminal",
+        suffix="GENERAL_TERMINAL_SUFFIX",
     )
     print("All external commands have been linted successfully.")
 
