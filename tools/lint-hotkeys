@@ -11,13 +11,18 @@ from zulipterminal.config.keys import (
     KEY_BINDINGS,
     display_keys_for_command,
 )
+from zulipterminal.config.regexes import REGEX_READLINE_COMMANDS
 
 
-KEYS_FILE = (
-    Path(__file__).resolve().parent.parent / "zulipterminal" / "config" / "keys.py"
-)
+# absolute path to zulip-terminal
+ROOT_DIRECTORY = Path(__file__).resolve().parent.parent
+
+# absolute path to zulip-terminal/zulipterminal to be passed as parameter
+ZULIPTERMINAL = ROOT_DIRECTORY / "zulipterminal"
+
+KEYS_FILE = ZULIPTERMINAL / "config" / "keys.py"
 KEYS_FILE_NAME = KEYS_FILE.name
-OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
+OUTPUT_FILE = ROOT_DIRECTORY / "docs" / "hotkeys.md"
 OUTPUT_FILE_NAME = OUTPUT_FILE.name
 SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
@@ -25,12 +30,62 @@ HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 # Exclude keys from duplicate keys checking
 KEYS_TO_EXCLUDE = ["q", "e", "m", "r"]
 
+# Exclude files from being checked for external command usage
+EXCLUDED_FILES = [
+    KEYS_FILE,
+    ZULIPTERMINAL / "config" / "regexes.py",
+]
+
 
 def main(fix: bool) -> None:
+    lint_all_external_commands()
     if fix:
         generate_hotkeys_file()
     else:
         lint_hotkeys_file()
+
+
+def lint_all_external_commands() -> None:
+    lint_external_commands_by_type(
+        regex_pattern=REGEX_READLINE_COMMANDS,
+        command_type="Urwid Readline",
+        suffix="READLINE_SUFFIX",
+    )
+    print("All external commands have been linted successfully.")
+
+
+def lint_external_commands_by_type(
+    regex_pattern: str, command_type: str, suffix: str
+) -> None:
+    """
+    Lint src directory for the usage of external commands
+    in the codebase by checking for their regex
+    """
+    error_flag = 0
+    for file_path in ZULIPTERMINAL.rglob("*.py"):
+        if file_path in EXCLUDED_FILES:
+            continue
+        with file_path.open() as f:
+            contents = f.read()
+            regex_matches = re.finditer(regex_pattern, contents)
+            suffix_matches = re.finditer(suffix, contents)
+            count_matches = sum(1 for _ in regex_matches) + sum(
+                1 for _ in suffix_matches
+            )
+            if count_matches > 0:
+                print(
+                    f"{file_path.name} contains {count_matches} mentions of {command_type} commands."
+                )
+                error_flag = 1
+    if error_flag == 1:
+        print(
+            f"{command_type} commands are not intended for direct use or modification."
+        )
+        print(
+            f"Please refer to {KEYS_FILE_NAME} for identifying the {command_type} commands."
+        )
+        print("Rerun this command after removing the usage of external commands.")
+        sys.exit(error_flag)
 
 
 def lint_hotkeys_file() -> None:
