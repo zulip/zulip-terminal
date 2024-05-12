@@ -5,14 +5,14 @@
 ## General
 |Command|Key Combination|
 | :--- | :---: |
-|Show/hide help menu|<kbd>?</kbd>|
-|Show/hide markdown help menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
-|Show/hide about menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
-|Go Back|<kbd>Esc</kbd>|
+|Show/hide Help Menu|<kbd>?</kbd>|
+|Show/hide Markdown Help Menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
+|Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
+|Go back|<kbd>Esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
-|View user information (From Users list)|<kbd>i</kbd>|
+|View user information (from users list)|<kbd>i</kbd>|
 
 ## Navigation
 |Command|Key Combination|
@@ -35,11 +35,11 @@
 ## Searching
 |Command|Key Combination|
 | :--- | :---: |
-|Search Users|<kbd>w</kbd>|
-|Search Messages|<kbd>/</kbd>|
-|Search Streams|<kbd>q</kbd>|
+|Search users|<kbd>w</kbd>|
+|Search messages|<kbd>/</kbd>|
+|Search streams|<kbd>q</kbd>|
 |Search topics in a stream|<kbd>q</kbd>|
-|Search emojis from Emoji-picker popup|<kbd>p</kbd>|
+|Search emojis from emoji picker popup|<kbd>p</kbd>|
 
 ## Message actions
 |Command|Key Combination|
@@ -51,7 +51,7 @@
 |Edit message's content or topic|<kbd>e</kbd>|
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
-|Show/hide Emoji picker popup for current message|<kbd>:</kbd>|
+|Show/hide emoji picker popup for current message|<kbd>:</kbd>|
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
 |Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
@@ -69,7 +69,7 @@
 |Command|Key Combination|
 | :--- | :---: |
 |Toggle topics in a stream|<kbd>t</kbd>|
-|Mute/unmute Streams|<kbd>m</kbd>|
+|Mute/unmute streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
 |Show/hide stream members (from stream information)|<kbd>m</kbd>|
 |Copy stream email to clipboard (from stream information)|<kbd>c</kbd>|

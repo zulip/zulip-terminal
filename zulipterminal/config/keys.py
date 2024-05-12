@@ -31,23 +31,23 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
 
     'HELP': {
         'keys': ['?'],
-        'help_text': 'Show/hide help menu',
+        'help_text': 'Show/hide Help Menu',
         'excluded_from_random_tips': True,
         'key_category': 'general',
     },
     'MARKDOWN_HELP': {
         'keys': ['meta m'],
-        'help_text': 'Show/hide markdown help menu',
+        'help_text': 'Show/hide Markdown Help Menu',
         'key_category': 'general',
     },
     'ABOUT': {
         'keys': ['meta ?'],
-        'help_text': 'Show/hide about menu',
+        'help_text': 'Show/hide About Menu',
         'key_category': 'general',
     },
     'GO_BACK': {
         'keys': ['esc'],
-        'help_text': 'Go Back',
+        'help_text': 'Go back',
         'excluded_from_random_tips': False,
         'key_category': 'general',
     },
@@ -154,7 +154,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'ADD_REACTION': {
         'keys': [':'],
-        'help_text': 'Show/hide Emoji picker popup for current message',
+        'help_text': 'Show/hide emoji picker popup for current message',
         'key_category': 'msg_actions',
     },
     'STREAM_NARROW': {
@@ -220,17 +220,17 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'SEARCH_PEOPLE': {
         'keys': ['w'],
-        'help_text': 'Search Users',
+        'help_text': 'Search users',
         'key_category': 'searching',
     },
     'SEARCH_MESSAGES': {
         'keys': ['/'],
-        'help_text': 'Search Messages',
+        'help_text': 'Search messages',
         'key_category': 'searching',
     },
     'SEARCH_STREAMS': {
         'keys': ['q'],
-        'help_text': 'Search Streams',
+        'help_text': 'Search streams',
         'key_category': 'searching',
     },
     'SEARCH_TOPICS': {
@@ -240,13 +240,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'SEARCH_EMOJIS': {
         'keys': ['p'],
-        'help_text': 'Search emojis from Emoji-picker popup',
+        'help_text': 'Search emojis from emoji picker popup',
         'excluded_from_random_tips': True,
         'key_category': 'searching',
     },
     'TOGGLE_MUTE_STREAM': {
         'keys': ['m'],
-        'help_text': 'Mute/unmute Streams',
+        'help_text': 'Mute/unmute streams',
         'key_category': 'stream_list',
     },
     'ENTER': {
@@ -317,7 +317,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'USER_INFO': {
         'keys': ['i'],
-        'help_text': 'View user information (From Users list)',
+        'help_text': 'View user information (from users list)',
         'key_category': 'general',
     },
     'BEGINNING_OF_LINE': {
