@@ -154,7 +154,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'ADD_REACTION': {
         'keys': [':'],
-        'help_text': 'Show/hide emoji picker popup for current message',
+        'help_text': 'Show/hide emoji picker for current message',
         'key_category': 'msg_actions',
     },
     'STREAM_NARROW': {
@@ -240,7 +240,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'SEARCH_EMOJIS': {
         'keys': ['p'],
-        'help_text': 'Search emojis from emoji picker popup',
+        'help_text': 'Search emojis from emoji picker',
         'excluded_from_random_tips': True,
         'key_category': 'searching',
     },
@@ -256,12 +256,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'THUMBS_UP': {
         'keys': ['+'],
-        'help_text': 'Add/remove thumbs-up reaction to the current message',
+        'help_text': 'Toggle thumbs-up reaction to the current message',
         'key_category': 'msg_actions',
     },
     'TOGGLE_STAR_STATUS': {
         'keys': ['ctrl s', '*'],
-        'help_text': 'Add/remove star status of the current message',
+        'help_text': 'Toggle star status of the current message',
         'key_category': 'msg_actions',
     },
     'MSG_INFO': {
@@ -317,7 +317,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'USER_INFO': {
         'keys': ['i'],
-        'help_text': 'View user information (from users list)',
+        'help_text': 'Show/hide user information (from users list)',
         'key_category': 'general',
     },
     'BEGINNING_OF_LINE': {

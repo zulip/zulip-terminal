@@ -12,7 +12,7 @@
 |Open draft message saved in this session|<kbd>d</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
-|View user information (from users list)|<kbd>i</kbd>|
+|Show/hide user information (from users list)|<kbd>i</kbd>|
 
 ## Navigation
 |Command|Key Combination|
@@ -39,7 +39,7 @@
 |Search messages|<kbd>/</kbd>|
 |Search streams|<kbd>q</kbd>|
 |Search topics in a stream|<kbd>q</kbd>|
-|Search emojis from emoji picker popup|<kbd>p</kbd>|
+|Search emojis from emoji picker|<kbd>p</kbd>|
 
 ## Message actions
 |Command|Key Combination|
@@ -51,13 +51,13 @@
 |Edit message's content or topic|<kbd>e</kbd>|
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
-|Show/hide emoji picker popup for current message|<kbd>:</kbd>|
+|Show/hide emoji picker for current message|<kbd>:</kbd>|
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
 |Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Toggle first emoji reaction on selected message|<kbd>=</kbd>|
-|Add/remove thumbs-up reaction to the current message|<kbd>+</kbd>|
-|Add/remove star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
+|Toggle thumbs-up reaction to the current message|<kbd>+</kbd>|
+|Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
 |Show/hide edit history (from message information)|<kbd>e</kbd>|
