@@ -2089,29 +2089,47 @@ class TestModel:
             "user_id",
             "vary_each_msg",
             "visual_notification_status",
-            "types_when_notify_called",
+            "expected_message_types_when_notify_called",
         ],
         [
-            (
-                5140,
+            case(
+                5140,  # message_fixture sender_id is 5140
                 {"flags": ["mentioned", "wildcard_mentioned"]},
                 True,
                 [],
-            ),  # message_fixture sender_id is 5140
-            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream", "private"]),
-            (5179, {"flags": []}, False, ["private"]),
-        ],
-        ids=[
-            "not_notified_since_self_message",
-            "notified_stream_and_private_since_directly_mentioned",
-            "notified_stream_and_private_since_wildcard_mentioned",
-            "notified_stream_since_stream_has_desktop_notifications",
-            "notified_private_since_private_message",
+                id="not_notified_since_self_message",
+            ),
+            case(
+                5179,
+                {"flags": ["mentioned"]},
+                False,
+                ["stream", "private"],
+                id="notified_stream_and_private_since_directly_mentioned",
+            ),
+            case(
+                5179,
+                {"flags": ["wildcard_mentioned"]},
+                False,
+                ["stream", "private"],
+                id="notified_stream_and_private_since_wildcard_mentioned",
+            ),
+            case(
+                5179,
+                {"flags": []},
+                True,
+                ["stream", "private"],
+                id="notified_stream_since_stream_has_desktop_notifications",
+            ),
+            case(
+                5179,
+                {"flags": []},
+                False,
+                ["private"],
+                id="notified_private_since_private_message",
+            ),
         ],
     )
-    def test_notify_users_calling_msg_type(
+    def test_notify_user__calling_message_type(
         self,
         mocker,
         model,
@@ -2119,7 +2137,7 @@ class TestModel:
         user_id,
         vary_each_msg,
         visual_notification_status,
-        types_when_notify_called,
+        expected_message_types_when_notify_called,
     ):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
@@ -2132,7 +2150,7 @@ class TestModel:
         model.notify_user(message_fixture)
 
         target = None
-        if message_fixture["type"] in types_when_notify_called:
+        if message_fixture["type"] in expected_message_types_when_notify_called:
             who = message_fixture["type"]
             if who == "stream":
                 target = "PTEST -> Test"
@@ -2178,7 +2196,7 @@ class TestModel:
             ),
         ],
     )
-    def test_notify_user_transformed_content(
+    def test_notify_user__transformed_content(
         self, mocker, model, message_fixture, content, expected_notification_text
     ):
         mocker.patch(MODEL + ".is_visual_notifications_enabled", lambda s, id: True)
@@ -2192,25 +2210,38 @@ class TestModel:
     @pytest.mark.parametrize(
         "notify_enabled, is_notify_called",
         [
-            (True, True),
-            (False, False),
+            case(True, True, id="notify_enabled:notify_called"),
+            case(False, False, id="notify_disabled:notify_not_called"),
         ],
     )
-    def test_notify_users_enabled(
+    def test_notify_user__enabled(
         self, mocker, model, message_fixture, notify_enabled, is_notify_called
     ):
         message_fixture.update({"sender_id": 2, "flags": ["mentioned"]})
         model.controller.notify_enabled = notify_enabled
         model.user_id = 1
         notify = mocker.patch(MODULE + ".notify")
+
         model.notify_user(message_fixture)
+
         assert notify.called == is_notify_called
 
     @pytest.mark.parametrize(
         "hide_content, expected_content",
-        [(True, "New direct message from Foo Foo"), (False, "private content here.")],
+        [
+            case(
+                True,
+                "New direct message from Foo Foo",
+                id="PM_message_content_visible_in_notification",
+            ),
+            case(
+                False,
+                "private content here.",
+                id="PM_message_content_hidden_in_notification",
+            ),
+        ],
     )
-    def test_notify_users_hides_PM_content_based_on_user_setting(
+    def test_notify_user__hides_PM_content_based_on_user_setting(
         self, mocker, model, private_message_fixture, hide_content, expected_content
     ):
         notify = mocker.patch(MODULE + ".notify")
