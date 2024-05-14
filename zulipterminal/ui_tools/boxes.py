@@ -947,14 +947,14 @@ class MessageSearchBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("ENTER", key) and self.text_box.edit_text == ""
+            is_command_key("EXECUTE_SEARCH", key) and self.text_box.edit_text == ""
         ) or is_command_key("GO_BACK", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
             return key
 
-        elif is_command_key("ENTER", key):
+        elif is_command_key("EXECUTE_SEARCH", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus("body")
@@ -1003,7 +1003,7 @@ class PanelSearchBox(ReadlineEdit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("ENTER", key) and self.get_edit_text() == ""
+            is_command_key("EXECUTE_SEARCH", key) and self.get_edit_text() == ""
         ) or is_command_key("GO_BACK", key):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
@@ -1011,7 +1011,7 @@ class PanelSearchBox(ReadlineEdit):
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
                 self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
-        elif is_command_key("ENTER", key) and not self.panel_view.empty_search:
+        elif is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")

@@ -25,13 +25,13 @@
 |Scroll up|<kbd>PgUp</kbd> / <kbd>K</kbd>|
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
+|Trigger the selected entry|<kbd>Enter</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
 |Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
 |Narrow to messages in which you're mentioned|<kbd>#</kbd>|
 |Next unread topic|<kbd>n</kbd>|
 |Next unread direct message|<kbd>p</kbd>|
-|Perform current action|<kbd>Enter</kbd>|
 
 ## Searching
 |Command|Key Combination|
@@ -41,6 +41,7 @@
 |Search streams|<kbd>q</kbd>|
 |Search topics in a stream|<kbd>q</kbd>|
 |Search emojis from emoji picker|<kbd>p</kbd>|
+|Submit search and browse results|<kbd>Enter</kbd>|
 
 ## Message actions
 |Command|Key Combination|
@@ -84,6 +85,7 @@
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|Insert new line|<kbd>Enter</kbd>|
 
 ## Editor: Navigation
 |Command|Key Combination|

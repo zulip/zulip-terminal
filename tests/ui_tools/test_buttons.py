@@ -262,7 +262,7 @@ class TestStreamButton:
 
 class TestUserButton:
     # FIXME Place this in a general test of a derived class?
-    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
+    @pytest.mark.parametrize("enter_key", keys_for_command("ACTIVATE_BUTTON"))
     def test_activate_called_once_on_keypress(
         self,
         mocker: MockerFixture,
@@ -358,7 +358,7 @@ class TestEmojiButton:
         assert emoji_button.emoji_name == emoji_unit[0]
         assert emoji_button.reaction_count == count
 
-    @pytest.mark.parametrize("key", keys_for_command("ENTER"))
+    @pytest.mark.parametrize("key", keys_for_command("ACTIVATE_BUTTON"))
     @pytest.mark.parametrize(
         "emoji, has_user_reacted, is_selected_final, expected_reaction_count",
         [

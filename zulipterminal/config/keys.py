@@ -96,6 +96,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Go to bottom / Last message',
         'key_category': 'navigation',
     },
+    'ACTIVATE_BUTTON': {
+        'keys': ['enter'],
+        'help_text': 'Trigger the selected entry',
+        'key_category': 'navigation',
+    },
     'REPLY_MESSAGE': {
         'keys': ['r', 'enter'],
         'help_text': 'Reply to the current message',
@@ -249,15 +254,15 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'excluded_from_random_tips': True,
         'key_category': 'searching',
     },
+    'EXECUTE_SEARCH': {
+        'keys': ['enter'],
+        'help_text': 'Submit search and browse results',
+        'key_category': 'searching',
+    },
     'TOGGLE_MUTE_STREAM': {
         'keys': ['m'],
         'help_text': 'Mute/unmute streams',
         'key_category': 'stream_list',
-    },
-    'ENTER': {
-        'keys': ['enter'],
-        'help_text': 'Perform current action',
-        'key_category': 'navigation',
     },
     'THUMBS_UP': {
         'keys': ['+'],
@@ -404,6 +409,14 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['ctrl t'],
         'help_text': 'Swap with previous character',
         'key_category': 'editor_text_manipulation',
+    },
+    'NEW_LINE': {
+        # urwid_readline's command
+        # This obvious hotkey is added to clarify against 'enter' to send
+        # and to differentiate from other hotkeys using 'enter'.
+        'keys': ['enter'],
+        'help_text': 'Insert new line',
+        'key_category': 'msg_compose',
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],

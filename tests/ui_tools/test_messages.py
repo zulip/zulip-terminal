@@ -1961,7 +1961,9 @@ class TestMessageBox:
         assert isinstance(footlinks, expected_instance)
 
     @pytest.mark.parametrize(
-        "key", keys_for_command("ENTER"), ids=lambda param: f"left_click-key:{param}"
+        "key",
+        keys_for_command("ACTIVATE_BUTTON"),
+        ids=lambda param: f"left_click-key:{param}",
     )
     def test_mouse_event_left_click(
         self, mocker, msg_box, key, widget_size, compose_box_is_open

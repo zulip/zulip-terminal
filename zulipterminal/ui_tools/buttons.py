@@ -120,7 +120,7 @@ class TopButton(urwid.Button):
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("ENTER", key):
+        if is_command_key("ACTIVATE_BUTTON", key):
             self.activate(key)
             return None
         else:  # This is in the else clause, to avoid multiple activation
@@ -417,7 +417,7 @@ class EmojiButton(TopButton):
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
         if event == "mouse press" and button == 1:
-            self.keypress(size, primary_key_for_command("ENTER"))
+            self.keypress(size, primary_key_for_command("ACTIVATE_BUTTON"))
             return True
         return super().mouse_event(size, event, button, col, row, focus)
 
