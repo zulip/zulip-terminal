@@ -323,82 +323,82 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a', 'home'],
         'help_text': 'Jump to the beginning of line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'END_OF_LINE': {
         'keys': ['ctrl e', 'end'],
         'help_text': 'Jump to the end of line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'ONE_WORD_BACKWARD': {
         'keys': ['meta b', 'shift left'],
         'help_text': 'Jump backward one word',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'ONE_WORD_FORWARD': {
         'keys': ['meta f', 'shift right'],
         'help_text': 'Jump forward one word',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'DELETE_LAST_CHARACTER': {
         'keys': ['ctrl h'],
         'help_text': 'Delete previous character (to left)',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'TRANSPOSE_CHARACTERS': {
         'keys': ['ctrl t'],
         'help_text': 'Transpose characters',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'CUT_TO_END_OF_LINE': {
         'keys': ['ctrl k'],
         'help_text': 'Cut forwards to the end of the line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'CUT_TO_START_OF_LINE': {
         'keys': ['ctrl u'],
         'help_text': 'Cut backwards to the start of the line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'CUT_TO_END_OF_WORD': {
         'keys': ['meta d'],
         'help_text': 'Cut forwards to the end of the current word',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'CUT_TO_START_OF_WORD': {
         'keys': ['ctrl w', 'meta backspace'],
         'help_text': 'Cut backwards to the start of the current word',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'CUT_WHOLE_LINE': {
         'keys': ['meta x'],
         'help_text': 'Cut the current line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'PASTE_LAST_CUT': {
         'keys': ['ctrl y'],
         'help_text': 'Paste last cut section',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'UNDO_LAST_ACTION': {
         'keys': ['ctrl _'],
         'help_text': 'Undo last action',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_text_manipulation',
     },
     'PREV_LINE': {
         'keys': ['up', 'ctrl p'],
         'help_text': 'Jump to the previous line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'NEXT_LINE': {
         'keys': ['down', 'ctrl n'],
         'help_text': 'Jump to the next line',
-        'key_category': 'msg_compose',
+        'key_category': 'editor_navigation',
     },
     'CLEAR_MESSAGE': {
         'keys': ['ctrl l'],
-        'help_text': 'Clear compose box',
-        'key_category': 'msg_compose',
+        'help_text': 'Clear text box',
+        'key_category': 'editor_text_manipulation',
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
@@ -420,6 +420,8 @@ HELP_CATEGORIES = {
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
     "msg_compose": "Composing a Message",
+    "editor_navigation": "Editor: Navigation",
+    "editor_text_manipulation": "Editor: Text Manipulation",
 }
 
 ZT_TO_URWID_CMD_MAPPING = {

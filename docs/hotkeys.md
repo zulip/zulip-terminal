@@ -83,10 +83,20 @@
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+
+## Editor: Navigation
+|Command|Key Combination|
+| :--- | :---: |
 |Jump to the beginning of line|<kbd>Ctrl</kbd> + <kbd>a</kbd> / <kbd>Home</kbd>|
 |Jump to the end of line|<kbd>Ctrl</kbd> + <kbd>e</kbd> / <kbd>End</kbd>|
 |Jump backward one word|<kbd>Meta</kbd> + <kbd>b</kbd> / <kbd>Shift</kbd> + <kbd>Left</kbd>|
 |Jump forward one word|<kbd>Meta</kbd> + <kbd>f</kbd> / <kbd>Shift</kbd> + <kbd>Right</kbd>|
+|Jump to the previous line|<kbd>Up</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>|
+|Jump to the next line|<kbd>Down</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>|
+
+## Editor: Text Manipulation
+|Command|Key Combination|
+| :--- | :---: |
 |Delete previous character (to left)|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
 |Transpose characters|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
 |Cut forwards to the end of the line|<kbd>Ctrl</kbd> + <kbd>k</kbd>|
@@ -96,7 +106,5 @@
 |Cut the current line|<kbd>Meta</kbd> + <kbd>x</kbd>|
 |Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
 |Undo last action|<kbd>Ctrl</kbd> + <kbd>_</kbd>|
-|Jump to the previous line|<kbd>Up</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>|
-|Jump to the next line|<kbd>Down</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>|
-|Clear compose box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
+|Clear text box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 
