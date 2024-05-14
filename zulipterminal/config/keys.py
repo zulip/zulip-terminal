@@ -321,22 +321,22 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'general',
     },
     'BEGINNING_OF_LINE': {
-        'keys': ['ctrl a'],
+        'keys': ['ctrl a', 'home'],
         'help_text': 'Jump to the beginning of line',
         'key_category': 'msg_compose',
     },
     'END_OF_LINE': {
-        'keys': ['ctrl e'],
+        'keys': ['ctrl e', 'end'],
         'help_text': 'Jump to the end of line',
         'key_category': 'msg_compose',
     },
     'ONE_WORD_BACKWARD': {
-        'keys': ['meta b'],
+        'keys': ['meta b', 'shift left'],
         'help_text': 'Jump backward one word',
         'key_category': 'msg_compose',
     },
     'ONE_WORD_FORWARD': {
-        'keys': ['meta f'],
+        'keys': ['meta f', 'shift right'],
         'help_text': 'Jump forward one word',
         'key_category': 'msg_compose',
     },
@@ -366,8 +366,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'msg_compose',
     },
     'CUT_TO_START_OF_WORD': {
-        'keys': ['ctrl w'],
+        'keys': ['ctrl w', 'meta backspace'],
         'help_text': 'Cut backwards to the start of the current word',
+        'key_category': 'msg_compose',
+    },
+    'CUT_WHOLE_LINE': {
+        'keys': ['meta x'],
+        'help_text': 'Cut the current line',
         'key_category': 'msg_compose',
     },
     'PASTE_LAST_CUT': {
