@@ -1740,7 +1740,11 @@ class EditModeView(PopUpView):
         for mode in EDIT_MODE_CAPTIONS:
             self.add_radio_button(mode)
         super().__init__(
-            controller, self.widgets, "ENTER", 62, "Topic edit propagation mode"
+            controller,
+            self.widgets,
+            "ACTIVATE_BUTTON",
+            62,
+            "Topic edit propagation mode",
         )
         # Set cursor to marked checkbox.
         for i in range(len(self.widgets)):

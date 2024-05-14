@@ -830,7 +830,7 @@ class TestEditModeView:
             (2, "change_all"),
         ],
     )
-    @pytest.mark.parametrize("key", keys_for_command("ENTER"))
+    @pytest.mark.parametrize("key", keys_for_command("ACTIVATE_BUTTON"))
     def test_select_edit_mode(
         self,
         edit_mode_view: EditModeView,
@@ -1523,7 +1523,7 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
     def test_checkbox_toggle_mute_stream(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1536,7 +1536,7 @@ class TestStreamInfoView:
 
         toggle_mute_status.assert_called_once_with(stream_id)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
     def test_checkbox_toggle_pin_stream(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1549,7 +1549,7 @@ class TestStreamInfoView:
 
         toggle_pin_status.assert_called_once_with(stream_id)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ENTER"), " "))
+    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
     def test_checkbox_toggle_visual_notification(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:

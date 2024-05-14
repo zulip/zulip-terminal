@@ -898,7 +898,7 @@ class MessageBox(urwid.Pile):
         if event == "mouse press" and button == 1:
             if self.model.controller.is_in_editor_mode():
                 return True
-            self.keypress(size, primary_key_for_command("ENTER"))
+            self.keypress(size, primary_key_for_command("ACTIVATE_BUTTON"))
             return True
 
         return super().mouse_event(size, event, button, col, row, focus)

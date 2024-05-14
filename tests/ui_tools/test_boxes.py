@@ -1819,7 +1819,7 @@ class TestPanelSearchBox:
     @pytest.mark.parametrize(
         "log, expect_body_focus_set", [([], False), (["SOMETHING"], True)]
     )
-    @pytest.mark.parametrize("enter_key", keys_for_command("ENTER"))
+    @pytest.mark.parametrize("enter_key", keys_for_command("EXECUTE_SEARCH"))
     def test_keypress_ENTER(
         self,
         panel_search_box: PanelSearchBox,
