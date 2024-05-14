@@ -340,14 +340,24 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Jump forward one word',
         'key_category': 'editor_navigation',
     },
-    'DELETE_LAST_CHARACTER': {
-        'keys': ['ctrl h'],
-        'help_text': 'Delete previous character (to left)',
+    'PREV_LINE': {
+        'keys': ['up', 'ctrl p'],
+        'help_text': 'Jump to the previous line',
+        'key_category': 'editor_navigation',
+    },
+    'NEXT_LINE': {
+        'keys': ['down', 'ctrl n'],
+        'help_text': 'Jump to the next line',
+        'key_category': 'editor_navigation',
+    },
+    'UNDO_LAST_ACTION': {
+        'keys': ['ctrl _'],
+        'help_text': 'Undo last action',
         'key_category': 'editor_text_manipulation',
     },
-    'TRANSPOSE_CHARACTERS': {
-        'keys': ['ctrl t'],
-        'help_text': 'Transpose characters',
+    'CLEAR_MESSAGE': {
+        'keys': ['ctrl l'],
+        'help_text': 'Clear text box',
         'key_category': 'editor_text_manipulation',
     },
     'CUT_TO_END_OF_LINE': {
@@ -380,24 +390,14 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Paste last cut section',
         'key_category': 'editor_text_manipulation',
     },
-    'UNDO_LAST_ACTION': {
-        'keys': ['ctrl _'],
-        'help_text': 'Undo last action',
+    'DELETE_LAST_CHARACTER': {
+        'keys': ['ctrl h'],
+        'help_text': 'Delete previous character (to left)',
         'key_category': 'editor_text_manipulation',
     },
-    'PREV_LINE': {
-        'keys': ['up', 'ctrl p'],
-        'help_text': 'Jump to the previous line',
-        'key_category': 'editor_navigation',
-    },
-    'NEXT_LINE': {
-        'keys': ['down', 'ctrl n'],
-        'help_text': 'Jump to the next line',
-        'key_category': 'editor_navigation',
-    },
-    'CLEAR_MESSAGE': {
-        'keys': ['ctrl l'],
-        'help_text': 'Clear text box',
+    'TRANSPOSE_CHARACTERS': {
+        'keys': ['ctrl t'],
+        'help_text': 'Transpose characters',
         'key_category': 'editor_text_manipulation',
     },
     'FULL_RENDERED_MESSAGE': {
