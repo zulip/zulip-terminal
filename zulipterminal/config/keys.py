@@ -322,32 +322,32 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a', 'home'],
-        'help_text': 'Jump to the beginning of line',
+        'help_text': 'Start of line',
         'key_category': 'editor_navigation',
     },
     'END_OF_LINE': {
         'keys': ['ctrl e', 'end'],
-        'help_text': 'Jump to the end of line',
+        'help_text': 'End of line',
         'key_category': 'editor_navigation',
     },
     'ONE_WORD_BACKWARD': {
         'keys': ['meta b', 'shift left'],
-        'help_text': 'Jump backward one word',
+        'help_text': 'Start of current or previous word',
         'key_category': 'editor_navigation',
     },
     'ONE_WORD_FORWARD': {
         'keys': ['meta f', 'shift right'],
-        'help_text': 'Jump forward one word',
+        'help_text': 'Start of next word',
         'key_category': 'editor_navigation',
     },
     'PREV_LINE': {
         'keys': ['up', 'ctrl p'],
-        'help_text': 'Jump to the previous line',
+        'help_text': 'Previous line',
         'key_category': 'editor_navigation',
     },
     'NEXT_LINE': {
         'keys': ['down', 'ctrl n'],
-        'help_text': 'Jump to the next line',
+        'help_text': 'Next line',
         'key_category': 'editor_navigation',
     },
     'UNDO_LAST_ACTION': {
@@ -392,12 +392,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'DELETE_LAST_CHARACTER': {
         'keys': ['ctrl h'],
-        'help_text': 'Delete previous character (to left)',
+        'help_text': 'Delete previous character',
         'key_category': 'editor_text_manipulation',
     },
     'TRANSPOSE_CHARACTERS': {
         'keys': ['ctrl t'],
-        'help_text': 'Transpose characters',
+        'help_text': 'Swap with previous character',
         'key_category': 'editor_text_manipulation',
     },
     'FULL_RENDERED_MESSAGE': {
