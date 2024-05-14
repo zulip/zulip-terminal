@@ -2089,6 +2089,8 @@ class TestModel:
             "user_id",
             "vary_each_msg",
             "visual_notification_status",
+            "is_muted_stream",
+            "is_muted_topic",
             "expected_message_types_when_notify_called",
         ],
         [
@@ -2096,37 +2098,47 @@ class TestModel:
                 5140,  # message_fixture sender_id is 5140
                 {"flags": ["mentioned", "wildcard_mentioned"]},
                 True,
+                False,
+                False,
                 [],
                 id="not_notified_since_self_message",
-            ),
+            ),  # Even if mentioned, stream notifying, all unmuted
             case(
                 5179,
                 {"flags": ["mentioned"]},
                 False,
+                True,
+                True,
                 ["stream", "private"],
                 id="notified_stream_and_private_since_directly_mentioned",
-            ),
+            ),  # Direct mention is overriding all (stream/topic) muting
             case(
                 5179,
                 {"flags": ["wildcard_mentioned"]},
                 False,
+                True,
+                True,
                 ["stream", "private"],
                 id="notified_stream_and_private_since_wildcard_mentioned",
-            ),
+            ),  # Wildcard mention is overriding all (stream/topic) muting
             case(
                 5179,
                 {"flags": []},
                 True,
+                True,
+                True,
                 ["stream", "private"],
                 id="notified_stream_since_stream_has_desktop_notifications",
-            ),
+            ),  # Stream setting is overriding all (stream/topic) muting
             case(
                 5179,
                 {"flags": []},
                 False,
+                True,
+                True,
                 ["private"],
                 id="notified_private_since_private_message",
-            ),
+            ),  # No Stream setting so (stream/topic) muting limits streams
         ],
     )
     def test_notify_user__calling_message_type(
@@ -2137,6 +2149,8 @@ class TestModel:
         user_id,
         vary_each_msg,
         visual_notification_status,
+        is_muted_stream: bool,
+        is_muted_topic: bool,
         expected_message_types_when_notify_called,
     ):
         message_fixture.update(vary_each_msg)
@@ -2145,6 +2159,8 @@ class TestModel:
             MODEL + ".is_visual_notifications_enabled",
             return_value=visual_notification_status,
         )
+        mocker.patch.object(model, "is_muted_stream", return_value=is_muted_stream)
+        mocker.patch.object(model, "is_muted_topic", return_value=is_muted_topic)
         notify = mocker.patch(MODULE + ".notify")
 
         model.notify_user(message_fixture)
