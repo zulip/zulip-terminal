@@ -1607,18 +1607,24 @@ class Model:
                 hidden_content = True
         elif message["type"] == "stream":
             stream_id = message["stream_id"]
-            if {"mentioned", "wildcard_mentioned"}.intersection(
-                set(message["flags"])
-            ) or self.is_visual_notifications_enabled(stream_id):
+            topic = message.get("subject", "")
+
+            contains_mention = set(message["flags"]).intersection(
+                {"mentioned", "wildcard_mentioned"}
+            )
+            stream_settings_notify = self.is_visual_notifications_enabled(stream_id)
+            contains_alert_word_and_stream_topic_not_muted = (
+                "has_alert_word" in message["flags"]
+                and not self.is_muted_stream(stream_id)
+                and not self.is_muted_topic(stream_id, topic)
+            )
+            if (
+                contains_mention
+                or stream_settings_notify
+                or contains_alert_word_and_stream_topic_not_muted
+            ):
                 recipient = "{display_recipient} -> {subject}".format(**message)
 
-            if "has_alert_word" in message["flags"]:
-                # Check if stream or topic is muted
-                topic = message.get("subject", "")
-                if not self.is_muted_stream(stream_id) and not self.is_muted_topic(
-                    stream_id, topic
-                ):
-                    recipient = "{display_recipient} -> {subject}".format(**message)
         if recipient:
             if hidden_content:
                 text = content
