@@ -97,14 +97,14 @@
 ## Editor: Text Manipulation
 |Command|Key Combination|
 | :--- | :---: |
-|Delete previous character (to left)|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
-|Transpose characters|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
+|Undo last action|<kbd>Ctrl</kbd> + <kbd>_</kbd>|
+|Clear text box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Cut forwards to the end of the line|<kbd>Ctrl</kbd> + <kbd>k</kbd>|
 |Cut backwards to the start of the line|<kbd>Ctrl</kbd> + <kbd>u</kbd>|
 |Cut forwards to the end of the current word|<kbd>Meta</kbd> + <kbd>d</kbd>|
 |Cut backwards to the start of the current word|<kbd>Ctrl</kbd> + <kbd>w</kbd> / <kbd>Meta</kbd> + <kbd>Backspace</kbd>|
 |Cut the current line|<kbd>Meta</kbd> + <kbd>x</kbd>|
 |Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
-|Undo last action|<kbd>Ctrl</kbd> + <kbd>_</kbd>|
-|Clear text box|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
+|Delete previous character (to left)|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
+|Transpose characters|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
 
