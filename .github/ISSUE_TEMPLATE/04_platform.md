@@ -1,7 +1,7 @@
 ---
 name: Feature suggestion
 about: A suggestion for an improvement, specific to the capabilities of the terminal environment.
-labels: enhancement,
+labels: 'enhancement,'
 ---
 
 <!--
