@@ -1,7 +1,7 @@
 ---
 name: Bug report (major)
 about: A major bug which significantly impacts usability, eg. an unexpected quit, crash, freeze.
-labels: 'bug: crash',
+labels: 'bug: crash,'
 ---
 
 ### Bug description

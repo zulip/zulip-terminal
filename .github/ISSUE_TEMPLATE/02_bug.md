@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: A concrete bug report with steps to reproduce the behavior.
-labels: bug,
+labels: 'bug,'
 ---
 
 ### Bug description

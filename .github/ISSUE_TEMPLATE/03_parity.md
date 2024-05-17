@@ -1,7 +1,7 @@
 ---
 name: Feature request (a missing known Zulip feature)
 about: A request for a feature which is missing, but present in another Zulip client (eg. Web/Desktop/mobile).
-labels: 'missing feature',
+labels: 'missing feature,'
 ---
 
 ### Description of feature missing from another Zulip client
