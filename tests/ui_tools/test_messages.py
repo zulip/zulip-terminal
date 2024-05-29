@@ -1,10 +1,12 @@
 from collections import OrderedDict, defaultdict
 from datetime import date
+from typing import Any, Dict, List, Tuple
 
 import pytest
 import pytz
 from bs4 import BeautifulSoup
 from pytest import param as case
+from pytest_mock import MockerFixture
 from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command
@@ -1585,13 +1587,119 @@ class TestMessageBox:
             # fmt: on
         ],
     )
-    def test_transform_content(self, mocker, raw_html, expected_content):
+    def test_transform_content(self, raw_html: str, expected_content: Any) -> None:
         expected_content = expected_content.replace("{}", QUOTED_TEXT_MARKER)
 
         content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
 
         rendered_text = Text(content)
         assert rendered_text.text == expected_content
+
+    @pytest.mark.parametrize(
+        "raw_html, expected_message_links",
+        [
+            case(
+                """
+                <p><a href="https://github.com/zulip/zulip-terminal/pull/1">https://github.com/zulip/zulip-terminal/pull/1</a></p>
+                """,
+                {
+                    "https://github.com/zulip/zulip-terminal/pull/1": (
+                        "github.com",
+                        1,
+                        True,
+                    )
+                },
+                id="github_pr_link_matches_text",
+            ),
+            case(
+                """
+                <p><a href="https://foo.com">https://foo.com</a></p>
+                """,
+                {"https://foo.com": ("https://foo.com", 1, False)},
+                id="external_link_no_footlink",
+            ),
+            case(
+                """
+                <p><a href="#narrow/stream/206-zulip-terminal/topic/announce">https://chat.zulip.zulip/#narrow/stream/206-zulip-terminal/topic/announce</a></p>
+                """,
+                {
+                    "https://chat.zulip.zulip#narrow/stream/206-zulip-terminal/topic/announce": (  # noqa: E501
+                        "https://chat.zulip.zulip/#narrow/stream/206-zulip-terminal/topic/announce",
+                        1,
+                        True,
+                    )
+                },
+                id="internal_link",
+            ),
+            case(
+                """
+                <p><a href="https://github.com/zulip/zulip-terminal">test</a></p>
+                """,
+                {"https://github.com/zulip/zulip-terminal": ("test", 1, True)},
+                id="github_link_with_text",
+            ),
+        ],
+    )
+    def test_transform_content_message_links(
+        self, raw_html: str, expected_message_links: Dict[str, Tuple[str, int, bool]]
+    ) -> None:
+        _, message_links, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
+
+        assert message_links == expected_message_links
+
+    @pytest.mark.parametrize(
+        "raw_html, expected_time_mentions",
+        [
+            case(
+                """
+                <p><time datetime="2024-05-29T11:30:00Z">2024-05-29T17:00:00+05:30</time></p>
+                """,  # noqa: E501
+                [
+                    (
+                        "Wed, May 29 2024, 17:00 (IST)",
+                        "Original text was 2024-05-29T17:00:00+05:30",
+                    )
+                ],
+                id="test_date",
+            ),
+            case(
+                """
+                <p><time datetime="3000-06-01T14:00:00Z">3000-06-01T19:30:00+05:30</time></p>
+                """,  # noqa: E501
+                [
+                    (
+                        "Sun, Jun 1 3000, 19:30 (IST)",
+                        "Original text was 3000-06-01T19:30:00+05:30",
+                    )
+                ],
+                id="distant_future_date",
+            ),
+            case(
+                """
+                <p><time datetime="1947-08-14T19:47:00Z">1947-08-15T01:17:00+05:30</time></p>
+                """,  # noqa: E501
+                [
+                    (
+                        "Fri, Aug 15 1947, 1:17 (IST)",
+                        "Original text was 1947-08-15T01:17:00+05:30",
+                    )
+                ],
+                id="past_date",
+            ),
+        ],
+    )
+    def test_transform_content_time_mentions(
+        self,
+        mocker: MockerFixture,
+        raw_html: str,
+        expected_time_mentions: List[Tuple[str, str]],
+    ) -> None:
+        mocker.patch(
+            MODULE + ".get_localzone", return_value=pytz.timezone("Asia/Kolkata")
+        )
+        _, _, time_mentions, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
+
+        assert time_mentions == expected_time_mentions
 
     # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
     @pytest.mark.parametrize(
