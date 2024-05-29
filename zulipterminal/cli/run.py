@@ -311,7 +311,7 @@ def fetch_zuliprc(zuliprc_path: str) -> str:
         login_data = get_api_key(realm_url)
 
     preferred_realm_url, login_id, api_key = login_data
-    path_to_new_zuliprc = HOME_PATH_ZULIPRC
+    path_to_new_zuliprc = CONFIG_PATH_ZULIPRC
     save_zuliprc_failure = _write_zuliprc(
         to_path=path_to_new_zuliprc,
         login_id=login_id,
@@ -333,6 +333,7 @@ def _write_zuliprc(
     Only creates new private files; errors if file already exists
     """
     try:
+        Path(to_path).parent.mkdir(parents=True, exist_ok=True)
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
