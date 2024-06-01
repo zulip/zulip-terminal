@@ -575,7 +575,11 @@ class MiddleColumnView(urwid.Frame):
             return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
-            self.controller.enter_editor_mode_with(self.search_box)
+            self.view.context = "message_view_editor"
+            self.controller.enter_editor_mode_with(
+                self.search_box,
+                is_readline_editor=True,
+            )
             self.set_focus("header")
             return key
 
@@ -647,7 +651,15 @@ class MiddleColumnView(urwid.Frame):
             return key
         elif is_command_key("GO_LEFT", key):
             self.view.show_left_panel(visible=True)
+            if self.view.frame.body.get_focus_path()[-3] == 1:
+                if self.view.left_panel.is_in_topic_view:
+                    self.view.context = "topic_view"
+                else:
+                    self.view.context = "stream_view"
+            else:
+                self.view.context = "general"
         elif is_command_key("GO_RIGHT", key):
+            self.view.context = "user_view"
             self.view.show_right_panel(visible=True)
         return super().keypress(size, key)
 
@@ -768,6 +780,7 @@ class RightColumnView(urwid.Frame):
             self.view.controller.update_screen()
             return key
         elif is_command_key("GO_LEFT", key):
+            self.view.context = "message_view"
             self.view.show_right_panel(visible=False)
         return super().keypress(size, key)
 
@@ -925,7 +938,20 @@ class LeftColumnView(urwid.Pile):
                 self.view.stream_w.keypress(size, key)
             return key
         elif is_command_key("GO_RIGHT", key):
+            self.view.context = "message_view"
             self.view.show_left_panel(visible=False)
+        elif (
+            is_command_key("GO_UP", key)
+            and self.view.frame.body.get_focus_path()[-3] == 1
+            and self.view.frame.body.get_focus_path()[-1] == 0
+        ):
+            self.view.context = "menu_view"
+        elif (
+            is_command_key("GO_DOWN", key)
+            and self.view.frame.body.get_focus_path()[-3] == 0
+            and self.view.frame.body.get_focus_path()[-1] == 3
+        ):
+            self.view.context = "stream_view"
         return super().keypress(size, key)
 
 

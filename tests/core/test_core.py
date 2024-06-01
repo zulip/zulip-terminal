@@ -1,14 +1,18 @@
 import os
 import webbrowser
+from collections import OrderedDict
 from platform import platform
 from threading import Thread, Timer
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from unittest.mock import PropertyMock
 
 import pyperclip
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
+from urwid import Widget
 
+from zulipterminal.api_types import Message
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
@@ -96,9 +100,13 @@ class TestController:
             controller.current_editor()
 
     def test_editor_mode_entered_from_initial(
-        self, mocker: MockerFixture, controller: Controller
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
         editor = mocker.Mock()
+        mock_context(controller.view)
 
         controller.enter_editor_mode_with(editor)
 
@@ -106,19 +114,56 @@ class TestController:
         assert controller.current_editor() == editor
 
     def test_editor_mode_error_on_multiple_enter(
-        self, mocker: MockerFixture, controller: Controller
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
+        mock_context(controller.view)
+
         controller.enter_editor_mode_with(mocker.Mock())
 
         with pytest.raises(AssertionError):
             controller.enter_editor_mode_with(mocker.Mock())
 
-    def test_editor_mode_exits_after_entering(
-        self, mocker: MockerFixture, controller: Controller
+    @pytest.mark.parametrize(
+        "is_readline_editor, expected_context",
+        [
+            (False, "editor"),
+            (True, None),
+        ],
+    )
+    def test_enter_editor_mode_with_different_readline_editor_values(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        is_readline_editor: bool,
+        expected_context: Optional[str],
+        mock_context: Callable[[Widget], PropertyMock],
     ) -> None:
-        controller.enter_editor_mode_with(mocker.Mock())
-        controller.exit_editor_mode()
+        context = mock_context(controller.view)
 
+        controller.enter_editor_mode_with(
+            editor=mocker.Mock(), is_readline_editor=is_readline_editor
+        )
+
+        if expected_context is not None:
+            context.assert_called_once_with(expected_context)
+        else:
+            context.assert_not_called()
+
+    def test_editor_mode_exits_after_entering(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
+        context = mock_context(controller.view)
+
+        controller.enter_editor_mode_with(mocker.Mock(), is_readline_editor=False)
+        context.assert_called_with("editor")
+        controller.exit_editor_mode()
+        context.assert_called_with("")
         assert not controller.is_in_editor_mode()
 
     def test_narrow_to_stream(
@@ -571,6 +616,19 @@ class TestController:
 
         assert popup_size == expected_popup_size
 
+    def test_exit_popup(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
+        context = mock_context(controller.view)
+
+        controller.loop = mocker.Mock()
+        controller.exit_popup()
+
+        context.assert_called_once_with("")
+
     @pytest.mark.parametrize(
         "active_conversation_info",
         [
@@ -608,3 +666,39 @@ class TestController:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
         assert controller.active_conversation_info == {}
+
+    def test_show_stream_info(
+        self,
+        controller: Controller,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        stream_id: int = 205,
+    ) -> None:
+        context = mock_context(controller.view)
+        stream_view = mocker.patch(MODULE + ".StreamInfoView")
+        pop_up = mocker.patch(MODULE + ".Controller.show_pop_up")
+
+        controller.show_stream_info(stream_id)
+
+        stream_view.assert_called_once_with(controller, stream_id)
+        context.assert_called_once_with("stream_info_view")
+        pop_up.assert_called_once_with(stream_view(), "area:stream")
+
+    def test_show_msg_info(
+        self,
+        controller: Controller,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        message_fixture: Message,
+    ) -> None:
+        context = mock_context(controller.view)
+        msg_view = mocker.patch(MODULE + ".MsgInfoView")
+        pop_up = mocker.patch(MODULE + ".Controller.show_pop_up")
+        topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
+        message_links = OrderedDict([("image.jpg", ("image", 1, True))])
+
+        controller.show_msg_info(message_fixture, topic_links, message_links, list())
+
+        msg_view.assert_called_once()
+        context.assert_called_once_with("msg_info_view")
+        pop_up.assert_called_once_with(msg_view(), "area:msg")

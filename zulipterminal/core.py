@@ -135,11 +135,16 @@ class Controller:
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
 
-    def enter_editor_mode_with(self, editor: Any) -> None:
+    def enter_editor_mode_with(
+        self, editor: Any, is_readline_editor: bool = False
+    ) -> None:
         assert self._editor is None, "Already in editor mode"
+        if not is_readline_editor:
+            self.view.context = "editor"
         self._editor = editor
 
     def exit_editor_mode(self) -> None:
+        self.view.context = ""
         self._editor = None
 
     def current_editor(self) -> Any:
@@ -245,6 +250,7 @@ class Controller:
         return isinstance(self.loop.widget, urwid.Overlay)
 
     def exit_popup(self) -> None:
+        self.view.context = ""
         self.loop.widget = self.view
 
     def show_help(self) -> None:
@@ -273,6 +279,7 @@ class Controller:
             message_links,
             time_mentions,
         )
+        self.view.context = "msg_info_view"
         self.show_pop_up(msg_info_view, "area:msg")
 
     def show_emoji_picker(self, message: Message) -> None:
@@ -287,6 +294,7 @@ class Controller:
 
     def show_stream_info(self, stream_id: int) -> None:
         show_stream_view = StreamInfoView(self, stream_id)
+        self.view.context = "stream_info_view"
         self.show_pop_up(show_stream_view, "area:stream")
 
     def show_stream_members(self, stream_id: int) -> None:

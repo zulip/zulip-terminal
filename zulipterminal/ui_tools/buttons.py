@@ -258,6 +258,7 @@ class StreamButton(TopButton):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
+            self.view.context = "topic_view"
             self.view.left_panel.show_topic_view(self)
         elif is_command_key("TOGGLE_MUTE_STREAM", key):
             self.controller.stream_muting_confirmation_popup(
@@ -369,6 +370,7 @@ class TopicButton(TopButton):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
+            self.view.context = "stream_view"
             self.view.associate_stream_with_topic(self.stream_id, self.topic_name)
             self.view.left_panel.show_stream_view()
         return super().keypress(size, key)

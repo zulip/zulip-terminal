@@ -1,6 +1,7 @@
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from unittest.mock import PropertyMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -1538,3 +1539,17 @@ def widget_size() -> Callable[[Widget], urwid_Size]:
             return ()
 
     return _widget_size
+
+
+@pytest.fixture
+def mock_context(mocker: MockerFixture) -> Callable[[Widget], PropertyMock]:
+    """
+    Mocks the context of the given view object.
+    """
+
+    def _mock_context(view_obj: Any) -> PropertyMock:
+        mocked_context = mocker.PropertyMock()
+        type(view_obj).context = mocked_context
+        return mocked_context
+
+    return _mock_context

@@ -1,9 +1,12 @@
 from collections import OrderedDict
+from typing import Callable, List, Tuple, Union
+from unittest.mock import PropertyMock
 
 import pytest
 import urwid
 from pytest import param as case
-from urwid import Divider
+from pytest_mock import MockerFixture
+from urwid import Divider, Widget
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import STATUS_ACTIVE
@@ -21,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     TopicsView,
     UsersView,
 )
+from zulipterminal.urwid_types import urwid_Box
 
 
 SUBDIR = "zulipterminal.ui_tools"
@@ -854,15 +858,24 @@ class TestMiddleColumnView:
         self.super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
-    def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_SEARCH_MESSAGES(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size,
+        mock_context: Callable[[Widget], PropertyMock],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch(MIDCOLVIEW + ".set_focus")
+        context = mock_context(mid_col_view.view)
 
         mid_col_view.keypress(size, key)
 
+        context.assert_called_once_with("message_view_editor")
         mid_col_view.controller.enter_editor_mode_with.assert_called_once_with(
-            mid_col_view.search_box
+            mid_col_view.search_box, is_readline_editor=True
         )
         mid_col_view.set_focus.assert_called_once_with("header")
 
@@ -981,6 +994,41 @@ class TestMiddleColumnView:
         mid_col_view.footer.private_box_view.assert_called_once_with()
         assert mid_col_view.footer.focus_position == 0
         assert return_value == key
+
+    @pytest.mark.parametrize(
+        "key, focus_path, is_in_topic_view, expected_context",
+        [
+            (
+                primary_key_for_command("GO_LEFT"),
+                [1, "body", 1, 0, 1],
+                False,
+                "stream_view",
+            ),
+            (primary_key_for_command("GO_LEFT"), [1, 1, 13], True, "topic_view"),
+            (primary_key_for_command("GO_LEFT"), [1, "body", 0, 0, 3], True, "general"),
+            (primary_key_for_command("GO_RIGHT"), [1, 1, 7], False, "user_view"),
+        ],
+    )
+    def test_keypress_GO_LEFT_OR_GO_RIGHT(
+        self,
+        mocker: MockerFixture,
+        mid_col_view: MiddleColumnView,
+        widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        key: str,
+        focus_path,
+        is_in_topic_view: bool,
+        expected_context: str,
+    ) -> None:
+        size = widget_size(mid_col_view)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        mocker.patch.object(
+            mid_col_view.view.frame.body, "get_focus_path", return_value=focus_path
+        )
+        mid_col_view.view.left_panel.is_in_topic_view = is_in_topic_view
+        context = mock_context(mid_col_view.view)
+        mid_col_view.keypress(size, key)
+        context.assert_called_once_with(expected_context)
 
 
 class TestRightColumnView:
@@ -1120,6 +1168,22 @@ class TestRightColumnView:
         right_col_view.set_focus.assert_called_once_with("body")
         assert right_col_view.user_search.reset_search_text.called
 
+    @pytest.mark.parametrize("key", keys_for_command("GO_LEFT"))
+    def test_keypress_GO_LEFT(
+        self,
+        mocker: MockerFixture,
+        right_col_view: RightColumnView,
+        widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        key,
+    ) -> None:
+        size = widget_size(right_col_view)
+        mocker.patch("zulipterminal.ui.View.show_right_panel")
+        mocker.patch("urwid.Frame.keypress")
+        context = mock_context(right_col_view.view)
+        right_col_view.keypress(size, key)
+        context.assert_called_once_with("message_view")
+
 
 class TestLeftColumnView:
     @pytest.fixture(autouse=True)
@@ -1220,6 +1284,89 @@ class TestLeftColumnView:
                 for topic, count in zip(topic_list, unread_count_list)
             ]
         )
+
+    @pytest.fixture
+    def keypress_test_setup(
+        self,
+        mocker: MockerFixture,
+        mock_context: Callable[[Widget], PropertyMock],
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> Tuple[LeftColumnView, urwid_Box, PropertyMock]:
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        left_col_view = LeftColumnView(self.view)
+        size = widget_size(left_col_view)
+        context = mock_context(left_col_view.view)
+        mocker.patch(VIEWS + ".LeftColumnView.contents")
+        mocker.patch("urwid.Pile.keypress")
+        return left_col_view, size, context
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_RIGHT"))
+    def test_keypress_GO_RIGHT(
+        self,
+        mocker: MockerFixture,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key,
+    ) -> None:
+        left_col_view, size, context = keypress_test_setup
+        mocker.patch("zulipterminal.ui.View.show_left_panel")
+        left_col_view.keypress(size, key)
+        context.assert_called_once_with("message_view")
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
+    @pytest.mark.parametrize(
+        "focus_path_value, update_context",
+        [
+            case([1, "body", 1, 1, 0], True, id="first_stream_button__autohide"),
+            case([1, 1, 0], True, id="first_stream_button__non_autohide"),
+            case([1, 1, 3], False, id="not_first_stream_button"),
+            case([1, "body", 1, 0, 3], False, id="menu_button__autohide"),
+            case([1, 0, 0], False, id="first_menu_button"),
+        ],
+    )
+    def test_keypress_GO_UP(
+        self,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key: str,
+        focus_path_value: List[Union[int, str]],
+        update_context: bool,
+    ):
+        left_col_view, size, context = keypress_test_setup
+        self.view.frame.body.get_focus_path.return_value = focus_path_value
+
+        left_col_view.keypress(size, key)
+
+        assert self.view.frame.body.get_focus_path.call_count == 2
+        self.view.frame.body.get_focus_path.assert_called_with()
+        if update_context:
+            context.assert_called_once_with("menu_view")
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
+    @pytest.mark.parametrize(
+        "focus_path_value, update_context",
+        [
+            case([1, "body", 0, 1, 0], False, id="non_menu__autohide"),
+            case([0, 1, 3], False, id="fourth_stream_button"),
+            case([1, "body", 0, 0, 3], True, id="stream__autohide"),
+            case([0, 0, 3], True, id="stream__non_autohide"),
+            case([0, 0, 0], False, id="not_last_menu_button"),
+        ],
+    )
+    def test_keypress_GO_DOWN(
+        self,
+        keypress_test_setup: Tuple[LeftColumnView, urwid_Box, PropertyMock],
+        key: str,
+        focus_path_value: List[Union[int, str]],
+        update_context: bool,
+    ):
+        left_col_view, size, context = keypress_test_setup
+        self.view.frame.body.get_focus_path.return_value = focus_path_value
+
+        left_col_view.keypress(size, key)
+
+        self.view.frame.body.get_focus_path.assert_called_with()
+        assert self.view.frame.body.get_focus_path.call_count == 2
+        if update_context:
+            context.assert_called_once_with("stream_view")
 
 
 class TestTabView:

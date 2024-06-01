@@ -1,4 +1,5 @@
 from typing import Any, Callable, List, Optional
+from unittest.mock import PropertyMock
 
 import pytest
 from pytest_mock import MockerFixture
@@ -92,6 +93,7 @@ class TestView:
 
         view.frame.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is False
 
     def test_set_footer_text_specific_text(
         self, view: View, text: str = "blah"
@@ -100,6 +102,7 @@ class TestView:
 
         view.frame.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is True
 
     def test_set_footer_text_with_duration(
         self,
@@ -118,6 +121,57 @@ class TestView:
         )
         mock_sleep.assert_called_once_with(duration)
         assert view.controller.update_screen.call_count == 2
+        assert view._is_footer_event_running is False
+
+    @pytest.mark.parametrize("event_running", [True, False])
+    def test_set_footer_text_on_context_change(
+        self, view: View, mocker: MockerFixture, event_running: bool
+    ) -> None:
+        mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
+        view._is_footer_event_running = event_running
+
+        view.set_footer_text(context_change=True)
+
+        if event_running:
+            view.frame.footer.set_text.assert_not_called()
+            view.controller.update_screen.assert_not_called()
+        else:
+            view.frame.footer.set_text.assert_called_once_with(["some help text"])
+            view.controller.update_screen.assert_called_once_with()
+
+    def test_update_context_non_empty(self, view: View, mocker: MockerFixture) -> None:
+        mock_set_footer_text = mocker.patch.object(view, "set_footer_text")
+        view._update_context("msg_info_view")
+        assert view._context == "msg_info_view"
+        mock_set_footer_text.assert_called_once_with(context_change=True)
+
+    @pytest.mark.parametrize(
+        "focus_position, panel_focus_position, context",
+        [
+            (0, 0, "general"),
+            (0, 1, "stream_view"),
+            (1, 0, "message_view"),
+            (2, 1, "user_view"),
+        ],
+    )
+    def test_update_context_empty(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        focus_position: int,
+        panel_focus_position: int,
+        context: str,
+    ) -> None:
+        mock_set_footer_text = mocker.patch.object(view, "set_footer_text")
+        mocker.patch.object(
+            view.frame.body,
+            "get_focus_path",
+            return_value=["body", focus_position, panel_focus_position, 0, 2],
+        )
+        view.body.focus_position = focus_position
+        view._update_context("")
+        assert view._context == context
+        mock_set_footer_text.assert_called_once_with(context_change=True)
 
     @pytest.mark.parametrize(
         "suggestions, state, truncated, footer_text",
@@ -299,22 +353,37 @@ class TestView:
 
         super_keypress.assert_called_once_with(size, navigation_key)
 
-    @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
-    def test_keypress_ALL_MENTIONS(
+    @pytest.mark.parametrize(
+        "command, button_attr",
+        [
+            ("ALL_MENTIONS", "mentioned_button"),
+            ("ALL_STARRED", "starred_button"),
+            ("ALL_PM", "pm_button"),
+        ],
+    )
+    def test_keypress_menu_buttons(
         self,
         view: View,
         mocker: MockerFixture,
-        key: str,
         widget_size: Callable[[Widget], urwid_Box],
+        mock_context: Callable[[Widget], PropertyMock],
+        command: str,
+        button_attr: str,
     ) -> None:
-        view.mentioned_button = mocker.Mock()
-        view.mentioned_button.activate = mocker.Mock()
+        button = mocker.Mock()
+        setattr(view, button_attr, button)
+        context = mock_context(view)
         view.controller.is_in_editor_mode = lambda: False
         size = widget_size(view)
 
-        view.keypress(size, key)
+        for key in keys_for_command(command):
+            view.keypress(size, key)
 
-        view.mentioned_button.activate.assert_called_once_with(key)
+            context.assert_called_once_with("message_view")
+            button.activate.assert_called_once_with(key)
+
+            context.reset_mock()
+            button.activate.reset_mock()
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
