@@ -55,3 +55,6 @@ ignore=all
 # Ignore certain rules, you can reference them by their id or by their full name
 # Use 'all' to ignore all rules
 # ignore=T1,body-min-length
+
+[ignore-body-lines]
+regex=^(Co-authored-by:| *https?://\S+$)
