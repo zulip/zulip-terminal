@@ -715,14 +715,16 @@ class WriteBox(urwid.Pile):
         self.main_view(False)
         self.view.middle_column.set_focus("body")
 
+    def _set_default_footer_after_autocomplete(self) -> None:
+        self.is_in_typeahead_mode = False
+        self.view.set_footer_text()
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
             or is_command_key("AUTOCOMPLETE_REVERSE", key)
         ):
-            # set default footer when done with autocomplete
-            self.is_in_typeahead_mode = False
-            self.view.set_footer_text()
+            self._set_default_footer_after_autocomplete()
 
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
