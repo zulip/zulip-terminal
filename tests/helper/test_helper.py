@@ -573,6 +573,7 @@ def test_process_media(
     )
     mocked_open_media = mocker.patch(MODULE + ".open_media")
     mocker.patch(MODULE + ".PLATFORM", platform)
+    mocker.patch("zulipterminal.platform_code.PLATFORM", platform)
     mocker.patch("zulipterminal.core.Controller.show_media_confirmation_popup")
 
     process_media(controller, link)
