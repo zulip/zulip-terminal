@@ -784,6 +784,7 @@ def process_media(controller: Any, link: str) -> None:
         controller.view.set_footer_text, "Downloading your media..."
     )
     media_path = download_media(controller, link, show_download_status)
+    media_path = normalized_file_path(media_path)
     tool = ""
 
     # TODO: Add support for other platforms as well.
@@ -825,7 +826,7 @@ def download_media(
                     show_download_status()
 
         controller.report_success([" Downloaded ", ("bold", media_name)])
-        return normalized_file_path(local_path)
+        return local_path
 
 
 @asynch
