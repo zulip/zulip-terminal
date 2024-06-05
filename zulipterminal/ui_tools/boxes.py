@@ -709,6 +709,12 @@ class WriteBox(urwid.Pile):
 
         return emoji_typeahead, emojis
 
+    def exit_compose_box(self) -> None:
+        self._set_compose_attributes_to_defaults()
+        self.view.controller.exit_editor_mode()
+        self.main_view(False)
+        self.view.middle_column.set_focus("body")
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
@@ -800,10 +806,7 @@ class WriteBox(urwid.Pile):
                     )
         elif is_command_key("EXIT_COMPOSE", key):
             self.send_stop_typing_status()
-            self._set_compose_attributes_to_defaults()
-            self.view.controller.exit_editor_mode()
-            self.main_view(False)
-            self.view.middle_column.set_focus("body")
+            self.exit_compose_box()
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
