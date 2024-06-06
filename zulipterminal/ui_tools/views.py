@@ -398,7 +398,7 @@ class StreamsView(urwid.Frame):
             self.stream_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.stream_search_box)
             return key
-        elif is_command_key("GO_BACK", key):
+        elif is_command_key("CLEAR_SEARCH", key):
             self.stream_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.streams_btn_list)
@@ -518,7 +518,7 @@ class TopicsView(urwid.Frame):
             self.topic_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.topic_search_box)
             return key
-        elif is_command_key("GO_BACK", key):
+        elif is_command_key("CLEAR_SEARCH", key):
             self.topic_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.topics_btn_list)
@@ -759,7 +759,7 @@ class RightColumnView(urwid.Frame):
             self.user_search.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.user_search)
             return key
-        elif is_command_key("GO_BACK", key):
+        elif is_command_key("CLEAR_SEARCH", key):
             self.user_search.reset_search_text()
             self.allow_update_user_list = True
             self.body = UsersView(self.view.controller, self.users_btn_list)

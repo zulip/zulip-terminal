@@ -1858,8 +1858,8 @@ class TestPanelSearchBox:
             panel_view.set_focus.assert_not_called()
             panel_view.body.set_focus.assert_not_called()
 
-    @pytest.mark.parametrize("back_key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(
+    @pytest.mark.parametrize("back_key", keys_for_command("CLEAR_SEARCH"))
+    def test_keypress_CLEAR_SEARCH(
         self,
         panel_search_box: PanelSearchBox,
         back_key: str,

@@ -260,6 +260,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Submit search and browse results',
         'key_category': 'searching',
     },
+    'CLEAR_SEARCH': {
+        'keys': ['esc'],
+        'help_text': 'Clear search in current panel',
+        'key_category': 'searching',
+    },
     'TOGGLE_MUTE_STREAM': {
         'keys': ['m'],
         'help_text': 'Mute/unmute streams',

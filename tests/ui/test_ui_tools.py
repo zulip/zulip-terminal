@@ -559,8 +559,8 @@ class TestStreamsView:
             stream_view.stream_search_box
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, mocker, stream_view, key, widget_size):
+    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    def test_keypress_CLEAR_SEARCH(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
@@ -725,8 +725,8 @@ class TestTopicsView:
             topic_view.topic_search_box
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, mocker, topic_view, key, widget_size):
+    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    def test_keypress_CLEAR_SEARCH(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
@@ -1105,8 +1105,8 @@ class TestRightColumnView:
             right_col_view.user_search
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test_keypress_GO_BACK(self, right_col_view, mocker, key, widget_size):
+    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    def test_keypress_CLEAR_SEARCH(self, right_col_view, mocker, key, widget_size):
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".UsersView")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
