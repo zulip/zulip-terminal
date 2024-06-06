@@ -19,6 +19,7 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
+from zulipterminal.config.keys import primary_display_key_for_command
 from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
@@ -35,6 +36,7 @@ from zulipterminal.ui_tools.views import (
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    ExceptionView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -299,6 +301,11 @@ class Controller:
 
     def popup_with_message(self, text: str, width: int) -> None:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
+
+    def show_exception_popup(self, text: str, width: int, traceback: str) -> None:
+        self.show_pop_up(
+            ExceptionView(self, text, width, "EXCEPTION", traceback), "area:error"
+        )
 
     def show_about(self) -> None:
         self.show_pop_up(
@@ -709,8 +716,12 @@ class Controller:
                     + "\n\n"
                     + "Details of the exception can be found in "
                     + exception_logfile
+                    + "\n\n"
+                    + f"Press [{primary_display_key_for_command('COPY_TRACEBACK')}]"
+                    + " to copy traceback to clipboard."
                 )
-                self.popup_with_message(message, width=80)
+                full_traceback = "".join(traceback.format_exception(*exc))
+                self.show_exception_popup(message, traceback=full_traceback, width=80)
                 self._exception_info = None
         return True  # If don't raise, retain pipe
 
