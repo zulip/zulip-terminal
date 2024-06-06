@@ -62,6 +62,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Copy information from About Menu to clipboard',
         'key_category': 'general',
     },
+    'EXIT_POPUP': {
+        'keys': ['esc'],
+        'help_text': 'Close popup',
+        'key_category': 'navigation',
+    },
     'GO_UP': {
         'keys': ['up', 'k'],
         'help_text': 'Go up / Previous message',
