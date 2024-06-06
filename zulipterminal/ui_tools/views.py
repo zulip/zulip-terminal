@@ -415,6 +415,8 @@ class StreamsView(urwid.Frame):
             self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
@@ -543,6 +545,8 @@ class TopicsView(urwid.Frame):
             self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
@@ -790,6 +794,8 @@ class RightColumnView(urwid.Frame):
             self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         elif is_command_key("GO_LEFT", key):
             self.view.show_right_panel(visible=False)
         return super().keypress(size, key)
@@ -949,6 +955,8 @@ class LeftColumnView(urwid.Pile):
             return key
         elif is_command_key("GO_RIGHT", key):
             self.view.show_left_panel(visible=False)
+        elif is_command_key("ALL_MESSAGES", key) and self.get_focus() is self.menu_v:
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
