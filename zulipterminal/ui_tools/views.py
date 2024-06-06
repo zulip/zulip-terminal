@@ -1076,6 +1076,24 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "EXIT_POPUP", width, title)
 
 
+class ExceptionView(NoticeView):
+    def __init__(
+        self,
+        controller: Any,
+        notice_text: Any,
+        width: int,
+        title: str,
+        traceback: str,
+    ) -> None:
+        self.traceback = traceback
+        super().__init__(controller, notice_text, width, title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("COPY_TRACEBACK", key):
+            self.controller.copy_to_clipboard(self.traceback, "Traceback")
+        return super().keypress(size, key)
+
+
 class AboutView(PopUpView):
     def __init__(
         self,
