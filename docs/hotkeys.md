@@ -11,7 +11,6 @@
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
-|Show/hide user information (from users list)|<kbd>i</kbd>|
 |New footer hotkey hint|<kbd>Tab</kbd>|
 
 ## Navigation
@@ -64,6 +63,12 @@
 |Toggle topics in a stream|<kbd>t</kbd>|
 |Mute/unmute streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
+
+## User list actions
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide user information|<kbd>i</kbd>|
+|Narrow to direct messages with user|<kbd>Enter</kbd>|
 
 ## Begin composing a message
 |Command|Key Combination|
