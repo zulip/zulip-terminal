@@ -26,6 +26,14 @@
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
 |Trigger the selected entry|<kbd>Enter</kbd> / <kbd>Space</kbd>|
+
+## Switching Messages View
+|Command|Key Combination|
+| :--- | :---: |
+|Narrow to the stream of the current message|<kbd>s</kbd>|
+|Narrow to the topic of the current message|<kbd>S</kbd>|
+|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
 |Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
@@ -49,9 +57,6 @@
 | :--- | :---: |
 |Edit message's content or topic|<kbd>e</kbd>|
 |Show/hide emoji picker for current message|<kbd>:</kbd>|
-|Narrow to the stream of the current message|<kbd>s</kbd>|
-|Narrow to the topic of the current message|<kbd>S</kbd>|
-|Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Toggle first emoji reaction on selected message|<kbd>=</kbd>|
 |Toggle thumbs-up reaction to the current message|<kbd>+</kbd>|
 |Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
@@ -90,7 +95,6 @@
 |Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
-|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
 
