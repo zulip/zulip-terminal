@@ -73,8 +73,6 @@
 |Toggle topics in a stream|<kbd>t</kbd>|
 |Mute/unmute streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
-|Show/hide stream members (from stream information)|<kbd>m</kbd>|
-|Copy stream email to clipboard (from stream information)|<kbd>c</kbd>|
 
 ## Begin composing a message
 |Command|Key Combination|
@@ -122,4 +120,10 @@
 |Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
 |Delete previous character|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
 |Swap with previous character|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
+
+## Stream information (press i to view info of a stream)
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide stream members|<kbd>m</kbd>|
+|Copy stream email to clipboard|<kbd>c</kbd>|
 
