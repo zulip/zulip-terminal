@@ -42,6 +42,7 @@
 |Search topics in a stream|<kbd>q</kbd>|
 |Search emojis from emoji picker|<kbd>p</kbd>|
 |Submit search and browse results|<kbd>Enter</kbd>|
+|Clear search in current panel|<kbd>Esc</kbd>|
 
 ## Message actions
 |Command|Key Combination|
