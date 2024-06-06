@@ -314,16 +314,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_MEMBERS': {
         'keys': ['m'],
-        'help_text': 'Show/hide stream members (from stream information)',
+        'help_text': 'Show/hide stream members',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_list',
+        'key_category': 'stream_info',
     },
     'COPY_STREAM_EMAIL': {
         'keys': ['c'],
         'help_text':
-            'Copy stream email to clipboard (from stream information)',
+            'Copy stream email to clipboard',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_list',
+        'key_category': 'stream_info',
     },
     'REDRAW': {
         'keys': ['ctrl l'],
@@ -456,6 +456,10 @@ HELP_CATEGORIES = {
     "compose_box": "Writing a message",
     "editor_navigation": "Editor: Navigation",
     "editor_text_manipulation": "Editor: Text Manipulation",
+    "stream_info": (
+        f"Stream information (press {KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
+        f" to view info of a stream)"
+    ),
 }
 
 ZT_TO_URWID_CMD_MAPPING = {
