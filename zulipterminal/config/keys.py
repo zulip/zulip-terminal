@@ -46,12 +46,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide About Menu',
         'key_category': 'general',
     },
-    'GO_BACK': {
-        'keys': ['esc'],
-        'help_text': 'Go back',
-        'excluded_from_random_tips': False,
-        'key_category': 'general',
-    },
     'OPEN_DRAFT': {
         'keys': ['d'],
         'help_text': 'Open draft message saved in this session',
@@ -186,6 +180,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'NARROW_MESSAGE_RECIPIENT': {
         'keys': ['meta .'],
         'help_text': 'Narrow to compose box message recipient',
+        'key_category': 'msg_compose',
+    },
+    'EXIT_COMPOSE': {
+        'keys': ['esc'],
+        'help_text': 'Exit message compose box',
         'key_category': 'msg_compose',
     },
     'TOGGLE_NARROW': {

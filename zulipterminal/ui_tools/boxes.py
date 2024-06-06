@@ -775,7 +775,7 @@ class WriteBox(urwid.Pile):
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
-                    self.keypress(size, primary_key_for_command("GO_BACK"))
+                    self.keypress(size, primary_key_for_command("EXIT_COMPOSE"))
                     assert self.msg_edit_state is None
         elif is_command_key("NARROW_MESSAGE_RECIPIENT", key):
             if self.compose_box_status == "open_with_stream":
@@ -798,7 +798,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.report_error(
                         "Cannot narrow to message without specifying recipients."
                     )
-        elif is_command_key("GO_BACK", key):
+        elif is_command_key("EXIT_COMPOSE", key):
             self.send_stop_typing_status()
             self._set_compose_attributes_to_defaults()
             self.view.controller.exit_editor_mode()
