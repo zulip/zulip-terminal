@@ -328,8 +328,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'USER_INFO': {
         'keys': ['i'],
-        'help_text': 'Show/hide user information (from users list)',
-        'key_category': 'general',
+        'help_text': 'Show/hide user information',
+        'key_category': 'user_list',
+    },
+    'NARROW_TO_USER_PM': {
+        # Added to clarify functionality of button activation,
+        # as opposed to opening user profile or other effects.
+        # Implementation uses ACTIVATE_BUTTON command.
+        'keys': ['enter'],
+        'help_text': 'Narrow to direct messages with user',
+        'key_category': 'user_list',
     },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a', 'home'],
@@ -438,6 +446,7 @@ HELP_CATEGORIES = {
     "searching": "Searching",
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
+    "user_list": "User list actions",
     "msg_compose": "Composing a Message",
     "editor_navigation": "Editor: Navigation",
     "editor_text_manipulation": "Editor: Text Manipulation",
