@@ -296,16 +296,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'EDIT_HISTORY': {
         'keys': ['e'],
-        'help_text': 'Show/hide edit history (from message information)',
+        'help_text': 'Show/hide edit history',
         'excluded_from_random_tips': True,
-        'key_category': 'msg_actions',
+        'key_category': 'msg_info',
     },
     'VIEW_IN_BROWSER': {
         'keys': ['v'],
         'help_text':
-            'View current message in browser (from message information)',
+            'View current message in browser',
         'excluded_from_random_tips': True,
-        'key_category': 'msg_actions',
+        'key_category': 'msg_info',
     },
     'STREAM_INFO': {
         'keys': ['i'],
@@ -435,13 +435,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
-        'help_text': 'Show/hide full rendered message (from message information)',
-        'key_category': 'msg_actions',
+        'help_text': 'Show/hide full rendered message',
+        'key_category': 'msg_info',
     },
     'FULL_RAW_MESSAGE': {
         'keys': ['r'],
-        'help_text': 'Show/hide full raw message (from message information)',
-        'key_category': 'msg_actions',
+        'help_text': 'Show/hide full raw message',
+        'key_category': 'msg_info',
     },
     'NEW_HINT': {
         'keys': ['tab'],
@@ -465,6 +465,10 @@ HELP_CATEGORIES = {
     "stream_info": (
         f"Stream information (press {KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
         f" to view info of a stream)"
+    ),
+    "msg_info": (
+        f"Message information (press {KEY_BINDINGS['MSG_INFO']['keys'][0]}"
+        f" to view info of a message)"
     ),
 }
 
