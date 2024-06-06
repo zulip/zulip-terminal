@@ -18,6 +18,7 @@
 ## Navigation
 |Command|Key Combination|
 | :--- | :---: |
+|Close popup|<kbd>Esc</kbd>|
 |Go up / Previous message|<kbd>Up</kbd> / <kbd>k</kbd>|
 |Go down / Next message|<kbd>Down</kbd> / <kbd>j</kbd>|
 |Go left|<kbd>Left</kbd> / <kbd>h</kbd>|

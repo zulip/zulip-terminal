@@ -1058,7 +1058,7 @@ class PopUpView(urwid.Frame):
         return widgets
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key) or is_command_key(self.command, key):
+        if is_command_key("EXIT_POPUP", key) or is_command_key(self.command, key):
             self.controller.exit_popup()
 
         return super().keypress(size, key)
@@ -1073,7 +1073,7 @@ class NoticeView(PopUpView):
             urwid.Padding(urwid.Text(notice_text), left=1, right=1),
             urwid.Divider(),
         ]
-        super().__init__(controller, widgets, "GO_BACK", width, title)
+        super().__init__(controller, widgets, "EXIT_POPUP", width, title)
 
 
 class AboutView(PopUpView):
@@ -1351,7 +1351,7 @@ class PopUpConfirmationView(urwid.Overlay):
         self.controller.exit_popup()
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key):
+        if is_command_key("EXIT_POPUP", key):
             self.controller.exit_popup()
         return super().keypress(size, key)
 
@@ -1561,7 +1561,7 @@ class StreamMembersView(PopUpView):
         super().__init__(controller, widgets, "STREAM_INFO", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key) or is_command_key("STREAM_MEMBERS", key):
+        if is_command_key("EXIT_POPUP", key) or is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_info(stream_id=self.stream_id)
             return key
         return super().keypress(size, key)
@@ -1895,7 +1895,7 @@ class EditHistoryView(PopUpView):
         return author_prefix
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key) or is_command_key("EDIT_HISTORY", key):
+        if is_command_key("EXIT_POPUP", key) or is_command_key("EDIT_HISTORY", key):
             self.controller.show_msg_info(
                 msg=self.message,
                 topic_links=self.topic_links,
@@ -1937,7 +1937,7 @@ class FullRenderedMsgView(PopUpView):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key) or is_command_key(
+        if is_command_key("EXIT_POPUP", key) or is_command_key(
             "FULL_RENDERED_MESSAGE", key
         ):
             self.controller.show_msg_info(
@@ -1989,7 +1989,7 @@ class FullRawMsgView(PopUpView):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("GO_BACK", key) or is_command_key("FULL_RAW_MESSAGE", key):
+        if is_command_key("EXIT_POPUP", key) or is_command_key("FULL_RAW_MESSAGE", key):
             self.controller.show_msg_info(
                 msg=self.message,
                 topic_links=self.topic_links,
@@ -2144,7 +2144,7 @@ class EmojiPickerView(PopUpView):
             self.emoji_search.set_caption(" ")
             self.controller.enter_editor_mode_with(self.emoji_search)
             return key
-        elif is_command_key("GO_BACK", key) or is_command_key("ADD_REACTION", key):
+        elif is_command_key("EXIT_POPUP", key) or is_command_key("ADD_REACTION", key):
             for emoji_code, emoji_name in self.selected_emojis.items():
                 self.controller.model.toggle_message_reaction(self.message, emoji_name)
             self.emoji_search.reset_search_text()
