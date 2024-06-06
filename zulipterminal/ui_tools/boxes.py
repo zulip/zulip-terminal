@@ -1010,7 +1010,10 @@ class PanelSearchBox(ReadlineEdit):
             self.reset_search_text()
             self.panel_view.set_focus("body")
             # Don't call 'Esc' when inside a popup search-box.
-            if not self.panel_view.view.controller.is_any_popup_open():
+            if (
+                not self.panel_view.view.controller.is_any_popup_open()
+                and self.panel_view.search_status != SearchStatus.DEFAULT
+            ):
                 self.panel_view.keypress(size, primary_key_for_command("GO_BACK"))
         elif (
             is_command_key("EXECUTE_SEARCH", key)
