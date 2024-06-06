@@ -36,6 +36,7 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.config.ui_mappings import STREAM_ACCESS_TYPE
 from zulipterminal.helper import (
+    SearchStatus,
     asynch,
     format_string,
     match_emoji,
@@ -1043,7 +1044,10 @@ class PanelSearchBox(ReadlineEdit):
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
                 self.panel_view.keypress(size, primary_key_for_command("CLEAR_SEARCH"))
-        elif is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
+        elif (
+            is_command_key("EXECUTE_SEARCH", key)
+            and self.panel_view.search_status != SearchStatus.EMPTY
+        ):
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
