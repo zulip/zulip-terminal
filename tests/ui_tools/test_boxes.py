@@ -235,7 +235,7 @@ class TestWriteBox:
 
         assert not write_box.model.send_private_message.called
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_private_compose(
         self,
         key: str,
@@ -256,7 +256,7 @@ class TestWriteBox:
         assert write_box.msg_write_box.edit_text == ""
         assert write_box.compose_box_status == "closed"
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_stream_compose(
         self,
         key: str,
@@ -1516,7 +1516,7 @@ class TestWriteBox:
             (primary_key_for_command("AUTOCOMPLETE"), True, True, False),
             (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True, False),
             # footer resets
-            (primary_key_for_command("GO_BACK"), True, False, True),
+            (primary_key_for_command("EXIT_COMPOSE"), True, False, True),
             ("space", True, False, True),
             ("k", True, False, True),
         ],

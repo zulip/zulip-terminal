@@ -8,7 +8,6 @@
 |Show/hide Help Menu|<kbd>?</kbd>|
 |Show/hide Markdown Help Menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
 |Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
-|Go back|<kbd>Esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
@@ -87,6 +86,7 @@
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|Exit message compose box|<kbd>Esc</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
 
 ## Editor: Navigation
