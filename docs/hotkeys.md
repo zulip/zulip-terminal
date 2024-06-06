@@ -9,6 +9,7 @@
 |Show/hide Markdown Help Menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
 |Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|
+|Copy traceback from Exception Popup to clipboard|<kbd>c</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
 |New footer hotkey hint|<kbd>Tab</kbd>|
