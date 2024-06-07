@@ -30,14 +30,14 @@
 ## Switching Messages View
 |Command|Key Combination|
 | :--- | :---: |
-|Narrow to the stream of the current message|<kbd>s</kbd>|
-|Narrow to the topic of the current message|<kbd>S</kbd>|
-|Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
-|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
-|Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
-|Narrow to all direct messages|<kbd>P</kbd>|
-|Narrow to all starred messages|<kbd>f</kbd>|
-|Narrow to messages in which you're mentioned|<kbd>#</kbd>|
+|View the stream of the current message|<kbd>s</kbd>|
+|View the topic of the current message|<kbd>S</kbd>|
+|Zoom in/out the message's conversation context|<kbd>z</kbd>|
+|Switch message view to the compose box target|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|View all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
+|View all direct messages|<kbd>P</kbd>|
+|View all starred messages|<kbd>f</kbd>|
+|View all messages in which you're mentioned|<kbd>#</kbd>|
 |Next unread topic|<kbd>n</kbd>|
 |Next unread direct message|<kbd>p</kbd>|
 
