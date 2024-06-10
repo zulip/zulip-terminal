@@ -1224,7 +1224,7 @@ class HelpView(PopUpView):
             keys_in_category = (
                 binding
                 for binding in KEY_BINDINGS.values()
-                if binding["key_category"] == category
+                if category in binding["key_categories"]
             )
             key_bindings = [
                 (

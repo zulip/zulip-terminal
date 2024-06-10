@@ -136,9 +136,10 @@ def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     """
     categories = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
-        categories[item["key_category"]].append(
-            (item["help_text"], display_keys_for_command(cmd))
-        )
+        for category in item["key_categories"]:
+            categories[category].append(
+                (item["help_text"], display_keys_for_command(cmd))
+            )
     return categories
 
 
