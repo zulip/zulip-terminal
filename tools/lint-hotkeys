@@ -39,8 +39,8 @@ def lint_hotkeys_file() -> None:
     existing OUTPUT_FILE
     """
     hotkeys_file_string = get_hotkeys_file_string()
+    error_flag = 0 if is_every_key_category_valid() else 1
     # To lint keys description
-    error_flag = 0
     categories = read_help_categories()
     for action in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
@@ -89,6 +89,24 @@ def generate_hotkeys_file() -> None:
     output_file_matches_string(hotkeys_file_string)
     write_hotkeys_file(hotkeys_file_string)
     print(f"Hot Keys list saved in {OUTPUT_FILE}")
+
+
+def is_every_key_category_valid() -> bool:
+    """
+    Check for typos in key categories in KEYS_FILE
+    """
+    error_flag = False
+    for key, binding in KEY_BINDINGS.items():
+        key_category = binding.get("key_category")
+        if key_category not in HELP_CATEGORIES:
+            print(
+                f"Invalid key_category '{key_category}' for key '{key}'."
+                f" Choose a category from:\n{', '.join(HELP_CATEGORIES.keys())}\n"
+            )
+            error_flag = True
+    if not error_flag:
+        print("All key bindings have valid categories.")
+    return not error_flag
 
 
 def get_hotkeys_file_string() -> str:
