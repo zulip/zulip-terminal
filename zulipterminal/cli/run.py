@@ -332,6 +332,27 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
+def check_for_default_zuliprc() -> str:
+    zuliprc_locations = [
+        CONFIG_PATH_ZULIPRC,
+        DOWNLOADED_PATH_ZULIPRC,
+        HOME_PATH_ZULIPRC,
+    ]
+    valid_locations = [
+        location for location in zuliprc_locations if Path(location).exists()
+    ]
+    count = len(valid_locations)
+    if count > 1:
+        valid_locations_string = "\n  ".join(valid_locations)
+        exit_with_error(
+            f"Found multiple zuliprc files at:\n  {valid_locations_string}\n"
+            "Please retry by specifying the path to your target zuliprc file."
+        )
+    elif count == 1:
+        return valid_locations[0]
+    return ""
+
+
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
     zuliprc_path = path.expanduser(zuliprc_str)
     while not path.exists(zuliprc_path):
