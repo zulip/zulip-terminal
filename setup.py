@@ -116,5 +116,6 @@ setup(
         "pytz>=2022.7.1",
         "tzlocal>=2.1",
         "pyperclip>=1.8.1",
+        "platformdirs>=4.2.0",
     ],
 )
