@@ -158,6 +158,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="list all the organizations that you have configurations for, and exit",
     )
     parser.add_argument(
+        "-n",
+        "--new-organization",
+        action="store_true",
+        help="login to a new organization",
+    )
+    parser.add_argument(
         "--theme",
         "-t",
         help=f"choose color theme (default: {DEFAULT_SETTINGS['theme']})",
@@ -294,7 +300,7 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str, str]]:
     return None
 
 
-def fetch_zuliprc(zuliprc_path: str) -> str:
+def fetch_zuliprc(zuliprc_path: str, new_realm: bool) -> str:
     supported_locations = [
         ZULIP_CONFIG_PATH,
         HOME_PATH_ZULIPRC,
@@ -305,8 +311,13 @@ def fetch_zuliprc(zuliprc_path: str) -> str:
         if zuliprc_path != ""
         else "any of the following locations:\n  " + "\n  ".join(supported_locations)
     )
+    missing_zuliprc_text = (
+        ""
+        if new_realm
+        else f"{in_color('red', f'zuliprc file was not found at {locations_checked}')}"
+    )
     print(
-        f"{in_color('red', f'zuliprc file was not found at {locations_checked}')}"
+        f"{missing_zuliprc_text}"
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
         f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
@@ -392,15 +403,21 @@ def check_for_default_zuliprc() -> str:
     return ""
 
 
-def parse_zuliprc(zuliprc_str: str) -> Tuple[Dict[str, SettingData], str]:
+def parse_zuliprc(
+    zuliprc_str: str, new_realm: bool
+) -> Tuple[Dict[str, SettingData], str]:
     zuliprc_path = (
-        check_for_default_zuliprc()
-        if zuliprc_str == ""
-        else path.expanduser(zuliprc_str)
+        (
+            check_for_default_zuliprc()
+            if zuliprc_str == ""
+            else path.expanduser(zuliprc_str)
+        )
+        if not new_realm
+        else ""
     )
     while zuliprc_path == "" or not path.exists(zuliprc_path):
         try:
-            zuliprc_path = fetch_zuliprc(zuliprc_path)
+            zuliprc_path = fetch_zuliprc(zuliprc_path, new_realm)
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
         except (OSError, ValueError):
             # Remove zuliprc file if created.
@@ -559,7 +576,7 @@ def main(options: Optional[List[str]] = None) -> None:
     )
 
     try:
-        zterm, zuliprc_path = parse_zuliprc(zuliprc_path)
+        zterm, zuliprc_path = parse_zuliprc(zuliprc_path, args.new_organization)
 
         ### Validate footlinks settings (not from command line)
         if (
