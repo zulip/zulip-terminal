@@ -274,7 +274,7 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     return None
 
 
-def fetch_zuliprc(zuliprc_path: str) -> None:
+def fetch_zuliprc(zuliprc_path: str) -> str:
     print(
         f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
         f"\nPlease enter your credentials to login into your Zulip organization."
@@ -301,16 +301,18 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         login_data = get_api_key(realm_url)
 
     preferred_realm_url, login_id, api_key = login_data
+    path_to_new_zuliprc = HOME_PATH_ZULIPRC
     save_zuliprc_failure = _write_zuliprc(
-        to_path=HOME_PATH_ZULIPRC,
+        to_path=path_to_new_zuliprc,
         login_id=login_id,
         api_key=api_key,
         server_url=preferred_realm_url,
     )
     if not save_zuliprc_failure:
-        print(f"Generated API key saved at {HOME_PATH_ZULIPRC}")
+        print(f"Generated API key saved at {path_to_new_zuliprc}")
     else:
         exit_with_error(save_zuliprc_failure)
+    return str(path_to_new_zuliprc)
 
 
 def _write_zuliprc(
@@ -353,11 +355,11 @@ def check_for_default_zuliprc() -> str:
     return ""
 
 
-def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
-    zuliprc_path = path.expanduser(zuliprc_str)
-    while not path.exists(zuliprc_path):
+def parse_zuliprc(zuliprc_str: str) -> Tuple[Dict[str, SettingData], str]:
+    zuliprc_path = zuliprc_str if zuliprc_str == "" else path.expanduser(zuliprc_str)
+    while zuliprc_path == "" or not path.exists(zuliprc_path):
         try:
-            fetch_zuliprc(zuliprc_path)
+            zuliprc_path = fetch_zuliprc(zuliprc_path)
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
         except (OSError, ValueError):
             # Remove zuliprc file if created.
@@ -406,7 +408,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
         for conf in config:
             settings[conf] = SettingData(config[conf], ConfigSource.ZULIPRC)
 
-    return settings
+    return settings, zuliprc_path
 
 
 def list_themes() -> str:
@@ -461,10 +463,9 @@ def main(options: Optional[List[str]] = None) -> None:
         print(list_themes())
         sys.exit(0)
 
+    zuliprc_path = ""
     if args.config_file:
         zuliprc_path = args.config_file
-    else:
-        zuliprc_path = HOME_PATH_ZULIPRC
 
     print(
         "Detected:"
@@ -473,7 +474,7 @@ def main(options: Optional[List[str]] = None) -> None:
     )
 
     try:
-        zterm = parse_zuliprc(zuliprc_path)
+        zterm, zuliprc_path = parse_zuliprc(zuliprc_path)
 
         ### Validate footlinks settings (not from command line)
         if (
