@@ -379,7 +379,6 @@ def unreadable_dir(tmp_path: Path) -> Generator[Tuple[Path, Path], None, None]:
     ids=["valid_path_but_cannot_be_written_to", "path_does_not_exist"],
 )
 def test_main_cannot_write_zuliprc_given_good_credentials(
-    monkeypatch: pytest.MonkeyPatch,
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
     unreadable_dir: Tuple[Path, Path],
@@ -390,7 +389,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
     # This is default base path to use
     zuliprc_path = os.path.join(str(tmp_path), path_to_use)
-    monkeypatch.setenv("HOME", zuliprc_path)
+    mocker.patch("zulipterminal.cli.run.HOME_PATH_ZULIPRC", zuliprc_path + "/zuliprc")
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")

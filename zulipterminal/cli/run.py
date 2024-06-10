@@ -11,6 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
+from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
@@ -26,7 +27,12 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.platform_code import detected_platform, detected_python_in_full
+from zulipterminal.platform_code import (
+    config_file_path,
+    detected_platform,
+    detected_python_in_full,
+    downloads_file_path,
+)
 from zulipterminal.version import ZT_VERSION
 
 
@@ -40,6 +46,10 @@ class SettingData(NamedTuple):
     value: str
     source: ConfigSource
 
+
+DOWNLOADED_PATH_ZULIPRC = str(downloads_file_path() / "zuliprc")
+HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
+CONFIG_PATH_ZULIPRC = str(config_file_path() / "zulip-terminal" / "zuliprc")
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
@@ -292,13 +302,13 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
 
     preferred_realm_url, login_id, api_key = login_data
     save_zuliprc_failure = _write_zuliprc(
-        zuliprc_path,
+        to_path=HOME_PATH_ZULIPRC,
         login_id=login_id,
         api_key=api_key,
         server_url=preferred_realm_url,
     )
     if not save_zuliprc_failure:
-        print(f"Generated API key saved at {zuliprc_path}")
+        print(f"Generated API key saved at {HOME_PATH_ZULIPRC}")
     else:
         exit_with_error(save_zuliprc_failure)
 
@@ -433,7 +443,7 @@ def main(options: Optional[List[str]] = None) -> None:
     if args.config_file:
         zuliprc_path = args.config_file
     else:
-        zuliprc_path = "~/zuliprc"
+        zuliprc_path = HOME_PATH_ZULIPRC
 
     print(
         "Detected:"
