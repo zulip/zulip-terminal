@@ -381,14 +381,16 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
     # This is default base path to use
     zuliprc_path = os.path.join(str(tmp_path), path_to_use)
-    mocker.patch("zulipterminal.cli.run.CONFIG_PATH_ZULIPRC", zuliprc_path + "/zuliprc")
+    mocker.patch(
+        "zulipterminal.cli.run.ZULIP_CONFIG_PATH", zuliprc_path + "/zulip-terminal"
+    )
     mocker.patch("zulipterminal.cli.run.check_for_default_zuliprc", return_value="")
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
     mocker.patch(
         MODULE + ".get_api_key",
-        return_value=("my_site", "my_login", "my_api_key"),
+        return_value=("my_site", "my_realm", "my_login", "my_api_key"),
     )
 
     with pytest.raises(SystemExit):
@@ -400,7 +402,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     expected_line = (
         "\x1b[91m"
         f"{expected_exception}: zuliprc could not be created "
-        f"at {os.path.join(zuliprc_path, 'zuliprc')}"
+        f"at {zuliprc_path}/zulip-terminal/my_realm/zuliprc"
         "\x1b[0m"
     )
     assert lines[-1] == expected_line

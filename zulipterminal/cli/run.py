@@ -49,7 +49,7 @@ class SettingData(NamedTuple):
 
 DOWNLOADED_PATH_ZULIPRC = str(downloads_file_path() / "zuliprc")
 HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
-CONFIG_PATH_ZULIPRC = str(config_file_path() / "zulip-terminal" / "zuliprc")
+ZULIP_CONFIG_PATH = str(config_file_path() / "zulip-terminal")
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
@@ -246,7 +246,7 @@ def get_server_settings(realm_url: str) -> ServerSettings:
     return response.json()
 
 
-def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str, str]]:
     from getpass import getpass
 
     try:
@@ -257,6 +257,7 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     # Assuming we connect to and get data from the server, use the realm_url it suggests
     # This avoids cases where there are redirects between http and https, for example
     preferred_realm_url = server_properties["realm_uri"]
+    realm_name = server_properties["realm_name"]
 
     login_id_label = get_login_label(server_properties)
     login_id = styled_input(login_id_label)
@@ -270,13 +271,18 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
         },
     )
     if response.status_code == requests.codes.OK:
-        return preferred_realm_url, login_id, str(response.json()["api_key"])
+        return (
+            preferred_realm_url,
+            realm_name,
+            login_id,
+            str(response.json()["api_key"]),
+        )
     return None
 
 
 def fetch_zuliprc(zuliprc_path: str) -> str:
     supported_locations = [
-        CONFIG_PATH_ZULIPRC,
+        ZULIP_CONFIG_PATH,
         HOME_PATH_ZULIPRC,
         DOWNLOADED_PATH_ZULIPRC,
     ]
@@ -310,8 +316,8 @@ def fetch_zuliprc(zuliprc_path: str) -> str:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
-    preferred_realm_url, login_id, api_key = login_data
-    path_to_new_zuliprc = CONFIG_PATH_ZULIPRC
+    preferred_realm_url, realm_name, login_id, api_key = login_data
+    path_to_new_zuliprc = str(Path(ZULIP_CONFIG_PATH) / realm_name / "zuliprc")
     save_zuliprc_failure = _write_zuliprc(
         to_path=path_to_new_zuliprc,
         login_id=login_id,
@@ -347,13 +353,19 @@ def _write_zuliprc(
 
 def check_for_default_zuliprc() -> str:
     zuliprc_locations = [
-        CONFIG_PATH_ZULIPRC,
         DOWNLOADED_PATH_ZULIPRC,
         HOME_PATH_ZULIPRC,
     ]
     valid_locations = [
         location for location in zuliprc_locations if Path(location).exists()
     ]
+    valid_locations.extend(
+        str(file) for file in Path(ZULIP_CONFIG_PATH).glob("zuliprc")
+    )
+    valid_locations.extend(
+        str(file) for file in Path(ZULIP_CONFIG_PATH).glob("*/zuliprc")
+    )
+
     count = len(valid_locations)
     if count > 1:
         valid_locations_string = "\n  ".join(valid_locations)
