@@ -452,6 +452,30 @@ def list_themes() -> str:
     )
 
 
+def path_to_realm_zuliprc(realm_name_prefix: str) -> str:
+    if len(realm_name_prefix) < 3:
+        exit_with_error("Organization name prefix must be at least 3 characters long")
+    matching_dirs = [
+        dir
+        for dir in Path(ZULIP_CONFIG_PATH).glob("*/")
+        if dir.name.lower().startswith(realm_name_prefix.lower())
+    ]
+    if len(matching_dirs) > 1:
+        matching_dirs_string = "\n".join(str(dir) for dir in matching_dirs)
+        exit_with_error(
+            f"Found multiple organizations starting with '{realm_name_prefix}':\n"
+            f"{matching_dirs_string}\n"
+        )
+    elif len(matching_dirs) == 0:
+        exit_with_error(
+            f"Could not find any organizations starting with '{realm_name_prefix}'."
+        )
+    matching_files = list(matching_dirs[0].glob("zuliprc"))
+    if len(matching_files) == 0:
+        exit_with_error(f"Could not find any zuliprc files at:\n{matching_dirs[0]}\n")
+    return str(matching_files[0])
+
+
 def main(options: Optional[List[str]] = None) -> None:
     """
     Launch Zulip Terminal.
