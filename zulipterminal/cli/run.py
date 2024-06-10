@@ -275,8 +275,18 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
 
 
 def fetch_zuliprc(zuliprc_path: str) -> str:
+    supported_locations = [
+        CONFIG_PATH_ZULIPRC,
+        HOME_PATH_ZULIPRC,
+        DOWNLOADED_PATH_ZULIPRC,
+    ]
+    locations_checked = (
+        zuliprc_path
+        if zuliprc_path != ""
+        else "any of the following locations:\n  " + "\n  ".join(supported_locations)
+    )
     print(
-        f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
+        f"{in_color('red', f'zuliprc file was not found at {locations_checked}')}"
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
         f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
@@ -356,7 +366,11 @@ def check_for_default_zuliprc() -> str:
 
 
 def parse_zuliprc(zuliprc_str: str) -> Tuple[Dict[str, SettingData], str]:
-    zuliprc_path = zuliprc_str if zuliprc_str == "" else path.expanduser(zuliprc_str)
+    zuliprc_path = (
+        check_for_default_zuliprc()
+        if zuliprc_str == ""
+        else path.expanduser(zuliprc_str)
+    )
     while zuliprc_path == "" or not path.exists(zuliprc_path):
         try:
             zuliprc_path = fetch_zuliprc(zuliprc_path)
