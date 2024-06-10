@@ -130,6 +130,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         description=description, formatter_class=formatter_class
     )
     parser.add_argument(
+        "org-name",
+        nargs="?",
+        action="store",
+        default="",
+        help="specify the name (case-insensitive prefix) of your zulip organization "
+        "to fetch its configuration",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -514,9 +522,13 @@ def main(options: Optional[List[str]] = None) -> None:
         print(list_themes())
         sys.exit(0)
 
-    zuliprc_path = ""
+    zuliprc_path = getattr(args, "org-name")
     if args.config_file:
+        if zuliprc_path != "":
+            exit_with_error("Cannot use --config-file and org-name together")
         zuliprc_path = args.config_file
+    elif zuliprc_path:
+        zuliprc_path = path_to_realm_zuliprc(zuliprc_path)
 
     print(
         "Detected:"
