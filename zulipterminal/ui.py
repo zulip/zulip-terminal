@@ -328,6 +328,9 @@ class View(urwid.WidgetWrap):
         elif is_command_key("MARKDOWN_HELP", key):
             self.controller.show_markdown_help()
             return key
+        elif is_command_key("NEW_HINT", key):
+            self.set_footer_text()
+            return key
         return super().keypress(size, key)
 
     def mouse_event(

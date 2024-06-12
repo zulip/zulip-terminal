@@ -438,6 +438,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide full raw message (from message information)',
         'key_category': 'msg_actions',
     },
+    'NEW_HINT': {
+        'keys': ['tab'],
+        'help_text': 'New footer hotkey hint',
+        'key_category': 'general',
+    },
 }
 # fmt: on
 
