@@ -341,6 +341,23 @@ class TestView:
         assert returned_key == key
         assert view.body.focus_col == 1
 
+    @pytest.mark.parametrize("key", keys_for_command("NEW_HINT"))
+    def test_keypress_NEW_HINT(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Box],
+    ) -> None:
+        size = widget_size(view)
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        mocker.patch(CONTROLLER + ".is_in_editor_mode", return_value=False)
+
+        returned_key = view.keypress(size, key)
+
+        set_footer_text.assert_called_once_with()
+        assert returned_key == key
+
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_autohide_users(
