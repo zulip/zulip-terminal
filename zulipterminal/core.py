@@ -299,7 +299,7 @@ class Controller:
         stream_members_view = StreamMembersView(self, stream_id)
         self.show_pop_up(stream_members_view, "area:stream")
 
-    def popup_with_message(self, text: str, width: int) -> None:
+    def show_popup_with_message(self, text: str, width: int) -> None:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
 
     def show_exception_popup(self, text: str, width: int, traceback: str) -> None:
