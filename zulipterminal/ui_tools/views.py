@@ -1091,6 +1091,8 @@ class ExceptionView(NoticeView):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("COPY_TRACEBACK", key):
             self.controller.copy_to_clipboard(self.traceback, "Traceback")
+        if is_command_key("GO_BACK", key):
+            self.controller.view.set_footer_text()
         return super().keypress(size, key)
 
 

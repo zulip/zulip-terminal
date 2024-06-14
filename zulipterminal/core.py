@@ -649,6 +649,7 @@ class Controller:
         self.deregister_client()
 
     def prompting_exit_handler(self, signum: int, frame: Any) -> None:
+        self.view.set_footer_text()
         question = urwid.Text(
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
@@ -697,6 +698,14 @@ class Controller:
                 )
                 self.show_exception_popup(message, traceback=full_traceback, width=80)
                 self._exception_info = None
+
+                self.view.set_footer_text(
+                    [
+                        "An exception occurred: ",
+                        "Press 'c' to copy traceback to clipboard.",
+                    ],
+                    "task:error",
+                )
         return True  # If don't raise, retain pipe
 
     def main(self) -> None:
