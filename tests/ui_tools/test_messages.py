@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from pytest import param as case
 from urwid import Columns, Divider, Padding, Text
 
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
@@ -1968,6 +1968,7 @@ class TestMessageBox:
     def test_mouse_event_left_click(
         self, mocker, msg_box, key, widget_size, compose_box_is_open
     ):
+        expected_keypress = primary_key_for_command("ACTIVATE_BUTTON")
         size = widget_size(msg_box)
         col = 1
         row = 1
@@ -1981,4 +1982,4 @@ class TestMessageBox:
         if compose_box_is_open:
             msg_box.keypress.assert_not_called()
         else:
-            msg_box.keypress.assert_called_once_with(size, key)
+            msg_box.keypress.assert_called_once_with(size, expected_keypress)

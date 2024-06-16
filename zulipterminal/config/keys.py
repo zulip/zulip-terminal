@@ -6,6 +6,7 @@ from typing import Dict, List
 
 from typing_extensions import NotRequired, TypedDict
 from urwid.command_map import (
+    ACTIVATE,
     CURSOR_DOWN,
     CURSOR_LEFT,
     CURSOR_MAX_RIGHT,
@@ -92,7 +93,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'navigation',
     },
     'ACTIVATE_BUTTON': {
-        'keys': ['enter'],
+        'keys': ['enter', ' '],
         'help_text': 'Trigger the selected entry',
         'key_category': 'navigation',
     },
@@ -445,6 +446,7 @@ ZT_TO_URWID_CMD_MAPPING = {
     "SCROLL_UP": CURSOR_PAGE_UP,
     "SCROLL_DOWN": CURSOR_PAGE_DOWN,
     "GO_TO_BOTTOM": CURSOR_MAX_RIGHT,
+    "ACTIVATE_BUTTON": ACTIVATE,
 }
 
 
@@ -490,6 +492,9 @@ def display_key_for_urwid_key(urwid_key: str) -> str:
     """
     Returns a displayable user-centric format of the urwid key.
     """
+    if urwid_key == " ":
+        return "Space"
+
     for urwid_map_key, display_map_key in URWID_KEY_TO_DISPLAY_KEY_MAPPING.items():
         if urwid_map_key in urwid_key:
             urwid_key = urwid_key.replace(urwid_map_key, display_map_key)
