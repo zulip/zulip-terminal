@@ -139,28 +139,28 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'CYCLE_COMPOSE_FOCUS': {
         'keys': ['tab'],
         'help_text': 'Cycle through recipient and content boxes',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'SEND_MESSAGE': {
         'keys': ['ctrl d', 'meta enter'],
         'help_text': 'Send a message',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'SAVE_AS_DRAFT': {
         'keys': ['meta s'],
         'help_text': 'Save current message as a draft',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'AUTOCOMPLETE': {
         'keys': ['ctrl f'],
         'help_text': ('Autocomplete @mentions, #stream_names, :emoji:'
                       ' and topics'),
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'AUTOCOMPLETE_REVERSE': {
         'keys': ['ctrl r'],
         'help_text': 'Cycle through autocomplete suggestions in reverse',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'ADD_REACTION': {
         'keys': [':'],
@@ -180,12 +180,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'NARROW_MESSAGE_RECIPIENT': {
         'keys': ['meta .'],
         'help_text': 'Narrow to compose box message recipient',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'EXIT_COMPOSE': {
         'keys': ['esc'],
         'help_text': 'Exit message compose box',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'TOGGLE_NARROW': {
         'keys': ['z'],
@@ -426,7 +426,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         # and to differentiate from other hotkeys using 'enter'.
         'keys': ['enter'],
         'help_text': 'Insert new line',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
@@ -448,7 +448,7 @@ HELP_CATEGORIES = {
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
     "open_compose": "Begin composing a message",
-    "msg_compose": "Composing a Message",
+    "compose_box": "Writing a message",
     "editor_navigation": "Editor: Navigation",
     "editor_text_manipulation": "Editor: Text Manipulation",
 }
