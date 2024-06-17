@@ -82,7 +82,7 @@
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
 
-## Composing a Message
+## Writing a message
 |Command|Key Combination|
 | :--- | :---: |
 |Cycle through recipient and content boxes|<kbd>Tab</kbd>|
