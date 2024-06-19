@@ -1097,6 +1097,7 @@ class AboutView(PopUpView):
             if server_feature_level
             else []
         )
+
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
             ("Server", [("Version", server_version)] + self.feature_level_content),
@@ -1120,10 +1121,27 @@ class AboutView(PopUpView):
             ),
         ]
 
+        # Prepare string version of contents to support copying to clipboard
+        sections = []
+        for section_title, properties in contents:
+            formatted_properties = "\n".join(
+                f"{label}: {value}" for label, value in properties
+            )
+            sections.append(f"#### {section_title}\n{formatted_properties}")
+        self.copy_info = "\n\n".join(sections)
+
+        about_keys = "[" + ", ".join(display_keys_for_command("COPY_ABOUT_INFO")) + "]"
+        contents.append((f"Copy information to clipboard {about_keys}", []))
+
         popup_width, column_widths = self.calculate_table_widths(contents, len(title))
         widgets = self.make_table_with_categories(contents, column_widths)
 
         super().__init__(controller, widgets, "ABOUT", popup_width, title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("COPY_ABOUT_INFO", key):
+            self.controller.copy_to_clipboard(self.copy_info, "About info")
+        return super().keypress(size, key)
 
 
 class UserInfoView(PopUpView):

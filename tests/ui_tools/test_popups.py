@@ -213,6 +213,14 @@ class TestAboutView:
         self.about_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
+    @pytest.mark.parametrize("key", {*keys_for_command("COPY_ABOUT_INFO")})
+    def test_keypress_copy_info(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.about_view)
+        self.about_view.keypress(size, key)
+        assert self.controller.copy_to_clipboard.called
+
     def test_keypress_exit_popup_invalid_key(
         self, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -262,6 +270,7 @@ class TestAboutView:
             "Server",
             "Application Configuration",
             "Detected Environment",
+            "Copy information to clipboard [c]",
         ]
 
 
