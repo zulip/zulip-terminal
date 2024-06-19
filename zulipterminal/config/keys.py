@@ -56,6 +56,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Open draft message saved in this session',
         'key_category': 'general',
     },
+    'COPY_ABOUT_INFO': {
+        'keys': ['c'],
+        'help_text': 'Copy information from About Menu to clipboard',
+        'key_category': 'general',
+    },
     'GO_UP': {
         'keys': ['up', 'k'],
         'help_text': 'Go up / Previous message',
