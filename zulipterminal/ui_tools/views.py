@@ -1115,7 +1115,7 @@ class AboutView(PopUpView):
                 ],
             ),
             (
-                "Detected environment",
+                "Detected Environment",
                 [("Platform", PLATFORM), ("Python", detected_python_in_full())],
             ),
         ]
