@@ -10,6 +10,7 @@
 |Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
 |Go back|<kbd>Esc</kbd>|
 |Open draft message saved in this session|<kbd>d</kbd>|
+|Copy information from About Menu to clipboard|<kbd>c</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
 |Show/hide user information (from users list)|<kbd>i</kbd>|
