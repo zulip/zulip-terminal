@@ -189,6 +189,12 @@ class TestAboutView:
         )
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
 
+        # FIXME: Since we don't test on WSL explicitly, for now
+        #        treat PLATFORM as WSL in order for it to be supported
+        mocker.patch(MODULE + ".PLATFORM", "WSL")
+
+        mocker.patch(MODULE + ".detected_python_in_full", lambda: "[Python version]")
+
         self.about_view = AboutView(
             self.controller,
             "About",
@@ -272,6 +278,26 @@ class TestAboutView:
             "Detected Environment",
             "Copy information to clipboard [c]",
         ]
+
+    def test_copied_content(self) -> None:
+        expected_output = f"""#### Application
+Zulip Terminal: {ZT_VERSION}
+
+#### Server
+Version: {MINIMUM_SUPPORTED_SERVER_VERSION[0]}
+
+#### Application Configuration
+Theme: zt_dark
+Autohide: disabled
+Maximum footlinks: 3
+Color depth: 256
+Notifications: disabled
+Exit confirmation: disabled
+
+#### Detected Environment
+Platform: WSL
+Python: [Python version]"""
+        assert self.about_view.copy_info == expected_output
 
 
 class TestUserInfoView:
