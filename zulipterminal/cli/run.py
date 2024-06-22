@@ -460,6 +460,16 @@ def list_themes() -> str:
     )
 
 
+def list_realms() -> str:
+    valid_orgs = [
+        file.parent.name for file in Path(ZULIP_CONFIG_PATH).glob("*/zuliprc")
+    ]
+    if len(valid_orgs) == 0:
+        exit_with_error("No organizations found in zuliprc config folder.")
+    text = "Configurations for the following organizations are available:\n  "
+    return text + "\n  ".join(valid_orgs)
+
+
 def path_to_realm_zuliprc(realm_name_prefix: str) -> str:
     if len(realm_name_prefix) < 3:
         exit_with_error("Organization name prefix must be at least 3 characters long")
