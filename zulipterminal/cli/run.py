@@ -152,6 +152,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "organization (default: ~/zuliprc)",
     )
     parser.add_argument(
+        "-o",
+        "--list-organizations",
+        action="store_true",
+        help="list all the organizations that you have configurations for, and exit",
+    )
+    parser.add_argument(
         "--theme",
         "-t",
         help=f"choose color theme (default: {DEFAULT_SETTINGS['theme']})",
@@ -528,6 +534,10 @@ def main(options: Optional[List[str]] = None) -> None:
 
     if args.version:
         print(f"Zulip Terminal {ZT_VERSION}")
+        sys.exit(0)
+
+    if args.list_organizations:
+        print(list_realms())
         sys.exit(0)
 
     if args.list_themes:
