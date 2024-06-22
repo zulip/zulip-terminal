@@ -485,8 +485,10 @@ def path_to_realm_zuliprc(realm_name_prefix: str) -> str:
             f"{matching_dirs_string}\n"
         )
     elif len(matching_dirs) == 0:
+        existing_realms = list_realms()
         exit_with_error(
-            f"Could not find any organizations starting with '{realm_name_prefix}'."
+            f"Could not find any organizations starting with '{realm_name_prefix}'.",
+            helper_text=f"{existing_realms}",
         )
     matching_files = list(matching_dirs[0].glob("zuliprc"))
     if len(matching_files) == 0:
