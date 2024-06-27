@@ -89,18 +89,19 @@ def notify(title: str, text: str) -> str:
     return ""
 
 
-def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
+def validate_GUI_exit_status(  # noqa: N802 (allow upper case)
+    exit_status: int,
+) -> Literal["success", "failure"]:
     """
     Returns success return code for GUI commands, which are OS specific.
     """
-    # WSL uses GUI return code as 1. Refer below link to know more:
-    # https://stackoverflow.com/questions/52423031/
-    # why-does-opening-an-explorer-window-and-selecting-a-file-through-pythons-subpro/
-    # 52423798#52423798
+    # NOTE: WSL (explorer.exe) always returns a non-zero exit code (1) for GUI commands.
+    # This is a known issue. Therefore, we consider it a success if the exit code is 1.
+    # For more information, see: https://github.com/microsoft/WSL/issues/6565
     if PLATFORM == "WSL":
-        return 1
+        return "success"
 
-    return 0
+    return "success" if exit_status == 0 else "failure"
 
 
 def normalized_file_path(path: str) -> str:

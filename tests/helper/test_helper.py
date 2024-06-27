@@ -548,7 +548,7 @@ def test_download_media(
         ("Linux", True, True, "xdg-open", "/path/to/media"),
         ("MacOS", True, True, "open", "/path/to/media"),
         ("WSL", True, True, "explorer.exe", "\\path\\to\\media"),
-        ("UnknownOS", True, False, "unknown-tool", "/path/to/media"),
+        ("UnknownOS", True, False, "invalid", "/path/to/media"),
     ],
     ids=[
         "Linux_os_user",
@@ -572,9 +572,13 @@ def test_process_media(
         MODULE + ".download_media", return_value=media_path
     )
     mocked_open_media = mocker.patch(MODULE + ".open_media")
-    mocker.patch(MODULE + ".PLATFORM", platform)
-    mocker.patch("zulipterminal.platform_code.PLATFORM", platform)
-    mocker.patch("zulipterminal.core.Controller.show_media_confirmation_popup")
+
+    # Mocking the PLATFORM variable in both platform_code and the main module
+    # to ensure consistency during tests that rely on platform detection.
+    mocker.patch("zulipterminal.platform_code" + ".PLATFORM", platform)
+    mocker.patch(
+        "zulipterminal.platform_code" + ".process_media_tool", return_value=tool
+    )
 
     process_media(controller, link)
 
@@ -603,28 +607,49 @@ def test_process_media_empty_url(
 
 
 @pytest.mark.parametrize(
-    "returncode, error",
+    "platform, returncode, tool, error",
     [
-        (0, []),
-        (
+        case("Linux", 0, "xdg-open", [], id="Linux:success"),
+        case("MacOS", 0, "open", [], id="MacOS:success"),
+        case("WSL", 1, "explorer.exe", [], id="WSL:success"),
+        case(
+            "Linux",
             1,
+            "xdg-open",
             [
                 " The tool ",
                 ("footer_contrast", "xdg-open"),
                 " did not run successfully" ". Exited with ",
                 ("footer_contrast", "1"),
             ],
+            id="Linux:error",
         ),
+        case(
+            "MacOS",
+            1,
+            "open",
+            [
+                " The tool ",
+                ("footer_contrast", "open"),
+                " did not run successfully" ". Exited with ",
+                ("footer_contrast", "1"),
+            ],
+            id="Mac:error",
+        ),
+        # NOTE: explorer.exe (WSL) always returns a non-zero exit code (1)
+        # so we do not test for it.
     ],
 )
 def test_open_media(
     mocker: MockerFixture,
+    platform: str,
     returncode: int,
+    tool: str,
     error: List[Any],
-    tool: str = "xdg-open",
     media_path: str = "/tmp/zt-somerandomtext-image.png",
 ) -> None:
     mocked_run = mocker.patch(MODULE + ".subprocess.run")
+    mocker.patch("zulipterminal.platform_code" + ".PLATFORM", platform)
     mocked_run.return_value.returncode = returncode
     controller = mocker.Mock()
 
