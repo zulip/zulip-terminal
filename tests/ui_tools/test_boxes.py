@@ -25,7 +25,12 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index, MinimalUserData
-from zulipterminal.ui_tools.boxes import PanelSearchBox, WriteBox, _MessageEditState
+from zulipterminal.ui_tools.boxes import (
+    MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP,
+    PanelSearchBox,
+    WriteBox,
+    _MessageEditState,
+)
 from zulipterminal.urwid_types import urwid_Size
 
 
@@ -236,7 +241,7 @@ class TestWriteBox:
         assert not write_box.model.send_private_message.called
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test__compose_attributes_reset_for_private_compose(
+    def test__compose_attributes_reset_for_private_compose__no_popup(
         self,
         key: str,
         mocker: MockerFixture,
@@ -247,17 +252,41 @@ class TestWriteBox:
         mocker.patch("urwid.connect_signal")
         write_box.model.user_id_email_dict = user_id_email_dict
         write_box.private_box_view(recipient_user_ids=[11])
-        write_box.msg_write_box.edit_text = "random text"
+
+        write_box.msg_write_box.edit_text = "." * (
+            MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP - 1
+        )
 
         size = widget_size(write_box)
         write_box.keypress(size, key)
 
+        write_box.view.controller.exit_compose_confirmation_popup.assert_not_called()
         assert write_box.to_write_box is None
         assert write_box.msg_write_box.edit_text == ""
         assert write_box.compose_box_status == "closed"
 
     @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
-    def test__compose_attributes_reset_for_stream_compose(
+    def test__compose_attributes_reset_for_private_compose__popup(
+        self,
+        key: str,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        user_id_email_dict: Dict[int, str],
+    ) -> None:
+        mocker.patch("urwid.connect_signal")
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.private_box_view(recipient_user_ids=[11])
+
+        write_box.msg_write_box.edit_text = "." * MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.view.controller.exit_compose_confirmation_popup.assert_called_once()
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    def test__compose_attributes_reset_for_stream_compose__no_popup(
         self,
         key: str,
         mocker: MockerFixture,
@@ -266,14 +295,36 @@ class TestWriteBox:
     ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
         write_box.stream_box_view(stream_id=1)
-        write_box.msg_write_box.edit_text = "random text"
+
+        write_box.msg_write_box.edit_text = "." * (
+            MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP - 1
+        )
 
         size = widget_size(write_box)
         write_box.keypress(size, key)
 
+        write_box.view.controller.exit_compose_confirmation_popup.assert_not_called()
         assert write_box.stream_id is None
         assert write_box.msg_write_box.edit_text == ""
         assert write_box.compose_box_status == "closed"
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_BACK"))
+    def test__compose_attributes_reset_for_stream_compose__popup(
+        self,
+        key: str,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        mocker.patch(WRITEBOX + "._set_stream_write_box_style")
+        write_box.stream_box_view(stream_id=1)
+
+        write_box.msg_write_box.edit_text = "." * MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.view.controller.exit_compose_confirmation_popup.assert_called_once_with()
 
     @pytest.mark.parametrize(
         ["raw_recipients", "tidied_recipients"],
@@ -1508,38 +1559,57 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize(
-        "key, current_typeahead_mode, expected_typeahead_mode, expect_footer_was_reset",
+        "key, current_typeahead_mode, expected_typeahead_mode",
         [
-            # footer does not reset
-            (primary_key_for_command("AUTOCOMPLETE"), False, False, False),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False, False),
-            (primary_key_for_command("AUTOCOMPLETE"), True, True, False),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True, False),
-            # footer resets
-            (primary_key_for_command("GO_BACK"), True, False, True),
-            ("space", True, False, True),
-            ("k", True, False, True),
+            (primary_key_for_command("AUTOCOMPLETE"), False, False),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False),
+            (primary_key_for_command("AUTOCOMPLETE"), True, True),
+            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True),
         ],
     )
-    def test_keypress_typeahead_mode_autocomplete_key(
+    def test__keypress_typeahead_mode_autocomplete_key_footer_no_reset(
         self,
+        mocker: MockerFixture,
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
         current_typeahead_mode: bool,
         expected_typeahead_mode: bool,
-        expect_footer_was_reset: bool,
         key: str,
     ) -> None:
+        write_box.msg_write_box = mocker.Mock(edit_text="")
         write_box.is_in_typeahead_mode = current_typeahead_mode
         size = widget_size(write_box)
 
         write_box.keypress(size, key)
 
         assert write_box.is_in_typeahead_mode == expected_typeahead_mode
-        if expect_footer_was_reset:
-            self.view.set_footer_text.assert_called_once_with()
-        else:
-            self.view.set_footer_text.assert_not_called()
+        self.view.set_footer_text.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "key, current_typeahead_mode, expected_typeahead_mode",
+        [
+            (primary_key_for_command("GO_BACK"), True, False),
+            ("space", True, False),
+            ("k", True, False),
+        ],
+    )
+    def test__keypress_typeahead_mode_autocomplete_key_footer_reset(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        current_typeahead_mode: bool,
+        expected_typeahead_mode: bool,
+        key: str,
+    ) -> None:
+        write_box.msg_write_box = mocker.Mock(edit_text="")
+        write_box.is_in_typeahead_mode = current_typeahead_mode
+        size = widget_size(write_box)
+
+        write_box.keypress(size, key)
+
+        assert write_box.is_in_typeahead_mode == expected_typeahead_mode
+        self.view.set_footer_text.assert_called_once_with()
 
     @pytest.mark.parametrize(
         [

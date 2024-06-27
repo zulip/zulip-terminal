@@ -515,10 +515,17 @@ class Controller:
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
         question = urwid.Text(
-            "Save this message as a draft? (This will overwrite the existing draft.)"
+            (
+                "bold",
+                "Save this message as a draft? "
+                "(This will overwrite the existing draft.)",
+            ),
+            "center",
         )
         save_draft = partial(self.model.save_draft, draft)
-        self.loop.widget = PopUpConfirmationView(self, question, save_draft)
+        self.loop.widget = PopUpConfirmationView(
+            self, question, save_draft, location="center"
+        )
 
     def stream_muting_confirmation_popup(
         self, stream_id: int, stream_name: str
@@ -531,6 +538,21 @@ class Controller:
         )
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
         self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+
+    def exit_compose_confirmation_popup(self) -> None:
+        question = urwid.Text(
+            (
+                "bold",
+                "Please confirm that you wish to exit the compose box.\n"
+                "(You can save the message as a draft upon returning to compose)",
+            ),
+            "center",
+        )
+        write_box = self.view.write_box
+        popup_view = PopUpConfirmationView(
+            self, question, write_box.exit_compose_box, location="center"
+        )
+        self.loop.widget = popup_view
 
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
         try:

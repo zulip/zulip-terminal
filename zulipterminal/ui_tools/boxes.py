@@ -10,7 +10,7 @@ from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
 import urwid
-from typing_extensions import Literal
+from typing_extensions import Final, Literal
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
@@ -47,6 +47,11 @@ from zulipterminal.helper import (
 )
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.urwid_types import urwid_Size
+
+
+# This constant defines the maximum character length of a message
+# in the compose box that does not trigger a confirmation popup.
+MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP: Final = 15
 
 
 class _MessageEditState(NamedTuple):
@@ -709,14 +714,25 @@ class WriteBox(urwid.Pile):
 
         return emoji_typeahead, emojis
 
+    def exit_compose_box(self) -> None:
+        self._set_default_footer_after_autocomplete()
+        self._set_compose_attributes_to_defaults()
+        self.view.controller.exit_editor_mode()
+        self.main_view(False)
+        self.view.middle_column.set_focus("body")
+
+    def _set_default_footer_after_autocomplete(self) -> None:
+        self.is_in_typeahead_mode = False
+        self.view.set_footer_text()
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
             or is_command_key("AUTOCOMPLETE_REVERSE", key)
+            or is_command_key("GO_BACK", key)
+            # "GO_BACK" logic has been handled below
         ):
-            # set default footer when done with autocomplete
-            self.is_in_typeahead_mode = False
-            self.view.set_footer_text()
+            self._set_default_footer_after_autocomplete()
 
         if is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
@@ -799,11 +815,24 @@ class WriteBox(urwid.Pile):
                         "Cannot narrow to message without specifying recipients."
                     )
         elif is_command_key("GO_BACK", key):
+            saved_draft = self.model.session_draft_message()
             self.send_stop_typing_status()
-            self._set_compose_attributes_to_defaults()
-            self.view.controller.exit_editor_mode()
-            self.main_view(False)
-            self.view.middle_column.set_focus("body")
+
+            compose_not_in_edit_mode = self.msg_edit_state is None
+            compose_box_content = self.msg_write_box.edit_text
+            saved_draft_content = saved_draft.get("content") if saved_draft else None
+
+            exceeds_max_length = (
+                len(compose_box_content) >= MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP
+            )
+            not_saved_as_draft = (
+                saved_draft is None or compose_box_content != saved_draft_content
+            )
+
+            if compose_not_in_edit_mode and exceeds_max_length and not_saved_as_draft:
+                self.view.controller.exit_compose_confirmation_popup()
+            else:
+                self.exit_compose_box()
         elif is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
