@@ -46,6 +46,7 @@ from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    CodeBlockButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
@@ -1421,7 +1422,7 @@ class StreamInfoView(PopUpView):
 
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
-        self.markup_desc, message_links, _ = MessageBox.transform_content(
+        self.markup_desc, message_links, _, _ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,
         )
@@ -1576,11 +1577,13 @@ class MsgInfoView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.code_blocks = code_blocks
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
@@ -1594,6 +1597,9 @@ class MsgInfoView(PopUpView):
         )
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
+        )
+        copy_code_keys = "[{}]".format(
+            ", ".join(map(str, display_keys_for_command("COPY_CODE_BLOCK")))
         )
         msg_info = [
             (
@@ -1613,6 +1619,7 @@ class MsgInfoView(PopUpView):
                 ("Open in web browser", view_in_browser_keys),
                 ("Full rendered message", full_rendered_message_keys),
                 ("Full raw message", full_raw_message_keys),
+                ("Copy code block", copy_code_keys),
             ],
         )
         msg_info.append(viewing_actions)
@@ -1636,6 +1643,8 @@ class MsgInfoView(PopUpView):
             msg_info.append(("Topic Links", []))
         if time_mentions:
             msg_info.append(("Time mentions", time_mentions))
+        if code_blocks:
+            msg_info.append(("Code Blocks", []))
         if msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
@@ -1673,7 +1682,6 @@ class MsgInfoView(PopUpView):
                 widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
             )
             popup_width = max(popup_width, message_link_width)
-
         if topic_links:
             topic_link_widgets, topic_link_width = self.create_link_buttons(
                 controller, topic_links
@@ -1688,6 +1696,23 @@ class MsgInfoView(PopUpView):
 
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)
+        if code_blocks:
+            (
+                code_blocks_widgets,
+                code_blocks_width,
+            ) = self.create_code_block_buttons(controller, code_blocks)
+
+            # slice_index = Number of labels before code blocks + 1 newline
+            #               + 1 'Code Blocks' category label.
+            #               + 2 for Viewing Actions category label and its newline
+            slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(code_blocks)
+
+            widgets = (
+                widgets[:slice_index] + code_blocks_widgets + widgets[slice_index:]
+            )
+            popup_width = max(popup_width, code_blocks_width)
 
         super().__init__(controller, widgets, "MSG_INFO", popup_width, title)
 
@@ -1718,6 +1743,40 @@ class MsgInfoView(PopUpView):
 
         return link_widgets, link_width
 
+    @staticmethod
+    def create_code_block_buttons(
+        controller: Any, code_blocks: List[Tuple[str, List[Tuple[str, str]]]]
+    ) -> Tuple[List[Any], int]:
+        code_block_widgets = []
+        code_block_width = 0
+
+        for index, block in enumerate(code_blocks):
+            language, code_block_list = block
+            caption = f"{str(index+1)}: {language}\n"
+
+            display_attr = None if index % 2 else "popup_contrast"
+            code_block_widgets.append(
+                CodeBlockButton(
+                    controller=controller,
+                    caption=caption,
+                    code_block_list=code_block_list,
+                    display_attr=display_attr,
+                    index=index + 1,
+                )
+            )
+
+            if code_block_widgets[index].display_code:
+                code_block_width = max(
+                    code_block_width,
+                    len(max(code_block_widgets[index].display_code, key=len)),
+                )
+
+            code = caption + str(snip[1] for snip in code_block_list)
+            code_block_width = max(
+                code_block_width, len(max(code.split("\n"), key=len))
+            )
+        return code_block_widgets, code_block_width
+
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
             self.controller.show_edit_history(
@@ -1725,6 +1784,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
@@ -1735,6 +1795,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
@@ -1743,6 +1804,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
             return key
         return super().keypress(size, key)
@@ -1796,6 +1858,7 @@ class EditHistoryView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1803,6 +1866,7 @@ class EditHistoryView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.code_blocks = code_blocks
         width = 64
         widgets: List[Any] = []
 
@@ -1901,6 +1965,7 @@ class EditHistoryView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
             return key
         return super().keypress(size, key)
@@ -1914,6 +1979,7 @@ class FullRenderedMsgView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1921,6 +1987,7 @@ class FullRenderedMsgView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.code_blocks = code_blocks
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message
@@ -1945,6 +2012,7 @@ class FullRenderedMsgView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
             return key
         return super().keypress(size, key)
@@ -1958,6 +2026,7 @@ class FullRawMsgView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        code_blocks: List[Tuple[str, List[Tuple[str, str]]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1965,6 +2034,7 @@ class FullRawMsgView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.code_blocks = code_blocks
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message header and footer
@@ -1995,6 +2065,7 @@ class FullRawMsgView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                code_blocks=self.code_blocks,
             )
             return key
         return super().keypress(size, key)

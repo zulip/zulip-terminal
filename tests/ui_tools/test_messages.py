@@ -680,6 +680,7 @@ class TestMessageBox:
             server_url=SERVER_URL,
             message_links=OrderedDict(),
             time_mentions=list(),
+            code_blocks=list(),
             bq_len=0,
         )
 
@@ -1585,13 +1586,83 @@ class TestMessageBox:
             # fmt: on
         ],
     )
-    def test_transform_content(self, mocker, raw_html, expected_content):
+    def test_transform_content(self, raw_html, expected_content):
         expected_content = expected_content.replace("{}", QUOTED_TEXT_MARKER)
 
         content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
 
         rendered_text = Text(content)
         assert rendered_text.text == expected_content
+
+    @pytest.mark.parametrize(
+        "raw_html, expected_code_blocks",
+        [
+            (
+                """<div class="codehilite" data-code-language="Python"><pre><span></span><code><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>""",  # noqa: E501
+                [
+                    (
+                        "Python",
+                        [
+                            ("pygments:k", "def"),
+                            ("pygments:w", " "),
+                            ("pygments:nf", "foo"),
+                            ("pygments:p", "("),
+                            ("pygments:n", "x"),
+                            ("pygments:p", "):"),
+                            ("pygments:w", "\n    "),
+                            ("pygments:k", "return"),
+                            ("pygments:p", "("),
+                            ("pygments:n", "x"),
+                            ("pygments:o", "+"),
+                            ("pygments:mi", "1"),
+                            ("pygments:p", ")"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                """<div class="codehilite" data-code-language="JavaScript"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Hello, world!"</span><span class="p">);</span>
+</code></pre></div>""",  # noqa: E501
+                [
+                    (
+                        "JavaScript",
+                        [
+                            ("pygments:nx", "console"),
+                            ("pygments:p", "."),
+                            ("pygments:nx", "log"),
+                            ("pygments:p", "("),
+                            ("pygments:s2", '"Hello, world!"'),
+                            ("pygments:p", ");"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+            ),
+            (
+                """<div class="codehilite" data-code-language="Python"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="s2">"Hello, world!"</span><span class="p">)</span>
+</code></pre></div>""",  # noqa: E501
+                [
+                    (
+                        "Python",
+                        [
+                            ("pygments:nb", "print"),
+                            ("pygments:p", "("),
+                            ("pygments:s2", '"Hello, world!"'),
+                            ("pygments:p", ")"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+            ),
+        ],
+    )
+    def test_transform_content_code_blocks(self, raw_html, expected_code_blocks):
+        _, _, _, code_blocks = MessageBox.transform_content(raw_html, SERVER_URL)
+
+        assert code_blocks == expected_code_blocks
 
     # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
     @pytest.mark.parametrize(
