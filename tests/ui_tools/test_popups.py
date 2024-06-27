@@ -592,6 +592,13 @@ class TestFullRawMsgView:
         assert self.full_raw_message.header.widget_list == msg_box.header
         assert self.full_raw_message.footer.widget_list == msg_box.footer
 
+        assert isinstance(self.full_raw_message.footer.widget_list[0], Text)
+        assert (
+            self.full_raw_message.footer.widget_list[0].text
+            == f"\nPress {keys_for_command('COPY_MESSAGE')}"
+            " to copy raw message content to clipboard"
+        )
+
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -631,6 +638,21 @@ class TestFullRawMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+        )
+
+    @pytest.mark.parametrize(
+        "key",
+        {*keys_for_command("COPY_MESSAGE")},
+    )
+    def test_keypress_copy_full_raw_msg(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.full_raw_message)
+
+        self.full_raw_message.keypress(size, key)
+
+        self.controller.copy_to_clipboard.assert_called_once_with(
+            self.full_raw_message.raw_message_content, "Message Content"
         )
 
 

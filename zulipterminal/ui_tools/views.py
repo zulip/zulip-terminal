@@ -1969,14 +1969,27 @@ class FullRawMsgView(PopUpView):
 
         # Get rendered message header and footer
         msg_box = MessageBox(message, controller.model, None)
+        msg_box.footer.append(
+            urwid.Text(
+                (
+                    "msg_bold",
+                    (
+                        f"\nPress {keys_for_command('COPY_MESSAGE')}"
+                        " to copy raw message content to clipboard"
+                    ),
+                ),
+                align="left",
+            )
+        )
 
         # Get raw message content widget list
-        response = controller.model.fetch_raw_message_content(message["id"])
-
-        if response is None:
+        self.raw_message_content = controller.model.fetch_raw_message_content(
+            message["id"]
+        )
+        if self.raw_message_content is None:
             return
 
-        body_list = [urwid.Text(response)]
+        body_list = [urwid.Text(self.raw_message_content)]
 
         super().__init__(
             controller,
@@ -1997,6 +2010,9 @@ class FullRawMsgView(PopUpView):
                 time_mentions=self.time_mentions,
             )
             return key
+        elif is_command_key("COPY_MESSAGE", key):
+            content = self.raw_message_content
+            self.controller.copy_to_clipboard(content, "Message Content")
         return super().keypress(size, key)
 
 
