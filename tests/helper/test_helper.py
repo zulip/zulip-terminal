@@ -603,11 +603,15 @@ def test_process_media_empty_url(
 
 
 @pytest.mark.parametrize(
-    "returncode, error",
+    "platform, returncode, tool, error",
     [
-        (0, []),
+        ("Linux", 0, "xdg-open", []),
+        ("MacOS", 0, "open", []),
+        ("WSL", 1, "explorer.exe", []),
         (
+            "Linux",
             1,
+            "xdg-open",
             [
                 " The tool ",
                 ("footer_contrast", "xdg-open"),
@@ -615,16 +619,37 @@ def test_process_media_empty_url(
                 ("footer_contrast", "1"),
             ],
         ),
+        (
+            "MacOS",
+            1,
+            "open",
+            [
+                " The tool ",
+                ("footer_contrast", "open"),
+                " did not run successfully" ". Exited with ",
+                ("footer_contrast", "1"),
+            ],
+        ),
+        # NOTE: WSL always returns a non-zero exit code (1), so we do not test for it.
+    ],
+    ids=[
+        "Linux_os_user",
+        "Mac_os_user",
+        "WSL_os_user",
+        "Linux_os_error",
+        "Mac_os_error",
     ],
 )
 def test_open_media(
     mocker: MockerFixture,
+    platform: str,
     returncode: int,
+    tool: str,
     error: List[Any],
-    tool: str = "xdg-open",
     media_path: str = "/tmp/zt-somerandomtext-image.png",
 ) -> None:
     mocked_run = mocker.patch(MODULE + ".subprocess.run")
+    mocker.patch("zulipterminal.platform_code.PLATFORM", platform)
     mocked_run.return_value.returncode = returncode
     controller = mocker.Mock()
 
