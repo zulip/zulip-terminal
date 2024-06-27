@@ -39,7 +39,7 @@ def lint_hotkeys_file() -> None:
     existing OUTPUT_FILE
     """
     hotkeys_file_string = get_hotkeys_file_string()
-    error_flag = 0 if is_every_key_category_valid() else 1
+    error_flag = not is_every_key_category_valid()
     # To lint keys description
     categories = read_help_categories()
     for action in HELP_CATEGORIES:
@@ -53,7 +53,7 @@ def lint_hotkeys_file() -> None:
                     f"Description - ({help_text}) for key combination - [{various_key_combinations}]\n"
                     "It should contain only alphabets, spaces and special characters except ."
                 )
-                error_flag = 1
+                error_flag = True
         # Check key combination duplication
         check_duplicate_keys_list = [
             key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
@@ -67,8 +67,8 @@ def lint_hotkeys_file() -> None:
             print(
                 f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[action]}) detected"
             )
-            error_flag = 1
-    if error_flag == 1:
+            error_flag = True
+    if error_flag:
         print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
     else:
         print("No hotkeys linting errors")
@@ -76,7 +76,7 @@ def lint_hotkeys_file() -> None:
             print(
                 f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
             )
-            error_flag = 1
+            error_flag = True
     sys.exit(error_flag)
 
 
