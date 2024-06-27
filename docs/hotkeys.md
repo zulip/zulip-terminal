@@ -26,12 +26,20 @@
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
 |Trigger the selected entry|<kbd>Enter</kbd> / <kbd>Space</kbd>|
-|Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
-|Narrow to all direct messages|<kbd>P</kbd>|
-|Narrow to all starred messages|<kbd>f</kbd>|
-|Narrow to messages in which you're mentioned|<kbd>#</kbd>|
 |Next unread topic|<kbd>n</kbd>|
 |Next unread direct message|<kbd>p</kbd>|
+
+## Switching Messages View
+|Command|Key Combination|
+| :--- | :---: |
+|View the stream of the current message|<kbd>s</kbd>|
+|View the topic of the current message|<kbd>S</kbd>|
+|Zoom in/out the message's conversation context|<kbd>z</kbd>|
+|Open PM with compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
+|View all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
+|View all direct messages|<kbd>P</kbd>|
+|View all starred messages|<kbd>f</kbd>|
+|View all messages you're mentioned in|<kbd>#</kbd>|
 
 ## Searching
 |Command|Key Combination|
@@ -54,9 +62,6 @@
 |New message to a stream|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
 |Show/hide emoji picker for current message|<kbd>:</kbd>|
-|Narrow to the stream of the current message|<kbd>s</kbd>|
-|Narrow to the topic of the current message|<kbd>S</kbd>|
-|Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
 |Toggle first emoji reaction on selected message|<kbd>=</kbd>|
 |Toggle thumbs-up reaction to the current message|<kbd>+</kbd>|
 |Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
@@ -84,7 +89,6 @@
 |Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
-|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
 
 ## Editor: Navigation

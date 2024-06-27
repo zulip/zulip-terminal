@@ -170,24 +170,24 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_NARROW': {
         'keys': ['s'],
-        'help_text': 'Narrow to the stream of the current message',
-        'key_category': 'msg_actions',
+        'help_text': 'View the stream of the current message',
+        'key_category': 'narrowing',
     },
     'TOPIC_NARROW': {
         'keys': ['S'],
-        'help_text': 'Narrow to the topic of the current message',
-        'key_category': 'msg_actions',
-    },
-    'NARROW_MESSAGE_RECIPIENT': {
-        'keys': ['meta .'],
-        'help_text': 'Narrow to compose box message recipient',
-        'key_category': 'msg_compose',
+        'help_text': 'View the topic of the current message',
+        'key_category': 'narrowing',
     },
     'TOGGLE_NARROW': {
         'keys': ['z'],
         'help_text':
-            'Narrow to a topic/direct-chat, or stream/all-direct-messages',
-        'key_category': 'msg_actions',
+            "Zoom in/out the message's conversation context",
+        'key_category': 'narrowing',
+    },
+    'NARROW_MESSAGE_RECIPIENT': {
+        'keys': ['meta .'],
+        'help_text': 'Open PM with compose box message recipient',
+        'key_category': 'narrowing',
     },
     'REACTION_AGREEMENT': {
         'keys': ['='],
@@ -201,23 +201,23 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'ALL_MESSAGES': {
         'keys': ['a', 'esc'],
-        'help_text': 'Narrow to all messages',
-        'key_category': 'navigation',
+        'help_text': 'View all messages',
+        'key_category': 'narrowing',
     },
     'ALL_PM': {
         'keys': ['P'],
-        'help_text': 'Narrow to all direct messages',
-        'key_category': 'navigation',
+        'help_text': 'View all direct messages',
+        'key_category': 'narrowing',
     },
     'ALL_STARRED': {
         'keys': ['f'],
-        'help_text': 'Narrow to all starred messages',
-        'key_category': 'navigation',
+        'help_text': 'View all starred messages',
+        'key_category': 'narrowing',
     },
     'ALL_MENTIONS': {
         'keys': ['#'],
-        'help_text': "Narrow to messages in which you're mentioned",
-        'key_category': 'navigation',
+        'help_text': "View all messages you're mentioned in",
+        'key_category': 'narrowing',
     },
     'NEXT_UNREAD_TOPIC': {
         'keys': ['n'],
@@ -435,6 +435,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
 HELP_CATEGORIES = {
     "general": "General",
     "navigation": "Navigation",
+    "narrowing": "Switching Messages View",
     "searching": "Searching",
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
