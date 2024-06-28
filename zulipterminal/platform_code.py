@@ -52,7 +52,7 @@ else:
 
 
 # PLATFORM DEPENDENT HELPERS
-MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
+MOUSE_SELECTION_KEY = "Fn + cmd" if PLATFORM == "MacOS" else "Shift"
 
 
 def detected_platform() -> str:
