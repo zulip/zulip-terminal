@@ -42,7 +42,7 @@ from zulipterminal.config.regexes import (
 from zulipterminal.platform_code import (
     PLATFORM,
     normalized_file_path,
-    successful_GUI_return_code,
+    validate_GUI_exit_status,
 )
 
 
@@ -784,6 +784,7 @@ def process_media(controller: Any, link: str) -> None:
         controller.view.set_footer_text, "Downloading your media..."
     )
     media_path = download_media(controller, link, show_download_status)
+    media_path = normalized_file_path(media_path)
     tool = ""
 
     # TODO: Add support for other platforms as well.
@@ -825,7 +826,7 @@ def download_media(
                     show_download_status()
 
         controller.report_success([" Downloaded ", ("bold", media_name)])
-        return normalized_file_path(local_path)
+        return local_path
 
 
 @asynch
@@ -840,7 +841,7 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
             command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
-        if exit_status != successful_GUI_return_code():
+        if validate_GUI_exit_status(exit_status) == "failure":
             error = [
                 " The tool ",
                 ("footer_contrast", tool),
