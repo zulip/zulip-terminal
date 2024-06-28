@@ -40,6 +40,7 @@ STYLES = {
     'msg_quote'       : (Color.BROWN,               Color.BLACK),
     'msg_bold'        : (Color.WHITE__BOLD,         Color.BLACK),
     'msg_time'        : (Color.BLACK,               Color.WHITE),
+    'msg_spoiler'     : (Color.LIGHT_GREEN__BOLD,   Color.BLACK),
     'footer'          : (Color.BLACK,               Color.LIGHT_GRAY),
     'footer_contrast' : (Color.WHITE,               Color.BLACK),
     'starred'         : (Color.LIGHT_RED__BOLD,     Color.BLACK),

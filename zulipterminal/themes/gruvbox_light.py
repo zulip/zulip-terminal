@@ -45,6 +45,7 @@ STYLES = {
     'msg_quote'        : (Color.NEUTRAL_YELLOW,         Color.LIGHT0_HARD),
     'msg_bold'         : (Color.DARK2__BOLD,            Color.LIGHT0_HARD),
     'msg_time'         : (Color.LIGHT0_HARD,            Color.DARK2),
+    'msg_spoiler'      : (Color.FADED_GREEN__BOLD,      Color.LIGHT0_HARD),
     'footer'           : (Color.LIGHT0_HARD,            Color.DARK4),
     'footer_contrast'  : (Color.DARK2,                  Color.LIGHT0_HARD),
     'starred'          : (Color.FADED_RED__BOLD,        Color.LIGHT0_HARD),
