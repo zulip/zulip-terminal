@@ -87,6 +87,7 @@
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|
+|Open the message in external editor|<kbd>Ctrl</kbd> + <kbd>o</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
 
 ## Editor: Navigation

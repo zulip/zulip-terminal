@@ -13,6 +13,7 @@
   - [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
   - [How do I access multiple servers?](#how-do-i-access-multiple-servers)
   - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
+  - [Can I compose messages in another editor?](#can-i-compose-messages-in-another-editor)
 - Something is not working!
   - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
   - [Symbols look different to in the provided screenshots, or just look incorrect](#symbols-look-different-to-in-the-provided-screenshots-or-just-look-incorrect)
@@ -372,6 +373,35 @@ through autocomplete depend upon the context automatically.
 
 **NOTE:** If a direct message recipient's name contains comma(s) (`,`), they
 are currently treated as comma-separated recipients.
+
+## Can I compose messages in another editor?
+
+In the main branch of zulip-terminal, you can now use an external editor to 
+compose your message using `ctrl o` shortcut. If `ZULIP_EDITOR_COMMAND` or 
+`EDITOR` environment variable is set, this command or program would be used 
+to open the message by appending a temporary file filepath of the current message.
+
+It will work directly for most terminal editors with only the program name `vim`, 
+`nano`, `helix`, `kakoune`, `nvim`...
+
+It can also be used for desktop editor with some constraint which needs to be 
+address using `ZULIP_EDITOR_COMMAND` custom command. The program must not fork 
+or detach from the running terminal and should open in a new window, some 
+examples:
+
+- [lapce](https://github.com/lapce/lapce) with `lapce -n -w`
+- [sublime-text](https://www.sublimetext.com/) with `subl -n -w`
+- [marker](https://github.com/fabiocolacio/Marker) with `marker`
+- [vim](https://github.com/vim/vim) with `vim -g -f` or `gvim -f`
+- [vscode](https://github.com/microsoft/vscode) with `code -n -w`
+
+When the external editor process ends (closing the window or quitting terminal 
+editor), the composing box will be updated with the new message content from 
+the temporary file.
+
+**NOTE:** Backslashing white space (`\ `) is needed when using an executable 
+containing them, for example for Sublime Text on macOS can be configure with 
+`/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl`.
 
 ## Colors appear mismatched, don't change with theme, or look strange
 
