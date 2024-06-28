@@ -11,6 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
+from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
@@ -26,7 +27,12 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.platform_code import detected_platform, detected_python_in_full
+from zulipterminal.platform_code import (
+    config_file_path,
+    detected_platform,
+    detected_python_in_full,
+    downloads_file_path,
+)
 from zulipterminal.version import ZT_VERSION
 
 
@@ -40,6 +46,10 @@ class SettingData(NamedTuple):
     value: str
     source: ConfigSource
 
+
+DOWNLOADED_PATH_ZULIPRC = str(downloads_file_path() / "zuliprc")
+HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
+ZULIP_CONFIG_PATH = str(config_file_path() / "zulip-terminal")
 
 TRACEBACK_LOG_FILENAME = "zulip-terminal-tracebacks.log"
 API_CALL_LOG_FILENAME = "zulip-terminal-API-requests.log"
@@ -120,6 +130,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         description=description, formatter_class=formatter_class
     )
     parser.add_argument(
+        "org-name",
+        nargs="?",
+        action="store",
+        default="",
+        help="specify the name (case-insensitive prefix) of your zulip organization "
+        "to fetch its configuration",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -132,6 +150,18 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store",
         help="config file downloaded from your zulip "
         "organization (default: ~/zuliprc)",
+    )
+    parser.add_argument(
+        "-o",
+        "--list-organizations",
+        action="store_true",
+        help="list all the organizations that you have configurations for, and exit",
+    )
+    parser.add_argument(
+        "-n",
+        "--new-organization",
+        action="store_true",
+        help="login to a new organization",
     )
     parser.add_argument(
         "--theme",
@@ -236,7 +266,7 @@ def get_server_settings(realm_url: str) -> ServerSettings:
     return response.json()
 
 
-def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str, str]]:
     from getpass import getpass
 
     try:
@@ -247,6 +277,7 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     # Assuming we connect to and get data from the server, use the realm_url it suggests
     # This avoids cases where there are redirects between http and https, for example
     preferred_realm_url = server_properties["realm_uri"]
+    realm_name = server_properties["realm_name"]
 
     login_id_label = get_login_label(server_properties)
     login_id = styled_input(login_id_label)
@@ -260,13 +291,33 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
         },
     )
     if response.status_code == requests.codes.OK:
-        return preferred_realm_url, login_id, str(response.json()["api_key"])
+        return (
+            preferred_realm_url,
+            realm_name,
+            login_id,
+            str(response.json()["api_key"]),
+        )
     return None
 
 
-def fetch_zuliprc(zuliprc_path: str) -> None:
+def fetch_zuliprc(zuliprc_path: str, new_realm: bool) -> str:
+    supported_locations = [
+        ZULIP_CONFIG_PATH,
+        HOME_PATH_ZULIPRC,
+        DOWNLOADED_PATH_ZULIPRC,
+    ]
+    locations_checked = (
+        zuliprc_path
+        if zuliprc_path != ""
+        else "any of the following locations:\n  " + "\n  ".join(supported_locations)
+    )
+    missing_zuliprc_text = (
+        ""
+        if new_realm
+        else f"{in_color('red', f'zuliprc file was not found at {locations_checked}')}"
+    )
     print(
-        f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
+        f"{missing_zuliprc_text}"
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
         f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
@@ -290,17 +341,19 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
-    preferred_realm_url, login_id, api_key = login_data
+    preferred_realm_url, realm_name, login_id, api_key = login_data
+    path_to_new_zuliprc = str(Path(ZULIP_CONFIG_PATH) / realm_name / "zuliprc")
     save_zuliprc_failure = _write_zuliprc(
-        zuliprc_path,
+        to_path=path_to_new_zuliprc,
         login_id=login_id,
         api_key=api_key,
         server_url=preferred_realm_url,
     )
     if not save_zuliprc_failure:
-        print(f"Generated API key saved at {zuliprc_path}")
+        print(f"Generated API key saved at {path_to_new_zuliprc}")
     else:
         exit_with_error(save_zuliprc_failure)
+    return str(path_to_new_zuliprc)
 
 
 def _write_zuliprc(
@@ -311,6 +364,7 @@ def _write_zuliprc(
     Only creates new private files; errors if file already exists
     """
     try:
+        Path(to_path).parent.mkdir(parents=True, exist_ok=True)
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
@@ -322,11 +376,48 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
-    zuliprc_path = path.expanduser(zuliprc_str)
-    while not path.exists(zuliprc_path):
+def check_for_default_zuliprc() -> str:
+    zuliprc_locations = [
+        DOWNLOADED_PATH_ZULIPRC,
+        HOME_PATH_ZULIPRC,
+    ]
+    valid_locations = [
+        location for location in zuliprc_locations if Path(location).exists()
+    ]
+    valid_locations.extend(
+        str(file) for file in Path(ZULIP_CONFIG_PATH).glob("zuliprc")
+    )
+    valid_locations.extend(
+        str(file) for file in Path(ZULIP_CONFIG_PATH).glob("*/zuliprc")
+    )
+
+    count = len(valid_locations)
+    if count > 1:
+        valid_locations_string = "\n  ".join(valid_locations)
+        exit_with_error(
+            f"Found multiple zuliprc files at:\n  {valid_locations_string}\n"
+            "Please retry by specifying the path to your target zuliprc file."
+        )
+    elif count == 1:
+        return valid_locations[0]
+    return ""
+
+
+def parse_zuliprc(
+    zuliprc_str: str, new_realm: bool
+) -> Tuple[Dict[str, SettingData], str]:
+    zuliprc_path = (
+        (
+            check_for_default_zuliprc()
+            if zuliprc_str == ""
+            else path.expanduser(zuliprc_str)
+        )
+        if not new_realm
+        else ""
+    )
+    while zuliprc_path == "" or not path.exists(zuliprc_path):
         try:
-            fetch_zuliprc(zuliprc_path)
+            zuliprc_path = fetch_zuliprc(zuliprc_path, new_realm)
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
         except (OSError, ValueError):
             # Remove zuliprc file if created.
@@ -375,7 +466,7 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
         for conf in config:
             settings[conf] = SettingData(config[conf], ConfigSource.ZULIPRC)
 
-    return settings
+    return settings, zuliprc_path
 
 
 def list_themes() -> str:
@@ -390,6 +481,42 @@ def list_themes() -> str:
         "Specify theme in zuliprc file or override "
         "using -t/--theme options on command line."
     )
+
+
+def list_realms() -> str:
+    valid_orgs = [
+        file.parent.name for file in Path(ZULIP_CONFIG_PATH).glob("*/zuliprc")
+    ]
+    if len(valid_orgs) == 0:
+        exit_with_error("No organizations found in zuliprc config folder.")
+    text = "Configurations for the following organizations are available:\n  "
+    return text + "\n  ".join(valid_orgs)
+
+
+def path_to_realm_zuliprc(realm_name_prefix: str) -> str:
+    if len(realm_name_prefix) < 3:
+        exit_with_error("Organization name prefix must be at least 3 characters long")
+    matching_dirs = [
+        dir
+        for dir in Path(ZULIP_CONFIG_PATH).glob("*/")
+        if dir.name.lower().startswith(realm_name_prefix.lower())
+    ]
+    if len(matching_dirs) > 1:
+        matching_dirs_string = "\n".join(str(dir) for dir in matching_dirs)
+        exit_with_error(
+            f"Found multiple organizations starting with '{realm_name_prefix}':\n"
+            f"{matching_dirs_string}\n"
+        )
+    elif len(matching_dirs) == 0:
+        existing_realms = list_realms()
+        exit_with_error(
+            f"Could not find any organizations starting with '{realm_name_prefix}'.",
+            helper_text=f"{existing_realms}",
+        )
+    matching_files = list(matching_dirs[0].glob("zuliprc"))
+    if len(matching_files) == 0:
+        exit_with_error(f"Could not find any zuliprc files at:\n{matching_dirs[0]}\n")
+    return str(matching_files[0])
 
 
 def main(options: Optional[List[str]] = None) -> None:
@@ -426,14 +553,21 @@ def main(options: Optional[List[str]] = None) -> None:
         print(f"Zulip Terminal {ZT_VERSION}")
         sys.exit(0)
 
+    if args.list_organizations:
+        print(list_realms())
+        sys.exit(0)
+
     if args.list_themes:
         print(list_themes())
         sys.exit(0)
 
+    zuliprc_path = getattr(args, "org-name")
     if args.config_file:
+        if zuliprc_path != "":
+            exit_with_error("Cannot use --config-file and org-name together")
         zuliprc_path = args.config_file
-    else:
-        zuliprc_path = "~/zuliprc"
+    elif zuliprc_path:
+        zuliprc_path = path_to_realm_zuliprc(zuliprc_path)
 
     print(
         "Detected:"
@@ -442,7 +576,7 @@ def main(options: Optional[List[str]] = None) -> None:
     )
 
     try:
-        zterm = parse_zuliprc(zuliprc_path)
+        zterm, zuliprc_path = parse_zuliprc(zuliprc_path, args.new_organization)
 
         ### Validate footlinks settings (not from command line)
         if (
