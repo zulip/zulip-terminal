@@ -163,6 +163,7 @@ def test_create_msg_box_list(
             },
         },
         "pointer": {},
+        "muted_messages": {},
     }
     mocker.patch(MODULE + ".MessageBox")
     mocker.patch(MODULE + ".urwid.AttrMap", return_value="MSG")
