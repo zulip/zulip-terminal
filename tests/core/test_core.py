@@ -44,11 +44,14 @@ class TestController:
 
         self.config_file = "path/to/zuliprc"
         self.theme_name = "zt_dark"
-        self.theme = generate_theme("zt_dark", 256)
+        self.theme = generate_theme(
+            "zt_dark", color_depth=256, transparent_background=False
+        )
         self.in_explore_mode = False
         self.autohide = True  # FIXME Add tests for no-autohide
         self.notify_enabled = False
         self.exit_confirmation = True
+        self.transparency_enabled = False
         self.maximum_footlinks = 3
         result = Controller(
             config_file=self.config_file,
@@ -62,6 +65,7 @@ class TestController:
                 autohide=self.autohide,
                 notify=self.notify_enabled,
                 exit_confirmation=self.exit_confirmation,
+                transparency=self.transparency_enabled,
             ),
         )
         result.view.message_view = mocker.Mock()  # set in View.__init__

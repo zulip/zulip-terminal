@@ -143,6 +143,8 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--color-depth",
         "--notify",
         "--no-notify",
+        "--transparency",
+        "--no-transparency",
     }
     optional_argument_lines = {
         line[2:] for line in lines if len(line) > 2 and line[2] == "-"
@@ -203,6 +205,7 @@ def test_valid_zuliprc_but_no_connection(
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
         "   notify setting 'disabled' specified from default config.",
+        "   transparency setting 'disabled' specified from default config.",
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
@@ -262,6 +265,7 @@ def test_warning_regarding_incomplete_theme(
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
         "   notify setting 'disabled' specified from default config.",
+        "   transparency setting 'disabled' specified from default config.",
         "\x1b[91m",
         f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
     ]
@@ -481,6 +485,7 @@ def test_successful_main_function_with_config(
         f"   maximum footlinks value {footlinks_output}",
         "   color depth setting '256' specified in zuliprc file.",
         "   notify setting 'enabled' specified in zuliprc file.",
+        "   transparency setting 'disabled' specified from default config.",
     ]
     assert lines == expected_lines
 
