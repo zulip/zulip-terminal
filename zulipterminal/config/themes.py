@@ -50,6 +50,7 @@ REQUIRED_STYLES = {
     'msg_quote'       : 'underline',
     'msg_bold'        : 'bold',
     'msg_time'        : 'bold',
+    'msg_spoiler'     : 'bold',
     'footer'          : 'standout',
     'footer_contrast' : 'standout',
     'starred'         : 'bold',
