@@ -2,6 +2,7 @@
 UI to render a Zulip message for display, and respond contextually to actions
 """
 
+import json
 import typing
 from collections import defaultdict
 from datetime import date, datetime
@@ -729,6 +730,36 @@ class MessageBox(urwid.Pile):
                 "/me", f"<strong>{self.message['sender_full_name']}</strong>", 1
             )
 
+        # If message contains submessages (like polls, todo), process them
+        # and update the message content.
+        if self.message["submessages"]:
+            try:
+                first_submessage_content = json.loads(
+                    self.message["submessages"][0]["content"]
+                )
+            except (json.JSONDecodeError, TypeError):
+                first_submessage_content = {}
+
+            if (
+                "widget_type" in first_submessage_content
+                and first_submessage_content["widget_type"] == "poll"
+            ):
+                question, votes_for_option = self.process_poll_data(
+                    self.message["submessages"]
+                )
+
+                if question:
+                    self.message[
+                        "content"
+                    ] = f"<strong>Poll Question: {question}</strong>\n"
+                else:
+                    self.message["content"] = "<strong>Add Poll Question</strong>\n"
+                for option, voters in votes_for_option.items():
+                    voter_count = len(voters)
+                    count_text = f"<strong>[{voter_count:^3}]</strong>"
+                    option_text = f"{option}"
+                    self.message["content"] += f"{count_text} {option_text}\n"
+
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
             self.message["content"], self.model.server_url
@@ -811,6 +842,46 @@ class MessageBox(urwid.Pile):
             super().__init__(self.main_view())
 
         return author_is_present
+
+    @classmethod
+    def process_poll_data(cls, poll_data: Any) -> Tuple[str, Dict[str, List[int]]]:
+        question = ""
+        votes_for_option: Dict[str, List[int]] = {}
+
+        for submessage in poll_data:
+            content = submessage.get("content", {})
+            if isinstance(content, str):
+                try:
+                    content = json.loads(content)
+                except json.JSONDecodeError:
+                    continue
+
+            if "widget_type" in content and content["widget_type"] == "poll":
+                question = content["extra_data"]["question"]
+                votes_for_option = {
+                    option: [] for option in content["extra_data"]["options"]
+                }
+
+            elif "type" in content and content["type"] == "new_option":
+                option = content["option"]
+                votes_for_option[option] = []
+
+            elif "type" in content and content["type"] == "vote":
+                key = content["key"]
+                index_str = key.split(",")[1]
+                if index_str.isdigit():
+                    index = int(index_str)
+                    if index < len(votes_for_option):
+                        option = list(votes_for_option.keys())[index]
+                        voter_id = submessage["sender_id"]
+                        if content["vote"] == -1:
+                            if voter_id in votes_for_option[option]:
+                                votes_for_option[option].remove(voter_id)
+                        else:
+                            if voter_id not in votes_for_option[option]:
+                                votes_for_option[option].append(voter_id)
+
+        return question, votes_for_option
 
     @classmethod
     def transform_content(
