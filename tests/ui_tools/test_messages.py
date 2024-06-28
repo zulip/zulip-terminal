@@ -726,6 +726,7 @@ class TestMessageBox:
             server_url=SERVER_URL,
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             bq_len=0,
         )
 
