@@ -24,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
     PopUpView,
+    ReadReceiptView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -634,6 +635,83 @@ class TestFullRawMsgView:
         )
 
 
+class TestReadReceiptView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture, msg_box: MessageBox) -> None:
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        self.controller.model.fetch_message_read_receipt_user_ids = mocker.Mock(
+            return_value="[3,7,9]"
+        )
+        self.controller.model.user_name_from_id = mocker.Mock(
+            return_value="['Alice','John','Charlie']"
+        )
+        mocker.patch(MODULE + ".MessageBox", return_value=msg_box)
+        # NOTE: Given that the ReadReceiptView just uses the message ID from
+        # the message data currently, message_fixture is not used to avoid
+        # adding extra test runs unnecessarily.
+        self.message = Message(id=1)
+        self.read_receipt = ReadReceiptView(
+            controller=self.controller,
+            message=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+            title="Read Receipts",
+        )
+
+    def test_init(self, msg_box: MessageBox) -> None:
+        assert self.read_receipt.title == "Read Receipts"
+        assert self.read_receipt.controller == self.controller
+        assert self.read_receipt.message == self.message
+        assert self.read_receipt.topic_links == OrderedDict()
+        assert self.read_receipt.message_links == OrderedDict()
+        assert self.read_receipt.time_mentions == list()
+
+    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    def test_keypress_exit_popup(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.read_receipt)
+
+        self.read_receipt.keypress(size, key)
+
+        assert self.controller.exit_popup.called
+
+    def test_keypress_exit_popup_invalid_key(
+        self, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.read_receipt)
+        key = "a"
+
+        self.read_receipt.keypress(size, key)
+
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize(
+        "key",
+        {
+            *keys_for_command("READ_RECEIPTS"),
+            *keys_for_command("GO_BACK"),
+        },
+    )
+    def test_keypress_show_msg_info(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.read_receipt)
+
+        self.read_receipt.keypress(size, key)
+
+        self.controller.show_msg_info.assert_called_once_with(
+            msg=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )
+
+
 class TestEditHistoryView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: MockerFixture) -> None:
@@ -962,6 +1040,11 @@ class TestMsgInfoView:
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
         mocker.patch(LISTWALKER, return_value=[])
+
+        # To show options based on ZFL
+        # Setting it 0 as default if it doesn't exist
+        self.controller.model.server_feature_level = 0
+
         # The subsequent patches (index and initial_data) set
         # show_edit_history_label to False for this autoused fixture.
         self.controller.model.index = {"edited_messages": set()}
@@ -1112,6 +1195,42 @@ class TestMsgInfoView:
             time_mentions=list(),
         )
 
+    @pytest.mark.parametrize("key", keys_for_command("READ_RECEIPTS"))
+    @pytest.mark.parametrize(
+        "server_feature_level",
+        [137, 135],
+        ids=[
+            "read_receipt_supported_zfl",
+            "read_receipt_unsupported_zfl",
+        ],
+    )
+    def test_keypress_read_receipts(
+        self,
+        server_feature_level: int,
+        message_fixture: Message,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        msg_info_view = MsgInfoView(
+            self.controller,
+            message_fixture,
+            title="Message Information",
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+        )
+        size = widget_size(msg_info_view)
+        msg_info_view.keypress(size, key)
+        if msg_info_view.show_read_receipts_label:
+            self.controller.show_read_receipts.assert_called_once_with(
+                message=message_fixture,
+                topic_links=OrderedDict(),
+                message_links=OrderedDict(),
+                time_mentions=list(),
+            )
+        else:
+            self.controller.show_read_receipts.assert_not_called()
+
     @pytest.mark.parametrize(
         "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("MSG_INFO")}
     )
@@ -1137,14 +1256,39 @@ class TestMsgInfoView:
 
         assert self.controller.open_in_browser.called
 
-    def test_height_noreactions(self) -> None:
-        expected_height = 8
-        # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
-        # +1 (display group header)
+    @pytest.mark.parametrize(
+        [
+            "server_feature_level",
+            "expected_height",
+        ],
+        [
+            (137, 9),
+            (135, 8),
+        ],
+        ids=[
+            "read_receipt_supported_zfl",
+            "read_receipt_unsupported_zfl",
+        ],
+    )
+    def test_height_noreactions(
+        self, server_feature_level: int, message_fixture: Message, expected_height: int
+    ) -> None:
+        self.controller.model.server_feature_level = server_feature_level
+        self.msg_info_view = MsgInfoView(
+            self.controller,
+            message_fixture,
+            "Message Information",
+            OrderedDict(),
+            OrderedDict(),
+            list(),
+        )
+        # 9 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (whitespace column)
+        # +1 (display group header)
         # +1 (view message in browser)
         # +1 (full rendered message)
         # +1 (full raw message)
+        # +1 (read receipts) if ZFL>=137
         assert self.msg_info_view.height == expected_height
 
     # FIXME This is the same parametrize as MessageBox:test_reactions_view
@@ -1197,13 +1341,30 @@ class TestMsgInfoView:
             )
         ],
     )
+    @pytest.mark.parametrize(
+        [
+            "server_feature_level",
+            "expected_height",
+        ],
+        [
+            (137, 15),
+            (135, 14),
+        ],
+        ids=[
+            "read_receipt_supported_zfl",
+            "read_receipt_unsupported_zfl",
+        ],
+    )
     def test_height_reactions(
         self,
         message_fixture: Message,
         to_vary_in_each_message: Message,
+        server_feature_level: int,
+        expected_height: int,
     ) -> None:
         varied_message = message_fixture
         varied_message.update(to_vary_in_each_message)
+        self.controller.model.server_feature_level = server_feature_level
         self.msg_info_view = MsgInfoView(
             self.controller,
             varied_message,
@@ -1212,9 +1373,9 @@ class TestMsgInfoView:
             OrderedDict(),
             list(),
         )
-        # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
+        # 15 = [8-9] (labels, depending on server_feature_level)
+        # + 2 blank line + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
-        expected_height = 14
         assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(

@@ -1669,6 +1669,61 @@ class TestModel:
         assert return_value == expected_raw_content
 
     @pytest.mark.parametrize(
+        "response, expected_read_receipts, feature_level",
+        [
+            case(
+                {"msg": "", "result": "success", "user_ids": [3, 7, 9]},
+                [3, 7, 9],
+                139,
+                id="valid_ZFL_with_valid_response",
+            ),
+            case(
+                {"msg": "Invalid message(s)", "result": "error"},
+                [],
+                137,
+                id="valid_ZFL_with_invalid_response",
+            ),
+        ],
+    )
+    def test_fetch_message_read_receipt_user_ids__valid_zfl(
+        self,
+        mocker,
+        model,
+        expected_read_receipts,
+        response,
+        feature_level,
+        message_id=1,
+    ):
+        model.server_feature_level = feature_level
+        self.client.call_endpoint.return_value = response
+        result = model.fetch_message_read_receipt_user_ids(message_id)
+        assert result == expected_read_receipts
+
+    @pytest.mark.parametrize(
+        "feature_level",
+        [
+            case(
+                136,
+                id="invalid_ZFL_with_response",
+            ),
+            case(
+                0,
+                id="missing_ZFL_with_response",
+            ),
+        ],
+    )
+    def test_fetch_message_read_receipt_user_ids__invalid_zfl(
+        self,
+        mocker,
+        model,
+        feature_level,
+        message_id=1,
+    ):
+        model.server_feature_level = feature_level
+        with pytest.raises(RuntimeError, match="Unsupported server feature level."):
+            model.fetch_message_read_receipt_user_ids(message_id)
+
+    @pytest.mark.parametrize(
         "initial_muted_streams, value",
         [
             ({315}, True),

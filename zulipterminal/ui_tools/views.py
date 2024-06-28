@@ -1629,6 +1629,16 @@ class MsgInfoView(PopUpView):
                 ", ".join(map(str, display_keys_for_command("EDIT_HISTORY")))
             )
             msg_info[1][1].append(("Edit History", keys))
+
+        # ZFL >= 137 supports the option to show read receipts
+        # only show 'View read receipts' option if ZFL >= 137
+        self.show_read_receipts_label = controller.model.server_feature_level >= 137
+        if self.show_read_receipts_label:
+            read_receipt_keys = "[{}]".format(
+                ", ".join(map(str, keys_for_command("READ_RECEIPTS")))
+            )
+            msg_info[1][1].append(("View read receipts", read_receipt_keys))
+
         # Render the category using the existing table methods if links exist.
         if message_links:
             msg_info.append(("Message Links", []))
@@ -1739,6 +1749,14 @@ class MsgInfoView(PopUpView):
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
             self.controller.show_full_raw_message(
+                message=self.msg,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        elif is_command_key("READ_RECEIPTS", key) and self.show_read_receipts_label:
+            self.controller.show_read_receipts(
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
@@ -1990,6 +2008,58 @@ class FullRawMsgView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EXIT_POPUP", key) or is_command_key("FULL_RAW_MESSAGE", key):
+            self.controller.show_msg_info(
+                msg=self.message,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+            )
+            return key
+        return super().keypress(size, key)
+
+
+class ReadReceiptView(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        message: Message,
+        topic_links: "Dict[str, Tuple[str, int, bool]]",
+        message_links: "Dict[str, Tuple[str, int, bool]]",
+        time_mentions: List[Tuple[str, str]],
+        title: str,
+    ) -> None:
+        self.controller = controller
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        model = controller.model
+
+        # Get read receipt user ids list
+        message_read_user_ids = model.fetch_message_read_receipt_user_ids(message["id"])
+        user_names = [model.user_name_from_id(id) for id in message_read_user_ids]
+        sorted_user_names = sorted(user_names)
+        msg_read_list = [("", [(name, "") for name in sorted_user_names])]
+        header = [
+            (
+                "pack",
+                urwid.Text(
+                    f"This message has been read by {len(user_names)} people.\n"
+                ),
+            )
+        ]
+        popup_width, column_width = self.calculate_table_widths(
+            msg_read_list, len(title)
+        )
+        widgets = self.make_table_with_categories(msg_read_list, column_width)
+
+        super().__init__(
+            controller, widgets, "MSG_INFO", popup_width + 6, title, urwid.Pile(header)
+        )
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("GO_BACK", key) or is_command_key("READ_RECEIPTS", key):
             self.controller.show_msg_info(
                 msg=self.message,
                 topic_links=self.topic_links,
