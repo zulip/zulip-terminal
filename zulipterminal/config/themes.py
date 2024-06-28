@@ -74,6 +74,7 @@ REQUIRED_STYLES = {
     'area:error'      : 'standout',
     'area:user'       : 'standout',
     'search_error'    : 'standout',
+    'active_narrow'   : 'standout',
     'task:success'    : 'standout',
     'task:error'      : 'standout',
     'task:warning'    : 'standout',
