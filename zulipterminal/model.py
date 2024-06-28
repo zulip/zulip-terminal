@@ -1716,7 +1716,7 @@ class Model:
             notice = notice_template.format(
                 failed_command, primary_display_key_for_command("EXIT_POPUP")
             )
-            self.controller.popup_with_message(notice, width=50)
+            self.controller.show_popup_with_message(notice, width=50)
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
 

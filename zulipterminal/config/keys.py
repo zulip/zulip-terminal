@@ -340,6 +340,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide user information (from users list)',
         'key_category': 'general',
     },
+    'COPY_TRACEBACK': {
+        'keys': ['c'],
+        'help_text': 'Copy traceback to clipboard',
+        'excluded_from_random_tips': True,
+        'key_category': 'general',
+    },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a', 'home'],
         'help_text': 'Start of line',

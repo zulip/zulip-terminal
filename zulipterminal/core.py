@@ -35,6 +35,7 @@ from zulipterminal.ui_tools.views import (
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    ExceptionView,
     FullRawMsgView,
     FullRenderedMsgView,
     HelpView,
@@ -293,8 +294,15 @@ class Controller:
         stream_members_view = StreamMembersView(self, stream_id)
         self.show_pop_up(stream_members_view, "area:stream")
 
-    def popup_with_message(self, text: str, width: int) -> None:
+    def show_popup_with_message(self, text: str, width: int) -> None:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
+
+    def show_exception_popup(
+        self, text: str, width: int, traceback: Optional[str] = ""
+    ) -> None:
+        self.show_pop_up(
+            ExceptionView(self, text, width, "EXCEPTION", traceback), "area:error"
+        )
 
     def show_about(self) -> None:
         self.show_pop_up(
@@ -641,6 +649,7 @@ class Controller:
         self.deregister_client()
 
     def prompting_exit_handler(self, signum: int, frame: Any) -> None:
+        self.view.set_footer_text()
         question = urwid.Text(
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
@@ -658,6 +667,8 @@ class Controller:
                 raise exc[0].with_traceback(exc[1], exc[2])
             else:
                 import traceback
+
+                full_traceback = "".join(traceback.format_exception(*exc))
 
                 exception_logfile = "zulip-terminal-thread-exceptions.log"
                 with open(exception_logfile, "a") as logfile:
@@ -682,9 +693,19 @@ class Controller:
                     + "\n\n"
                     + "Details of the exception can be found in "
                     + exception_logfile
+                    + "\n\n"
+                    + "Press 'c' to copy traceback to clipboard."
                 )
-                self.popup_with_message(message, width=80)
+                self.show_exception_popup(message, traceback=full_traceback, width=80)
                 self._exception_info = None
+
+                self.view.set_footer_text(
+                    [
+                        "An exception occurred: ",
+                        "Press 'c' to copy traceback to clipboard.",
+                    ],
+                    "task:error",
+                )
         return True  # If don't raise, retain pipe
 
     def main(self) -> None:

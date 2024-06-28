@@ -13,6 +13,7 @@
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
 |Show/hide user information (from users list)|<kbd>i</kbd>|
+|Copy traceback to clipboard|<kbd>c</kbd>|
 
 ## Navigation
 |Command|Key Combination|
