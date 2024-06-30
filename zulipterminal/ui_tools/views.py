@@ -1076,6 +1076,14 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "EXIT_POPUP", width, title)
 
 
+class SpoilerView(PopUpView):
+    def __init__(self, controller: Any, title: str, content: str) -> None:
+        width, _ = controller.maximum_popup_dimensions()
+        widget = [urwid.Text(content)]
+
+        super().__init__(controller, widget, "MSG_INFO", width, title)
+
+
 class AboutView(PopUpView):
     def __init__(
         self,

@@ -42,6 +42,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
+    SpoilerView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -480,6 +481,11 @@ class Controller:
         Helper to show a warning message in footer
         """
         self.view.set_footer_text(text, "task:warning", duration)
+
+    def show_spoiler(self, content: str) -> None:
+        self.show_pop_up(
+            SpoilerView(self, "Spoiler (up/down scrolls)", content), "area:msg"
+        )
 
     def show_media_confirmation_popup(
         self, func: Any, tool: str, media_path: str
