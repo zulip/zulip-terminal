@@ -317,6 +317,36 @@ class UserButton(TopButton):
         return super().keypress(size, key)
 
 
+class SpoilerButton(urwid.Button):
+    def __init__(
+        self,
+        controller: Any,
+        header_len: int,
+        header: List[Any],
+        content: List[Any],
+        display_attr: Optional[str],
+    ) -> None:
+        self.controller = controller
+        self.content = content
+
+        super().__init__("")
+        self.update_widget(header_len, header, display_attr)
+        urwid.connect_signal(self, "click", callback=self.show_spoiler)
+
+    def update_widget(
+        self, header_len: int, header: List[Any], display_attr: Optional[str] = None
+    ) -> None:
+        """
+        Overrides the existing button widget for custom styling.
+        """
+        # Set cursor position next to header_len to avoid the cursor.
+        icon = urwid.SelectableIcon(header, cursor_position=header_len + 1)
+        self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+
+    def show_spoiler(self, *_: Any) -> None:
+        self.controller.show_spoiler(self.content)
+
+
 class TopicButton(TopButton):
     def __init__(
         self,
