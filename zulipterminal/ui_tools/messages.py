@@ -1204,7 +1204,11 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
-                self.message, self.topic_links, self.message_links, self.time_mentions
+                self.message,
+                self.topic_links,
+                self.message_links,
+                self.time_mentions,
+                self.spoilers,
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)

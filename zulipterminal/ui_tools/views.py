@@ -1584,11 +1584,13 @@ class MsgInfoView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             msg["timestamp"], show_seconds=True, show_year=True
@@ -1733,6 +1735,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
@@ -1743,6 +1746,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
@@ -1751,6 +1755,7 @@ class MsgInfoView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)
@@ -1804,6 +1809,7 @@ class EditHistoryView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1811,6 +1817,7 @@ class EditHistoryView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         width = 64
         widgets: List[Any] = []
 
@@ -1909,6 +1916,7 @@ class EditHistoryView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)
@@ -1922,6 +1930,7 @@ class FullRenderedMsgView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1929,6 +1938,7 @@ class FullRenderedMsgView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message
@@ -1953,6 +1963,7 @@ class FullRenderedMsgView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)
@@ -1966,6 +1977,7 @@ class FullRawMsgView(PopUpView):
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
     ) -> None:
         self.controller = controller
@@ -1973,6 +1985,7 @@ class FullRawMsgView(PopUpView):
         self.topic_links = topic_links
         self.message_links = message_links
         self.time_mentions = time_mentions
+        self.spoilers = spoilers
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message header and footer
@@ -2003,6 +2016,7 @@ class FullRawMsgView(PopUpView):
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
             )
             return key
         return super().keypress(size, key)
