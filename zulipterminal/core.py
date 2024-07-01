@@ -265,6 +265,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         msg_info_view = MsgInfoView(
             self,
@@ -273,6 +274,7 @@ class Controller:
             topic_links,
             message_links,
             time_mentions,
+            spoilers,
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -343,6 +345,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             FullRenderedMsgView(
@@ -351,6 +354,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Full rendered message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -362,6 +366,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             FullRawMsgView(
@@ -370,6 +375,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Full raw message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -381,6 +387,7 @@ class Controller:
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             EditHistoryView(
@@ -389,6 +396,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Edit History {SCROLL_PROMPT}",
             ),
             "area:msg",
