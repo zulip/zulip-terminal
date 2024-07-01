@@ -51,6 +51,7 @@ from zulipterminal.ui_tools.buttons import (
     MentionedButton,
     MessageLinkButton,
     PMButton,
+    SpoilerButton,
     StarredButton,
     StreamButton,
     TopicButton,
@@ -1646,6 +1647,8 @@ class MsgInfoView(PopUpView):
             msg_info.append(("Topic Links", []))
         if time_mentions:
             msg_info.append(("Time mentions", time_mentions))
+        if spoilers:
+            msg_info.append(("Spoilers", []))
         if msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
@@ -1698,6 +1701,26 @@ class MsgInfoView(PopUpView):
 
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)
+
+        if spoilers:
+            spoiler_buttons = []
+            spoiler_width = 0
+            for index, (header_len, header, content) in enumerate(spoilers):
+                spoiler_width = max(header_len, spoiler_width)
+                display_attr = None if index % 2 else "popup_contrast"
+                spoiler_buttons.append(
+                    SpoilerButton(controller, header_len, header, content, display_attr)
+                )
+
+            # slice_index = Number of labels before message links + 1 newline
+            #               + 1 'Spoilers' category label.
+            #               + 2 for Viewing Actions category label and its newline
+            slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(spoiler_buttons)
+
+            widgets = widgets[:slice_index] + spoiler_buttons + widgets[slice_index:]
+            popup_width = max(popup_width, spoiler_width)
 
         super().__init__(controller, widgets, "MSG_INFO", popup_width, title)
 
