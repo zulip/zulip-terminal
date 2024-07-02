@@ -1078,11 +1078,38 @@ class NoticeView(PopUpView):
 
 
 class SpoilerView(PopUpView):
-    def __init__(self, controller: Any, title: str, content: str) -> None:
+    def __init__(
+        self,
+        controller: Any,
+        title: str,
+        content: str,
+        message: Message,
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
+        time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
+    ) -> None:
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        self.spoilers = spoilers
         width, _ = controller.maximum_popup_dimensions()
         widget = [urwid.Text(content)]
 
         super().__init__(controller, widget, "MSG_INFO", width, title)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("EXIT_POPUP", key) or is_command_key("ACTIVATE_BUTTON", key):
+            self.controller.show_msg_info(
+                msg=self.message,
+                topic_links=self.topic_links,
+                message_links=self.message_links,
+                time_mentions=self.time_mentions,
+                spoilers=self.spoilers,
+            )
+            return key
+        return super().keypress(size, key)
 
 
 class AboutView(PopUpView):
@@ -1703,14 +1730,9 @@ class MsgInfoView(PopUpView):
             popup_width = max(popup_width, topic_link_width)
 
         if spoilers:
-            spoiler_buttons = []
-            spoiler_width = 0
-            for index, (header_len, header, content) in enumerate(spoilers):
-                spoiler_width = max(header_len, spoiler_width)
-                display_attr = None if index % 2 else "popup_contrast"
-                spoiler_buttons.append(
-                    SpoilerButton(controller, header_len, header, content, display_attr)
-                )
+            spoiler_buttons, spoiler_width = self.create_spoiler_buttons(
+                controller, spoilers
+            )
 
             # slice_index = Number of labels before message links + 1 newline
             #               + 1 'Spoilers' category label.
@@ -1750,6 +1772,39 @@ class MsgInfoView(PopUpView):
             )
 
         return link_widgets, link_width
+
+    def create_spoiler_buttons(
+        self, controller: Any, spoilers: List[Tuple[int, List[Any], List[Any]]]
+    ) -> Tuple[List[SpoilerButton], int]:
+        spoiler_buttons = []
+        spoiler_width = 0
+
+        for index, (header_len, header, content) in enumerate(spoilers):
+            spoiler_width = max(header_len, spoiler_width)
+
+            display_attr = None if index % 2 else "popup_contrast"
+
+            processed_header = [f"{index+1}: "] + header
+            processed_header_len = sum(
+                len(part[1]) if isinstance(part, tuple) else len(part)
+                for part in processed_header
+            )
+
+            spoiler_buttons.append(
+                SpoilerButton(
+                    controller,
+                    processed_header_len,
+                    processed_header,
+                    header + ["\n\n"] + content,
+                    self.msg,
+                    self.topic_links,
+                    self.message_links,
+                    self.time_mentions,
+                    self.spoilers,
+                    display_attr,
+                )
+            )
+        return spoiler_buttons, spoiler_width
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:

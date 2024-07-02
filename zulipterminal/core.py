@@ -490,9 +490,27 @@ class Controller:
         """
         self.view.set_footer_text(text, "task:warning", duration)
 
-    def show_spoiler(self, content: str) -> None:
+    def show_spoiler(
+        self,
+        content: str,
+        message: Message,
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
+        time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
+    ) -> None:
         self.show_pop_up(
-            SpoilerView(self, "Spoiler (up/down scrolls)", content), "area:msg"
+            SpoilerView(
+                self,
+                "Spoiler (up/down scrolls)",
+                content,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                spoilers,
+            ),
+            "area:msg",
         )
 
     def show_media_confirmation_popup(

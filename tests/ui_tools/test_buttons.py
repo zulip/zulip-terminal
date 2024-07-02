@@ -321,13 +321,34 @@ class TestSpoilerButton:
         header_len: int = 0,
         header: List[Any] = [""],
         content: List[Any] = [""],
+        message: Message = {},
+        topic_links: Dict[str, Tuple[str, int, bool]] = {},
+        message_links: Dict[str, Tuple[str, int, bool]] = {},
+        time_mentions: List[Tuple[str, str]] = [],
+        spoilers: List[Tuple[int, List[Any], List[Any]]] = [],
         display_attr: Optional[str] = None,
     ) -> SpoilerButton:
         self.content = content
         self.header_len = header_len
         self.header = header
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        self.spoilers = spoilers
         self.display_attr = display_attr
-        return SpoilerButton(self.controller, header_len, header, content, display_attr)
+        return SpoilerButton(
+            self.controller,
+            header_len,
+            header,
+            content,
+            message,
+            topic_links,
+            message_links,
+            time_mentions,
+            spoilers,
+            display_attr,
+        )
 
     def test_init(self, mocker: MockerFixture) -> None:
         self.update_widget = mocker.patch(MODULE + ".SpoilerButton.update_widget")
@@ -374,7 +395,12 @@ class TestSpoilerButton:
         mocked_button.show_spoiler()
 
         mocked_button.controller.show_spoiler.assert_called_once_with(
-            mocked_button.content
+            mocked_button.content,
+            mocked_button.message,
+            mocked_button.topic_links,
+            mocked_button.message_links,
+            mocked_button.time_mentions,
+            mocked_button.spoilers,
         )
 
 

@@ -970,7 +970,17 @@ class TestSpoilerView:
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
         mocker.patch(MODULE + ".urwid.SimpleFocusListWalker", return_value=[])
-        self.spoiler_view = SpoilerView(self.controller, "Spoiler View", "")
+        self.message = Message(id=1)
+        self.spoiler_view = SpoilerView(
+            self.controller,
+            "Spoiler View",
+            "",
+            self.message,
+            OrderedDict(),
+            OrderedDict(),
+            list(),
+            list(),
+        )
 
     def test_keypress_any_key(
         self, widget_size: Callable[[Widget], urwid_Size]
@@ -986,7 +996,13 @@ class TestSpoilerView:
     ) -> None:
         size = widget_size(self.spoiler_view)
         self.spoiler_view.keypress(size, key)
-        assert self.controller.exit_popup.called
+        self.controller.show_msg_info.assert_called_once_with(
+            msg=self.message,
+            topic_links=OrderedDict(),
+            message_links=OrderedDict(),
+            time_mentions=list(),
+            spoilers=list(),
+        )
 
     def test_keypress_navigation(
         self,
