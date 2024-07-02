@@ -324,10 +324,20 @@ class SpoilerButton(urwid.Button):
         header_len: int,
         header: List[Any],
         content: List[Any],
+        message: Message,
+        topic_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool]],
+        time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
         display_attr: Optional[str],
     ) -> None:
         self.controller = controller
         self.content = content
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        self.spoilers = spoilers
 
         super().__init__("")
         self.update_widget(header_len, header, display_attr)
@@ -344,7 +354,14 @@ class SpoilerButton(urwid.Button):
         self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
 
     def show_spoiler(self, *_: Any) -> None:
-        self.controller.show_spoiler(self.content)
+        self.controller.show_spoiler(
+            self.content,
+            self.message,
+            self.topic_links,
+            self.message_links,
+            self.time_mentions,
+            self.spoilers,
+        )
 
 
 class TopicButton(TopButton):
