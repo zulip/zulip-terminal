@@ -24,6 +24,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     PopUpConfirmationView,
     PopUpView,
+    SpoilerView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -503,6 +504,7 @@ class TestFullRenderedMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             title="Full Rendered Message",
         )
 
@@ -513,6 +515,7 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.topic_links == OrderedDict()
         assert self.full_rendered_message.message_links == OrderedDict()
         assert self.full_rendered_message.time_mentions == list()
+        assert self.full_rendered_message.spoilers == list()
         assert self.full_rendered_message.header.widget_list == msg_box.header
         assert self.full_rendered_message.footer.widget_list == msg_box.footer
 
@@ -555,6 +558,7 @@ class TestFullRenderedMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
 
@@ -579,6 +583,7 @@ class TestFullRawMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             title="Full Raw Message",
         )
 
@@ -589,6 +594,7 @@ class TestFullRawMsgView:
         assert self.full_raw_message.topic_links == OrderedDict()
         assert self.full_raw_message.message_links == OrderedDict()
         assert self.full_raw_message.time_mentions == list()
+        assert self.full_raw_message.spoilers == list()
         assert self.full_raw_message.header.widget_list == msg_box.header
         assert self.full_raw_message.footer.widget_list == msg_box.footer
 
@@ -631,6 +637,7 @@ class TestFullRawMsgView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
 
@@ -654,6 +661,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
             title="Edit History",
         )
 
@@ -663,6 +671,7 @@ class TestEditHistoryView:
         assert self.edit_history_view.topic_links == OrderedDict()
         assert self.edit_history_view.message_links == OrderedDict()
         assert self.edit_history_view.time_mentions == list()
+        assert self.edit_history_view.spoilers == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
             message_id=self.message["id"],
         )
@@ -702,6 +711,7 @@ class TestEditHistoryView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
     @pytest.mark.parametrize(
@@ -952,6 +962,47 @@ class TestHelpView:
         assert self.controller.exit_popup.called
 
 
+class TestSpoilerView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
+        self.controller = mocker.Mock()
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(MODULE + ".urwid.SimpleFocusListWalker", return_value=[])
+        self.spoiler_view = SpoilerView(self.controller, "Spoiler View", "")
+
+    def test_keypress_any_key(
+        self, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        key = "a"
+        size = widget_size(self.spoiler_view)
+        self.spoiler_view.keypress(size, key)
+        assert not self.controller.exit_popup.called
+
+    @pytest.mark.parametrize(
+        "key", {*keys_for_command("GO_BACK"), *keys_for_command("ENTER")}
+    )
+    def test_keypress_exit_popup(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.spoiler_view)
+        self.spoiler_view.keypress(size, key)
+        assert self.controller.exit_popup.called
+
+    def test_keypress_navigation(
+        self,
+        mocker: MockerFixture,
+        widget_size: Callable[[Widget], urwid_Size],
+        navigation_key_expected_key_pair: Tuple[str, str] = ("ENTER", "ENTER"),
+    ) -> None:
+        key, expected_key = navigation_key_expected_key_pair
+        size = widget_size(self.spoiler_view)
+        super_keypress = mocker.patch(MODULE + ".urwid.ListBox.keypress")
+        self.spoiler_view.keypress(size, key)
+        super_keypress.assert_called_once_with(size, expected_key)
+
+
 class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(
@@ -979,6 +1030,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture: Message) -> None:
@@ -986,6 +1038,7 @@ class TestMsgInfoView:
         assert self.msg_info_view.topic_links == OrderedDict()
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
+        assert self.msg_info_view.spoilers == list()
 
     def test_pop_up_info_order(self, message_fixture: Message) -> None:
         topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
@@ -997,6 +1050,7 @@ class TestMsgInfoView:
             topic_links=topic_links,
             message_links=message_links,
             time_mentions=list(),
+            spoilers=list(),
         )
         msg_links = msg_info_view.button_widgets
         assert msg_links == [message_links, topic_links]
@@ -1045,6 +1099,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1056,6 +1111,7 @@ class TestMsgInfoView:
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
+                spoilers=list(),
             )
         else:
             self.controller.show_edit_history.assert_not_called()
@@ -1074,6 +1130,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1084,6 +1141,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
     @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
@@ -1100,6 +1158,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
         size = widget_size(msg_info_view)
 
@@ -1110,6 +1169,7 @@ class TestMsgInfoView:
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
+            spoilers=list(),
         )
 
     @pytest.mark.parametrize(
@@ -1210,6 +1270,7 @@ class TestMsgInfoView:
             "Message Information",
             OrderedDict(),
             OrderedDict(),
+            list(),
             list(),
         )
         # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
