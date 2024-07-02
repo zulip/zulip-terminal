@@ -49,7 +49,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'OPEN_DRAFT': {
         'keys': ['d'],
         'help_text': 'Open draft message saved in this session',
-        'key_category': 'general',
+        'key_category': 'open_compose',
     },
     'COPY_ABOUT_INFO': {
         'keys': ['c'],
@@ -104,22 +104,22 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'REPLY_MESSAGE': {
         'keys': ['r', 'enter'],
         'help_text': 'Reply to the current message',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'MENTION_REPLY': {
         'keys': ['@'],
         'help_text': 'Reply mentioning the sender of the current message',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'QUOTE_REPLY': {
         'keys': ['>'],
         'help_text': 'Reply quoting the current message text',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'REPLY_AUTHOR': {
         'keys': ['R'],
         'help_text': 'Reply directly to the sender of the current message',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'EDIT_MESSAGE': {
         'keys': ['e'],
@@ -129,38 +129,38 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'STREAM_MESSAGE': {
         'keys': ['c'],
         'help_text': 'New message to a stream',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'PRIVATE_MESSAGE': {
         'keys': ['x'],
         'help_text': 'New message to a person or group of people',
-        'key_category': 'msg_actions',
+        'key_category': 'open_compose',
     },
     'CYCLE_COMPOSE_FOCUS': {
         'keys': ['tab'],
         'help_text': 'Cycle through recipient and content boxes',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'SEND_MESSAGE': {
         'keys': ['ctrl d', 'meta enter'],
         'help_text': 'Send a message',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'SAVE_AS_DRAFT': {
         'keys': ['meta s'],
         'help_text': 'Save current message as a draft',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'AUTOCOMPLETE': {
         'keys': ['ctrl f'],
         'help_text': ('Autocomplete @mentions, #stream_names, :emoji:'
                       ' and topics'),
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'AUTOCOMPLETE_REVERSE': {
         'keys': ['ctrl r'],
         'help_text': 'Cycle through autocomplete suggestions in reverse',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'ADD_REACTION': {
         'keys': [':'],
@@ -180,12 +180,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'NARROW_MESSAGE_RECIPIENT': {
         'keys': ['meta .'],
         'help_text': 'Narrow to compose box message recipient',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'EXIT_COMPOSE': {
         'keys': ['esc'],
         'help_text': 'Exit message compose box',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'TOGGLE_NARROW': {
         'keys': ['z'],
@@ -426,7 +426,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         # and to differentiate from other hotkeys using 'enter'.
         'keys': ['enter'],
         'help_text': 'Insert new line',
-        'key_category': 'msg_compose',
+        'key_category': 'compose_box',
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
@@ -447,7 +447,8 @@ HELP_CATEGORIES = {
     "searching": "Searching",
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
-    "msg_compose": "Composing a Message",
+    "open_compose": "Begin composing a message",
+    "compose_box": "Writing a message",
     "editor_navigation": "Editor: Navigation",
     "editor_text_manipulation": "Editor: Text Manipulation",
 }
