@@ -155,6 +155,33 @@ class TestModel:
         assert set(model._user_settings) == expected_keys
 
     @pytest.mark.parametrize(
+        "zulip_feature_level, expected_name",
+        [
+            (
+                0,
+                "All messages",
+            ),
+            (
+                255,
+                "Combined feed",
+            ),
+        ],
+    )
+    def test_init_combined_feed_name(
+        self, mocker, zulip_feature_level, initial_data, expected_name
+    ):
+        mocker.patch(MODEL + ".get_messages", return_value="")
+        initial_data["zulip_feature_level"] = zulip_feature_level
+        self.client.register = mocker.Mock(return_value=initial_data)
+        combined_feed = mocker.patch(
+            "zulipterminal.helper.CombinedFeed.set_combined_feed_name"
+        )
+
+        Model(self.controller)
+
+        combined_feed.assert_called_with(expected_name)
+
+    @pytest.mark.parametrize(
         "server_response, locally_processed_data, zulip_feature_level",
         [
             (

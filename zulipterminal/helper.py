@@ -66,6 +66,19 @@ class EmojiData(TypedDict):
 NamedEmojiData = Dict[str, EmojiData]
 
 
+class CombinedFeed:
+    CombinedFeedType = Literal["Combined feed", "All messages"]
+    _combined_feed_name: CombinedFeedType = "All messages"
+
+    @classmethod
+    def get_combined_feed_name(cls) -> CombinedFeedType:
+        return cls._combined_feed_name
+
+    @classmethod
+    def set_combined_feed_name(cls, value: CombinedFeedType) -> None:
+        cls._combined_feed_name = value
+
+
 class CustomProfileData(TypedDict):
     label: str
     value: Union[str, List[int]]

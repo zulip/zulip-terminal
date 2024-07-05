@@ -29,7 +29,7 @@ from zulipterminal.config.symbols import (
     TIME_MENTION_MARKER,
 )
 from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
-from zulipterminal.helper import get_unused_fence
+from zulipterminal.helper import CombinedFeed, get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
@@ -214,7 +214,8 @@ class MessageBox(urwid.Pile):
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
         if curr_narrow == []:
-            text_to_fill = f" {ALL_MESSAGES_MARKER} All messages "
+            text_to_fill = f" {ALL_MESSAGES_MARKER} "
+            f"{CombinedFeed.get_combined_feed_name()} "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
             text_to_fill = f" {DIRECT_MESSAGE_MARKER} All direct messages "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":

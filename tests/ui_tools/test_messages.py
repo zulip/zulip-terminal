@@ -9,7 +9,6 @@ from urwid import Columns, Divider, Padding, Text
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
-    ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
     MENTIONED_MESSAGES_MARKER,
     QUOTED_TEXT_MARKER,
@@ -902,26 +901,50 @@ class TestMessageBox:
         assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize(
-        "msg_narrow, msg_type, assert_header_bar, assert_search_bar",
+        "msg_narrow, msg_type, assert_header_bar",
         [
-            (
-                [],
-                0,
-                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
-                f" {ALL_MESSAGES_MARKER} All messages ",
-            ),
             (
                 [],
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
-                f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [],
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
-                f" {ALL_MESSAGES_MARKER} All messages ",
             ),
+        ],
+    )
+    def test_msg_generates_search_and_header_bar__ALL_MESSAGES(
+        self,
+        mocker,
+        messages_successful_response,
+        msg_type,
+        msg_narrow,
+        assert_header_bar,
+    ):
+        self.model.stream_dict = {
+            205: {
+                "color": "#bd6",
+            },
+        }
+        self.model.narrow = msg_narrow
+        combined_feed = mocker.patch(
+            "zulipterminal.helper.CombinedFeed.get_combined_feed_name"
+        )
+        messages = messages_successful_response["messages"]
+        current_message = messages[msg_type]
+
+        msg_box = MessageBox(current_message, self.model, messages[0])
+        msg_box.top_search_bar()
+        header_bar = msg_box.recipient_header()
+
+        assert header_bar[0].text.startswith(assert_header_bar)
+        assert combined_feed.called
+
+    @pytest.mark.parametrize(
+        "msg_narrow, msg_type, assert_header_bar, assert_search_bar",
+        [
             (
                 [["stream", "PTEST"]],
                 0,
@@ -984,12 +1007,6 @@ class TestMessageBox:
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {STARRED_MESSAGES_MARKER} Starred messages ",
-            ),
-            (
-                [["search", "FOO"]],
-                0,
-                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
-                f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [["is", "mentioned"]],

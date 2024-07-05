@@ -507,6 +507,10 @@ URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
 }
 
 
+def update_combined_feed() -> None:
+    KEY_BINDINGS["ALL_MESSAGES"]["help_text"] = "Narrow to combined feed"
+
+
 def display_key_for_urwid_key(urwid_key: str) -> str:
     """
     Returns a displayable user-centric format of the urwid key.

@@ -58,10 +58,14 @@ from zulipterminal.api_types import (
     UpdateMessageContentEvent,
     UpdateMessagesLocationEvent,
 )
-from zulipterminal.config.keys import primary_display_key_for_command
+from zulipterminal.config.keys import (
+    primary_display_key_for_command,
+    update_combined_feed,
+)
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import EDIT_TOPIC_POLICY, ROLE_BY_ID, STATE_ICON
 from zulipterminal.helper import (
+    CombinedFeed,
     CustomProfileData,
     MinimalUserData,
     NamedEmojiData,
@@ -194,6 +198,11 @@ class Model:
         if self.server_feature_level < 30:
             for stream in self.stream_dict.values():
                 stream["date_created"] = None
+
+        CombinedFeed.set_combined_feed_name("All messages")
+        if self.server_feature_level >= 255:
+            CombinedFeed.set_combined_feed_name("Combined feed")
+            update_combined_feed()
 
         self.normalize_and_cache_message_retention_text()
 
