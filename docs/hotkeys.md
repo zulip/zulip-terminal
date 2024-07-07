@@ -32,8 +32,8 @@
 | :--- | :---: |
 |Narrow to the stream of the current message|<kbd>s</kbd>|
 |Narrow to the topic of the current message|<kbd>S</kbd>|
-|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
 |Narrow to a topic/direct-chat, or stream/all-direct-messages|<kbd>z</kbd>|
+|Narrow to compose box message recipient|<kbd>Meta</kbd> + <kbd>.</kbd>|
 |Narrow to all messages|<kbd>a</kbd> / <kbd>Esc</kbd>|
 |Narrow to all direct messages|<kbd>P</kbd>|
 |Narrow to all starred messages|<kbd>f</kbd>|
