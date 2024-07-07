@@ -177,6 +177,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Narrow to the topic of the current message',
         'key_category': 'narrowing',
     },
+    'TOGGLE_NARROW': {
+        'keys': ['z'],
+        'help_text':
+            'Narrow to a topic/direct-chat, or stream/all-direct-messages',
+        'key_category': 'narrowing',
+    },
     'NARROW_MESSAGE_RECIPIENT': {
         'keys': ['meta .'],
         'help_text': 'Narrow to compose box message recipient',
@@ -186,12 +192,6 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['esc'],
         'help_text': 'Exit message compose box',
         'key_category': 'compose_box',
-    },
-    'TOGGLE_NARROW': {
-        'keys': ['z'],
-        'help_text':
-            'Narrow to a topic/direct-chat, or stream/all-direct-messages',
-        'key_category': 'narrowing',
     },
     'REACTION_AGREEMENT': {
         'keys': ['='],
