@@ -655,15 +655,21 @@ def primary_display_key_for_command(command: str) -> str:
     return display_key_for_urwid_key(primary_key_for_command(command))
 
 
-def commands_for_random_tips() -> List[KeyBinding]:
+def commands_for_random_tips(context: str = "") -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
     """
-    return [
+    if not context or context not in HELP_CONTEXTS:
+        context = "global"
+    random_tips: List[KeyBinding] = [
         key_binding
         for key_binding in KEY_BINDINGS.values()
         if not key_binding.get("excluded_from_random_tips", False)
+        and context in key_binding["key_contexts"]
     ]
+    if len(random_tips) == 0:
+        return commands_for_random_tips("global")
+    return random_tips
 
 
 # Refer urwid/command_map.py
