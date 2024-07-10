@@ -350,6 +350,9 @@ class View(urwid.WidgetWrap):
             # Show help menu
             self.controller.show_help()
             return key
+        elif is_command_key("CONTEXTUAL_HELP", key):
+            self.controller.show_help(self.context)
+            return key
         elif is_command_key("MARKDOWN_HELP", key):
             self.controller.show_markdown_help()
             return key

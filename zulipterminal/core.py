@@ -252,8 +252,8 @@ class Controller:
     def exit_popup(self) -> None:
         self.loop.widget = self.view
 
-    def show_help(self) -> None:
-        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}")
+    def show_help(self, context: Optional[str] = None) -> None:
+        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}", context)
         self.show_pop_up(help_view, "area:help")
 
     def show_markdown_help(self) -> None:

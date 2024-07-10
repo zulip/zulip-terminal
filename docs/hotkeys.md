@@ -6,6 +6,7 @@
 |Command|Key Combination|
 | :--- | :---: |
 |Show/hide Help Menu|<kbd>?</kbd>|
+|Show/hide Contextual Help Menu|<kbd>Meta</kbd> + <kbd>c</kbd>|
 |Show/hide Markdown Help Menu|<kbd>Meta</kbd> + <kbd>m</kbd>|
 |Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|

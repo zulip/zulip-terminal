@@ -38,6 +38,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'general',
         'key_contexts': ['general'],
     },
+    'CONTEXTUAL_HELP': {
+        'keys': ['meta c'],
+        'help_text': 'Show/hide Contextual Help Menu',
+        'excluded_from_random_tips': True,
+        'key_category': 'general',
+        'key_contexts': ['general'],
+    },
     'MARKDOWN_HELP': {
         'keys': ['meta m'],
         'help_text': 'Show/hide Markdown Help Menu',
