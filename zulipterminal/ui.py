@@ -104,13 +104,13 @@ class View(urwid.WidgetWrap):
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
         allowed_commands = commands_for_random_tips()
         if not allowed_commands:
-            return ["Help(?): "]
+            return ["Help[?] "]
         random_command = random.choice(allowed_commands)
         random_command_display_keys = ", ".join(
             [display_key_for_urwid_key(key) for key in random_command["keys"]]
         )
         return [
-            "Help(?): ",
+            "Help[?] ",
             ("footer_contrast", f" {random_command_display_keys} "),
             f" {random_command['help_text']}",
         ]
