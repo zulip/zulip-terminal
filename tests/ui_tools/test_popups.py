@@ -1054,9 +1054,9 @@ class TestMsgInfoView:
         assert self.msg_info_view.time_mentions == list()
         assert self.msg_info_view.spoilers == list()
 
-    def test_pop_up_info_order(self, message_fixture: Message) -> None:
-        topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
-        message_links = OrderedDict([("image.jpg", ("image", 1, True))])
+    def test_popup_info_order(self, message_fixture: Message) -> None:
+        topic_links = OrderedDict([("https://bar.com", ("topic", 1, True, False))])
+        message_links = OrderedDict([("image.jpg", ("image", 1, True, False))])
         msg_info_view = MsgInfoView(
             self.controller,
             message_fixture,
@@ -1302,14 +1302,14 @@ class TestMsgInfoView:
         ],
         [
             (
-                OrderedDict([("https://bar.com", ("Foo", 1, True))]),
+                OrderedDict([("https://bar.com", ("Foo", 1, True, False))]),
                 "1: Foo\nhttps://bar.com",
                 {None: "popup_contrast"},
                 {None: "selected"},
                 15,
             ),
             (
-                OrderedDict([("https://foo.com", ("", 1, True))]),
+                OrderedDict([("https://foo.com", ("", 1, True, False))]),
                 "1: https://foo.com",
                 {None: "popup_contrast"},
                 {None: "selected"},
@@ -1323,7 +1323,7 @@ class TestMsgInfoView:
     )
     def test_create_link_buttons(
         self,
-        initial_link: "OrderedDict[str, Tuple[str, int, bool]]",
+        initial_link: "OrderedDict[str, Tuple[str, int, bool, bool]]",
         expected_text: str,
         expected_attr_map: Dict[None, str],
         expected_focus_map: Dict[None, str],
@@ -1588,8 +1588,8 @@ class TestStreamInfoView:
             (
                 OrderedDict(
                     [
-                        ("https://example.com", ("Example", 1, True)),
-                        ("https://generic.com", ("Generic", 2, True)),
+                        ("https://example.com", ("Example", 1, True, False)),
+                        ("https://generic.com", ("Generic", 2, True, False)),
                     ]
                 ),
                 "1: https://example.com\n2: https://generic.com",
@@ -1608,7 +1608,7 @@ class TestStreamInfoView:
     )
     def test_footlinks(
         self,
-        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        message_links: "OrderedDict[str, Tuple[str, int, bool, bool]]",
         expected_text: str,
         expected_attrib: List[Tuple[Optional[str], int]],
         expected_footlinks_width: int,

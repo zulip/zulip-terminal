@@ -1881,7 +1881,7 @@ class TestMessageBox:
                     [
                         (
                             "https://github.com/zulip/zulip-terminal/pull/1",
-                            ("#T1", 1, True),
+                            ("#T1", 1, True, False),
                         ),
                     ]
                 ),
@@ -1893,8 +1893,8 @@ class TestMessageBox:
             case(
                 OrderedDict(
                     [
-                        ("https://foo.com", ("Foo!", 1, True)),
-                        ("https://bar.com", ("Bar!", 2, True)),
+                        ("https://foo.com", ("Foo!", 1, True, False)),
+                        ("https://bar.com", ("Bar!", 2, True, False)),
                     ]
                 ),
                 "1: https://foo.com\n2: https://bar.com",
@@ -1913,8 +1913,11 @@ class TestMessageBox:
             case(
                 OrderedDict(
                     [
-                        ("https://example.com", ("https://example.com", 1, False)),
-                        ("http://example.com", ("http://example.com", 2, False)),
+                        (
+                            "https://example.com",
+                            ("https://example.com", 1, False, False),
+                        ),
+                        ("http://example.com", ("http://example.com", 2, False, False)),
                     ]
                 ),
                 None,
@@ -1925,8 +1928,8 @@ class TestMessageBox:
             case(
                 OrderedDict(
                     [
-                        ("https://foo.com", ("https://foo.com, Text", 1, True)),
-                        ("https://bar.com", ("Text, https://bar.com", 2, True)),
+                        ("https://foo.com", ("https://foo.com, Text", 1, True, False)),
+                        ("https://bar.com", ("Text, https://bar.com", 2, True, False)),
                     ]
                 ),
                 "1: https://foo.com\n2: https://bar.com",
@@ -1945,9 +1948,9 @@ class TestMessageBox:
             case(
                 OrderedDict(
                     [
-                        ("https://foo.com", ("Foo!", 1, True)),
-                        ("http://example.com", ("example.com", 2, False)),
-                        ("https://bar.com", ("Bar!", 3, True)),
+                        ("https://foo.com", ("Foo!", 1, True, False)),
+                        ("http://example.com", ("example.com", 2, False, False)),
+                        ("https://bar.com", ("Bar!", 3, True, False)),
                     ]
                 ),
                 "1: https://foo.com\n3: https://bar.com",
@@ -1994,7 +1997,7 @@ class TestMessageBox:
     def test_footlinks_limit(self, maximum_footlinks, expected_instance):
         message_links = OrderedDict(
             [
-                ("https://github.com/zulip/zulip-terminal", ("ZT", 1, True)),
+                ("https://github.com/zulip/zulip-terminal", ("ZT", 1, True, False)),
             ]
         )
 

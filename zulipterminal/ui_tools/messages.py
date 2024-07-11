@@ -60,8 +60,8 @@ class MessageBox(urwid.Pile):
         self.topic_name = ""
         self.email = ""  # FIXME: Can we remove this?
         self.user_id: Optional[int] = None
-        self.message_links: Dict[str, Tuple[str, int, bool]] = dict()
-        self.topic_links: Dict[str, Tuple[str, int, bool]] = dict()
+        self.message_links: Dict[str, Tuple[str, int, bool, bool]] = dict()
+        self.topic_links: Dict[str, Tuple[str, int, bool, bool]] = dict()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.spoilers: List[Tuple[int, List[Any], List[Any]]] = list()
         self.last_message = last_message
@@ -77,6 +77,7 @@ class MessageBox(urwid.Pile):
                     link["text"],
                     len(self.topic_links) + 1,
                     True,
+                    False,
                 )
 
             self.stream_name = self.message["display_recipient"]
@@ -314,7 +315,7 @@ class MessageBox(urwid.Pile):
 
     @staticmethod
     def footlinks_view(
-        message_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         *,
         maximum_footlinks: int,
         padded: bool,
@@ -331,7 +332,7 @@ class MessageBox(urwid.Pile):
         footlinks = []
         counter = 0
         footlinks_width = 0
-        for link, (text, index, show_footlink) in message_links.items():
+        for link, (text, index, show_footlink, spoiler_link) in message_links.items():
             if counter == maximum_footlinks:
                 break
             if not show_footlink:
@@ -374,7 +375,7 @@ class MessageBox(urwid.Pile):
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
     ) -> Tuple[
         List[Any],
-        Dict[str, Tuple[str, int, bool]],
+        Dict[str, Tuple[str, int, bool, bool]],
         List[Tuple[str, str]],
         List[Tuple[int, List[Any], List[Any]]],
     ]:
@@ -503,8 +504,11 @@ class MessageBox(urwid.Pile):
                         # Do not show as a footlink as the text is sufficient
                         # to represent the link.
                         show_footlink = False
+
+                spoiler_link = False
                 if element.find_parent("div", class_="spoiler-block"):
                     show_footlink = False
+                    spoiler_link = True
 
                 # Detect duplicate links to save screen real estate.
                 if link not in metadata["message_links"]:
@@ -512,18 +516,23 @@ class MessageBox(urwid.Pile):
                         text,
                         len(metadata["message_links"]) + 1,
                         show_footlink,
+                        spoiler_link,
                     )
                 else:
                     # Append the text if its link already exist with a
                     # different text.
-                    saved_text, saved_link_index, saved_footlink_status = metadata[
-                        "message_links"
-                    ][link]
+                    (
+                        saved_text,
+                        saved_link_index,
+                        saved_footlink_status,
+                        spoiler_link,
+                    ) = metadata["message_links"][link]
                     if saved_text != text:
                         metadata["message_links"][link] = (
                             f"{saved_text}, {text}",
                             saved_link_index,
                             show_footlink or saved_footlink_status,
+                            spoiler_link,
                         )
 
                 markup.extend(
@@ -900,7 +909,7 @@ class MessageBox(urwid.Pile):
         cls, content: Any, server_url: str
     ) -> Tuple[
         Tuple[None, Any],
-        Dict[str, Tuple[str, int, bool]],
+        Dict[str, Tuple[str, int, bool, bool]],
         List[Tuple[str, str]],
         List[Tuple[int, List[Any], List[Any]]],
     ]:

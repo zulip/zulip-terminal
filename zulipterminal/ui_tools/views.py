@@ -1084,8 +1084,8 @@ class SpoilerView(PopUpView):
         title: str,
         content: str,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -1609,8 +1609,8 @@ class MsgInfoView(PopUpView):
         controller: Any,
         msg: Message,
         title: str,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -1748,17 +1748,21 @@ class MsgInfoView(PopUpView):
 
     @staticmethod
     def create_link_buttons(
-        controller: Any, links: Dict[str, Tuple[str, int, bool]]
+        controller: Any, links: Dict[str, Tuple[str, int, bool, bool]]
     ) -> Tuple[List[MessageLinkButton], int]:
         link_widgets = []
         link_width = 0
 
         for index, link in enumerate(links):
-            text, link_index, _ = links[link]
+            text, link_index, _, spoiler_link = links[link]
             if text:
                 caption = f"{link_index}: {text}\n{link}"
+                if spoiler_link:
+                    caption = f"{link_index} [spoiler]: {text}\n{link}"
             else:
                 caption = f"{link_index}: {link}"
+                if spoiler_link:
+                    caption = f"{link_index} [spoiler]: {link}"
             link_width = max(link_width, len(max(caption.split("\n"), key=len)))
 
             display_attr = None if index % 2 else "popup_contrast"
@@ -1884,8 +1888,8 @@ class EditHistoryView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
@@ -2005,8 +2009,8 @@ class FullRenderedMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,
@@ -2052,8 +2056,8 @@ class FullRawMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
         title: str,

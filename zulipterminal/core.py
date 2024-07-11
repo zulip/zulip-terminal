@@ -262,8 +262,8 @@ class Controller:
     def show_msg_info(
         self,
         msg: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -342,8 +342,8 @@ class Controller:
     def show_full_rendered_message(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -363,8 +363,8 @@ class Controller:
     def show_full_raw_message(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -384,8 +384,8 @@ class Controller:
     def show_edit_history(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
@@ -494,8 +494,8 @@ class Controller:
         self,
         content: str,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
         spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
