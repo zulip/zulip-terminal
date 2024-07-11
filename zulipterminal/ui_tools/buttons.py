@@ -163,6 +163,9 @@ class DMPanelButton(TopButton):
             count=count,
         )
 
+    def selectable(self) -> bool:
+        return False
+
     def activate(self, key: Any) -> None:
         self.show_function()
 
