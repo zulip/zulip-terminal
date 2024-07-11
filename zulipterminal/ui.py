@@ -5,7 +5,7 @@ Defines the `View`, and controls where each component is displayed
 import random
 import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import urwid
 
@@ -181,6 +181,9 @@ class View(urwid.WidgetWrap):
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
+
+    def get_focus_path(self) -> Tuple[Union[int, str], ...]:
+        return self.frame.get_focus_path()
 
     def main_window(self) -> Any:
         self.left_panel, self.left_tab = self.left_column_view()

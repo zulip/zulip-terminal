@@ -39,7 +39,7 @@ class TestController:
         self.poll_for_events = mocker.patch(MODEL + ".poll_for_events")
         mocker.patch(MODULE + ".Controller.show_loading")
         self.main_loop = mocker.patch(
-            MODULE + ".urwid.MainLoop", return_value=mocker.Mock()
+            MODULE + ".FocusTrackingMainLoop", return_value=mocker.Mock()
         )
 
         self.config_file = "path/to/zuliprc"

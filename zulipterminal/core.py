@@ -25,6 +25,7 @@ from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
     MIN_SUPPORTED_POPUP_WIDTH,
 )
+from zulipterminal.contexts import FocusTrackingMainLoop
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
@@ -104,7 +105,7 @@ class Controller:
 
         screen = Screen()
         screen.set_terminal_properties(colors=self.color_depth)
-        self.loop = urwid.MainLoop(self.view, self.theme, screen=screen)
+        self.loop = FocusTrackingMainLoop(self.view, self.theme, screen=screen)
 
         # urwid pipe for concurrent screen update handling
         self._update_pipe = self.loop.watch_pipe(self._draw_screen)
