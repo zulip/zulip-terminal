@@ -21,6 +21,7 @@ from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     CHECK_MARK,
     DIRECT_MESSAGE_MARKER,
+    STREAM_MESSAGE_MARKER,
     MENTIONED_MESSAGES_MARKER,
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
@@ -163,6 +164,7 @@ class StreamPanelButton(TopButton):
         super().__init__(
             controller=controller,
             label_markup=(None, button_text),
+            prefix_markup=("title", STREAM_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
             show_function=lambda: None,
             count=count,
