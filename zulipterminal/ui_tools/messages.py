@@ -503,6 +503,8 @@ class MessageBox(urwid.Pile):
                         # Do not show as a footlink as the text is sufficient
                         # to represent the link.
                         show_footlink = False
+                if element.find_parent("div", class_="spoiler-block"):
+                    show_footlink = False
 
                 # Detect duplicate links to save screen real estate.
                 if link not in metadata["message_links"]:
