@@ -168,6 +168,9 @@ class StreamPanelButton(TopButton):
             count=count,
         )
 
+    def selectable(self) -> bool:
+        return False
+
 
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
