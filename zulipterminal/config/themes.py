@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pygments.token import STANDARD_TYPES, _TokenType
 
 from zulipterminal.config.color import term16
-from zulipterminal.themes import gruvbox_dark, gruvbox_light, zt_blue, zt_dark, zt_light
+from zulipterminal.themes import gruvbox_dark, gruvbox_light, solarized_dark, zt_blue, zt_dark, zt_light
 
 
 StyleSpec = Union[
@@ -93,6 +93,7 @@ REQUIRED_META = {
 THEMES: Dict[str, Any] = {
     "gruvbox_dark": gruvbox_dark,
     "gruvbox_light": gruvbox_light,
+    "solarized_dark": solarized_dark,
     "zt_dark": zt_dark,
     "zt_light": zt_light,
     "zt_blue": zt_blue,
