@@ -116,6 +116,8 @@ class Model:
         self.index = initial_index
         self.last_unread_pm = None
 
+        self.active_button: Any = None
+
         self.user_id = -1
         self.user_email = ""
         self.user_full_name = ""
@@ -322,6 +324,10 @@ class Model:
             raise RuntimeError("Model.set_narrow parameters used incorrectly.")
 
         if new_narrow != self.narrow:
+            # Deactivate any previous button
+            if self.active_button is not None:
+                self.active_button.is_active = False
+
             self.narrow = new_narrow
 
             if pm_with is not None and new_narrow[0][0] == "pm-with":
@@ -337,6 +343,26 @@ class Model:
                 self.stream_id = self.stream_id_from_name(stream)
             else:
                 self.stream_id = None
+
+            # Activate new button (if stream)
+            if self.stream_id:
+                new_stream_button = self.controller.view.stream_id_to_button[
+                    self.stream_id
+                ]
+                self.active_button = new_stream_button  # Save to deactivate
+                self.active_button.is_active = True
+            if new_narrow == []:
+                self.active_button = self.controller.view.home_button
+                self.active_button.is_active = True
+            if pms is True:
+                self.active_button = self.controller.view.pm_button
+                self.active_button.is_active = True
+            if starred is True:
+                self.active_button = self.controller.view.starred_button
+                self.active_button.is_active = True
+            if mentioned is True:
+                self.active_button = self.controller.view.mentioned_button
+                self.active_button.is_active = True
 
             return False
         else:
