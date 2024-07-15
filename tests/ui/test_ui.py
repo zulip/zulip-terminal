@@ -96,7 +96,7 @@ class TestView:
     def test_set_footer_text_specific_text(
         self, view: View, text: str = "blah"
     ) -> None:
-        view.set_footer_text([text])
+        view.set_footer_text_for_event([text])
 
         view.frame.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
@@ -106,12 +106,12 @@ class TestView:
         view: View,
         mocker: MockerFixture,
         custom_text: str = "custom",
-        duration: Optional[float] = 5.3,
+        duration: float = 5.3,
     ) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
         mock_sleep = mocker.patch("time.sleep")
 
-        view.set_footer_text([custom_text], duration=duration)
+        view.set_footer_text_for_event_duration([custom_text], duration=duration)
 
         view.frame.footer.set_text.assert_has_calls(
             [mocker.call([custom_text]), mocker.call(["some help text"])]

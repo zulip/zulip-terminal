@@ -445,7 +445,7 @@ class Controller:
         # Until conversation becomes "inactive" like when a `stop` event is sent
         while self.active_conversation_info:
             sender_name = self.active_conversation_info["sender_name"]
-            self.view.set_footer_text(
+            self.view.set_footer_text_for_event(
                 [
                     ("footer_contrast", " " + sender_name + " "),
                     " is typing" + next(dots),
@@ -464,7 +464,7 @@ class Controller:
         """
         Helper to show an error message in footer
         """
-        self.view.set_footer_text(text, "task:error", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:error")
 
     def report_success(
         self,
@@ -474,7 +474,7 @@ class Controller:
         """
         Helper to show a success message in footer
         """
-        self.view.set_footer_text(text, "task:success", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:success")
 
     def report_warning(
         self,
@@ -484,7 +484,7 @@ class Controller:
         """
         Helper to show a warning message in footer
         """
-        self.view.set_footer_text(text, "task:warning", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:warning")
 
     def show_media_confirmation_popup(
         self, func: Any, tool: str, media_path: str

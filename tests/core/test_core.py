@@ -589,7 +589,7 @@ class TestController:
         controller: Controller,
         active_conversation_info: Dict[str, str],
     ) -> None:
-        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        set_footer_text_for_event = mocker.patch(VIEW + ".set_footer_text_for_event")
         reset_footer_text = mocker.patch(VIEW + ".reset_footer_text")
         mocker.patch(MODULE + ".time.sleep")
         controller.active_conversation_info = active_conversation_info
@@ -601,7 +601,7 @@ class TestController:
         Thread(controller.show_typing_notification()).start()
 
         if active_conversation_info:
-            set_footer_text.assert_has_calls(
+            set_footer_text_for_event.assert_has_calls(
                 [
                     mocker.call([("footer_contrast", " hamlet "), " is typing"]),
                     mocker.call([("footer_contrast", " hamlet "), " is typing."]),

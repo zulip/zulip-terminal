@@ -116,12 +116,7 @@ class View(urwid.WidgetWrap):
         ]
 
     @asynch
-    def set_footer_text(
-        self,
-        text: List[Any],
-        style: str = "footer",
-        duration: Optional[float] = None,
-    ) -> None:
+    def set_footer_text(self, text: List[Any], style: str = "footer") -> None:
         # Avoid updating repeatedly (then pausing and showing default text)
         # This is simple, though doesn't avoid starting one thread for each call
         if text == self._w.footer.text:
@@ -130,14 +125,20 @@ class View(urwid.WidgetWrap):
         self.frame.footer.set_text(text)
         self.frame.footer.set_attr_map({None: style})
         self.controller.update_screen()
-        if duration is not None:
-            assert duration > 0
-            time.sleep(duration)
-            self.reset_footer_text()
 
     def reset_footer_text(self) -> None:
         text = self.get_random_help()
         self.set_footer_text(text, "footer")
+
+    def set_footer_text_for_event(self, text: List[Any], style: str = "footer") -> None:
+        self.set_footer_text(text, style)
+
+    def set_footer_text_for_event_duration(
+        self, text: List[Any], duration: float, style: str = "footer"
+    ) -> None:
+        self.set_footer_text_for_event(text, style)
+        time.sleep(duration)
+        self.reset_footer_text()
 
     @asynch
     def set_typeahead_footer(
@@ -337,7 +338,7 @@ class View(urwid.WidgetWrap):
         self, size: urwid_Box, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse drag":
-            self.model.controller.view.set_footer_text(
+            self.model.controller.view.set_footer_text_for_event(
                 [
                     "Try pressing ",
                     ("footer_contrast", f" {MOUSE_SELECTION_KEY} "),
