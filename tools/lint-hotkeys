@@ -43,9 +43,9 @@ def lint_hotkeys_file() -> None:
     categories = read_help_categories()
 
     # Lint each key combination and description
-    for action in HELP_CATEGORIES:
+    for batch in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
-        for help_text, key_combinations_list in categories[action]:
+        for help_text, key_combinations_list in categories[batch]:
             check_duplicate_keys_list.extend(key_combinations_list)
             various_key_combinations = " / ".join(key_combinations_list)
             # Check description style
@@ -66,7 +66,7 @@ def lint_hotkeys_file() -> None:
         ]
         if len(duplicate_keys) != 0:
             print(
-                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[action]}) detected"
+                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected"
             )
             error_flag = True
     if error_flag:
@@ -107,13 +107,13 @@ def generate_hotkeys_file_string() -> str:
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
         "<!--- Do not modify -->\n\n# Hot Keys\n"
     )
-    for action in HELP_CATEGORIES:
+    for batch in HELP_CATEGORIES:
         hotkeys_file_string += (
-            f"## {HELP_CATEGORIES[action]}\n"
+            f"## {HELP_CATEGORIES[batch]}\n"
             "|Command|Key Combination|\n"
             "| :--- | :---: |\n"
         )
-        for help_text, key_combinations_list in categories[action]:
+        for help_text, key_combinations_list in categories[batch]:
             various_key_combinations = " / ".join(
                 [
                     " + ".join([f"<kbd>{key}</kbd>" for key in key_combination.split()])
