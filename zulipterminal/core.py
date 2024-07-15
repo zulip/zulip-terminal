@@ -454,7 +454,7 @@ class Controller:
             time.sleep(0.45)
 
         self.is_typing_notification_in_progress = False
-        self.view.set_footer_text()
+        self.view.reset_footer_text()
 
     def report_error(
         self,

@@ -118,26 +118,26 @@ class View(urwid.WidgetWrap):
     @asynch
     def set_footer_text(
         self,
-        text_list: Optional[List[Any]] = None,
+        text: List[Any],
         style: str = "footer",
         duration: Optional[float] = None,
     ) -> None:
         # Avoid updating repeatedly (then pausing and showing default text)
         # This is simple, though doesn't avoid starting one thread for each call
-        if text_list == self._w.footer.text:
+        if text == self._w.footer.text:
             return
 
-        if text_list is None:
-            text = self.get_random_help()
-        else:
-            text = text_list
         self.frame.footer.set_text(text)
         self.frame.footer.set_attr_map({None: style})
         self.controller.update_screen()
         if duration is not None:
             assert duration > 0
             time.sleep(duration)
-            self.set_footer_text()
+            self.reset_footer_text()
+
+    def reset_footer_text(self) -> None:
+        text = self.get_random_help()
+        self.set_footer_text(text, "footer")
 
     @asynch
     def set_typeahead_footer(
@@ -329,7 +329,7 @@ class View(urwid.WidgetWrap):
             self.controller.show_markdown_help()
             return key
         elif is_command_key("NEW_HINT", key):
-            self.set_footer_text()
+            self.reset_footer_text()
             return key
         return super().keypress(size, key)
 
@@ -347,7 +347,7 @@ class View(urwid.WidgetWrap):
             )
             self.displaying_selection_hint = True
         elif event == "mouse release" and self.displaying_selection_hint:
-            self.model.controller.view.set_footer_text()
+            self.model.controller.view.reset_footer_text()
             self.displaying_selection_hint = False
 
         return super().mouse_event(size, event, button, col, row, focus)

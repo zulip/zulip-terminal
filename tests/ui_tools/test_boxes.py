@@ -1583,7 +1583,7 @@ class TestWriteBox:
         write_box.keypress(size, key)
 
         assert write_box.is_in_typeahead_mode == expected_typeahead_mode
-        assert not self.view.set_footer_text.called
+        assert not self.view.reset_footer_text.called
 
     @pytest.mark.parametrize(
         "key, current_typeahead_mode, expected_typeahead_mode",
@@ -1611,7 +1611,7 @@ class TestWriteBox:
         assert write_box.is_in_typeahead_mode == expected_typeahead_mode
 
         # We may prefer called-once in future, but the key part is that we do reset
-        assert self.view.set_footer_text.called
+        assert self.view.reset_footer_text.called
 
     @pytest.mark.parametrize(
         [

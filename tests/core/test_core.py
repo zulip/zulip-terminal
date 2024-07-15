@@ -590,6 +590,7 @@ class TestController:
         active_conversation_info: Dict[str, str],
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        reset_footer_text = mocker.patch(VIEW + ".reset_footer_text")
         mocker.patch(MODULE + ".time.sleep")
         controller.active_conversation_info = active_conversation_info
 
@@ -608,8 +609,8 @@ class TestController:
                     mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
                 ]
             )
-            set_footer_text.assert_called_with()
+            reset_footer_text.assert_called_with()
         else:
-            set_footer_text.assert_called_once_with()
+            reset_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
         assert controller.active_conversation_info == {}

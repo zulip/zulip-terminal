@@ -85,10 +85,10 @@ class TestView:
 
         view._w.footer.set_text.assert_not_called()
 
-    def test_set_footer_text_default(self, view: View, mocker: MockerFixture) -> None:
+    def test_reset_footer_text(self, view: View, mocker: MockerFixture) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
 
-        view.set_footer_text()
+        view.reset_footer_text()
 
         view.frame.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
@@ -350,12 +350,12 @@ class TestView:
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         size = widget_size(view)
-        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        reset_footer_text = mocker.patch(VIEW + ".reset_footer_text")
         mocker.patch(CONTROLLER + ".is_in_editor_mode", return_value=False)
 
         returned_key = view.keypress(size, key)
 
-        set_footer_text.assert_called_once_with()
+        reset_footer_text.assert_called_once_with()
         assert returned_key == key
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
