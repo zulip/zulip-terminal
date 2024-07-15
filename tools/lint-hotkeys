@@ -25,6 +25,23 @@ HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc"]
 
 
+def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
+    """
+    Generate a dict from KEYS_FILE
+    key: help category
+    value: a list of help texts and key combinations, for each key binding in that help category
+    """
+    entries_by_category = defaultdict(list)
+    for cmd, item in KEY_BINDINGS.items():
+        entries_by_category[item["key_category"]].append(
+            (item["help_text"], display_keys_for_command(cmd))
+        )
+    return entries_by_category
+
+
+ENTRIES_BY_CATEGORY: Dict[str, List[Tuple[str, List[str]]]] = read_help_categories()
+
+
 def main(fix: bool) -> None:
     if fix:
         generate_hotkeys_file()
@@ -40,12 +57,11 @@ def lint_hotkeys_file() -> None:
     """
     hotkeys_file_string = generate_hotkeys_file_string()
     error_flag = False
-    categories = read_help_categories()
 
     # Lint each key combination and description
     for batch in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
-        for help_text, key_combinations_list in categories[batch]:
+        for help_text, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
             check_duplicate_keys_list.extend(key_combinations_list)
             various_key_combinations = " / ".join(key_combinations_list)
             # Check description style
@@ -102,7 +118,6 @@ def generate_hotkeys_file_string() -> str:
     Construct string in form for output to OUTPUT_FILE based on help text
     description and shortcut key combinations in KEYS_FILE
     """
-    categories = read_help_categories()
     hotkeys_file_string = (
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
         "<!--- Do not modify -->\n\n# Hot Keys\n"
@@ -113,7 +128,7 @@ def generate_hotkeys_file_string() -> str:
             "|Command|Key Combination|\n"
             "| :--- | :---: |\n"
         )
-        for help_text, key_combinations_list in categories[batch]:
+        for help_text, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
             various_key_combinations = " / ".join(
                 [
                     " + ".join([f"<kbd>{key}</kbd>" for key in key_combination.split()])
@@ -143,20 +158,6 @@ def output_file_matches_string(hotkeys_file_string: str) -> bool:
     except FileNotFoundError:
         print(f"{OUTPUT_FILE_NAME} does not exist")
         return False
-
-
-def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
-    """
-    Generate a dict from KEYS_FILE
-    key: help category
-    value: a list of help texts and key combinations, for each key binding in that help category
-    """
-    entries_by_category = defaultdict(list)
-    for cmd, item in KEY_BINDINGS.items():
-        entries_by_category[item["key_category"]].append(
-            (item["help_text"], display_keys_for_command(cmd))
-        )
-    return entries_by_category
 
 
 if __name__ == "__main__":
