@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple
@@ -39,8 +38,8 @@ def lint_hotkeys_file() -> None:
     existing OUTPUT_FILE
     """
     hotkeys_file_string = get_hotkeys_file_string()
+    error_flag = False
     # To lint keys description
-    error_flag = 0
     categories = read_help_categories()
     for action in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
@@ -53,7 +52,7 @@ def lint_hotkeys_file() -> None:
                     f"Description - ({help_text}) for key combination - [{various_key_combinations}]\n"
                     "It should contain only alphabets, spaces and special characters except ."
                 )
-                error_flag = 1
+                error_flag = True
         # Check key combination duplication
         check_duplicate_keys_list = [
             key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
@@ -67,9 +66,11 @@ def lint_hotkeys_file() -> None:
             print(
                 f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[action]}) detected"
             )
-            error_flag = 1
-    if error_flag == 1:
-        print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
+            error_flag = True
+    if error_flag:
+        raise SystemExit(
+            f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}"
+        )
     else:
         print("No hotkeys linting errors")
         if not OUTPUT_FILE.exists():
@@ -77,11 +78,9 @@ def lint_hotkeys_file() -> None:
                 f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE_NAME} file"
             )
         if not output_file_matches_string(hotkeys_file_string):
-            print(
+            raise SystemExit(
                 f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
             )
-            error_flag = 1
-    sys.exit(error_flag)
 
 
 def generate_hotkeys_file() -> None:
