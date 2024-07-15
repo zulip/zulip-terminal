@@ -34,13 +34,15 @@ def main(fix: bool) -> None:
 
 def lint_hotkeys_file() -> None:
     """
-    Lint KEYS_FILE for key description, then compare if in sync with
-    existing OUTPUT_FILE
+    Lint KEYS_FILE for valid key descriptions (help texts) and key categories,
+    check for duplicate key combinations,
+    and compare with existing OUTPUT_FILE.
     """
     hotkeys_file_string = get_hotkeys_file_string()
     error_flag = False
-    # To lint keys description
     categories = read_help_categories()
+
+    # Lint each key combination and description
     for action in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
         for help_text, key_combinations_list in categories[action]:
@@ -86,7 +88,7 @@ def lint_hotkeys_file() -> None:
 def generate_hotkeys_file() -> None:
     """
     Generate OUTPUT_FILE based on help text description and
-    shortcut key combinations in KEYS_FILE
+    shortcut key combinations in KEYS_FILE, grouped by categories
     """
     hotkeys_file_string = get_hotkeys_file_string()
     output_file_matches_string(hotkeys_file_string)
@@ -124,6 +126,9 @@ def get_hotkeys_file_string() -> str:
 
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
+    """
+    Check if the OUTPUT_FILE exists and matches the generated hotkeys_file_string
+    """
     try:
         with open(OUTPUT_FILE) as output_file:
             content_is_identical = hotkeys_file_string == output_file.read()
@@ -142,7 +147,9 @@ def output_file_matches_string(hotkeys_file_string: str) -> bool:
 
 def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     """
-    Get all help categories from KEYS_FILE
+    Generate a dict from KEYS_FILE
+    key: help category
+    value: a list of help texts and key combinations, for each key binding in that help category
     """
     categories = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
