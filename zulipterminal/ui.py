@@ -49,6 +49,7 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
         self.stream_topic_map: Dict[int, str] = {}
+        self._is_footer_event_running: bool = False
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
@@ -128,9 +129,11 @@ class View(urwid.WidgetWrap):
 
     def reset_footer_text(self) -> None:
         text = self.get_random_help()
+        self._is_footer_event_running = False
         self.set_footer_text(text, "footer")
 
     def set_footer_text_for_event(self, text: List[Any], style: str = "footer") -> None:
+        self._is_footer_event_running = True
         self.set_footer_text(text, style)
 
     def set_footer_text_for_event_duration(
