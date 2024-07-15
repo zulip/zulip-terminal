@@ -38,7 +38,7 @@ def lint_hotkeys_file() -> None:
     check for duplicate key combinations,
     and compare with existing OUTPUT_FILE.
     """
-    hotkeys_file_string = get_hotkeys_file_string()
+    hotkeys_file_string = generate_hotkeys_file_string()
     error_flag = False
     categories = read_help_categories()
 
@@ -90,14 +90,14 @@ def generate_hotkeys_file() -> None:
     Generate OUTPUT_FILE based on help text description and
     shortcut key combinations in KEYS_FILE, grouped by categories
     """
-    hotkeys_file_string = get_hotkeys_file_string()
+    hotkeys_file_string = generate_hotkeys_file_string()
     output_file_matches_string(hotkeys_file_string)
     with open(OUTPUT_FILE, "w") as hotkeys_file:
         hotkeys_file.write(hotkeys_file_string)
     print(f"Hot Keys list saved in {OUTPUT_FILE}")
 
 
-def get_hotkeys_file_string() -> str:
+def generate_hotkeys_file_string() -> str:
     """
     Construct string in form for output to OUTPUT_FILE based on help text
     description and shortcut key combinations in KEYS_FILE
