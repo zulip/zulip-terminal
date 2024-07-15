@@ -72,6 +72,10 @@ def lint_hotkeys_file() -> None:
         print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
     else:
         print("No hotkeys linting errors")
+        if not OUTPUT_FILE.exists():
+            raise SystemExit(
+                f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE_NAME} file"
+            )
         if not output_file_matches_string(hotkeys_file_string):
             print(
                 f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
@@ -120,13 +124,19 @@ def get_hotkeys_file_string() -> str:
 
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
-    with open(OUTPUT_FILE) as output_file:
-        content_is_identical = hotkeys_file_string == output_file.read()
-    if content_is_identical:
-        print(f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}")
-        return True
-    else:
-        print(f"{OUTPUT_FILE_NAME} file not in sync with config/{KEYS_FILE_NAME}")
+    try:
+        with open(OUTPUT_FILE) as output_file:
+            content_is_identical = hotkeys_file_string == output_file.read()
+        if content_is_identical:
+            print(
+                f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}"
+            )
+            return True
+        else:
+            print(f"{OUTPUT_FILE_NAME} file not in sync with config/{KEYS_FILE_NAME}")
+            return False
+    except FileNotFoundError:
+        print(f"{OUTPUT_FILE_NAME} does not exist")
         return False
 
 
