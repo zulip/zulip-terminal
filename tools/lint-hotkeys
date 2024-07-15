@@ -91,7 +91,8 @@ def generate_hotkeys_file() -> None:
     """
     hotkeys_file_string = get_hotkeys_file_string()
     output_file_matches_string(hotkeys_file_string)
-    write_hotkeys_file(hotkeys_file_string)
+    with open(OUTPUT_FILE, "w") as hotkeys_file:
+        hotkeys_file.write(hotkeys_file_string)
     print(f"Hot Keys list saved in {OUTPUT_FILE}")
 
 
@@ -150,14 +151,6 @@ def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
             (item["help_text"], display_keys_for_command(cmd))
         )
     return categories
-
-
-def write_hotkeys_file(hotkeys_file_string: str) -> None:
-    """
-    Write hotkeys_file_string variable once to OUTPUT_FILE
-    """
-    with open(OUTPUT_FILE, "w") as hotkeys_file:
-        hotkeys_file.write(hotkeys_file_string)
 
 
 if __name__ == "__main__":
