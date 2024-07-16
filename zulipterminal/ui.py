@@ -49,6 +49,7 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
         self.stream_topic_map: Dict[int, str] = {}
+        self._context: str = "global"
         self._is_footer_event_running: bool = False
 
         self.message_view: Any = None
@@ -103,7 +104,7 @@ class View(urwid.WidgetWrap):
 
     def get_random_help(self) -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
-        allowed_commands = commands_for_random_tips()
+        allowed_commands = commands_for_random_tips(self.context)
         if not allowed_commands:
             return ["Help[?] "]
         random_command = random.choice(allowed_commands)
@@ -142,6 +143,19 @@ class View(urwid.WidgetWrap):
         self.set_footer_text_for_event(text, style)
         time.sleep(duration)
         self.reset_footer_text()
+
+    def set_footer_text_on_context_change(self) -> None:
+        if self._is_footer_event_running:
+            return
+        self.reset_footer_text()
+
+    def _update_context(self, context_value: str = "") -> None:
+        if self._context == context_value:
+            return
+        self._context = context_value
+        self.set_footer_text_on_context_change()
+
+    context = property(lambda self: self._context, _update_context)
 
     @asynch
     def set_typeahead_footer(

@@ -123,6 +123,24 @@ class TestView:
         assert view._is_footer_event_running is False
 
     @pytest.mark.parametrize(
+        "event_running, expected_call_count", [(True, 0), (False, 1)]
+    )
+    def test_set_footer_text_on_context_change(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        event_running: bool,
+        expected_call_count: int,
+    ) -> None:
+        mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
+        view._is_footer_event_running = event_running
+
+        view.set_footer_text_on_context_change()
+
+        assert view.frame.footer.set_text.call_count == expected_call_count
+        assert view.controller.update_screen.call_count == expected_call_count
+
+    @pytest.mark.parametrize(
         "suggestions, state, truncated, footer_text",
         [
             ([], None, False, [" [No matches found]"]),
