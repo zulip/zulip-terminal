@@ -11,6 +11,7 @@ from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     HELP_CONTEXTS,
     KEY_BINDINGS,
+    PARENT_CONTEXTS,
     display_keys_for_command,
 )
 
@@ -90,7 +91,10 @@ def lint_hotkeys_file() -> None:
     error_flag = False
 
     error_flag |= (
-        lint_help_groups("category") | lint_help_groups("context") | lint_help_text()
+        lint_help_groups("category")
+        | lint_help_groups("context")
+        | lint_help_text()
+        | lint_parent_contexts()
     )
 
     if error_flag:
@@ -180,6 +184,38 @@ def lint_help_groups(group: Group) -> bool:
         )
 
     return error_flag
+
+
+def lint_parent_contexts() -> bool:
+    """
+    Lint for any typos in the PARENT_CONTEXTS dict
+    """
+    key_typos = []
+    value_typos = []
+
+    for key, value_list in PARENT_CONTEXTS.items():
+        if key not in HELP_CONTEXTS:
+            key_typos.append(key)
+        for value in value_list:
+            if value not in HELP_CONTEXTS:
+                value_typos.append(value)
+
+    error_message = ""
+    if key_typos:
+        error_message += (
+            f"Invalid contexts in parent context keys: {', '.join(key_typos)}.\n"
+        )
+    if value_typos:
+        error_message += (
+            f"Invalid contexts in parent context values: {', '.join(value_typos)}.\n"
+        )
+
+    if error_message:
+        error_message += f" Choose a context from:\n{', '.join(HELP_CONTEXTS.keys())}\n"
+        print(error_message)
+        return True
+
+    return False
 
 
 def generate_hotkeys_file(group: Group) -> None:

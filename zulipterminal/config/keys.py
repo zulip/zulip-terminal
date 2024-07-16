@@ -572,6 +572,24 @@ HELP_CONTEXTS: Dict[str, str] = {
     "search_box": "Search box",
 }
 
+PARENT_CONTEXTS: Dict[str, List[str]] = {
+    "global": [],
+    "general": ["global"],
+    "editor": ["global"],
+    "compose_box": ["editor", "global"],
+    "stream": ["general", "global", "button"],
+    "topic": ["general", "global", "button"],
+    "user": ["general", "global", "button"],
+    "message": ["general", "global"],
+    "stream_info": ["global", "popup"],
+    "msg_info": ["global", "popup"],
+    "emoji_list": ["global", "popup"],
+    "about": ["global", "popup"],
+    "search_box": ["global", "editor"],
+    "popup": ["global"],
+    "button": ["global"],
+}
+
 ZT_TO_URWID_CMD_MAPPING = {
     "GO_UP": CURSOR_UP,
     "GO_DOWN": CURSOR_DOWN,
