@@ -57,26 +57,7 @@ def lint_hotkeys_file() -> None:
     """
     error_flag = False
 
-    # Lint each key combination for duplicates
-    for batch in HELP_CATEGORIES:
-        check_duplicate_keys_list: List[str] = []
-        for _, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
-            check_duplicate_keys_list.extend(key_combinations_list)
-        check_duplicate_keys_list = [
-            key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
-        ]
-        duplicate_keys = [
-            key
-            for key in check_duplicate_keys_list
-            if check_duplicate_keys_list.count(key) > 1
-        ]
-        if len(duplicate_keys) != 0:
-            print(
-                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected"
-            )
-            error_flag = True
-
-    # Lint help text
+    error_flag |= lint_help_categories()
     error_flag |= lint_help_text()
 
     if error_flag:
@@ -108,6 +89,32 @@ def lint_help_text() -> bool:
             print(
                 f"Description - ({help_text}) for key combination - [{key_combinations}]\n"
                 "It should contain only alphabets, spaces and special characters except ."
+            )
+            error_flag = True
+    return error_flag
+
+
+def lint_help_categories() -> bool:
+    """
+    Lint help categories by checking each key combination for duplicates
+    within the same category
+    """
+    error_flag = False
+    for batch in HELP_CATEGORIES:
+        check_duplicate_keys_list: List[str] = []
+        for _, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
+            check_duplicate_keys_list.extend(key_combinations_list)
+        check_duplicate_keys_list = [
+            key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
+        ]
+        duplicate_keys = [
+            key
+            for key in check_duplicate_keys_list
+            if check_duplicate_keys_list.count(key) > 1
+        ]
+        if len(duplicate_keys) != 0:
+            print(
+                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected"
             )
             error_flag = True
     return error_flag
