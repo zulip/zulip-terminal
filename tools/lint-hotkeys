@@ -3,7 +3,7 @@ import argparse
 import re
 from collections import defaultdict
 from pathlib import Path, PurePath
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from typing_extensions import Literal
 
@@ -38,9 +38,11 @@ def read_help_groups() -> Dict[str, List[Tuple[str, List[str]]]]:
     key_group: KeyGroup = "key_category"
     entries_by_group = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
-        entries_by_group[item[key_group]].append(
-            (item["help_text"], display_keys_for_command(cmd))
-        )
+        groups = [item[key_group]]
+        for group in groups:
+            entries_by_group[group].append(
+                (item["help_text"], display_keys_for_command(cmd))
+            )
     return entries_by_group
 
 
@@ -138,10 +140,13 @@ def lint_help_groups() -> bool:
     # Lint for typos in key categories
     error_message = ""
     for key, binding in KEY_BINDINGS.items():
-        group_value = binding[key_group]
-        if group_value not in help_group:
-            error_message += f"  Invalid {group} '{group_value}' for key '{key}'.\n"
-            error_flag = True
+        group_values: Union[str, List[str]] = binding[key_group]
+        if isinstance(group_values, str):
+            group_values = [group_values]
+        for group_value in group_values:
+            if group_value not in help_group:
+                error_message += f"  Invalid {group} '{group_value}' for key '{key}'.\n"
+                error_flag = True
     if error_message:
         print(
             f"Choose a valid {group} value from:\n{', '.join(help_group.keys())}\n"
