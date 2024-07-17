@@ -5,6 +5,8 @@ from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple
 
+from typing_extensions import Literal
+
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
@@ -25,15 +27,19 @@ HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc"]
 
 
+KeyGroup = Literal["key_category"]
+
+
 def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     """
     Generate a dict from KEYS_FILE
     key: help category
     value: a list of help texts and key combinations, for each key binding in that help category
     """
+    key_group: KeyGroup = "key_category"
     entries_by_category = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
-        entries_by_category[item["key_category"]].append(
+        entries_by_category[item[key_group]].append(
             (item["help_text"], display_keys_for_command(cmd))
         )
     return entries_by_category
@@ -106,6 +112,7 @@ def lint_help_categories() -> bool:
     """
     help_group = HELP_CATEGORIES
     entries_by_group = ENTRIES_BY_CATEGORY
+    key_group: KeyGroup = "key_category"
 
     # Lint for duplicate key combinations within the same category
     error_flag = False
@@ -130,7 +137,7 @@ def lint_help_categories() -> bool:
     # Lint for typos in key categories
     error_message = ""
     for key, binding in KEY_BINDINGS.items():
-        category_value = binding["key_category"]
+        category_value = binding[key_group]
         if category_value not in help_group:
             error_message += f"  Invalid category '{category_value}' for key '{key}'.\n"
             error_flag = True
