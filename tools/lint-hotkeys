@@ -102,8 +102,9 @@ def lint_help_text() -> bool:
 def lint_help_categories() -> bool:
     """
     Lint help categories by checking each key combination for duplicates
-    within the same category
+    within the same category and the validity of each category (typo-checking)
     """
+    # Lint for duplicate key combinations within the same category
     error_flag = False
     for batch in HELP_CATEGORIES:
         check_duplicate_keys_list: List[str] = []
@@ -122,6 +123,20 @@ def lint_help_categories() -> bool:
                 f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected\n"
             )
             error_flag = True
+
+    # Lint for typos in key categories
+    error_message = ""
+    for key, binding in KEY_BINDINGS.items():
+        category_value = binding["key_category"]
+        if category_value not in HELP_CATEGORIES:
+            error_message += f"  Invalid category '{category_value}' for key '{key}'.\n"
+            error_flag = True
+    if error_message:
+        print(
+            f"Choose a valid category value from:\n{', '.join(HELP_CATEGORIES.keys())}\n"
+            + error_message
+        )
+
     return error_flag
 
 
