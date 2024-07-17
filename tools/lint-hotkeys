@@ -55,7 +55,6 @@ def lint_hotkeys_file() -> None:
     check for duplicate key combinations,
     and compare with existing OUTPUT_FILE.
     """
-    hotkeys_file_string = generate_hotkeys_file_string()
     error_flag = False
 
     # Lint each key combination and description
@@ -95,6 +94,7 @@ def lint_hotkeys_file() -> None:
             raise SystemExit(
                 f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE_NAME} file"
             )
+        hotkeys_file_string = generate_hotkeys_file_string()
         if not output_file_matches_string(hotkeys_file_string):
             raise SystemExit(
                 f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
