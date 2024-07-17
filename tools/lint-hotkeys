@@ -104,9 +104,11 @@ def lint_help_categories() -> bool:
     Lint help categories by checking each key combination for duplicates
     within the same category and the validity of each category (typo-checking)
     """
+    help_group = HELP_CATEGORIES
+
     # Lint for duplicate key combinations within the same category
     error_flag = False
-    for batch in HELP_CATEGORIES:
+    for batch in help_group:
         check_duplicate_keys_list: List[str] = []
         for _, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
             check_duplicate_keys_list.extend(key_combinations_list)
@@ -120,7 +122,7 @@ def lint_help_categories() -> bool:
         ]
         if len(duplicate_keys) != 0:
             print(
-                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected\n"
+                f"Duplicate key combination for keys {duplicate_keys} for category ({help_group[batch]}) detected\n"
             )
             error_flag = True
 
@@ -128,12 +130,12 @@ def lint_help_categories() -> bool:
     error_message = ""
     for key, binding in KEY_BINDINGS.items():
         category_value = binding["key_category"]
-        if category_value not in HELP_CATEGORIES:
+        if category_value not in help_group:
             error_message += f"  Invalid category '{category_value}' for key '{key}'.\n"
             error_flag = True
     if error_message:
         print(
-            f"Choose a valid category value from:\n{', '.join(HELP_CATEGORIES.keys())}\n"
+            f"Choose a valid category value from:\n{', '.join(help_group.keys())}\n"
             + error_message
         )
 
@@ -157,13 +159,15 @@ def generate_hotkeys_file_string() -> str:
     Construct string in form for output to OUTPUT_FILE based on help text
     description and shortcut key combinations in KEYS_FILE
     """
+    help_group = HELP_CATEGORIES
+
     hotkeys_file_string = (
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
         "<!--- Do not modify -->\n\n# Hot Keys\n"
     )
-    for batch in HELP_CATEGORIES:
+    for batch in help_group:
         hotkeys_file_string += (
-            f"## {HELP_CATEGORIES[batch]}\n"
+            f"## {help_group[batch]}\n"
             "|Command|Key Combination|\n"
             "| :--- | :---: |\n"
         )
