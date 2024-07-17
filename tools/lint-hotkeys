@@ -105,12 +105,13 @@ def lint_help_categories() -> bool:
     within the same category and the validity of each category (typo-checking)
     """
     help_group = HELP_CATEGORIES
+    entries_by_group = ENTRIES_BY_CATEGORY
 
     # Lint for duplicate key combinations within the same category
     error_flag = False
     for batch in help_group:
         check_duplicate_keys_list: List[str] = []
-        for _, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
+        for _, key_combinations_list in entries_by_group[batch]:
             check_duplicate_keys_list.extend(key_combinations_list)
         check_duplicate_keys_list = [
             key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
@@ -160,6 +161,7 @@ def generate_hotkeys_file_string() -> str:
     description and shortcut key combinations in KEYS_FILE
     """
     help_group = HELP_CATEGORIES
+    entries_by_group = ENTRIES_BY_CATEGORY
 
     hotkeys_file_string = (
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
@@ -171,7 +173,7 @@ def generate_hotkeys_file_string() -> str:
             "|Command|Key Combination|\n"
             "| :--- | :---: |\n"
         )
-        for help_text, key_combinations_list in ENTRIES_BY_CATEGORY[batch]:
+        for help_text, key_combinations_list in entries_by_group[batch]:
             various_key_combinations = " / ".join(
                 [
                     " + ".join([f"<kbd>{key}</kbd>" for key in key_combination.split()])
