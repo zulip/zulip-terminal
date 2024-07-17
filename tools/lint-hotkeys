@@ -19,7 +19,6 @@ KEYS_FILE = (
 )
 KEYS_FILE_NAME = KEYS_FILE.name
 OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
-OUTPUT_FILE_NAME = OUTPUT_FILE.name
 SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
@@ -74,12 +73,12 @@ def lint_hotkeys_file() -> None:
         print("No hotkeys linting errors")
         if not OUTPUT_FILE.exists():
             raise SystemExit(
-                f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE_NAME} file"
+                f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE.name} file"
             )
         hotkeys_file_string = generate_hotkeys_file_string()
         if not output_file_matches_string(hotkeys_file_string):
             raise SystemExit(
-                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
+                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE.name} file"
             )
 
 
@@ -197,19 +196,20 @@ def output_file_matches_string(hotkeys_file_string: str) -> bool:
     """
     Check if the OUTPUT_FILE exists and matches the generated hotkeys_file_string
     """
+    output_file_name = OUTPUT_FILE.name
     try:
         with open(OUTPUT_FILE) as output_file:
             content_is_identical = hotkeys_file_string == output_file.read()
         if content_is_identical:
             print(
-                f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}"
+                f"{output_file_name} file already in sync with config/{KEYS_FILE_NAME}"
             )
             return True
         else:
-            print(f"{OUTPUT_FILE_NAME} file not in sync with config/{KEYS_FILE_NAME}")
+            print(f"{output_file_name} file not in sync with config/{KEYS_FILE_NAME}")
             return False
     except FileNotFoundError:
-        print(f"{OUTPUT_FILE_NAME} does not exist")
+        print(f"{output_file_name} does not exist")
         return False
 
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fix",
         action="store_true",
-        help=f"Generate {OUTPUT_FILE_NAME} file by extracting key description and key "
+        help=f"Generate {OUTPUT_FILE.name} file by extracting key description and key "
         f"combination from config/{KEYS_FILE_NAME} file",
     )
     args = parser.parse_args()
