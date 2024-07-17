@@ -82,15 +82,20 @@ def lint_help_text() -> bool:
     Lint each keybinding's help text / description for invalid characters
     """
     error_flag = False
+    error_message = ""
     for keybinding in KEY_BINDINGS.values():
         help_text = keybinding["help_text"]
         if not re.match(HELP_TEXT_STYLE, help_text):
             key_combinations = " / ".join(keybinding["keys"])
-            print(
-                f"Description - ({help_text}) for key combination - [{key_combinations}]\n"
-                "It should contain only alphabets, spaces and special characters except ."
+            error_message += (
+                f"  ({help_text}) for key combination - [{key_combinations}]\n"
             )
             error_flag = True
+    if error_flag:
+        print(
+            "Help text descriptions should contain only alphabets, spaces and special characters except .\n"
+            + error_message
+        )
     return error_flag
 
 
@@ -114,7 +119,7 @@ def lint_help_categories() -> bool:
         ]
         if len(duplicate_keys) != 0:
             print(
-                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected"
+                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[batch]}) detected\n"
             )
             error_flag = True
     return error_flag
