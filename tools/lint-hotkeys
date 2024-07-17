@@ -18,7 +18,7 @@ KEYS_FILE = (
     Path(__file__).resolve().parent.parent / "zulipterminal" / "config" / "keys.py"
 )
 KEYS_FILE_NAME = KEYS_FILE.name
-OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
+CATEGORY_OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
 SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
@@ -58,7 +58,7 @@ def lint_hotkeys_file() -> None:
     """
     Lint KEYS_FILE for valid key descriptions (help texts) and key categories,
     check for duplicate key combinations,
-    and compare with existing OUTPUT_FILE.
+    and compare with existing output file.
     """
     error_flag = False
 
@@ -71,14 +71,15 @@ def lint_hotkeys_file() -> None:
         )
     else:
         print("No hotkeys linting errors")
-        if not OUTPUT_FILE.exists():
+        output_file = CATEGORY_OUTPUT_FILE
+        if not output_file.exists():
             raise SystemExit(
-                f"Run './tools/{SCRIPT_NAME} --fix' to generate {OUTPUT_FILE.name} file"
+                f"Run './tools/{SCRIPT_NAME} --fix' to generate {output_file.name} file"
             )
         hotkeys_file_string = generate_hotkeys_file_string()
         if not output_file_matches_string(hotkeys_file_string):
             raise SystemExit(
-                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE.name} file"
+                f"Run './tools/{SCRIPT_NAME} --fix' to update {output_file.name} file"
             )
 
 
@@ -152,19 +153,20 @@ def lint_help_groups() -> bool:
 
 def generate_hotkeys_file() -> None:
     """
-    Generate OUTPUT_FILE based on help text description and
+    Generate output file based on help text description and
     shortcut key combinations in KEYS_FILE, grouped by categories
     """
+    output_file = CATEGORY_OUTPUT_FILE
     hotkeys_file_string = generate_hotkeys_file_string()
     output_file_matches_string(hotkeys_file_string)
-    with open(OUTPUT_FILE, "w") as hotkeys_file:
+    with open(output_file, "w") as hotkeys_file:
         hotkeys_file.write(hotkeys_file_string)
-    print(f"Hot Keys list saved in {OUTPUT_FILE}")
+    print(f"Hot Keys list saved in {output_file.name}")
 
 
 def generate_hotkeys_file_string() -> str:
     """
-    Construct string in form for output to OUTPUT_FILE based on help text
+    Construct string in form for output to output file based on help text
     description and shortcut key combinations in KEYS_FILE
     """
     help_group = HELP_CATEGORIES
@@ -194,12 +196,13 @@ def generate_hotkeys_file_string() -> str:
 
 def output_file_matches_string(hotkeys_file_string: str) -> bool:
     """
-    Check if the OUTPUT_FILE exists and matches the generated hotkeys_file_string
+    Check if the output file exists and matches the generated hotkeys_file_string
     """
-    output_file_name = OUTPUT_FILE.name
+    output_file = CATEGORY_OUTPUT_FILE
+    output_file_name = output_file.name
     try:
-        with open(OUTPUT_FILE) as output_file:
-            content_is_identical = hotkeys_file_string == output_file.read()
+        with open(output_file) as existing_file:
+            content_is_identical = hotkeys_file_string == existing_file.read()
         if content_is_identical:
             print(
                 f"{output_file_name} file already in sync with config/{KEYS_FILE_NAME}"
@@ -221,7 +224,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fix",
         action="store_true",
-        help=f"Generate {OUTPUT_FILE.name} file by extracting key description and key "
+        help=f"Generate {CATEGORY_OUTPUT_FILE.name} file by extracting key description and key "
         f"combination from config/{KEYS_FILE_NAME} file",
     )
     args = parser.parse_args()
