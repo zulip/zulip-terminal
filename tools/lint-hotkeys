@@ -151,12 +151,12 @@ def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
     key: help category
     value: a list of help texts and key combinations, for each key binding in that help category
     """
-    categories = defaultdict(list)
+    entries_by_category = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
-        categories[item["key_category"]].append(
+        entries_by_category[item["key_category"]].append(
             (item["help_text"], display_keys_for_command(cmd))
         )
-    return categories
+    return entries_by_category
 
 
 if __name__ == "__main__":
