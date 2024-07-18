@@ -5,7 +5,7 @@ from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple, Union
 
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
@@ -26,16 +26,17 @@ HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc"]
 
 
+Group = Literal["category"]
 KeyGroup = Literal["key_category"]
+GroupedHelpEntries = Dict[str, List[Tuple[str, List[str]]]]
 
 
-def read_help_groups() -> Dict[str, List[Tuple[str, List[str]]]]:
+def read_help_groups(key_group: KeyGroup) -> GroupedHelpEntries:
     """
     Generate a dict from KEYS_FILE
     key: help category
     value: a list of help texts and key combinations, for each key binding in that help category
     """
-    key_group: KeyGroup = "key_category"
     entries_by_group = defaultdict(list)
     for cmd, item in KEY_BINDINGS.items():
         groups = [item[key_group]]
@@ -46,12 +47,26 @@ def read_help_groups() -> Dict[str, List[Tuple[str, List[str]]]]:
     return entries_by_group
 
 
-ENTRIES_BY_CATEGORY: Dict[str, List[Tuple[str, List[str]]]] = read_help_groups()
+class HelpGroupBundle(TypedDict):
+    help_group: Dict[str, str]
+    entries_by_group: GroupedHelpEntries
+    key_group: KeyGroup
+    output_file: Path
+
+
+GROUP_MAPPING: Dict[Group, HelpGroupBundle] = {
+    "category": {
+        "help_group": HELP_CATEGORIES,
+        "entries_by_group": read_help_groups("key_category"),
+        "key_group": "key_category",
+        "output_file": CATEGORY_OUTPUT_FILE,
+    },
+}
 
 
 def main(fix: bool) -> None:
     if fix:
-        generate_hotkeys_file()
+        generate_hotkeys_file("category")
     else:
         lint_hotkeys_file()
 
@@ -64,7 +79,7 @@ def lint_hotkeys_file() -> None:
     """
     error_flag = False
 
-    error_flag |= lint_help_groups()
+    error_flag |= lint_help_groups("category")
     error_flag |= lint_help_text()
 
     if error_flag:
@@ -78,8 +93,8 @@ def lint_hotkeys_file() -> None:
             raise SystemExit(
                 f"Run './tools/{SCRIPT_NAME} --fix' to generate {output_file.name} file"
             )
-        hotkeys_file_string = generate_hotkeys_file_string()
-        if not output_file_matches_string(hotkeys_file_string):
+        hotkeys_file_string = generate_hotkeys_file_string("category")
+        if not output_file_matches_string(hotkeys_file_string, "category"):
             raise SystemExit(
                 f"Run './tools/{SCRIPT_NAME} --fix' to update {output_file.name} file"
             )
@@ -107,15 +122,15 @@ def lint_help_text() -> bool:
     return error_flag
 
 
-def lint_help_groups() -> bool:
+def lint_help_groups(group: Group) -> bool:
     """
     Lint help groups by checking each key combination for duplicates
     within the same group and the validity of each category (typo-checking)
     """
-    group = "category"
-    help_group = HELP_CATEGORIES
-    entries_by_group = ENTRIES_BY_CATEGORY
-    key_group: KeyGroup = "key_category"
+    bundle = GROUP_MAPPING[group]
+    help_group = bundle["help_group"]
+    entries_by_group = bundle["entries_by_group"]
+    key_group: KeyGroup = bundle["key_group"]
 
     # Lint for duplicate key combinations within the same category
     error_flag = False
@@ -156,26 +171,26 @@ def lint_help_groups() -> bool:
     return error_flag
 
 
-def generate_hotkeys_file() -> None:
+def generate_hotkeys_file(group: Group) -> None:
     """
     Generate output file based on help text description and
     shortcut key combinations in KEYS_FILE, grouped by categories
     """
-    output_file = CATEGORY_OUTPUT_FILE
-    hotkeys_file_string = generate_hotkeys_file_string()
-    output_file_matches_string(hotkeys_file_string)
+    output_file = GROUP_MAPPING[group]["output_file"]
+    hotkeys_file_string = generate_hotkeys_file_string(group)
+    output_file_matches_string(hotkeys_file_string, group)
     with open(output_file, "w") as hotkeys_file:
         hotkeys_file.write(hotkeys_file_string)
     print(f"Hot Keys list saved in {output_file.name}")
 
 
-def generate_hotkeys_file_string() -> str:
+def generate_hotkeys_file_string(group: Group) -> str:
     """
     Construct string in form for output to output file based on help text
     description and shortcut key combinations in KEYS_FILE
     """
-    help_group = HELP_CATEGORIES
-    entries_by_group = ENTRIES_BY_CATEGORY
+    help_group = GROUP_MAPPING[group]["help_group"]
+    entries_by_group = GROUP_MAPPING[group]["entries_by_group"]
 
     hotkeys_file_string = (
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
@@ -199,11 +214,11 @@ def generate_hotkeys_file_string() -> str:
     return hotkeys_file_string
 
 
-def output_file_matches_string(hotkeys_file_string: str) -> bool:
+def output_file_matches_string(hotkeys_file_string: str, group: Group) -> bool:
     """
     Check if the output file exists and matches the generated hotkeys_file_string
     """
-    output_file = CATEGORY_OUTPUT_FILE
+    output_file = GROUP_MAPPING[group]["output_file"]
     output_file_name = output_file.name
     try:
         with open(output_file) as existing_file:
