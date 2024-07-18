@@ -72,10 +72,12 @@ GROUP_MAPPING: Dict[Group, HelpGroupBundle] = {
 }
 
 
-def main(fix: bool) -> None:
+def main(fix: bool, generate_context_file: bool) -> None:
     if fix:
         generate_hotkeys_file("category")
-    else:
+    if generate_context_file:
+        generate_hotkeys_file("context")
+    if not fix and not generate_context_file:
         lint_hotkeys_file()
 
 
@@ -256,5 +258,11 @@ if __name__ == "__main__":
         help=f"Generate {CATEGORY_OUTPUT_FILE.name} file by extracting key description and key "
         f"combination from config/{KEYS_FILE_NAME} file",
     )
+    parser.add_argument(
+        "--generate-context-file",
+        action="store_true",
+        help=f"Generate {CONTEXT_OUTPUT_FILE.name} file by extracting key description and key "
+        f"combination from config/{KEYS_FILE_NAME} file",
+    )
     args = parser.parse_args()
-    main(args.fix)
+    main(args.fix, args.generate_context_file)
