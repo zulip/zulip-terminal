@@ -26,7 +26,12 @@ from zulipterminal.config.symbols import (
     STARRED_MESSAGES_MARKER,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
-from zulipterminal.helper import StreamData, hash_util_decode, process_media
+from zulipterminal.helper import (
+    CombinedFeed,
+    StreamData,
+    hash_util_decode,
+    process_media,
+)
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 
@@ -130,7 +135,8 @@ class TopButton(urwid.Button):
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = (
-            f"All messages     [{primary_display_key_for_command('ALL_MESSAGES')}]"
+            f"{f'{CombinedFeed.get_combined_feed_name()}'.ljust(17)}"
+            f"[{primary_display_key_for_command('ALL_MESSAGES')}]"
         )
 
         super().__init__(
