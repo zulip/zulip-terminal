@@ -42,7 +42,7 @@ from zulipterminal.config.regexes import (
 from zulipterminal.platform_code import (
     PLATFORM,
     normalized_file_path,
-    successful_GUI_return_code,
+    validate_GUI_exit_status,
 )
 
 
@@ -841,7 +841,7 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
             command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
-        if exit_status != successful_GUI_return_code():
+        if validate_GUI_exit_status(exit_status) == "failure":
             error = [
                 " The tool ",
                 ("footer_contrast", tool),
