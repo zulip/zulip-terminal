@@ -42,6 +42,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
+    SpoilerView,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -265,9 +266,10 @@ class Controller:
     def show_msg_info(
         self,
         msg: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         msg_info_view = MsgInfoView(
             self,
@@ -276,6 +278,7 @@ class Controller:
             topic_links,
             message_links,
             time_mentions,
+            spoilers,
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -344,9 +347,10 @@ class Controller:
     def show_full_rendered_message(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             FullRenderedMsgView(
@@ -355,6 +359,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Full rendered message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -363,9 +368,10 @@ class Controller:
     def show_full_raw_message(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             FullRawMsgView(
@@ -374,6 +380,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Full raw message {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -382,9 +389,10 @@ class Controller:
     def show_edit_history(
         self,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
     ) -> None:
         self.show_pop_up(
             EditHistoryView(
@@ -393,6 +401,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
+                spoilers,
                 f"Edit History {SCROLL_PROMPT}",
             ),
             "area:msg",
@@ -485,6 +494,29 @@ class Controller:
         Helper to show a warning message in footer
         """
         self.view.set_footer_text(text, "task:warning", duration)
+
+    def show_spoiler(
+        self,
+        content: str,
+        message: Message,
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
+        time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
+    ) -> None:
+        self.show_pop_up(
+            SpoilerView(
+                self,
+                "Spoiler (up/down scrolls)",
+                content,
+                message,
+                topic_links,
+                message_links,
+                time_mentions,
+                spoilers,
+            ),
+            "area:msg",
+        )
 
     def show_media_confirmation_popup(
         self, func: Any, tool: str, media_path: str

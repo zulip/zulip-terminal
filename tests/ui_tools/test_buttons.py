@@ -14,6 +14,7 @@ from zulipterminal.ui_tools.buttons import (
     MessageLinkButton,
     ParsedNarrowLink,
     PMButton,
+    SpoilerButton,
     StarredButton,
     StreamButton,
     TopButton,
@@ -306,6 +307,101 @@ class TestUserButton:
         user_button.keypress(size, key)
 
         pop_up.assert_called_once_with(user_button.user_id)
+
+
+class TestSpoilerButton:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
+        self.controller = mocker.Mock()
+        self.super_init = mocker.patch(MODULE + ".urwid.Button.__init__")
+        self.connect_signal = mocker.patch(MODULE + ".urwid.connect_signal")
+
+    def spoiler_button(
+        self,
+        header_len: int = 0,
+        header: List[Any] = [""],
+        content: List[Any] = [""],
+        message: Message = {},
+        topic_links: Dict[str, Tuple[str, int, bool, bool]] = {},
+        message_links: Dict[str, Tuple[str, int, bool, bool]] = {},
+        time_mentions: List[Tuple[str, str]] = [],
+        spoilers: List[Tuple[int, List[Any], List[Any]]] = [],
+        display_attr: Optional[str] = None,
+    ) -> SpoilerButton:
+        self.content = content
+        self.header_len = header_len
+        self.header = header
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        self.spoilers = spoilers
+        self.display_attr = display_attr
+        return SpoilerButton(
+            self.controller,
+            header_len,
+            header,
+            content,
+            message,
+            topic_links,
+            message_links,
+            time_mentions,
+            spoilers,
+            display_attr,
+        )
+
+    def test_init(self, mocker: MockerFixture) -> None:
+        self.update_widget = mocker.patch(MODULE + ".SpoilerButton.update_widget")
+
+        mocked_button = self.spoiler_button()
+
+        assert mocked_button.controller == self.controller
+        assert mocked_button.content == self.content
+        self.super_init.assert_called_once_with("")
+        self.update_widget.assert_called_once_with(
+            self.header_len, self.header, self.display_attr
+        )
+        assert self.connect_signal.called
+
+    @pytest.mark.parametrize(
+        "header, header_len, expected_cursor_position",
+        [
+            (["Test"], 4, 5),
+            (["Check"], 5, 6),
+        ],
+    )
+    def test_update_widget(
+        self,
+        mocker: MockerFixture,
+        header: List[Any],
+        header_len: int,
+        expected_cursor_position: int,
+        display_attr: Optional[str] = None,
+    ) -> None:
+        self.selectable_icon = mocker.patch(MODULE + ".urwid.SelectableIcon")
+
+        # The method update_widget() is called in SpoilerButton's init.
+        mocked_button = self.spoiler_button(
+            header=header, header_len=header_len, display_attr=display_attr
+        )
+        self.selectable_icon.assert_called_once_with(
+            header, cursor_position=expected_cursor_position
+        )
+        assert isinstance(mocked_button._w, AttrMap)
+
+    def test_show_spoiler(self) -> None:
+        mocked_button = self.spoiler_button()
+
+        mocked_button.show_spoiler()
+
+        mocked_button.controller.show_spoiler.assert_called_once_with(
+            mocked_button.content,
+            mocked_button.message,
+            mocked_button.topic_links,
+            mocked_button.message_links,
+            mocked_button.time_mentions,
+            mocked_button.spoilers,
+        )
 
 
 class TestEmojiButton:
