@@ -24,6 +24,8 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
+    POPUP_CONTENT_BORDER,
+    POPUP_TOP_LINE,
     SECTION_DIVIDER_LINE,
 )
 from zulipterminal.config.ui_mappings import (
@@ -34,7 +36,6 @@ from zulipterminal.config.ui_mappings import (
     STREAM_ACCESS_TYPE,
     STREAM_POST_POLICY,
 )
-from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
     TidiedUserInfo,
     asynch,
@@ -949,6 +950,26 @@ class TabView(urwid.WidgetWrap):
 PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
 
 
+class PopUpFrame(urwid.WidgetDecoration, urwid.WidgetWrap):
+    def __init__(self, body: Any, title: Optional[str], style: str) -> None:
+        content = urwid.LineBox(body, **POPUP_CONTENT_BORDER)
+
+        if title is not None:
+            text = urwid.Text(title, align="center")
+            title_map = urwid.AttrMap(urwid.Filler(text), style)
+            title_box_adapter = urwid.BoxAdapter(title_map, height=1)
+            title_top = urwid.AttrMap(urwid.Divider(POPUP_TOP_LINE), "popup_border")
+            frame_title = urwid.Pile([title_top, title_box_adapter])
+            titled_content = urwid.Frame(body=content, header=frame_title)
+        else:
+            titled_content = urwid.Frame(body=content)
+
+        styled = urwid.AttrMap(titled_content, "popup_border")
+
+        urwid.WidgetDecoration.__init__(self, body)
+        urwid.WidgetWrap.__init__(self, styled)
+
+
 class PopUpView(urwid.Frame):
     def __init__(
         self,
@@ -957,6 +978,7 @@ class PopUpView(urwid.Frame):
         command: str,
         requested_width: int,
         title: str,
+        *,
         header: Optional[Any] = None,
         footer: Optional[Any] = None,
     ) -> None:
@@ -1296,19 +1318,17 @@ class MarkdownHelpView(PopUpView):
             [("", rendered_menu_content)], column_widths
         )
 
-        super().__init__(controller, body, "MARKDOWN_HELP", popup_width, title, header)
+        super().__init__(
+            controller, body, "MARKDOWN_HELP", popup_width, title, header=header
+        )
 
 
-PopUpConfirmationViewLocation = Literal["top-left", "center"]
-
-
-class PopUpConfirmationView(urwid.Overlay):
+class PopUpConfirmationView(urwid.Frame):
     def __init__(
         self,
         controller: Any,
         question: Any,
         success_callback: Callable[[], None],
-        location: PopUpConfirmationViewLocation = "top-left",
     ) -> None:
         self.controller = controller
         self.success_callback = success_callback
@@ -1319,31 +1339,17 @@ class PopUpConfirmationView(urwid.Overlay):
         display_widget = urwid.GridFlow([yes, no], 3, 5, 1, "center")
         wrapped_widget = urwid.WidgetWrap(display_widget)
         widgets = [question, urwid.Divider(), wrapped_widget]
-        prompt = urwid.LineBox(urwid.ListBox(urwid.SimpleFocusListWalker(widgets)))
+        prompt = urwid.ListBox(urwid.SimpleFocusListWalker(widgets))
 
-        if location == "top-left":
-            align = "left"
-            valign = "top"
-            width = LEFT_WIDTH + 1
-            height = 8
-        else:
-            align = "center"
-            valign = "middle"
+        self.title = None
 
-            max_cols, max_rows = controller.maximum_popup_dimensions()
-            # +2 to compensate for the LineBox characters.
-            width = min(max_cols, max(question.pack()[0], len("Yes"), len("No"))) + 2
-            height = min(max_rows, sum(widget.rows((width,)) for widget in widgets)) + 2
-
-        urwid.Overlay.__init__(
-            self,
-            prompt,
-            self.controller.view,
-            align=align,
-            valign=valign,
-            width=width,
-            height=height,
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        self.width = min(max_cols, max(question.pack()[0], len("Yes"), len("No")))
+        self.height = min(
+            max_rows, sum(widget.rows((self.width,)) for widget in widgets)
         )
+
+        super().__init__(prompt)
 
     def exit_popup_yes(self, args: Any) -> None:
         self.success_callback()
@@ -1934,8 +1940,8 @@ class FullRenderedMsgView(PopUpView):
             "MSG_INFO",
             max_cols,
             title,
-            urwid.Pile(msg_box.header),
-            urwid.Pile(msg_box.footer),
+            header=urwid.Pile(msg_box.header),
+            footer=urwid.Pile(msg_box.footer),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
@@ -1986,8 +1992,8 @@ class FullRawMsgView(PopUpView):
             "MSG_INFO",
             max_cols,
             title,
-            urwid.Pile(msg_box.header),
-            urwid.Pile(msg_box.footer),
+            header=urwid.Pile(msg_box.header),
+            footer=urwid.Pile(msg_box.footer),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:

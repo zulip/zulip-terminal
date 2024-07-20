@@ -45,11 +45,20 @@ class TestPopUpConfirmationView:
     @pytest.fixture
     def popup_view(self, mocker: MockerFixture) -> PopUpConfirmationView:
         self.controller = mocker.Mock()
+        self.controller.maximum_popup_dimensions.return_value = (70, 25)
+
+        self.text = Text("Some question?")
+
         self.callback = mocker.Mock()
+
         self.list_walker = mocker.patch(LISTWALKER, return_value=[])
+
         self.divider = mocker.patch(MODULE + ".urwid.Divider")
-        self.text = mocker.patch(MODULE + ".urwid.Text")
+        self.divider.return_value.rows.return_value = 1
+
         self.wrapper_w = mocker.patch(MODULE + ".urwid.WidgetWrap")
+        self.wrapper_w.return_value.rows.return_value = 1
+
         return PopUpConfirmationView(
             self.controller,
             self.text,
@@ -68,6 +77,7 @@ class TestPopUpConfirmationView:
         self, mocker: MockerFixture, popup_view: PopUpConfirmationView
     ) -> None:
         popup_view.exit_popup_yes(mocker.Mock())
+
         self.callback.assert_called_once_with()
         assert self.controller.exit_popup.called
 
@@ -75,11 +85,12 @@ class TestPopUpConfirmationView:
         self, mocker: MockerFixture, popup_view: PopUpConfirmationView
     ) -> None:
         popup_view.exit_popup_no(mocker.Mock())
+
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize("key", keys_for_command("EXIT_POPUP"))
-    def test_exit_popup_EXIT_POPUP(
+    def test_keypress__EXIT_POPUP(
         self,
         popup_view: PopUpConfirmationView,
         key: str,
@@ -87,6 +98,7 @@ class TestPopUpConfirmationView:
     ) -> None:
         size = widget_size(popup_view)
         popup_view.keypress(size, key)
+
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
 
@@ -119,8 +131,8 @@ class TestPopUpView:
             self.command,
             self.width,
             self.title,
-            self.header,
-            self.footer,
+            header=self.header,
+            footer=self.footer,
         )
 
     def test_init(self, mocker: MockerFixture) -> None:
