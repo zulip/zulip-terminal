@@ -267,6 +267,7 @@ class Controller:
         msg: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         msg_info_view = MsgInfoView(
@@ -275,6 +276,7 @@ class Controller:
             f"Message Information {SCROLL_PROMPT}",
             topic_links,
             message_links,
+            code_snippets,
             time_mentions,
         )
         self.show_pop_up(msg_info_view, "area:msg")
@@ -346,6 +348,7 @@ class Controller:
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -354,6 +357,7 @@ class Controller:
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 f"Full rendered message {SCROLL_PROMPT}",
             ),
@@ -365,6 +369,7 @@ class Controller:
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -373,6 +378,7 @@ class Controller:
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 f"Full raw message {SCROLL_PROMPT}",
             ),
@@ -384,6 +390,7 @@ class Controller:
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.show_pop_up(
@@ -392,6 +399,7 @@ class Controller:
                 message,
                 topic_links,
                 message_links,
+                code_snippets,
                 time_mentions,
                 f"Edit History {SCROLL_PROMPT}",
             ),

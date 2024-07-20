@@ -505,6 +505,7 @@ class TestFullRenderedMsgView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Full Rendered Message",
         )
@@ -557,6 +558,7 @@ class TestFullRenderedMsgView:
             msg=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
 
@@ -581,6 +583,7 @@ class TestFullRawMsgView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Full Raw Message",
         )
@@ -633,6 +636,7 @@ class TestFullRawMsgView:
             msg=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
 
@@ -656,6 +660,7 @@ class TestEditHistoryView:
             message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             title="Edit History",
         )
@@ -704,6 +709,7 @@ class TestEditHistoryView:
             msg=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
 
@@ -982,6 +988,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
 
     def test_init(self, message_fixture: Message) -> None:
@@ -999,6 +1006,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=topic_links,
             message_links=message_links,
+            code_snippets=list(),
             time_mentions=list(),
         )
         msg_links = msg_info_view.button_widgets
@@ -1047,6 +1055,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -1058,6 +1067,7 @@ class TestMsgInfoView:
                 message=message_fixture,
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
+                code_snippets=list(),
                 time_mentions=list(),
             )
         else:
@@ -1076,6 +1086,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -1086,6 +1097,7 @@ class TestMsgInfoView:
             message=message_fixture,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
 
@@ -1102,6 +1114,7 @@ class TestMsgInfoView:
             title="Message Information",
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
         size = widget_size(msg_info_view)
@@ -1112,6 +1125,7 @@ class TestMsgInfoView:
             message=message_fixture,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
         )
 
@@ -1214,6 +1228,7 @@ class TestMsgInfoView:
             OrderedDict(),
             OrderedDict(),
             list(),
+            list(),
         )
         # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
@@ -1266,6 +1281,58 @@ class TestMsgInfoView:
         assert link_w._wrapped_widget.focus_map == expected_focus_map
         assert link_w._wrapped_widget.attr_map == expected_attr_map
         assert link_width == expected_link_width
+
+    @pytest.mark.parametrize(
+        [
+            "initial_code_snippet",
+            "expected_code",
+            "expected_attr_map",
+            "expected_focus_map",
+            "expected_code_width",
+        ],
+        [
+            (
+                [
+                    (
+                        "Python",
+                        [
+                            ("pygments:k", "def"),
+                            ("pygments:w", " "),
+                            ("pygments:nf", "main"),
+                            ("pygments:p", "()"),
+                            ("pygments:w", "\n  "),
+                            ("pygments:nb", "print"),
+                            ("pygments:p", "("),
+                            ("pygments:s2", '"Hello"'),
+                            ("pygments:p", ")"),
+                            ("pygments:w", "\n"),
+                        ],
+                    )
+                ],
+                '1: Python\ndef main()\n  print("Hello")...',
+                {None: "popup_contrast"},
+                {None: "selected"},
+                95,
+            )
+        ],
+        ids=["with_code_snippet"],
+    )
+    def test_create_code_snippet_buttons(
+        self,
+        initial_code_snippet: List[Tuple[str, List[Tuple[str, str]]]],
+        expected_code: str,
+        expected_attr_map: Dict[None, str],
+        expected_focus_map: Dict[None, str],
+        expected_code_width: int,
+    ) -> None:
+        [code_w], copy_code_width = self.msg_info_view.create_code_snippet_buttons(
+            self.controller, initial_code_snippet
+        )
+
+        assert code_w._wrapped_widget.original_widget.text == expected_code
+        assert code_w._wrapped_widget.focus_map == expected_focus_map
+        assert code_w._wrapped_widget.attr_map == expected_attr_map
+        assert copy_code_width == expected_code_width
 
 
 class TestStreamInfoView:
