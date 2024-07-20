@@ -24,7 +24,7 @@ from zulipterminal.config.symbols import (
     STREAM_MARKER_WEB_PUBLIC,
 )
 from zulipterminal.config.ui_mappings import StreamAccessType
-from zulipterminal.helper import Index, MinimalUserData
+from zulipterminal.helper import Index, MinimalUserData, SearchStatus
 from zulipterminal.ui_tools.boxes import (
     MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP,
     PanelSearchBox,
@@ -1903,8 +1903,8 @@ class TestPanelSearchBox:
         size = widget_size(panel_search_box)
         panel_search_box.panel_view.view.controller.is_in_editor_mode = lambda: True
         panel_search_box.panel_view.log = log
-        empty_search = not log
-        panel_search_box.panel_view.empty_search = empty_search
+        search_status = SearchStatus.FILTERED if log else SearchStatus.EMPTY
+        panel_search_box.panel_view.search_status = search_status
         panel_search_box.set_caption("")
         panel_search_box.edit_text = "key words"
 
