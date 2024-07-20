@@ -903,6 +903,7 @@ def initial_data(
             }
         ],
         "result": "success",
+        "muted_users": {},
         "queue_id": "1522420755:786",
         "realm_users": users_fixture,
         "cross_realm_bots": [
@@ -1073,6 +1074,7 @@ def empty_index(
             stream_msg_ids_by_stream_id=defaultdict(set, {}),
             topic_msg_ids=defaultdict(dict, {}),
             edited_messages=set(),
+            muted_messages=set(),
             topics=defaultdict(list),
             search=set(),
             messages=defaultdict(
