@@ -11,7 +11,6 @@
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
-|Show/hide user information (from users list)|<kbd>i</kbd>|
 |New footer hotkey hint|<kbd>Tab</kbd>|
 
 ## Navigation
@@ -62,10 +61,6 @@
 |Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
-|Show/hide edit history (from message information)|<kbd>e</kbd>|
-|View current message in browser (from message information)|<kbd>v</kbd>|
-|Show/hide full rendered message (from message information)|<kbd>f</kbd>|
-|Show/hide full raw message (from message information)|<kbd>r</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
@@ -73,8 +68,12 @@
 |Toggle topics in a stream|<kbd>t</kbd>|
 |Mute/unmute streams|<kbd>m</kbd>|
 |Show/hide stream information & modify settings|<kbd>i</kbd>|
-|Show/hide stream members (from stream information)|<kbd>m</kbd>|
-|Copy stream email to clipboard (from stream information)|<kbd>c</kbd>|
+
+## User list actions
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide user information|<kbd>i</kbd>|
+|Narrow to direct messages with user|<kbd>Enter</kbd>|
 
 ## Begin composing a message
 |Command|Key Combination|
@@ -122,4 +121,18 @@
 |Paste last cut section|<kbd>Ctrl</kbd> + <kbd>y</kbd>|
 |Delete previous character|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
 |Swap with previous character|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
+
+## Stream information (press i to view info of a stream)
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide stream members|<kbd>m</kbd>|
+|Copy stream email to clipboard|<kbd>c</kbd>|
+
+## Message information (press i to view info of a message)
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide edit history|<kbd>e</kbd>|
+|View current message in browser|<kbd>v</kbd>|
+|Show/hide full rendered message|<kbd>f</kbd>|
+|Show/hide full raw message|<kbd>r</kbd>|
 

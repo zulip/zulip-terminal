@@ -296,16 +296,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'EDIT_HISTORY': {
         'keys': ['e'],
-        'help_text': 'Show/hide edit history (from message information)',
+        'help_text': 'Show/hide edit history',
         'excluded_from_random_tips': True,
-        'key_category': 'msg_actions',
+        'key_category': 'msg_info',
     },
     'VIEW_IN_BROWSER': {
         'keys': ['v'],
         'help_text':
-            'View current message in browser (from message information)',
+            'View current message in browser',
         'excluded_from_random_tips': True,
-        'key_category': 'msg_actions',
+        'key_category': 'msg_info',
     },
     'STREAM_INFO': {
         'keys': ['i'],
@@ -314,16 +314,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_MEMBERS': {
         'keys': ['m'],
-        'help_text': 'Show/hide stream members (from stream information)',
+        'help_text': 'Show/hide stream members',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_list',
+        'key_category': 'stream_info',
     },
     'COPY_STREAM_EMAIL': {
         'keys': ['c'],
         'help_text':
-            'Copy stream email to clipboard (from stream information)',
+            'Copy stream email to clipboard',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_list',
+        'key_category': 'stream_info',
     },
     'REDRAW': {
         'keys': ['ctrl l'],
@@ -337,8 +337,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'USER_INFO': {
         'keys': ['i'],
-        'help_text': 'Show/hide user information (from users list)',
-        'key_category': 'general',
+        'help_text': 'Show/hide user information',
+        'key_category': 'user_list',
+    },
+    'NARROW_TO_USER_PM': {
+        # Added to clarify functionality of button activation,
+        # as opposed to opening user profile or other effects.
+        # Implementation uses ACTIVATE_BUTTON command.
+        'keys': ['enter'],
+        'help_text': 'Narrow to direct messages with user',
+        'key_category': 'user_list',
     },
     'BEGINNING_OF_LINE': {
         'keys': ['ctrl a', 'home'],
@@ -435,13 +443,13 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'FULL_RENDERED_MESSAGE': {
         'keys': ['f'],
-        'help_text': 'Show/hide full rendered message (from message information)',
-        'key_category': 'msg_actions',
+        'help_text': 'Show/hide full rendered message',
+        'key_category': 'msg_info',
     },
     'FULL_RAW_MESSAGE': {
         'keys': ['r'],
-        'help_text': 'Show/hide full raw message (from message information)',
-        'key_category': 'msg_actions',
+        'help_text': 'Show/hide full raw message',
+        'key_category': 'msg_info',
     },
     'NEW_HINT': {
         'keys': ['tab'],
@@ -458,10 +466,19 @@ HELP_CATEGORIES = {
     "searching": "Searching",
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
+    "user_list": "User list actions",
     "open_compose": "Begin composing a message",
     "compose_box": "Writing a message",
     "editor_navigation": "Editor: Navigation",
     "editor_text_manipulation": "Editor: Text Manipulation",
+    "stream_info": (
+        f"Stream information (press {KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
+        f" to view info of a stream)"
+    ),
+    "msg_info": (
+        f"Message information (press {KEY_BINDINGS['MSG_INFO']['keys'][0]}"
+        f" to view info of a message)"
+    ),
 }
 
 ZT_TO_URWID_CMD_MAPPING = {
