@@ -4,8 +4,10 @@ Detection of supported platforms & platform-specific functions
 
 import platform
 import subprocess
+from pathlib import Path
 from typing import Tuple
 
+from platformdirs import user_config_dir, user_downloads_dir
 from typing_extensions import Literal
 
 
@@ -87,6 +89,14 @@ def notify(title: str, text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
+
+
+def config_file_path() -> Path:
+    return Path(user_config_dir())
+
+
+def downloads_file_path() -> Path:
+    return Path(user_downloads_dir())
 
 
 def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
