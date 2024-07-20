@@ -1096,7 +1096,9 @@ class MessageBox(urwid.Pile):
                     )
 
             if self.message["type"] == "private":
-                self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+                self.model.controller.view.write_box.private_box_edit_view(
+                    recipient_user_ids=self.recipient_ids,
+                )
             elif self.message["type"] == "stream":
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,

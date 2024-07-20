@@ -5,7 +5,8 @@ from typing import Any, Callable, Dict, List, Optional
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
-from urwid import Widget
+from urwid import Text, Widget
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import (
     TYPING_STARTED_EXPIRY_PERIOD,
@@ -471,7 +472,7 @@ class TestWriteBox:
             ),
         ],
     )
-    def test_update_recipients(
+    def test_update_recipients_from_emails_in_widget(
         self,
         write_box: WriteBox,
         header: str,
@@ -482,7 +483,7 @@ class TestWriteBox:
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
-        write_box.update_recipients(write_box.to_write_box)
+        write_box.update_recipients_from_emails_in_widget(write_box.to_write_box)
 
         assert write_box.recipient_emails == expected_recipient_emails
         assert write_box.recipient_user_ids == expected_recipient_user_ids
@@ -1734,6 +1735,16 @@ class TestWriteBox:
                 "HEADER_BOX_RECIPIENT",
                 id="message_to_recipient_box",
             ),
+            case(
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                "private",
+                True,
+                True,
+                "CONTAINER_MESSAGE",
+                "MESSAGE_BOX_BODY",
+                id="private_edit_box-no_cycle",
+            ),
         ],
     )
     @pytest.mark.parametrize("tab_key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
@@ -1754,17 +1765,21 @@ class TestWriteBox:
     ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
 
+        if message_being_edited:
+            write_box.msg_edit_state = _MessageEditState(
+                message_id=10, old_topic="some old topic"
+            )
         if box_type == "stream":
             if message_being_edited:
                 mocker.patch(MODULE + ".EditModeButton")
                 write_box.stream_box_edit_view(stream_id)
-                write_box.msg_edit_state = _MessageEditState(
-                    message_id=10, old_topic="some old topic"
-                )
             else:
                 write_box.stream_box_view(stream_id)
         else:
-            write_box.private_box_view()
+            if message_being_edited:
+                write_box.private_box_edit_view()
+            else:
+                write_box.private_box_view()
         size = widget_size(write_box)
 
         def focus_val(x: str) -> int:
@@ -1789,6 +1804,41 @@ class TestWriteBox:
             assert write_box.FOCUS_MESSAGE_BOX_BODY == focus_val(  # noqa: SIM300
                 expected_focus_col_name
             )
+
+    @pytest.mark.parametrize("message_being_edited", [(True), (False)])
+    @pytest.mark.parametrize(
+        "recipient_ids, expected_recipient_text",
+        [
+            ([], "To: "),
+            ([11], "To: Human 1 <person1@example.com>"),
+            (
+                [11, 12],
+                "To: Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+            ),
+        ],
+    )
+    def test_private_box_recipient_editing(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        user_dict: List[Dict[str, Any]],
+        user_id_email_dict: Dict[int, str],
+        recipient_ids: List[int],
+        expected_recipient_text: str,
+        message_being_edited: bool,
+    ) -> None:
+        write_box.model.user_id_email_dict = user_id_email_dict
+        write_box.model.user_dict = user_dict
+        mocker.patch("urwid.connect_signal")
+
+        if message_being_edited:
+            write_box.private_box_edit_view(recipient_user_ids=recipient_ids)
+            assert isinstance(write_box.to_write_box, Text)
+        else:
+            write_box.private_box_view(recipient_user_ids=recipient_ids)
+            assert isinstance(write_box.to_write_box, ReadlineEdit)
+
+        assert write_box.to_write_box.text == expected_recipient_text
 
     @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
