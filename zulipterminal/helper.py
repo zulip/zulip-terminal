@@ -57,6 +57,12 @@ class StreamData(TypedDict):
     description: str
 
 
+class MessageInfoPopupContent(TypedDict):
+    topic_links: Dict[str, Tuple[str, int, bool]]
+    message_links: Dict[str, Tuple[str, int, bool]]
+    time_mentions: List[Tuple[str, str]]
+
+
 class EmojiData(TypedDict):
     code: str
     aliases: List[str]
