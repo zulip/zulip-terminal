@@ -1725,30 +1725,15 @@ class MsgInfoView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
-            self.controller.show_edit_history(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_edit_history(message=self.msg)
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
             self.controller.open_in_browser(url)
         elif is_command_key("FULL_RENDERED_MESSAGE", key):
-            self.controller.show_full_rendered_message(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_full_rendered_message(message=self.msg)
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
-            self.controller.show_full_raw_message(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_full_raw_message(message=self.msg)
             return key
         return super().keypress(size, key)
 

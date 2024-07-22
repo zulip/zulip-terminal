@@ -1014,10 +1014,7 @@ class TestMsgInfoView:
 
         if self.msg_info_view.show_edit_history_label:
             self.controller.show_edit_history.assert_called_once_with(
-                message=self.message,
-                topic_links=OrderedDict(),
-                message_links=OrderedDict(),
-                time_mentions=list(),
+                message=self.message
             )
         else:
             self.controller.show_edit_history.assert_not_called()
@@ -1031,10 +1028,7 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
 
         self.controller.show_full_rendered_message.assert_called_once_with(
-            message=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
+            message=self.message
         )
 
     @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
@@ -1046,10 +1040,7 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
 
         self.controller.show_full_raw_message.assert_called_once_with(
-            message=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
+            message=self.message
         )
 
     @pytest.mark.parametrize(
