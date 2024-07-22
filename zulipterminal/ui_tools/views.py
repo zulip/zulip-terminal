@@ -1585,7 +1585,7 @@ class MsgInfoView(PopUpView):
         self.time_mentions = time_mentions
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
-            msg["timestamp"], show_seconds=True, show_year=True
+            self.msg["timestamp"], show_seconds=True, show_year=True
         )
         view_in_browser_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("VIEW_IN_BROWSER")))
@@ -1602,8 +1602,8 @@ class MsgInfoView(PopUpView):
                 "",
                 [
                     ("Date & Time", date_and_time),
-                    ("Sender", msg["sender_full_name"]),
-                    ("Sender's Email ID", msg["sender_email"]),
+                    ("Sender", self.msg["sender_full_name"]),
+                    ("Sender's Email ID", self.msg["sender_email"]),
                 ],
             )
         ]
@@ -1632,13 +1632,13 @@ class MsgInfoView(PopUpView):
             )
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
-        if message_links:
+        if self.message_links:
             msg_info.append(("Message Links", []))
-        if topic_links:
+        if self.topic_links:
             msg_info.append(("Topic Links", []))
-        if time_mentions:
-            msg_info.append(("Time mentions", time_mentions))
-        if msg["reactions"]:
+        if self.time_mentions:
+            msg_info.append(("Time mentions", self.time_mentions))
+        if self.msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
                 for reaction in msg["reactions"]
@@ -1658,9 +1658,9 @@ class MsgInfoView(PopUpView):
         # computing their slice indexes
         self.button_widgets: List[Any] = []
 
-        if message_links:
+        if self.message_links:
             message_link_widgets, message_link_width = self.create_link_buttons(
-                controller, message_links
+                controller, self.message_links
             )
 
             # slice_index = Number of labels before message links + 1 newline
@@ -1669,16 +1669,16 @@ class MsgInfoView(PopUpView):
             slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
 
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
-            self.button_widgets.append(message_links)
+            self.button_widgets.append(self.message_links)
 
             widgets = (
                 widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
             )
             popup_width = max(popup_width, message_link_width)
 
-        if topic_links:
+        if self.topic_links:
             topic_link_widgets, topic_link_width = self.create_link_buttons(
-                controller, topic_links
+                controller, self.topic_links
             )
 
             # slice_index = Number of labels before topic links + 1 newline
@@ -1686,7 +1686,7 @@ class MsgInfoView(PopUpView):
             #               + 2 for Viewing Actions category label and its newline
             slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
-            self.button_widgets.append(topic_links)
+            self.button_widgets.append(self.topic_links)
 
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)

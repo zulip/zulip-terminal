@@ -975,27 +975,28 @@ class TestMsgInfoView:
             "Tue Mar 13 10:55:22",
             "Tue Mar 13 10:55:37",
         ]
+        self.message = message_fixture
         self.msg_info_view = MsgInfoView(
             self.controller,
-            message_fixture,
+            self.message,
             "Message Information",
             OrderedDict(),
             OrderedDict(),
             list(),
         )
 
-    def test_init(self, message_fixture: Message) -> None:
-        assert self.msg_info_view.msg == message_fixture
+    def test_init(self) -> None:
+        assert self.msg_info_view.msg == self.message
         assert self.msg_info_view.topic_links == OrderedDict()
         assert self.msg_info_view.message_links == OrderedDict()
         assert self.msg_info_view.time_mentions == list()
 
-    def test_pop_up_info_order(self, message_fixture: Message) -> None:
+    def test_pop_up_info_order(self) -> None:
         topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
         message_links = OrderedDict([("image.jpg", ("image", 1, True))])
         msg_info_view = MsgInfoView(
             self.controller,
-            message_fixture,
+            self.message,
             title="Message Information",
             topic_links=topic_links,
             message_links=message_links,
@@ -1029,7 +1030,6 @@ class TestMsgInfoView:
     )
     def test_keypress_edit_history(
         self,
-        message_fixture: Message,
         key: str,
         widget_size: Callable[[Widget], urwid_Size],
         realm_allow_edit_history: bool,
@@ -1041,21 +1041,13 @@ class TestMsgInfoView:
         self.controller.model.initial_data = {
             "realm_allow_edit_history": realm_allow_edit_history,
         }
-        msg_info_view = MsgInfoView(
-            self.controller,
-            message_fixture,
-            title="Message Information",
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
-        size = widget_size(msg_info_view)
+        size = widget_size(self.msg_info_view)
 
-        msg_info_view.keypress(size, key)
+        self.msg_info_view.keypress(size, key)
 
-        if msg_info_view.show_edit_history_label:
+        if self.msg_info_view.show_edit_history_label:
             self.controller.show_edit_history.assert_called_once_with(
-                message=message_fixture,
+                message=self.message,
                 topic_links=OrderedDict(),
                 message_links=OrderedDict(),
                 time_mentions=list(),
@@ -1065,25 +1057,14 @@ class TestMsgInfoView:
 
     @pytest.mark.parametrize("key", keys_for_command("FULL_RENDERED_MESSAGE"))
     def test_keypress_full_rendered_message(
-        self,
-        message_fixture: Message,
-        key: str,
-        widget_size: Callable[[Widget], urwid_Size],
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
-        msg_info_view = MsgInfoView(
-            self.controller,
-            message_fixture,
-            title="Message Information",
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
-        size = widget_size(msg_info_view)
+        size = widget_size(self.msg_info_view)
 
-        msg_info_view.keypress(size, key)
+        self.msg_info_view.keypress(size, key)
 
         self.controller.show_full_rendered_message.assert_called_once_with(
-            message=message_fixture,
+            message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
@@ -1091,25 +1072,14 @@ class TestMsgInfoView:
 
     @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
     def test_keypress_full_raw_message(
-        self,
-        message_fixture: Message,
-        key: str,
-        widget_size: Callable[[Widget], urwid_Size],
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
-        msg_info_view = MsgInfoView(
-            self.controller,
-            message_fixture,
-            title="Message Information",
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
-        size = widget_size(msg_info_view)
+        size = widget_size(self.msg_info_view)
 
-        msg_info_view.keypress(size, key)
+        self.msg_info_view.keypress(size, key)
 
         self.controller.show_full_raw_message.assert_called_once_with(
-            message=message_fixture,
+            message=self.message,
             topic_links=OrderedDict(),
             message_links=OrderedDict(),
             time_mentions=list(),
