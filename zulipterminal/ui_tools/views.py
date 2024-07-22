@@ -1798,16 +1798,10 @@ class EditHistoryView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         width = 64
         widgets: List[Any] = []
 
@@ -1912,16 +1906,10 @@ class FullRenderedMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message
@@ -1944,16 +1932,10 @@ class FullRawMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message header and footer

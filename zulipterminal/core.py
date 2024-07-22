@@ -348,61 +348,23 @@ class Controller:
             "area:user",
         )
 
-    def show_full_rendered_message(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_full_rendered_message(self, message: Message) -> None:
         self.show_pop_up(
             FullRenderedMsgView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Full rendered message {SCROLL_PROMPT}",
+                self, message, f"Full rendered message {SCROLL_PROMPT}"
             ),
             "area:msg",
         )
 
-    def show_full_raw_message(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_full_raw_message(self, message: Message) -> None:
         self.show_pop_up(
-            FullRawMsgView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Full raw message {SCROLL_PROMPT}",
-            ),
+            FullRawMsgView(self, message, f"Full raw message {SCROLL_PROMPT}"),
             "area:msg",
         )
 
-    def show_edit_history(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_edit_history(self, message: Message) -> None:
         self.show_pop_up(
-            EditHistoryView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Edit History {SCROLL_PROMPT}",
-            ),
-            "area:msg",
+            EditHistoryView(self, message, f"Edit History {SCROLL_PROMPT}"), "area:msg"
         )
 
     def open_in_browser(self, url: str) -> None:

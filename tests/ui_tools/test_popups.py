@@ -503,9 +503,6 @@ class TestFullRenderedMsgView:
         self.full_rendered_message = FullRenderedMsgView(
             controller=self.controller,
             message=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
             title="Full Rendered Message",
         )
 
@@ -513,9 +510,6 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.title == "Full Rendered Message"
         assert self.full_rendered_message.controller == self.controller
         assert self.full_rendered_message.message == self.message
-        assert self.full_rendered_message.topic_links == OrderedDict()
-        assert self.full_rendered_message.message_links == OrderedDict()
-        assert self.full_rendered_message.time_mentions == list()
         assert self.full_rendered_message.header.widget_list == msg_box.header
         assert self.full_rendered_message.footer.widget_list == msg_box.footer
 
@@ -574,9 +568,6 @@ class TestFullRawMsgView:
         self.full_raw_message = FullRawMsgView(
             controller=self.controller,
             message=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
             title="Full Raw Message",
         )
 
@@ -584,9 +575,6 @@ class TestFullRawMsgView:
         assert self.full_raw_message.title == "Full Raw Message"
         assert self.full_raw_message.controller == self.controller
         assert self.full_raw_message.message == self.message
-        assert self.full_raw_message.topic_links == OrderedDict()
-        assert self.full_raw_message.message_links == OrderedDict()
-        assert self.full_raw_message.time_mentions == list()
         assert self.full_raw_message.header.widget_list == msg_box.header
         assert self.full_raw_message.footer.widget_list == msg_box.footer
 
@@ -644,18 +632,12 @@ class TestEditHistoryView:
         self.edit_history_view = EditHistoryView(
             controller=self.controller,
             message=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
             title="Edit History",
         )
 
     def test_init(self) -> None:
         assert self.edit_history_view.controller == self.controller
         assert self.edit_history_view.message == self.message
-        assert self.edit_history_view.topic_links == OrderedDict()
-        assert self.edit_history_view.message_links == OrderedDict()
-        assert self.edit_history_view.time_mentions == list()
         self.controller.model.fetch_message_history.assert_called_once_with(
             message_id=self.message["id"],
         )
