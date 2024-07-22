@@ -36,6 +36,7 @@ from zulipterminal.config.ui_mappings import (
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
+    MessageInfoPopupContent,
     TidiedUserInfo,
     asynch,
     match_emoji,
@@ -1578,14 +1579,12 @@ class MsgInfoView(PopUpView):
         controller: Any,
         msg: Message,
         title: str,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
+        message_info_content: MessageInfoPopupContent,
     ) -> None:
         self.msg = msg
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
+        self.topic_links = message_info_content["topic_links"]
+        self.message_links = message_info_content["message_links"]
+        self.time_mentions = message_info_content["time_mentions"]
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
             self.msg["timestamp"], show_seconds=True, show_year=True

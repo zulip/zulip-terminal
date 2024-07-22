@@ -9,7 +9,11 @@ from urwid import Columns, Pile, Text, Widget
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
-from zulipterminal.helper import CustomProfileData, TidiedUserInfo
+from zulipterminal.helper import (
+    CustomProfileData,
+    MessageInfoPopupContent,
+    TidiedUserInfo,
+)
 from zulipterminal.ui_tools.messages import MessageBox
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -922,10 +926,22 @@ class TestHelpView:
         assert self.controller.exit_popup.called
 
 
+@pytest.fixture
+def message_info_content() -> MessageInfoPopupContent:
+    return MessageInfoPopupContent(
+        topic_links=OrderedDict(),
+        message_links=OrderedDict(),
+        time_mentions=list(),
+    )
+
+
 class TestMsgInfoView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(
-        self, mocker: MockerFixture, message_fixture: Message
+        self,
+        mocker: MockerFixture,
+        message_fixture: Message,
+        message_info_content: MessageInfoPopupContent,
     ) -> None:
         self.controller = mocker.Mock()
         mocker.patch.object(
@@ -943,13 +959,12 @@ class TestMsgInfoView:
             "Tue Mar 13 10:55:37",
         ]
         self.message = message_fixture
+        self.message_info_content = message_info_content
         self.msg_info_view = MsgInfoView(
             self.controller,
             self.message,
             "Message Information",
-            OrderedDict(),
-            OrderedDict(),
-            list(),
+            self.message_info_content,
         )
 
     def test_init(self) -> None:
@@ -961,16 +976,22 @@ class TestMsgInfoView:
     def test_pop_up_info_order(self) -> None:
         topic_links = OrderedDict([("https://bar.com", ("topic", 1, True))])
         message_links = OrderedDict([("image.jpg", ("image", 1, True))])
-        msg_info_view = MsgInfoView(
-            self.controller,
-            self.message,
-            title="Message Information",
+        message_info_content = MessageInfoPopupContent(
             topic_links=topic_links,
             message_links=message_links,
             time_mentions=list(),
         )
+        msg_info_view = MsgInfoView(
+            self.controller,
+            self.message,
+            title="Message Information",
+            message_info_content=message_info_content,
+        )
         msg_links = msg_info_view.button_widgets
-        assert msg_links == [message_links, topic_links]
+        assert msg_links == [
+            message_info_content["message_links"],
+            message_info_content["topic_links"],
+        ]
 
     def test_keypress_any_key(
         self, widget_size: Callable[[Widget], urwid_Size]
@@ -1139,9 +1160,7 @@ class TestMsgInfoView:
             self.controller,
             varied_message,
             "Message Information",
-            OrderedDict(),
-            OrderedDict(),
-            list(),
+            self.message_info_content,
         )
         # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
         # + 4 reactions (excluding 'Message Links').
