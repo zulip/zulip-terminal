@@ -67,40 +67,61 @@ def test_is_command_key_invalid_command(invalid_command: str) -> None:
 
 def test_HELP_is_not_allowed_as_tip() -> None:
     assert keys.KEY_BINDINGS["HELP"]["excluded_from_random_tips"] is True
-    assert keys.KEY_BINDINGS["HELP"] not in keys.commands_for_random_tips()
+    commands, _ = keys.commands_for_random_tips()
+    assert keys.KEY_BINDINGS["HELP"] not in commands
 
 
-def test_commands_for_random_tips(mocker: MockerFixture) -> None:
+@pytest.mark.parametrize(
+    "context, expected_command, expected_context",
+    [
+        (None, "GAMMA", "Global"),
+        ("context_1", "BETA", "Context 1"),
+        ("context_2", "GAMMA", "Global"),
+    ],
+)
+def test_commands_for_random_tips(
+    context: str, expected_command: str, expected_context: str, mocker: MockerFixture
+) -> None:
     new_key_bindings: Dict[str, keys.KeyBinding] = {
         "ALPHA": {
             "keys": ["a"],
             "help_text": "alpha",
             "key_category": "category 1",
+            "key_contexts": ["context_1", "context_2"],
             "excluded_from_random_tips": True,
         },
         "BETA": {
             "keys": ["b"],
             "help_text": "beta",
             "key_category": "category 1",
+            "key_contexts": ["context_1"],
             "excluded_from_random_tips": False,
         },
         "GAMMA": {
             "keys": ["g"],
             "help_text": "gamma",
             "key_category": "category 1",
+            "key_contexts": ["global"],
         },
         "DELTA": {
             "keys": ["d"],
             "help_text": "delta",
             "key_category": "category 2",
+            "key_contexts": ["context_2"],
             "excluded_from_random_tips": True,
         },
     }
+    new_help_contexts: Dict[str, str] = {
+        "global": "Global",
+        "context_1": "Context 1",
+        "context_2": "Context 2",
+    }
     mocker.patch.dict(keys.KEY_BINDINGS, new_key_bindings, clear=True)
-    result = keys.commands_for_random_tips()
-    assert len(result) == 2
-    assert new_key_bindings["BETA"] in result
-    assert new_key_bindings["GAMMA"] in result
+    mocker.patch.object(keys, "HELP_CONTEXTS", new_help_contexts)
+    commands, context_display_name = keys.commands_for_random_tips(context)
+    assert len(commands) == 1
+    assert new_key_bindings[expected_command] in commands
+    assert context_display_name == expected_context
 
 
 def test_updated_urwid_command_map() -> None:

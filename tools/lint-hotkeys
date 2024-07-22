@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 import argparse
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path, PurePath
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
+
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
+    HELP_CONTEXTS,
     KEY_BINDINGS,
+    PARENT_CONTEXTS,
     display_keys_for_command,
 )
 
@@ -17,8 +20,8 @@ KEYS_FILE = (
     Path(__file__).resolve().parent.parent / "zulipterminal" / "config" / "keys.py"
 )
 KEYS_FILE_NAME = KEYS_FILE.name
-OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
-OUTPUT_FILE_NAME = OUTPUT_FILE.name
+CATEGORY_OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "hotkeys.md"
+CONTEXT_OUTPUT_FILE = Path(__file__).resolve().parent.parent / "docs" / "contexts.md"
 SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
@@ -26,35 +29,130 @@ HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc"]
 
 
-def main(fix: bool) -> None:
+Group = Literal["category", "context"]
+KeyGroup = Literal["key_category", "key_contexts"]
+GroupedHelpEntries = Dict[str, List[Tuple[str, List[str]]]]
+
+
+def read_help_groups(key_group: KeyGroup) -> GroupedHelpEntries:
+    """
+    Generate a dict from KEYS_FILE
+    key: help category/context
+    value: a list of help texts and key combinations, for each key binding in that help category/context
+    """
+    entries_by_group = defaultdict(list)
+    for cmd, item in KEY_BINDINGS.items():
+        groups = [item[key_group]] if key_group == "key_category" else item[key_group]
+        for group in groups:
+            entries_by_group[group].append(
+                (item["help_text"], display_keys_for_command(cmd))
+            )
+    return entries_by_group
+
+
+class HelpGroupBundle(TypedDict):
+    help_group: Dict[str, str]
+    entries_by_group: GroupedHelpEntries
+    key_group: KeyGroup
+    output_file: Path
+
+
+GROUP_MAPPING: Dict[Group, HelpGroupBundle] = {
+    "category": {
+        "help_group": HELP_CATEGORIES,
+        "entries_by_group": read_help_groups("key_category"),
+        "key_group": "key_category",
+        "output_file": CATEGORY_OUTPUT_FILE,
+    },
+    "context": {
+        "help_group": HELP_CONTEXTS,
+        "entries_by_group": read_help_groups("key_contexts"),
+        "key_group": "key_contexts",
+        "output_file": CONTEXT_OUTPUT_FILE,
+    },
+}
+
+
+def main(fix: bool, generate_context_file: bool) -> None:
     if fix:
-        generate_hotkeys_file()
-    else:
+        generate_hotkeys_file("category")
+    if generate_context_file:
+        generate_hotkeys_file("context")
+    if not fix and not generate_context_file:
         lint_hotkeys_file()
 
 
 def lint_hotkeys_file() -> None:
     """
-    Lint KEYS_FILE for key description, then compare if in sync with
-    existing OUTPUT_FILE
+    Lint KEYS_FILE for valid key descriptions (help texts) and key categories/contexts,
+    check for duplicate key combinations,
+    and compare with existing output file.
     """
-    hotkeys_file_string = get_hotkeys_file_string()
-    # To lint keys description
-    error_flag = 0
-    categories = read_help_categories()
-    for action in HELP_CATEGORIES:
+    error_flag = False
+
+    error_flag |= (
+        lint_help_groups("category")
+        | lint_help_groups("context")
+        | lint_help_text()
+        | lint_parent_contexts()
+    )
+
+    if error_flag:
+        raise SystemExit(
+            f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}"
+        )
+    else:
+        print("No hotkeys linting errors")
+        output_file = CATEGORY_OUTPUT_FILE
+        if not output_file.exists():
+            raise SystemExit(
+                f"Run './tools/{SCRIPT_NAME} --fix' to generate {output_file.name} file"
+            )
+        hotkeys_file_string = generate_hotkeys_file_string("category")
+        if not output_file_matches_string(hotkeys_file_string, "category"):
+            raise SystemExit(
+                f"Run './tools/{SCRIPT_NAME} --fix' to update {output_file.name} file"
+            )
+
+
+def lint_help_text() -> bool:
+    """
+    Lint each keybinding's help text / description for invalid characters
+    """
+    error_flag = False
+    error_message = ""
+    for keybinding in KEY_BINDINGS.values():
+        help_text = keybinding["help_text"]
+        if not re.match(HELP_TEXT_STYLE, help_text):
+            key_combinations = " / ".join(keybinding["keys"])
+            error_message += (
+                f"  ({help_text}) for key combination - [{key_combinations}]\n"
+            )
+            error_flag = True
+    if error_flag:
+        print(
+            "Help text descriptions should contain only alphabets, spaces and special characters except .\n"
+            + error_message
+        )
+    return error_flag
+
+
+def lint_help_groups(group: Group) -> bool:
+    """
+    Lint help groups by checking each key combination for duplicates
+    within the same group and the validity of each category/context (typo-checking)
+    """
+    bundle = GROUP_MAPPING[group]
+    help_group = bundle["help_group"]
+    entries_by_group = bundle["entries_by_group"]
+    key_group: KeyGroup = bundle["key_group"]
+
+    # Lint for duplicate key combinations within the same category/context
+    error_flag = False
+    for batch in help_group:
         check_duplicate_keys_list: List[str] = []
-        for help_text, key_combinations_list in categories[action]:
+        for _, key_combinations_list in entries_by_group[batch]:
             check_duplicate_keys_list.extend(key_combinations_list)
-            various_key_combinations = " / ".join(key_combinations_list)
-            # Check description style
-            if not re.match(HELP_TEXT_STYLE, help_text):
-                print(
-                    f"Description - ({help_text}) for key combination - [{various_key_combinations}]\n"
-                    "It should contain only alphabets, spaces and special characters except ."
-                )
-                error_flag = 1
-        # Check key combination duplication
         check_duplicate_keys_list = [
             key for key in check_duplicate_keys_list if key not in KEYS_TO_EXCLUDE
         ]
@@ -65,49 +163,93 @@ def lint_hotkeys_file() -> None:
         ]
         if len(duplicate_keys) != 0:
             print(
-                f"Duplicate key combination for keys {duplicate_keys} for category ({HELP_CATEGORIES[action]}) detected"
+                f"Duplicate key combination for keys {duplicate_keys} for {group} ({help_group[batch]}) detected\n"
             )
-            error_flag = 1
-    if error_flag == 1:
-        print(f"Rerun this command after resolving errors in config/{KEYS_FILE_NAME}")
-    else:
-        print("No hotkeys linting errors")
-        if not output_file_matches_string(hotkeys_file_string):
-            print(
-                f"Run './tools/{SCRIPT_NAME} --fix' to update {OUTPUT_FILE_NAME} file"
-            )
-            error_flag = 1
-    sys.exit(error_flag)
+            error_flag = True
+
+    # Lint for typos in key categories/contexts
+    error_message = ""
+    for key, binding in KEY_BINDINGS.items():
+        group_values: Union[str, List[str]] = binding[key_group]
+        if isinstance(group_values, str):
+            group_values = [group_values]
+        for group_value in group_values:
+            if group_value not in help_group:
+                error_message += f"  Invalid {group} '{group_value}' for key '{key}'.\n"
+                error_flag = True
+    if error_message:
+        print(
+            f"Choose a valid {group} value from:\n{', '.join(help_group.keys())}\n"
+            + error_message
+        )
+
+    return error_flag
 
 
-def generate_hotkeys_file() -> None:
+def lint_parent_contexts() -> bool:
     """
-    Generate OUTPUT_FILE based on help text description and
-    shortcut key combinations in KEYS_FILE
+    Lint for any typos in the PARENT_CONTEXTS dict
     """
-    hotkeys_file_string = get_hotkeys_file_string()
-    output_file_matches_string(hotkeys_file_string)
-    write_hotkeys_file(hotkeys_file_string)
-    print(f"Hot Keys list saved in {OUTPUT_FILE}")
+    key_typos = []
+    value_typos = []
+
+    for key, value_list in PARENT_CONTEXTS.items():
+        if key not in HELP_CONTEXTS:
+            key_typos.append(key)
+        for value in value_list:
+            if value not in HELP_CONTEXTS:
+                value_typos.append(value)
+
+    error_message = ""
+    if key_typos:
+        error_message += (
+            f"Invalid contexts in parent context keys: {', '.join(key_typos)}.\n"
+        )
+    if value_typos:
+        error_message += (
+            f"Invalid contexts in parent context values: {', '.join(value_typos)}.\n"
+        )
+
+    if error_message:
+        error_message += f" Choose a context from:\n{', '.join(HELP_CONTEXTS.keys())}\n"
+        print(error_message)
+        return True
+
+    return False
 
 
-def get_hotkeys_file_string() -> str:
+def generate_hotkeys_file(group: Group) -> None:
     """
-    Construct string in form for output to OUTPUT_FILE based on help text
+    Generate output file based on help text description and
+    shortcut key combinations in KEYS_FILE, grouped by categories/contexts
+    """
+    output_file = GROUP_MAPPING[group]["output_file"]
+    hotkeys_file_string = generate_hotkeys_file_string(group)
+    output_file_matches_string(hotkeys_file_string, group)
+    with open(output_file, "w") as hotkeys_file:
+        hotkeys_file.write(hotkeys_file_string)
+    print(f"Hot Keys list saved in {output_file.name}")
+
+
+def generate_hotkeys_file_string(group: Group) -> str:
+    """
+    Construct string in form for output to output file based on help text
     description and shortcut key combinations in KEYS_FILE
     """
-    categories = read_help_categories()
+    help_group = GROUP_MAPPING[group]["help_group"]
+    entries_by_group = GROUP_MAPPING[group]["entries_by_group"]
+
     hotkeys_file_string = (
         f"<!--- Generated automatically by tools/{SCRIPT_NAME} -->\n"
         "<!--- Do not modify -->\n\n# Hot Keys\n"
     )
-    for action in HELP_CATEGORIES:
+    for batch in help_group:
         hotkeys_file_string += (
-            f"## {HELP_CATEGORIES[action]}\n"
+            f"## {help_group[batch]}\n"
             "|Command|Key Combination|\n"
             "| :--- | :---: |\n"
         )
-        for help_text, key_combinations_list in categories[action]:
+        for help_text, key_combinations_list in entries_by_group[batch]:
             various_key_combinations = " / ".join(
                 [
                     " + ".join([f"<kbd>{key}</kbd>" for key in key_combination.split()])
@@ -119,35 +261,26 @@ def get_hotkeys_file_string() -> str:
     return hotkeys_file_string
 
 
-def output_file_matches_string(hotkeys_file_string: str) -> bool:
-    with open(OUTPUT_FILE) as output_file:
-        content_is_identical = hotkeys_file_string == output_file.read()
-    if content_is_identical:
-        print(f"{OUTPUT_FILE_NAME} file already in sync with config/{KEYS_FILE_NAME}")
-        return True
-    else:
-        print(f"{OUTPUT_FILE_NAME} file not in sync with config/{KEYS_FILE_NAME}")
+def output_file_matches_string(hotkeys_file_string: str, group: Group) -> bool:
+    """
+    Check if the output file exists and matches the generated hotkeys_file_string
+    """
+    output_file = GROUP_MAPPING[group]["output_file"]
+    output_file_name = output_file.name
+    try:
+        with open(output_file) as existing_file:
+            content_is_identical = hotkeys_file_string == existing_file.read()
+        if content_is_identical:
+            print(
+                f"{output_file_name} file already in sync with config/{KEYS_FILE_NAME}"
+            )
+            return True
+        else:
+            print(f"{output_file_name} file not in sync with config/{KEYS_FILE_NAME}")
+            return False
+    except FileNotFoundError:
+        print(f"{output_file_name} does not exist")
         return False
-
-
-def read_help_categories() -> Dict[str, List[Tuple[str, List[str]]]]:
-    """
-    Get all help categories from KEYS_FILE
-    """
-    categories = defaultdict(list)
-    for cmd, item in KEY_BINDINGS.items():
-        categories[item["key_category"]].append(
-            (item["help_text"], display_keys_for_command(cmd))
-        )
-    return categories
-
-
-def write_hotkeys_file(hotkeys_file_string: str) -> None:
-    """
-    Write hotkeys_file_string variable once to OUTPUT_FILE
-    """
-    with open(OUTPUT_FILE, "w") as hotkeys_file:
-        hotkeys_file.write(hotkeys_file_string)
 
 
 if __name__ == "__main__":
@@ -158,8 +291,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fix",
         action="store_true",
-        help=f"Generate {OUTPUT_FILE_NAME} file by extracting key description and key "
+        help=f"Generate {CATEGORY_OUTPUT_FILE.name} file by extracting key description and key "
+        f"combination from config/{KEYS_FILE_NAME} file",
+    )
+    parser.add_argument(
+        "--generate-context-file",
+        action="store_true",
+        help=f"Generate {CONTEXT_OUTPUT_FILE.name} file by extracting key description and key "
         f"combination from config/{KEYS_FILE_NAME} file",
     )
     args = parser.parse_args()
-    main(args.fix)
+    main(args.fix, args.generate_context_file)

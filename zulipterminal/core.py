@@ -25,6 +25,7 @@ from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
     MIN_SUPPORTED_POPUP_WIDTH,
 )
+from zulipterminal.contexts import FocusTrackingMainLoop
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
@@ -104,7 +105,7 @@ class Controller:
 
         screen = Screen()
         screen.set_terminal_properties(colors=self.color_depth)
-        self.loop = urwid.MainLoop(self.view, self.theme, screen=screen)
+        self.loop = FocusTrackingMainLoop(self.view, self.theme, screen=screen)
 
         # urwid pipe for concurrent screen update handling
         self._update_pipe = self.loop.watch_pipe(self._draw_screen)
@@ -251,8 +252,8 @@ class Controller:
     def exit_popup(self) -> None:
         self.loop.widget = self.view
 
-    def show_help(self) -> None:
-        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}")
+    def show_help(self, context: Optional[str] = None) -> None:
+        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}", context)
         self.show_pop_up(help_view, "area:help")
 
     def show_markdown_help(self) -> None:
@@ -445,7 +446,7 @@ class Controller:
         # Until conversation becomes "inactive" like when a `stop` event is sent
         while self.active_conversation_info:
             sender_name = self.active_conversation_info["sender_name"]
-            self.view.set_footer_text(
+            self.view.set_footer_text_for_event(
                 [
                     ("footer_contrast", " " + sender_name + " "),
                     " is typing" + next(dots),
@@ -454,7 +455,7 @@ class Controller:
             time.sleep(0.45)
 
         self.is_typing_notification_in_progress = False
-        self.view.set_footer_text()
+        self.view.reset_footer_text()
 
     def report_error(
         self,
@@ -464,7 +465,7 @@ class Controller:
         """
         Helper to show an error message in footer
         """
-        self.view.set_footer_text(text, "task:error", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:error")
 
     def report_success(
         self,
@@ -474,7 +475,7 @@ class Controller:
         """
         Helper to show a success message in footer
         """
-        self.view.set_footer_text(text, "task:success", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:success")
 
     def report_warning(
         self,
@@ -484,7 +485,7 @@ class Controller:
         """
         Helper to show a warning message in footer
         """
-        self.view.set_footer_text(text, "task:warning", duration)
+        self.view.set_footer_text_for_event_duration(text, duration, "task:warning")
 
     def show_media_confirmation_popup(
         self, func: Any, tool: str, media_path: str

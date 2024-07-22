@@ -727,7 +727,7 @@ class WriteBox(urwid.Pile):
 
     def _set_default_footer_after_autocomplete(self) -> None:
         self.is_in_typeahead_mode = False
-        self.view.set_footer_text()
+        self.view.reset_footer_text()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (

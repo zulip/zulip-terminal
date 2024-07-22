@@ -85,39 +85,60 @@ class TestView:
 
         view._w.footer.set_text.assert_not_called()
 
-    def test_set_footer_text_default(self, view: View, mocker: MockerFixture) -> None:
+    def test_reset_footer_text(self, view: View, mocker: MockerFixture) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
 
-        view.set_footer_text()
+        view.reset_footer_text()
 
         view.frame.footer.set_text.assert_called_once_with(["some help text"])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is False
 
     def test_set_footer_text_specific_text(
         self, view: View, text: str = "blah"
     ) -> None:
-        view.set_footer_text([text])
+        view.set_footer_text_for_event([text])
 
         view.frame.footer.set_text.assert_called_once_with([text])
         view.controller.update_screen.assert_called_once_with()
+        assert view._is_footer_event_running is True
 
     def test_set_footer_text_with_duration(
         self,
         view: View,
         mocker: MockerFixture,
         custom_text: str = "custom",
-        duration: Optional[float] = 5.3,
+        duration: float = 5.3,
     ) -> None:
         mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
         mock_sleep = mocker.patch("time.sleep")
 
-        view.set_footer_text([custom_text], duration=duration)
+        view.set_footer_text_for_event_duration([custom_text], duration=duration)
 
         view.frame.footer.set_text.assert_has_calls(
             [mocker.call([custom_text]), mocker.call(["some help text"])]
         )
         mock_sleep.assert_called_once_with(duration)
         assert view.controller.update_screen.call_count == 2
+        assert view._is_footer_event_running is False
+
+    @pytest.mark.parametrize(
+        "event_running, expected_call_count", [(True, 0), (False, 1)]
+    )
+    def test_set_footer_text_on_context_change(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        event_running: bool,
+        expected_call_count: int,
+    ) -> None:
+        mocker.patch(VIEW + ".get_random_help", return_value=["some help text"])
+        view._is_footer_event_running = event_running
+
+        view.set_footer_text_on_context_change()
+
+        assert view.frame.footer.set_text.call_count == expected_call_count
+        assert view.controller.update_screen.call_count == expected_call_count
 
     @pytest.mark.parametrize(
         "suggestions, state, truncated, footer_text",
@@ -350,12 +371,12 @@ class TestView:
         widget_size: Callable[[Widget], urwid_Box],
     ) -> None:
         size = widget_size(view)
-        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        reset_footer_text = mocker.patch(VIEW + ".reset_footer_text")
         mocker.patch(CONTROLLER + ".is_in_editor_mode", return_value=False)
 
         returned_key = view.keypress(size, key)
 
-        set_footer_text.assert_called_once_with()
+        reset_footer_text.assert_called_once_with()
         assert returned_key == key
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))

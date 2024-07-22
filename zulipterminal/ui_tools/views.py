@@ -14,6 +14,7 @@ from zulipterminal.api_types import EditPropagateMode, Message
 from zulipterminal.config.keys import (
     HELP_CATEGORIES,
     KEY_BINDINGS,
+    PARENT_CONTEXTS,
     display_key_for_urwid_key,
     display_keys_for_command,
     is_command_key,
@@ -1238,13 +1239,21 @@ class UserInfoView(PopUpView):
 
 
 class HelpView(PopUpView):
-    def __init__(self, controller: Any, title: str) -> None:
+    def __init__(
+        self, controller: Any, title: str, context: Optional[str] = None
+    ) -> None:
         help_menu_content = []
+        if context:
+            valid_contexts = PARENT_CONTEXTS[context] + [context]
         for category in HELP_CATEGORIES:
             keys_in_category = (
                 binding
                 for binding in KEY_BINDINGS.values()
                 if binding["key_category"] == category
+                and (
+                    not context
+                    or bool(set(binding["key_contexts"]) & set(valid_contexts))
+                )
             )
             key_bindings = [
                 (
@@ -1254,6 +1263,8 @@ class HelpView(PopUpView):
                 for binding in keys_in_category
             ]
 
+            if not key_bindings:
+                continue
             help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
 
         popup_width, column_widths = self.calculate_table_widths(

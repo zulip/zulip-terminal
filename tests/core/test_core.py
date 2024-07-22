@@ -39,7 +39,7 @@ class TestController:
         self.poll_for_events = mocker.patch(MODEL + ".poll_for_events")
         mocker.patch(MODULE + ".Controller.show_loading")
         self.main_loop = mocker.patch(
-            MODULE + ".urwid.MainLoop", return_value=mocker.Mock()
+            MODULE + ".FocusTrackingMainLoop", return_value=mocker.Mock()
         )
 
         self.config_file = "path/to/zuliprc"
@@ -589,7 +589,8 @@ class TestController:
         controller: Controller,
         active_conversation_info: Dict[str, str],
     ) -> None:
-        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        set_footer_text_for_event = mocker.patch(VIEW + ".set_footer_text_for_event")
+        reset_footer_text = mocker.patch(VIEW + ".reset_footer_text")
         mocker.patch(MODULE + ".time.sleep")
         controller.active_conversation_info = active_conversation_info
 
@@ -600,7 +601,7 @@ class TestController:
         Thread(controller.show_typing_notification()).start()
 
         if active_conversation_info:
-            set_footer_text.assert_has_calls(
+            set_footer_text_for_event.assert_has_calls(
                 [
                     mocker.call([("footer_contrast", " hamlet "), " is typing"]),
                     mocker.call([("footer_contrast", " hamlet "), " is typing."]),
@@ -608,8 +609,8 @@ class TestController:
                     mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
                 ]
             )
-            set_footer_text.assert_called_with()
+            reset_footer_text.assert_called_with()
         else:
-            set_footer_text.assert_called_once_with()
+            reset_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
         assert controller.active_conversation_info == {}

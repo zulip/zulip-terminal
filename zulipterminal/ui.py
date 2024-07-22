@@ -5,7 +5,7 @@ Defines the `View`, and controls where each component is displayed
 import random
 import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import urwid
 
@@ -49,6 +49,8 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
         self.stream_topic_map: Dict[int, str] = {}
+        self._context: str = "global"
+        self._is_footer_event_running: bool = False
 
         self.message_view: Any = None
         self.displaying_selection_hint = False
@@ -102,42 +104,62 @@ class View(urwid.WidgetWrap):
 
     def get_random_help(self) -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
-        allowed_commands = commands_for_random_tips()
+        allowed_commands, tip_context = commands_for_random_tips(self.context)
         if not allowed_commands:
-            return ["Help(?): "]
+            return ["Help[?] "]
         random_command = random.choice(allowed_commands)
         random_command_display_keys = ", ".join(
             [display_key_for_urwid_key(key) for key in random_command["keys"]]
         )
         return [
-            "Help(?): ",
+            "Help[?] ",
             ("footer_contrast", f" {random_command_display_keys} "),
-            f" {random_command['help_text']}",
+            f" ({tip_context}) ",
+            (
+                "footer_contrast",
+                f" {random_command['help_text']} ",
+            ),
         ]
 
     @asynch
-    def set_footer_text(
-        self,
-        text_list: Optional[List[Any]] = None,
-        style: str = "footer",
-        duration: Optional[float] = None,
-    ) -> None:
+    def set_footer_text(self, text: List[Any], style: str = "footer") -> None:
         # Avoid updating repeatedly (then pausing and showing default text)
         # This is simple, though doesn't avoid starting one thread for each call
-        if text_list == self._w.footer.text:
+        if text == self._w.footer.text:
             return
 
-        if text_list is None:
-            text = self.get_random_help()
-        else:
-            text = text_list
         self.frame.footer.set_text(text)
         self.frame.footer.set_attr_map({None: style})
         self.controller.update_screen()
-        if duration is not None:
-            assert duration > 0
-            time.sleep(duration)
-            self.set_footer_text()
+
+    def reset_footer_text(self) -> None:
+        text = self.get_random_help()
+        self._is_footer_event_running = False
+        self.set_footer_text(text, "footer")
+
+    def set_footer_text_for_event(self, text: List[Any], style: str = "footer") -> None:
+        self._is_footer_event_running = True
+        self.set_footer_text(text, style)
+
+    def set_footer_text_for_event_duration(
+        self, text: List[Any], duration: float, style: str = "footer"
+    ) -> None:
+        self.set_footer_text_for_event(text, style)
+        time.sleep(duration)
+        self.reset_footer_text()
+
+    def set_footer_text_on_context_change(self) -> None:
+        if self._is_footer_event_running:
+            return
+        self.reset_footer_text()
+
+    def _update_context(self, context_value: str = "") -> None:
+        if self._context == context_value:
+            return
+        self._context = context_value
+        self.set_footer_text_on_context_change()
+
+    context = property(lambda self: self._context, _update_context)
 
     @asynch
     def set_typeahead_footer(
@@ -159,6 +181,9 @@ class View(urwid.WidgetWrap):
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
+
+    def get_focus_path(self) -> Tuple[Union[int, str], ...]:
+        return self.frame.get_focus_path()
 
     def main_window(self) -> Any:
         self.left_panel, self.left_tab = self.left_column_view()
@@ -325,11 +350,14 @@ class View(urwid.WidgetWrap):
             # Show help menu
             self.controller.show_help()
             return key
+        elif is_command_key("CONTEXTUAL_HELP", key):
+            self.controller.show_help(self.context)
+            return key
         elif is_command_key("MARKDOWN_HELP", key):
             self.controller.show_markdown_help()
             return key
         elif is_command_key("NEW_HINT", key):
-            self.set_footer_text()
+            self.reset_footer_text()
             return key
         return super().keypress(size, key)
 
@@ -337,7 +365,7 @@ class View(urwid.WidgetWrap):
         self, size: urwid_Box, event: str, button: int, col: int, row: int, focus: bool
     ) -> bool:
         if event == "mouse drag":
-            self.model.controller.view.set_footer_text(
+            self.model.controller.view.set_footer_text_for_event(
                 [
                     "Try pressing ",
                     ("footer_contrast", f" {MOUSE_SELECTION_KEY} "),
@@ -347,7 +375,7 @@ class View(urwid.WidgetWrap):
             )
             self.displaying_selection_hint = True
         elif event == "mouse release" and self.displaying_selection_hint:
-            self.model.controller.view.set_footer_text()
+            self.model.controller.view.reset_footer_text()
             self.displaying_selection_hint = False
 
         return super().mouse_event(size, event, button, col, row, focus)
