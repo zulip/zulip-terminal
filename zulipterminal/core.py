@@ -86,6 +86,7 @@ class Controller:
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
         self.editor_command = editor_command
+        self.popup_stack: List[urwid.Widget] = []
 
         self.debug_path = debug_path
 
@@ -226,6 +227,8 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
+        self.popup_stack.append(self.loop.widget)
+
         text = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
@@ -249,6 +252,10 @@ class Controller:
         return isinstance(self.loop.widget, urwid.Overlay)
 
     def exit_popup(self) -> None:
+        self.loop.widget = self.popup_stack.pop()
+
+    def exit_all_popups(self) -> None:
+        self.popup_stack.clear()
         self.loop.widget = self.view
 
     def show_help(self) -> None:

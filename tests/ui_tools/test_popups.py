@@ -520,14 +520,14 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.footer.widget_list == msg_box.footer
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
-    def test_keypress_exit_popup(
+    def test_keypress_exit_all_popups(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
         size = widget_size(self.full_rendered_message)
 
         self.full_rendered_message.keypress(size, key)
 
-        assert self.controller.exit_popup.called
+        assert self.controller.exit_all_popups.called
 
     def test_keypress_exit_popup_invalid_key(
         self, widget_size: Callable[[Widget], urwid_Size]
@@ -546,19 +546,14 @@ class TestFullRenderedMsgView:
             *keys_for_command("EXIT_POPUP"),
         },
     )
-    def test_keypress_show_msg_info(
+    def test_keypress_exit_to_msg_info(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
         size = widget_size(self.full_rendered_message)
 
         self.full_rendered_message.keypress(size, key)
 
-        self.controller.show_msg_info.assert_called_once_with(
-            msg=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
+        assert self.controller.exit_popup.called
 
 
 class TestFullRawMsgView:
@@ -596,14 +591,14 @@ class TestFullRawMsgView:
         assert self.full_raw_message.footer.widget_list == msg_box.footer
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
-    def test_keypress_exit_popup(
+    def test_keypress_exit_all_popups(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
         size = widget_size(self.full_raw_message)
 
         self.full_raw_message.keypress(size, key)
 
-        assert self.controller.exit_popup.called
+        assert self.controller.exit_all_popups.called
 
     def test_keypress_exit_popup_invalid_key(
         self, widget_size: Callable[[Widget], urwid_Size]
@@ -622,19 +617,14 @@ class TestFullRawMsgView:
             *keys_for_command("EXIT_POPUP"),
         },
     )
-    def test_keypress_show_msg_info(
+    def test_keypress_exit_to_msg_info(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
         size = widget_size(self.full_raw_message)
 
         self.full_raw_message.keypress(size, key)
 
-        self.controller.show_msg_info.assert_called_once_with(
-            msg=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
+        assert self.controller.exit_popup.called
 
 
 class TestEditHistoryView:
@@ -671,14 +661,14 @@ class TestEditHistoryView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
-    def test_keypress_exit_popup(
+    def test_keypress_exit_all_popups(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
         size = widget_size(self.edit_history_view)
 
         self.edit_history_view.keypress(size, key)
 
-        assert self.controller.exit_popup.called
+        assert self.controller.exit_all_popups.called
 
     def test_keypress_exit_popup_invalid_key(
         self, widget_size: Callable[[Widget], urwid_Size]
@@ -700,12 +690,7 @@ class TestEditHistoryView:
 
         self.edit_history_view.keypress(size, key)
 
-        self.controller.show_msg_info.assert_called_once_with(
-            msg=self.message,
-            topic_links=OrderedDict(),
-            message_links=OrderedDict(),
-            time_mentions=list(),
-        )
+        assert self.controller.exit_popup.called
 
     @pytest.mark.parametrize(
         "snapshot",

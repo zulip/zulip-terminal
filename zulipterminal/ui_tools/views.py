@@ -959,12 +959,14 @@ class PopUpView(urwid.Frame):
         title: str,
         header: Optional[Any] = None,
         footer: Optional[Any] = None,
+        command_full_exit: Optional[str] = None,
     ) -> None:
         self.controller = controller
         self.command = command
         self.title = title
         self.log = urwid.SimpleFocusListWalker(body)
         self.body = urwid.ListBox(self.log)
+        self.command_full_exit = command_full_exit
 
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
@@ -1060,7 +1062,8 @@ class PopUpView(urwid.Frame):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EXIT_POPUP", key) or is_command_key(self.command, key):
             self.controller.exit_popup()
-
+        elif self.command_full_exit and is_command_key(self.command_full_exit, key):
+            self.controller.exit_all_popups()
         return super().keypress(size, key)
 
 
@@ -1831,7 +1834,14 @@ class EditHistoryView(PopUpView):
             ]
             widgets.append(urwid.Text(feedback, align="center"))
 
-        super().__init__(controller, widgets, "MSG_INFO", width, title)
+        super().__init__(
+            controller,
+            widgets,
+            "EDIT_HISTORY",
+            width,
+            title,
+            command_full_exit="MSG_INFO",
+        )
 
     def _make_edit_block(self, snapshot: Dict[str, Any], tag: EditHistoryTag) -> Any:
         content = snapshot["content"]
@@ -1896,17 +1906,6 @@ class EditHistoryView(PopUpView):
 
         return author_prefix
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("EDIT_HISTORY", key):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
-
 
 class FullRenderedMsgView(PopUpView):
     def __init__(
@@ -1931,25 +1930,13 @@ class FullRenderedMsgView(PopUpView):
         super().__init__(
             controller,
             [msg_box.content],
-            "MSG_INFO",
+            "FULL_RENDERED_MESSAGE",
             max_cols,
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            command_full_exit="MSG_INFO",
         )
-
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key(
-            "FULL_RENDERED_MESSAGE", key
-        ):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
 
 
 class FullRawMsgView(PopUpView):
@@ -1983,23 +1970,13 @@ class FullRawMsgView(PopUpView):
         super().__init__(
             controller,
             body_list,
-            "MSG_INFO",
+            "FULL_RAW_MESSAGE",
             max_cols,
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            command_full_exit="MSG_INFO",
         )
-
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("FULL_RAW_MESSAGE", key):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
 
 
 class EmojiPickerView(PopUpView):
