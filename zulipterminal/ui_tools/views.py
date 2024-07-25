@@ -1092,12 +1092,15 @@ class AboutView(PopUpView):
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
         transparency_enabled: bool,
+        screen: urwid.raw_display.Screen,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
             if server_feature_level
             else []
         )
+
+        terminal_size = screen.get_cols_rows()
 
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
@@ -1119,7 +1122,11 @@ class AboutView(PopUpView):
             ),
             (
                 "Detected Environment",
-                [("Platform", PLATFORM), ("Python", detected_python_in_full())],
+                [
+                    ("Platform", PLATFORM),
+                    ("Python", detected_python_in_full()),
+                    ("Current terminal size", f"{terminal_size[0]}x{terminal_size[1]}"),
+                ],
             ),
         ]
 
@@ -1137,7 +1144,6 @@ class AboutView(PopUpView):
 
         popup_width, column_widths = self.calculate_table_widths(contents, len(title))
         widgets = self.make_table_with_categories(contents, column_widths)
-
         super().__init__(controller, widgets, "ABOUT", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
