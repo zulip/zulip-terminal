@@ -2,10 +2,12 @@ from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytest
+import urwid
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
+from zulipterminal import urwid_types
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
@@ -195,6 +197,10 @@ class TestAboutView:
 
         mocker.patch(MODULE + ".detected_python_in_full", lambda: "[Python version]")
 
+
+        mock_screen = mocker.Mock(spec=urwid.raw_display.Screen)
+        mock_screen.get_cols_rows.return_value = (80, 24)
+
         self.about_view = AboutView(
             self.controller,
             "About",
@@ -208,6 +214,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            screen=mock_screen,
         )
 
     @pytest.mark.parametrize(
@@ -246,6 +253,9 @@ class TestAboutView:
         mocker.patch(LISTWALKER, return_value=[])
         server_version, server_feature_level = zulip_version
 
+        mock_screen = mocker.Mock(spec=urwid.raw_display.Screen)
+        mock_screen.get_cols_rows.return_value = (80, 24)
+
         about_view = AboutView(
             self.controller,
             "About",
@@ -259,6 +269,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            screen=mock_screen,
         )
 
         assert len(about_view.feature_level_content) == (
@@ -299,7 +310,8 @@ Transparency: disabled
 
 #### Detected Environment
 Platform: WSL
-Python: [Python version]"""
+Python: [Python version]
+Current terminal size: 80x24"""
         assert self.about_view.copy_info == expected_output
 
 
