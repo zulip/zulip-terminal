@@ -1076,6 +1076,10 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "EXIT_POPUP", width, title)
 
 
+
+
+
+
 class AboutView(PopUpView):
     def __init__(
         self,
@@ -1092,7 +1096,7 @@ class AboutView(PopUpView):
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
         transparency_enabled: bool,
-        screen: urwid.raw_display.Screen,
+        terminal_size: Tuple[int, int],
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1100,7 +1104,7 @@ class AboutView(PopUpView):
             else []
         )
 
-        terminal_size = screen.get_cols_rows()
+
 
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
@@ -1125,7 +1129,8 @@ class AboutView(PopUpView):
                 [
                     ("Platform", PLATFORM),
                     ("Python", detected_python_in_full()),
-                    ("Current terminal size", f"{terminal_size[0]}x{terminal_size[1]}"),
+                    ("Current terminal size",
+                     f"{terminal_size[0]} columns x {terminal_size[1]} rows"),
                 ],
             ),
         ]
@@ -1150,6 +1155,10 @@ class AboutView(PopUpView):
         if is_command_key("COPY_ABOUT_INFO", key):
             self.controller.copy_to_clipboard(self.copy_info, "About info")
         return super().keypress(size, key)
+
+
+
+
 
 
 class UserInfoView(PopUpView):

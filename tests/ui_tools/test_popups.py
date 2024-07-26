@@ -2,12 +2,10 @@ from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytest
-import urwid
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
-from zulipterminal import urwid_types
 from zulipterminal.api_types import Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
@@ -197,10 +195,6 @@ class TestAboutView:
 
         mocker.patch(MODULE + ".detected_python_in_full", lambda: "[Python version]")
 
-
-        mock_screen = mocker.Mock(spec=urwid.raw_display.Screen)
-        mock_screen.get_cols_rows.return_value = (80, 24)
-
         self.about_view = AboutView(
             self.controller,
             "About",
@@ -214,7 +208,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
-            screen=mock_screen,
+            terminal_size=(80, 24),
         )
 
     @pytest.mark.parametrize(
@@ -253,9 +247,6 @@ class TestAboutView:
         mocker.patch(LISTWALKER, return_value=[])
         server_version, server_feature_level = zulip_version
 
-        mock_screen = mocker.Mock(spec=urwid.raw_display.Screen)
-        mock_screen.get_cols_rows.return_value = (80, 24)
-
         about_view = AboutView(
             self.controller,
             "About",
@@ -269,14 +260,31 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
-            screen=mock_screen,
+            terminal_size=(80, 24),
         )
 
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
         )
 
-    def test_categories(self) -> None:
+    def test_categories(self, mocker: MockerFixture) -> None:
+        mocker.Mock()
+        self.about_view = AboutView(
+            self.controller,
+            "About",
+            zt_version=ZT_VERSION,
+            server_version=MINIMUM_SUPPORTED_SERVER_VERSION[0],
+            server_feature_level=MINIMUM_SUPPORTED_SERVER_VERSION[1],
+            theme_name="zt_dark",
+            color_depth=256,
+            notify_enabled=False,
+            autohide_enabled=False,
+            maximum_footlinks=3,
+            exit_confirmation_enabled=False,
+            transparency_enabled=False,
+            terminal_size=(80, 24),
+        )
+
         categories = [
             widget.text
             for widget in self.about_view.log
@@ -311,7 +319,7 @@ Transparency: disabled
 #### Detected Environment
 Platform: WSL
 Python: [Python version]
-Current terminal size: 80x24"""
+Current terminal size: 80 columns x 24 rows"""
         assert self.about_view.copy_info == expected_output
 
 
