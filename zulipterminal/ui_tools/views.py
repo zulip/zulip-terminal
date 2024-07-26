@@ -1076,10 +1076,6 @@ class NoticeView(PopUpView):
         super().__init__(controller, widgets, "EXIT_POPUP", width, title)
 
 
-
-
-
-
 class AboutView(PopUpView):
     def __init__(
         self,
@@ -1104,8 +1100,6 @@ class AboutView(PopUpView):
             else []
         )
 
-
-
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
             ("Server", [("Version", server_version)] + self.feature_level_content),
@@ -1129,8 +1123,10 @@ class AboutView(PopUpView):
                 [
                     ("Platform", PLATFORM),
                     ("Python", detected_python_in_full()),
-                    ("Current terminal size",
-                     f"{terminal_size[0]} columns x {terminal_size[1]} rows"),
+                    (
+                        "Current terminal size",
+                        f"{terminal_size[0]} columns x {terminal_size[1]} rows",
+                    ),
                 ],
             ),
         ]
@@ -1155,10 +1151,6 @@ class AboutView(PopUpView):
         if is_command_key("COPY_ABOUT_INFO", key):
             self.controller.copy_to_clipboard(self.copy_info, "About info")
         return super().keypress(size, key)
-
-
-
-
 
 
 class UserInfoView(PopUpView):
