@@ -208,6 +208,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size=(80, 24),
         )
 
     @pytest.mark.parametrize(
@@ -259,13 +260,31 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size=(80, 24),
         )
 
         assert len(about_view.feature_level_content) == (
             1 if server_feature_level else 0
         )
 
-    def test_categories(self) -> None:
+    def test_categories(self, mocker: MockerFixture) -> None:
+        mocker.Mock()
+        self.about_view = AboutView(
+            self.controller,
+            "About",
+            zt_version=ZT_VERSION,
+            server_version=MINIMUM_SUPPORTED_SERVER_VERSION[0],
+            server_feature_level=MINIMUM_SUPPORTED_SERVER_VERSION[1],
+            theme_name="zt_dark",
+            color_depth=256,
+            notify_enabled=False,
+            autohide_enabled=False,
+            maximum_footlinks=3,
+            exit_confirmation_enabled=False,
+            transparency_enabled=False,
+            terminal_size=(80, 24),
+        )
+
         categories = [
             widget.text
             for widget in self.about_view.log
@@ -299,7 +318,8 @@ Transparency: disabled
 
 #### Detected Environment
 Platform: WSL
-Python: [Python version]"""
+Python: [Python version]
+Current terminal size: 80 columns x 24 rows"""
         assert self.about_view.copy_info == expected_output
 
 

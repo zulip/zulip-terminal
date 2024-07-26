@@ -301,6 +301,7 @@ class Controller:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
 
     def show_about(self) -> None:
+        terminal_size = self.loop.screen.get_cols_rows()
         self.show_pop_up(
             AboutView(
                 self,
@@ -315,6 +316,7 @@ class Controller:
                 maximum_footlinks=self.maximum_footlinks,
                 exit_confirmation_enabled=self.exit_confirmation,
                 transparency_enabled=self.transparency_enabled,
+                terminal_size=terminal_size,
             ),
             "area:help",
         )
