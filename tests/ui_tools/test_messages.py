@@ -838,6 +838,7 @@ class TestMessageBox:
                 "color": "#bd6",
             },
         }
+        self.model.controller.is_in_empty_narrow = False
         last_message = dict(message, **to_vary_in_last_message)
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
@@ -890,6 +891,7 @@ class TestMessageBox:
     def test_main_view_generates_PM_header(
         self, mocker, message, to_vary_in_last_message
     ):
+        self.model.controller.is_in_empty_narrow = False
         last_message = dict(message, **to_vary_in_last_message)
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
@@ -1032,9 +1034,11 @@ class TestMessageBox:
             },
         }
         self.model.narrow = msg_narrow
+        self.model.controller.is_in_empty_narrow = False
         messages = messages_successful_response["messages"]
         current_message = messages[msg_type]
         msg_box = MessageBox(current_message, self.model, messages[0])
+
         search_bar = msg_box.top_search_bar()
         header_bar = msg_box.recipient_header()
 
@@ -1405,6 +1409,7 @@ class TestMessageBox:
         report_error = msg_box.model.controller.report_error
         report_warning = msg_box.model.controller.report_warning
         mocker.patch(MODULE + ".time", return_value=100)
+        msg_box.model.controller.is_in_empty_narrow = False
 
         msg_box.keypress(size, key)
 
@@ -1820,6 +1825,7 @@ class TestMessageBox:
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, None)
         reactions = to_vary_in_each_message["reactions"]
+        msg_box.model.controller.is_in_empty_narrow = False
 
         reactions_view = msg_box.reactions_view(reactions)
 
@@ -1976,6 +1982,7 @@ class TestMessageBox:
         mocker.patch.object(msg_box, "keypress")
         msg_box.model = mocker.Mock()
         msg_box.model.controller.is_in_editor_mode.return_value = compose_box_is_open
+        msg_box.model.controller.is_in_empty_narrow = False
 
         msg_box.mouse_event(size, "mouse press", 1, col, row, focus)
 
