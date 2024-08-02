@@ -198,8 +198,23 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
+    def empty_narrow_header(self) -> Any:
+        title_markup = ("header", [("general_narrow", "No selected message")])
+        title = urwid.Text(title_markup)
+        header = urwid.Columns(
+            [
+                ("pack", title),
+                (1, urwid.Text(("general_bar", " "))),
+                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), "general_bar"),
+            ]
+        )
+        header.markup = title_markup
+        return header
+
     def recipient_header(self) -> Any:
-        if self.message["type"] == "stream":
+        if self.model.controller.is_in_empty_narrow:
+            return self.empty_narrow_header()
+        elif self.message["type"] == "stream":
             return self.stream_header()
         else:
             return self.private_header()
