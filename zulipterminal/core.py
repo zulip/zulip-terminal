@@ -93,6 +93,7 @@ class Controller:
 
         self.active_conversation_info: Dict[str, Any] = {}
         self.is_typing_notification_in_progress = False
+        self.is_in_empty_narrow = False
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
@@ -598,6 +599,7 @@ class Controller:
         if len(msg_id_list) == 0 or (anchor is not None and anchor not in msg_id_list):
             self.model.get_messages(num_before=30, num_after=10, anchor=anchor)
             msg_id_list = self.model.get_message_ids_in_current_narrow()
+        self.is_in_empty_narrow = bool(len(msg_id_list) == 0)
 
         w_list = create_msg_box_list(self.model, msg_id_list, focus_msg_id=anchor)
 
