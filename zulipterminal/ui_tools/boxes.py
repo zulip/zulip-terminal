@@ -1014,7 +1014,7 @@ class MessageSearchBox(urwid.Pile):
                 self.text_box,
             ]
         )
-        self.msg_narrow = urwid.Text("DONT HIDE")
+        self.msg_narrow = urwid.Text("")
         self.recipient_bar = urwid.LineBox(
             self.msg_narrow,
             title="Current message recipients",
