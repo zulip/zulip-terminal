@@ -683,7 +683,8 @@ class MessageBox(urwid.Pile):
             "recipients": recipient_header is not None,
             "author": message["this"]["author"] != message["last"]["author"],
             "24h": (
-                message["last"]["datetime"] is not None
+                message["this"]["datetime"] is not None
+                and message["last"]["datetime"] is not None
                 and ((message["this"]["datetime"] - message["last"]["datetime"]).days)
             ),
             "timestamp": (
