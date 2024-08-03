@@ -82,8 +82,10 @@ class MessageBox(urwid.Pile):
             self.stream_id = self.message["stream_id"]
             self.topic_name = self.message["subject"]
         else:
-            self.email = self.message["sender_email"]
-            self.user_id = self.message["sender_id"]
+            # Get sender details only for non-empty narrows
+            if self.message.get("id") is not None:
+                self.email = self.message["sender_email"]
+                self.user_id = self.message["sender_id"]
 
             if self._is_private_message_to_self():
                 recipient = self.message["display_recipient"][0]

@@ -48,6 +48,7 @@ class TestMessageBox:
             display_recipient=[
                 {"id": 7, "email": "boo@zulip.com", "full_name": "Boo is awesome"}
             ],
+            id=457823,
             stream_id=5,
             subject="hi",
             sender_email="foo@zulip.com",
@@ -71,6 +72,7 @@ class TestMessageBox:
             display_recipient=[
                 {"full_name": "Foo Foo", "email": "foo@zulip.com", "id": None}
             ],
+            id=457823,
             sender_id=9,
             content="<p> self message. </p>",
             sender_full_name="Foo Foo",
@@ -82,6 +84,7 @@ class TestMessageBox:
             MODULE + ".MessageBox._is_private_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
+
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
@@ -753,6 +756,7 @@ class TestMessageBox:
                 "color": "#bd6",
             },
         }
+        self.model.controller.is_in_empty_narrow = False
         MessageBox(message, self.model, last_message)
 
     @pytest.mark.parametrize(
@@ -1149,8 +1153,11 @@ class TestMessageBox:
     ):
         message_fixture.update({"id": 4})
         varied_message = dict(message_fixture, **to_vary_in_each_message)
+        self.model.controller.is_in_empty_narrow = False
         msg_box = MessageBox(varied_message, self.model, varied_message)
+
         view_components = msg_box.main_view()
+
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
 
@@ -1160,7 +1167,9 @@ class TestMessageBox:
         messages = messages_successful_response["messages"]
         for message in messages:
             self.model.index["edited_messages"].add(message["id"])
+            self.model.controller.is_in_empty_narrow = False
             msg_box = MessageBox(message, self.model, message)
+
             view_components = msg_box.main_view()
 
             label = view_components[0].original_widget.contents[0]
@@ -1186,6 +1195,7 @@ class TestMessageBox:
     ):
         message = message_fixture
         last_msg = dict(message, **to_vary_in_last_message)
+        self.model.controller.is_in_empty_narrow = False
 
         msg_box = MessageBox(message, self.model, last_msg)
 
@@ -1389,6 +1399,7 @@ class TestMessageBox:
             to_vary_in_each_message["subject"] = ""
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         message_type = varied_message["type"]
+        self.model.controller.is_in_empty_narrow = False
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         size = widget_size(msg_box)
         msg_box.model.user_id = 1
