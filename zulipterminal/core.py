@@ -4,6 +4,7 @@ Defines the `Controller`, which sets up the `Model`, `View`, and how they intera
 
 import itertools
 import os
+import shutil
 import signal
 import sys
 import time
@@ -301,6 +302,9 @@ class Controller:
         self.show_pop_up(NoticeView(self, text, width, "NOTICE"), "area:error")
 
     def show_about(self) -> None:
+        terminal_size = shutil.get_terminal_size()
+        terminal_size_str = f"{terminal_size.columns} cols x {terminal_size.lines} rows"
+
         self.show_pop_up(
             AboutView(
                 self,
@@ -315,6 +319,7 @@ class Controller:
                 maximum_footlinks=self.maximum_footlinks,
                 exit_confirmation_enabled=self.exit_confirmation,
                 transparency_enabled=self.transparency_enabled,
+                terminal_size=terminal_size_str,
             ),
             "area:help",
         )
