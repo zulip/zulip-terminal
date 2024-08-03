@@ -65,12 +65,6 @@ class TestMessageBox:
         assert msg_box.message_links == OrderedDict()
         assert msg_box.time_mentions == list()
 
-    def test_init_fails_with_bad_message_type(self):
-        message = dict(type="BLAH")
-
-        with pytest.raises(RuntimeError):
-            MessageBox(message, self.model, None)
-
     def test_private_message_to_self(self, mocker):
         message = dict(
             type="private",

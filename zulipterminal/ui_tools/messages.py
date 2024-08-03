@@ -81,13 +81,10 @@ class MessageBox(urwid.Pile):
             self.stream_name = self.message["display_recipient"]
             self.stream_id = self.message["stream_id"]
             self.topic_name = self.message["subject"]
-        elif self.message["type"] == "private":
+        else:
             self.email = self.message["sender_email"]
             self.user_id = self.message["sender_id"]
-        else:
-            raise RuntimeError("Invalid message type")
 
-        if self.message["type"] == "private":
             if self._is_private_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
