@@ -1092,6 +1092,7 @@ class AboutView(PopUpView):
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
         transparency_enabled: bool,
+        terminal_size: str,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1119,7 +1120,11 @@ class AboutView(PopUpView):
             ),
             (
                 "Detected Environment",
-                [("Platform", PLATFORM), ("Python", detected_python_in_full())],
+                [
+                    ("Platform", PLATFORM),
+                    ("Python", detected_python_in_full()),
+                    ("Terminal Size", terminal_size),
+                ],
             ),
         ]
 
