@@ -1,5 +1,6 @@
 import datetime
 from collections import OrderedDict
+from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -55,18 +56,24 @@ def composition_factory(
     return data
 
 
+@dataclass
+class SavedDraftTestScenario:
+    composition: Optional[Composition]
+    expected_call: str
+
+
 def saved_draft_factory(
     draft_composition: Optional[Composition] = None,
-) -> Dict[str, Union[Optional[Composition], str]]:
+) -> SavedDraftTestScenario:
     expected_function = (
         "view.controller.save_draft_confirmation_popup"
         if draft_composition is not None
         else "model.save_draft"
     )
-    return {
-        "draft_composition": draft_composition,
-        "expected_function": expected_function,
-    }
+    return SavedDraftTestScenario(
+        composition=draft_composition,
+        expected_call=expected_function,
+    )
 
 
 class TestWriteBox:
@@ -171,9 +178,7 @@ class TestWriteBox:
             "saved_private_group_draft_exists",
         ],
     )
-    def saved_draft(
-        self, request: FixtureRequest
-    ) -> Dict[str, Union[Optional[Composition], str]]:
+    def saved_draft(self, request: FixtureRequest) -> SavedDraftTestScenario:
         return request.param
 
     @pytest.fixture(
@@ -237,17 +242,16 @@ class TestWriteBox:
     def test_keypress_SAVE_AS_DRAFT_stream(
         self,
         key: str,
-        saved_draft: Dict[str, Union[Optional[Composition], str]],
+        saved_draft: SavedDraftTestScenario,
         stream_draft_composition: StreamComposition,
         stream_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
-        draft_saved_in_current_session = saved_draft["draft_composition"]
+        draft_saved_in_current_session = saved_draft.composition
         _, write_box = stream_draft_setup_fixture
-        assert isinstance(saved_draft["expected_function"], str)
         expected_function = reduce(
-            getattr, saved_draft["expected_function"].split("."), write_box
+            getattr, saved_draft.expected_call.split("."), write_box
         )
         write_box.model.session_draft_message.return_value = (
             draft_saved_in_current_session
@@ -265,16 +269,15 @@ class TestWriteBox:
         key: str,
         mocker: MockerFixture,
         private_draft_composition: PrivateComposition,
-        saved_draft: Dict[str, Union[Optional[Composition], str]],
+        saved_draft: SavedDraftTestScenario,
         private_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
-        draft_saved_in_current_session = saved_draft["draft_composition"]
+        draft_saved_in_current_session = saved_draft.composition
         mocker, write_box = private_draft_setup_fixture
-        assert isinstance(saved_draft["expected_function"], str)
         expected_function = reduce(
-            getattr, saved_draft["expected_function"].split("."), write_box
+            getattr, saved_draft.expected_call.split("."), write_box
         )
         mocker.patch(
             MODULE + ".WriteBox._tidy_valid_recipients_and_notify_invalid_ones",
@@ -295,12 +298,12 @@ class TestWriteBox:
         self,
         key: str,
         mocker: MockerFixture,
-        saved_draft: Dict[str, Union[Optional[Composition], str]],
+        saved_draft: SavedDraftTestScenario,
         private_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
         write_box: WriteBox,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
-        draft_saved_in_current_session = saved_draft["draft_composition"]
+        draft_saved_in_current_session = saved_draft.composition
         mocker, write_box = private_draft_setup_fixture
         mocker.patch(
             MODULE + ".WriteBox._tidy_valid_recipients_and_notify_invalid_ones",
