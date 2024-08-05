@@ -39,21 +39,33 @@ MODULE = "zulipterminal.ui_tools.boxes"
 WRITEBOX = MODULE + ".WriteBox"
 
 
-def composition_factory(
-    type: str,
-    to: Union[str, List[int]] = "",
-    subject: Optional[str] = None,
-    read_by_sender: bool = True,
-) -> Dict[str, object]:
-    data = {
-        "type": type,
-        "content": f"Random {type} message",
-        "read_by_sender": read_by_sender,
-        "to": to,
-    }
-    if subject:
-        data["subject"] = subject
-    return data
+def composition_factory(type: str, group: bool = False) -> Composition:
+    read_by_sender: bool = True
+    content = "Random {} message"
+    if type == "private":
+        if group:
+            to = [5140, 5180]
+        else:
+            to = [5140]
+        content = content.format(type)
+        return PrivateComposition(
+            {
+                "type": "private",
+                "content": content,
+                "to": to,
+                "read_by_sender": read_by_sender,
+            }
+        )
+    else:
+        return StreamComposition(
+            {
+                "type": "stream",
+                "content": content,
+                "subject": "Topic",
+                "to": "Current stream",
+                "read_by_sender": read_by_sender,
+            }
+        )
 
 
 @dataclass
@@ -149,27 +161,9 @@ class TestWriteBox:
     @pytest.fixture(
         params=[
             saved_draft_factory(),
-            saved_draft_factory(
-                StreamComposition(
-                    **composition_factory(  # type: ignore[typeddict-item]
-                        type="stream", to="Current stream", subject="Topic"
-                    )
-                )
-            ),
-            saved_draft_factory(
-                PrivateComposition(
-                    **composition_factory(  # type: ignore[typeddict-item]
-                        type="private", to=[5179]
-                    )
-                )
-            ),
-            saved_draft_factory(
-                PrivateComposition(
-                    **composition_factory(  # type: ignore[typeddict-item]
-                        type="group", to=[5140, 5179]
-                    )
-                )
-            ),
+            saved_draft_factory(composition_factory(type="stream")),
+            saved_draft_factory(composition_factory(type="private")),
+            saved_draft_factory(composition_factory(type="private", group=True)),
         ],
         ids=[
             "no_saved_draft_exists",
@@ -183,10 +177,9 @@ class TestWriteBox:
 
     @pytest.fixture(
         params=[
-            composition_factory("private", to=[5140]),
-            composition_factory("private", to=[5140, 5180]),
+            composition_factory("private"),
+            composition_factory("private", group=True),
         ],
-        ids=["private_draft", "group_draft"],
     )
     def private_draft_composition(
         self, request: FixtureRequest
@@ -194,7 +187,7 @@ class TestWriteBox:
         return request.param
 
     @pytest.fixture(
-        params=[composition_factory("stream", to="Another stream", subject="Topic")],
+        params=[composition_factory("stream")],
     )
     def stream_draft_composition(
         self, request: FixtureRequest
