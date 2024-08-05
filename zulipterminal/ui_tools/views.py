@@ -193,6 +193,8 @@ class MessageView(urwid.ListBox):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if self.model.controller.is_in_empty_narrow:
+            return super().keypress(size, key)
         if is_command_key("GO_DOWN", key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
