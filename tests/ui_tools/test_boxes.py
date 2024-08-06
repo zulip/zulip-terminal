@@ -40,10 +40,13 @@ WRITEBOX = MODULE + ".WriteBox"
 
 
 def composition_factory(
-    type: str, group: bool = False, saved: bool = False
+    type: str,
+    group: bool = False,
+    content_same: bool = True,
+    recipient_same: bool = True,
 ) -> Composition:
     read_by_sender: bool = True
-    content = "Random {} message"
+    content = "Random message" if content_same else "Different message"
     if type == "private":
         condition_map = {
             False: {False: [5140], True: [3276]},
@@ -54,7 +57,7 @@ def composition_factory(
             {
                 "type": "private",
                 "content": content,
-                "to": condition_map[group][saved],
+                "to": condition_map[group][recipient_same],
                 "read_by_sender": read_by_sender,
             }
         )
@@ -64,7 +67,7 @@ def composition_factory(
                 "type": "stream",
                 "content": content,
                 "subject": "Topic",
-                "to": "Saved draft stream" if saved else "Current stream",
+                "to": "Saved draft stream" if recipient_same else "Current stream",
                 "read_by_sender": read_by_sender,
             }
         )
@@ -163,11 +166,9 @@ class TestWriteBox:
     @pytest.fixture(
         params=[
             saved_draft_factory(),
-            saved_draft_factory(composition_factory(type="stream", saved=True)),
-            saved_draft_factory(composition_factory(type="private", saved=True)),
-            saved_draft_factory(
-                composition_factory(type="private", group=True, saved=True)
-            ),
+            saved_draft_factory(composition_factory(type="stream")),
+            saved_draft_factory(composition_factory(type="private")),
+            saved_draft_factory(composition_factory(type="private", group=True)),
         ],
         ids=[
             "no_saved_draft_exists",
@@ -181,22 +182,47 @@ class TestWriteBox:
 
     @pytest.fixture(
         params=[
-            composition_factory("private"),
-            composition_factory("private", group=True),
+            (
+                composition_factory("private", recipient_same=False),
+                "dm__same_content__different_recipient",
+            ),
+            (
+                composition_factory("private", recipient_same=False, group=True),
+                "group_dm__same_content__different_recipient",
+            ),
+            (
+                composition_factory("private", content_same=False),
+                "dm__same_recipient__different_content",
+            ),
+            (
+                composition_factory("private", content_same=False, group=True),
+                "group_dm__same_recipient__different_content",
+            ),
         ],
     )
     def private_draft_composition(
         self, request: FixtureRequest
     ) -> Tuple[List[Composition], List[str]]:
-        return request.param
+        param, _ = request.param
+        return param
 
     @pytest.fixture(
-        params=[composition_factory("stream")],
+        params=[
+            (
+                composition_factory("stream", recipient_same=False),
+                "stream__same_content__different_recipient",
+            ),
+            (
+                composition_factory("stream", content_same=False),
+                "stream__same_recipient__different_content",
+            ),
+        ],
     )
     def stream_draft_composition(
         self, request: FixtureRequest
     ) -> Tuple[List[Composition], List[str]]:
-        return request.param
+        param, _ = request.param
+        return param
 
     @pytest.fixture
     def private_draft_setup_fixture(
