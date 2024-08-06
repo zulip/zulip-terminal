@@ -2,7 +2,7 @@ import datetime
 from collections import OrderedDict
 from dataclasses import dataclass
 from functools import reduce
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytest
 from pytest import FixtureRequest
@@ -39,20 +39,22 @@ MODULE = "zulipterminal.ui_tools.boxes"
 WRITEBOX = MODULE + ".WriteBox"
 
 
-def composition_factory(type: str, group: bool = False) -> Composition:
+def composition_factory(
+    type: str, group: bool = False, saved: bool = False
+) -> Composition:
     read_by_sender: bool = True
     content = "Random {} message"
     if type == "private":
-        if group:
-            to = [5140, 5180]
-        else:
-            to = [5140]
+        condition_map = {
+            False: {False: [5140], True: [3276]},
+            True: {False: [5140, 5180], True: [3276, 3277]},
+        }
         content = content.format(type)
         return PrivateComposition(
             {
                 "type": "private",
                 "content": content,
-                "to": to,
+                "to": condition_map[group][saved],
                 "read_by_sender": read_by_sender,
             }
         )
@@ -62,7 +64,7 @@ def composition_factory(type: str, group: bool = False) -> Composition:
                 "type": "stream",
                 "content": content,
                 "subject": "Topic",
-                "to": "Current stream",
+                "to": "Saved draft stream" if saved else "Current stream",
                 "read_by_sender": read_by_sender,
             }
         )
@@ -161,9 +163,11 @@ class TestWriteBox:
     @pytest.fixture(
         params=[
             saved_draft_factory(),
-            saved_draft_factory(composition_factory(type="stream")),
-            saved_draft_factory(composition_factory(type="private")),
-            saved_draft_factory(composition_factory(type="private", group=True)),
+            saved_draft_factory(composition_factory(type="stream", saved=True)),
+            saved_draft_factory(composition_factory(type="private", saved=True)),
+            saved_draft_factory(
+                composition_factory(type="private", group=True, saved=True)
+            ),
         ],
         ids=[
             "no_saved_draft_exists",
