@@ -378,32 +378,26 @@ def unreadable_dir(tmp_path: Path) -> Generator[Tuple[Path, Path], None, None]:
     unreadable_dir.chmod(0o755)
 
 
-@pytest.mark.parametrize(
-    "path_to_use, expected_exception",
-    [
-        ("unreadable", "PermissionError"),
-        ("goodnewhome", "FileNotFoundError"),
-    ],
-    ids=["valid_path_but_cannot_be_written_to", "path_does_not_exist"],
-)
 def test_main_cannot_write_zuliprc_given_good_credentials(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
     unreadable_dir: Tuple[Path, Path],
-    path_to_use: str,
-    expected_exception: str,
+    path_to_use: str = "unreadable",
+    expected_exception: str = "PermissionError",
 ) -> None:
     tmp_path, unusable_path = unreadable_dir
 
     # This is default base path to use
     zuliprc_path = os.path.join(str(tmp_path), path_to_use, "zuliprc")
-    mocker.patch(MODULE + ".HOME_PATH_ZULIPRC", zuliprc_path)
-    mocker.patch(MODULE + ".CONFIG_PATH", os.path.join(str(tmp_path), "config"))
+    mocker.patch(MODULE + ".CONFIG_PATH", zuliprc_path)
+    mocker.patch(MODULE + ".HOME_PATH_ZULIPRC", os.path.join(str(tmp_path), "home"))
+    account_alias = "my_account_alias"
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
     mocker.patch(
-        MODULE + ".get_api_key", return_value=("my_site", "my_login", "my_api_key")
+        MODULE + ".get_api_key",
+        return_value=("my_site", "my_login", "my_api_key", account_alias),
     )
 
     with pytest.raises(SystemExit):
@@ -415,7 +409,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     expected_line = (
         "\x1b[91m"
         f"{expected_exception}: zuliprc could not be created "
-        f"at {zuliprc_path}"
+        f"at {os.path.join(zuliprc_path, account_alias, 'zuliprc')}"
         "\x1b[0m"
     )
     assert lines[-1] == expected_line

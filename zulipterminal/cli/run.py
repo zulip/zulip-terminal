@@ -145,7 +145,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "-c",
         action="store",
         help="config file downloaded from your zulip "
-        f"organization (default: {HOME_PATH_ZULIPRC})",
+        f"organization (default: {CONFIG_PATH}/account_alias/zuliprc)",
     )
     parser.add_argument(
         "--theme",
@@ -266,7 +266,7 @@ def get_server_settings(realm_url: str) -> ServerSettings:
     return response.json()
 
 
-def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str, str]]:
     from getpass import getpass
 
     try:
@@ -281,6 +281,12 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     login_id_label = get_login_label(server_properties)
     login_id = styled_input(login_id_label)
     password = getpass(in_color("blue", "Password: "))
+    account_alias = styled_input(
+        "Please choose a simple and unique name for this account,"
+        " which represents your user profile and its server."
+        " Use only letters, numbers, and underscores.\n"
+        "Account alias: "
+    )
 
     response = requests.post(
         url=f"{preferred_realm_url}/api/v1/fetch_api_key",
@@ -290,7 +296,12 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
         },
     )
     if response.status_code == requests.codes.OK:
-        return preferred_realm_url, login_id, str(response.json()["api_key"])
+        return (
+            preferred_realm_url,
+            login_id,
+            str(response.json()["api_key"]),
+            account_alias,
+        )
     return None
 
 
@@ -321,13 +332,13 @@ def login_and_save(zuliprc_path: Optional[str]) -> str:
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
     login_data = get_api_key(realm_url)
-    zuliprc_path = zuliprc_path or path.expanduser(HOME_PATH_ZULIPRC)
 
     while login_data is None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
-    preferred_realm_url, login_id, api_key = login_data
+    preferred_realm_url, login_id, api_key, account_alias = login_data
+    zuliprc_path = os.path.join(CONFIG_PATH, account_alias, "zuliprc")
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
@@ -349,6 +360,7 @@ def _write_zuliprc(
     Only creates new private files; errors if file already exists
     """
     try:
+        Path(to_path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
@@ -388,7 +400,11 @@ def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
 
 
 def check_for_default_zuliprc() -> Optional[str]:
-    zuliprc_count_in_config = sum(1 for _ in Path(CONFIG_PATH).glob("*/zuliprc"))
+    zuliprc_count_in_config = (
+        sum(1 for _ in Path(CONFIG_PATH).glob("*/zuliprc"))
+        if path.exists(CONFIG_PATH)
+        else 0
+    )
     home_path_count = path.exists(HOME_PATH_ZULIPRC)
     total_count = zuliprc_count_in_config + home_path_count
 
