@@ -134,6 +134,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         description=description, formatter_class=formatter_class
     )
     parser.add_argument(
+        "account-alias",
+        nargs="?",
+        action="store",
+        default="",
+        help="specify the chosen alias of your zulip account "
+        "to fetch its configuration",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -514,6 +522,13 @@ def main(options: Optional[List[str]] = None) -> None:
         sys.exit(0)
 
     zuliprc_path = None
+    account_alias = getattr(args, "account-alias")
+    if account_alias:
+        if args.config_file:
+            exit_with_error("Cannot use account-alias and --config-file together")
+        zuliprc_path = os.path.join(CONFIG_PATH, account_alias, "zuliprc")
+        if not path.exists(zuliprc_path):
+            exit_with_error(f"Account alias {account_alias} not found")
     if args.config_file:
         zuliprc_path = args.config_file
     zuliprc_path = resolve_to_valid_path(zuliprc_path)
