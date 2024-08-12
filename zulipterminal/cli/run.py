@@ -285,12 +285,15 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     return None
 
 
-def login_and_save(zuliprc_path: str) -> None:
+def login_and_save(zuliprc_path: Optional[str]) -> str:
     """
     Prompts the user for their login credentials and saves them to a zuliprc file.
     """
     print(
-        f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
+        f"{in_color('red', 'zuliprc file was not found')}"
+        f"{in_color('red', f' at {zuliprc_path}')}"
+        if zuliprc_path
+        else "."
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
         f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
@@ -309,6 +312,7 @@ def login_and_save(zuliprc_path: str) -> None:
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
     login_data = get_api_key(realm_url)
+    zuliprc_path = zuliprc_path or path.expanduser("~/zuliprc")
 
     while login_data is None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
@@ -325,6 +329,7 @@ def login_and_save(zuliprc_path: str) -> None:
         print(f"Generated API key saved at {zuliprc_path}")
     else:
         exit_with_error(save_zuliprc_failure)
+    return zuliprc_path
 
 
 def _write_zuliprc(
@@ -346,20 +351,20 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def resolve_to_valid_path(zuliprc_str: str) -> str:
+def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
     """
     Returns the path to a valid zuliprc file.
     If none are found or the path provided is invalid, prompts the user to login
     and returns the path to the created zuliprc file.
     """
-    zuliprc_path = path.expanduser(zuliprc_str)
-    while not path.exists(zuliprc_path):
+    zuliprc_path = None if zuliprc_str is None else path.expanduser(zuliprc_str)
+    while zuliprc_path is None or not path.exists(zuliprc_path):
         try:
-            login_and_save(zuliprc_path)
+            zuliprc_path = login_and_save(zuliprc_path)
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
         except (OSError, ValueError):
             # Remove zuliprc file if created.
-            if path.exists(zuliprc_path):
+            if zuliprc_path is not None and path.exists(zuliprc_path):
                 remove(zuliprc_path)
             print(in_color("red", "\nInvalid Credentials, Please try again!\n"))
         except EOFError:
@@ -462,10 +467,9 @@ def main(options: Optional[List[str]] = None) -> None:
         print(list_themes())
         sys.exit(0)
 
+    zuliprc_path = None
     if args.config_file:
         zuliprc_path = args.config_file
-    else:
-        zuliprc_path = "~/zuliprc"
     zuliprc_path = resolve_to_valid_path(zuliprc_path)
 
     print(
