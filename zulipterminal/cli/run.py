@@ -11,6 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
+from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
@@ -28,6 +29,9 @@ from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.platform_code import detected_platform, detected_python_in_full
 from zulipterminal.version import ZT_VERSION
+
+
+HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
 
 
 class ConfigSource(Enum):
@@ -136,7 +140,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "-c",
         action="store",
         help="config file downloaded from your zulip "
-        "organization (default: ~/zuliprc)",
+        f"organization (default: {HOME_PATH_ZULIPRC})",
     )
     parser.add_argument(
         "--theme",
@@ -312,7 +316,7 @@ def login_and_save(zuliprc_path: Optional[str]) -> str:
     # for adding "/api"
     realm_url = realm_url.rstrip("/")
     login_data = get_api_key(realm_url)
-    zuliprc_path = zuliprc_path or path.expanduser("~/zuliprc")
+    zuliprc_path = zuliprc_path or path.expanduser(HOME_PATH_ZULIPRC)
 
     while login_data is None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
