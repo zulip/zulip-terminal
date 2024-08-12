@@ -27,11 +27,16 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.platform_code import detected_platform, detected_python_in_full
+from zulipterminal.platform_code import (
+    detected_platform,
+    detected_python_in_full,
+    xdg_config_home,
+)
 from zulipterminal.version import ZT_VERSION
 
 
 HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
+CONFIG_PATH = str(xdg_config_home() / "zulip-terminal")
 
 
 class ConfigSource(Enum):
@@ -358,10 +363,15 @@ def _write_zuliprc(
 def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
     """
     Returns the path to a valid zuliprc file.
+    If a path is not provided by the user, searches the default locations.
     If none are found or the path provided is invalid, prompts the user to login
     and returns the path to the created zuliprc file.
     """
-    zuliprc_path = None if zuliprc_str is None else path.expanduser(zuliprc_str)
+    zuliprc_path = (
+        check_for_default_zuliprc()
+        if zuliprc_str is None
+        else path.expanduser(zuliprc_str)
+    )
     while zuliprc_path is None or not path.exists(zuliprc_path):
         try:
             zuliprc_path = login_and_save(zuliprc_path)
@@ -375,6 +385,22 @@ def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
     return zuliprc_path
+
+
+def check_for_default_zuliprc() -> Optional[str]:
+    zuliprc_count_in_config = sum(1 for _ in Path(CONFIG_PATH).glob("*/zuliprc"))
+    home_path_count = path.exists(HOME_PATH_ZULIPRC)
+    total_count = zuliprc_count_in_config + home_path_count
+
+    if total_count == 1:
+        return HOME_PATH_ZULIPRC if home_path_count else CONFIG_PATH
+    if total_count > 1:
+        exit_with_error(
+            "Found multiple zuliprc configuration files. Please retry by specifying"
+            " the path to your target zuliprc file by running\n"
+            "`zulip-term --config-file path/to/your/zuliprc`"
+        )
+    return None
 
 
 def parse_zuliprc(zuliprc_path: str) -> Dict[str, SettingData]:

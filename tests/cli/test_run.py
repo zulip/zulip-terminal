@@ -398,6 +398,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     # This is default base path to use
     zuliprc_path = os.path.join(str(tmp_path), path_to_use, "zuliprc")
     mocker.patch(MODULE + ".HOME_PATH_ZULIPRC", zuliprc_path)
+    mocker.patch(MODULE + ".CONFIG_PATH", os.path.join(str(tmp_path), "config"))
 
     # Give some arbitrary input and fake that it's always valid
     mocker.patch.object(builtins, "input", lambda _: "text\n")
