@@ -346,7 +346,12 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
+def resolve_to_valid_path(zuliprc_str: str) -> str:
+    """
+    Returns the path to a valid zuliprc file.
+    If none are found or the path provided is invalid, prompts the user to login
+    and returns the path to the created zuliprc file.
+    """
     zuliprc_path = path.expanduser(zuliprc_str)
     while not path.exists(zuliprc_path):
         try:
@@ -360,7 +365,10 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
         except EOFError:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
+    return zuliprc_path
 
+
+def parse_zuliprc(zuliprc_path: str) -> Dict[str, SettingData]:
     mode = os.stat(zuliprc_path).st_mode
     is_readable_by_group_or_others = mode & (stat.S_IRWXG | stat.S_IRWXO)
 
@@ -458,6 +466,7 @@ def main(options: Optional[List[str]] = None) -> None:
         zuliprc_path = args.config_file
     else:
         zuliprc_path = "~/zuliprc"
+    zuliprc_path = resolve_to_valid_path(zuliprc_path)
 
     print(
         "Detected:"
