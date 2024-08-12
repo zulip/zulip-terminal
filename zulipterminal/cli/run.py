@@ -142,6 +142,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "to fetch its configuration",
     )
     parser.add_argument(
+        "--list-accounts",
+        action="store_true",
+        help="list the aliases of all your zulip accounts, and exit",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -483,6 +488,17 @@ def list_themes() -> str:
     )
 
 
+def list_accounts() -> str:
+    if not path.exists(CONFIG_PATH):
+        exit_with_error(f"Config folder not found at {CONFIG_PATH}.")
+    valid_accounts = [file.parent.name for file in Path(CONFIG_PATH).glob("*/zuliprc")]
+    if len(valid_accounts) == 0:
+        exit_with_error("No accounts found.")
+    return "Configurations for the following accounts are available:\n  " "\n  ".join(
+        valid_accounts
+    )
+
+
 def main(options: Optional[List[str]] = None) -> None:
     """
     Launch Zulip Terminal.
@@ -519,6 +535,10 @@ def main(options: Optional[List[str]] = None) -> None:
 
     if args.list_themes:
         print(list_themes())
+        sys.exit(0)
+
+    if args.list_accounts:
+        print(list_accounts())
         sys.exit(0)
 
     zuliprc_path = None

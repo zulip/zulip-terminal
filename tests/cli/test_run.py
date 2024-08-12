@@ -135,6 +135,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--theme THEME, -t THEME",
         "-h, --help",
         "-d, --debug",
+        "--list-accounts",
         "--list-themes",
         "--profile",
         "--config-file CONFIG_FILE, -c CONFIG_FILE",
