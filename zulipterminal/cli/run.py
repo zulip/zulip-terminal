@@ -548,7 +548,9 @@ def main(options: Optional[List[str]] = None) -> None:
             exit_with_error("Cannot use account-alias and --config-file together")
         zuliprc_path = os.path.join(CONFIG_PATH, account_alias, "zuliprc")
         if not path.exists(zuliprc_path):
-            exit_with_error(f"Account alias {account_alias} not found")
+            exit_with_error(
+                f"Account alias {account_alias} not found\n" f"{list_accounts()}"
+            )
     if args.config_file:
         zuliprc_path = args.config_file
     zuliprc_path = resolve_to_valid_path(zuliprc_path)
