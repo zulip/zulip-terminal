@@ -142,6 +142,12 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "to fetch its configuration",
     )
     parser.add_argument(
+        "-n",
+        "--new-account",
+        action="store_true",
+        help="login to a new account",
+    )
+    parser.add_argument(
         "--list-accounts",
         action="store_true",
         help="list the aliases of all your zulip accounts, and exit",
@@ -381,7 +387,7 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
+def resolve_to_valid_path(zuliprc_str: Optional[str], is_new_account: bool) -> str:
     """
     Returns the path to a valid zuliprc file.
     If a path is not provided by the user, searches the default locations.
@@ -394,12 +400,13 @@ def resolve_to_valid_path(zuliprc_str: Optional[str]) -> str:
         else path.expanduser(zuliprc_str)
     )
     while zuliprc_path is None or not path.exists(zuliprc_path):
-        print(
-            f"{in_color('red', 'zuliprc file was not found')}"
-            f"{in_color('red', f' at {zuliprc_path}')}"
-            if zuliprc_path
-            else "."
-        )
+        if not is_new_account:
+            print(
+                f"{in_color('red', 'zuliprc file was not found')}"
+                f"{in_color('red', f' at {zuliprc_path}')}"
+                if zuliprc_path
+                else "."
+            )
         try:
             zuliprc_path = login_and_save()
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
@@ -555,7 +562,7 @@ def main(options: Optional[List[str]] = None) -> None:
             )
     if args.config_file:
         zuliprc_path = args.config_file
-    zuliprc_path = resolve_to_valid_path(zuliprc_path)
+    zuliprc_path = resolve_to_valid_path(zuliprc_path, args.new_account)
 
     print(
         "Detected:"
