@@ -23,7 +23,7 @@ SCRIPT_NAME = PurePath(__file__).name
 HELP_TEXT_STYLE = re.compile(r"^[a-zA-Z /()',&@#:_-]*$")
 
 # Exclude keys from duplicate keys checking
-KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc"]
+KEYS_TO_EXCLUDE = ["q", "e", "m", "r", "Esc", "p", "n"]
 
 
 def main(fix: bool) -> None:

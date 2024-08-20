@@ -1263,6 +1263,33 @@ class HelpView(PopUpView):
 
         super().__init__(controller, widgets, "HELP", popup_width, title)
 
+        self.category_start_positions = [
+            index
+            for index, widget in enumerate(self.log)
+            if isinstance(widget, urwid.Text)
+            and widget.get_text()[1]
+            and widget.get_text()[1][0][0] == "popup_category"
+        ]
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("GO_TO_NEXT_TITLE", key):
+            focus_position = self.log.get_focus()[1]
+            last_visible_position = focus_position + size[1] - 1  # type: ignore[misc]
+            last_help_entry = len(self.log) - 1
+            if last_help_entry > last_visible_position:
+                for category_start_position in self.category_start_positions:
+                    if category_start_position > focus_position:
+                        self.log.set_focus(category_start_position)
+                        break
+
+        elif is_command_key("GO_TO_PREVIOUS_TITLE", key):
+            focus_position = self.log.get_focus()[1]
+            for category_start_position in reversed(self.category_start_positions):
+                if category_start_position < focus_position:
+                    self.log.set_focus(category_start_position)
+                    break
+        return super().keypress(size, key)
+
 
 class MarkdownHelpView(PopUpView):
     def __init__(self, controller: Any, title: str) -> None:

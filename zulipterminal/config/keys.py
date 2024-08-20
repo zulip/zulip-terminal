@@ -101,6 +101,18 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Trigger the selected entry',
         'key_category': 'navigation',
     },
+    'GO_TO_PREVIOUS_TITLE': {
+        'keys': ['p'],
+        'help_text': 'Go to previous help category',
+        'key_category': 'navigation',
+        'excluded_from_random_tips': True,
+    },
+    'GO_TO_NEXT_TITLE': {
+        'keys': ['n'],
+        'help_text': 'Go to next help category',
+        'key_category': 'navigation',
+        'excluded_from_random_tips': True,
+    },
     'REPLY_MESSAGE': {
         'keys': ['r', 'enter'],
         'help_text': 'Reply to the current message',
