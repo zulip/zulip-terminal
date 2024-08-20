@@ -327,6 +327,53 @@ class UserButton(TopButton):
         return super().keypress(size, key)
 
 
+class SpoilerButton(urwid.Button):
+    def __init__(
+        self,
+        controller: Any,
+        header_len: int,
+        header: List[Any],
+        content: List[Any],
+        message: Message,
+        topic_links: Dict[str, Tuple[str, int, bool, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
+        time_mentions: List[Tuple[str, str]],
+        spoilers: List[Tuple[int, List[Any], List[Any]]],
+        display_attr: Optional[str],
+    ) -> None:
+        self.controller = controller
+        self.content = content
+        self.message = message
+        self.topic_links = topic_links
+        self.message_links = message_links
+        self.time_mentions = time_mentions
+        self.spoilers = spoilers
+
+        super().__init__("")
+        self.update_widget(header_len, header, display_attr)
+        urwid.connect_signal(self, "click", callback=self.show_spoiler)
+
+    def update_widget(
+        self, header_len: int, header: List[Any], display_attr: Optional[str] = None
+    ) -> None:
+        """
+        Overrides the existing button widget for custom styling.
+        """
+        # Set cursor position next to header_len to avoid the cursor.
+        icon = urwid.SelectableIcon(header, cursor_position=header_len + 1)
+        self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+
+    def show_spoiler(self, *_: Any) -> None:
+        self.controller.show_spoiler(
+            self.content,
+            self.message,
+            self.topic_links,
+            self.message_links,
+            self.time_mentions,
+            self.spoilers,
+        )
+
+
 class TopicButton(TopButton):
     def __init__(
         self,

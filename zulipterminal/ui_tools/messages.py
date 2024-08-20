@@ -31,7 +31,7 @@ from zulipterminal.config.symbols import (
 from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
 from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
-from zulipterminal.ui_tools.tables import render_table
+from zulipterminal.ui_tools.tables import render_table, row_with_only_border
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
 
@@ -60,9 +60,10 @@ class MessageBox(urwid.Pile):
         self.topic_name = ""
         self.email = ""  # FIXME: Can we remove this?
         self.user_id: Optional[int] = None
-        self.message_links: Dict[str, Tuple[str, int, bool]] = dict()
-        self.topic_links: Dict[str, Tuple[str, int, bool]] = dict()
+        self.message_links: Dict[str, Tuple[str, int, bool, bool]] = dict()
+        self.topic_links: Dict[str, Tuple[str, int, bool, bool]] = dict()
         self.time_mentions: List[Tuple[str, str]] = list()
+        self.spoilers: List[Tuple[int, List[Any], List[Any]]] = list()
         self.last_message = last_message
         # if this is the first message
         if self.last_message is None:
@@ -76,6 +77,7 @@ class MessageBox(urwid.Pile):
                     link["text"],
                     len(self.topic_links) + 1,
                     True,
+                    False,
                 )
 
             self.stream_name = self.message["display_recipient"]
@@ -313,7 +315,7 @@ class MessageBox(urwid.Pile):
 
     @staticmethod
     def footlinks_view(
-        message_links: Dict[str, Tuple[str, int, bool]],
+        message_links: Dict[str, Tuple[str, int, bool, bool]],
         *,
         maximum_footlinks: int,
         padded: bool,
@@ -330,7 +332,7 @@ class MessageBox(urwid.Pile):
         footlinks = []
         counter = 0
         footlinks_width = 0
-        for link, (text, index, show_footlink) in message_links.items():
+        for link, (text, index, show_footlink, spoiler_link) in message_links.items():
             if counter == maximum_footlinks:
                 break
             if not show_footlink:
@@ -371,12 +373,22 @@ class MessageBox(urwid.Pile):
     @classmethod
     def soup2markup(
         cls, soup: Any, metadata: Dict[str, Any], **state: Any
-    ) -> Tuple[List[Any], Dict[str, Tuple[str, int, bool]], List[Tuple[str, str]]]:
+    ) -> Tuple[
+        List[Any],
+        Dict[str, Tuple[str, int, bool, bool]],
+        List[Tuple[str, str]],
+        List[Tuple[int, List[Any], List[Any]]],
+    ]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
         markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
         if soup is None:  # This is not iterable, so return promptly
-            return markup, metadata["message_links"], metadata["time_mentions"]
+            return (
+                markup,
+                metadata["message_links"],
+                metadata["time_mentions"],
+                metadata["spoilers"],
+            )
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             "br": "",  # No indicator of absence
@@ -493,24 +505,34 @@ class MessageBox(urwid.Pile):
                         # to represent the link.
                         show_footlink = False
 
+                spoiler_link = False
+                if element.find_parent("div", class_="spoiler-block"):
+                    show_footlink = False
+                    spoiler_link = True
+
                 # Detect duplicate links to save screen real estate.
                 if link not in metadata["message_links"]:
                     metadata["message_links"][link] = (
                         text,
                         len(metadata["message_links"]) + 1,
                         show_footlink,
+                        spoiler_link,
                     )
                 else:
                     # Append the text if its link already exist with a
                     # different text.
-                    saved_text, saved_link_index, saved_footlink_status = metadata[
-                        "message_links"
-                    ][link]
+                    (
+                        saved_text,
+                        saved_link_index,
+                        saved_footlink_status,
+                        spoiler_link,
+                    ) = metadata["message_links"][link]
                     if saved_text != text:
                         metadata["message_links"][link] = (
                             f"{saved_text}, {text}",
                             saved_link_index,
                             show_footlink or saved_footlink_status,
+                            spoiler_link,
                         )
 
                 markup.extend(
@@ -632,9 +654,76 @@ class MessageBox(urwid.Pile):
 
                 source_text = f"Original text was {tag_text.strip()}"
                 metadata["time_mentions"].append((time_string, source_text))
+            elif tag == "div" and "spoiler-block" in tag_classes:
+                # SPOILERS
+                header = element.find(class_="spoiler-header")
+                header.contents = [part for part in header.contents if part != "\n"]
+
+                if not header.contents:
+                    default = BeautifulSoup("<p>Spoiler</p>", "html.parser")
+                    header.contents.append(default)
+
+                processed_header = cls.soup2markup(header, metadata)[0]
+
+                processed_header_text = "".join(
+                    part[1] if isinstance(part, tuple) else part
+                    for part in processed_header
+                )
+                header_len = sum(
+                    len(part[1]) if isinstance(part, tuple) else len(part)
+                    for part in processed_header
+                )
+
+                # Limit to the first 10 characters and append "..."
+                if len(processed_header_text) > 10:
+                    processed_header_text = processed_header_text[:10] + "..."
+
+                processed_header_len = len(processed_header_text)
+                marker = "Spoiler:"
+
+                widths = [len(marker), processed_header_len]
+                top_border = row_with_only_border("┌", "─", "┬", "┐", widths)
+                bottom_border = row_with_only_border(
+                    "└", "─", "┴", "┘", widths, newline=False
+                )
+                markup.extend(top_border)
+                markup.extend(
+                    [
+                        "│ ",
+                        ("msg_spoiler", marker),
+                        " │ ",
+                        processed_header_text,
+                        " │\n",
+                    ]
+                )
+                markup.extend(bottom_border)
+                # Spoiler content
+                content = element.find(class_="spoiler-content")
+
+                # Remove surrounding newlines.
+                content_contents = content.contents
+                if len(content_contents) > 2:
+                    if content_contents[-1] == "\n":
+                        content.contents.pop(-1)
+                    if content_contents[0] == "\n":
+                        content.contents.pop(0)
+                if len(content_contents) == 1 and content_contents[0] == "\n":
+                    content.contents.pop(0)
+
+                # FIXME: Do not soup2markup content in the MessageBox as it
+                # will render 'sensitive' spoiler anchor tags in the footlinks.
+                processed_content = cls.soup2markup(content, metadata)[0]
+                metadata["spoilers"].append(
+                    (header_len, processed_header, processed_content)
+                )
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
-        return markup, metadata["message_links"], metadata["time_mentions"]
+        return (
+            markup,
+            metadata["message_links"],
+            metadata["time_mentions"],
+            metadata["spoilers"],
+        )
 
     def main_view(self) -> List[Any]:
         # Recipient Header
@@ -730,9 +819,12 @@ class MessageBox(urwid.Pile):
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
-        )
+        (
+            content,
+            self.message_links,
+            self.time_mentions,
+            self.spoilers,
+        ) = self.transform_content(self.message["content"], self.model.server_url)
         self.content.set_text(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
@@ -817,8 +909,9 @@ class MessageBox(urwid.Pile):
         cls, content: Any, server_url: str
     ) -> Tuple[
         Tuple[None, Any],
-        Dict[str, Tuple[str, int, bool]],
+        Dict[str, Tuple[str, int, bool, bool]],
         List[Tuple[str, str]],
+        List[Tuple[int, List[Any], List[Any]]],
     ]:
         soup = BeautifulSoup(content, "lxml")
         body = soup.find(name="body")
@@ -827,13 +920,14 @@ class MessageBox(urwid.Pile):
             server_url=server_url,
             message_links=dict(),
             time_mentions=list(),
+            spoilers=list(),
         )  # type: Dict[str, Any]
 
         if isinstance(body, Tag) and body.find(name="blockquote"):
             metadata["bq_len"] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
-        markup, message_links, time_mentions = cls.soup2markup(body, metadata)
-        return (None, markup), message_links, time_mentions
+        markup, message_links, time_mentions, spoilers = cls.soup2markup(body, metadata)
+        return (None, markup), message_links, time_mentions, spoilers
 
     @staticmethod
     def indent_quoted_content(soup: Any, padding_char: str) -> int:
@@ -1121,7 +1215,11 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
-                self.message, self.topic_links, self.message_links, self.time_mentions
+                self.message,
+                self.topic_links,
+                self.message_links,
+                self.time_mentions,
+                self.spoilers,
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
