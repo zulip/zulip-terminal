@@ -19,7 +19,6 @@ import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
-from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
@@ -42,6 +41,7 @@ from zulipterminal.ui_tools.views import (
     MsgInfoView,
     NoticeView,
     PopUpConfirmationView,
+    PopUpFrame,
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
@@ -226,23 +226,21 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
-        text = urwid.Text(to_show.title, align="center")
-        title_map = urwid.AttrMap(urwid.Filler(text), style)
-        title_box_adapter = urwid.BoxAdapter(title_map, height=1)
-        title_top = urwid.AttrMap(urwid.Divider(POPUP_TOP_LINE), "popup_border")
-        title = urwid.Pile([title_top, title_box_adapter])
-
-        content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
+        if to_show.title is not None:
+            # +2 to height, due to title enhancement
+            # TODO: Ideally this would be in PopUpFrame
+            extra_height = 2
+        else:
+            extra_height = 0
 
         self.loop.widget = urwid.Overlay(
-            urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
+            PopUpFrame(to_show, to_show.title, style),
             self.view,
             align="center",
             valign="middle",
             # +2 to both of the following, due to LineBox
-            # +2 to height, due to title enhancement
             width=to_show.width + 2,
-            height=to_show.height + 4,
+            height=to_show.height + 2 + extra_height,
         )
 
     def is_any_popup_open(self) -> bool:
@@ -499,9 +497,8 @@ class Controller:
                 "?",
             ]
         )
-        self.loop.widget = PopUpConfirmationView(
-            self, question, callback, location="center"
-        )
+        popup = PopUpConfirmationView(self, question, callback)
+        self.show_pop_up(popup, "area:msg")
 
     def search_messages(self, text: str) -> None:
         # Search for a text in messages
@@ -528,9 +525,9 @@ class Controller:
             "center",
         )
         save_draft = partial(self.model.save_draft, draft)
-        self.loop.widget = PopUpConfirmationView(
-            self, question, save_draft, location="center"
-        )
+
+        popup = PopUpConfirmationView(self, question, save_draft)
+        self.show_pop_up(popup, "area:msg")
 
     def stream_muting_confirmation_popup(
         self, stream_id: int, stream_name: str
@@ -542,7 +539,8 @@ class Controller:
             "center",
         )
         mute_this_stream = partial(self.model.toggle_stream_muted_status, stream_id)
-        self.loop.widget = PopUpConfirmationView(self, question, mute_this_stream)
+        popup = PopUpConfirmationView(self, question, mute_this_stream)
+        self.show_pop_up(popup, "area:msg")
 
     def exit_compose_confirmation_popup(self) -> None:
         question = urwid.Text(
@@ -554,10 +552,9 @@ class Controller:
             "center",
         )
         write_box = self.view.write_box
-        popup_view = PopUpConfirmationView(
-            self, question, write_box.exit_compose_box, location="center"
-        )
-        self.loop.widget = popup_view
+
+        popup_view = PopUpConfirmationView(self, question, write_box.exit_compose_box)
+        self.show_pop_up(popup_view, "area:msg")
 
     def copy_to_clipboard(self, text: str, text_category: str) -> None:
         try:
@@ -672,11 +669,10 @@ class Controller:
             ("bold", " Please confirm that you wish to exit Zulip-Terminal "),
             "center",
         )
-        popup_view = PopUpConfirmationView(
-            self, question, self.deregister_client, location="center"
-        )
-        self.loop.widget = popup_view
-        self.loop.run()
+
+        popup_view = PopUpConfirmationView(self, question, self.deregister_client)
+        self.show_pop_up(popup_view, "area:msg")
+        self.loop.run()  # Appears necessary to return control from signal handler
 
     def _raise_exception(self, *args: Any, **kwargs: Any) -> Literal[True]:
         if self._exception_info is not None:
