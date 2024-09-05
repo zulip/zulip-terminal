@@ -6,7 +6,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
-from zulipterminal.api_types import Message
+from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, Message
 from zulipterminal.config.keys import is_command_key, keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
@@ -26,6 +26,7 @@ from zulipterminal.ui_tools.views import (
     PopUpView,
     StreamInfoView,
     StreamMembersView,
+    TopicInfoView,
     UserInfoView,
 )
 from zulipterminal.urwid_types import urwid_Size
@@ -1602,6 +1603,52 @@ class TestStreamInfoView:
         visual_notify_checkbox.keypress(size, key)
 
         toggle_visual_notify_status.assert_called_once_with(stream_id)
+
+
+class TestTopicInfoView:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(
+        self, mocker: MockerFixture, general_stream: Dict[str, Any], topics: List[str]
+    ) -> None:
+        self.controller = mocker.Mock()
+
+        mocker.patch.object(
+            self.controller, "maximum_popup_dimensions", return_value=(64, 64)
+        )
+        mocker.patch(LISTWALKER, return_value=[])
+        self.stream_id = general_stream["stream_id"]
+        self.topic = topics[0]
+        self.controller.model.stream_dict = {self.stream_id: general_stream}
+
+        self.topic_info_view = TopicInfoView(
+            self.controller, self.stream_id, self.topic
+        )
+
+    @pytest.mark.parametrize(
+        "topic_name, expected_topic_button_label",
+        [
+            ("hi!", "Resolve Topic"),
+            (f"{RESOLVED_TOPIC_PREFIX}" + "hi!", "Unresolve Topic"),
+        ],
+    )
+    def test_topic_button_label(
+        self, topic_name: str, expected_topic_button_label: str
+    ) -> None:
+        topic_info_view = TopicInfoView(self.controller, self.stream_id, topic_name)
+        assert (
+            topic_info_view.resolve_topic_setting_button_label
+            == expected_topic_button_label
+        )
+
+    def test_toggle_resolve_status(self) -> None:
+        resolve_button = self.topic_info_view.widgets[-1]
+        resolve_button._emit("click")
+
+        self.controller.model.toggle_topic_resolve_status.assert_called_once_with(
+            stream_id=self.stream_id, topic_name=self.topic
+        )
+
+        self.controller.exit_popup.assert_called_once()
 
 
 class TestStreamMembersView:
