@@ -30,6 +30,7 @@ def main(fix: bool) -> None:
     if fix:
         generate_hotkeys_file()
     else:
+        lint_help_categories()
         lint_hotkeys_file()
 
 
@@ -78,6 +79,22 @@ def lint_hotkeys_file() -> None:
             )
             error_flag = 1
     sys.exit(error_flag)
+
+
+def lint_help_categories() -> None:
+    """
+    Check if HELP_CATEGORIES contains all key categories
+    """
+    missing_categories = [
+        binding["key_category"]
+        for binding in KEY_BINDINGS.values()
+        if binding["key_category"] not in HELP_CATEGORIES
+    ]
+    if missing_categories:
+        print(
+            f"Missing categories in HELP_CATEGORIES (keys.py file): {missing_categories}"
+        )
+        sys.exit(1)
 
 
 def generate_hotkeys_file() -> None:
