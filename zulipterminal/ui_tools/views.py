@@ -726,6 +726,8 @@ class RightColumnView(urwid.Frame):
 
         users_btn_list = list()
         for user in users:
+            if self.view.model.is_muted_user(user["user_id"]):
+                continue
             status = user["status"]
             # Only include `inactive` users in search result.
             if status == "inactive" and not self.view.controller.is_in_editor_mode():
