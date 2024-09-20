@@ -776,6 +776,7 @@ class TestMessageBox:
                 "reactions": [],
                 "sender_full_name": "Alice",
                 "timestamp": 1532103879,
+                "sender_id": 32900,
             }
         ],
     )
@@ -814,6 +815,7 @@ class TestMessageBox:
                 "reactions": [],
                 "sender_full_name": "Alice",
                 "timestamp": 1532103879,
+                "sender_id": 32900,
             }
         ],
     )
@@ -867,6 +869,7 @@ class TestMessageBox:
                 "reactions": [],
                 "sender_full_name": "Alice",
                 "timestamp": 1532103879,
+                "sender_id": 32900,
             },
         ],
     )
@@ -1057,6 +1060,7 @@ class TestMessageBox:
                 "reactions": [],
                 "sender_full_name": "alice",
                 "timestamp": 1532103879,
+                "sender_id": 32900,
             }
         ],
     )
@@ -1116,6 +1120,8 @@ class TestMessageBox:
         last_msg = dict(message, **all_to_vary)
 
         msg_box = MessageBox(this_msg, self.model, last_msg)
+
+        self.model.is_muted_user.return_value = False
 
         expected_header[2] = output_date_time
         if current_year > 2018:
