@@ -957,6 +957,9 @@ class Model:
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
+    def is_muted_user(self, user_id: int) -> bool:
+        return user_id in self._muted_users
+
     def stream_topic_from_message_id(
         self, message_id: int
     ) -> Optional[Tuple[int, str]]:

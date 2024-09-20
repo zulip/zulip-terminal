@@ -4113,6 +4113,17 @@ class TestModel:
         assert return_value == is_muted
 
     @pytest.mark.parametrize(
+        "user, is_muted",
+        [
+            case(1, False, id="unmuted_user"),
+            case(2, True, id="muted_user"),
+        ],
+    )
+    def test_is_muted_user(self, user, is_muted, model):
+        model._muted_users = {2}
+        assert model.is_muted_user(user) == is_muted
+
+    @pytest.mark.parametrize(
         "unread_topics, current_topic, next_unread_topic",
         [
             case(
