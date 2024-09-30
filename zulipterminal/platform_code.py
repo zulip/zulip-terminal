@@ -112,3 +112,19 @@ def normalized_file_path(path: str) -> str:
         return path.replace("/", "\\")
 
     return path
+
+
+def process_media_tool() -> str:
+    """
+    Returns the media tool command as per platform.
+    """
+    if PLATFORM == "WSL":
+        tool = "explorer.exe"
+    elif PLATFORM == "Linux":
+        tool = "xdg-open"
+    elif PLATFORM == "MacOS":
+        tool = "open"
+    else:
+        tool = "invalid"
+
+    return tool
