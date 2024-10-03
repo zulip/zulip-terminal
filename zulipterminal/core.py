@@ -714,10 +714,13 @@ class Controller:
                     "* an issue at "
                     "https://github.com/zulip/zulip-terminal/issues"
                     "\n\n"
-                    f"Details of the exception can be found in {exception_logfile}"
-                    "\n\n"
-                    f"Press [{primary_display_key_for_command('COPY_TRACEBACK')}]"
-                    " to copy traceback to clipboard."
+                    "When reporting, it would be helpful to provide details of the "
+                    "exception beyond the quick summary above, which you can obtain:"
+                    "\n"
+                    f"* from the end of '{exception_logfile}'"
+                    "\n"
+                    "* by copying the details to the clipboard now "
+                    f"(press [{primary_display_key_for_command('COPY_TRACEBACK')}])"
                 )
                 full_traceback = "".join(traceback.format_exception(*exc))
                 self.show_exception_popup(message, traceback=full_traceback, width=80)
