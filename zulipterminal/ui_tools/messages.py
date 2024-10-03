@@ -33,6 +33,7 @@ from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
+from zulipterminal.widget import find_widget_type
 
 
 if typing.TYPE_CHECKING:
@@ -727,6 +728,11 @@ class MessageBox(urwid.Pile):
         if self.message["is_me_message"]:
             self.message["content"] = self.message["content"].replace(
                 "/me", f"<strong>{self.message['sender_full_name']}</strong>", 1
+            )
+
+        if self.message.get("submessages"):
+            widget_type = find_widget_type(  # noqa: F841
+                self.message.get("submessages")
             )
 
         # Transform raw message content into markup (As needed by urwid.Text)
