@@ -9,6 +9,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from zulip import Client, ZulipError
 
+from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
@@ -1359,6 +1360,200 @@ class TestModel:
             report_error.assert_not_called()
         else:
             report_error.assert_called_once_with(expected_response[user_type][0])
+
+    @pytest.mark.parametrize(
+        "topic_name, latest_message_timestamp, server_feature_level,"
+        " topic_editing_limit_seconds, move_messages_within_stream_limit_seconds,"
+        " expected_new_topic_name",
+        [
+            case(
+                "hi!",
+                11662271397,
+                0,
+                None,
+                None,
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                id="topic_resolved:Zulip2.1+:ZFL0",
+            ),
+            case(
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                11662271397,
+                0,
+                None,
+                None,
+                "hi!",
+                id="topic_unresolved:Zulip2.1+:ZFL0",
+            ),
+            case(
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                11662271397,
+                10,
+                86400,
+                None,
+                "hi!",
+                id="topic_unresolved:Zulip2.1+:ZFL10",
+            ),
+            case(
+                "hi!",
+                11662271397,
+                12,
+                259200,
+                None,
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                id="topic_resolved:Zulip2.1+:ZFL12",
+            ),
+            case(
+                "hi!",
+                11662271397,
+                162,
+                86400,
+                86400,
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                id="topic_resolved:Zulip7.0+:ZFL162",
+            ),
+            case(
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                11662271397,
+                162,
+                259200,
+                259200,
+                "hi!",
+                id="topic_unresolved:Zulip7.0+:ZFL162",
+            ),
+            case(
+                "hi!",
+                11662271397,
+                184,
+                259200,
+                259200,
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                id="topic_unresolved:Zulip7.0+:ZFL184",
+            ),
+            case(
+                RESOLVED_TOPIC_PREFIX + "hi!",
+                11662271397,
+                184,
+                259200,
+                259200,
+                "hi!",
+                id="topic_unresolved:Zulip7.0+:ZFL184",
+            ),
+        ],
+    )
+    def test_toggle_topic_resolve_status_no_footer_error(
+        self,
+        mocker,
+        model,
+        initial_data,
+        topic_name,
+        latest_message_timestamp,
+        server_feature_level,
+        topic_editing_limit_seconds,
+        move_messages_within_stream_limit_seconds,
+        expected_new_topic_name,
+        stream_id=1,
+        message_id=1,
+    ):
+        model.initial_data = initial_data
+        model.server_feature_level = server_feature_level
+        initial_data[
+            "realm_community_topic_editing_limit_seconds"
+        ] = topic_editing_limit_seconds
+        initial_data[
+            "realm_move_messages_within_stream_limit_seconds"
+        ] = move_messages_within_stream_limit_seconds
+        # If user can't edit topic, topic (un)resolve is disabled. Therefore,
+        # default return_value=True
+        model.can_user_edit_topic = mocker.Mock(return_value=True)
+        model.get_latest_message_in_topic = mocker.Mock(
+            return_value={
+                "subject": topic_name,
+                "timestamp": latest_message_timestamp,
+                "id": message_id,
+            }
+        )
+        model.update_stream_message = mocker.Mock(return_value={"result": "success"})
+
+        model.toggle_topic_resolve_status(stream_id, topic_name)
+
+        model.update_stream_message.assert_called_once_with(
+            message_id=message_id,
+            topic=expected_new_topic_name,
+            propagate_mode="change_all",
+        )
+
+    @pytest.mark.parametrize(
+        "topic_name, latest_message_timestamp, server_feature_level,"
+        " topic_editing_limit_seconds, move_messages_within_stream_limit_seconds,"
+        " expected_footer_error,",
+        [
+            case(
+                "hi!",
+                0,
+                12,
+                86400,
+                None,
+                " Time limit for editing topic has been exceeded.",
+                id="time_limit_exceeded:Zulip2.1+:ZFL12",
+            ),
+            case(
+                "hi!",
+                0,
+                162,
+                259200,
+                259200,
+                " Time limit for editing topic has been exceeded.",
+                id="time_limit_exceeded:Zulip7.0+:ZFL162",
+            ),
+            case(
+                "hi!",
+                0,
+                184,
+                None,
+                86400,
+                " Time limit for editing topic has been exceeded.",
+                id="topic_resolved:Zulip2.1+:ZFL184",
+            ),
+        ],
+    )
+    def test_toggle_topic_resolve_status_footer_error(
+        self,
+        mocker,
+        model,
+        initial_data,
+        topic_name,
+        latest_message_timestamp,
+        server_feature_level,
+        topic_editing_limit_seconds,
+        move_messages_within_stream_limit_seconds,
+        expected_footer_error,
+        stream_id=1,
+        message_id=1,
+    ):
+        model.initial_data = initial_data
+        model.server_feature_level = server_feature_level
+        initial_data[
+            "realm_community_topic_editing_limit_seconds"
+        ] = topic_editing_limit_seconds
+        initial_data[
+            "realm_move_messages_within_stream_limit_seconds"
+        ] = move_messages_within_stream_limit_seconds
+        # If user can't edit topic, topic (un)resolve is disabled. Therefore,
+        # default return_value=True
+        model.can_user_edit_topic = mocker.Mock(return_value=True)
+        model.get_latest_message_in_topic = mocker.Mock(
+            return_value={
+                "subject": topic_name,
+                "timestamp": latest_message_timestamp,
+                "id": message_id,
+            }
+        )
+        model.update_stream_message = mocker.Mock(return_value={"result": "success"})
+        report_error = model.controller.report_error
+
+        model.toggle_topic_resolve_status(stream_id, topic_name)
+
+        report_error.assert_called_once_with(expected_footer_error)
 
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(
