@@ -46,6 +46,7 @@ from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    CodeSnippetButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
@@ -1441,7 +1442,7 @@ class StreamInfoView(PopUpView):
 
         title = f"{stream_marker} {stream['name']}"
         rendered_desc = stream["rendered_description"]
-        self.markup_desc, message_links, _ = MessageBox.transform_content(
+        self.markup_desc, message_links, _, _ = MessageBox.transform_content(
             rendered_desc,
             self.controller.model.server_url,
         )
@@ -1595,11 +1596,13 @@ class MsgInfoView(PopUpView):
         title: str,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
     ) -> None:
         self.msg = msg
         self.topic_links = topic_links
         self.message_links = message_links
+        self.code_snippets = code_snippets
         self.time_mentions = time_mentions
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
@@ -1656,6 +1659,8 @@ class MsgInfoView(PopUpView):
             msg_info.append(("Topic Links", []))
         if time_mentions:
             msg_info.append(("Time mentions", time_mentions))
+        if code_snippets:
+            msg_info.append(("Code Snippets", []))
         if msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
@@ -1709,6 +1714,21 @@ class MsgInfoView(PopUpView):
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)
 
+        if code_snippets:
+            (
+                code_snippets_widgets,
+                code_snippets_width,
+            ) = self.create_code_snippet_buttons(controller, code_snippets)
+            # slice_index = Number of labels before code snippets + 1 newline
+            #               + 1 'Code Snippets' category label.
+            slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
+            slice_index += sum([len(w) + 2 for w in self.button_widgets])
+            self.button_widgets.append(code_snippets)
+            widgets = (
+                widgets[:slice_index] + code_snippets_widgets + widgets[slice_index:]
+            )
+            popup_width = max(popup_width, code_snippets_width)
+
         super().__init__(controller, widgets, "MSG_INFO", popup_width, title)
 
     @staticmethod
@@ -1738,12 +1758,48 @@ class MsgInfoView(PopUpView):
 
         return link_widgets, link_width
 
+    def create_code_snippet_buttons(
+        self, controller: Any, code_snippets: List[Tuple[str, List[Tuple[str, str]]]]
+    ) -> Tuple[List[Any], int]:
+        code_snippet_widgets = []
+        code_snippet_width = 0
+
+        for index, snippet in enumerate(code_snippets):
+            language, snippet_list = snippet
+            language = "" if language is None else language
+            display_code, copy_code = CodeSnippetButton.get_code_from_snippet(
+                self, snippet_list
+            )
+            if display_code:
+                code_snippet_width = max(
+                    code_snippet_width, len(max(display_code, key=len))
+                )
+            caption = f"{str(index+1)}: {language}\n"
+
+            display_attr = None if index % 2 else "popup_contrast"
+            display_code = [("pygments:w", caption)] + display_code
+            code_snippet_widgets.append(
+                CodeSnippetButton(
+                    controller=controller,
+                    caption=caption,
+                    display_code=display_code,
+                    copy_code=copy_code,
+                    display_attr=display_attr,
+                )
+            )
+            code = caption + str(snip[1] for snip in snippet_list)
+            code_snippet_width = max(
+                code_snippet_width, len(max(code.split("\n"), key=len))
+            )
+        return code_snippet_widgets, code_snippet_width
+
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
             self.controller.show_edit_history(
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
         elif is_command_key("VIEW_IN_BROWSER", key):
@@ -1754,6 +1810,7 @@ class MsgInfoView(PopUpView):
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
             return key
@@ -1762,6 +1819,7 @@ class MsgInfoView(PopUpView):
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
             return key
@@ -1815,6 +1873,7 @@ class EditHistoryView(PopUpView):
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1822,6 +1881,7 @@ class EditHistoryView(PopUpView):
         self.message = message
         self.topic_links = topic_links
         self.message_links = message_links
+        self.code_snippets = code_snippets
         self.time_mentions = time_mentions
         width = 64
         widgets: List[Any] = []
@@ -1920,6 +1980,7 @@ class EditHistoryView(PopUpView):
                 msg=self.message,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
             return key
@@ -1933,6 +1994,7 @@ class FullRenderedMsgView(PopUpView):
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1940,6 +2002,7 @@ class FullRenderedMsgView(PopUpView):
         self.message = message
         self.topic_links = topic_links
         self.message_links = message_links
+        self.code_snippets = code_snippets
         self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
@@ -1964,6 +2027,7 @@ class FullRenderedMsgView(PopUpView):
                 msg=self.message,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
             return key
@@ -1977,6 +2041,7 @@ class FullRawMsgView(PopUpView):
         message: Message,
         topic_links: Dict[str, Tuple[str, int, bool]],
         message_links: Dict[str, Tuple[str, int, bool]],
+        code_snippets: List[Tuple[str, List[Tuple[str, str]]]],
         time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
@@ -1984,6 +2049,7 @@ class FullRawMsgView(PopUpView):
         self.message = message
         self.topic_links = topic_links
         self.message_links = message_links
+        self.code_snippets = code_snippets
         self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
@@ -2014,6 +2080,7 @@ class FullRawMsgView(PopUpView):
                 msg=self.message,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
+                code_snippets=self.code_snippets,
                 time_mentions=self.time_mentions,
             )
             return key
