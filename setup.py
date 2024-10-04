@@ -105,7 +105,7 @@ setup(
     },
     tests_require=testing_deps,
     install_requires=[
-        "urwid~=2.1.2",
+        "urwid~=2.6.15",
         "zulip>=0.8.2",
         "urwid_readline>=0.13",
         "beautifulsoup4>=4.11.1",
