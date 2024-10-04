@@ -36,6 +36,7 @@ from zulipterminal.config.ui_mappings import (
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
+    MessageInfoPopupContent,
     TidiedUserInfo,
     asynch,
     match_emoji,
@@ -959,12 +960,14 @@ class PopUpView(urwid.Frame):
         title: str,
         header: Optional[Any] = None,
         footer: Optional[Any] = None,
+        command_full_exit: Optional[str] = None,
     ) -> None:
         self.controller = controller
         self.command = command
         self.title = title
         self.log = urwid.SimpleFocusListWalker(body)
         self.body = urwid.ListBox(self.log)
+        self.command_full_exit = command_full_exit
 
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
@@ -1060,7 +1063,8 @@ class PopUpView(urwid.Frame):
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EXIT_POPUP", key) or is_command_key(self.command, key):
             self.controller.exit_popup()
-
+        elif self.command_full_exit and is_command_key(self.command_full_exit, key):
+            self.controller.exit_all_popups()
         return super().keypress(size, key)
 
 
@@ -1593,17 +1597,15 @@ class MsgInfoView(PopUpView):
         controller: Any,
         msg: Message,
         title: str,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
+        message_info_content: MessageInfoPopupContent,
     ) -> None:
         self.msg = msg
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
+        self.topic_links = message_info_content["topic_links"]
+        self.message_links = message_info_content["message_links"]
+        self.time_mentions = message_info_content["time_mentions"]
         self.server_url = controller.model.server_url
         date_and_time = controller.model.formatted_local_time(
-            msg["timestamp"], show_seconds=True, show_year=True
+            self.msg["timestamp"], show_seconds=True, show_year=True
         )
         view_in_browser_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("VIEW_IN_BROWSER")))
@@ -1620,8 +1622,8 @@ class MsgInfoView(PopUpView):
                 "",
                 [
                     ("Date & Time", date_and_time),
-                    ("Sender", msg["sender_full_name"]),
-                    ("Sender's Email ID", msg["sender_email"]),
+                    ("Sender", self.msg["sender_full_name"]),
+                    ("Sender's Email ID", self.msg["sender_email"]),
                 ],
             )
         ]
@@ -1650,13 +1652,13 @@ class MsgInfoView(PopUpView):
             )
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
-        if message_links:
+        if self.message_links:
             msg_info.append(("Message Links", []))
-        if topic_links:
+        if self.topic_links:
             msg_info.append(("Topic Links", []))
-        if time_mentions:
-            msg_info.append(("Time mentions", time_mentions))
-        if msg["reactions"]:
+        if self.time_mentions:
+            msg_info.append(("Time mentions", self.time_mentions))
+        if self.msg["reactions"]:
             reactions = sorted(
                 (reaction["emoji_name"], reaction["user"]["full_name"])
                 for reaction in msg["reactions"]
@@ -1676,9 +1678,9 @@ class MsgInfoView(PopUpView):
         # computing their slice indexes
         self.button_widgets: List[Any] = []
 
-        if message_links:
+        if self.message_links:
             message_link_widgets, message_link_width = self.create_link_buttons(
-                controller, message_links
+                controller, self.message_links
             )
 
             # slice_index = Number of labels before message links + 1 newline
@@ -1687,16 +1689,16 @@ class MsgInfoView(PopUpView):
             slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
 
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
-            self.button_widgets.append(message_links)
+            self.button_widgets.append(self.message_links)
 
             widgets = (
                 widgets[:slice_index] + message_link_widgets + widgets[slice_index:]
             )
             popup_width = max(popup_width, message_link_width)
 
-        if topic_links:
+        if self.topic_links:
             topic_link_widgets, topic_link_width = self.create_link_buttons(
-                controller, topic_links
+                controller, self.topic_links
             )
 
             # slice_index = Number of labels before topic links + 1 newline
@@ -1704,7 +1706,7 @@ class MsgInfoView(PopUpView):
             #               + 2 for Viewing Actions category label and its newline
             slice_index = len(msg_info[0][1]) + len(msg_info[1][1]) + 2 + 2
             slice_index += sum([len(w) + 2 for w in self.button_widgets])
-            self.button_widgets.append(topic_links)
+            self.button_widgets.append(self.topic_links)
 
             widgets = widgets[:slice_index] + topic_link_widgets + widgets[slice_index:]
             popup_width = max(popup_width, topic_link_width)
@@ -1740,30 +1742,15 @@ class MsgInfoView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
-            self.controller.show_edit_history(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_edit_history(message=self.msg)
         elif is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
             self.controller.open_in_browser(url)
         elif is_command_key("FULL_RENDERED_MESSAGE", key):
-            self.controller.show_full_rendered_message(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_full_rendered_message(message=self.msg)
             return key
         elif is_command_key("FULL_RAW_MESSAGE", key):
-            self.controller.show_full_raw_message(
-                message=self.msg,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
+            self.controller.show_full_raw_message(message=self.msg)
             return key
         return super().keypress(size, key)
 
@@ -1813,16 +1800,10 @@ class EditHistoryView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         width = 64
         widgets: List[Any] = []
 
@@ -1849,7 +1830,14 @@ class EditHistoryView(PopUpView):
             ]
             widgets.append(urwid.Text(feedback, align="center"))
 
-        super().__init__(controller, widgets, "MSG_INFO", width, title)
+        super().__init__(
+            controller,
+            widgets,
+            "EDIT_HISTORY",
+            width,
+            title,
+            command_full_exit="MSG_INFO",
+        )
 
     def _make_edit_block(self, snapshot: Dict[str, Any], tag: EditHistoryTag) -> Any:
         content = snapshot["content"]
@@ -1914,33 +1902,16 @@ class EditHistoryView(PopUpView):
 
         return author_prefix
 
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("EDIT_HISTORY", key):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
-
 
 class FullRenderedMsgView(PopUpView):
     def __init__(
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message
@@ -1949,25 +1920,13 @@ class FullRenderedMsgView(PopUpView):
         super().__init__(
             controller,
             [msg_box.content],
-            "MSG_INFO",
+            "FULL_RENDERED_MESSAGE",
             max_cols,
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            command_full_exit="MSG_INFO",
         )
-
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key(
-            "FULL_RENDERED_MESSAGE", key
-        ):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
 
 
 class FullRawMsgView(PopUpView):
@@ -1975,16 +1934,10 @@ class FullRawMsgView(PopUpView):
         self,
         controller: Any,
         message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
         title: str,
     ) -> None:
         self.controller = controller
         self.message = message
-        self.topic_links = topic_links
-        self.message_links = message_links
-        self.time_mentions = time_mentions
         max_cols, max_rows = controller.maximum_popup_dimensions()
 
         # Get rendered message header and footer
@@ -2001,23 +1954,13 @@ class FullRawMsgView(PopUpView):
         super().__init__(
             controller,
             body_list,
-            "MSG_INFO",
+            "FULL_RAW_MESSAGE",
             max_cols,
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            command_full_exit="MSG_INFO",
         )
-
-    def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("FULL_RAW_MESSAGE", key):
-            self.controller.show_msg_info(
-                msg=self.message,
-                topic_links=self.topic_links,
-                message_links=self.message_links,
-                time_mentions=self.time_mentions,
-            )
-            return key
-        return super().keypress(size, key)
 
 
 class EmojiPickerView(PopUpView):

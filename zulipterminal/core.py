@@ -26,7 +26,7 @@ from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
     MIN_SUPPORTED_POPUP_WIDTH,
 )
-from zulipterminal.helper import asynch, suppress_output
+from zulipterminal.helper import MessageInfoPopupContent, asynch, suppress_output
 from zulipterminal.model import Model
 from zulipterminal.platform_code import PLATFORM
 from zulipterminal.ui import Screen, View
@@ -88,6 +88,7 @@ class Controller:
         self.notify_enabled = notify
         self.maximum_footlinks = maximum_footlinks
         self.editor_command = editor_command
+        self.popup_stack: List[urwid.Widget] = []
 
         self.debug_path = debug_path
 
@@ -228,6 +229,8 @@ class Controller:
         return max_popup_cols, max_popup_rows
 
     def show_pop_up(self, to_show: Any, style: str) -> None:
+        self.popup_stack.append(self.loop.widget)
+
         text = urwid.Text(to_show.title, align="center")
         title_map = urwid.AttrMap(urwid.Filler(text), style)
         title_box_adapter = urwid.BoxAdapter(title_map, height=1)
@@ -251,6 +254,10 @@ class Controller:
         return isinstance(self.loop.widget, urwid.Overlay)
 
     def exit_popup(self) -> None:
+        self.loop.widget = self.popup_stack.pop()
+
+    def exit_all_popups(self) -> None:
+        self.popup_stack.clear()
         self.loop.widget = self.view
 
     def show_help(self) -> None:
@@ -265,19 +272,10 @@ class Controller:
         self.show_pop_up(EditModeView(self, button), "area:msg")
 
     def show_msg_info(
-        self,
-        msg: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
+        self, msg: Message, message_info_content: MessageInfoPopupContent
     ) -> None:
         msg_info_view = MsgInfoView(
-            self,
-            msg,
-            f"Message Information {SCROLL_PROMPT}",
-            topic_links,
-            message_links,
-            time_mentions,
+            self, msg, f"Message Information {SCROLL_PROMPT}", message_info_content
         )
         self.show_pop_up(msg_info_view, "area:msg")
 
@@ -348,61 +346,23 @@ class Controller:
             "area:user",
         )
 
-    def show_full_rendered_message(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_full_rendered_message(self, message: Message) -> None:
         self.show_pop_up(
             FullRenderedMsgView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Full rendered message {SCROLL_PROMPT}",
+                self, message, f"Full rendered message {SCROLL_PROMPT}"
             ),
             "area:msg",
         )
 
-    def show_full_raw_message(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_full_raw_message(self, message: Message) -> None:
         self.show_pop_up(
-            FullRawMsgView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Full raw message {SCROLL_PROMPT}",
-            ),
+            FullRawMsgView(self, message, f"Full raw message {SCROLL_PROMPT}"),
             "area:msg",
         )
 
-    def show_edit_history(
-        self,
-        message: Message,
-        topic_links: Dict[str, Tuple[str, int, bool]],
-        message_links: Dict[str, Tuple[str, int, bool]],
-        time_mentions: List[Tuple[str, str]],
-    ) -> None:
+    def show_edit_history(self, message: Message) -> None:
         self.show_pop_up(
-            EditHistoryView(
-                self,
-                message,
-                topic_links,
-                message_links,
-                time_mentions,
-                f"Edit History {SCROLL_PROMPT}",
-            ),
-            "area:msg",
+            EditHistoryView(self, message, f"Edit History {SCROLL_PROMPT}"), "area:msg"
         )
 
     def open_in_browser(self, url: str) -> None:
