@@ -136,6 +136,7 @@ initial_index = Index(
 class UnreadCounts(TypedDict):
     all_msg: int
     all_pms: int
+    all_stream_msg: int
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
     unread_pms: Dict[int, int]  # sender_id
@@ -239,6 +240,7 @@ def _set_count_in_view(
     user_buttons_list = controller.view.user_w.users_btn_list
     all_msg = controller.view.home_button
     all_pm = controller.view.pm_button
+    all_stream = controller.view.stream_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
         user_id = message["sender_id"]
@@ -272,6 +274,9 @@ def _set_count_in_view(
                 for topic_button in topic_buttons_list:
                     if topic_button.topic_name == msg_topic:
                         topic_button.update_count(topic_button.count + new_count)
+            if add_to_counts:
+                unread_counts["all_stream_msg"] += new_count
+            all_stream.update_count(unread_counts["all_stream_msg"])
         else:
             for user_button in user_buttons_list:
                 if user_button.user_id == user_id:
@@ -488,6 +493,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     unread_counts = UnreadCounts(
         all_msg=0,
         all_pms=0,
+        all_stream_msg=0,
         all_mentions=0,
         unread_topics=dict(),
         unread_pms=dict(),
@@ -520,6 +526,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
             unread_counts["streams"][stream_id] += count
         if stream_id not in model.muted_streams:
             unread_counts["all_msg"] += count
+            unread_counts["all_stream_msg"] += count
 
     # store unread count of group pms in `unread_huddles`
     for group_pm in unread_msg_counts["huddles"]:
