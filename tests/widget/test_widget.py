@@ -1,9 +1,9 @@
-from typing import List
+from typing import Dict, List, Union
 
 import pytest
 from pytest import param as case
 
-from zulipterminal.widget import Submessage, find_widget_type
+from zulipterminal.widget import Submessage, find_widget_type, process_todo_widget
 
 
 @pytest.mark.parametrize(
@@ -66,3 +66,233 @@ def test_find_widget_type(
     widget_type = find_widget_type(submessages)
 
     assert widget_type == expected_widget_type
+
+
+@pytest.mark.parametrize(
+    "submessages, expected_title, expected_tasks",
+    [
+        case(
+            [
+                {
+                    "id": 11899,
+                    "message_id": 1954463,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Tasks", "tasks": [{"task": '
+                        '"Write code", "desc": ""}, {"task": "Sleep", "desc": ""}]}}'
+                    ),
+                },
+                {
+                    "id": 11900,
+                    "message_id": 1954463,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task","key":2,"task":"Eat","desc":"",'
+                        '"completed":false}'
+                    ),
+                },
+            ],
+            "Today's Tasks",
+            {
+                "0,canned": {"task": "Write code", "desc": "", "completed": False},
+                "1,canned": {"task": "Sleep", "desc": "", "completed": False},
+                "2,27294": {"task": "Eat", "desc": "", "completed": False},
+            },
+            id="title_and_unfinished_tasks",
+        ),
+        case(
+            [
+                {
+                    "id": 11912,
+                    "message_id": 1954626,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "", "tasks": [{"task": "Hey", "desc": ""},'
+                        ' {"task": "Hi", "desc": ""}]}}'
+                    ),
+                }
+            ],
+            "Task list",
+            {
+                "0,canned": {"task": "Hey", "desc": "", "completed": False},
+                "1,canned": {"task": "Hi", "desc": "", "completed": False},
+            },
+            id="no_title_and_unfinished_tasks",
+        ),
+        case(
+            [
+                {
+                    "id": 11919,
+                    "message_id": 1954843,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "", "tasks": []}}'
+                    ),
+                }
+            ],
+            "Task list",
+            {},
+            id="no_title_or_tasks",
+        ),
+        case(
+            [
+                {
+                    "id": 11932,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "", "tasks": []}}'
+                    ),
+                },
+                {
+                    "id": 11933,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task","key":2,"task":"Write code",'
+                        '"desc":"Make the todo ZT PR!","completed":false}'
+                    ),
+                },
+                {
+                    "id": 11934,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task","key":4,"task":"Sleep",'
+                        '"desc":"at least 8 hours a day","completed":false}'
+                    ),
+                },
+                {
+                    "id": 11935,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task","key":6,"task":"Eat",'
+                        '"desc":"3 meals a day","completed":false}'
+                    ),
+                },
+                {
+                    "id": 11936,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task","key":8,"task":"Exercise",'
+                        '"desc":"an hour a day","completed":false}'
+                    ),
+                },
+                {
+                    "id": 11937,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"2,27294"}',
+                },
+                {
+                    "id": 11938,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"2,27294"}',
+                },
+                {
+                    "id": 11939,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"4,27294"}',
+                },
+                {
+                    "id": 11940,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"6,27294"}',
+                },
+                {
+                    "id": 11941,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"8,27294"}',
+                },
+                {
+                    "id": 11942,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"2,27294"}',
+                },
+                {
+                    "id": 11943,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"4,27294"}',
+                },
+                {
+                    "id": 11944,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"6,27294"}',
+                },
+                {
+                    "id": 11945,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"4,27294"}',
+                },
+                {
+                    "id": 11946,
+                    "message_id": 1954847,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"8,27294"}',
+                },
+            ],
+            "Task list",
+            {
+                "2,27294": {
+                    "task": "Write code",
+                    "desc": "Make the todo ZT PR!",
+                    "completed": True,
+                },
+                "4,27294": {
+                    "task": "Sleep",
+                    "desc": "at least 8 hours a day",
+                    "completed": True,
+                },
+                "6,27294": {"task": "Eat", "desc": "3 meals a day", "completed": False},
+                "8,27294": {
+                    "task": "Exercise",
+                    "desc": "an hour a day",
+                    "completed": False,
+                },
+            },
+            id="title_and_description_and_finished_tasks",
+        ),
+    ],
+)
+def test_process_todo_widget(
+    submessages: List[Submessage],
+    expected_title: str,
+    expected_tasks: Dict[str, Dict[str, Union[str, bool]]],
+) -> None:
+    title, tasks = process_todo_widget(submessages)
+
+    assert title == expected_title
+    assert tasks == expected_tasks
