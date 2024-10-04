@@ -62,6 +62,7 @@
 |Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
+|Copy code block to clipboard (from message information)|<kbd>c</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
