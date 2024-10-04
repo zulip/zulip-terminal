@@ -1078,6 +1078,8 @@ class TestRightColumnView:
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
         right_col_view = RightColumnView(self.view)
+        mocker.patch("zulipterminal.model.Model.is_muted_user", return_value=False)
+        self.view.model.is_muted_user.return_value = False
         if status != "inactive":
             user_btn.assert_called_once_with(
                 user=self.view.users[0],

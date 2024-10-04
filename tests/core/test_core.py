@@ -229,6 +229,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_id = 5140
         controller.model.user_email = "some@email"
+        controller.model._muted_users = set()
         controller.model.user_dict = {
             user_email: {
                 "user_id": user_id,
@@ -267,6 +268,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
+        controller.model._muted_users = set()
         controller.model.stream_dict = {
             205: {
                 "color": "#ffffff",
@@ -295,6 +297,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_id = 1
         controller.model.user_email = "some@email"
+        controller.model._muted_users = set()
 
         controller.narrow_to_all_pm()  # FIXME: Add id narrowing test
 
@@ -316,6 +319,7 @@ class TestController:
         # FIXME: Expand upon is_muted_topic().
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
+        controller.model._muted_users = set()
         controller.model.stream_dict = {
             205: {
                 "color": "#ffffff",
@@ -343,6 +347,7 @@ class TestController:
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
+        controller.model._muted_users = set()
         controller.model.stream_dict = {
             205: {
                 "color": "#ffffff",

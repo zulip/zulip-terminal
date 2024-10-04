@@ -145,6 +145,7 @@ class Model:
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
+            "muted_users",
         ]
 
         # Events desired with their corresponding callback
@@ -160,6 +161,7 @@ class Model:
             "user_settings": self._handle_user_settings_event,
             "realm_emoji": self._handle_update_emoji_event,
             "realm_user": self._handle_realm_user_event,
+            "muted_users": self._handle_muted_users_event,
         }
 
         self.initial_data: Dict[str, Any] = {}
@@ -208,6 +210,11 @@ class Model:
             )
             for stream_name, topic, *date_muted in muted_topics
         }
+        # NOTE: muted_users also contains timestamps, but we only store the user IDs
+        # muted_users was added in ZFL 48, Zulip 4.0
+        self._muted_users: Set[int] = set()
+        if self.server_feature_level >= 48:
+            self._update_muted_users(self.initial_data["muted_users"])
 
         groups = self.initial_data["realm_user_groups"]
         self.user_group_by_id: Dict[int, Dict[str, Any]] = {}
@@ -950,6 +957,9 @@ class Model:
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
+    def is_muted_user(self, user_id: int) -> bool:
+        return user_id in self._muted_users
+
     def stream_topic_from_message_id(
         self, message_id: int
     ) -> Optional[Tuple[int, str]]:
@@ -1203,6 +1213,9 @@ class Model:
             )
 
         return user_info
+
+    def _update_muted_users(self, muted_users: List[Dict[int, int]]) -> None:
+        self._muted_users = {muted_user["id"] for muted_user in muted_users}
 
     def _update_users_data_from_initial_data(self) -> None:
         # Dict which stores the active/idle status of users (by email)
@@ -1665,6 +1678,13 @@ class Model:
                 text,
             )
         return ""
+
+    def _handle_muted_users_event(self, event: Event) -> None:
+        """
+        Handle muting/unmuting of users
+        """
+        assert event["type"] == "muted_users"
+        self._update_muted_users(event["muted_users"])
 
     def _handle_message_event(self, event: Event) -> None:
         """
