@@ -33,7 +33,7 @@ from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
-from zulipterminal.widget import find_widget_type
+from zulipterminal.widget import find_widget_type, process_poll_widget
 
 
 if typing.TYPE_CHECKING:
@@ -731,9 +731,33 @@ class MessageBox(urwid.Pile):
             )
 
         if self.message.get("submessages"):
-            widget_type = find_widget_type(  # noqa: F841
-                self.message.get("submessages")
-            )
+            widget_type = find_widget_type(self.message.get("submessages"))
+
+            if widget_type == "poll":
+                poll_question, poll_options = process_poll_widget(
+                    self.message.get("submessages")
+                )
+
+                poll_widget = (
+                    f"<strong>Poll: {poll_question}</strong>"
+                    if poll_question
+                    else "No poll question provided. Please add one via the web app."
+                )
+
+                if poll_options:
+                    max_votes_len = max(
+                        len(str(len(option["votes"])))
+                        for option in poll_options.values()
+                    )
+
+                    for option_info in poll_options.values():
+                        padded_votes = f"{len(option_info['votes']):>{max_votes_len}}"
+                        poll_widget += f"\n[ {padded_votes} ] {option_info['option']}"
+                else:
+                    poll_widget += "\nNo options provided."
+                    "Please add them via the web app."
+
+                self.message["content"] = poll_widget
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
