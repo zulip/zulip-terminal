@@ -70,4 +70,7 @@ def process_todo_widget(
                 if task_id in tasks:
                     tasks[task_id]["completed"] = not tasks[task_id]["completed"]
 
+            elif widget.get("type") == "new_task_list_title":
+                title = widget["title"]
+
     return title, tasks

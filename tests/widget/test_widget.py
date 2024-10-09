@@ -285,6 +285,53 @@ def test_find_widget_type(
             },
             id="title_and_description_and_finished_tasks",
         ),
+        case(
+            [
+                {
+                    "id": 12143,
+                    "message_id": 1958318,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": {'
+                        '"task_list_title": "Today\'s Work", "tasks": [{"task": '
+                        '"Update todo titles on ZT", "desc": ""}, '
+                        '{"task": "Push todo update", "desc": ""}]}}'
+                    ),
+                },
+                {
+                    "id": 12144,
+                    "message_id": 1958318,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"type":"new_task_list_title",'
+                        '"title":"Today\'s Work [Updated]"}'
+                    ),
+                },
+                {
+                    "id": 12145,
+                    "message_id": 1958318,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"strike","key":"0,canned"}',
+                },
+            ],
+            "Today's Work [Updated]",
+            {
+                "0,canned": {
+                    "task": "Update todo titles on ZT",
+                    "desc": "",
+                    "completed": True,
+                },
+                "1,canned": {
+                    "task": "Push todo update",
+                    "desc": "",
+                    "completed": False,
+                },
+            },
+            id="updated_title_and_finished_tasks",
+        ),
     ],
 )
 def test_process_todo_widget(
