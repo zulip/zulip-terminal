@@ -152,6 +152,7 @@ class Model:
             "message": self._handle_message_event,
             "update_message": self._handle_update_message_event,
             "reaction": self._handle_reaction_event,
+            "submessage": self._handle_submessage_event,
             "subscription": self._handle_subscription_event,
             "typing": self._handle_typing_event,
             "update_message_flags": self._handle_update_message_flags_event,
@@ -1857,6 +1858,27 @@ class Model:
                     if reaction["emoji_code"] == emoji_code:
                         message["reactions"].remove(reaction)
 
+            self.index["messages"][message_id] = message
+            self._update_rendered_view(message_id)
+
+    def _handle_submessage_event(self, event: Event) -> None:
+        """
+        Handle change to submessages on a message (todo, poll etc.)
+        """
+        assert event["type"] == "submessage"
+        message_id = event["message_id"]
+        if message_id in self.index["messages"]:
+            message = self.index["messages"][message_id]
+            message["submessages"].append(
+                {
+                    "type": event["type"],
+                    "msg_type": event["msg_type"],
+                    "message_id": event["message_id"],
+                    "submessage_id": event["submessage_id"],
+                    "sender_id": event["sender_id"],
+                    "content": event["content"],
+                }
+            )
             self.index["messages"][message_id] = message
             self._update_rendered_view(message_id)
 
