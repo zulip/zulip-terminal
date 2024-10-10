@@ -237,6 +237,7 @@ class TestModel:
             "message",
             "update_message",
             "reaction",
+            "submessage",
             "subscription",
             "typing",
             "update_message_flags",
@@ -2912,6 +2913,214 @@ class TestModel:
         assert len(end_reactions) == expected_number_after
 
         model._update_rendered_view.assert_called_once_with(event_message_id)
+
+    @pytest.mark.parametrize(
+        "submessages, event, expected_updated_submessage",
+        [
+            case(
+                [
+                    {
+                        "id": 1,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": [{"task"'
+                        ': "Handle submessages events on ZT", "desc": ""}, {"task": '
+                        '"Play ping pong", "desc": ""}]}}',
+                    }
+                ],
+                {
+                    "type": "submessage",
+                    "msg_type": "widget",
+                    "message_id": 1958326,
+                    "submessage_id": 1,
+                    "sender_id": 27294,
+                    "content": '{"type":"strike","key":"0,canned"}',
+                    "id": 1,
+                },
+                [
+                    {
+                        "id": 1,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": '
+                        '[{"task": "Handle submessages events on ZT", "desc": ""}, '
+                        '{"task": "Play ping pong", "desc": ""}]}}',
+                    },
+                    {
+                        "type": "submessage",
+                        "msg_type": "widget",
+                        "message_id": 1958326,
+                        "submessage_id": 1,
+                        "sender_id": 27294,
+                        "content": '{"type":"strike","key":"0,canned"}',
+                        "id": 1,
+                    },
+                ],
+                id="submessage_strike_event_todo_widget",
+            ),
+            case(
+                [
+                    {
+                        "id": 1,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": [{"task": '
+                        '"Handle submessages events on ZT", "desc": ""}, {"task": '
+                        '"Play ping pong", "desc": ""}]}}',
+                    },
+                    {
+                        "id": 12154,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"type":"strike","key":"0,canned"}',
+                    },
+                ],
+                {
+                    "type": "submessage",
+                    "msg_type": "widget",
+                    "message_id": 1958326,
+                    "submessage_id": 12185,
+                    "sender_id": 27294,
+                    "content": '{"type":"new_task","key":2,"task":"Make a coffee",'
+                    '"desc":"","completed":false}',
+                    "id": 0,
+                },
+                [
+                    {
+                        "id": 1,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": [{"task": '
+                        '"Handle submessages events on ZT", "desc": ""}, {"task": '
+                        '"Play ping pong", "desc": ""}]}}',
+                    },
+                    {
+                        "id": 12154,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"type":"strike","key":"0,canned"}',
+                    },
+                    {
+                        "type": "submessage",
+                        "msg_type": "widget",
+                        "message_id": 1958326,
+                        "submessage_id": 12185,
+                        "sender_id": 27294,
+                        "content": '{"type":"new_task","key":2,"task":"Make a coffee",'
+                        '"desc":"","completed":false}',
+                        "id": 0,
+                    },
+                ],
+                id="submessage_new_task_event_todo_widget",
+            ),
+            case(
+                [
+                    {
+                        "id": 12153,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": [{"task": '
+                        '"Handle submessages events on ZT", "desc": ""}, {"task": '
+                        '"Play ping pong", "desc": ""}]}}',
+                    },
+                    {
+                        "id": 12154,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"type":"strike","key":"0,canned"}',
+                    },
+                    {
+                        "type": "submessage",
+                        "msg_type": "widget",
+                        "message_id": 1958326,
+                        "submessage_id": 12185,
+                        "sender_id": 27294,
+                        "content": '{"type":"new_task","key":2,"task":"Make a coffee"'
+                        ',"desc":"","completed":false}',
+                        "id": 0,
+                    },
+                ],
+                {
+                    "type": "submessage",
+                    "msg_type": "widget",
+                    "message_id": 1958326,
+                    "submessage_id": 12186,
+                    "sender_id": 27294,
+                    "content": '{"type":"new_task_list_title","title":"Today\'s Work '
+                    '[Updated]"}',
+                    "id": 11,
+                },
+                [
+                    {
+                        "id": 12153,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"widget_type": "todo", "extra_data": '
+                        '{"task_list_title": "Today\'s Work", "tasks": [{"task": '
+                        '"Handle submessages events on ZT", "desc": ""}, {"task": '
+                        '"Play ping pong", "desc": ""}]}}',
+                    },
+                    {
+                        "id": 12154,
+                        "message_id": 1958326,
+                        "sender_id": 27294,
+                        "msg_type": "widget",
+                        "content": '{"type":"strike","key":"0,canned"}',
+                    },
+                    {
+                        "type": "submessage",
+                        "msg_type": "widget",
+                        "message_id": 1958326,
+                        "submessage_id": 12185,
+                        "sender_id": 27294,
+                        "content": '{"type":"new_task","key":2,"task":"Make a coffee"'
+                        ',"desc":"","completed":false}',
+                        "id": 0,
+                    },
+                    {
+                        "type": "submessage",
+                        "msg_type": "widget",
+                        "message_id": 1958326,
+                        "submessage_id": 12186,
+                        "sender_id": 27294,
+                        "content": '{"type":"new_task_list_title",'
+                        '"title":"Today\'s Work [Updated]"}',
+                        "id": 11,
+                    },
+                ],
+                id="submessage_new_task_list_title_event_todo_widget",
+            ),
+        ],
+    )
+    def test__handle_submessage_event(
+        self,
+        mocker,
+        model,
+        submessages,
+        event,
+        expected_updated_submessage,
+        id=1958326,
+    ):
+        model.index["messages"][id]["submessages"] = submessages
+        model._update_rendered_view = mocker.Mock()
+
+        model._handle_submessage_event(event)
+
+        assert model.index["messages"][id]["submessages"] == expected_updated_submessage
 
     @pytest.fixture(
         params=[

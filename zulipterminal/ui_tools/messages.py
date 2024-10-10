@@ -33,6 +33,7 @@ from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
+from zulipterminal.widget import find_widget_type, process_todo_widget
 
 
 if typing.TYPE_CHECKING:
@@ -728,6 +729,32 @@ class MessageBox(urwid.Pile):
             self.message["content"] = self.message["content"].replace(
                 "/me", f"<strong>{self.message['sender_full_name']}</strong>", 1
             )
+
+        if self.message.get("submessages"):
+            widget_type = find_widget_type(self.message.get("submessages"))
+
+            if widget_type == "todo":
+                title, tasks = process_todo_widget(self.message.get("submessages"))
+
+                todo_widget = f"<strong>{title}</strong>"
+
+                if tasks:
+                    for task_id, task_info in tasks.items():
+                        task_status = "[✔ ]" if task_info["completed"] else "[  ]"
+                        task_name = task_info["task"]
+                        task_description = task_info["desc"]
+
+                        if task_description == "":
+                            todo_widget += (
+                                f"\n{task_status} <strong>{task_name}</strong>"
+                            )
+                        else:
+                            todo_widget += (
+                                f"\n{task_status} <strong>{task_name}</strong>: "
+                                f"{task_description}"
+                            )
+
+                self.message["content"] = todo_widget
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
