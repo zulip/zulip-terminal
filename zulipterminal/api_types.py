@@ -503,6 +503,15 @@ class RealmUserEvent(TypedDict):
     person: RealmUserEventPerson
 
 
+class SubmessageEvent(TypedDict):
+    type: Literal["submessage"]
+    msg_type: str
+    message_id: int
+    submessage_id: int
+    sender_id: int
+    content: str
+
+
 # -----------------------------------------------------------------------------
 # See https://zulip.com/api/get-events#subscription-update
 # (also -peer_add and -peer_remove; FIXME: -add & -remove are not yet supported)
@@ -619,6 +628,7 @@ Event = Union[
     UpdateMessageContentEvent,
     UpdateMessagesLocationEvent,
     ReactionEvent,
+    SubmessageEvent,
     SubscriptionUpdateEvent,
     SubscriptionPeerAddRemoveEvent,
     TypingEvent,
