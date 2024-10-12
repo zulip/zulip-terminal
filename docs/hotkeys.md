@@ -136,4 +136,5 @@
 |View current message in browser|<kbd>v</kbd>|
 |Show/hide full rendered message|<kbd>f</kbd>|
 |Show/hide full raw message|<kbd>r</kbd>|
+|Show/hide poll voter list|<kbd>w</kbd>|
 

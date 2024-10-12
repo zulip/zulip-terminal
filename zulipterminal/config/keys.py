@@ -457,6 +457,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide full raw message',
         'key_category': 'msg_info',
     },
+    'SHOW_POLL_VOTES': {
+        'keys': ['w'],
+        'help_text': 'Show/hide poll voter list',
+        'key_category': 'msg_info',
+    },
     'NEW_HINT': {
         'keys': ['tab'],
         'help_text': 'New footer hotkey hint',
