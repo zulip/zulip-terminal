@@ -300,6 +300,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide message sender information',
         'key_category': 'msg_actions',
     },
+    'SHOW_POLL_VOTES': {
+        'keys': ['v'],
+        'help_text': 'Show/hide poll voter list',
+        'key_category': 'msg_actions',
+    },
     'EDIT_HISTORY': {
         'keys': ['e'],
         'help_text': 'Show/hide edit history',

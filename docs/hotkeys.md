@@ -62,6 +62,7 @@
 |Toggle star status of the current message|<kbd>Ctrl</kbd> + <kbd>s</kbd> / <kbd>*</kbd>|
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
+|Show/hide poll voter list|<kbd>v</kbd>|
 
 ## Stream list actions
 |Command|Key Combination|
