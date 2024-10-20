@@ -121,6 +121,14 @@ class MessageBox(urwid.Pile):
         if len(self.model.narrow) == 2 and self.model.narrow[1][0] == "topic":
             return False
 
+        if self.model.is_search_narrow():
+            if len(self.model.narrow) == 1:
+                return True
+            if len(self.model.narrow) == 2:
+                return self.message["type"] != "private"
+            if len(self.model.narrow) == 3:
+                return self.model.narrow[1][0] != "topic"
+
         last_msg = self.last_message
         if self.message["type"] == "stream":
             return not (
