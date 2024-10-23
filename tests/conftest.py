@@ -1104,7 +1104,7 @@ def index_stream(empty_index: Index) -> Index:
     """
     index = empty_index
     index["stream_msg_ids_by_stream_id"] = defaultdict(set, {205: {537286}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
@@ -1145,8 +1145,8 @@ def index_user(empty_index: Index) -> Index:
     """
     user_ids = frozenset({5179, 5140})
     index = empty_index
-    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
@@ -1158,8 +1158,8 @@ def index_user_multiple(empty_index: Index) -> Index:
     """
     user_ids = frozenset({5179, 5140, 5180})
     index = empty_index
-    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
@@ -1178,7 +1178,7 @@ def index_all_starred(empty_index: Index, request: Any) -> Index:
     msgs_with_stars = request.param
     index = empty_index
     index["starred_msg_ids"] = msgs_with_stars
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
             msg["flags"].append("starred")
@@ -1192,7 +1192,7 @@ def index_all_mentions(
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     index = empty_index
     index["mentioned_msg_ids"] = mentioned_messages | wildcard_mentioned_messages
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")

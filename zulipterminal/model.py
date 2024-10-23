@@ -369,10 +369,10 @@ class Model:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
         elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
+            ids = index["direct_msg_ids"]
         elif narrow[0][0] == "pm-with":
             recipients = self.recipients
-            ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
+            ids = index["direct_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":

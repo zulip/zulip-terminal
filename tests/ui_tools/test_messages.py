@@ -85,7 +85,7 @@ class TestMessageBox:
         )
         self.model.user_email = "foo@zulip.com"
         mocker.patch(
-            MODULE + ".MessageBox._is_private_message_to_self", return_value=True
+            MODULE + ".MessageBox._is_direct_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)

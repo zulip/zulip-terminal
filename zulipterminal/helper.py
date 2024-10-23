@@ -322,7 +322,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                     ...
                 }
         },
-        'private_msg_ids_by_user_ids': {
+        'direct_msg_ids_by_user_ids': {
             (3, 7): {  # user_ids frozenset
                 51234,
                 56454,
@@ -345,7 +345,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             23423,
             ...
         },
-        'private_msg_ids': {
+        'direct_msg_ids': {
             22334,
             23423,
             ...
@@ -452,7 +452,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                 index["mentioned_msg_ids"].add(msg["id"])
 
             if msg["type"] == "private":
-                index["private_msg_ids"].add(msg["id"])
+                index["direct_msg_ids"].add(msg["id"])
                 recipients = frozenset(
                     {recipient["id"] for recipient in msg["display_recipient"]}
                 )
@@ -463,7 +463,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
                         for email in narrow[0][1].split(", ")
                     ] + [model.user_id]
                     if recipients == frozenset(narrow_emails):
-                        index["private_msg_ids_by_user_ids"][recipients].add(msg["id"])
+                        index["direct_msg_ids_by_user_ids"][recipients].add(msg["id"])
 
             if msg["type"] == "stream" and msg["stream_id"] == model.stream_id:
                 index["stream_msg_ids_by_stream_id"][msg["stream_id"]].add(msg["id"])
