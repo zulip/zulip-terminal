@@ -2,7 +2,7 @@
 
 This tutorial shows how typing indicator was implemented in the client. The process for adding a new feature to zulip terminal varies greatly depending on the feature. This tutorial is intended to make you familiar with the general process.
 
-Since the typing indicator data for the other user in pm cannot be generated locally, it should be received from the client.
+Since the typing indicator data for the other user in dm cannot be generated locally, it should be received from the client.
 
 A quick google search for `zulip typing indicator` points to https://zulip.readthedocs.io/en/latest/subsystems/typing-indicators.html. This document explains how typing indicator is implemented on the web client and is useful in understanding how typing indicator works internally.
 
