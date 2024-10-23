@@ -224,7 +224,7 @@ class TestWriteBox:
             )
 
     @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
-    def test_not_calling_send_private_message_without_recipients(
+    def test_not_calling_send_direct_message_without_recipients(
         self,
         key: str,
         mocker: MockerFixture,

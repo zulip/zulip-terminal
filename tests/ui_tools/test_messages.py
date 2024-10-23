@@ -71,7 +71,7 @@ class TestMessageBox:
         with pytest.raises(RuntimeError):
             MessageBox(message, self.model, None)
 
-    def test_direct_message_to_self(self, mocker):  # rebased
+    def test_direct_message_to_self(self, mocker):
         message = dict(
             type="private",
             display_recipient=[
@@ -85,14 +85,13 @@ class TestMessageBox:
         )
         self.model.user_email = "foo@zulip.com"
         mocker.patch(
-            MODULE + ".MessageBox._is_direct_message_to_self",  # rebased
-            return_value=True,
+            MODULE + ".MessageBox._is_direct_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
-        msg_box._is_direct_message_to_self.assert_called_once_with()  # rebased
+        msg_box._is_direct_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "content, expected_markup",

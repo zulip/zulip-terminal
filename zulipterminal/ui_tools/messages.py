@@ -89,7 +89,7 @@ class MessageBox(urwid.Pile):
             raise RuntimeError("Invalid message type")
 
         if self.message["type"] == "private":
-            if self._is_direct_message_to_self():  # rebased
+            if self._is_direct_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
                 self.recipient_emails = [self.model.user_email]
