@@ -97,7 +97,7 @@ class WriteBox(urwid.Pile):
         # don't include the user's own id in this list
         self.typing_recipient_user_ids: List[int]
 
-        # Private message recipient text entry, None if stream-box
+        # Direct message recipient text entry, None if stream-box
         # or not initialized
         self.to_write_box: Optional[ReadlineEdit]
 
