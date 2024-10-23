@@ -498,9 +498,9 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
     mentions_count = len(unread_msg_counts["mentions"])
     unread_counts["all_mentions"] += mentions_count
 
-    for pm in unread_msg_counts["pms"]:
-        count = len(pm["unread_message_ids"])
-        unread_counts["unread_pms"][pm["sender_id"]] = count
+    for dm in unread_msg_counts["pms"]:
+        count = len(dm["unread_message_ids"])
+        unread_counts["unread_pms"][dm["sender_id"]] = count
         unread_counts["all_msg"] += count
         unread_counts["all_pms"] += count
 
