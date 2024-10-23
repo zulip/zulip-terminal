@@ -1152,7 +1152,7 @@ class TestLeftColumnView:
     def test_menu_view(self, mocker):
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
-        pm_button = mocker.patch(VIEWS + ".PMButton")
+        dm_button = mocker.patch(VIEWS + ".PMButton")
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
@@ -1161,7 +1161,7 @@ class TestLeftColumnView:
         home_button.assert_called_once_with(
             controller=left_col_view.controller, count=2
         )
-        pm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
+        dm_button.assert_called_once_with(controller=left_col_view.controller, count=0)
         starred_button.assert_called_once_with(
             controller=left_col_view.controller, count=3
         )

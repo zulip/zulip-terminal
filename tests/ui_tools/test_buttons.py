@@ -181,12 +181,12 @@ class TestTopButton:
 
 class TestPMButton:
     def test_button_text_length(self, mocker: MockerFixture, count: int = 10) -> None:
-        pm_button = PMButton(controller=mocker.Mock(), count=count)
-        assert len(pm_button.label_text) == 20
+        dm_button = PMButton(controller=mocker.Mock(), count=count)
+        assert len(dm_button.label_text) == 20
 
     def test_button_text_title(self, mocker: MockerFixture, count: int = 10) -> None:
-        pm_button = PMButton(controller=mocker.Mock(), count=count)
-        title_text = pm_button.label_text[:-3].strip()
+        dm_button = PMButton(controller=mocker.Mock(), count=count)
+        title_text = dm_button.label_text[:-3].strip()
         assert title_text == "Direct messages"
 
 

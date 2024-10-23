@@ -238,7 +238,7 @@ def _set_count_in_view(
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
     user_buttons_list = controller.view.user_w.users_btn_list
     all_msg = controller.view.home_button
-    all_dm = controller.view.pm_button
+    all_dm = controller.view.dm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
         user_id = message["sender_id"]
@@ -719,12 +719,12 @@ def notify_if_message_sent_outside_narrow(
         topic_narrow = stream_narrow + [["topic", message["subject"]]]
         check_narrow_and_notify(stream_narrow, topic_narrow, controller)
     elif message["type"] == "private":
-        pm_narrow = [["is", "private"]]
+        dm_narrow = [["is", "private"]]
         recipient_emails = [
             controller.model.user_id_email_dict[user_id] for user_id in message["to"]
         ]
-        pm_with_narrow = [["pm-with", ", ".join(recipient_emails)]]
-        check_narrow_and_notify(pm_narrow, pm_with_narrow, controller)
+        dm_with_narrow = [["pm-with", ", ".join(recipient_emails)]]
+        check_narrow_and_notify(dm_narrow, dm_with_narrow, controller)
 
 
 def hash_util_decode(string: str) -> str:

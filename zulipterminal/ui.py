@@ -270,7 +270,7 @@ class View(urwid.WidgetWrap):
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
-            self.pm_button.activate(key)
+            self.dm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
