@@ -104,8 +104,8 @@ class Index(TypedDict):
     all_msg_ids: Set[int]
     starred_msg_ids: Set[int]
     mentioned_msg_ids: Set[int]
-    private_msg_ids: Set[int]
-    private_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
+    direct_msg_ids: Set[int]
+    direct_msg_ids_by_user_ids: Dict[FrozenSet[int], Set[int]]
     stream_msg_ids_by_stream_id: Dict[int, Set[int]]
     topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
@@ -121,8 +121,8 @@ initial_index = Index(
     all_msg_ids=set(),
     starred_msg_ids=set(),
     mentioned_msg_ids=set(),
-    private_msg_ids=set(),
-    private_msg_ids_by_user_ids=defaultdict(set),
+    direct_msg_ids=set(),
+    direct_msg_ids_by_user_ids=defaultdict(set),
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
