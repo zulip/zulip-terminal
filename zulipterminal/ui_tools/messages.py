@@ -89,7 +89,7 @@ class MessageBox(urwid.Pile):
             raise RuntimeError("Invalid message type")
 
         if self.message["type"] == "private":
-            if self._is_private_message_to_self():
+            if self._is_direct_message_to_self():  # rebased
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
                 self.recipient_emails = [self.model.user_email]
@@ -147,7 +147,7 @@ class MessageBox(urwid.Pile):
         else:
             raise RuntimeError("Invalid message type")
 
-    def _is_private_message_to_self(self) -> bool:
+    def _is_direct_message_to_self(self) -> bool:
         recipient_list = self.message["display_recipient"]
         return (
             len(recipient_list) == 1
@@ -1043,7 +1043,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
-            # For private messages, subject = "" (empty string)
+            # For direct messages, subject = "" (empty string)
             # This also handles the realm_message_content_edit_limit_seconds == 0 case
             if (
                 self.message["sender_id"] != self.model.user_id
@@ -1115,7 +1115,7 @@ class MessageBox(urwid.Pile):
                         )
                         return key
                 else:
-                    # The remaining case is of a private message not belonging to user.
+                    # The remaining case is of a direct message not belonging to user.
                     # Which should be already handled by the topmost if block
                     raise RuntimeError(
                         "Reached unexpected block. This should be handled at the top."

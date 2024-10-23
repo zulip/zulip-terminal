@@ -1556,7 +1556,7 @@ class Model:
 
     def _handle_typing_event(self, event: Event) -> None:
         """
-        Handle typing notifications (in private messages)
+        Handle typing notifications (in direct messages)
         """
         assert event["type"] == "typing"
 

@@ -450,7 +450,7 @@ def msg_template_factory(
     """
     Generate message template for all types of messages(stream/PM/group)
     """
-    # TODO: Separate Message into distinct types for stream and private messages.
+    # TODO: Separate Message into distinct types for stream and direct messages.
     message = Message(
         id=msg_id,
         sender_full_name="Foo Foo",
