@@ -407,9 +407,9 @@ class TestModel:
         "bad_args",
         [
             dict(topic="some topic"),
-            dict(stream="foo", pm_with="someone"),
-            dict(topic="blah", pm_with="someone"),
-            dict(pm_with="someone", topic="foo"),
+            dict(stream="foo", dm_with="someone"),
+            dict(topic="blah", dm_with="someone"),
+            dict(dm_with="someone", topic="foo"),
         ],
     )
     def test_set_narrow_bad_input(self, model, bad_args):
@@ -428,7 +428,7 @@ class TestModel:
             ([["is", "starred"]], dict(starred=True)),
             ([["is", "mentioned"]], dict(mentioned=True)),
             ([["is", "private"]], dict(pms=True)),
-            ([["pm-with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
+            ([["pm-with", "FOO@zulip.com"]], dict(dm_with="FOO@zulip.com")),
         ],
     )
     def test_set_narrow_already_set(self, model, narrow, good_args):
@@ -449,7 +449,7 @@ class TestModel:
             ([], [["is", "starred"]], dict(starred=True)),
             ([], [["is", "mentioned"]], dict(mentioned=True)),
             ([], [["is", "private"]], dict(pms=True)),
-            ([], [["pm-with", "FOOBOO@gmail.com"]], dict(pm_with="FOOBOO@gmail.com")),
+            ([], [["pm-with", "FOOBOO@gmail.com"]], dict(dm_with="FOOBOO@gmail.com")),
         ],
     )
     def test_set_narrow_not_already_set(

@@ -883,7 +883,7 @@ class TestMessageBox:
             {"type": "stream"},
         ],
         ids=[
-            "larger_pm_group",
+            "larger_dm_group",
             "stream_before",
         ],
     )

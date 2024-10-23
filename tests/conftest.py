@@ -500,7 +500,7 @@ def extra_stream_msg_template() -> Message:
 
 
 @pytest.fixture
-def pm_template() -> Message:
+def dm_template() -> Message:
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
     return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
 
@@ -513,18 +513,18 @@ def group_dm_template() -> Message:
     return msg_template_factory(537288, "private", 1520918737, recipients=recipients)
 
 
-@pytest.fixture(params=["pm_template", "group_dm_template"])
+@pytest.fixture(params=["dm_template", "group_dm_template"])
 def direct_message_fixture(request: Any) -> Message:
     return request.getfixturevalue(request.param)
 
 
 @pytest.fixture(
-    params=["stream_msg_template", "pm_template", "group_dm_template"],
-    ids=["stream_message", "pm_message", "group_pm_message"],
+    params=["stream_msg_template", "dm_template", "group_dm_template"],
+    ids=["stream_message", "dm_message", "group_dm_message"],
 )
 def message_fixture(request: Any) -> Message:
     """
-    Acts as a parametrize fixture for stream msg, dms and group_pms.
+    Acts as a parametrize fixture for stream msg, dms and group_dms.
     """
     # `request` currently does not have an exported Pytest type.
     # TODO: Use the exported type when it's made available.
@@ -535,7 +535,7 @@ def message_fixture(request: Any) -> Message:
 @pytest.fixture
 def messages_successful_response(
     stream_msg_template: Message,
-    pm_template: Message,
+    dm_template: Message,
     group_dm_template: Message,
 ) -> Dict[str, Any]:
     """
@@ -546,7 +546,7 @@ def messages_successful_response(
             "anchor": 10000000000000000,
             "messages": [
                 stream_msg_template,
-                pm_template,
+                dm_template,
                 group_dm_template,
             ],
             "result": "success",
@@ -634,10 +634,10 @@ def topics() -> List[str]:
     ],
     ids=[
         "stream_mention__stream_wildcard",
-        "stream+pm_mention__no_wildcard",
-        "no_mention__stream+pm_wildcard",
-        "stream+group_mention__pm_wildcard",
-        "pm_mention__stream+group_wildcard",
+        "stream+dm_mention__no_wildcard",
+        "no_mention__stream+dm_wildcard",
+        "stream+group_mention__dm_wildcard",
+        "dm_mention__stream+group_wildcard",
         "group_mention__all_wildcard",
         "all_mention__stream_wildcard",
         "stream+group_mention__wildcard",
@@ -1060,7 +1060,7 @@ def initial_index() -> Index:
 
 @pytest.fixture
 def empty_index(
-    stream_msg_template: Message, pm_template: Message, group_dm_template: Message
+    stream_msg_template: Message, dm_template: Message, group_dm_template: Message
 ) -> Index:
     return deepcopy(
         Index(
@@ -1079,7 +1079,7 @@ def empty_index(
                 lambda: {},
                 {
                     stream_msg_template["id"]: stream_msg_template,
-                    pm_template["id"]: pm_template,
+                    dm_template["id"]: dm_template,
                     group_dm_template["id"]: group_dm_template,
                 },
             ),
@@ -1140,7 +1140,7 @@ def index_multiple_topic_msg(
 @pytest.fixture
 def index_user(empty_index: Index) -> Index:
     """
-    Expected index of initial_data when model.narrow = [['pm_with',
+    Expected index of initial_data when model.narrow = [['dm_with',
                                                          'boo@zulip.com'],
     """
     user_ids = frozenset({5179, 5140})
@@ -1153,7 +1153,7 @@ def index_user(empty_index: Index) -> Index:
 @pytest.fixture
 def index_user_multiple(empty_index: Index) -> Index:
     """
-    Expected index of initial_data when model.narrow = [['pm_with',
+    Expected index of initial_data when model.narrow = [['dm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
     user_ids = frozenset({5179, 5140, 5180})

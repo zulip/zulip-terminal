@@ -301,7 +301,7 @@ class Model:
         stream: Optional[str] = None,
         topic: Optional[str] = None,
         pms: bool = False,
-        pm_with: Optional[str] = None,
+        dm_with: Optional[str] = None,
         starred: bool = False,
         mentioned: bool = False,
     ) -> bool:
@@ -311,7 +311,7 @@ class Model:
             frozenset(["stream"]): [["stream", stream]],
             frozenset(["stream", "topic"]): [["stream", stream], ["topic", topic]],
             frozenset(["pms"]): [["is", "private"]],
-            frozenset(["pm_with"]): [["pm-with", pm_with]],
+            frozenset(["dm_with"]): [["pm-with", dm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
         }
@@ -325,8 +325,8 @@ class Model:
         if new_narrow != self.narrow:
             self.narrow = new_narrow
 
-            if pm_with is not None and new_narrow[0][0] == "pm-with":
-                users = pm_with.split(", ")
+            if dm_with is not None and new_narrow[0][0] == "pm-with":
+                users = dm_with.split(", ")
                 self.recipients = frozenset(
                     [self.user_dict[user]["user_id"] for user in users] + [self.user_id]
                 )

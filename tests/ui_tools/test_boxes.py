@@ -186,7 +186,7 @@ class TestWriteBox:
             ([1001], False, []),
             ([1001, 11], True, [11]),
         ],
-        ids=["pm_only_with_oneself", "group_pm"],
+        ids=["dm_only_with_oneself", "group_dm"],
     )
     def test_not_calling_typing_method_to_oneself(
         self,

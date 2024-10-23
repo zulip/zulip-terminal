@@ -514,7 +514,7 @@ class TestController:
             "Default_all_msg_search",
             "redo_default_search",
             "search_within_stream",
-            "pm_search_again",
+            "dm_search_again",
             "search_within_topic_narrow",
         ],
     )

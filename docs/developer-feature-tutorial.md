@@ -115,7 +115,7 @@ To check for the above conditions, we create a function in `ui.py`:
     def handle_typing_event(self, event: Dict['str', Any]) -> None:
         # If the user is in dm narrow with the person typing
         if len(self.model.narrow) == 1 and\
-                self.model.narrow[0][0] == 'pm_with' and\
+                self.model.narrow[0][0] == 'dm_with' and\
                 event['sender']['email'] in self.model.narrow[0][1].split(','):
             if event['op'] == 'start':
                 user = self.model.user_dict[event['sender']['email']]
