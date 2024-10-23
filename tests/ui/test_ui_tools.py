@@ -960,7 +960,7 @@ class TestMiddleColumnView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_no_pm(
+    def test_keypress_NEXT_UNREAD_PM_no_dm(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
@@ -1128,7 +1128,7 @@ class TestLeftColumnView:
         self.view.model = mocker.Mock()
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
             "all_msg": 2,
-            "all_pms": 0,
+            "all_dms": 0,
             "streams": {
                 86: 1,
                 14: 1,

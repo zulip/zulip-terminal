@@ -3989,7 +3989,7 @@ class TestModel:
 
     @pytest.mark.parametrize("setting", [True, False])
     def test_update_pm_content_in_desktop_notifications(self, mocker, model, setting):
-        setting_name = "pm_content_in_desktop_notifications"
+        setting_name = "dm_content_in_desktop_notifications"
         event = {
             "type": "update_global_notifications",
             "notification_name": setting_name,
@@ -4291,20 +4291,20 @@ class TestModel:
 
         assert unread_topic == next_unread_topic
 
-    def test_get_next_unread_pm(self, model):
+    def test_get_next_unread_dm(self, model):
         model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
         return_value = model.get_next_unread_pm()
         assert return_value == 1
         assert model.last_unread_pm == 1
 
-    def test_get_next_unread_pm_again(self, model):
+    def test_get_next_unread_dm_again(self, model):
         model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
         model.last_unread_pm = 1
         return_value = model.get_next_unread_pm()
         assert return_value == 2
         assert model.last_unread_pm == 2
 
-    def test_get_next_unread_pm_no_unread(self, model):
+    def test_get_next_unread_dm_no_unread(self, model):
         model.unread_counts = {"unread_pms": {}}
         return_value = model.get_next_unread_pm()
         assert return_value is None

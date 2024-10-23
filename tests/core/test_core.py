@@ -287,7 +287,7 @@ class TestController:
         assert msg_ids == id_list
         assert final_focus_msg_id == expected_final_focus_msg_id
 
-    def test_narrow_to_all_pm(
+    def test_narrow_to_all_dm(
         self, mocker: MockerFixture, controller: Controller, index_user: Index
     ) -> None:
         controller.model.narrow = []
@@ -296,7 +296,7 @@ class TestController:
         controller.model.user_id = 1
         controller.model.user_email = "some@email"
 
-        controller.narrow_to_all_pm()  # FIXME: Add id narrowing test
+        controller.narrow_to_all_dm()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == [["is", "private"]]
         controller.view.message_view.log.clear.assert_called_once_with()

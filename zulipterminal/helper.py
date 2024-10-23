@@ -135,7 +135,7 @@ initial_index = Index(
 
 class UnreadCounts(TypedDict):
     all_msg: int
-    all_pms: int
+    all_dms: int
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
     unread_pms: Dict[int, int]  # sender_id
@@ -227,7 +227,7 @@ def _set_count_in_view(
 ) -> None:
     """
     This function for the most part contains the logic for setting the
-    count in the UI buttons. The later buttons (all_msg, all_pms)
+    count in the UI buttons. The later buttons (all_msg, all_dms)
     additionally set the current count in the model and make use of the
     same in the UI.
     """
@@ -238,7 +238,7 @@ def _set_count_in_view(
         toggled_stream_id = controller.view.topic_w.stream_button.stream_id
     user_buttons_list = controller.view.user_w.users_btn_list
     all_msg = controller.view.home_button
-    all_pm = controller.view.pm_button
+    all_dm = controller.view.pm_button
     all_mentioned = controller.view.mentioned_button
     for message in changed_messages:
         user_id = message["sender_id"]
@@ -277,8 +277,8 @@ def _set_count_in_view(
                 if user_button.user_id == user_id:
                     user_button.update_count(user_button.count + new_count)
                     break
-            unread_counts["all_pms"] += new_count
-            all_pm.update_count(unread_counts["all_pms"])
+            unread_counts["all_dms"] += new_count
+            all_dm.update_count(unread_counts["all_dms"])
 
         if add_to_counts:
             unread_counts["all_msg"] += new_count
@@ -487,7 +487,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
 
     unread_counts = UnreadCounts(
         all_msg=0,
-        all_pms=0,
+        all_dms=0,
         all_mentions=0,
         unread_topics=dict(),
         unread_pms=dict(),
@@ -502,7 +502,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         count = len(dm["unread_message_ids"])
         unread_counts["unread_pms"][dm["sender_id"]] = count
         unread_counts["all_msg"] += count
-        unread_counts["all_pms"] += count
+        unread_counts["all_dms"] += count
 
     for stream in unread_msg_counts["streams"]:
         count = len(stream["unread_message_ids"])
@@ -522,13 +522,13 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
             unread_counts["all_msg"] += count
 
     # store unread count of group dms in `unread_huddles`
-    for group_pm in unread_msg_counts["huddles"]:
-        count = len(group_pm["unread_message_ids"])
-        user_ids = group_pm["user_ids_string"].split(",")
+    for group in unread_msg_counts["huddles"]:
+        count = len(group["unread_message_ids"])
+        user_ids = group["user_ids_string"].split(",")
         user_ids = frozenset(map(int, user_ids))
         unread_counts["unread_huddles"][user_ids] = count
         unread_counts["all_msg"] += count
-        unread_counts["all_pms"] += count
+        unread_counts["all_dms"] += count
 
     return unread_counts
 

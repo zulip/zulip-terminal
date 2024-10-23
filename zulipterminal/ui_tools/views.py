@@ -792,7 +792,7 @@ class LeftColumnView(urwid.Pile):
         count = self.model.unread_counts.get("all_msg", 0)
         self.view.home_button = HomeButton(controller=self.controller, count=count)
 
-        count = self.model.unread_counts.get("all_pms", 0)
+        count = self.model.unread_counts.get("all_dms", 0)
         self.view.pm_button = PMButton(controller=self.controller, count=count)
 
         self.view.mentioned_button = MentionedButton(

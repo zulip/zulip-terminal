@@ -938,7 +938,7 @@ class MessageBox(urwid.Pile):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
                 if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
-                    self.model.controller.narrow_to_all_pm(
+                    self.model.controller.narrow_to_all_dm(
                         contextual_message_id=self.message["id"],
                     )
                 else:
