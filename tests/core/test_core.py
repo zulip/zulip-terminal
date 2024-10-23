@@ -247,7 +247,7 @@ class TestController:
         recipients = frozenset([controller.model.user_id, user_id])
         assert controller.model.recipients == recipients
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
-        id_list = index_user["private_msg_ids_by_user_ids"][recipients]
+        id_list = index_user["direct_msg_ids_by_user_ids"][recipients]
         assert {widget.original_widget.message["id"]} == id_list
 
     @pytest.mark.parametrize(
@@ -302,7 +302,7 @@ class TestController:
         controller.view.message_view.log.clear.assert_called_once_with()
 
         widgets = controller.view.message_view.log.extend.call_args_list[0][0][0]
-        id_list = index_user["private_msg_ids"]
+        id_list = index_user["direct_msg_ids"]
         msg_ids = {widget.original_widget.message["id"] for widget in widgets}
         assert msg_ids == id_list
 

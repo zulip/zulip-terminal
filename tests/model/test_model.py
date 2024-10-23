@@ -478,16 +478,16 @@ class TestModel:
                 {"topic_msg_ids": {1: {"BOO": {0, 1}}}},
                 set(),
             ),
-            ([["is", "private"]], {"private_msg_ids": {0, 1}}, {0, 1}),
+            ([["is", "private"]], {"direct_msg_ids": {0, 1}}, {0, 1}),
             (
                 [["pm-with", "FOO@zulip.com"]],
-                {"private_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
+                {"direct_msg_ids_by_user_ids": {frozenset({1, 2}): {0, 1}}},
                 {0, 1},
             ),
             (
                 [["pm-with", "FOO@zulip.com"]],
                 {  # Covers recipient empty-set case
-                    "private_msg_ids_by_user_ids": {
+                    "direct_msg_ids_by_user_ids": {
                         frozenset({1, 3}): {0, 1}  # NOTE {1,3} not {1,2}
                     }
                 },
@@ -2283,12 +2283,12 @@ class TestModel:
         [(True, "New direct message from Foo Foo"), (False, "private content here.")],
     )
     def test_notify_users_hides_PM_content_based_on_user_setting(
-        self, mocker, model, private_message_fixture, hide_content, expected_content
+        self, mocker, model, direct_message_fixture, hide_content, expected_content
     ):
         notify = mocker.patch(MODULE + ".notify")
         model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
 
-        message = private_message_fixture
+        message = direct_message_fixture
         message["user_id"] = 5179
         message["flags"] = []
 
