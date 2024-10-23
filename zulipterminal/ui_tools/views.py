@@ -630,14 +630,14 @@ class MiddleColumnView(urwid.Frame):
             )
             return key
         elif is_command_key("NEXT_UNREAD_PM", key):
-            # narrow to next unread pm
-            pm = self.model.get_next_unread_pm()
-            if pm is None:
+            # narrow to next unread dm
+            dm = self.model.get_next_unread_pm()
+            if dm is None:
                 return key
-            email = self.model.user_id_email_dict[pm]
+            email = self.model.user_id_email_dict[dm]
             self.controller.narrow_to_user(
                 recipient_emails=[email],
-                contextual_message_id=pm,
+                contextual_message_id=dm,
             )
         elif is_command_key("PRIVATE_MESSAGE", key):
             # Create new PM message
