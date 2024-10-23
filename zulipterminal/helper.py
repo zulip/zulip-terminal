@@ -139,7 +139,7 @@ class UnreadCounts(TypedDict):
     all_mentions: int
     unread_topics: Dict[Tuple[int, str], int]  # stream_id, topic
     unread_pms: Dict[int, int]  # sender_id
-    unread_huddles: Dict[FrozenSet[int], int]  # Group pms
+    unread_huddles: Dict[FrozenSet[int], int]  # Group dms
     streams: Dict[int, int]  # stream_id
 
 
@@ -207,7 +207,7 @@ def _set_count_in_model(
             )
             update_unreads(unread_counts["streams"], stream_id)
         # self-dm has only one display_recipient
-        # 1-1 pms have 2 display_recipient
+        # 1-1 dms have 2 display_recipient
         elif len(message["display_recipient"]) <= 2:
             update_unreads(unread_counts["unread_pms"], message["sender_id"])
         else:  # If it's a group dm
@@ -482,7 +482,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:
-    # TODO: support group pms
+    # TODO: support group dms
     unread_msg_counts = model.initial_data["unread_msgs"]
 
     unread_counts = UnreadCounts(
@@ -521,7 +521,7 @@ def classify_unread_counts(model: Any) -> UnreadCounts:
         if stream_id not in model.muted_streams:
             unread_counts["all_msg"] += count
 
-    # store unread count of group pms in `unread_huddles`
+    # store unread count of group dms in `unread_huddles`
     for group_pm in unread_msg_counts["huddles"]:
         count = len(group_pm["unread_message_ids"])
         user_ids = group_pm["user_ids_string"].split(",")
