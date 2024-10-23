@@ -206,11 +206,11 @@ def _set_count_in_model(
                 unread_counts["unread_topics"], (stream_id, message["subject"])
             )
             update_unreads(unread_counts["streams"], stream_id)
-        # self-pm has only one display_recipient
+        # self-dm has only one display_recipient
         # 1-1 pms have 2 display_recipient
         elif len(message["display_recipient"]) <= 2:
             update_unreads(unread_counts["unread_pms"], message["sender_id"])
-        else:  # If it's a group pm
+        else:  # If it's a group dm
             update_unreads(
                 unread_counts["unread_huddles"],
                 frozenset(

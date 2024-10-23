@@ -1568,7 +1568,7 @@ class Model:
         sender_email = event["sender"]["email"]
         sender_id = event["sender"]["user_id"]
 
-        # If the user is in pm narrow with the person typing
+        # If the user is in dm narrow with the person typing
         # and the person typing isn't the user themselves
         if (
             len(narrow) == 1
