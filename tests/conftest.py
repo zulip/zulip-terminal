@@ -506,20 +506,20 @@ def pm_template() -> Message:
 
 
 @pytest.fixture
-def group_pm_template() -> Message:
+def group_dm_template() -> Message:
     recipients = display_recipient_factory(
         [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
     )
     return msg_template_factory(537288, "private", 1520918737, recipients=recipients)
 
 
-@pytest.fixture(params=["pm_template", "group_pm_template"])
+@pytest.fixture(params=["pm_template", "group_dm_template"])
 def direct_message_fixture(request: Any) -> Message:
     return request.getfixturevalue(request.param)
 
 
 @pytest.fixture(
-    params=["stream_msg_template", "pm_template", "group_pm_template"],
+    params=["stream_msg_template", "pm_template", "group_dm_template"],
     ids=["stream_message", "pm_message", "group_pm_message"],
 )
 def message_fixture(request: Any) -> Message:
@@ -536,7 +536,7 @@ def message_fixture(request: Any) -> Message:
 def messages_successful_response(
     stream_msg_template: Message,
     pm_template: Message,
-    group_pm_template: Message,
+    group_dm_template: Message,
 ) -> Dict[str, Any]:
     """
     A successful response from a /messages API query.
@@ -547,7 +547,7 @@ def messages_successful_response(
             "messages": [
                 stream_msg_template,
                 pm_template,
-                group_pm_template,
+                group_dm_template,
             ],
             "result": "success",
             "msg": "",
@@ -1060,7 +1060,7 @@ def initial_index() -> Index:
 
 @pytest.fixture
 def empty_index(
-    stream_msg_template: Message, pm_template: Message, group_pm_template: Message
+    stream_msg_template: Message, pm_template: Message, group_dm_template: Message
 ) -> Index:
     return deepcopy(
         Index(
@@ -1080,7 +1080,7 @@ def empty_index(
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,
-                    group_pm_template["id"]: group_pm_template,
+                    group_dm_template["id"]: group_dm_template,
                 },
             ),
         )
@@ -1468,7 +1468,7 @@ def classified_unread_counts() -> Dict[str, Any]:
     """
     return {
         "all_msg": 12,
-        "all_pms": 8,
+        "all_dms": 8,
         "unread_topics": {
             (1000, "Some general unread topic"): 3,
             (99, "Some private unread topic"): 1,

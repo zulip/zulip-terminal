@@ -152,7 +152,7 @@ class PMButton(TopButton):
             label_markup=(None, button_text),
             prefix_markup=("title", DIRECT_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=controller.narrow_to_all_dm,
             count=count,
         )
 
