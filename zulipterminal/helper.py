@@ -381,7 +381,7 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
         'messages': {
             # all the messages mapped to their id
             # for easy retrieval of message from id
-            45645: {  # PRIVATE
+            45645: {  # DIRECT
                 'id': 4290,
                 'timestamp': 1521817473,
                 'content': 'Hi @**Cordelia Lear**',
