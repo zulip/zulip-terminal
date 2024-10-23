@@ -971,8 +971,8 @@ class TestMiddleColumnView:
 
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
-    def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
+    @pytest.mark.parametrize("key", keys_for_command("DIRECT_MESSAGE"))
+    def test_keypress_DIRECT_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mid_col_view.model.get_next_unread_pm.return_value = None
