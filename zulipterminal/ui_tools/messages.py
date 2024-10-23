@@ -88,7 +88,7 @@ class MessageBox(urwid.Pile):
             raise RuntimeError("Invalid message type")
 
         if self.message["type"] == "private":
-            if self._is_private_message_to_self():
+            if self._is_direct_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
                 self.recipient_emails = [self.model.user_email]
@@ -146,7 +146,7 @@ class MessageBox(urwid.Pile):
         else:
             raise RuntimeError("Invalid message type")
 
-    def _is_private_message_to_self(self) -> bool:
+    def _is_direct_message_to_self(self) -> bool:
         recipient_list = self.message["display_recipient"]
         return (
             len(recipient_list) == 1

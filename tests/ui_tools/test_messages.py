@@ -71,7 +71,7 @@ class TestMessageBox:
         with pytest.raises(RuntimeError):
             MessageBox(message, self.model, None)
 
-    def test_private_message_to_self(self, mocker):
+    def test_direct_message_to_self(self, mocker):
         message = dict(
             type="private",
             display_recipient=[
@@ -91,7 +91,7 @@ class TestMessageBox:
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
-        msg_box._is_private_message_to_self.assert_called_once_with()
+        msg_box._is_direct_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "content, expected_markup",
