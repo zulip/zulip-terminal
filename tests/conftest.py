@@ -524,7 +524,7 @@ def direct_message_fixture(request: Any) -> Message:
 )
 def message_fixture(request: Any) -> Message:
     """
-    Acts as a parametrize fixture for stream msg, pms and group_pms.
+    Acts as a parametrize fixture for stream msg, dms and group_pms.
     """
     # `request` currently does not have an exported Pytest type.
     # TODO: Use the exported type when it's made available.
