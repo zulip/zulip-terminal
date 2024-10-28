@@ -520,11 +520,11 @@ def direct_message_fixture(request: Any) -> Message:
 
 @pytest.fixture(
     params=["stream_msg_template", "dm_template", "group_dm_template"],
-    ids=["stream_message", "dm_message", "group_dm_message"],
+    ids=["stream_message", "pm_message", "group_pm_message"],
 )
 def message_fixture(request: Any) -> Message:
     """
-    Acts as a parametrize fixture for stream msg, dms and group_dms.
+    Acts as a parametrize fixture for stream msg, dms and group_pms.
     """
     # `request` currently does not have an exported Pytest type.
     # TODO: Use the exported type when it's made available.
@@ -634,10 +634,10 @@ def topics() -> List[str]:
     ],
     ids=[
         "stream_mention__stream_wildcard",
-        "stream+dm_mention__no_wildcard",
-        "no_mention__stream+dm_wildcard",
-        "stream+group_mention__dm_wildcard",
-        "dm_mention__stream+group_wildcard",
+        "stream+pm_mention__no_wildcard",
+        "no_mention__stream+pm_wildcard",
+        "stream+group_mention__pm_wildcard",
+        "pm_mention__stream+group_wildcard",
         "group_mention__all_wildcard",
         "all_mention__stream_wildcard",
         "stream+group_mention__wildcard",

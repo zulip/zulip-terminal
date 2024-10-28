@@ -369,7 +369,7 @@ through autocomplete depend upon the context automatically.
 * `P` (with stream color) if the stream is valid and private,
 * `✗` if the stream is invalid.
 
-![PM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
+![DM recipients header](https://user-images.githubusercontent.com/55916430/118403345-9d422800-b68b-11eb-9005-6d2af74adab9.png)
 
 **NOTE:** If a direct message recipient's name contains comma(s) (`,`), they
 are currently treated as comma-separated recipients.

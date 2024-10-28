@@ -46,11 +46,11 @@ from zulipterminal.platform_code import PLATFORM, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
+    DMButton,
     EmojiButton,
     HomeButton,
     MentionedButton,
     MessageLinkButton,
-    PMButton,
     StarredButton,
     StreamButton,
     TopicButton,
@@ -629,7 +629,7 @@ class MiddleColumnView(urwid.Frame):
                 topic_name=topic,
             )
             return key
-        elif is_command_key("NEXT_UNREAD_PM", key):
+        elif is_command_key("NEXT_UNREAD_DM", key):
             # narrow to next unread dm
             dm = self.model.get_next_unread_pm()
             if dm is None:
@@ -640,7 +640,7 @@ class MiddleColumnView(urwid.Frame):
                 contextual_message_id=dm,
             )
         elif is_command_key("DIRECT_MESSAGE", key):
-            # Create new PM message
+            # Create new DM message
             self.footer.private_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
@@ -793,7 +793,7 @@ class LeftColumnView(urwid.Pile):
         self.view.home_button = HomeButton(controller=self.controller, count=count)
 
         count = self.model.unread_counts.get("all_dms", 0)
-        self.view.dm_button = PMButton(controller=self.controller, count=count)
+        self.view.dm_button = DMButton(controller=self.controller, count=count)
 
         self.view.mentioned_button = MentionedButton(
             controller=self.controller,

@@ -222,7 +222,7 @@ class Controller:
         width = clamp(max_cols, min_width, max_width)
         scaling = 1 - ((width - min_width) / (4 * (max_width - min_width)))
         max_popup_cols = int(scaling * max_cols)
-        # Scale Height
+        # Scale Height.
         max_popup_rows = 3 * max_rows // 4
 
         return max_popup_cols, max_popup_rows

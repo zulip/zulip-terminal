@@ -214,7 +214,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'View all messages',
         'key_category': 'narrowing',
     },
-    'ALL_PM': {
+    'ALL_DM': {
         'keys': ['P'],
         'help_text': 'View all direct messages',
         'key_category': 'narrowing',
@@ -234,7 +234,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Next unread topic',
         'key_category': 'narrowing',
     },
-    'NEXT_UNREAD_PM': {
+    'NEXT_UNREAD_DM': {
         'keys': ['p'],
         'help_text': 'Next unread direct message',
         'key_category': 'narrowing',
@@ -346,7 +346,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide user information',
         'key_category': 'user_list',
     },
-    'NARROW_TO_USER_PM': {
+    'NARROW_TO_USER_DM': {
         # Added to clarify functionality of button activation,
         # as opposed to opening user profile or other effects.
         # Implementation uses ACTIVATE_BUTTON command.
