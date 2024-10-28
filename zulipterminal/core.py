@@ -645,7 +645,7 @@ class Controller:
     ) -> None:
         self._narrow_to(
             anchor=contextual_message_id,
-            dm_with=", ".join(recipient_emails),
+            pm_with=", ".join(recipient_emails),
         )
 
     def narrow_to_all_messages(

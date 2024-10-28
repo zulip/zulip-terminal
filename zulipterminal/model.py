@@ -1024,7 +1024,7 @@ class Model:
         return None
 
     def get_next_unread_pm(self) -> Optional[int]:
-        pms = list(self.unread_counts["unread_pms"].keys())
+        pms = list(self.unread_counts["unread_dms"].keys())
         next_pm = False
         for pm in pms:
             if next_pm is True:
