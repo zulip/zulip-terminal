@@ -51,7 +51,6 @@ from zulipterminal.ui_tools.buttons import (
     HomeButton,
     MentionedButton,
     MessageLinkButton,
-    PMButton,
     StarredButton,
     StreamButton,
     TopicButton,

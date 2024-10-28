@@ -14,7 +14,6 @@ from zulipterminal.ui_tools.buttons import (
     EmojiButton,
     MessageLinkButton,
     ParsedNarrowLink,
-    PMButton,
     StarredButton,
     StreamButton,
     TopButton,
