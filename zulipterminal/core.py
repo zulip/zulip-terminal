@@ -653,7 +653,7 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
-    def narrow_to_all_pm(self, *, contextual_message_id: Optional[int] = None) -> None:
+    def narrow_to_all_dm(self, *, contextual_message_id: Optional[int] = None) -> None:
         self._narrow_to(anchor=contextual_message_id, pms=True)
 
     def narrow_to_all_starred(self) -> None:
