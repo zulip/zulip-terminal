@@ -3989,7 +3989,7 @@ class TestModel:
 
     @pytest.mark.parametrize("setting", [True, False])
     def test_update_pm_content_in_desktop_notifications(self, mocker, model, setting):
-        setting_name = "dm_content_in_desktop_notifications"
+        setting_name = "pm_content_in_desktop_notifications"
         event = {
             "type": "update_global_notifications",
             "notification_name": setting_name,

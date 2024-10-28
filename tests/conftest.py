@@ -425,7 +425,7 @@ def display_recipient_factory(
     recipient_details_list: List[Tuple[int, str]]
 ) -> List[Dict[str, Any]]:
     """
-    Generate display_recipient field for (PM/group) messages
+    Generate display_recipient field for (DM/group) messages
     """
     return [
         {
@@ -448,7 +448,7 @@ def msg_template_factory(
     recipients: Union[str, List[Dict[str, Any]]] = "PTEST",
 ) -> Message:
     """
-    Generate message template for all types of messages(stream/PM/group)
+    Generate message template for all types of messages(stream/DM/group)
     """
     # TODO: Separate Message into distinct types for stream and direct messages.
     message = Message(

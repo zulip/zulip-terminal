@@ -827,7 +827,7 @@ class TestMessageBox:
         ids=[
             "different_stream_before",
             "different_topic_before",
-            "PM_before",
+            "DM_before",
         ],
     )
     def test_main_view_generates_stream_header(
@@ -887,7 +887,7 @@ class TestMessageBox:
             "stream_before",
         ],
     )
-    def test_main_view_generates_PM_header(
+    def test_main_view_generates_DM_header(
         self, mocker, message, to_vary_in_last_message
     ):
         last_message = dict(message, **to_vary_in_last_message)
@@ -1041,7 +1041,7 @@ class TestMessageBox:
         assert header_bar[0].text.startswith(assert_header_bar)
         assert search_bar.text_to_fill == assert_search_bar
 
-    # Assume recipient (PM/stream/topic) header is unchanged below
+    # Assume recipient (DM/stream/topic) header is unchanged below
     @pytest.mark.parametrize(
         "message",
         [

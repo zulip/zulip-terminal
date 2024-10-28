@@ -260,7 +260,7 @@ class View(urwid.WidgetWrap):
         elif (
             is_command_key("SEARCH_MESSAGES", key)
             or is_command_key("NEXT_UNREAD_TOPIC", key)
-            or is_command_key("NEXT_UNREAD_PM", key)
+            or is_command_key("NEXT_UNREAD_DM", key)
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("DIRECT_MESSAGE", key)
         ):
@@ -269,7 +269,7 @@ class View(urwid.WidgetWrap):
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
-        elif is_command_key("ALL_PM", key):
+        elif is_command_key("ALL_DM", key):
             self.dm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)

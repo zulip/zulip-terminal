@@ -942,8 +942,8 @@ class TestMiddleColumnView:
         assert mid_col_view.controller.narrow_to_topic.called is False
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_stream(
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_DM"))
+    def test_keypress_NEXT_UNREAD_DM_stream(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
@@ -959,8 +959,8 @@ class TestMiddleColumnView:
             contextual_message_id=1,
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
-    def test_keypress_NEXT_UNREAD_PM_no_dm(
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_DM"))
+    def test_keypress_NEXT_UNREAD_DM_no_dm(
         self, mid_col_view, mocker, key, widget_size
     ):
         size = widget_size(mid_col_view)
@@ -1152,7 +1152,7 @@ class TestLeftColumnView:
     def test_menu_view(self, mocker):
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
-        dm_button = mocker.patch(VIEWS + ".PMButton")
+        dm_button = mocker.patch(VIEWS + ".DMButton")
         starred_button = mocker.patch(VIEWS + ".StarredButton")
         mocker.patch(VIEWS + ".urwid.ListBox")
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker")
