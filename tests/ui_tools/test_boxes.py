@@ -1,8 +1,11 @@
 import datetime
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional
+from dataclasses import dataclass
+from functools import reduce
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytest
+from pytest import FixtureRequest
 from pytest import param as case
 from pytest_mock import MockerFixture
 from urwid import Widget
@@ -11,6 +14,9 @@ from zulipterminal.api_types import (
     TYPING_STARTED_EXPIRY_PERIOD,
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
+    Composition,
+    PrivateComposition,
+    StreamComposition,
 )
 from zulipterminal.config.keys import (
     keys_for_command,
@@ -36,6 +42,60 @@ from zulipterminal.urwid_types import urwid_Size
 
 MODULE = "zulipterminal.ui_tools.boxes"
 WRITEBOX = MODULE + ".WriteBox"
+
+
+def composition_factory(
+    type: str,
+    group: bool = False,
+    content_same: bool = True,
+    recipient_same: bool = True,
+) -> Composition:
+    read_by_sender: bool = True
+    content = "Random message" if content_same else "Different message"
+    if type == "private":
+        condition_map = {
+            False: {False: [5140], True: [3276]},
+            True: {False: [5140, 5180], True: [3276, 3277]},
+        }
+        content = content.format(type)
+        return PrivateComposition(
+            {
+                "type": "private",
+                "content": content,
+                "to": condition_map[group][recipient_same],
+                "read_by_sender": read_by_sender,
+            }
+        )
+    else:
+        return StreamComposition(
+            {
+                "type": "stream",
+                "content": content,
+                "subject": "Topic",
+                "to": "Saved draft stream" if recipient_same else "Current stream",
+                "read_by_sender": read_by_sender,
+            }
+        )
+
+
+@dataclass
+class SavedDraftTestScenario:
+    composition: Optional[Composition]
+    expected_call: str
+
+
+def saved_draft_factory(
+    draft_composition: Optional[Composition] = None,
+) -> SavedDraftTestScenario:
+    expected_function = (
+        "view.controller.save_draft_confirmation_popup"
+        if draft_composition is not None
+        else "model.save_draft"
+    )
+    return SavedDraftTestScenario(
+        composition=draft_composition,
+        expected_call=expected_function,
+    )
 
 
 class TestWriteBox:
@@ -107,6 +167,226 @@ class TestWriteBox:
         write_box.msg_write_box.edit_text = "random text"
 
         assert not write_box.model.send_typing_status_by_user_ids.called
+
+    @pytest.fixture(
+        params=[
+            saved_draft_factory(),
+            saved_draft_factory(composition_factory(type="stream")),
+            saved_draft_factory(composition_factory(type="private")),
+            saved_draft_factory(composition_factory(type="private", group=True)),
+        ],
+        ids=[
+            "no_saved_draft_exists",
+            "saved_stream_draft_exists",
+            "saved_private_draft_exists",
+            "saved_private_group_draft_exists",
+        ],
+    )
+    def saved_draft(self, request: FixtureRequest) -> SavedDraftTestScenario:
+        return request.param
+
+    @pytest.fixture(
+        params=[
+            (
+                composition_factory("private", recipient_same=False),
+                "dm__same_content__different_recipient",
+            ),
+            (
+                composition_factory("private", recipient_same=False, group=True),
+                "group_dm__same_content__different_recipient",
+            ),
+            (
+                composition_factory("private", content_same=False),
+                "dm__same_recipient__different_content",
+            ),
+            (
+                composition_factory("private", content_same=False, group=True),
+                "group_dm__same_recipient__different_content",
+            ),
+        ],
+    )
+    def private_draft_composition(
+        self, request: FixtureRequest
+    ) -> Tuple[List[Composition], List[str]]:
+        param, _ = request.param
+        return param
+
+    @pytest.fixture(
+        params=[
+            (
+                composition_factory("stream", recipient_same=False),
+                "stream__same_content__different_recipient",
+            ),
+            (
+                composition_factory("stream", content_same=False),
+                "stream__same_recipient__different_content",
+            ),
+        ],
+    )
+    def stream_draft_composition(
+        self, request: FixtureRequest
+    ) -> Tuple[List[Composition], List[str]]:
+        param, _ = request.param
+        return param
+
+    @pytest.fixture
+    def private_draft_setup_fixture(
+        self,
+        mocker: MockerFixture,
+        private_draft_composition: PrivateComposition,
+        write_box: WriteBox,
+    ) -> Tuple[MockerFixture, WriteBox]:
+        mocker.patch(MODULE + ".WriteBox.update_recipients")
+        write_box.msg_write_box = mocker.Mock(
+            edit_text=private_draft_composition["content"]
+        )
+        write_box.to_write_box = mocker.Mock()
+        write_box.compose_box_status = "open_with_private"
+        write_box.recipient_user_ids = private_draft_composition["to"]
+        return mocker, write_box
+
+    @pytest.fixture
+    def stream_draft_setup_fixture(
+        self,
+        mocker: MockerFixture,
+        stream_draft_composition: StreamComposition,
+        write_box: WriteBox,
+    ) -> Tuple[MockerFixture, WriteBox]:
+        mocker.patch(MODULE + ".WriteBox.update_recipients")
+        write_box.msg_write_box = mocker.Mock(
+            edit_text=stream_draft_composition["content"]
+        )
+        write_box.stream_write_box = mocker.Mock(
+            edit_text=stream_draft_composition["to"]
+        )
+        write_box.title_write_box = mocker.Mock(
+            edit_text=stream_draft_composition["subject"]
+        )
+        write_box.compose_box_status = "open_with_stream"
+        write_box.stream_id = 1
+        return mocker, write_box
+
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    def test_keypress_SAVE_AS_DRAFT_stream(
+        self,
+        key: str,
+        saved_draft: SavedDraftTestScenario,
+        stream_draft_composition: StreamComposition,
+        stream_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        draft_saved_in_current_session = saved_draft.composition
+        _, write_box = stream_draft_setup_fixture
+        expected_function = reduce(
+            getattr, saved_draft.expected_call.split("."), write_box
+        )
+        write_box.model.session_draft_message.return_value = (
+            draft_saved_in_current_session
+        )
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.model.session_draft_message.assert_called()
+        expected_function.assert_called_once_with(stream_draft_composition)
+
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    def test_keypress_SAVE_AS_DRAFT_private__valid_recipients(
+        self,
+        key: str,
+        mocker: MockerFixture,
+        private_draft_composition: PrivateComposition,
+        saved_draft: SavedDraftTestScenario,
+        private_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        draft_saved_in_current_session = saved_draft.composition
+        mocker, write_box = private_draft_setup_fixture
+        expected_function = reduce(
+            getattr, saved_draft.expected_call.split("."), write_box
+        )
+        mocker.patch(
+            MODULE + ".WriteBox._tidy_valid_recipients_and_notify_invalid_ones",
+            return_value=True,
+        )
+        write_box.model.session_draft_message.return_value = (
+            draft_saved_in_current_session
+        )
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.model.session_draft_message.assert_called()
+        expected_function.assert_called_once_with(private_draft_composition)
+
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    def test_keypress_SAVE_AS_DRAFT_private__invalid_recipients(
+        self,
+        key: str,
+        mocker: MockerFixture,
+        saved_draft: SavedDraftTestScenario,
+        private_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        draft_saved_in_current_session = saved_draft.composition
+        mocker, write_box = private_draft_setup_fixture
+        mocker.patch(
+            MODULE + ".WriteBox._tidy_valid_recipients_and_notify_invalid_ones",
+            return_value=False,
+        )
+        write_box.model.session_draft_message.return_value = (
+            draft_saved_in_current_session
+        )
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.model.save_draft.assert_not_called()
+        write_box.view.controller.save_draft_confirmation_popup.assert_not_called()
+
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    def test_keypress_SAVE_AS_DRAFT_stream__already_saved(
+        self,
+        key: str,
+        stream_draft_composition: StreamComposition,
+        stream_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        write_box.model.session_draft_message.return_value = stream_draft_composition
+        _, write_box = stream_draft_setup_fixture
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.model.session_draft_message.assert_called()
+        write_box.view.controller.save_draft_confirmation_popup.assert_not_called()
+
+    @pytest.mark.parametrize("key", keys_for_command("SAVE_AS_DRAFT"))
+    def test_keypress_SAVE_AS_DRAFT_private__same_as_saved_draft(
+        self,
+        key: str,
+        mocker: MockerFixture,
+        private_draft_composition: PrivateComposition,
+        private_draft_setup_fixture: Tuple[MockerFixture, WriteBox],
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        mocker, write_box = private_draft_setup_fixture
+        mocker.patch(
+            MODULE + ".WriteBox._tidy_valid_recipients_and_notify_invalid_ones",
+            return_value=True,
+        )
+        write_box.model.session_draft_message.return_value = private_draft_composition
+
+        size = widget_size(write_box)
+        write_box.keypress(size, key)
+
+        write_box.model.session_draft_message.assert_called()
+        write_box.view.controller.save_draft_confirmation_popup.assert_not_called()
 
     @pytest.mark.parametrize(
         "text, state, is_valid_stream, required_typeahead",
