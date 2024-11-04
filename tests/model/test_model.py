@@ -1914,6 +1914,7 @@ class TestModel:
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[])
+        self.controller.is_in_empty_narrow = False
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
@@ -1933,6 +1934,7 @@ class TestModel:
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
+        self.controller.is_in_empty_narrow = False
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
@@ -1955,6 +1957,7 @@ class TestModel:
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
+        self.controller.is_in_empty_narrow = False
         mocker.patch(MODULE + ".create_msg_box_list", return_value=["msg_w"])
         model.notify_user = mocker.Mock()
         set_count = mocker.patch(MODULE + ".set_count")
@@ -2098,6 +2101,7 @@ class TestModel:
         (
             self.controller.view.left_panel.is_in_topic_view_with_stream_id.return_value
         ) = False
+        self.controller.is_in_empty_narrow = False
         model.notify_user = mocker.Mock()
         model.narrow = narrow
         model.recipients = recipients
