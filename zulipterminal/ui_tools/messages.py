@@ -771,6 +771,11 @@ class MessageBox(urwid.Pile):
                     else "No poll question provided. Please add one via the web app."
                 )
 
+                if not self.poll_question:
+                    # If no poll question is provided, set a message to display
+                    # in Poll Results popup.
+                    self.poll_question = "No poll question provided."
+
                 if self.poll_options:
                     max_votes_len = max(
                         len(str(len(option["votes"])))
