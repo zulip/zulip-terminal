@@ -29,7 +29,7 @@ from zulipterminal.config.symbols import (
     TIME_MENTION_MARKER,
 )
 from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
-from zulipterminal.helper import get_unused_fence
+from zulipterminal.helper import MessageInfoPopupContent, get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
@@ -1147,7 +1147,12 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.middle_column.set_focus("footer")
         elif is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
-                self.message, self.topic_links, self.message_links, self.time_mentions
+                self.message,
+                MessageInfoPopupContent(
+                    topic_links=self.topic_links,
+                    message_links=self.message_links,
+                    time_mentions=self.time_mentions,
+                ),
             )
         elif is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
