@@ -679,6 +679,7 @@ class TestMessageBox:
         metadata = dict(
             server_url=SERVER_URL,
             message_links=OrderedDict(),
+            code_snippets=list(),
             time_mentions=list(),
             bq_len=0,
         )

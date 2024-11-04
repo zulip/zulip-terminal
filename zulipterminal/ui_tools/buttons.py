@@ -686,6 +686,59 @@ class MessageLinkButton(urwid.Button):
                 self.controller.exit_popup()
 
 
+class CodeSnippetButton(urwid.Button):
+    def __init__(
+        self,
+        *,
+        controller: Any,
+        caption: str,
+        display_code: List[Tuple[str, str]],
+        copy_code: str,
+        display_attr: Optional[str],
+    ) -> None:
+        self.controller = controller
+        self.model = self.controller.model
+        self.view = self.controller.view
+        self.caption = caption
+        self.display_code = display_code
+        self.copy_code = copy_code
+
+        super().__init__("")
+
+        self.update_widget(display_code, display_attr)
+        urwid.connect_signal(self, "click", self.copy_to_clipboard)
+
+    def update_widget(
+        self, display_code: List[Tuple[str, str]], display_attr: Optional[str] = None
+    ) -> None:
+        """
+        Overrides the existing button widget for custom styling.
+        """
+        # Set cursor position next to len(caption) to avoid the cursor.
+        icon = urwid.SelectableIcon(display_code, cursor_position=len(display_code) + 1)
+        self._w = urwid.AttrMap(icon, display_attr, focus_map="selected")
+
+    def copy_to_clipboard(self, *_: Any) -> None:
+        self.controller.copy_to_clipboard(self.copy_code, "code")
+
+    def get_code_from_snippet(
+        self, snippet_list: List[Tuple[str, str]]
+    ) -> Tuple[List[Tuple[str, str]], str]:
+        """
+        Returns two lines of code from the given snippet list
+        as to summarize the code and
+        returns code in text format to be copied.
+        """
+        snippet = snippet_list[:]
+        no_of_lines = 0
+        code = "".join(snip[1] for snip in snippet)
+        for index, snip in enumerate(snippet):
+            no_of_lines += 1 if "\n" in snip[1] else 0
+            if no_of_lines == 2:
+                return snippet[:index] + [("pygments:w", "...")], code
+        return snippet, code
+
+
 class EditModeButton(urwid.Button):
     def __init__(self, *, controller: Any, width: int) -> None:
         self.controller = controller
