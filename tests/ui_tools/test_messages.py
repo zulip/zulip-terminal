@@ -71,7 +71,7 @@ class TestMessageBox:
         with pytest.raises(RuntimeError):
             MessageBox(message, self.model, None)
 
-    def test_private_message_to_self(self, mocker):
+    def test_direct_message_to_self(self, mocker):
         message = dict(
             type="private",
             display_recipient=[
@@ -85,13 +85,13 @@ class TestMessageBox:
         )
         self.model.user_email = "foo@zulip.com"
         mocker.patch(
-            MODULE + ".MessageBox._is_private_message_to_self", return_value=True
+            MODULE + ".MessageBox._is_direct_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
-        msg_box._is_private_message_to_self.assert_called_once_with()
+        msg_box._is_direct_message_to_self.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "content, expected_markup",
@@ -827,7 +827,7 @@ class TestMessageBox:
         ids=[
             "different_stream_before",
             "different_topic_before",
-            "PM_before",
+            "DM_before",
         ],
     )
     def test_main_view_generates_stream_header(
@@ -883,11 +883,11 @@ class TestMessageBox:
             {"type": "stream"},
         ],
         ids=[
-            "larger_pm_group",
+            "larger_dm_group",
             "stream_before",
         ],
     )
-    def test_main_view_generates_PM_header(
+    def test_main_view_generates_DM_header(
         self, mocker, message, to_vary_in_last_message
     ):
         last_message = dict(message, **to_vary_in_last_message)
@@ -1041,7 +1041,7 @@ class TestMessageBox:
         assert header_bar[0].text.startswith(assert_header_bar)
         assert search_bar.text_to_fill == assert_search_bar
 
-    # Assume recipient (PM/stream/topic) header is unchanged below
+    # Assume recipient (DM/stream/topic) header is unchanged below
     @pytest.mark.parametrize(
         "message",
         [

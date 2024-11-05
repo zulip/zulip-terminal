@@ -2,7 +2,7 @@
 
 This tutorial shows how typing indicator was implemented in the client. The process for adding a new feature to zulip terminal varies greatly depending on the feature. This tutorial is intended to make you familiar with the general process.
 
-Since the typing indicator data for the other user in pm cannot be generated locally, it should be received from the client.
+Since the typing indicator data for the other user in dm cannot be generated locally, it should be received from the client.
 
 A quick google search for `zulip typing indicator` points to https://zulip.readthedocs.io/en/latest/subsystems/typing-indicators.html. This document explains how typing indicator is implemented on the web client and is useful in understanding how typing indicator works internally.
 
@@ -113,7 +113,7 @@ To check for the above conditions, we create a function in `ui.py`:
 ```python
 
     def handle_typing_event(self, event: Dict['str', Any]) -> None:
-        # If the user is in pm narrow with the person typing
+        # If the user is in dm narrow with the person typing
         if len(self.model.narrow) == 1 and\
                 self.model.narrow[0][0] == 'pm_with' and\
                 event['sender']['email'] in self.model.narrow[0][1].split(','):

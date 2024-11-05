@@ -370,10 +370,10 @@ class Model:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
         elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
+            ids = index["direct_msg_ids"]
         elif narrow[0][0] == "pm-with":
             recipients = self.recipients
-            ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
+            ids = index["direct_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":
@@ -1556,7 +1556,7 @@ class Model:
 
     def _handle_typing_event(self, event: Event) -> None:
         """
-        Handle typing notifications (in private messages)
+        Handle typing notifications (in direct messages)
         """
         assert event["type"] == "typing"
 
@@ -1569,7 +1569,7 @@ class Model:
         sender_email = event["sender"]["email"]
         sender_id = event["sender"]["user_id"]
 
-        # If the user is in pm narrow with the person typing
+        # If the user is in dm narrow with the person typing
         # and the person typing isn't the user themselves
         if (
             len(narrow) == 1
