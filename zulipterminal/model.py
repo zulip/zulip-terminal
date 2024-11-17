@@ -1835,18 +1835,28 @@ class Model:
         if message_id in self.index["messages"]:
             message = self.index["messages"][message_id]
             if event["op"] == "add":
-                message["reactions"].append(
-                    {
-                        key: event.get(key)
-                        for key in [
-                            "user",
-                            "reaction_type",
-                            "emoji_code",
-                            "emoji_name",
-                            "user_id",
-                        ]
+                reactions_entry = {
+                    key: event.get(key)
+                    for key in [
+                        "user",
+                        "reaction_type",
+                        "emoji_code",
+                        "emoji_name",
+                        "user_id",
+                    ]
+                }
+
+                # Convert from reaction event schema to message reactions schema
+                if isinstance(event.get("user"), dict) and isinstance(
+                    reactions_entry["user"], dict
+                ):
+                    reactions_entry["user"] = {
+                        **event["user"],
+                        "id": event["user"].get("user_id"),
                     }
-                )
+                    reactions_entry["user"].pop("user_id", None)
+
+                message["reactions"].append(reactions_entry)
             else:
                 for reaction in message["reactions"]:
                     reaction_user_id = (
