@@ -408,7 +408,8 @@ class UpdateMessagesLocationEvent(BaseUpdateMessageEvent):
 class ReactionEvent(TypedDict):
     type: Literal["reaction"]
     op: str
-    user: Dict[str, Any]  # 'email', 'user_id', 'full_name'
+    user_id: NotRequired[int]  # Added in Zulip v3.0, ZFL 2 replacing 'user'
+    user: NotRequired[Dict[str, Any]]  # 'email', 'user_id', 'full_name'
     reaction_type: EmojiType
     emoji_code: str
     emoji_name: str
