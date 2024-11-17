@@ -1838,7 +1838,13 @@ class Model:
                 message["reactions"].append(
                     {
                         key: event.get(key)
-                        for key in ["user", "reaction_type", "emoji_code", "emoji_name"]
+                        for key in [
+                            "user",
+                            "reaction_type",
+                            "emoji_code",
+                            "emoji_name",
+                            "user_id",
+                        ]
                     }
                 )
             else:
