@@ -2862,21 +2862,25 @@ class TestModel:
 
     @pytest.fixture
     def reaction_event_factory(self):
-        def _factory(*, op: str, message_id: int):
-            return {
-                "emoji_code": "1f44d",
+        def _factory(*, op: str, message_id: int, user=None, user_id=None):
+            base_event = {
                 "id": 2,
-                "user": {
-                    "email": "Foo@zulip.com",
-                    "user_id": 5140,
-                    "full_name": "Foo Boo",
-                },
+                "emoji_code": "1f44d",
                 "reaction_type": "unicode_emoji",
                 "message_id": message_id,
                 "emoji_name": "thumbs_up",
                 "type": "reaction",
                 "op": op,
             }
+            if user is not None:
+                base_event["user"] = {
+                    "email": "Foo@zulip.com",
+                    "user_id": 5140,
+                    "full_name": "Foo Boo",
+                }
+            if user_id is not None:
+                base_event["user_id"] = user_id
+            return base_event
 
         return _factory
 
@@ -2885,28 +2889,45 @@ class TestModel:
         """
         Generate index for reaction tests based on minimal specification
 
-        Input is a list of pairs, of a message-id and a list of reaction tuples
+        Input:
+        - msgs: A list of tuples where each tuple contains:
+            - A message ID
+            - A list of reaction tuples, where each reaction includes:
+                - user_id
+                - reaction_type
+                - emoji_code
+                - emoji_name
+        - schema: Defines the fields present in the reaction
+        (e.g., "with_user", "with_user_id", "with_both")
+
         NOTE: reactions as None indicate not indexed, [] indicates no reaction
         """
         MsgsType = List[Tuple[int, Optional[List[Tuple[int, str, str, str]]]]]
 
-        def _factory(msgs: MsgsType):
+        def _factory(msgs: MsgsType, schema="with_user"):
+            def build_reaction(user_id, type, code, name):
+                reaction = {
+                    "reaction_type": type,
+                    "emoji_code": code,
+                    "emoji_name": name,
+                }
+                if schema in {"with_user", "with_both"}:
+                    reaction["user"] = {
+                        "email": f"User email #{user_id}",
+                        "full_name": f"User #{user_id}",
+                        "id": user_id,
+                    }
+                if schema in {"with_user_id", "with_both"}:
+                    reaction["user_id"] = user_id
+                return reaction
+
             return {
                 "messages": {
                     message_id: {
                         "id": message_id,
                         "content": f"message content {message_id}",
                         "reactions": [
-                            {
-                                "user": {
-                                    "email": f"User email #{user_id}",
-                                    "full_name": f"User #{user_id}",
-                                    "id": user_id,
-                                },
-                                "reaction_type": type,
-                                "emoji_code": code,
-                                "emoji_name": name,
-                            }
+                            build_reaction(user_id, type, code, name)
                             for user_id, type, code, name in reactions
                         ],
                     }
@@ -2918,6 +2939,12 @@ class TestModel:
         return _factory
 
     @pytest.mark.parametrize("op", ["add", "remove"])
+    @pytest.mark.parametrize(
+        "reaction_event_schema", ["with_user", "with_user_id", "with_both"]
+    )
+    @pytest.mark.parametrize(
+        "reaction_schema", ["with_user", "with_user_id", "with_both"]
+    )
     def test__handle_reaction_event_not_in_index(
         self,
         mocker,
@@ -2925,18 +2952,30 @@ class TestModel:
         reaction_event_factory,
         reaction_event_index_factory,
         op,
+        reaction_event_schema,
+        reaction_schema,
         unindexed_message_id=1,
     ):
-        reaction_event = reaction_event_factory(
-            op=op,
-            message_id=unindexed_message_id,
-        )
+        common_args = {
+            "op": op,
+            "message_id": unindexed_message_id,
+        }
+        if reaction_event_schema == "with_user":
+            reaction_event = reaction_event_factory(**common_args, user=True)
+        elif reaction_event_schema == "with_user_id":
+            reaction_event = reaction_event_factory(**common_args, user_id=5140)
+        else:
+            reaction_event = reaction_event_factory(
+                **common_args, user=True, user_id=5140
+            )
+
         model.index = reaction_event_index_factory(
             [
                 (unindexed_message_id, None),  # explicitly exclude
                 (2, [(1, "unicode_emoji", "1232", "thumbs_up")]),
                 (3, []),
-            ]
+            ],
+            reaction_schema,
         )
         model._update_rendered_view = mocker.Mock()
         previous_index = deepcopy(model.index)
@@ -2954,6 +2993,12 @@ class TestModel:
             ("remove", 1),  # Removed emoji doesn't match, so length remains 1
         ],
     )
+    @pytest.mark.parametrize(
+        "reaction_event_schema", ["with_user", "with_user_id", "with_both"]
+    )
+    @pytest.mark.parametrize(
+        "reaction_schema", ["with_user", "with_user_id", "with_both"]
+    )
     def test__handle_reaction_event_for_msg_in_index(
         self,
         mocker,
@@ -2961,18 +3006,30 @@ class TestModel:
         reaction_event_factory,
         reaction_event_index_factory,
         op,
+        reaction_event_schema,
+        reaction_schema,
         expected_number_after,
         event_message_id=1,
     ):
-        reaction_event = reaction_event_factory(
-            op=op,
-            message_id=event_message_id,
-        )
+        common_args = {
+            "op": op,
+            "message_id": event_message_id,
+        }
+        if reaction_event_schema == "with_user":
+            reaction_event = reaction_event_factory(**common_args, user=True)
+        elif reaction_event_schema == "with_user_id":
+            reaction_event = reaction_event_factory(**common_args, user_id=5140)
+        else:
+            reaction_event = reaction_event_factory(
+                **common_args, user=True, user_id=5140
+            )
+
         model.index = reaction_event_index_factory(
             [
                 (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
                 (2, []),
-            ]
+            ],
+            reaction_schema,
         )
         model._update_rendered_view = mocker.Mock()
 
