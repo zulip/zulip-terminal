@@ -1603,6 +1603,22 @@ class TestMessageBox:
                         {
                             "emoji_name": "thumbs_up",
                             "emoji_code": "1f44d",
+                            "user_id": 1001,
+                            "reaction_type": "unicode_emoji",
+                        },
+                    ],
+                },
+                "  :thumbs_up: 1  ",
+                [
+                    ("reaction", 17),
+                ],
+            ),
+            case(
+                {
+                    "reactions": [
+                        {
+                            "emoji_name": "thumbs_up",
+                            "emoji_code": "1f44d",
                             "user": {
                                 "email": "iago@zulip.com",
                                 "full_name": "Iago",
