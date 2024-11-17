@@ -453,17 +453,11 @@ class Model:
     def toggle_message_reaction(
         self, message: Message, reaction_to_toggle: str
     ) -> None:
-        # Check if reaction_to_toggle is a valid original/alias
         assert reaction_to_toggle in self.all_emoji_names
 
         for emoji_name, emoji_data in self.active_emoji_data.items():
-            if (
-                reaction_to_toggle == emoji_name
-                or reaction_to_toggle in emoji_data["aliases"]
-            ):
-                # Found the emoji to toggle. Store its code/type and dont check further
-                emoji_code = emoji_data["code"]
-                emoji_type = emoji_data["type"]
+            if reaction_to_toggle in (emoji_name, *emoji_data["aliases"]):
+                emoji_code, emoji_type = emoji_data["code"], emoji_data["type"]
                 break
 
         reaction_to_toggle_spec = dict(
@@ -1838,25 +1832,22 @@ class Model:
         """
         assert event["type"] == "reaction"
         message_id = event["message_id"]
-        # If the message is indexed
         if message_id in self.index["messages"]:
             message = self.index["messages"][message_id]
             if event["op"] == "add":
                 message["reactions"].append(
                     {
-                        "user": event["user"],
-                        "reaction_type": event["reaction_type"],
-                        "emoji_code": event["emoji_code"],
-                        "emoji_name": event["emoji_name"],
+                        key: event.get(key)
+                        for key in ["user", "reaction_type", "emoji_code", "emoji_name"]
                     }
                 )
             else:
-                emoji_code = event["emoji_code"]
                 for reaction in message["reactions"]:
                     # Since Who reacted is not displayed,
                     # remove the first one encountered
-                    if reaction["emoji_code"] == emoji_code:
+                    if reaction["emoji_code"] == event["emoji_code"]:
                         message["reactions"].remove(reaction)
+                        break
 
             self.index["messages"][message_id] = message
             self._update_rendered_view(message_id)
