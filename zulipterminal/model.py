@@ -1849,9 +1849,20 @@ class Model:
                 )
             else:
                 for reaction in message["reactions"]:
-                    # Since Who reacted is not displayed,
-                    # remove the first one encountered
-                    if reaction["emoji_code"] == event["emoji_code"]:
+                    reaction_user_id = (
+                        reaction["user"]["id"]
+                        if "user" in reaction
+                        else reaction["user_id"]
+                    )
+                    event_user_id = (
+                        event["user"]["user_id"]
+                        if event.get("user") and isinstance(event["user"], dict)
+                        else event["user_id"]
+                    )
+                    if (
+                        reaction["emoji_code"] == event["emoji_code"]
+                        and reaction_user_id == event_user_id
+                    ):
                         message["reactions"].remove(reaction)
                         break
 
