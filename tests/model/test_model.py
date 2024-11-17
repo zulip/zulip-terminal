@@ -2832,7 +2832,7 @@ class TestModel:
                                 "user": {
                                     "email": f"User email #{user_id}",
                                     "full_name": f"User #{user_id}",
-                                    "user_id": user_id,
+                                    "id": user_id,
                                 },
                                 "reaction_type": type,
                                 "emoji_code": code,
