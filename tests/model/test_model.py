@@ -2987,17 +2987,117 @@ class TestModel:
         assert not model._update_rendered_view.called
 
     @pytest.mark.parametrize(
-        "op, expected_number_after",
-        [
-            ("add", 2),
-            ("remove", 1),  # Removed emoji doesn't match, so length remains 1
-        ],
-    )
-    @pytest.mark.parametrize(
         "reaction_event_schema", ["with_user", "with_user_id", "with_both"]
     )
     @pytest.mark.parametrize(
         "reaction_schema", ["with_user", "with_user_id", "with_both"]
+    )
+    @pytest.mark.parametrize(
+        "msgs, op, expected_number_after",
+        [
+            case(
+                [
+                    (2, [(5140, "unicode_emoji", "2764", "heart")]),
+                    (1, []),
+                ],
+                "add",
+                2,
+                id="single_reaction_add",
+            ),
+            case(
+                [
+                    (2, [(5140, "unicode_emoji", "1f44d", "thumbs_up")]),
+                    (1, []),
+                ],
+                "remove",
+                0,
+                id="single_reaction_remove",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (3478, "unicode_emoji", "1f44d", "thumbs_up"),
+                            (3479, "unicode_emoji", "1f44d", "thumbs_up"),
+                        ],
+                    ),
+                ],
+                "add",
+                3,
+                id="same_emoji_different_users_add",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (3478, "unicode_emoji", "1f44d", "thumbs_up"),
+                            (5140, "unicode_emoji", "1f44d", "thumbs_up"),
+                        ],
+                    ),
+                ],
+                "remove",
+                1,
+                id="same_emoji_different_users_remove",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (5140, "zulip_extra_emoji", "zulip", "zulip"),
+                            (3478, "unicode_emoji", "2764", "heart"),
+                        ],
+                    ),
+                ],
+                "add",
+                3,
+                id="different_emoji_different_users_add",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (5140, "unicode_emoji", "1f44d", "thumbs_up"),
+                            (3478, "unicode_emoji", "2764", "heart"),
+                        ],
+                    ),
+                ],
+                "remove",
+                1,
+                id="different_emoji_different_users_remove",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (5140, "zulip_extra_emoji", "zulip", "zulip"),
+                            (5140, "unicode_emoji", "2764", "heart"),
+                        ],
+                    ),
+                ],
+                "add",
+                3,
+                id="different_emoji_same_user_add",
+            ),
+            case(
+                [
+                    (
+                        2,
+                        [
+                            (5140, "unicode_emoji", "1f44d", "thumbs_up"),
+                            (5140, "unicode_emoji", "5678", "heart"),
+                        ],
+                    ),
+                ],
+                "remove",
+                1,
+                id="different_emoji_same_user_remove",
+            ),
+        ],
     )
     def test__handle_reaction_event_for_msg_in_index(
         self,
@@ -3008,8 +3108,9 @@ class TestModel:
         op,
         reaction_event_schema,
         reaction_schema,
+        msgs,
         expected_number_after,
-        event_message_id=1,
+        event_message_id=2,
     ):
         common_args = {
             "op": op,
@@ -3024,13 +3125,7 @@ class TestModel:
                 **common_args, user=True, user_id=5140
             )
 
-        model.index = reaction_event_index_factory(
-            [
-                (1, [(1, "unicode_emoji", "1232", "thumbs_up")]),
-                (2, []),
-            ],
-            reaction_schema,
-        )
+        model.index = reaction_event_index_factory(msgs, reaction_schema)
         model._update_rendered_view = mocker.Mock()
 
         model._handle_reaction_event(reaction_event)
