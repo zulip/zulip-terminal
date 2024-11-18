@@ -790,6 +790,75 @@ class TestModel:
 
         assert has_reacted == expected_has_user_reacted
 
+    @pytest.mark.parametrize(
+        "user_data, expected_user_id",
+        [
+            case({"user_id": 456}, 456, id="reaction_event_user_id"),
+            case(
+                {"user": {"user_id": 123}},
+                123,
+                id="reaction_event_user",
+            ),
+            case(
+                {"user_id": 101},
+                101,
+                id="reaction_user_id",
+            ),
+            case(
+                {"user": {"id": 202}},
+                202,
+                id="reaction_user",
+            ),
+        ],
+    )
+    def test_get_user_id_from_reaction_success(
+        self,
+        model: Model,
+        user_data: Dict[str, Any],
+        expected_user_id: int,
+    ):
+        reaction = {
+            "type": "reaction",
+            "op": "add",
+            "reaction_type": "unicode_emoji",
+            "emoji_code": "1f44d",
+            "emoji_name": "thumbs_up",
+            "message_id": "24757",
+            **user_data,
+        }
+        assert model.get_user_id_from_reaction(reaction) == expected_user_id
+
+    @pytest.mark.parametrize(
+        "user_data",
+        [
+            case({}, id="reaction_event_missing_user_id_user"),
+            case(
+                {"user": {"id": "not_an_int"}},
+                id="invalid_user",
+            ),
+            case(
+                {"user_id": "not_an_int"},
+                id="invalid_user_id",
+            ),
+        ],
+    )
+    def test_get_user_id_from_reaction_failure(
+        self,
+        model: Model,
+        user_data: Dict[str, Any],
+    ):
+        reaction = {
+            "type": "reaction",
+            "op": "add",
+            "reaction_type": "unicode_emoji",
+            "emoji_code": "1f44d",
+            "emoji_name": "thumbs_up",
+            "message_id": "24757",
+            **user_data,
+        }
+        with pytest.raises((AssertionError, AttributeError)):
+            model.get_user_id_from_reaction(reaction)
+
     @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
     @pytest.mark.parametrize("status", ["start", "stop"])
     def test_send_typing_status_by_user_ids(
