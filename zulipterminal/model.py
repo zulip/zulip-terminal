@@ -48,6 +48,7 @@ from zulipterminal.api_types import (
     MessagesFlagChange,
     PrivateComposition,
     PrivateMessageUpdateRequest,
+    ReactionEvent,
     RealmEmojiData,
     RealmUser,
     StreamComposition,
@@ -479,17 +480,21 @@ class Model:
         for reaction in message["reactions"]:
             if reaction["emoji_code"] != emoji_code:
                 continue
-            # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
-            # check both the reaction.user.{user_id/id} fields too for pre v3 support.
-            user = reaction.get("user", {})
-            has_user_reacted = (
-                user.get("user_id", None) == self.user_id
-                or user.get("id", None) == self.user_id
-                or reaction.get("user_id", None) == self.user_id
-            )
-            if has_user_reacted:
+            user_id = self.get_user_id_from_reaction(reaction)
+            if user_id == self.user_id:
                 return True
         return False
+
+    def get_user_id_from_reaction(
+        self, reaction: Union[Dict[str, Any], ReactionEvent]
+    ) -> int:
+        # The reaction.user_id field was added in Zulip v3.0, ZFL 2 so we need to
+        # check both the reaction.user.{user_id/id} fields too for pre v3 support.
+        user = reaction.get("user", {})
+        assert isinstance(user, dict)
+        user_id = user.get("id") or user.get("user_id") or reaction.get("user_id")
+        assert isinstance(user_id, int)
+        return user_id
 
     def session_draft_message(self) -> Optional[Composition]:
         return deepcopy(self._draft)
@@ -1859,16 +1864,8 @@ class Model:
                 message["reactions"].append(reactions_entry)
             else:
                 for reaction in message["reactions"]:
-                    reaction_user_id = (
-                        reaction["user"]["id"]
-                        if "user" in reaction
-                        else reaction["user_id"]
-                    )
-                    event_user_id = (
-                        event["user"]["user_id"]
-                        if event.get("user") and isinstance(event["user"], dict)
-                        else event["user_id"]
-                    )
+                    reaction_user_id = self.get_user_id_from_reaction(reaction)
+                    event_user_id = self.get_user_id_from_reaction(event)
                     if (
                         reaction["emoji_code"] == event["emoji_code"]
                         and reaction_user_id == event_user_id
