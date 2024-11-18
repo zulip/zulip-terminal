@@ -272,10 +272,8 @@ class MessageBox(urwid.Pile):
             my_user_id = self.model.user_id
             reaction_stats = defaultdict(list)
             for reaction in reactions:
-                user_id = int(reaction["user"].get("id", -1))
-                if user_id == -1:
-                    user_id = int(reaction["user"]["user_id"])
-                user_name = reaction["user"]["full_name"]
+                user_id = self.model.get_user_id_from_reaction(reaction)
+                user_name = self.model._all_users_by_id[user_id]["full_name"]
                 if user_id == my_user_id:
                     user_name = "You"
                 reaction_stats[reaction["emoji_name"]].append((user_id, user_name))
