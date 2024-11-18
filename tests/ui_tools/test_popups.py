@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from unittest.mock import patch
 
 import pytest
 from pytest import param as case
@@ -1169,21 +1170,13 @@ class TestMsgInfoView:
                     {
                         "emoji_name": "zulip",
                         "emoji_code": "zulip",
-                        "user": {
-                            "email": "iago@zulip.com",
-                            "full_name": "Iago",
-                            "id": 5,
-                        },
+                        "user_id": 5,
                         "reaction_type": "zulip_extra_emoji",
                     },
                     {
                         "emoji_name": "zulip",
                         "emoji_code": "zulip",
-                        "user": {
-                            "email": "AARON@zulip.com",
-                            "full_name": "aaron",
-                            "id": 1,
-                        },
+                        "user_id": 1,
                         "reaction_type": "zulip_extra_emoji",
                     },
                     {
@@ -1207,18 +1200,37 @@ class TestMsgInfoView:
     ) -> None:
         varied_message = message_fixture
         varied_message.update(to_vary_in_each_message)
-        self.msg_info_view = MsgInfoView(
-            self.controller,
-            varied_message,
-            "Message Information",
-            OrderedDict(),
-            OrderedDict(),
-            list(),
-        )
-        # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
-        # + 4 reactions (excluding 'Message Links').
-        expected_height = 14
-        assert self.msg_info_view.height == expected_height
+
+        mock_all_users_by_id = {
+            1: {"full_name": "aaron"},
+            5: {"full_name": "Iago"},
+        }
+
+        def mock_get_user_id(reaction: Dict[str, Any]) -> int:
+            if "user_id" in reaction:
+                return reaction["user_id"]
+            return reaction["user"]["id"]
+
+        with patch.object(
+            self.controller.model,
+            "get_user_id_from_reaction",
+            side_effect=mock_get_user_id,
+        ), patch.object(
+            self.controller.model, "_all_users_by_id", mock_all_users_by_id
+        ):
+            self.msg_info_view = MsgInfoView(
+                self.controller,
+                varied_message,
+                "Message Information",
+                OrderedDict(),
+                OrderedDict(),
+                list(),
+            )
+
+            # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
+            # + 4 reactions (excluding 'Message Links').
+            expected_height = 14
+            assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
         [

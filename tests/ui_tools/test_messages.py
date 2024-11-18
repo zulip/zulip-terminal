@@ -1,5 +1,6 @@
 from collections import OrderedDict, defaultdict
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 import pytz
@@ -1614,60 +1615,6 @@ class TestMessageBox:
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
                             "user": {
-                                "email": "iago@zulip.com",
-                                "full_name": "Iago",
-                                "id": 5,
-                            },
-                            "reaction_type": "zulip_extra_emoji",
-                        },
-                        {
-                            "emoji_name": "zulip",
-                            "emoji_code": "zulip",
-                            "user": {
-                                "email": "AARON@zulip.com",
-                                "full_name": "aaron",
-                                "id": 1,
-                            },
-                            "reaction_type": "zulip_extra_emoji",
-                        },
-                        {
-                            "emoji_name": "heart",
-                            "emoji_code": "2764",
-                            "user": {
-                                "email": "iago@zulip.com",
-                                "full_name": "Iago",
-                                "id": 5,
-                            },
-                            "reaction_type": "unicode_emoji",
-                        },
-                    ],
-                },
-                " :thumbs_up: 1   :zulip: 2   :heart: 1  ",
-                [
-                    ("reaction", 15),
-                    (None, 1),
-                    ("reaction_mine", 11),
-                    (None, 1),
-                    ("reaction", 11),
-                ],
-            ),
-            case(
-                {
-                    "reactions": [
-                        {
-                            "emoji_name": "thumbs_up",
-                            "emoji_code": "1f44d",
-                            "user": {
-                                "email": "iago@zulip.com",
-                                "full_name": "Iago",
-                                "id": 5,
-                            },
-                            "reaction_type": "unicode_emoji",
-                        },
-                        {
-                            "emoji_name": "zulip",
-                            "emoji_code": "zulip",
-                            "user": {
                                 "email": "AARON@zulip.com",
                                 "full_name": "aaron",
                                 "id": 1,
@@ -1701,31 +1648,19 @@ class TestMessageBox:
                         {
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
-                            "user": {
-                                "email": "iago@zulip.com",
-                                "full_name": "Iago",
-                                "id": 5,
-                            },
+                            "user_id": 5,
                             "reaction_type": "unicode_emoji",
                         },
                         {
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
-                            "user": {
-                                "email": "AARON@zulip.com",
-                                "full_name": "aaron",
-                                "id": 1,
-                            },
+                            "user_id": 1,
                             "reaction_type": "zulip_extra_emoji",
                         },
                         {
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
-                            "user": {
-                                "email": "shivam@zulip.com",
-                                "full_name": "Shivam",
-                                "id": 6,
-                            },
+                            "user_id": 6,
                             "reaction_type": "unicode_emoji",
                         },
                     ],
@@ -1741,31 +1676,19 @@ class TestMessageBox:
                         {
                             "emoji_name": "heart",
                             "emoji_code": "2764",
-                            "user": {
-                                "email": "iago@zulip.com",
-                                "full_name": "Iago",
-                                "id": 5,
-                            },
+                            "user_id": 5,
                             "reaction_type": "unicode_emoji",
                         },
                         {
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
-                            "user": {
-                                "email": "AARON@zulip.com",
-                                "full_name": "aaron",
-                                "id": 1,
-                            },
+                            "user_id": 1,
                             "reaction_type": "zulip_extra_emoji",
                         },
                         {
                             "emoji_name": "zulip",
                             "emoji_code": "zulip",
-                            "user": {
-                                "email": "shivam@zulip.com",
-                                "full_name": "Shivam",
-                                "id": 6,
-                            },
+                            "user_id": 6,
                             "reaction_type": "unicode_emoji",
                         },
                     ],
@@ -1821,10 +1744,26 @@ class TestMessageBox:
         msg_box = MessageBox(varied_message, self.model, None)
         reactions = to_vary_in_each_message["reactions"]
 
-        reactions_view = msg_box.reactions_view(reactions)
+        mock_all_users_by_id = {
+            1: {"full_name": "aaron"},
+            5: {"full_name": "Iago"},
+            6: {"full_name": "Shivam"},
+        }
 
-        assert reactions_view.original_widget.text == expected_text
-        assert reactions_view.original_widget.attrib == expected_attributes
+        def mock_get_user_id(reaction):
+            if "user_id" in reaction:
+                return reaction["user_id"]
+            return reaction["user"]["id"]
+
+        with patch.object(
+            self.model,
+            "get_user_id_from_reaction",
+            side_effect=mock_get_user_id,
+        ), patch.object(self.model, "_all_users_by_id", mock_all_users_by_id):
+            reactions_view = msg_box.reactions_view(reactions)
+
+            assert reactions_view.original_widget.text == expected_text
+            assert reactions_view.original_widget.attrib == expected_attributes
 
     @pytest.mark.parametrize(
         "message_links, expected_text, expected_attrib, expected_footlinks_width",

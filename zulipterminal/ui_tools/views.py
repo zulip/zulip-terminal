@@ -1657,7 +1657,12 @@ class MsgInfoView(PopUpView):
             msg_info.append(("Time mentions", time_mentions))
         if msg["reactions"]:
             reactions = sorted(
-                (reaction["emoji_name"], reaction["user"]["full_name"])
+                (
+                    reaction["emoji_name"],
+                    controller.model._all_users_by_id[
+                        controller.model.get_user_id_from_reaction(reaction)
+                    ]["full_name"],
+                )
                 for reaction in msg["reactions"]
             )
             grouped_reactions: Dict[str, str] = dict()
