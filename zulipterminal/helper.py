@@ -40,9 +40,9 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.platform_code import (
-    PLATFORM,
     normalized_file_path,
-    successful_GUI_return_code,
+    process_media_tool,
+    validate_GUI_exit_status,
 )
 
 
@@ -785,18 +785,10 @@ def process_media(controller: Any, link: str) -> None:
     )
     media_path = download_media(controller, link, show_download_status)
     media_path = normalized_file_path(media_path)
-    tool = ""
 
-    # TODO: Add support for other platforms as well.
-    if PLATFORM == "WSL":
-        tool = "explorer.exe"
-        # Modifying path to backward slashes instead of forward slashes
-        media_path = media_path.replace("/", "\\")
-    elif PLATFORM == "Linux":
-        tool = "xdg-open"
-    elif PLATFORM == "MacOS":
-        tool = "open"
-    else:
+    tool = process_media_tool()
+
+    if tool == "invalid":
         controller.report_error("Media not supported for this platform")
         return
 
@@ -841,7 +833,7 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
             command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
-        if exit_status != successful_GUI_return_code():
+        if validate_GUI_exit_status(exit_status) == "failure":
             error = [
                 " The tool ",
                 ("footer_contrast", tool),

@@ -6,7 +6,7 @@ from zulipterminal.platform_code import (
     SupportedPlatforms,
     normalized_file_path,
     notify,
-    successful_GUI_return_code,
+    validate_GUI_exit_status,
 )
 
 
@@ -76,20 +76,25 @@ def test_notify_quotes(
 
 
 @pytest.mark.parametrize(
-    "platform, expected_return_code",
+    "platform, return_code, expected_return_value",
     [
-        ("Linux", 0),
-        ("MacOS", 0),
-        ("WSL", 1),
+        ("Linux", 0, "success"),
+        ("MacOS", 0, "success"),
+        ("WSL", 1, "success"),
+        ("Linux", 1, "failure"),
+        ("MacOS", 1, "failure"),
+        # NOTE: explorer.exe (WSL) always returns a non-zero exit code (1),
+        # so we do not test for it.
     ],
 )
-def test_successful_GUI_return_code(
+def test_validate_GUI_exit_status(
     mocker: MockerFixture,
     platform: SupportedPlatforms,
-    expected_return_code: int,
+    return_code: int,
+    expected_return_value: str,
 ) -> None:
     mocker.patch(MODULE + ".PLATFORM", platform)
-    assert successful_GUI_return_code() == expected_return_code
+    assert validate_GUI_exit_status(return_code) == expected_return_value
 
 
 @pytest.mark.parametrize(
