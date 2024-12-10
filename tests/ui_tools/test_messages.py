@@ -1073,11 +1073,11 @@ class TestMessageBox:
         "expected_header, to_vary_in_last_message",
         [
             (
-                [STATUS_INACTIVE, "alice", " ", "DAYDATETIME"],
+                [STATUS_INACTIVE, "alice", " ", " ", "DAYDATETIME"],
                 {"sender_full_name": "bob"},
             ),
-            ([" ", " ", " ", "DAYDATETIME"], {"timestamp": 1532103779}),
-            ([STATUS_INACTIVE, "alice", " ", "DAYDATETIME"], {"timestamp": 0}),
+            ([" ", " ", " ", " ", "DAYDATETIME"], {"timestamp": 1532103779}),
+            ([STATUS_INACTIVE, "alice", " ", " ", "DAYDATETIME"], {"timestamp": 0}),
         ],
         ids=[
             "show_author_as_authors_different",
@@ -1118,10 +1118,10 @@ class TestMessageBox:
 
         msg_box = MessageBox(this_msg, self.model, last_msg)
 
-        expected_header[2] = output_date_time
+        expected_header[3] = output_date_time
         if current_year > 2018:
-            expected_header[2] = "2018 - " + expected_header[2]
-        expected_header[3] = "*" if starred_msg == "this" else " "
+            expected_header[3] = "2018 - " + expected_header[3]
+        expected_header[4] = "*" if starred_msg == "this" else " "
 
         view_components = msg_box.main_view()
 
@@ -1734,12 +1734,14 @@ class TestMessageBox:
     )
     def test_reactions_view(
         self,
+        mocker,
         message_fixture,
         to_vary_in_each_message,
         expected_text,
         expected_attributes,
     ):
         self.model.user_id = 1
+        mocker.patch.object(self.model, "is_guest_user", return_value=False)
         varied_message = dict(message_fixture, **to_vary_in_each_message)
         msg_box = MessageBox(varied_message, self.model, None)
         reactions = to_vary_in_each_message["reactions"]

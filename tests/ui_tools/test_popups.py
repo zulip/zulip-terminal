@@ -976,6 +976,7 @@ class TestMsgInfoView:
             "Tue Mar 13 10:55:22",
             "Tue Mar 13 10:55:37",
         ]
+        mocker.patch.object(self.controller.model, "is_guest_user", return_value=False)
         self.msg_info_view = MsgInfoView(
             self.controller,
             message_fixture,
