@@ -146,10 +146,12 @@ class Model:
             # zulip_version and zulip_feature_level are always returned in
             # POST /register from Feature level 3.
             "zulip_version",
+            "alert_words",
         ]
 
         # Events desired with their corresponding callback
         self.event_actions: Dict[str, Callable[[Event], None]] = {
+            "alert_words": self._handle_alert_words_event,
             "message": self._handle_message_event,
             "update_message": self._handle_update_message_event,
             "reaction": self._handle_reaction_event,
@@ -189,6 +191,8 @@ class Model:
         self.visual_notified_streams: Set[int] = set()
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
+
+        self._alert_words: List[str] = self.initial_data["alert_words"]
 
         # NOTE: The date_created field of stream has been added in feature
         # level 30, server version 4. For consistency we add this field
@@ -246,6 +250,9 @@ class Model:
 
     def user_settings(self) -> UserSettings:
         return deepcopy(self._user_settings)
+
+    def get_alert_words(self) -> List[str]:
+        return self._alert_words.copy()
 
     def message_retention_days_response(self, days: int, org_default: bool) -> str:
         suffix = " [Organization default]" if org_default else ""
@@ -1552,6 +1559,13 @@ class Model:
                     else:
                         for user_id in user_ids:
                             subscribers.remove(user_id)
+
+    def _handle_alert_words_event(self, event: Event) -> None:
+        """
+        Handle alert_words events
+        """
+        assert event["type"] == "alert_words"
+        self._alert_words = event["alert_words"]
 
     def _handle_typing_event(self, event: Event) -> None:
         """
