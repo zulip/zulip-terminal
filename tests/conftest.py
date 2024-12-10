@@ -450,7 +450,7 @@ def msg_template_factory(
     """
     Generate message template for all types of messages(stream/PM/group)
     """
-    # TODO: Separate Message into distinct types for stream and private messages.
+    # TODO: Separate Message into distinct types for stream and direct messages.
     message = Message(
         id=msg_id,
         sender_full_name="Foo Foo",
@@ -500,31 +500,31 @@ def extra_stream_msg_template() -> Message:
 
 
 @pytest.fixture
-def pm_template() -> Message:
+def dm_template() -> Message:
     recipients = display_recipient_factory([(5179, "Boo Boo"), (5140, "Foo Foo")])
     return msg_template_factory(537287, "private", 1520918736, recipients=recipients)
 
 
 @pytest.fixture
-def group_pm_template() -> Message:
+def group_dm_template() -> Message:
     recipients = display_recipient_factory(
         [(5179, "Boo Boo"), (5140, "Foo Foo"), (5180, "Bar Bar")]
     )
     return msg_template_factory(537288, "private", 1520918737, recipients=recipients)
 
 
-@pytest.fixture(params=["pm_template", "group_pm_template"])
-def private_message_fixture(request: Any) -> Message:
+@pytest.fixture(params=["dm_template", "group_dm_template"])
+def direct_message_fixture(request: Any) -> Message:
     return request.getfixturevalue(request.param)
 
 
 @pytest.fixture(
-    params=["stream_msg_template", "pm_template", "group_pm_template"],
+    params=["stream_msg_template", "dm_template", "group_dm_template"],
     ids=["stream_message", "pm_message", "group_pm_message"],
 )
 def message_fixture(request: Any) -> Message:
     """
-    Acts as a parametrize fixture for stream msg, pms and group_pms.
+    Acts as a parametrize fixture for stream msg, dms and group_pms.
     """
     # `request` currently does not have an exported Pytest type.
     # TODO: Use the exported type when it's made available.
@@ -535,8 +535,8 @@ def message_fixture(request: Any) -> Message:
 @pytest.fixture
 def messages_successful_response(
     stream_msg_template: Message,
-    pm_template: Message,
-    group_pm_template: Message,
+    dm_template: Message,
+    group_dm_template: Message,
 ) -> Dict[str, Any]:
     """
     A successful response from a /messages API query.
@@ -546,8 +546,8 @@ def messages_successful_response(
             "anchor": 10000000000000000,
             "messages": [
                 stream_msg_template,
-                pm_template,
-                group_pm_template,
+                dm_template,
+                group_dm_template,
             ],
             "result": "success",
             "msg": "",
@@ -1060,7 +1060,7 @@ def initial_index() -> Index:
 
 @pytest.fixture
 def empty_index(
-    stream_msg_template: Message, pm_template: Message, group_pm_template: Message
+    stream_msg_template: Message, dm_template: Message, group_dm_template: Message
 ) -> Index:
     return deepcopy(
         Index(
@@ -1068,8 +1068,8 @@ def empty_index(
             all_msg_ids=set(),
             starred_msg_ids=set(),
             mentioned_msg_ids=set(),
-            private_msg_ids=set(),
-            private_msg_ids_by_user_ids=defaultdict(set, {}),
+            direct_msg_ids=set(),
+            direct_msg_ids_by_user_ids=defaultdict(set, {}),
             stream_msg_ids_by_stream_id=defaultdict(set, {}),
             topic_msg_ids=defaultdict(dict, {}),
             edited_messages=set(),
@@ -1079,8 +1079,8 @@ def empty_index(
                 lambda: {},
                 {
                     stream_msg_template["id"]: stream_msg_template,
-                    pm_template["id"]: pm_template,
-                    group_pm_template["id"]: group_pm_template,
+                    dm_template["id"]: dm_template,
+                    group_dm_template["id"]: group_dm_template,
                 },
             ),
         )
@@ -1104,7 +1104,7 @@ def index_stream(empty_index: Index) -> Index:
     """
     index = empty_index
     index["stream_msg_ids_by_stream_id"] = defaultdict(set, {205: {537286}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
@@ -1140,26 +1140,26 @@ def index_multiple_topic_msg(
 @pytest.fixture
 def index_user(empty_index: Index) -> Index:
     """
-    Expected index of initial_data when model.narrow = [['pm_with',
+    Expected index of initial_data when model.narrow = [['dm_with',
                                                          'boo@zulip.com'],
     """
     user_ids = frozenset({5179, 5140})
     index = empty_index
-    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537287}})
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
 @pytest.fixture
 def index_user_multiple(empty_index: Index) -> Index:
     """
-    Expected index of initial_data when model.narrow = [['pm_with',
+    Expected index of initial_data when model.narrow = [['dm_with',
                                             'boo@zulip.com, bar@zulip.com'],
     """
     user_ids = frozenset({5179, 5140, 5180})
     index = empty_index
-    index["private_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids_by_user_ids"] = defaultdict(set, {user_ids: {537288}})
+    index["direct_msg_ids"] = {537287, 537288}
     return index
 
 
@@ -1178,7 +1178,7 @@ def index_all_starred(empty_index: Index, request: Any) -> Index:
     msgs_with_stars = request.param
     index = empty_index
     index["starred_msg_ids"] = msgs_with_stars
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
             msg["flags"].append("starred")
@@ -1192,7 +1192,7 @@ def index_all_mentions(
     mentioned_messages, wildcard_mentioned_messages = mentioned_messages_combination
     index = empty_index
     index["mentioned_msg_ids"] = mentioned_messages | wildcard_mentioned_messages
-    index["private_msg_ids"] = {537287, 537288}
+    index["direct_msg_ids"] = {537287, 537288}
     for msg_id, msg in index["messages"].items():
         if msg_id in mentioned_messages and "mentioned" not in msg["flags"]:
             msg["flags"].append("mentioned")
@@ -1468,7 +1468,7 @@ def classified_unread_counts() -> Dict[str, Any]:
     """
     return {
         "all_msg": 12,
-        "all_pms": 8,
+        "all_dms": 8,
         "unread_topics": {
             (1000, "Some general unread topic"): 3,
             (99, "Some private unread topic"): 1,
