@@ -33,7 +33,11 @@ from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
-from zulipterminal.widget import find_widget_type, process_todo_widget
+from zulipterminal.widget import (
+    find_widget_type,
+    process_poll_widget,
+    process_todo_widget,
+)
 
 
 if typing.TYPE_CHECKING:
@@ -65,6 +69,7 @@ class MessageBox(urwid.Pile):
         self.topic_links: Dict[str, Tuple[str, int, bool]] = dict()
         self.time_mentions: List[Tuple[str, str]] = list()
         self.last_message = last_message
+        self.widget_type: str = ""
         # if this is the first message
         if self.last_message is None:
             self.last_message = defaultdict(dict)
@@ -729,9 +734,9 @@ class MessageBox(urwid.Pile):
             )
 
         if self.message.get("submessages"):
-            widget_type = find_widget_type(self.message.get("submessages", []))
+            self.widget_type = find_widget_type(self.message.get("submessages", []))
 
-            if widget_type == "todo":
+            if self.widget_type == "todo":
                 title, tasks = process_todo_widget(self.message.get("submessages", []))
 
                 todo_widget = "<strong>To-do</strong>\n" + f"<strong>{title}</strong>"
@@ -752,6 +757,39 @@ class MessageBox(urwid.Pile):
                 # The original raw content can be fetched if needed,
                 # though it's not very useful.
                 self.message["content"] = todo_widget
+
+            elif self.widget_type == "poll":
+                self.poll_question, self.poll_options = process_poll_widget(
+                    self.message.get("submessages", [])
+                )
+
+                poll_widget = (
+                    f"<strong>Poll\n{self.poll_question}</strong>"
+                    if self.poll_question
+                    else "No poll question provided. Please add one via the web app."
+                )
+
+                if not self.poll_question:
+                    # If no poll question is provided, set a message to display
+                    # in Poll Results popup.
+                    self.poll_question = "No poll question provided."
+
+                if self.poll_options:
+                    max_votes_len = max(
+                        len(str(len(option["votes"])))
+                        for option in self.poll_options.values()
+                    )
+
+                    for option_info in self.poll_options.values():
+                        padded_votes = f"{len(option_info['votes']):>{max_votes_len}}"
+                        poll_widget += f"\n[ {padded_votes} ] {option_info['option']}"
+                else:
+                    poll_widget += "\nNo options provided."
+                    "Please add them via the web app."
+
+                # Update the message content with the latest poll_widget,
+                # similar to the todo_widget above.
+                self.message["content"] = poll_widget
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
@@ -1151,4 +1189,6 @@ class MessageBox(urwid.Pile):
             self.model.controller.show_emoji_picker(self.message)
         elif is_command_key("MSG_SENDER_INFO", key):
             self.model.controller.show_msg_sender_info(self.message["sender_id"])
+        elif is_command_key("SHOW_POLL_VOTES", key) and self.widget_type == "poll":
+            self.model.controller.show_poll_vote(self.poll_question, self.poll_options)
         return key

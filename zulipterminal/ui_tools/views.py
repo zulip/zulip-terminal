@@ -23,6 +23,7 @@ from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
 from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
+    INVALID_MARKER,
     PINNED_STREAMS_DIVIDER,
     SECTION_DIVIDER_LINE,
 )
@@ -2176,3 +2177,37 @@ class EmojiPickerView(PopUpView):
             self.controller.exit_popup()
             return key
         return super().keypress(size, key)
+
+
+class PollResultsView(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        poll_question: str,
+        poll_options: Dict[str, Dict[str, Any]],
+    ) -> None:
+        poll_results_content: List[Tuple[str, List[Tuple[str, str]]]] = [("", [])]
+
+        for option_key, option_data in poll_options.items():
+            option_text = option_data["option"]
+            if len(option_text) >= 13:
+                option_text = option_text[:10] + "…"
+            voter_names = option_data["votes"]
+
+            voters_display = (
+                "\n".join(map(str, voter_names))
+                if voter_names
+                else f"{INVALID_MARKER} No votes yet"
+            )
+
+            poll_results_content[0][1].append((option_text, voters_display))
+
+        popup_width, column_widths = self.calculate_table_widths(
+            poll_results_content, len(poll_question)
+        )
+
+        widgets = self.make_table_with_categories(poll_results_content, column_widths)
+
+        super().__init__(
+            controller, widgets, "SHOW_POLL_VOTES", popup_width, poll_question
+        )
