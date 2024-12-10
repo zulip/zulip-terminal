@@ -1742,6 +1742,9 @@ class Model:
                 msg_w = msg_w_list[0]
 
             if self.current_narrow_contains_message(message):
+                if self.controller.is_in_empty_narrow:
+                    del msg_log[0]
+                    self.controller.is_in_empty_narrow = False
                 msg_log.append(msg_w)
 
             self.controller.update_screen()

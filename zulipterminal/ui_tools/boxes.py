@@ -1014,7 +1014,7 @@ class MessageSearchBox(urwid.Pile):
                 self.text_box,
             ]
         )
-        self.msg_narrow = urwid.Text("DONT HIDE")
+        self.msg_narrow = urwid.Text("")
         self.recipient_bar = urwid.LineBox(
             self.msg_narrow,
             title="Current message recipients",
@@ -1032,9 +1032,11 @@ class MessageSearchBox(urwid.Pile):
             return key
 
         elif is_command_key("EXECUTE_SEARCH", key):
-            self.controller.exit_editor_mode()
-            self.controller.search_messages(self.text_box.edit_text)
-            self.controller.view.middle_column.set_focus("body")
+            if self.controller.search_messages(self.text_box.edit_text):
+                self.controller.exit_editor_mode()
+                self.controller.view.middle_column.set_focus("body")
+            else:
+                self.controller.report_error(["No results found."])
             return key
 
         key = super().keypress(size, key)
