@@ -26,6 +26,8 @@
 |Scroll down|<kbd>PgDn</kbd> / <kbd>J</kbd>|
 |Go to bottom / Last message|<kbd>End</kbd> / <kbd>G</kbd>|
 |Trigger the selected entry|<kbd>Enter</kbd> / <kbd>Space</kbd>|
+|Open recent conversations|<kbd>^</kbd>|
+|Search recent conversations|<kbd>Ctrl+f</kbd>|
 
 ## Switching Messages View
 |Command|Key Combination|

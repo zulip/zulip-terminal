@@ -24,7 +24,7 @@ from zulipterminal.config.symbols import (
     MENTIONED_MESSAGES_MARKER,
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
-    TIME_MENTION_MARKER
+    TIME_MENTION_MARKER,
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
@@ -130,9 +130,7 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"All messages           [{primary_display_key_for_command('ALL_MESSAGES')}]"
-        )
+        button_text = f"All messages           [{primary_display_key_for_command('ALL_MESSAGES')}]"# noqa: E501
 
         super().__init__(
             controller=controller,
@@ -146,7 +144,9 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages        [{primary_display_key_for_command('ALL_PM')}]"
+        button_text = (
+            f"Direct messages        [{primary_display_key_for_command('ALL_PM')}]"
+        )
 
         super().__init__(
             controller=controller,
@@ -160,9 +160,7 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"Mentions               [{primary_display_key_for_command('ALL_MENTIONS')}]"
-        )
+        button_text = f"Mentions               [{primary_display_key_for_command('ALL_MENTIONS')}]"# noqa: E501
 
         super().__init__(
             controller=controller,
@@ -172,11 +170,11 @@ class MentionedButton(TopButton):
             show_function=controller.narrow_to_all_mentions,
             count=count,
         )
-class TimeMentionedButton(TopButton):  
+
+
+class TimeMentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"Recent Conversations  [{primary_display_key_for_command('OPEN_RECENT_CONVERSATIONS')}]"
-        )
+        button_text = f"Recent Conversations  [{primary_display_key_for_command('OPEN_RECENT_CONVERSATIONS')}]"# noqa: E501
         super().__init__(
             controller=controller,
             prefix_markup=("title", TIME_MENTION_MARKER),

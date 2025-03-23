@@ -72,7 +72,7 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(
             self, self.model, self.write_box, self.search_box
         )
-        
+
         return urwid.LineBox(
             self.middle_column,
             title="Messages",

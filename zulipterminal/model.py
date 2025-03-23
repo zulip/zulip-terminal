@@ -8,7 +8,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 from typing import (
     Any,
     Callable,
@@ -314,7 +314,6 @@ class Model:
             frozenset(["pm_with"]): [["pm-with", pm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
-
         }
         for narrow_param, narrow in valid_narrows.items():
             if narrow_param == selected_params:
@@ -856,7 +855,6 @@ class Model:
                 message["topic_links"] = topic_links
 
         return message
-        
 
     def fetch_message_history(
         self, message_id: int
@@ -1095,10 +1093,13 @@ class Model:
                 if stream["name"] == stream_name
                 if sub != self.user_id
             ]
+
     def group_recent_conversations(self) -> List[Dict[str, Any]]:
         """Return the 10 most recent stream conversations."""
         # Filter for stream messages
-        stream_msgs = [m for m in self.index["messages"].values() if m["type"] == "stream"]
+        stream_msgs = [
+            m for m in self.index["messages"].values() if m["type"] == "stream"
+        ]
         if not stream_msgs:
             return []
 
@@ -1114,11 +1115,13 @@ class Model:
         processed_conversations = []
         now = datetime.now(timezone.utc)
         for (stream_id, topic), msg_list in sorted(
-            convos.items(), key=lambda x: max(m["timestamp"] for m in x[1]), reverse=True
+            convos.items(),
+            key=lambda x: max(m["timestamp"] for m in x[1]),
+            reverse=True,
         )[:10]:
             # Map stream_id to stream name
 
-            stream_name=self.stream_name_from_id(stream_id)
+            stream_name = self.stream_name_from_id(stream_id)
             topic_name = topic if topic else "(no topic)"
 
             # Extract participants
@@ -1137,14 +1140,17 @@ class Model:
                 hours = delta.seconds // 3600
                 time_str = f"{hours} hours ago" if hours > 0 else "just now"
 
-            processed_conversations.append({
-                "stream": stream_name,
-                "topic": topic_name,
-                "participants": list(participants),
-                "time": time_str,
-            })
+            processed_conversations.append(
+                {
+                    "stream": stream_name,
+                    "topic": topic_name,
+                    "participants": list(participants),
+                    "time": time_str,
+                }
+            )
 
-        return processed_conversations    
+        return processed_conversations
+
     def _clean_and_order_custom_profile_data(
         self, custom_profile_data: Dict[str, CustomFieldValue]
     ) -> List[CustomProfileData]:
@@ -1467,7 +1473,8 @@ class Model:
             if stream["name"] == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
-    def stream_name_from_id(self,stream_id:int)->str:
+
+    def stream_name_from_id(self, stream_id: int) -> str:
         return self.stream_dict[stream_id]["name"]
 
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
