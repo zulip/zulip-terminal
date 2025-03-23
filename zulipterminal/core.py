@@ -47,6 +47,7 @@ from zulipterminal.ui_tools.views import (
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
+    
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -593,10 +594,11 @@ class Controller:
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
+        self.view.middle_column.set_view("messages")
 
         if already_narrowed and anchor is None:
             return
-
+        
         msg_id_list = self.model.get_message_ids_in_current_narrow()
 
         # If no messages are found in the current narrow

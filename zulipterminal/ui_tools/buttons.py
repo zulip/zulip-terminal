@@ -24,6 +24,7 @@ from zulipterminal.config.symbols import (
     MENTIONED_MESSAGES_MARKER,
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
+    TIME_MENTION_MARKER
 )
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
@@ -130,7 +131,7 @@ class TopButton(urwid.Button):
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = (
-            f"All messages     [{primary_display_key_for_command('ALL_MESSAGES')}]"
+            f"All messages           [{primary_display_key_for_command('ALL_MESSAGES')}]"
         )
 
         super().__init__(
@@ -145,7 +146,7 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
+        button_text = f"Direct messages        [{primary_display_key_for_command('ALL_PM')}]"
 
         super().__init__(
             controller=controller,
@@ -160,7 +161,7 @@ class PMButton(TopButton):
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = (
-            f"Mentions         [{primary_display_key_for_command('ALL_MENTIONS')}]"
+            f"Mentions               [{primary_display_key_for_command('ALL_MENTIONS')}]"
         )
 
         super().__init__(
@@ -171,12 +172,28 @@ class MentionedButton(TopButton):
             show_function=controller.narrow_to_all_mentions,
             count=count,
         )
+class TimeMentionedButton(TopButton):  
+    def __init__(self, *, controller: Any, count: int) -> None:
+        button_text = (
+            f"Recent Conversations  [{primary_display_key_for_command('OPEN_RECENT_CONVERSATIONS')}]"
+        )
+        super().__init__(
+            controller=controller,
+            prefix_markup=("title", TIME_MENTION_MARKER),
+            label_markup=(None, button_text),
+            suffix_markup=("unread_count", f" ({count})" if count > 0 else ""),
+            show_function=self.show_recent_conversations,
+            count=count,
+        )
+
+    def show_recent_conversations(self) -> None:
+        self.controller.view.middle_column.set_view("recent")
 
 
 class StarredButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
         button_text = (
-            f"Starred messages [{primary_display_key_for_command('ALL_STARRED')}]"
+            f"Starred messages       [{primary_display_key_for_command('ALL_STARRED')}]"
         )
 
         super().__init__(

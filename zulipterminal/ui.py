@@ -72,6 +72,7 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(
             self, self.model, self.write_box, self.search_box
         )
+        
         return urwid.LineBox(
             self.middle_column,
             title="Messages",
@@ -273,6 +274,8 @@ class View(urwid.WidgetWrap):
             self.pm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)
+        elif is_command_key("OPEN_RECENT_CONVERSATIONS", key):
+            self.time_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):

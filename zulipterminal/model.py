@@ -8,7 +8,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime,timezone
 from typing import (
     Any,
     Callable,
@@ -116,7 +116,6 @@ class Model:
         self.recipients: FrozenSet[Any] = frozenset()
         self.index = initial_index
         self.last_unread_pm = None
-
         self.user_id = -1
         self.user_email = ""
         self.user_full_name = ""
@@ -315,6 +314,7 @@ class Model:
             frozenset(["pm_with"]): [["pm-with", pm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
+
         }
         for narrow_param, narrow in valid_narrows.items():
             if narrow_param == selected_params:
@@ -856,6 +856,7 @@ class Model:
                 message["topic_links"] = topic_links
 
         return message
+        
 
     def fetch_message_history(
         self, message_id: int
@@ -1094,7 +1095,56 @@ class Model:
                 if stream["name"] == stream_name
                 if sub != self.user_id
             ]
+    def group_recent_conversations(self) -> List[Dict[str, Any]]:
+        """Return the 10 most recent stream conversations."""
+        # Filter for stream messages
+        stream_msgs = [m for m in self.index["messages"].values() if m["type"] == "stream"]
+        if not stream_msgs:
+            return []
 
+        # Sort messages by timestamp (most recent first)
+        stream_msgs.sort(key=lambda x: x["timestamp"], reverse=True)
+
+        # Group messages by stream and topic
+        convos = defaultdict(list)
+        for msg in stream_msgs[:50]:  # Limit to 50 recent messages
+            convos[(msg["stream_id"], msg["subject"])].append(msg)
+
+        # Process conversations into the desired format
+        processed_conversations = []
+        now = datetime.now(timezone.utc)
+        for (stream_id, topic), msg_list in sorted(
+            convos.items(), key=lambda x: max(m["timestamp"] for m in x[1]), reverse=True
+        )[:10]:
+            # Map stream_id to stream name
+
+            stream_name=self.stream_name_from_id(stream_id)
+            topic_name = topic if topic else "(no topic)"
+
+            # Extract participants
+            participants = set()
+            for msg in msg_list:
+                participants.add(msg["sender_full_name"])
+
+            # Format timestamp (using the most recent message in the conversation)
+            most_recent_msg = max(msg_list, key=lambda x: x["timestamp"])
+            timestamp = most_recent_msg["timestamp"]
+            conv_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+            delta = now - conv_time
+            if delta.days > 0:
+                time_str = f"{delta.days} days ago"
+            else:
+                hours = delta.seconds // 3600
+                time_str = f"{hours} hours ago" if hours > 0 else "just now"
+
+            processed_conversations.append({
+                "stream": stream_name,
+                "topic": topic_name,
+                "participants": list(participants),
+                "time": time_str,
+            })
+
+        return processed_conversations    
     def _clean_and_order_custom_profile_data(
         self, custom_profile_data: Dict[str, CustomFieldValue]
     ) -> List[CustomProfileData]:
@@ -1417,6 +1467,8 @@ class Model:
             if stream["name"] == stream_name:
                 return stream_id
         raise RuntimeError("Invalid stream name.")
+    def stream_name_from_id(self,stream_id:int)->str:
+        return self.stream_dict[stream_id]["name"]
 
     def stream_access_type(self, stream_id: int) -> StreamAccessType:
         if stream_id not in self.stream_dict:
