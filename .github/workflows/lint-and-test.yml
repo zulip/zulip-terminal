@@ -170,7 +170,7 @@ jobs:
           gitlint --commits FETCH_HEAD..${{ github.event.pull_request.head.sha }}
 
   base_pytest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Install & test - CPython 3.7 (ubuntu), codecov
     steps:
       - uses: actions/checkout@v4
