@@ -10,7 +10,7 @@ from zulipterminal.config.color import Background
 from zulipterminal.config.color import DefaultBoldColor as Color
 
 
-# fmt: off  
+# fmt: off
 STYLES = {
     # style_name      :  foreground                 background
     None              : (Color.WHITE,               Background.COLOR),

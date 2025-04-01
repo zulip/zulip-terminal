@@ -2,19 +2,16 @@
 Defines the `Controller`, which sets up the `Model`, `View`, and how they interact
 """
 
-import os
 import itertools
+import os
 import signal
 import sys
 import time
 import webbrowser
-import requests
 from functools import partial
 from platform import platform
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-import subprocess
-import configparser
 
 import pyperclip
 import urwid
@@ -101,19 +98,7 @@ class Controller:
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
-
-        api_key = ''
-        config_file = os.path.expanduser(config_file)
-        if os.path.exists(config_file):
-            config = configparser.ConfigParser()
-            config.read(config_file)  
-            api_config = dict(config.items('api'))
-            api_key = api_config['key']
-        command = ['python3', os.path.join(os.path.dirname(__file__), '../tools/encrypt.py'), '--decrypt', api_key]
-
-        decryped_key = subprocess.run(command, stdout=subprocess.PIPE, text=True)
-        decrypted_key= decryped_key.stdout.strip()
-        self.client = zulip.Client(config_file=config_file, client=client_identifier,api_key=decrypted_key)
+        self.client = zulip.Client(config_file=config_file, client=client_identifier)
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.

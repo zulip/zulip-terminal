@@ -7,15 +7,15 @@ from pygments.token import STANDARD_TYPES, _TokenType
 
 from zulipterminal.config.color import Background, term16
 from zulipterminal.themes import (
-    gruvbox_dark_high_contrast,
     gruvbox_dark,
-    gruvbox_light,
-    zt_blue, zt_dark, 
-    zt_light, 
+    gruvbox_dark_high_contrast,
     gruvbox_dark_low_contrast,
+    gruvbox_light,
     gruvbox_light_high_contrast,
-    gruvbox_light_low_contrast
-
+    gruvbox_light_low_contrast,
+    zt_blue,
+    zt_dark,
+    zt_light,
 )
 
 
@@ -109,7 +109,7 @@ THEMES: Dict[str, Any] = {
     "gruvbox_dark_high_contrast": gruvbox_dark_high_contrast,
     "gruvbox_dark_low_contrast": gruvbox_dark_low_contrast,
     "gruvbox_light_high_contrast": gruvbox_light_high_contrast,
-    "gruvbox_light_low_contrast": gruvbox_light_low_contrast,   
+    "gruvbox_light_low_contrast": gruvbox_light_low_contrast,
     # "sample": sample,
 }
 

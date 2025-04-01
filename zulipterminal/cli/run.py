@@ -6,12 +6,12 @@ import argparse
 import configparser
 import logging
 import os
+import re
 import stat
 import sys
 import traceback
 from enum import Enum
-import re
-from os import path  , remove
+from os import path, remove
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
