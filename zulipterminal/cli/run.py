@@ -6,7 +6,6 @@ import argparse
 import configparser
 import logging
 import os
-import re
 import stat
 import sys
 import traceback
