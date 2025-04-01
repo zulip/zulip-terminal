@@ -8,6 +8,7 @@ It uses a high-contrast color palette for better readability.
 For further details on themefiles look at the theme contribution guide.
 """
 from pygments.styles.solarized import SolarizedLightStyle
+
 from zulipterminal.themes.colors_gruvbox import DefaultBoldColor as Color
 
 
