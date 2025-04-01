@@ -10,7 +10,8 @@ import stat
 import sys
 import traceback
 from enum import Enum
-from os import path, remove
+import re
+from os import path  , remove
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests

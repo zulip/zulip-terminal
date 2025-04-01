@@ -846,7 +846,7 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w,
-            title="Streams",
+            title="Channels",
             title_attr="column_title",
             tlcorner=COLUMN_TITLE_BAR_LINE,
             tline=COLUMN_TITLE_BAR_LINE,
@@ -914,7 +914,7 @@ class LeftColumnView(urwid.Pile):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_STREAMS", key) or is_command_key(
+        if is_command_key("SEARCH_CHANNELS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             self.focus_position = 1
@@ -1115,6 +1115,8 @@ class AboutView(PopUpView):
             if server_feature_level
             else []
         )
+
+        print(self.feature_level_content)
 
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
@@ -1422,14 +1424,14 @@ class StreamInfoView(PopUpView):
             if stream["history_public_to_subscribers"]
             else "Not Public to Users"
         )
-        member_keys = ", ".join(map(repr, display_keys_for_command("STREAM_MEMBERS")))
+        member_keys = ", ".join(map(repr, display_keys_for_command("CHANNEL_MEMBERS")))
 
         self._stream_email = controller.model.get_stream_email_address(stream_id)
         if self._stream_email is None:
             stream_copy_text = "< Stream email is unavailable >"
         else:
             email_keys = ", ".join(
-                map(repr, display_keys_for_command("COPY_STREAM_EMAIL"))
+                map(repr, display_keys_for_command("COPY_CHANNEL_EMAIL"))
             )
             stream_copy_text = f"Press {email_keys} to copy Stream email address"
 

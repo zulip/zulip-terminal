@@ -46,7 +46,7 @@ class GruvBoxColor(Enum):
     LIGHT0_SOFT      = 'white           h228      #f2e5bc'
     LIGHT1           = 'white           h223      #ebdbb2'
     LIGHT4_256       = 'light_gray      h246      #a89984'
-   
+
     # Dark mode only - colors
     BRIGHT_BLUE      = 'light_blue      h109      #83a598'
     BRIGHT_GREEN     = 'light_green     h142      #b8bb26'
