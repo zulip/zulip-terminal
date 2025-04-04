@@ -18,9 +18,7 @@ from typing_extensions import Final, Literal
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
-from zulipterminal.config.keys import (
-    key_config
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.regexes import (
     REGEX_CLEANED_RECIPIENT,
     REGEX_RECIPIENT_EMAIL,
@@ -309,7 +307,10 @@ class WriteBox(urwid.Pile):
             invalid_recipients_error = [
                 "Invalid recipient(s) - " + ", ".join(invalid_recipients),
                 " - Use ",
-                ("footer_contrast", key_config.primary_display_key_for_command("AUTOCOMPLETE")),
+                (
+                    "footer_contrast",
+                    key_config.primary_display_key_for_command("AUTOCOMPLETE"),
+                ),
                 " or ",
                 (
                     "footer_contrast",
@@ -728,7 +729,7 @@ class WriteBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
-           key_config.is_command_key("AUTOCOMPLETE", key)
+            key_config.is_command_key("AUTOCOMPLETE", key)
             or key_config.is_command_key("AUTOCOMPLETE_REVERSE", key)
         ):
             # As is, this exits autocomplete even if the user chooses to resume compose.
@@ -795,9 +796,11 @@ class WriteBox(urwid.Pile):
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
-                    self.keypress(size, key_config.primary_key_for_command("EXIT_COMPOSE"))
+                    self.keypress(
+                        size, key_config.primary_key_for_command("EXIT_COMPOSE")
+                    )
                     assert self.msg_edit_state is None
-        elif key_config. is_command_key("NARROW_MESSAGE_RECIPIENT", key):
+        elif key_config.is_command_key("NARROW_MESSAGE_RECIPIENT", key):
             if self.compose_box_status == "open_with_stream":
                 self.model.controller.narrow_to_topic(
                     stream_name=self.stream_write_box.edit_text,
@@ -818,7 +821,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.report_error(
                         "Cannot narrow to message without specifying recipients."
                     )
-        elif key_config. is_command_key("EXIT_COMPOSE", key):
+        elif key_config.is_command_key("EXIT_COMPOSE", key):
             saved_draft = self.model.session_draft_message()
             self.send_stop_typing_status()
 
@@ -837,10 +840,10 @@ class WriteBox(urwid.Pile):
                 self.view.controller.exit_compose_confirmation_popup()
             else:
                 self.exit_compose_box()
-        elif key_config. is_command_key("MARKDOWN_HELP", key):
+        elif key_config.is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
-        elif key_config. is_command_key("OPEN_EXTERNAL_EDITOR", key):
+        elif key_config.is_command_key("OPEN_EXTERNAL_EDITOR", key):
             editor_command = self.view.controller.editor_command
 
             # None would indicate for shlex.split to read sys.stdin for Python < 3.12
@@ -881,7 +884,7 @@ class WriteBox(urwid.Pile):
             self.view.controller.loop.screen.start()
             return key
 
-        elif key_config. is_command_key("SAVE_AS_DRAFT", key):
+        elif key_config.is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.compose_box_status == "open_with_private":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
@@ -911,7 +914,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
-        elif key_config. is_command_key("CYCLE_COMPOSE_FOCUS", key):
+        elif key_config.is_command_key("CYCLE_COMPOSE_FOCUS", key):
             if len(self.contents) == 0:
                 return key
             header = self.header_write_box
@@ -927,7 +930,9 @@ class WriteBox(urwid.Pile):
                             invalid_stream_error = (
                                 "Invalid stream name."
                                 " Use {} or {} to autocomplete.".format(
-                                    key_config.primary_display_key_for_command("AUTOCOMPLETE"),
+                                    key_config.primary_display_key_for_command(
+                                        "AUTOCOMPLETE"
+                                    ),
                                     key_config.primary_display_key_for_command(
                                         "AUTOCOMPLETE_REVERSE"
                                     ),
@@ -997,9 +1002,7 @@ class MessageSearchBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def main_view(self) -> Any:
-        search_text = (
-            f"Search [{', '.join(key_config.display_keys_for_command('SEARCH_MESSAGES'))}]: "
-        )
+        search_text = f"Search [{', '.join(key_config.display_keys_for_command('SEARCH_MESSAGES'))}]: "
         self.text_box = ReadlineEdit(f"{search_text} ")
         # Add some text so that when packing,
         # urwid doesn't hide the widget.
@@ -1021,14 +1024,15 @@ class MessageSearchBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-           key_config. is_command_key("EXECUTE_SEARCH", key) and self.text_box.edit_text == ""
-        ) or key_config. is_command_key("CLEAR_SEARCH", key):
+            key_config.is_command_key("EXECUTE_SEARCH", key)
+            and self.text_box.edit_text == ""
+        ) or key_config.is_command_key("CLEAR_SEARCH", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
             return key
 
-        elif key_config. is_command_key("EXECUTE_SEARCH", key):
+        elif key_config.is_command_key("EXECUTE_SEARCH", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus("body")
@@ -1048,9 +1052,7 @@ class PanelSearchBox(ReadlineEdit):
     ) -> None:
         self.panel_view = panel_view
         self.search_command = search_command
-        self.search_text = (
-            f" Search [{', '.join(key_config.display_keys_for_command(search_command))}]: "
-        )
+        self.search_text = f" Search [{', '.join(key_config.display_keys_for_command(search_command))}]: "
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
         )
@@ -1077,15 +1079,21 @@ class PanelSearchBox(ReadlineEdit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-           key_config. is_command_key("EXECUTE_SEARCH", key) and self.get_edit_text() == ""
-        ) or key_config. is_command_key("CLEAR_SEARCH", key):
+            key_config.is_command_key("EXECUTE_SEARCH", key)
+            and self.get_edit_text() == ""
+        ) or key_config.is_command_key("CLEAR_SEARCH", key):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
-                self.panel_view.keypress(size, key_config.primary_key_for_command("CLEAR_SEARCH"))
-        elif key_config. is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
+                self.panel_view.keypress(
+                    size, key_config.primary_key_for_command("CLEAR_SEARCH")
+                )
+        elif (
+            key_config.is_command_key("EXECUTE_SEARCH", key)
+            and not self.panel_view.empty_search
+        ):
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")

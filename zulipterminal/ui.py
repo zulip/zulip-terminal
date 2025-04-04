@@ -9,9 +9,7 @@ from typing import Any, Dict, List, Optional
 
 import urwid
 
-from zulipterminal.config.keys import (
-    key_config
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
     AUTOHIDE_TAB_LEFT_ARROW,
@@ -106,7 +104,10 @@ class View(urwid.WidgetWrap):
             return ["Help(?): "]
         random_command = random.choice(allowed_commands)
         random_command_display_keys = ", ".join(
-            [self.key_config.display_key_for_urwid_key(key) for key in random_command["keys"]]
+            [
+                self.key_config.display_key_for_urwid_key(key)
+                for key in random_command["keys"]
+            ]
         )
         return [
             "Help(?): ",
@@ -281,9 +282,9 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 2
             self.users_view.keypress(size, key)
             return key
-        elif self.key_config.is_command_key("SEARCH_STREAMS", key) or self.key_config.is_command_key(
-            "SEARCH_TOPICS", key
-        ):
+        elif self.key_config.is_command_key(
+            "SEARCH_STREAMS", key
+        ) or self.key_config.is_command_key("SEARCH_TOPICS", key):
             # jump stream search
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)

@@ -2,6 +2,7 @@
 Defines the `Controller`, which sets up the `Model`, `View`, and how they interact
 """
 
+import configparser
 import itertools
 import os
 import signal
@@ -12,14 +13,12 @@ from functools import partial
 from platform import platform
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-import requests
-
 
 import pyperclip
+import requests
 import urwid
 import zulip
 from typing_extensions import Literal
-import configparser
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.keys import key_config
@@ -50,8 +49,7 @@ from zulipterminal.ui_tools.views import (
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
-    set_terminology
-
+    set_terminology,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -60,8 +58,10 @@ ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 SCROLL_PROMPT = "(up/down scrolls)"
 
+
 class NotAZulipOrganizationError(Exception):
     pass
+
 
 class Controller:
     """
@@ -104,7 +104,7 @@ class Controller:
         self.is_typing_notification_in_progress = False
 
         self.show_loading()
-        self.feature_level = None
+        self.feature_level = ""
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
         config_file = os.path.expanduser(config_file)
         if config_file is not None and os.path.exists(config_file):
@@ -112,10 +112,13 @@ class Controller:
             with open(config_file) as f:
                 config.read_file(f, config_file)
             if self.feature_level is None:
-                self.feature_level= self.get_feature_level(config.get("api", "site"))
-        self.terminology = 'channel' if  int(self.feature_level)>254 else 'stream'
-        key_config.set_terminology(self.terminology) #to set the terminology for key_bindings
-        set_terminology(self.terminology) #to set terminology for the UI
+                self.feature_level = self.get_feature_level(config.get("api", "site"))
+        self.terminology = "channel" if int(self.feature_level) > 254 else "stream"
+        self.key_config = key_config
+        self.key_config.set_terminology(
+            self.terminology
+        )  # to set the terminology for key_bindings
+        set_terminology(self.terminology)  # to set terminology for the UI
         self.client = zulip.Client(config_file=config_file, client=client_identifier)
         self.model = Model(self)
         self.view = View(self)
@@ -156,11 +159,11 @@ class Controller:
         self._critical_exception = critical
         os.write(self._exception_pipe, b"1")
 
-    def get_feature_level(self,realm_url: str) :
+    def get_feature_level(self, realm_url: str) -> str:
         response = requests.get(url=f"{realm_url}/api/v1/server_settings")
         if response.status_code != requests.codes.OK:
             raise NotAZulipOrganizationError(realm_url)
-        return response.json()['zulip_feature_level']
+        return response.json()["zulip_feature_level"]
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None

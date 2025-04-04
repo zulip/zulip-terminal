@@ -623,7 +623,6 @@ def main(options: Optional[List[str]] = None) -> None:
             **boolean_settings,
             debug_path=debug_path,
             editor_command=editor_command,
-            
         ).main()
     except ServerConnectionFailure as e:
         # Acts as separator between logs
