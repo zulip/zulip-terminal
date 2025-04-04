@@ -1024,8 +1024,8 @@ class TestMsgInfoView:
         ],
         ids=[
             "stream_message_id",
-            "pm_message_id",
-            "group_pm_message_id",
+            "dm_message_id",
+            "group_dm_message_id",
         ],
     )
     def test_keypress_edit_history(
