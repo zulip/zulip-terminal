@@ -8,7 +8,7 @@ labels: 'bug: crash,'
 
 
 
-<!-- If discussed in #zulip-terminal or another channel on chat.zulip.org, paste link below: -->
+<!-- If discussed in #zulip-terminal or another channel on chat.zulip.org, paste link below:  -->
 
 
 ### How is the bug triggered?
@@ -17,11 +17,15 @@ How can you reproduce the bug?
 
 
 ### Does it produce a 'traceback' or 'exception'?
-<!-- Copy/paste it between the ``` lines below: -->
+<!-- If an "Exception" popup appears, use the "Copy" option (hotkey: c on the popup) to copy the traceback
+and paste it between the ``` lines below. -->
 ```
 
 
 ```
+<!-- Otherwise, check these logs:
+   - `zulip-terminal-tracebacks.log` (main exceptions)
+   - `debug.log` (with `--debug` enabled) -->
 
 ### How are you running the application?
 Please include as many of the following as possible:
@@ -34,6 +38,9 @@ Please include as many of the following as possible:
 - **Python version (and implementation):**
   eg. 3.8, 3.9, 3.10, ... (implementation is likely to be eg. CPython, or PyPy)
 
-If possible, please provide details from the `About` menu: (hotkey: Meta + ?)
-(this can provide some of the details above)
+<!-- Most of these above details can be copied from the `About` menu (hotkey: Meta + ?).
+Press c on the popup to copy the information to the clipboard and paste it below. -->
+```
+
+```
 
