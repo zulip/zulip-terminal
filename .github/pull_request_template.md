@@ -8,6 +8,11 @@
 <!-- Do you not understand something? Are you unsure about a certain approach? Want feedback? -->
 - [ ] 
 
+### Documentation updates    <!-- DELETE SECTION IF NOT APPLICABLE -->
+<!-- Does this PR require updates to documentation? -->
+- [ ] Documentation updated
+- [ ] No documentation changes required
+
 ### External discussion & connections
 <!-- [x] all that apply, specifying topic and adding numbers after # for issues/PRs -->
 - [ ] Discussed in **#zulip-terminal** in `topic`
