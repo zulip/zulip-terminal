@@ -244,6 +244,7 @@ jobs:
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.10', OS: ubuntu-latest, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
+          - {PYTHON: '3.x', OS: windows-latest, NAME: "CPython 3.x [latest] (windows)", EXPECT: "unsupported"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
       PYTHON: ${{ matrix.env.PYTHON }}
