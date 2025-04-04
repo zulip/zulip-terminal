@@ -458,7 +458,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'msg_info',
     },
     'SHOW_POLL_VOTES': {
-        'keys': ['w'],
+        'keys': ['M'],
         'help_text': 'Show/hide poll voter list',
         'key_category': 'msg_info',
     },
