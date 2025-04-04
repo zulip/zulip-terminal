@@ -766,7 +766,14 @@ class Model:
             self.index = index_messages(response["messages"], self, self.index)
             narrow_str = repr(self.narrow)
             if first_anchor and response["anchor"] != 10000000000000000:
-                self.index["pointer"][narrow_str] = response["anchor"]
+                msg_id_list = self.get_message_ids_in_current_narrow()
+                sorted_msg_id_list = sorted(
+                    msg_id_list, key=lambda id: self.index["messages"][id]["timestamp"]
+                )
+                if response["anchor"] in sorted_msg_id_list:
+                    self.index["pointer"][narrow_str] = sorted_msg_id_list.index(
+                        response["anchor"]
+                    )
             if "found_newest" in response:
                 just_found_last_msg = response["found_newest"]
             else:
