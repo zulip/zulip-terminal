@@ -30,7 +30,7 @@
 ## Switching Messages View
 |Command|Key Combination|
 | :--- | :---: |
-|View the stream of the current message|<kbd>s</kbd>|
+|View the channel of the current message|<kbd>s</kbd>|
 |View the topic of the current message|<kbd>S</kbd>|
 |Zoom in/out the message's conversation context|<kbd>z</kbd>|
 |Switch message view to the compose box target|<kbd>Meta</kbd> + <kbd>.</kbd>|
@@ -46,8 +46,8 @@
 | :--- | :---: |
 |Search users|<kbd>w</kbd>|
 |Search messages|<kbd>/</kbd>|
-|Search streams|<kbd>q</kbd>|
-|Search topics in a stream|<kbd>q</kbd>|
+|Search channels|<kbd>q</kbd>|
+|Search topics in a channel|<kbd>q</kbd>|
 |Search emojis from emoji picker|<kbd>p</kbd>|
 |Submit search and browse results|<kbd>Enter</kbd>|
 |Clear search in current panel|<kbd>Esc</kbd>|
@@ -63,12 +63,12 @@
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
 
-## Stream list actions
+## channel list actions
 |Command|Key Combination|
 | :--- | :---: |
-|Toggle topics in a stream|<kbd>t</kbd>|
-|Mute/unmute streams|<kbd>m</kbd>|
-|Show/hide stream information & modify settings|<kbd>i</kbd>|
+|Toggle topics in a channel|<kbd>t</kbd>|
+|Mute/unmute channels|<kbd>m</kbd>|
+|Show/hide channel information & modify settings|<kbd>i</kbd>|
 
 ## User list actions
 |Command|Key Combination|
@@ -84,7 +84,7 @@
 |Reply mentioning the sender of the current message|<kbd>@</kbd>|
 |Reply quoting the current message text|<kbd>></kbd>|
 |Reply directly to the sender of the current message|<kbd>R</kbd>|
-|New message to a stream|<kbd>c</kbd>|
+|New message to a channel|<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
 
 ## Writing a message
@@ -93,7 +93,7 @@
 |Cycle through recipient and content boxes|<kbd>Tab</kbd>|
 |Send a message|<kbd>Ctrl</kbd> + <kbd>d</kbd> / <kbd>Meta</kbd> + <kbd>Enter</kbd>|
 |Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
-|Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
+|Autocomplete @mentions, #channel_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
@@ -123,11 +123,11 @@
 |Delete previous character|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
 |Swap with previous character|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
 
-## Stream information (press i to view info of a stream)
+## channel information (press i to view info of a channel)
 |Command|Key Combination|
 | :--- | :---: |
-|Show/hide stream members|<kbd>m</kbd>|
-|Copy stream email to clipboard|<kbd>c</kbd>|
+|Show/hide channel members|<kbd>m</kbd>|
+|Copy channel email to clipboard|<kbd>c</kbd>|
 
 ## Message information (press i to view info of a message)
 |Command|Key Combination|

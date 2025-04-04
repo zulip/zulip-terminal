@@ -17,16 +17,41 @@ from urwid.command_map import (
     command_map,
 )
 
-
 class KeyBinding(TypedDict):
     keys: List[str]
     help_text: str
     excluded_from_random_tips: NotRequired[bool]
     key_category: str
 
+class InvalidCommand(Exception):
+    pass
 
-# fmt: off
-KEY_BINDINGS: Dict[str, KeyBinding] = {
+
+class KeyConfig:
+    def __init__(self) -> None:
+        self.terminology: str = None  # Default terminology
+        self.key_bindings: Dict[str, KeyBinding] = {}
+        self.help_categories: Dict[str, str] = {}
+
+        self.ZT_TO_URWID_CMD_MAPPING = {
+        "GO_UP": CURSOR_UP,
+        "GO_DOWN": CURSOR_DOWN,
+        "GO_LEFT": CURSOR_LEFT,
+        "GO_RIGHT": CURSOR_RIGHT,
+        "SCROLL_UP": CURSOR_PAGE_UP,
+        "SCROLL_DOWN": CURSOR_PAGE_DOWN,
+        "GO_TO_BOTTOM": CURSOR_MAX_RIGHT,
+        "ACTIVATE_BUTTON": ACTIVATE,
+        }
+
+    def set_terminology(self, terminology: str) -> None:
+        """
+        Sets the terminology dynamically and updates dependent values.
+        """
+        self.terminology = terminology
+
+        # Update key bindings and help categories
+        self.KEY_BINDINGS: Dict[str, KeyBinding] = {
     # Key that is displayed in the UI is determined by the method
     # primary_key_for_command. (Currently the first key in the list)
 
@@ -134,7 +159,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_MESSAGE': {
         'keys': ['c'],
-        'help_text': 'New message to a stream',
+        'help_text': f'New message to a {self.terminology}',
         'key_category': 'open_compose',
     },
     'PRIVATE_MESSAGE': {
@@ -159,7 +184,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'AUTOCOMPLETE': {
         'keys': ['ctrl f'],
-        'help_text': ('Autocomplete @mentions, #stream_names, :emoji:'
+        'help_text': (f'Autocomplete @mentions, #{self.terminology}_names, :emoji:'
                       ' and topics'),
         'key_category': 'compose_box',
     },
@@ -175,7 +200,7 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_NARROW': {
         'keys': ['s'],
-        'help_text': 'View the stream of the current message',
+        'help_text': f'View the {self.terminology} of the current message',
         'key_category': 'narrowing',
     },
     'TOPIC_NARROW': {
@@ -206,8 +231,8 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'TOGGLE_TOPIC': {
         'keys': ['t'],
-        'help_text': 'Toggle topics in a stream',
-        'key_category': 'stream_list',
+        'help_text': f'Toggle topics in a {self.terminology}',
+        'key_category': f'{self.terminology}_list',
     },
     'ALL_MESSAGES': {
         'keys': ['a', 'esc'],
@@ -251,12 +276,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'SEARCH_STREAMS': {
         'keys': ['q'],
-        'help_text': 'Search streams',
+        'help_text': f'Search {self.terminology}s',
         'key_category': 'searching',
     },
     'SEARCH_TOPICS': {
         'keys': ['q'],
-        'help_text': 'Search topics in a stream',
+        'help_text': f'Search topics in a {self.terminology}',
         'key_category': 'searching',
     },
     'SEARCH_EMOJIS': {
@@ -277,8 +302,8 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'TOGGLE_MUTE_STREAM': {
         'keys': ['m'],
-        'help_text': 'Mute/unmute streams',
-        'key_category': 'stream_list',
+        'help_text': f'Mute/unmute {self.terminology}s',
+        'key_category': f'{self.terminology}_list',
     },
     'THUMBS_UP': {
         'keys': ['+'],
@@ -315,21 +340,21 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     },
     'STREAM_INFO': {
         'keys': ['i'],
-        'help_text': 'Show/hide stream information & modify settings',
-        'key_category': 'stream_list',
+        'help_text': f'Show/hide {self.terminology} information & modify settings',
+        'key_category': f'{self.terminology}_list',
     },
     'STREAM_MEMBERS': {
         'keys': ['m'],
-        'help_text': 'Show/hide stream members',
+        'help_text': f'Show/hide {self.terminology} members',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_info',
+        'key_category': f'{self.terminology}_info',
     },
     'COPY_STREAM_EMAIL': {
         'keys': ['c'],
         'help_text':
-            'Copy stream email to clipboard',
+            f'Copy {self.terminology} email to clipboard',
         'excluded_from_random_tips': True,
-        'key_category': 'stream_info',
+        'key_category': f'{self.terminology}_info',
     },
     'REDRAW': {
         'keys': ['ctrl l'],
@@ -463,128 +488,121 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'key_category': 'general',
     },
 }
-# fmt: on
+       
+        self.HELP_CATEGORIES = {
+        "general": "General",
+        "navigation": "Navigation",
+        "narrowing": "Switching Messages View",
+        "searching": "Searching",
+        "msg_actions": "Message actions",
+        f"{self.terminology}_list": f"{self.terminology} list actions",
+        "user_list": "User list actions",
+        "open_compose": "Begin composing a message",
+        "compose_box": "Writing a message",
+        "editor_navigation": "Editor: Navigation",
+        "editor_text_manipulation": "Editor: Text Manipulation",
+        f"{self.terminology}_info": (
+            f"{self.terminology} information (press {self.KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
+            f" to view info of a {self.terminology})"
+        ),
+        "msg_info": (
+            f"Message information (press {self.KEY_BINDINGS['MSG_INFO']['keys'][0]}"
+            f" to view info of a message)"
+        ),
+    }
 
-HELP_CATEGORIES = {
-    "general": "General",
-    "navigation": "Navigation",
-    "narrowing": "Switching Messages View",
-    "searching": "Searching",
-    "msg_actions": "Message actions",
-    "stream_list": "Stream list actions",
-    "user_list": "User list actions",
-    "open_compose": "Begin composing a message",
-    "compose_box": "Writing a message",
-    "editor_navigation": "Editor: Navigation",
-    "editor_text_manipulation": "Editor: Text Manipulation",
-    "stream_info": (
-        f"Stream information (press {KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
-        f" to view info of a stream)"
-    ),
-    "msg_info": (
-        f"Message information (press {KEY_BINDINGS['MSG_INFO']['keys'][0]}"
-        f" to view info of a message)"
-    ),
-}
-
-ZT_TO_URWID_CMD_MAPPING = {
-    "GO_UP": CURSOR_UP,
-    "GO_DOWN": CURSOR_DOWN,
-    "GO_LEFT": CURSOR_LEFT,
-    "GO_RIGHT": CURSOR_RIGHT,
-    "SCROLL_UP": CURSOR_PAGE_UP,
-    "SCROLL_DOWN": CURSOR_PAGE_DOWN,
-    "GO_TO_BOTTOM": CURSOR_MAX_RIGHT,
-    "ACTIVATE_BUTTON": ACTIVATE,
-}
+    def is_command_key(self,command: str, key: str) -> bool:
+        """
+        Returns the mapped binding for a key if mapped
+        or the key otherwise.
+        """
+        try:
+            return key in self.KEY_BINDINGS[command]["keys"]
+        except KeyError as exception:
+            raise InvalidCommand(command) from exception
 
 
-class InvalidCommand(Exception):
-    pass
+        
 
 
-def is_command_key(command: str, key: str) -> bool:
+    def primary_key_for_command(self,command: str) -> str:
+        """
+        Primary Key is the key that will be displayed eg. in the UI
+        """
+        return keys_for_command(command).pop(0)
+
+
+    URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
+        "page up": "PgUp",
+        "page down": "PgDn",
+    }
+
+
+    def display_key_for_urwid_key(self,urwid_key: str) -> str:
+        """
+        Returns a displayable user-centric format of the urwid key.
+        """
+        if urwid_key == " ":
+            return "Space"
+
+        for urwid_map_key, display_map_key in self.URWID_KEY_TO_DISPLAY_KEY_MAPPING.items():
+            if urwid_map_key in urwid_key:
+                urwid_key = urwid_key.replace(urwid_map_key, display_map_key)
+        display_key = [
+            keyboard_key.capitalize()
+            if len(keyboard_key) > 1 and keyboard_key[0].islower()
+            else keyboard_key
+            for keyboard_key in urwid_key.split()
+        ]
+        return " ".join(display_key)
+
+
+    def display_keys_for_command(self,command: str) -> List[str]:
+        """
+        Returns the user-friendly display keys for a given mapped command
+        """
+        return [
+            self.display_key_for_urwid_key(urwid_key) for urwid_key in keys_for_command(command)
+        ]
+
+
+    def primary_display_key_for_command(self,command: str) -> str:
+        """
+        Primary Display Key is the formatted display version of the primary key
+        """
+        return self.display_key_for_urwid_key(self.primary_key_for_command(command))
+
+
+    def commands_for_random_tips(self) -> List[KeyBinding]:
+        """
+        Return list of commands which may be displayed as a random tip
+        """
+        return [
+            key_binding
+            for key_binding in self.KEY_BINDINGS.values()
+            if not key_binding.get("excluded_from_random_tips", False)
+        ]
+
+
+# Create a shared instance of KeyConfig
+key_config = KeyConfig()
+key_config.set_terminology(None)
+
+def initialize_command_map(key_config: KeyConfig) -> None:
     """
-    Returns the mapped binding for a key if mapped
-    or the key otherwise.
+    Adds alternate keys for standard urwid navigational commands.
     """
-    try:
-        return key in KEY_BINDINGS[command]["keys"]
-    except KeyError as exception:
-        raise InvalidCommand(command) from exception
-
+    for zt_cmd, urwid_cmd in key_config.ZT_TO_URWID_CMD_MAPPING.items():
+        for key in keys_for_command(zt_cmd):
+            command_map[key] = urwid_cmd
 
 def keys_for_command(command: str) -> List[str]:
-    """
-    Returns the actual keys for a given mapped command
-    """
-    try:
-        return list(KEY_BINDINGS[command]["keys"])
-    except KeyError as exception:
-        raise InvalidCommand(command) from exception
-
-
-def primary_key_for_command(command: str) -> str:
-    """
-    Primary Key is the key that will be displayed eg. in the UI
-    """
-    return keys_for_command(command).pop(0)
-
-
-URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
-    "page up": "PgUp",
-    "page down": "PgDn",
-}
-
-
-def display_key_for_urwid_key(urwid_key: str) -> str:
-    """
-    Returns a displayable user-centric format of the urwid key.
-    """
-    if urwid_key == " ":
-        return "Space"
-
-    for urwid_map_key, display_map_key in URWID_KEY_TO_DISPLAY_KEY_MAPPING.items():
-        if urwid_map_key in urwid_key:
-            urwid_key = urwid_key.replace(urwid_map_key, display_map_key)
-    display_key = [
-        keyboard_key.capitalize()
-        if len(keyboard_key) > 1 and keyboard_key[0].islower()
-        else keyboard_key
-        for keyboard_key in urwid_key.split()
-    ]
-    return " ".join(display_key)
-
-
-def display_keys_for_command(command: str) -> List[str]:
-    """
-    Returns the user-friendly display keys for a given mapped command
-    """
-    return [
-        display_key_for_urwid_key(urwid_key) for urwid_key in keys_for_command(command)
-    ]
-
-
-def primary_display_key_for_command(command: str) -> str:
-    """
-    Primary Display Key is the formatted display version of the primary key
-    """
-    return display_key_for_urwid_key(primary_key_for_command(command))
-
-
-def commands_for_random_tips() -> List[KeyBinding]:
-    """
-    Return list of commands which may be displayed as a random tip
-    """
-    return [
-        key_binding
-        for key_binding in KEY_BINDINGS.values()
-        if not key_binding.get("excluded_from_random_tips", False)
-    ]
-
-
-# Refer urwid/command_map.py
-# Adds alternate keys for standard urwid navigational commands.
-for zt_cmd, urwid_cmd in ZT_TO_URWID_CMD_MAPPING.items():
-    for key in keys_for_command(zt_cmd):
-        command_map[key] = urwid_cmd
+            """
+            Returns the actual keys for a given mapped command
+            """
+            try:
+                return list(key_config.KEY_BINDINGS[command]["keys"])
+            except KeyError as exception:
+                raise InvalidCommand(command) from exception
+# Initialize the command map after the KeyConfig instance is fully initialized
+initialize_command_map(key_config)

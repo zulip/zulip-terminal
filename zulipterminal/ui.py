@@ -10,9 +10,7 @@ from typing import Any, Dict, List, Optional
 import urwid
 
 from zulipterminal.config.keys import (
-    commands_for_random_tips,
-    display_key_for_urwid_key,
-    is_command_key,
+    key_config
 )
 from zulipterminal.config.symbols import (
     APPLICATION_TITLE_BAR_LINE,
@@ -41,6 +39,8 @@ class View(urwid.WidgetWrap):
 
     def __init__(self, controller: Any) -> None:
         self.controller = controller
+        self.key_config = key_config
+        self.pm_button = controller
         self.palette = controller.theme
         self.model = controller.model
         self.users = self.model.users
@@ -49,7 +49,6 @@ class View(urwid.WidgetWrap):
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
         self.stream_topic_map: Dict[int, str] = {}
-
         self.message_view: Any = None
         self.displaying_selection_hint = False
 
@@ -102,12 +101,12 @@ class View(urwid.WidgetWrap):
 
     def get_random_help(self) -> List[Any]:
         # Get random allowed hotkey (ie. eligible for being displayed as a tip)
-        allowed_commands = commands_for_random_tips()
+        allowed_commands = self.key_config.commands_for_random_tips()
         if not allowed_commands:
             return ["Help(?): "]
         random_command = random.choice(allowed_commands)
         random_command_display_keys = ", ".join(
-            [display_key_for_urwid_key(key) for key in random_command["keys"]]
+            [self.key_config.display_key_for_urwid_key(key) for key in random_command["keys"]]
         )
         return [
             "Help(?): ",
@@ -258,31 +257,31 @@ class View(urwid.WidgetWrap):
             return self.controller.current_editor().keypress((size[1],), key)
         # Redirect commands to message_view.
         elif (
-            is_command_key("SEARCH_MESSAGES", key)
-            or is_command_key("NEXT_UNREAD_TOPIC", key)
-            or is_command_key("NEXT_UNREAD_PM", key)
-            or is_command_key("STREAM_MESSAGE", key)
-            or is_command_key("PRIVATE_MESSAGE", key)
+            self.key_config.is_command_key("SEARCH_MESSAGES", key)
+            or self.key_config.is_command_key("NEXT_UNREAD_TOPIC", key)
+            or self.key_config.is_command_key("NEXT_UNREAD_PM", key)
+            or self.key_config.is_command_key("STREAM_MESSAGE", key)
+            or self.key_config.is_command_key("PRIVATE_MESSAGE", key)
         ):
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=False)
             self.body.focus_col = 1
             self.middle_column.keypress(size, key)
             return key
-        elif is_command_key("ALL_PM", key):
+        elif self.key_config.is_command_key("ALL_PM", key):
             self.pm_button.activate(key)
-        elif is_command_key("ALL_STARRED", key):
+        elif self.key_config.is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)
-        elif is_command_key("ALL_MENTIONS", key):
+        elif self.key_config.is_command_key("ALL_MENTIONS", key):
             self.mentioned_button.activate(key)
-        elif is_command_key("SEARCH_PEOPLE", key):
+        elif self.key_config.is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=True)
             self.body.focus_position = 2
             self.users_view.keypress(size, key)
             return key
-        elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
+        elif self.key_config.is_command_key("SEARCH_STREAMS", key) or self.key_config.is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
@@ -291,7 +290,7 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 0
             self.left_panel.keypress(size, key)
             return key
-        elif is_command_key("OPEN_DRAFT", key):
+        elif self.key_config.is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
                 self.show_left_panel(visible=False)
@@ -318,17 +317,17 @@ class View(urwid.WidgetWrap):
                     ["No draft message was saved in this session."]
                 )
             return key
-        elif is_command_key("ABOUT", key):
+        elif self.key_config.is_command_key("ABOUT", key):
             self.controller.show_about()
             return key
-        elif is_command_key("HELP", key):
+        elif self.key_config.is_command_key("HELP", key):
             # Show help menu
             self.controller.show_help()
             return key
-        elif is_command_key("MARKDOWN_HELP", key):
+        elif self.key_config.is_command_key("MARKDOWN_HELP", key):
             self.controller.show_markdown_help()
             return key
-        elif is_command_key("NEW_HINT", key):
+        elif self.key_config.is_command_key("NEW_HINT", key):
             self.set_footer_text()
             return key
         return super().keypress(size, key)

@@ -1,5 +1,14 @@
 # Zulip-terminal Changelog
 
+
+
+### Changes in the terminology from 'Stream' to 'channel'
+- **Terminology Update**: The term "Stream" has been replaced with "Channel" in the UI for servers supporting the updated terminology. Older servers will continue to display "Stream" to maintain consistency with the server's terminology.
+
+### User Documentation Updates
+- Updated all references to "Stream" in the documentation to "Channel."
+- Added a FAQ entry to explain the terminology change and its behavior with older servers.
+
 ## 0.7.0 - 20 May 2022
 
 This long-awaited release includes contributions from our four 2021

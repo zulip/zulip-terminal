@@ -22,6 +22,7 @@
   - [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
   - [Zulip-term crashed!](#zulip-term-crashed)
   - [Something looks wrong! Where's this feature? There's a bug!](#something-looks-wrong-wheres-this-feature-theres-a-bug)
+  - [Why does the UI show "Channel" instead of "Stream"?](#why-does-the-ui-show-channel-instead-of-stream)
 
 ## What Python implementations are supported?
 
@@ -496,4 +497,10 @@ cause of the error, which should be output in such cases:
 Come meet us on the
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 stream on *chat.zulip.org*.
+
+## Why does the UI show "Channel" instead of "Stream"?
+
+Starting from a specific Zulip feature level, the term "Stream" has been renamed to "Channel" to align with modern terminology. If you are using an older Zulip server, the UI will still display "Stream" to match the server's terminology. This ensures consistency between the Zulip Terminal and the web or mobile apps.
+
+If you encounter any issues or confusion, feel free to reach out on the [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal) stream on *chat.zulip.org*.
 

@@ -19,10 +19,7 @@ from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
 from zulipterminal.config.keys import (
-    display_keys_for_command,
-    is_command_key,
-    primary_display_key_for_command,
-    primary_key_for_command,
+    key_config
 )
 from zulipterminal.config.regexes import (
     REGEX_CLEANED_RECIPIENT,
@@ -212,8 +209,8 @@ class WriteBox(urwid.Pile):
         self.to_write_box = ReadlineEdit("To: ", edit_text=recipient_info)
         self.to_write_box.enable_autocomplete(
             func=self._to_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            key=key_config.primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
         self.to_write_box.set_completer_delims("")
 
@@ -222,8 +219,8 @@ class WriteBox(urwid.Pile):
         )
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            key=key_config.primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
         self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
 
@@ -312,11 +309,11 @@ class WriteBox(urwid.Pile):
             invalid_recipients_error = [
                 "Invalid recipient(s) - " + ", ".join(invalid_recipients),
                 " - Use ",
-                ("footer_contrast", primary_display_key_for_command("AUTOCOMPLETE")),
+                ("footer_contrast", key_config.primary_display_key_for_command("AUTOCOMPLETE")),
                 " or ",
                 (
                     "footer_contrast",
-                    primary_display_key_for_command("AUTOCOMPLETE_REVERSE"),
+                    key_config.primary_display_key_for_command("AUTOCOMPLETE_REVERSE"),
                 ),
                 " to autocomplete.",
             ]
@@ -339,8 +336,8 @@ class WriteBox(urwid.Pile):
         )
         self.msg_write_box.enable_autocomplete(
             func=self.generic_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            key=key_config.primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
         self.msg_write_box.set_completer_delims(DELIMS_MESSAGE_COMPOSE)
 
@@ -349,8 +346,8 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.enable_autocomplete(
             func=self._topic_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            key=key_config.primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
         self.title_write_box.set_completer_delims("")
 
@@ -385,8 +382,8 @@ class WriteBox(urwid.Pile):
         )
         self.stream_write_box.enable_autocomplete(
             func=self._stream_box_autocomplete,
-            key=primary_key_for_command("AUTOCOMPLETE"),
-            key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
+            key=key_config.primary_key_for_command("AUTOCOMPLETE"),
+            key_reverse=key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
         self.stream_write_box.set_completer_delims("")
         self._setup_common_stream_compose(stream_id, caption, title)
@@ -731,8 +728,8 @@ class WriteBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
-            is_command_key("AUTOCOMPLETE", key)
-            or is_command_key("AUTOCOMPLETE_REVERSE", key)
+           key_config.is_command_key("AUTOCOMPLETE", key)
+            or key_config.is_command_key("AUTOCOMPLETE_REVERSE", key)
         ):
             # As is, this exits autocomplete even if the user chooses to resume compose.
             # Including a check for "EXIT_COMPOSE" in the above logic would avoid
@@ -741,7 +738,7 @@ class WriteBox(urwid.Pile):
             # TODO: Fully implement resuming of autocomplete upon resuming compose.
             self._set_default_footer_after_autocomplete()
 
-        if is_command_key("SEND_MESSAGE", key):
+        if key_config.is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
             if self.compose_box_status == "open_with_stream":
                 if re.fullmatch(r"\s*", self.title_write_box.edit_text):
@@ -798,9 +795,9 @@ class WriteBox(urwid.Pile):
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
-                    self.keypress(size, primary_key_for_command("EXIT_COMPOSE"))
+                    self.keypress(size, key_config.primary_key_for_command("EXIT_COMPOSE"))
                     assert self.msg_edit_state is None
-        elif is_command_key("NARROW_MESSAGE_RECIPIENT", key):
+        elif key_config. is_command_key("NARROW_MESSAGE_RECIPIENT", key):
             if self.compose_box_status == "open_with_stream":
                 self.model.controller.narrow_to_topic(
                     stream_name=self.stream_write_box.edit_text,
@@ -821,7 +818,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.report_error(
                         "Cannot narrow to message without specifying recipients."
                     )
-        elif is_command_key("EXIT_COMPOSE", key):
+        elif key_config. is_command_key("EXIT_COMPOSE", key):
             saved_draft = self.model.session_draft_message()
             self.send_stop_typing_status()
 
@@ -840,10 +837,10 @@ class WriteBox(urwid.Pile):
                 self.view.controller.exit_compose_confirmation_popup()
             else:
                 self.exit_compose_box()
-        elif is_command_key("MARKDOWN_HELP", key):
+        elif key_config. is_command_key("MARKDOWN_HELP", key):
             self.view.controller.show_markdown_help()
             return key
-        elif is_command_key("OPEN_EXTERNAL_EDITOR", key):
+        elif key_config. is_command_key("OPEN_EXTERNAL_EDITOR", key):
             editor_command = self.view.controller.editor_command
 
             # None would indicate for shlex.split to read sys.stdin for Python < 3.12
@@ -884,7 +881,7 @@ class WriteBox(urwid.Pile):
             self.view.controller.loop.screen.start()
             return key
 
-        elif is_command_key("SAVE_AS_DRAFT", key):
+        elif key_config. is_command_key("SAVE_AS_DRAFT", key):
             if self.msg_edit_state is None:
                 if self.compose_box_status == "open_with_private":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
@@ -914,7 +911,7 @@ class WriteBox(urwid.Pile):
                     self.view.controller.save_draft_confirmation_popup(
                         this_draft,
                     )
-        elif is_command_key("CYCLE_COMPOSE_FOCUS", key):
+        elif key_config. is_command_key("CYCLE_COMPOSE_FOCUS", key):
             if len(self.contents) == 0:
                 return key
             header = self.header_write_box
@@ -930,8 +927,8 @@ class WriteBox(urwid.Pile):
                             invalid_stream_error = (
                                 "Invalid stream name."
                                 " Use {} or {} to autocomplete.".format(
-                                    primary_display_key_for_command("AUTOCOMPLETE"),
-                                    primary_display_key_for_command(
+                                    key_config.primary_display_key_for_command("AUTOCOMPLETE"),
+                                    key_config.primary_display_key_for_command(
                                         "AUTOCOMPLETE_REVERSE"
                                     ),
                                 )
@@ -1001,7 +998,7 @@ class MessageSearchBox(urwid.Pile):
 
     def main_view(self) -> Any:
         search_text = (
-            f"Search [{', '.join(display_keys_for_command('SEARCH_MESSAGES'))}]: "
+            f"Search [{', '.join(key_config.display_keys_for_command('SEARCH_MESSAGES'))}]: "
         )
         self.text_box = ReadlineEdit(f"{search_text} ")
         # Add some text so that when packing,
@@ -1024,14 +1021,14 @@ class MessageSearchBox(urwid.Pile):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("EXECUTE_SEARCH", key) and self.text_box.edit_text == ""
-        ) or is_command_key("CLEAR_SEARCH", key):
+           key_config. is_command_key("EXECUTE_SEARCH", key) and self.text_box.edit_text == ""
+        ) or key_config. is_command_key("CLEAR_SEARCH", key):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
             return key
 
-        elif is_command_key("EXECUTE_SEARCH", key):
+        elif key_config. is_command_key("EXECUTE_SEARCH", key):
             self.controller.exit_editor_mode()
             self.controller.search_messages(self.text_box.edit_text)
             self.controller.view.middle_column.set_focus("body")
@@ -1052,7 +1049,7 @@ class PanelSearchBox(ReadlineEdit):
         self.panel_view = panel_view
         self.search_command = search_command
         self.search_text = (
-            f" Search [{', '.join(display_keys_for_command(search_command))}]: "
+            f" Search [{', '.join(key_config.display_keys_for_command(search_command))}]: "
         )
         self.search_error = urwid.AttrMap(
             urwid.Text([" ", INVALID_MARKER, " No Results"]), "search_error"
@@ -1080,15 +1077,15 @@ class PanelSearchBox(ReadlineEdit):
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if (
-            is_command_key("EXECUTE_SEARCH", key) and self.get_edit_text() == ""
-        ) or is_command_key("CLEAR_SEARCH", key):
+           key_config. is_command_key("EXECUTE_SEARCH", key) and self.get_edit_text() == ""
+        ) or key_config. is_command_key("CLEAR_SEARCH", key):
             self.panel_view.view.controller.exit_editor_mode()
             self.reset_search_text()
             self.panel_view.set_focus("body")
             # Don't call 'Esc' when inside a popup search-box.
             if not self.panel_view.view.controller.is_any_popup_open():
-                self.panel_view.keypress(size, primary_key_for_command("CLEAR_SEARCH"))
-        elif is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
+                self.panel_view.keypress(size, key_config.primary_key_for_command("CLEAR_SEARCH"))
+        elif key_config. is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
             self.set_caption([("filter_results", " Search Results "), " "])
             self.panel_view.set_focus("body")
