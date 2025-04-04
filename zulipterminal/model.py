@@ -36,6 +36,7 @@ from zulipterminal.api_types import (
     MAX_TOPIC_NAME_LENGTH,
     PRESENCE_OFFLINE_THRESHOLD_SECS,
     PRESENCE_PING_INTERVAL_SECS,
+    RESOLVED_TOPIC_PREFIX,
     TYPING_STARTED_EXPIRY_PERIOD,
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
@@ -708,6 +709,45 @@ class Model:
                     return True
         self.controller.report_error("User not found")
         return False
+
+    def toggle_topic_resolve_status(self, stream_id: int, topic_name: str) -> None:
+        latest_msg = self.get_latest_message_in_topic(stream_id, topic_name)
+        if not self.can_user_edit_topic() or not latest_msg:
+            return
+
+        time_since_msg_sent = time.time() - latest_msg["timestamp"]
+
+        # ZFL >= 162, realm_move_messages_within_stream_limit_seconds was
+        # introduced in place of realm_community_topic_editing_limit_seconds
+        if self.server_feature_level >= 162:
+            edit_time_limit = self.initial_data.get(
+                "realm_move_messages_within_stream_limit_seconds", None
+            )
+        elif 11 <= self.server_feature_level < 162:
+            edit_time_limit = self.initial_data.get(
+                "realm_community_topic_editing_limit_seconds", None
+            )
+        # ZFL < 11, community_topic_editing_limit_seconds
+        # was hardcoded as int value in secs eg. 86400s (1 day) or None
+        else:
+            edit_time_limit = 86400
+
+        # Don't allow editing topic if time-limit exceeded.
+        if edit_time_limit is not None and time_since_msg_sent >= edit_time_limit:
+            self.controller.report_error(
+                " Time limit for editing topic has been exceeded."
+            )
+            return
+
+        if topic_name.startswith(RESOLVED_TOPIC_PREFIX):
+            topic_name = topic_name[2:]
+        else:
+            topic_name = RESOLVED_TOPIC_PREFIX + topic_name
+        self.update_stream_message(
+            message_id=latest_msg["id"],
+            topic=topic_name,
+            propagate_mode="change_all",
+        )
 
     def generate_all_emoji_data(
         self, custom_emoji: Dict[str, RealmEmojiData]
