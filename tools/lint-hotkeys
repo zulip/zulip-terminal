@@ -6,12 +6,7 @@ from collections import defaultdict
 from pathlib import Path, PurePath
 from typing import Dict, List, Tuple
 
-from zulipterminal.config.keys import (
-    # HELP_CATEGORIES,
-    # KEY_BINDINGS,
-    # display_keys_for_command,
-    key_config,
-)
+from zulipterminal.config.keys import key_config
 
 
 KEYS_FILE = (

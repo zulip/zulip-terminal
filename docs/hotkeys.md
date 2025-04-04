@@ -30,7 +30,7 @@
 ## Switching Messages View
 |Command|Key Combination|
 | :--- | :---: |
-|View the channel of the current message|<kbd>s</kbd>|
+|View the  of the current message|<kbd>s</kbd>|
 |View the topic of the current message|<kbd>S</kbd>|
 |Zoom in/out the message's conversation context|<kbd>z</kbd>|
 |Switch message view to the compose box target|<kbd>Meta</kbd> + <kbd>.</kbd>|
@@ -46,8 +46,8 @@
 | :--- | :---: |
 |Search users|<kbd>w</kbd>|
 |Search messages|<kbd>/</kbd>|
-|Search channels|<kbd>q</kbd>|
-|Search topics in a channel|<kbd>q</kbd>|
+|Search s|<kbd>q</kbd>|
+|Search topics in a |<kbd>q</kbd>|
 |Search emojis from emoji picker|<kbd>p</kbd>|
 |Submit search and browse results|<kbd>Enter</kbd>|
 |Clear search in current panel|<kbd>Esc</kbd>|
@@ -63,12 +63,12 @@
 |Show/hide message information|<kbd>i</kbd>|
 |Show/hide message sender information|<kbd>u</kbd>|
 
-## channel list actions
+##  list actions
 |Command|Key Combination|
 | :--- | :---: |
-|Toggle topics in a channel|<kbd>t</kbd>|
-|Mute/unmute channels|<kbd>m</kbd>|
-|Show/hide channel information & modify settings|<kbd>i</kbd>|
+|Toggle topics in a |<kbd>t</kbd>|
+|Mute/unmute s|<kbd>m</kbd>|
+|Show/hide  information & modify settings|<kbd>i</kbd>|
 
 ## User list actions
 |Command|Key Combination|
@@ -84,7 +84,7 @@
 |Reply mentioning the sender of the current message|<kbd>@</kbd>|
 |Reply quoting the current message text|<kbd>></kbd>|
 |Reply directly to the sender of the current message|<kbd>R</kbd>|
-|New message to a channel|<kbd>c</kbd>|
+|New message to a |<kbd>c</kbd>|
 |New message to a person or group of people|<kbd>x</kbd>|
 
 ## Writing a message
@@ -93,7 +93,7 @@
 |Cycle through recipient and content boxes|<kbd>Tab</kbd>|
 |Send a message|<kbd>Ctrl</kbd> + <kbd>d</kbd> / <kbd>Meta</kbd> + <kbd>Enter</kbd>|
 |Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
-|Autocomplete @mentions, #channel_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
+|Autocomplete @mentions, #_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|
 |Insert new line|<kbd>Enter</kbd>|
@@ -123,11 +123,11 @@
 |Delete previous character|<kbd>Ctrl</kbd> + <kbd>h</kbd>|
 |Swap with previous character|<kbd>Ctrl</kbd> + <kbd>t</kbd>|
 
-## channel information (press i to view info of a channel)
+##  information (press i to view info of a )
 |Command|Key Combination|
 | :--- | :---: |
-|Show/hide channel members|<kbd>m</kbd>|
-|Copy channel email to clipboard|<kbd>c</kbd>|
+|Show/hide  members|<kbd>m</kbd>|
+|Copy  email to clipboard|<kbd>c</kbd>|
 
 ## Message information (press i to view info of a message)
 |Command|Key Combination|

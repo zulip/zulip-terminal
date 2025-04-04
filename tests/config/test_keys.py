@@ -6,12 +6,14 @@ from pytest_mock import MockerFixture
 from zulipterminal.config import keys
 
 
-AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
+AVAILABLE_COMMANDS = list(keys.key_config.KEY_BINDINGS.keys())
 
-USED_KEYS = {key for values in keys.KEY_BINDINGS.values() for key in values["keys"]}
+USED_KEYS = {
+    key for values in keys.key_config.KEY_BINDINGS.values() for key in values["keys"]
+}
 
 
-@pytest.fixture(params=keys.KEY_BINDINGS.keys())
+@pytest.fixture(params=keys.key_config.KEY_BINDINGS.keys())
 def valid_command(request: Any) -> str:
     return request.param
 
@@ -22,20 +24,20 @@ def invalid_command(request: Any) -> str:
 
 
 def test_keys_for_command(valid_command: str) -> None:
-    assert keys.KEY_BINDINGS[valid_command]["keys"] == keys.keys_for_command(
-        valid_command
-    )
+    assert keys.key_config.KEY_BINDINGS[valid_command][
+        "keys"
+    ] == keys.key_config.keys_for_command(valid_command)
 
 
 def test_primary_key_for_command(valid_command: str) -> None:
-    assert keys.KEY_BINDINGS[valid_command]["keys"][0] == keys.primary_key_for_command(
-        valid_command
-    )
+    assert keys.key_config.KEY_BINDINGS[valid_command]["keys"][
+        0
+    ] == keys.key_config.key_config.key_config.primary_key_for_command(valid_command)
 
 
 def test_keys_for_command_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.InvalidCommand):
-        keys.keys_for_command(invalid_command)
+    with pytest.raises(keys.key_config.InvalidCommand):
+        keys.key_config.keys_for_command(invalid_command)
 
 
 def test_keys_for_command_identity(valid_command: str) -> None:
@@ -44,30 +46,37 @@ def test_keys_for_command_identity(valid_command: str) -> None:
     new list which validates that the original keys don't get altered
     elsewhere unintentionally.
     """
-    assert id(keys.KEY_BINDINGS[valid_command]["keys"]) != id(
-        keys.keys_for_command(valid_command)
+    assert id(keys.key_config.KEY_BINDINGS[valid_command]["keys"]) != id(
+        keys.key_config.keys_for_command(valid_command)
     )
 
 
 def test_is_command_key_matching_keys(valid_command: str) -> None:
-    for key in keys.keys_for_command(valid_command):
-        assert keys.is_command_key(valid_command, key)
+    for key in keys.key_config.keys_for_command(valid_command):
+        assert keys.key_config.key_config.key_config.is_command_key(valid_command, key)
 
 
 def test_is_command_key_nonmatching_keys(valid_command: str) -> None:
-    keys_to_test = USED_KEYS - set(keys.keys_for_command(valid_command))
+    keys_to_test = USED_KEYS - set(keys.key_config.keys_for_command(valid_command))
     for key in keys_to_test:
-        assert not keys.is_command_key(valid_command, key)
+        assert not keys.key_config.key_config.key_config.is_command_key(
+            valid_command, key
+        )
 
 
 def test_is_command_key_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.InvalidCommand):
-        keys.is_command_key(invalid_command, "esc")  # key doesn't matter
+    with pytest.raises(keys.key_config.InvalidCommand):
+        keys.key_config.key_config.key_config.is_command_key(
+            invalid_command, "esc"
+        )  # key doesn't matter
 
 
 def test_HELP_is_not_allowed_as_tip() -> None:
-    assert keys.KEY_BINDINGS["HELP"]["excluded_from_random_tips"] is True
-    assert keys.KEY_BINDINGS["HELP"] not in keys.commands_for_random_tips()
+    assert keys.key_config.KEY_BINDINGS["HELP"]["excluded_from_random_tips"] is True
+    assert (
+        keys.key_config.KEY_BINDINGS["HELP"]
+        not in keys.key_config.commands_for_random_tips()
+    )
 
 
 def test_commands_for_random_tips(mocker: MockerFixture) -> None:
@@ -96,20 +105,22 @@ def test_commands_for_random_tips(mocker: MockerFixture) -> None:
             "excluded_from_random_tips": True,
         },
     }
-    mocker.patch.dict(keys.KEY_BINDINGS, new_key_bindings, clear=True)
-    result = keys.commands_for_random_tips()
+    mocker.patch.dict(keys.key_config.KEY_BINDINGS, new_key_bindings, clear=True)
+    result = keys.key_config.commands_for_random_tips()
     assert len(result) == 2
     assert new_key_bindings["BETA"] in result
     assert new_key_bindings["GAMMA"] in result
 
 
 def test_updated_urwid_command_map() -> None:
-    urwid_to_zt_mapping = {v: k for k, v in keys.ZT_TO_URWID_CMD_MAPPING.items()}
+    urwid_to_zt_mapping = {
+        v: k for k, v in keys.key_config.ZT_TO_URWID_CMD_MAPPING.items()
+    }
     # Check if keys in command map are actually the ones in KEY_BINDINGS
-    for key, urwid_cmd in keys.command_map._command.items():
+    for key, urwid_cmd in keys.key_config.command_map._command.items():
         try:
             zt_cmd = urwid_to_zt_mapping[urwid_cmd]
-            assert key in keys.keys_for_command(zt_cmd)
+            assert key in keys.key_config.keys_for_command(zt_cmd)
         except KeyError:
             pass
 
@@ -138,7 +149,7 @@ def test_updated_urwid_command_map() -> None:
     ],
 )
 def test_display_key_for_urwid_key(urwid_key: str, display_key: str) -> None:
-    assert keys.display_key_for_urwid_key(urwid_key) == display_key
+    assert keys.key_config.display_key_for_urwid_key(urwid_key) == display_key
 
 
 COMMAND_TO_DISPLAY_KEYS = [
@@ -150,14 +161,20 @@ COMMAND_TO_DISPLAY_KEYS = [
 
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_display_keys_for_command(command: str, display_keys: List[str]) -> None:
-    assert keys.display_keys_for_command(command) == display_keys
+    assert (
+        keys.key_config.key_config.key_config.display_keys_for_command(command)
+        == display_keys
+    )
 
 
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_primary_display_key_for_command(command: str, display_keys: List[str]) -> None:
-    assert keys.primary_display_key_for_command(command) == display_keys[0]
+    assert (
+        keys.key_config.key_config.key_config.primary_display_key_for_command(command)
+        == display_keys[0]
+    )
 
 
 def test_display_keys_for_command_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.InvalidCommand):
-        keys.display_keys_for_command(invalid_command)
+    with pytest.raises(keys.key_config.InvalidCommand):
+        keys.key_config.key_config.key_config.display_keys_for_command(invalid_command)

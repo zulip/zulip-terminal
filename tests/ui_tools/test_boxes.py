@@ -12,11 +12,7 @@ from zulipterminal.api_types import (
     TYPING_STARTED_WAIT_PERIOD,
     TYPING_STOPPED_WAIT_PERIOD,
 )
-from zulipterminal.config.keys import (
-    keys_for_command,
-    primary_display_key_for_command,
-    primary_key_for_command,
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import (
     INVALID_MARKER,
     STREAM_MARKER_PRIVATE,
@@ -223,7 +219,7 @@ class TestWriteBox:
                 typing_recipient_user_ids, status="stop"
             )
 
-    @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEND_MESSAGE"))
     def test_not_calling_send_private_message_without_recipients(
         self,
         key: str,
@@ -240,7 +236,7 @@ class TestWriteBox:
 
         assert not write_box.model.send_private_message.called
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_private_compose__no_popup(
         self,
         key: str,
@@ -265,7 +261,7 @@ class TestWriteBox:
         assert write_box.msg_write_box.edit_text == ""
         assert write_box.compose_box_status == "closed"
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_private_compose__popup(
         self,
         key: str,
@@ -285,7 +281,7 @@ class TestWriteBox:
 
         write_box.view.controller.exit_compose_confirmation_popup.assert_called_once()
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_stream_compose__no_popup(
         self,
         key: str,
@@ -308,7 +304,7 @@ class TestWriteBox:
         assert write_box.msg_write_box.edit_text == ""
         assert write_box.compose_box_status == "closed"
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_COMPOSE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_COMPOSE"))
     def test__compose_attributes_reset_for_stream_compose__popup(
         self,
         key: str,
@@ -372,9 +368,9 @@ class TestWriteBox:
     )
     @pytest.mark.parametrize(
         "key",
-        keys_for_command("SEND_MESSAGE")
-        + keys_for_command("SAVE_AS_DRAFT")
-        + keys_for_command("CYCLE_COMPOSE_FOCUS"),
+        key_config.keys_for_command("SEND_MESSAGE")
+        + key_config.keys_for_command("SAVE_AS_DRAFT")
+        + key_config.keys_for_command("CYCLE_COMPOSE_FOCUS"),
     )
     def test_tidying_recipients_on_keypresses(
         self,
@@ -410,9 +406,9 @@ class TestWriteBox:
     )
     @pytest.mark.parametrize(
         "key",
-        keys_for_command("SEND_MESSAGE")
-        + keys_for_command("SAVE_AS_DRAFT")
-        + keys_for_command("CYCLE_COMPOSE_FOCUS"),
+        key_config.keys_for_command("SEND_MESSAGE")
+        + key_config.keys_for_command("SAVE_AS_DRAFT")
+        + key_config.keys_for_command("CYCLE_COMPOSE_FOCUS"),
     )
     def test_footer_notification_on_invalid_recipients(
         self,
@@ -434,11 +430,14 @@ class TestWriteBox:
         expected_lines = [
             "Invalid recipient(s) - " + invalid_recipients,
             " - Use ",
-            ("footer_contrast", primary_display_key_for_command("AUTOCOMPLETE")),
+            (
+                "footer_contrast",
+                key_config.primary_display_key_for_command("AUTOCOMPLETE"),
+            ),
             " or ",
             (
                 "footer_contrast",
-                primary_display_key_for_command("AUTOCOMPLETE_REVERSE"),
+                key_config.primary_display_key_for_command("AUTOCOMPLETE_REVERSE"),
             ),
             " to autocomplete.",
         ]
@@ -1135,7 +1134,7 @@ class TestWriteBox:
         write_box.focus_position = write_box.FOCUS_CONTAINER_HEADER
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
+        write_box.keypress(size, key_config.primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.to_write_box.edit_text == expected_text
 
@@ -1382,7 +1381,7 @@ class TestWriteBox:
         write_box.header_write_box.focus_col = stream_focus
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
+        write_box.keypress(size, key_config.primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.header_write_box[stream_focus].edit_text == expected_text
 
@@ -1459,7 +1458,7 @@ class TestWriteBox:
         write_box.header_write_box.focus_col = topic_focus
         size = widget_size(write_box)
 
-        write_box.keypress(size, primary_key_for_command("AUTOCOMPLETE"))
+        write_box.keypress(size, key_config.primary_key_for_command("AUTOCOMPLETE"))
 
         assert write_box.header_write_box[topic_focus].edit_text == expected_text
 
@@ -1522,7 +1521,7 @@ class TestWriteBox:
         [_MessageEditState(message_id=10, old_topic="old topic"), None],
         ids=["update_message", "send_message"],
     )
-    @pytest.mark.parametrize("key", keys_for_command("SEND_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEND_MESSAGE"))
     def test_keypress_SEND_MESSAGE_no_topic(
         self,
         mocker: MockerFixture,
@@ -1561,10 +1560,10 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "key, current_typeahead_mode, expected_typeahead_mode",
         [
-            (primary_key_for_command("AUTOCOMPLETE"), False, False),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False),
-            (primary_key_for_command("AUTOCOMPLETE"), True, True),
-            (primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True),
+            (key_config.primary_key_for_command("AUTOCOMPLETE"), False, False),
+            (key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"), False, False),
+            (key_config.primary_key_for_command("AUTOCOMPLETE"), True, True),
+            (key_config.primary_key_for_command("AUTOCOMPLETE_REVERSE"), True, True),
         ],
     )
     def test__keypress_typeahead_mode_autocomplete_key_footer_no_reset(
@@ -1588,7 +1587,7 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "key, current_typeahead_mode, expected_typeahead_mode",
         [
-            (primary_key_for_command("EXIT_COMPOSE"), True, False),
+            (key_config.primary_key_for_command("EXIT_COMPOSE"), True, False),
             ("space", True, False),
             ("k", True, False),
         ],
@@ -1736,7 +1735,9 @@ class TestWriteBox:
             ),
         ],
     )
-    @pytest.mark.parametrize("tab_key", keys_for_command("CYCLE_COMPOSE_FOCUS"))
+    @pytest.mark.parametrize(
+        "tab_key", key_config.keys_for_command("CYCLE_COMPOSE_FOCUS")
+    )
     def test_keypress_CYCLE_COMPOSE_FOCUS(
         self,
         write_box: WriteBox,
@@ -1790,7 +1791,7 @@ class TestWriteBox:
                 expected_focus_col_name
             )
 
-    @pytest.mark.parametrize("key", keys_for_command("MARKDOWN_HELP"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("MARKDOWN_HELP"))
     def test_keypress_MARKDOWN_HELP(
         self, write_box: WriteBox, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1839,8 +1840,10 @@ class TestPanelSearchBox:
 
     @pytest.fixture
     def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
-        # X is the return from display_keys_for_command("UNTESTED_TOKEN")
-        mocker.patch(MODULE + ".display_keys_for_command", return_value="X")
+        # X is the return from key_config.display_key_config.keys_for_command("UNTESTED_TOKEN")
+        mocker.patch(
+            MODULE + ".key_config.display_key_config.keys_for_command", return_value="X"
+        )
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
@@ -1891,7 +1894,7 @@ class TestPanelSearchBox:
     @pytest.mark.parametrize(
         "log, expect_body_focus_set", [([], False), (["SOMETHING"], True)]
     )
-    @pytest.mark.parametrize("enter_key", keys_for_command("EXECUTE_SEARCH"))
+    @pytest.mark.parametrize("enter_key", key_config.keys_for_command("EXECUTE_SEARCH"))
     def test_keypress_ENTER(
         self,
         panel_search_box: PanelSearchBox,
@@ -1930,7 +1933,7 @@ class TestPanelSearchBox:
             panel_view.set_focus.assert_not_called()
             panel_view.body.set_focus.assert_not_called()
 
-    @pytest.mark.parametrize("back_key", keys_for_command("CLEAR_SEARCH"))
+    @pytest.mark.parametrize("back_key", key_config.keys_for_command("CLEAR_SEARCH"))
     def test_keypress_CLEAR_SEARCH(
         self,
         panel_search_box: PanelSearchBox,
