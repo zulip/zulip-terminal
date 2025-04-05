@@ -1280,7 +1280,7 @@ class HelpView(PopUpView):
                 for binding in key_config.KEY_BINDINGS.values()
                 if binding["key_category"] == category
             )
-            key_config.KEY_BINDINGS = [
+            processed_bindings = [
                 (
                     binding["help_text"],
                     ", ".join(
@@ -1289,9 +1289,8 @@ class HelpView(PopUpView):
                 )
                 for binding in keys_in_category
             ]
-
             help_menu_content.append(
-                (key_config.HELP_CATEGORIES[category], key_config.KEY_BINDINGS)
+                (key_config.HELP_CATEGORIES[category], processed_bindings)
             )
 
         popup_width, column_widths = self.calculate_table_widths(

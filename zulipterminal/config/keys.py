@@ -234,7 +234,7 @@ class KeyConfig:
             "TOGGLE_TOPIC": {
                 "keys": ["t"],
                 "help_text": f"Toggle topics in a {self.terminology}",
-                "key_category": f"{self.terminology}_list",
+                "key_category": "stream_list",
             },
             "ALL_MESSAGES": {
                 "keys": ["a", "esc"],
@@ -305,7 +305,7 @@ class KeyConfig:
             "TOGGLE_MUTE_STREAM": {
                 "keys": ["m"],
                 "help_text": f"Mute/unmute {self.terminology}s",
-                "key_category": f"{self.terminology}_list",
+                "key_category": "stream_list",
             },
             "THUMBS_UP": {
                 "keys": ["+"],
@@ -342,19 +342,19 @@ class KeyConfig:
             "STREAM_INFO": {
                 "keys": ["i"],
                 "help_text": f"Show/hide {self.terminology} information & modify settings",
-                "key_category": f"{self.terminology}_list",
+                "key_category": "stream_list",
             },
             "STREAM_MEMBERS": {
                 "keys": ["m"],
                 "help_text": f"Show/hide {self.terminology} members",
                 "excluded_from_random_tips": True,
-                "key_category": f"{self.terminology}_info",
+                "key_category": "stream_info",
             },
             "COPY_STREAM_EMAIL": {
                 "keys": ["c"],
                 "help_text": f"Copy {self.terminology} email to clipboard",
                 "excluded_from_random_tips": True,
-                "key_category": f"{self.terminology}_info",
+                "key_category": "stream_info",
             },
             "REDRAW": {
                 "keys": ["ctrl l"],
@@ -495,19 +495,19 @@ class KeyConfig:
             "narrowing": "Switching Messages View",
             "searching": "Searching",
             "msg_actions": "Message actions",
-            f"{self.terminology}_list": f"{self.terminology} list actions",
+            "stream_list": "stream list actions",
             "user_list": "User list actions",
             "open_compose": "Begin composing a message",
             "compose_box": "Writing a message",
             "editor_navigation": "Editor: Navigation",
             "editor_text_manipulation": "Editor: Text Manipulation",
-            f"{self.terminology}_info": (
-                f"{self.terminology} information (press {self.KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
-                f" to view info of a {self.terminology})"
+            "strream_info": (
+                f"stream information (press {self.KEY_BINDINGS['STREAM_INFO']['keys'][0]}"
+                " to view info of a stream)"
             ),
             "msg_info": (
                 f"Message information (press {self.KEY_BINDINGS['MSG_INFO']['keys'][0]}"
-                f" to view info of a message)"
+                " to view info of a message)"
             ),
         }
 
@@ -577,7 +577,8 @@ class KeyConfig:
             for key_binding in self.KEY_BINDINGS.values()
             if not key_binding.get("excluded_from_random_tips", False)
         ]
-    def keys_for_command(self,command: str) -> List[str]:
+
+    def keys_for_command(self, command: str) -> List[str]:
         """
         Returns the actual keys for a given mapped command
         """
@@ -599,6 +600,7 @@ def initialize_command_map(key_config: KeyConfig) -> None:
     for zt_cmd, urwid_cmd in key_config.ZT_TO_URWID_CMD_MAPPING.items():
         for key in key_config.keys_for_command(zt_cmd):
             command_map[key] = urwid_cmd
+
 
 # Initialize the command map after the KeyConfig instance is fully initialized
 initialize_command_map(key_config)
