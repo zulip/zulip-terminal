@@ -5,7 +5,7 @@ import urwid
 from pytest import param as case
 from urwid import Divider
 
-from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import STATUS_ACTIVE
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.views import (
@@ -273,7 +273,7 @@ class TestMessageView:
         msg_view.mouse_event(size, event, button, 0, 0, mocker.Mock())
         msg_view.keypress.assert_called_once_with(size, keypress)
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("GO_DOWN"))
     def test_keypress_GO_DOWN(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
         msg_view.new_loading = False
@@ -286,7 +286,7 @@ class TestMessageView:
         msg_view.set_focus_valign.assert_called_once_with("middle")
 
     @pytest.mark.parametrize("view_is_focused", [True, False])
-    @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("GO_DOWN"))
     def test_keypress_GO_DOWN_exception(
         self, mocker, msg_view, key, widget_size, view_is_focused
     ):
@@ -312,7 +312,7 @@ class TestMessageView:
             msg_view.load_new_messages.assert_not_called()
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("GO_UP"))
     def test_keypress_GO_UP(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
@@ -325,7 +325,7 @@ class TestMessageView:
         msg_view.set_focus_valign.assert_called_once_with("middle")
 
     @pytest.mark.parametrize("view_is_focused", [True, False])
-    @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("GO_UP"))
     def test_keypress_GO_UP_exception(
         self, mocker, msg_view, key, widget_size, view_is_focused
     ):
@@ -542,7 +542,7 @@ class TestStreamsView:
             [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_STREAMS"))
     def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
@@ -559,7 +559,7 @@ class TestStreamsView:
             stream_view.stream_search_box
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("CLEAR_SEARCH"))
     def test_keypress_CLEAR_SEARCH(self, mocker, stream_view, key, widget_size):
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
@@ -572,7 +572,7 @@ class TestStreamsView:
         stream_view.log.clear()
         stream_view.log.extend(stream_view.streams_btn_list[3])
         stream_view.log.set_focus(0)
-        stream_view.keypress(size, primary_key_for_command("GO_DOWN"))
+        stream_view.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
         assert stream_view.log.get_focus()[1] != stream_view.focus_index_before_search
 
         # Exit search
@@ -707,7 +707,7 @@ class TestTopicsView:
         assert [topic.topic_name for topic in topic_view.log] == topic_final_log
         set_focus_valign.assert_called_once_with("bottom")
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_TOPICS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_TOPICS"))
     def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
@@ -725,7 +725,7 @@ class TestTopicsView:
             topic_view.topic_search_box
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("CLEAR_SEARCH"))
     def test_keypress_CLEAR_SEARCH(self, mocker, topic_view, key, widget_size):
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
@@ -738,7 +738,7 @@ class TestTopicsView:
         topic_view.log.clear()
         topic_view.log.extend(topic_view.topics_btn_list[3])
         topic_view.log.set_focus(0)
-        topic_view.keypress(size, primary_key_for_command("GO_DOWN"))
+        topic_view.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
         assert topic_view.log.get_focus()[1] != topic_view.focus_index_before_search
 
         # Exit search
@@ -846,14 +846,14 @@ class TestMiddleColumnView:
             "MSG_LIST", header=self.search_box, footer=self.write_box
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mid_col_view.focus_part = "header"
         mid_col_view.keypress(size, key)
         self.super_keypress.assert_called_once_with(size, key)
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_MESSAGES"))
     def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
@@ -866,7 +866,9 @@ class TestMiddleColumnView:
         )
         mid_col_view.set_focus.assert_called_once_with("header")
 
-    @pytest.mark.parametrize("reply_message_key", keys_for_command("REPLY_MESSAGE"))
+    @pytest.mark.parametrize(
+        "reply_message_key", key_config.keys_for_command("REPLY_MESSAGE")
+    )
     def test_keypress_REPLY_MESSAGE(
         self, mid_col_view, mocker, widget_size, reply_message_key
     ):
@@ -882,7 +884,7 @@ class TestMiddleColumnView:
         mid_col_view.set_focus.assert_called_once_with("footer")
         assert mid_col_view.footer.focus_position == 1
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("STREAM_MESSAGE"))
     def test_keypress_STREAM_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
@@ -896,7 +898,7 @@ class TestMiddleColumnView:
         mid_col_view.set_focus.assert_called_once_with("footer")
         assert mid_col_view.footer.focus_position == 0
 
-    @pytest.mark.parametrize("key", keys_for_command("REPLY_AUTHOR"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("REPLY_AUTHOR"))
     def test_keypress_REPLY_AUTHOR(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
@@ -910,7 +912,7 @@ class TestMiddleColumnView:
         mid_col_view.set_focus.assert_called_once_with("footer")
         assert mid_col_view.footer.focus_position == 1
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("NEXT_UNREAD_TOPIC"))
     def test_keypress_NEXT_UNREAD_TOPIC_stream(
         self, mid_col_view, mocker, widget_size, key
     ):
@@ -928,7 +930,7 @@ class TestMiddleColumnView:
         )
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("NEXT_UNREAD_TOPIC"))
     def test_keypress_NEXT_UNREAD_TOPIC_no_stream(
         self, mid_col_view, mocker, widget_size, key
     ):
@@ -942,7 +944,7 @@ class TestMiddleColumnView:
         assert mid_col_view.controller.narrow_to_topic.called is False
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_stream(
         self, mid_col_view, mocker, key, widget_size
     ):
@@ -959,7 +961,7 @@ class TestMiddleColumnView:
             contextual_message_id=1,
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_no_pm(
         self, mid_col_view, mocker, key, widget_size
     ):
@@ -971,7 +973,7 @@ class TestMiddleColumnView:
 
         assert return_value == key
 
-    @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("PRIVATE_MESSAGE"))
     def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
@@ -1093,7 +1095,7 @@ class TestRightColumnView:
         )
         assert len(right_col_view.users_btn_list) == users_btn_len
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_PEOPLE"))
     def test_keypress_SEARCH_PEOPLE(self, right_col_view, mocker, key, widget_size):
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
@@ -1105,7 +1107,7 @@ class TestRightColumnView:
             right_col_view.user_search
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("CLEAR_SEARCH"))
     def test_keypress_CLEAR_SEARCH(self, right_col_view, mocker, key, widget_size):
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".UsersView")

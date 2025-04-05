@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 from urwid import AttrMap, Overlay, Widget
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import CHECK_MARK, MUTE_MARKER
 from zulipterminal.ui_tools.buttons import (
     DecodedStream,
@@ -226,7 +226,7 @@ class TestStreamButton:
         assert stream_button.suffix_style == "unread_count"
         update_count.assert_called_once_with(unread_count)
 
-    @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_ENTER_TOGGLE_TOPIC(
         self,
         mocker: MockerFixture,
@@ -242,7 +242,7 @@ class TestStreamButton:
             stream_button
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("TOGGLE_MUTE_STREAM"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("TOGGLE_MUTE_STREAM"))
     def test_keypress_TOGGLE_MUTE_STREAM(
         self,
         mocker: MockerFixture,
@@ -262,7 +262,9 @@ class TestStreamButton:
 
 class TestUserButton:
     # FIXME Place this in a general test of a derived class?
-    @pytest.mark.parametrize("enter_key", keys_for_command("ACTIVATE_BUTTON"))
+    @pytest.mark.parametrize(
+        "enter_key", key_config.keys_for_command("ACTIVATE_BUTTON")
+    )
     def test_activate_called_once_on_keypress(
         self,
         mocker: MockerFixture,
@@ -292,7 +294,7 @@ class TestUserButton:
 
         assert activate.call_count == 1
 
-    @pytest.mark.parametrize("key", keys_for_command("USER_INFO"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("USER_INFO"))
     def test_keypress_USER_INFO(
         self,
         mocker: MockerFixture,
@@ -358,7 +360,7 @@ class TestEmojiButton:
         assert emoji_button.emoji_name == emoji_unit[0]
         assert emoji_button.reaction_count == count
 
-    @pytest.mark.parametrize("key", keys_for_command("ACTIVATE_BUTTON"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("ACTIVATE_BUTTON"))
     @pytest.mark.parametrize(
         "emoji, has_user_reacted, is_selected_final, expected_reaction_count",
         [
@@ -510,7 +512,7 @@ class TestTopicButton:
         assert topic_button.suffix_text == MUTE_MARKER
         update_widget.assert_called_once_with()
 
-    @pytest.mark.parametrize("key", keys_for_command("TOGGLE_TOPIC"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("TOGGLE_TOPIC"))
     def test_keypress_EXIT_TOGGLE_TOPIC(
         self,
         mocker: MockerFixture,
