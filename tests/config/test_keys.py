@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.config import keys
+from zulipterminal.config import keys 
 
 
 AVAILABLE_COMMANDS = list(keys.key_config.KEY_BINDINGS.keys())
@@ -32,11 +32,11 @@ def test_keys_for_command(valid_command: str) -> None:
 def test_primary_key_for_command(valid_command: str) -> None:
     assert keys.key_config.KEY_BINDINGS[valid_command]["keys"][
         0
-    ] == keys.key_config.key_config.key_config.primary_key_for_command(valid_command)
+    ] == keys.key_config.primary_key_for_command(valid_command)
 
 
 def test_keys_for_command_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.key_config.InvalidCommand):
+    with pytest.raises(keys.InvalidCommand):
         keys.key_config.keys_for_command(invalid_command)
 
 
@@ -53,20 +53,20 @@ def test_keys_for_command_identity(valid_command: str) -> None:
 
 def test_is_command_key_matching_keys(valid_command: str) -> None:
     for key in keys.key_config.keys_for_command(valid_command):
-        assert keys.key_config.key_config.key_config.is_command_key(valid_command, key)
+        assert keys.key_config.is_command_key(valid_command, key)
 
 
 def test_is_command_key_nonmatching_keys(valid_command: str) -> None:
     keys_to_test = USED_KEYS - set(keys.key_config.keys_for_command(valid_command))
     for key in keys_to_test:
-        assert not keys.key_config.key_config.key_config.is_command_key(
+        assert not keys.key_config.is_command_key(
             valid_command, key
         )
 
 
 def test_is_command_key_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.key_config.InvalidCommand):
-        keys.key_config.key_config.key_config.is_command_key(
+    with pytest.raises(keys.InvalidCommand):
+        keys.key_config.is_command_key(
             invalid_command, "esc"
         )  # key doesn't matter
 
@@ -117,7 +117,7 @@ def test_updated_urwid_command_map() -> None:
         v: k for k, v in keys.key_config.ZT_TO_URWID_CMD_MAPPING.items()
     }
     # Check if keys in command map are actually the ones in KEY_BINDINGS
-    for key, urwid_cmd in keys.key_config.command_map._command.items():
+    for key, urwid_cmd in keys.command_map._command.items():
         try:
             zt_cmd = urwid_to_zt_mapping[urwid_cmd]
             assert key in keys.key_config.keys_for_command(zt_cmd)
@@ -162,7 +162,7 @@ COMMAND_TO_DISPLAY_KEYS = [
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_display_keys_for_command(command: str, display_keys: List[str]) -> None:
     assert (
-        keys.key_config.key_config.key_config.display_keys_for_command(command)
+        keys.key_config.display_keys_for_command(command)
         == display_keys
     )
 
@@ -170,11 +170,11 @@ def test_display_keys_for_command(command: str, display_keys: List[str]) -> None
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_primary_display_key_for_command(command: str, display_keys: List[str]) -> None:
     assert (
-        keys.key_config.key_config.key_config.primary_display_key_for_command(command)
+        keys.key_config.primary_display_key_for_command(command)
         == display_keys[0]
     )
 
 
 def test_display_keys_for_command_invalid_command(invalid_command: str) -> None:
-    with pytest.raises(keys.key_config.InvalidCommand):
-        keys.key_config.key_config.key_config.display_keys_for_command(invalid_command)
+    with pytest.raises(keys.InvalidCommand):
+        keys.key_config.display_keys_for_command(invalid_command)

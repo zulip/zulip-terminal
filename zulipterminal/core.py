@@ -113,7 +113,11 @@ class Controller:
                 config.read_file(f, config_file)
             if self.feature_level is None:
                 self.feature_level = self.get_feature_level(config.get("api", "site"))
-        self.terminology = "channel" if int(self.feature_level) > 254 else "stream"
+        if self.feature_level.isdigit():
+            self.feature_level = int(self.feature_level)
+        else:
+            self.feature_level = 0
+        self.terminology = "channel" if self.feature_level > 254 else "stream"
         self.key_config = key_config
         self.key_config.set_terminology(
             self.terminology

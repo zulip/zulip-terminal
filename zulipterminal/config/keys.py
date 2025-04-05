@@ -525,7 +525,7 @@ class KeyConfig:
         """
         Primary Key is the key that will be displayed eg. in the UI
         """
-        return keys_for_command(command).pop(0)
+        return self.keys_for_command(command).pop(0)
 
     URWID_KEY_TO_DISPLAY_KEY_MAPPING = {
         "page up": "PgUp",
@@ -559,7 +559,7 @@ class KeyConfig:
         """
         return [
             self.display_key_for_urwid_key(urwid_key)
-            for urwid_key in keys_for_command(command)
+            for urwid_key in self.keys_for_command(command)
         ]
 
     def primary_display_key_for_command(self, command: str) -> str:
@@ -577,6 +577,14 @@ class KeyConfig:
             for key_binding in self.KEY_BINDINGS.values()
             if not key_binding.get("excluded_from_random_tips", False)
         ]
+    def keys_for_command(self,command: str) -> List[str]:
+        """
+        Returns the actual keys for a given mapped command
+        """
+        try:
+            return list(self.KEY_BINDINGS[command]["keys"])
+        except KeyError as exception:
+            raise InvalidCommand(command) from exception
 
 
 # Create a shared instance of KeyConfig
@@ -589,19 +597,8 @@ def initialize_command_map(key_config: KeyConfig) -> None:
     Adds alternate keys for standard urwid navigational commands.
     """
     for zt_cmd, urwid_cmd in key_config.ZT_TO_URWID_CMD_MAPPING.items():
-        for key in keys_for_command(zt_cmd):
+        for key in key_config.keys_for_command(zt_cmd):
             command_map[key] = urwid_cmd
-
-
-def keys_for_command(command: str) -> List[str]:
-    """
-    Returns the actual keys for a given mapped command
-    """
-    try:
-        return list(key_config.KEY_BINDINGS[command]["keys"])
-    except KeyError as exception:
-        raise InvalidCommand(command) from exception
-
 
 # Initialize the command map after the KeyConfig instance is fully initialized
 initialize_command_map(key_config)

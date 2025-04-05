@@ -1841,9 +1841,7 @@ class TestPanelSearchBox:
     @pytest.fixture
     def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
         # X is the return from key_config.display_key_config.keys_for_command("UNTESTED_TOKEN")
-        mocker.patch(
-            MODULE + ".key_config.display_key_config.keys_for_command", return_value="X"
-        )
+        mocker.patch(MODULE + ".key_config.display_keys_for_command", return_value="X")
         panel_view = mocker.Mock()
         update_func = mocker.Mock()
         return PanelSearchBox(panel_view, "UNTESTED_TOKEN", update_func)
