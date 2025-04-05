@@ -104,7 +104,7 @@ class Controller:
         self.is_typing_notification_in_progress = False
 
         self.show_loading()
-        self.feature_level = ""
+        self.feature_level = None
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
         config_file = os.path.expanduser(config_file)
         if config_file is not None and os.path.exists(config_file):
@@ -113,10 +113,7 @@ class Controller:
                 config.read_file(f, config_file)
             if self.feature_level is None:
                 self.feature_level = self.get_feature_level(config.get("api", "site"))
-        if self.feature_level.isdigit():
-            self.feature_level = int(self.feature_level)
-        else:
-            self.feature_level = 0
+                print(type(self.feature_level))
         self.terminology = "channel" if self.feature_level > 254 else "stream"
         self.key_config = key_config
         self.key_config.set_terminology(

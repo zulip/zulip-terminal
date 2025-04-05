@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 import pytest
 from pytest_mock import MockerFixture
 
-from zulipterminal.config import keys 
+from zulipterminal.config import keys
 
 
 AVAILABLE_COMMANDS = list(keys.key_config.KEY_BINDINGS.keys())
@@ -59,16 +59,12 @@ def test_is_command_key_matching_keys(valid_command: str) -> None:
 def test_is_command_key_nonmatching_keys(valid_command: str) -> None:
     keys_to_test = USED_KEYS - set(keys.key_config.keys_for_command(valid_command))
     for key in keys_to_test:
-        assert not keys.key_config.is_command_key(
-            valid_command, key
-        )
+        assert not keys.key_config.is_command_key(valid_command, key)
 
 
 def test_is_command_key_invalid_command(invalid_command: str) -> None:
     with pytest.raises(keys.InvalidCommand):
-        keys.key_config.is_command_key(
-            invalid_command, "esc"
-        )  # key doesn't matter
+        keys.key_config.is_command_key(invalid_command, "esc")  # key doesn't matter
 
 
 def test_HELP_is_not_allowed_as_tip() -> None:
@@ -161,18 +157,12 @@ COMMAND_TO_DISPLAY_KEYS = [
 
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_display_keys_for_command(command: str, display_keys: List[str]) -> None:
-    assert (
-        keys.key_config.display_keys_for_command(command)
-        == display_keys
-    )
+    assert keys.key_config.display_keys_for_command(command) == display_keys
 
 
 @pytest.mark.parametrize("command, display_keys", COMMAND_TO_DISPLAY_KEYS)
 def test_primary_display_key_for_command(command: str, display_keys: List[str]) -> None:
-    assert (
-        keys.key_config.primary_display_key_for_command(command)
-        == display_keys[0]
-    )
+    assert keys.key_config.primary_display_key_for_command(command) == display_keys[0]
 
 
 def test_display_keys_for_command_invalid_command(invalid_command: str) -> None:
