@@ -12,11 +12,7 @@ from zulipterminal.api_types import (
     Message,
     MessageType,
 )
-from zulipterminal.config.keys import (
-    ZT_TO_URWID_CMD_MAPPING,
-    keys_for_command,
-    primary_key_for_command,
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.helper import (
     CustomProfileData,
     Index,
@@ -1495,8 +1491,8 @@ def compose_box_is_open(request: Any) -> bool:
 
 @pytest.fixture(
     params=[
-        ("mouse press", 4, primary_key_for_command("GO_UP")),
-        ("mouse press", 5, primary_key_for_command("GO_DOWN")),
+        ("mouse press", 4, key_config.primary_key_for_command("GO_UP")),
+        ("mouse press", 5, key_config.primary_key_for_command("GO_DOWN")),
     ],
     ids=[
         "mouse_scroll_up",
@@ -1511,7 +1507,11 @@ def mouse_scroll_event(request: Any) -> Tuple[Any]:
 
 
 @pytest.fixture(
-    params=[key for cmd in ZT_TO_URWID_CMD_MAPPING for key in keys_for_command(cmd)],
+    params=[
+        key
+        for cmd in key_config.ZT_TO_URWID_CMD_MAPPING
+        for key in key_config.keys_for_command(cmd)
+    ],
     ids=lambda param: "nav-key:{}".format(*param),
 )
 def navigation_key(request: Any) -> str:

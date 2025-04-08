@@ -206,3 +206,4 @@ select = [
 # N803: Allow upper-case in test function argument names, eg. ZFL, API
 # N806: Allow upper-case in test function variables
 "tests/*" = ["N802", "N803", "N806"]
+

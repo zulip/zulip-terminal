@@ -11,14 +11,7 @@ import urwid
 from typing_extensions import Literal
 
 from zulipterminal.api_types import EditPropagateMode, Message
-from zulipterminal.config.keys import (
-    HELP_CATEGORIES,
-    KEY_BINDINGS,
-    display_key_for_urwid_key,
-    display_keys_for_command,
-    is_command_key,
-    primary_key_for_command,
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
 from zulipterminal.config.symbols import (
     CHECK_MARK,
@@ -61,8 +54,14 @@ from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
 
 
+TERMINOLOGY = None
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
+
+
+def set_terminology(terminology: str) -> None:
+    global TERMINOLOGY
+    TERMINOLOGY = terminology
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -184,16 +183,16 @@ class MessageView(urwid.ListBox):
         if event == "mouse press":
             if button == 4:
                 for _ in range(MIDDLE_COLUMN_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_UP"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_UP"))
                 return True
             if button == 5:
                 for _ in range(MIDDLE_COLUMN_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_DOWN"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("GO_DOWN", key) and not self.new_loading:
+        if key_config.is_command_key("GO_DOWN", key) and not self.new_loading:
             try:
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, "above")
@@ -206,7 +205,7 @@ class MessageView(urwid.ListBox):
                     self.load_new_messages(id)
                 return key
 
-        elif is_command_key("GO_UP", key) and not self.old_loading:
+        elif key_config.is_command_key("GO_UP", key) and not self.old_loading:
             try:
                 position = self.log.prev_position(self.focus_position)
                 self.set_focus(position, "below")
@@ -218,27 +217,39 @@ class MessageView(urwid.ListBox):
                     self.load_old_messages(id)
                 return key
 
-        elif is_command_key("SCROLL_UP", key) and not self.old_loading:
+        elif key_config.is_command_key("SCROLL_UP", key) and not self.old_loading:
             if self.focus is not None and self.focus_position == 0:
-                return self.keypress(size, primary_key_for_command("GO_UP"))
+                return self.keypress(size, key_config.primary_key_for_command("GO_UP"))
             else:
-                return super().keypress(size, primary_key_for_command("SCROLL_UP"))
+                return super().keypress(
+                    size, key_config.primary_key_for_command("SCROLL_UP")
+                )
 
-        elif is_command_key("SCROLL_DOWN", key) and not self.old_loading:
+        elif key_config.is_command_key("SCROLL_DOWN", key) and not self.old_loading:
             if self.focus is not None and self.focus_position == len(self.log) - 1:
-                return self.keypress(size, primary_key_for_command("GO_DOWN"))
+                return self.keypress(
+                    size, key_config.primary_key_for_command("GO_DOWN")
+                )
             else:
-                return super().keypress(size, primary_key_for_command("SCROLL_DOWN"))
+                return super().keypress(
+                    size, key_config.primary_key_for_command("SCROLL_DOWN")
+                )
 
-        elif is_command_key("THUMBS_UP", key) and self.focus is not None:
+        elif key_config.is_command_key("THUMBS_UP", key) and self.focus is not None:
             message = self.focus.original_widget.message
             self.model.toggle_message_reaction(message, reaction_to_toggle="thumbs_up")
 
-        elif is_command_key("TOGGLE_STAR_STATUS", key) and self.focus is not None:
+        elif (
+            key_config.is_command_key("TOGGLE_STAR_STATUS", key)
+            and self.focus is not None
+        ):
             message = self.focus.original_widget.message
             self.model.toggle_message_star_status(message)
 
-        elif is_command_key("REACTION_AGREEMENT", key) and self.focus is not None:
+        elif (
+            key_config.is_command_key("REACTION_AGREEMENT", key)
+            and self.focus is not None
+        ):
             message = self.focus.original_widget.message
             message_reactions = message["reactions"]
             if message_reactions:
@@ -382,22 +393,22 @@ class StreamsView(urwid.Frame):
         if event == "mouse press":
             if button == 4:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_UP"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_DOWN"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_STREAMS", key):
+        if key_config.is_command_key("SEARCH_STREAMS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
             self.stream_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.stream_search_box)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif key_config.is_command_key("CLEAR_SEARCH", key):
             self.stream_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.streams_btn_list)
@@ -501,23 +512,23 @@ class TopicsView(urwid.Frame):
         if event == "mouse press":
             if button == 4:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_UP"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_DOWN"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
                 return True
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_TOPICS", key):
+        if key_config.is_command_key("SEARCH_TOPICS", key):
             _, self.focus_index_before_search = self.log.get_focus()
             self.set_focus("header")
             self.header_list.set_focus(2)
             self.topic_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.topic_search_box)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif key_config.is_command_key("CLEAR_SEARCH", key):
             self.topic_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.topics_btn_list)
@@ -543,11 +554,11 @@ class UsersView(urwid.ListBox):
                 return True
             if button == 4:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_UP"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_UP"))
                 return True
             elif button == 5:
                 for _ in range(SIDE_PANELS_MOUSE_SCROLL_LINES):
-                    self.keypress(size, primary_key_for_command("GO_DOWN"))
+                    self.keypress(size, key_config.primary_key_for_command("GO_DOWN"))
         return super().mouse_event(size, event, button, col, row, focus)
 
 
@@ -573,19 +584,19 @@ class MiddleColumnView(urwid.Frame):
         if self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
 
-        elif is_command_key("SEARCH_MESSAGES", key):
+        elif key_config.is_command_key("SEARCH_MESSAGES", key):
             self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus("header")
             return key
 
-        elif is_command_key("REPLY_MESSAGE", key):
+        elif key_config.is_command_key("REPLY_MESSAGE", key):
             self.body.keypress(size, key)
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1
             return key
 
-        elif is_command_key("STREAM_MESSAGE", key):
+        elif key_config.is_command_key("STREAM_MESSAGE", key):
             self.body.keypress(size, key)
             # For new streams with no previous conversation.
             if self.footer.focus is None:
@@ -599,14 +610,14 @@ class MiddleColumnView(urwid.Frame):
             self.footer.focus_position = 0
             return key
 
-        elif is_command_key("REPLY_AUTHOR", key):
+        elif key_config.is_command_key("REPLY_AUTHOR", key):
             self.body.keypress(size, key)
             if self.footer.focus is not None:
                 self.set_focus("footer")
                 self.footer.focus_position = 1
             return key
 
-        elif is_command_key("NEXT_UNREAD_TOPIC", key):
+        elif key_config.is_command_key("NEXT_UNREAD_TOPIC", key):
             # narrow to next unread topic
             focus = self.view.message_view.focus
             narrow = self.model.narrow
@@ -628,7 +639,7 @@ class MiddleColumnView(urwid.Frame):
                 topic_name=topic,
             )
             return key
-        elif is_command_key("NEXT_UNREAD_PM", key):
+        elif key_config.is_command_key("NEXT_UNREAD_PM", key):
             # narrow to next unread pm
             pm = self.model.get_next_unread_pm()
             if pm is None:
@@ -638,15 +649,15 @@ class MiddleColumnView(urwid.Frame):
                 recipient_emails=[email],
                 contextual_message_id=pm,
             )
-        elif is_command_key("PRIVATE_MESSAGE", key):
+        elif key_config.is_command_key("PRIVATE_MESSAGE", key):
             # Create new PM message
             self.footer.private_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
             return key
-        elif is_command_key("GO_LEFT", key):
+        elif key_config.is_command_key("GO_LEFT", key):
             self.view.show_left_panel(visible=True)
-        elif is_command_key("GO_RIGHT", key):
+        elif key_config.is_command_key("GO_RIGHT", key):
             self.view.show_right_panel(visible=True)
         return super().keypress(size, key)
 
@@ -752,13 +763,13 @@ class RightColumnView(urwid.Frame):
         return user_w
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_PEOPLE", key):
+        if key_config.is_command_key("SEARCH_PEOPLE", key):
             self.allow_update_user_list = False
             self.set_focus("header")
             self.user_search.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.user_search)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif key_config.is_command_key("CLEAR_SEARCH", key):
             self.user_search.reset_search_text()
             self.allow_update_user_list = True
             self.body = UsersView(self.view.controller, self.users_btn_list)
@@ -766,7 +777,7 @@ class RightColumnView(urwid.Frame):
             self.set_focus("body")
             self.view.controller.update_screen()
             return key
-        elif is_command_key("GO_LEFT", key):
+        elif key_config.is_command_key("GO_LEFT", key):
             self.view.show_right_panel(visible=False)
         return super().keypress(size, key)
 
@@ -846,7 +857,7 @@ class LeftColumnView(urwid.Pile):
         self.view.stream_w = StreamsView(streams_btn_list, self.view)
         w = urwid.LineBox(
             self.view.stream_w,
-            title="Streams",
+            title=f"{TERMINOLOGY}s",
             title_attr="column_title",
             tlcorner=COLUMN_TITLE_BAR_LINE,
             tline=COLUMN_TITLE_BAR_LINE,
@@ -914,16 +925,16 @@ class LeftColumnView(urwid.Pile):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("SEARCH_STREAMS", key) or is_command_key(
-            "SEARCH_TOPICS", key
-        ):
+        if key_config.is_command_key(
+            "SEARCH_STREAMS", key
+        ) or key_config.is_command_key("SEARCH_TOPICS", key):
             self.focus_position = 1
             if self.is_in_topic_view:
                 self.view.topic_w.keypress(size, key)
             else:
                 self.view.stream_w.keypress(size, key)
             return key
-        elif is_command_key("GO_RIGHT", key):
+        elif key_config.is_command_key("GO_RIGHT", key):
             self.view.show_left_panel(visible=False)
         return super().keypress(size, key)
 
@@ -1057,7 +1068,9 @@ class PopUpView(urwid.Frame):
         return widgets
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key(self.command, key):
+        if key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
+            self.command, key
+        ):
             self.controller.exit_popup()
 
         return super().keypress(size, key)
@@ -1088,7 +1101,7 @@ class ExceptionView(NoticeView):
         super().__init__(controller, notice_text, width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("COPY_TRACEBACK", key):
+        if key_config.is_command_key("COPY_TRACEBACK", key):
             self.controller.copy_to_clipboard(self.traceback, "Traceback")
         return super().keypress(size, key)
 
@@ -1149,7 +1162,11 @@ class AboutView(PopUpView):
             sections.append(f"#### {section_title}\n{formatted_properties}")
         self.copy_info = "\n\n".join(sections)
 
-        about_keys = "[" + ", ".join(display_keys_for_command("COPY_ABOUT_INFO")) + "]"
+        about_keys = (
+            "["
+            + ", ".join(key_config.display_keys_for_command("COPY_ABOUT_INFO"))
+            + "]"
+        )
         contents.append((f"Copy information to clipboard {about_keys}", []))
 
         popup_width, column_widths = self.calculate_table_widths(contents, len(title))
@@ -1158,7 +1175,7 @@ class AboutView(PopUpView):
         super().__init__(controller, widgets, "ABOUT", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("COPY_ABOUT_INFO", key):
+        if key_config.is_command_key("COPY_ABOUT_INFO", key):
             self.controller.copy_to_clipboard(self.copy_info, "About info")
         return super().keypress(size, key)
 
@@ -1257,21 +1274,24 @@ class UserInfoView(PopUpView):
 class HelpView(PopUpView):
     def __init__(self, controller: Any, title: str) -> None:
         help_menu_content = []
-        for category in HELP_CATEGORIES:
+        for category in key_config.HELP_CATEGORIES:
             keys_in_category = (
                 binding
-                for binding in KEY_BINDINGS.values()
+                for binding in key_config.KEY_BINDINGS.values()
                 if binding["key_category"] == category
             )
-            key_bindings = [
+            processed_bindings = [
                 (
                     binding["help_text"],
-                    ", ".join(map(display_key_for_urwid_key, binding["keys"])),
+                    ", ".join(
+                        map(key_config.display_key_for_urwid_key, binding["keys"])
+                    ),
                 )
                 for binding in keys_in_category
             ]
-
-            help_menu_content.append((HELP_CATEGORIES[category], key_bindings))
+            help_menu_content.append(
+                (key_config.HELP_CATEGORIES[category], processed_bindings)
+            )
 
         popup_width, column_widths = self.calculate_table_widths(
             help_menu_content, len(title)
@@ -1370,7 +1390,7 @@ class PopUpConfirmationView(urwid.Overlay):
         self.controller.exit_popup()
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key):
+        if key_config.is_command_key("EXIT_POPUP", key):
             self.controller.exit_popup()
         return super().keypress(size, key)
 
@@ -1422,20 +1442,24 @@ class StreamInfoView(PopUpView):
             if stream["history_public_to_subscribers"]
             else "Not Public to Users"
         )
-        member_keys = ", ".join(map(repr, display_keys_for_command("STREAM_MEMBERS")))
+        member_keys = ", ".join(
+            map(repr, key_config.display_keys_for_command("STREAM_MEMBERS"))
+        )
 
         self._stream_email = controller.model.get_stream_email_address(stream_id)
         if self._stream_email is None:
-            stream_copy_text = "< Stream email is unavailable >"
+            stream_copy_text = f"< {TERMINOLOGY} email is unavailable >"
         else:
             email_keys = ", ".join(
-                map(repr, display_keys_for_command("COPY_STREAM_EMAIL"))
+                map(repr, key_config.display_keys_for_command("COPY_STREAM_EMAIL"))
             )
-            stream_copy_text = f"Press {email_keys} to copy Stream email address"
+            stream_copy_text = f"Press {email_keys} to copy {TERMINOLOGY} email address"
 
         weekly_traffic = stream["stream_weekly_traffic"]
         weekly_msg_count = (
-            "Stream created recently" if weekly_traffic is None else str(weekly_traffic)
+            f"{TERMINOLOGY} created recently"
+            if weekly_traffic is None
+            else str(weekly_traffic)
         )
 
         title = f"{stream_marker} {stream['name']}"
@@ -1449,25 +1473,25 @@ class StreamInfoView(PopUpView):
         # NOTE: This is treated as a member to make it easier to test
         self._stream_info_content = [
             (
-                "Stream Details",
+                f"{TERMINOLOGY} Details",
                 [
-                    ("Stream ID", f"{self.stream_id}"),
-                    ("Type of Stream", f"{type_of_stream}"),
+                    (f"{TERMINOLOGY} ID", f"{self.stream_id}"),
+                    (f"Type of {TERMINOLOGY}", f"{type_of_stream}"),
                 ]
                 + date_created
                 + message_retention_days
                 + [
                     ("Weekly Message Count", str(weekly_msg_count)),
                     (
-                        "Stream Members",
+                        f"{TERMINOLOGY} Members",
                         f"{total_members} (Press {member_keys} to view list)",
                     ),
-                    ("Stream email", stream_copy_text),
+                    (f"{TERMINOLOGY} email", stream_copy_text),
                     ("History of Stream", f"{availability_of_history}"),
                     ("Posting Policy", f"{stream_policy}"),
                 ],
             ),
-            ("Stream settings", []),
+            (f"{TERMINOLOGY} settings", []),
         ]  # type: PopUpViewTableContent
 
         popup_width, column_widths = self.calculate_table_widths(
@@ -1550,12 +1574,15 @@ class StreamInfoView(PopUpView):
         self.controller.model.toggle_stream_visual_notifications(self.stream_id)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("STREAM_MEMBERS", key):
+        if key_config.is_command_key("STREAM_MEMBERS", key):
             self.controller.show_stream_members(stream_id=self.stream_id)
         elif (
-            is_command_key("COPY_STREAM_EMAIL", key) and self._stream_email is not None
+            key_config.is_command_key("COPY_STREAM_EMAIL", key)
+            and self._stream_email is not None
         ):
-            self.controller.copy_to_clipboard(self._stream_email, "Stream email")
+            self.controller.copy_to_clipboard(
+                self._stream_email, f"{TERMINOLOGY} email"
+            )
         return super().keypress(size, key)
 
 
@@ -1569,7 +1596,7 @@ class StreamMembersView(PopUpView):
         user_names = [model.user_name_from_id(id) for id in user_ids]
         sorted_user_names = sorted(user_names)
         sorted_user_names.insert(0, model.user_full_name)
-        title = "Stream Members (up/down scrolls)"
+        title = f"{TERMINOLOGY} Members (up/down scrolls)"
 
         stream_users_content = [("", [(name, "") for name in sorted_user_names])]
         popup_width, column_width = self.calculate_table_widths(
@@ -1580,7 +1607,9 @@ class StreamMembersView(PopUpView):
         super().__init__(controller, widgets, "STREAM_INFO", popup_width, title)
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("STREAM_MEMBERS", key):
+        if key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
+            "STREAM_MEMBERS", key
+        ):
             self.controller.show_stream_info(stream_id=self.stream_id)
             return key
         return super().keypress(size, key)
@@ -1605,14 +1634,16 @@ class MsgInfoView(PopUpView):
             msg["timestamp"], show_seconds=True, show_year=True
         )
         view_in_browser_keys = "[{}]".format(
-            ", ".join(map(str, display_keys_for_command("VIEW_IN_BROWSER")))
+            ", ".join(map(str, key_config.display_keys_for_command("VIEW_IN_BROWSER")))
         )
 
         full_rendered_message_keys = "[{}]".format(
-            ", ".join(map(str, display_keys_for_command("FULL_RENDERED_MESSAGE")))
+            ", ".join(
+                map(str, key_config.display_keys_for_command("FULL_RENDERED_MESSAGE"))
+            )
         )
         full_raw_message_keys = "[{}]".format(
-            ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
+            ", ".join(map(str, key_config.display_keys_for_command("FULL_RAW_MESSAGE")))
         )
         msg_info = [
             (
@@ -1645,7 +1676,7 @@ class MsgInfoView(PopUpView):
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
 
             keys = "[{}]".format(
-                ", ".join(map(str, display_keys_for_command("EDIT_HISTORY")))
+                ", ".join(map(str, key_config.display_keys_for_command("EDIT_HISTORY")))
             )
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
@@ -1743,17 +1774,20 @@ class MsgInfoView(PopUpView):
         return link_widgets, link_width
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EDIT_HISTORY", key) and self.show_edit_history_label:
+        if (
+            key_config.is_command_key("EDIT_HISTORY", key)
+            and self.show_edit_history_label
+        ):
             self.controller.show_edit_history(
                 message=self.msg,
                 topic_links=self.topic_links,
                 message_links=self.message_links,
                 time_mentions=self.time_mentions,
             )
-        elif is_command_key("VIEW_IN_BROWSER", key):
+        elif key_config.is_command_key("VIEW_IN_BROWSER", key):
             url = near_message_url(self.server_url[:-1], self.msg)
             self.controller.open_in_browser(url)
-        elif is_command_key("FULL_RENDERED_MESSAGE", key):
+        elif key_config.is_command_key("FULL_RENDERED_MESSAGE", key):
             self.controller.show_full_rendered_message(
                 message=self.msg,
                 topic_links=self.topic_links,
@@ -1761,7 +1795,7 @@ class MsgInfoView(PopUpView):
                 time_mentions=self.time_mentions,
             )
             return key
-        elif is_command_key("FULL_RAW_MESSAGE", key):
+        elif key_config.is_command_key("FULL_RAW_MESSAGE", key):
             self.controller.show_full_raw_message(
                 message=self.msg,
                 topic_links=self.topic_links,
@@ -1919,7 +1953,9 @@ class EditHistoryView(PopUpView):
         return author_prefix
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("EDIT_HISTORY", key):
+        if key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
+            "EDIT_HISTORY", key
+        ):
             self.controller.show_msg_info(
                 msg=self.message,
                 topic_links=self.topic_links,
@@ -1961,7 +1997,7 @@ class FullRenderedMsgView(PopUpView):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key(
+        if key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
             "FULL_RENDERED_MESSAGE", key
         ):
             self.controller.show_msg_info(
@@ -2013,7 +2049,9 @@ class FullRawMsgView(PopUpView):
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
-        if is_command_key("EXIT_POPUP", key) or is_command_key("FULL_RAW_MESSAGE", key):
+        if key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
+            "FULL_RAW_MESSAGE", key
+        ):
             self.controller.show_msg_info(
                 msg=self.message,
                 topic_links=self.topic_links,
@@ -2161,14 +2199,16 @@ class EmojiPickerView(PopUpView):
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if (
-            is_command_key("SEARCH_EMOJIS", key)
+            key_config.is_command_key("SEARCH_EMOJIS", key)
             and not self.controller.is_in_editor_mode()
         ):
             self.set_focus("header")
             self.emoji_search.set_caption(" ")
             self.controller.enter_editor_mode_with(self.emoji_search)
             return key
-        elif is_command_key("EXIT_POPUP", key) or is_command_key("ADD_REACTION", key):
+        elif key_config.is_command_key("EXIT_POPUP", key) or key_config.is_command_key(
+            "ADD_REACTION", key
+        ):
             for emoji_code, emoji_name in self.selected_emojis.items():
                 self.controller.model.toggle_message_reaction(self.message, emoji_name)
             self.emoji_search.reset_search_text()

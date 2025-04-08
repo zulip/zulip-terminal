@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from pytest import param as case
 from urwid import Columns, Divider, Padding, Text
 
-from zulipterminal.config.keys import keys_for_command, primary_key_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
@@ -1194,7 +1194,7 @@ class TestMessageBox:
 
         assert msg_box.update_message_author_status() == update_required
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize(
         "narrow, expect_to_prefill",
         [
@@ -1233,7 +1233,7 @@ class TestMessageBox:
         else:
             write_box.stream_box_view.assert_called_once_with(0)
 
-    @pytest.mark.parametrize("key", keys_for_command("EDIT_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EDIT_MESSAGE"))
     @pytest.mark.parametrize(
         [
             "to_vary_in_each_message",
@@ -1901,13 +1901,13 @@ class TestMessageBox:
 
     @pytest.mark.parametrize(
         "key",
-        keys_for_command("ACTIVATE_BUTTON"),
+        key_config.keys_for_command("ACTIVATE_BUTTON"),
         ids=lambda param: f"left_click-key:{param}",
     )
     def test_mouse_event_left_click(
         self, mocker, msg_box, key, widget_size, compose_box_is_open
     ):
-        expected_keypress = primary_key_for_command("ACTIVATE_BUTTON")
+        expected_keypress = key_config.primary_key_for_command("ACTIVATE_BUTTON")
         size = widget_size(msg_box)
         col = 1
         row = 1

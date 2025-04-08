@@ -16,7 +16,7 @@ from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
@@ -959,13 +959,13 @@ class MessageBox(urwid.Pile):
         if event == "mouse press" and button == 1:
             if self.model.controller.is_in_editor_mode():
                 return True
-            self.keypress(size, primary_key_for_command("ACTIVATE_BUTTON"))
+            self.keypress(size, key_config.primary_key_for_command("ACTIVATE_BUTTON"))
             return True
 
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("REPLY_MESSAGE", key):
+        if key_config.is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
                     recipient_user_ids=self.recipient_ids,
@@ -976,7 +976,7 @@ class MessageBox(urwid.Pile):
                     title=self.message["subject"],
                     stream_id=self.stream_id,
                 )
-        elif is_command_key("STREAM_MESSAGE", key):
+        elif key_config.is_command_key("STREAM_MESSAGE", key):
             if len(self.model.narrow) != 0 and self.model.narrow[0][0] == "stream":
                 self.model.controller.view.write_box.stream_box_view(
                     caption=self.message["display_recipient"],
@@ -984,7 +984,7 @@ class MessageBox(urwid.Pile):
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
-        elif is_command_key("STREAM_NARROW", key):
+        elif key_config.is_command_key("STREAM_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
@@ -995,7 +995,7 @@ class MessageBox(urwid.Pile):
                     stream_name=self.stream_name,
                     contextual_message_id=self.message["id"],
                 )
-        elif is_command_key("TOGGLE_NARROW", key):
+        elif key_config.is_command_key("TOGGLE_NARROW", key):
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
                 if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
@@ -1019,7 +1019,7 @@ class MessageBox(urwid.Pile):
                         topic_name=self.topic_name,
                         contextual_message_id=self.message["id"],
                     )
-        elif is_command_key("TOPIC_NARROW", key):
+        elif key_config.is_command_key("TOPIC_NARROW", key):
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
@@ -1031,25 +1031,25 @@ class MessageBox(urwid.Pile):
                     topic_name=self.topic_name,
                     contextual_message_id=self.message["id"],
                 )
-        elif is_command_key("ALL_MESSAGES", key):
+        elif key_config.is_command_key("ALL_MESSAGES", key):
             self.model.controller.narrow_to_all_messages(
                 contextual_message_id=self.message["id"]
             )
-        elif is_command_key("REPLY_AUTHOR", key):
+        elif key_config.is_command_key("REPLY_AUTHOR", key):
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
                 recipient_user_ids=[self.message["sender_id"]],
             )
-        elif is_command_key("MENTION_REPLY", key):
-            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+        elif key_config.is_command_key("MENTION_REPLY", key):
+            self.keypress(size, key_config.primary_key_for_command("REPLY_MESSAGE"))
             mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(mention)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(
                 len(mention)
             )
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("QUOTE_REPLY", key):
-            self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+        elif key_config.is_command_key("QUOTE_REPLY", key):
+            self.keypress(size, key_config.primary_key_for_command("REPLY_MESSAGE"))
 
             # To correctly quote a message that contains quote/code-blocks,
             # we need to fence quoted message containing ``` with ````,
@@ -1076,7 +1076,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("EDIT_MESSAGE", key):
+        elif key_config.is_command_key("EDIT_MESSAGE", key):
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
             # This also handles the realm_message_content_edit_limit_seconds == 0 case
@@ -1157,7 +1157,7 @@ class MessageBox(urwid.Pile):
                     )
 
             if self.message["type"] == "private":
-                self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
+                self.keypress(size, key_config.primary_key_for_command("REPLY_MESSAGE"))
             elif self.message["type"] == "stream":
                 self.model.controller.view.write_box.stream_box_edit_view(
                     stream_id=self.stream_id,
@@ -1180,12 +1180,12 @@ class MessageBox(urwid.Pile):
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("MSG_INFO", key):
+        elif key_config.is_command_key("MSG_INFO", key):
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
-        elif is_command_key("ADD_REACTION", key):
+        elif key_config.is_command_key("ADD_REACTION", key):
             self.model.controller.show_emoji_picker(self.message)
-        elif is_command_key("MSG_SENDER_INFO", key):
+        elif key_config.is_command_key("MSG_SENDER_INFO", key):
             self.model.controller.show_msg_sender_info(self.message["sender_id"])
         return key
