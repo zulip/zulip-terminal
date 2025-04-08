@@ -83,6 +83,7 @@ from zulipterminal.helper import (
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
 
+from zulipterminal.ui_tools.messages import PlaceholderMessageBox
 
 class ServerConnectionFailure(Exception):
     pass
@@ -1665,39 +1666,20 @@ class Model:
                 text,
             )
         return ""
-
     def _handle_message_event(self, event: Event) -> None:
-        """
-        Handle new messages (eg. add message to the end of the view)
-        """
         assert event["type"] == "message"
         message = self.modernize_message_response(event["message"])
-        # sometimes `flags` are missing in `event` so initialize
-        # an empty list of flags in that case.
         message["flags"] = event.get("flags", [])
-        # We need to update the topic order in index, unconditionally.
         if message["type"] == "stream":
-            # NOTE: The subsequent helper only updates the topic index based
-            # on the message event not the UI (the UI is updated in a
-            # consecutive block independently). However, it is critical to keep
-            # the topics index synchronized as it used whenever the topics list
-            # view is reconstructed later.
             self._update_topic_index(message["stream_id"], message["subject"])
-            # If the topic view is toggled for incoming message's
-            # recipient stream, then we re-arrange topic buttons
-            # with most recent at the top.
             if hasattr(self.controller, "view"):
                 view = self.controller.view
-                if view.left_panel.is_in_topic_view_with_stream_id(
-                    message["stream_id"]
-                ):
+                if view.left_panel.is_in_topic_view_with_stream_id(message["stream_id"]):
                     view.topic_w.update_topics_list(
                         message["stream_id"], message["subject"], message["sender_id"]
                     )
                     self.controller.update_screen()
 
-        # We can notify user regardless of whether UI is rendered or not,
-        # but depend upon the UI to indicate failures.
         failed_command = self.notify_user(message)
         if (
             failed_command
@@ -1720,31 +1702,33 @@ class Model:
             self.controller.update_screen()
             self._notified_user_of_notification_failure = True
 
-        # Index messages before calling set_count.
         self.index = index_messages([message], self, self.index)
         if "read" not in message["flags"]:
             set_count([message["id"]], self.controller, 1)
 
-        if hasattr(self.controller, "view") and self._have_last_message.get(
-            repr(self.narrow), False
-        ):
+        if hasattr(self.controller, "view"):
             msg_log = self.controller.view.message_view.log
-            if msg_log:
-                last_message = msg_log[-1].original_widget.message
-            else:
-                last_message = None
-            msg_w_list = create_msg_box_list(
-                self, [message["id"]], last_message=last_message
-            )
-            if not msg_w_list:
-                return
-            else:
+            # Assume we have the latest message if this is a new message we sent
+            narrow_str = repr(self.narrow)
+            if self.current_narrow_contains_message(message):
+                self._have_last_message[narrow_str] = True
+
+            if self._have_last_message.get(narrow_str, False):
+                last_message = msg_log[-1].original_widget.message if msg_log else None
+                msg_w_list = create_msg_box_list(
+                    self, [message["id"]], last_message=last_message
+                )
+                if not msg_w_list:
+                    return
                 msg_w = msg_w_list[0]
 
-            if self.current_narrow_contains_message(message):
-                msg_log.append(msg_w)
-
-            self.controller.update_screen()
+                if self.current_narrow_contains_message(message):
+                    # Clear placeholder if present
+                    if msg_log and isinstance(msg_log[0].original_widget, PlaceholderMessageBox):
+                        msg_log.clear()
+                    msg_log.append(msg_w)
+                    self.controller.view.message_view.set_focus(len(msg_log) - 1)
+                self.controller.update_screen()
 
     def _update_topic_index(self, stream_id: int, topic_name: str) -> None:
         """
