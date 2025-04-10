@@ -12,6 +12,8 @@ from functools import partial
 from platform import platform
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
+import configparser
+import subprocess
 
 import pyperclip
 import urwid
@@ -98,7 +100,7 @@ class Controller:
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
-        self.client = zulip.Client(config_file=config_file, client=client_identifier)
+        self.client = zulip.Client(config_file=config_file, client=client_identifier,api_key=self.get_api_key(config_file))
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -137,6 +139,25 @@ class Controller:
         self._exception_info = exc_info
         self._critical_exception = critical
         os.write(self._exception_pipe, b"1")
+    
+    def get_api_key(self,config_file: str) -> Optional[str]:
+        config_file = os.path.expanduser(config_file)
+        if config_file is not None and os.path.exists(config_file):
+            config = configparser.ConfigParser()
+            with open(config_file) as f:
+                config.read_file(f, config_file)
+            if config.has_section("api") and config.has_option("api", "passcmd"):
+                result = subprocess.run(config["api"]["passcmd"].split(),capture_output=True)
+                if result.returncode == 0:
+                    return result.stdout.decode().strip()
+                else :
+                    raise RuntimeError("Error: Unable to retrieve API key.")
+            else:
+                raise ValueError("Error: Invalid config file format.")
+        else:
+            raise FileNotFoundError(f"Error: Config file '{config_file}' not found.")
+
+        
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
