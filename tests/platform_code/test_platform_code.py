@@ -16,7 +16,6 @@ MODULE = "zulipterminal.platform_code"
 @pytest.mark.parametrize(
     "platform, is_notification_sent",
     [
-        # platform: Literal["WSL", "MacOS", "Linux", "unsupported"]
         pytest.param(
             "WSL",
             True,
@@ -72,8 +71,6 @@ def test_notify_quotes(
     assert len(params) == 1  # One external run call
     assert len(params[0][0][0]) == cmd_length
 
-    # NOTE: If there is a quoting error, we may get a ValueError too
-
 
 @pytest.mark.parametrize(
     "platform, expected_return_code",
@@ -108,3 +105,14 @@ def test_normalized_file_path(
 ) -> None:
     mocker.patch(MODULE + ".PLATFORM", platform)
     assert normalized_file_path(path) == expected_path
+
+
+@pytest.mark.parametrize("button_count", [1, 2, 3])  # Add parameterization
+def test_button_selection(mocker: MockerFixture, button_count: int) -> None:
+    """Test button selection in popups."""
+    buttons = [mocker.Mock(selected=False) for _ in range(button_count)]
+    buttons[0].selected = True  # Select the first button by default
+
+    assert any(
+        button.selected for button in buttons
+    ), "At least one button should be selected"

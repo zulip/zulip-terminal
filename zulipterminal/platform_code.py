@@ -59,6 +59,11 @@ def detected_platform() -> str:
     return PLATFORM
 
 
+def is_wsl() -> bool:
+    """Check if the platform is Windows Subsystem for Linux (WSL)."""
+    return PLATFORM == "WSL"
+
+
 def notify(title: str, text: str) -> str:
     command_list = None
     if PLATFORM == "MacOS":

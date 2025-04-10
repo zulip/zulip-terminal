@@ -2,9 +2,11 @@
 Defines the `Controller`, which sets up the `Model`, `View`, and how they interact
 """
 
+import configparser
 import itertools
 import os
 import signal
+import subprocess
 import sys
 import time
 import webbrowser
@@ -12,8 +14,6 @@ from functools import partial
 from platform import platform
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
-import configparser
-import subprocess
 
 import pyperclip
 import urwid
@@ -100,7 +100,11 @@ class Controller:
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
-        self.client = zulip.Client(config_file=config_file, client=client_identifier,api_key=self.get_api_key(config_file))
+        self.client = zulip.Client(
+            config_file=config_file,
+            client=client_identifier,
+            api_key=self.get_api_key(config_file),
+        )
         self.model = Model(self)
         self.view = View(self)
         # Start polling for events after view is rendered.
@@ -139,25 +143,25 @@ class Controller:
         self._exception_info = exc_info
         self._critical_exception = critical
         os.write(self._exception_pipe, b"1")
-    
-    def get_api_key(self,config_file: str) -> Optional[str]:
+
+    def get_api_key(self, config_file: str) -> Optional[str]:
         config_file = os.path.expanduser(config_file)
-        if config_file is not None and os.path.exists(config_file):
+        if os.path.exists(config_file):
             config = configparser.ConfigParser()
             with open(config_file) as f:
                 config.read_file(f, config_file)
             if config.has_section("api") and config.has_option("api", "passcmd"):
-                result = subprocess.run(config["api"]["passcmd"].split(),capture_output=True)
+                result = subprocess.run(
+                    config["api"]["passcmd"].split(), capture_output=True
+                )
                 if result.returncode == 0:
                     return result.stdout.decode().strip()
-                else :
+                else:
                     raise RuntimeError("Error: Unable to retrieve API key.")
             else:
                 raise ValueError("Error: Invalid config file format.")
         else:
             raise FileNotFoundError(f"Error: Config file '{config_file}' not found.")
-
-        
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
@@ -469,20 +473,18 @@ class Controller:
     def show_typing_notification(self) -> None:
         self.is_typing_notification_in_progress = True
         dots = itertools.cycle(["", ".", "..", "..."])
-
-        # Until conversation becomes "inactive" like when a `stop` event is sent
         while self.active_conversation_info:
-            sender_name = self.active_conversation_info["sender_name"]
+            sender_name = self.active_conversation_info.get("sender_name")
+            if sender_name is None:
+                break
+            # Update footer text with animated dots
             self.view.set_footer_text(
-                [
-                    ("footer_contrast", " " + sender_name + " "),
-                    " is typing" + next(dots),
-                ]
+                [("footer_contrast", f" {sender_name} "), f" is typing{next(dots)}"]
             )
-            time.sleep(0.45)
-
-        self.is_typing_notification_in_progress = False
+            time.sleep(0.1)
+        # Clear footer text once done
         self.view.set_footer_text()
+        self.is_typing_notification_in_progress = False
 
     def report_error(
         self,
