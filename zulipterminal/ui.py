@@ -162,7 +162,6 @@ class View(urwid.WidgetWrap):
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
 
     def on_column_focus_changed(self, index: int) -> None:
-        if index == 1:
             if self.middle_column.current_view == self.message_view:
                 self.message_view.read_message()
             elif (
