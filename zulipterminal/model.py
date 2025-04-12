@@ -8,7 +8,7 @@ import time
 from collections import defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import (
     Any,
     Callable,
@@ -1004,8 +1004,7 @@ class Model:
                 if next_topic:
                     if unread_topic == current_topic:
                         return None
-                    if (
-                        current_topic is not None
+                    if (current_topic is not None
                         and unread_topic[0] != current_topic[0]
                         and stream_start != current_topic
                     ):
@@ -1095,10 +1094,35 @@ class Model:
             ]
 
     def group_recent_conversations(self) -> List[Dict[str, Any]]:
-        """Return the 10 most recent stream conversations."""
-        # Filter for stream messages
+        """Return the 10 most recent stream conversations within the last 30 days."""
+
+        recency_threshold = datetime.now(timezone.utc) - timedelta(days=30)
+        recency_timestamp = int(recency_threshold.timestamp())
+
+        # Fetch the most recent messages without a narrow
+        request = {
+            "anchor": "newest",
+            "num_before": 100,
+            "num_after": 0,
+            "apply_markdown": True,
+            "narrow": json.dumps([]),  # No narrow, fetch all messages
+        }
+        response = self.client.get_messages(message_filters=request)
+        if response["result"] != "success":
+            return []
+
+        # Debug: Inspect the fetched messages
+        messages = [self.modernize_message_response(msg) for msg in response["messages"]] # noqa: E501
+        if messages:
+            most_recent_msg = max(messages, key=lambda x: x["timestamp"])
+            datetime.fromtimestamp(most_recent_msg["timestamp"], tz=timezone.utc)
+        else:
+            return []
+
+        # Filter for stream messages within the last 30 days
         stream_msgs = [
-            m for m in self.index["messages"].values() if m["type"] == "stream"
+            m for m in messages
+            if m["type"] == "stream" and m["timestamp"] >= recency_timestamp
         ]
         if not stream_msgs:
             return []
@@ -1108,7 +1132,7 @@ class Model:
 
         # Group messages by stream and topic
         convos = defaultdict(list)
-        for msg in stream_msgs[:50]:  # Limit to 50 recent messages
+        for msg in stream_msgs[:100]:
             convos[(msg["stream_id"], msg["subject"])].append(msg)
 
         # Process conversations into the desired format
@@ -1118,27 +1142,30 @@ class Model:
             convos.items(),
             key=lambda x: max(m["timestamp"] for m in x[1]),
             reverse=True,
-        )[:10]:
-            # Map stream_id to stream name
-
+        )[:30]:
             stream_name = self.stream_name_from_id(stream_id)
             topic_name = topic if topic else "(no topic)"
-
-            # Extract participants
             participants = set()
             for msg in msg_list:
                 participants.add(msg["sender_full_name"])
-
-            # Format timestamp (using the most recent message in the conversation)
             most_recent_msg = max(msg_list, key=lambda x: x["timestamp"])
             timestamp = most_recent_msg["timestamp"]
             conv_time = datetime.fromtimestamp(timestamp, tz=timezone.utc)
             delta = now - conv_time
-            if delta.days > 0:
-                time_str = f"{delta.days} days ago"
-            else:
-                hours = delta.seconds // 3600
-                time_str = f"{hours} hours ago" if hours > 0 else "just now"
+
+            # Format the time difference with the specified precision
+            total_seconds = int(delta.total_seconds())
+            if total_seconds < 60:  # Less than 1 minute
+                time_str = "just now"
+            elif total_seconds < 3600:  # Less than 1 hour
+                minutes = total_seconds // 60
+                time_str = f"{minutes} min{'s' if minutes != 1 else ''} ago"
+            elif total_seconds < 86400:  # Less than 24 hours
+                hours = total_seconds // 3600
+                time_str = f"{hours} hour{'s' if hours != 1 else ''} ago"
+            else:  # More than 24 hours
+                days = delta.days
+                time_str = f"{days} day{'s' if days != 1 else ''} ago"
 
             processed_conversations.append(
                 {
