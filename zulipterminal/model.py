@@ -1004,7 +1004,8 @@ class Model:
                 if next_topic:
                     if unread_topic == current_topic:
                         return None
-                    if (current_topic is not None
+                    if (
+                        current_topic is not None
                         and unread_topic[0] != current_topic[0]
                         and stream_start != current_topic
                     ):
@@ -1112,7 +1113,9 @@ class Model:
             return []
 
         # Debug: Inspect the fetched messages
-        messages = [self.modernize_message_response(msg) for msg in response["messages"]] # noqa: E501
+        messages = [
+            self.modernize_message_response(msg) for msg in response["messages"]
+        ]  # noqa: E501
         if messages:
             most_recent_msg = max(messages, key=lambda x: x["timestamp"])
             datetime.fromtimestamp(most_recent_msg["timestamp"], tz=timezone.utc)
@@ -1121,7 +1124,8 @@ class Model:
 
         # Filter for stream messages within the last 30 days
         stream_msgs = [
-            m for m in messages
+            m
+            for m in messages
             if m["type"] == "stream" and m["timestamp"] >= recency_timestamp
         ]
         if not stream_msgs:

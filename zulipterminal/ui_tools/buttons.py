@@ -130,7 +130,7 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"All messages           [{primary_display_key_for_command('ALL_MESSAGES')}]"# noqa: E501
+        button_text = f"All messages           [{primary_display_key_for_command('ALL_MESSAGES')}]"  # noqa: E501
 
         super().__init__(
             controller=controller,
@@ -160,7 +160,7 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Mentions               [{primary_display_key_for_command('ALL_MENTIONS')}]"# noqa: E501
+        button_text = f"Mentions               [{primary_display_key_for_command('ALL_MENTIONS')}]"  # noqa: E501
 
         super().__init__(
             controller=controller,
@@ -174,7 +174,7 @@ class MentionedButton(TopButton):
 
 class TimeMentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Recent Conversations  [{primary_display_key_for_command('OPEN_RECENT_CONVERSATIONS')}]"# noqa: E501
+        button_text = f"Recent Conversations  [{primary_display_key_for_command('OPEN_RECENT_CONVERSATIONS')}]"  # noqa: E501
         super().__init__(
             controller=controller,
             prefix_markup=("title", TIME_MENTION_MARKER),

@@ -160,12 +160,16 @@ class View(urwid.WidgetWrap):
     def footer_view(self) -> Any:
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
+
     def on_column_focus_changed(self, index: int) -> None:
-            if index == 1:
-                if self.middle_column.current_view == self.message_view:
-                    self.message_view.read_message()
-                elif self.middle_column.current_view == self.middle_column.recent_convo_view: # noqa: E501
-                    self.middle_column.recent_convo_view.focus_restored()
+        if index == 1:
+            if self.middle_column.current_view == self.message_view:
+                self.message_view.read_message()
+            elif (
+                self.middle_column.current_view == self.middle_column.recent_convo_view
+            ):  # noqa: E501
+                self.middle_column.recent_convo_view.focus_restored()
+
     def main_window(self) -> Any:
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
@@ -190,7 +194,6 @@ class View(urwid.WidgetWrap):
         # NOTE: set_focus_changed_callback is actually called before the
         # focus is set, so the message is not read yet, it will be read when
         # the focus is changed again either vertically or horizontally.
-
 
         self.body._contents.set_focus_changed_callback(self.on_column_focus_changed)
 
@@ -219,7 +222,6 @@ class View(urwid.WidgetWrap):
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-
         if not self.controller.autohide:
             return
         if visible:
@@ -240,7 +242,6 @@ class View(urwid.WidgetWrap):
             self.body.focus_position = 1
 
     def show_right_panel(self, *, visible: bool) -> None:
-
         if not self.controller.autohide:
             return
         if visible:

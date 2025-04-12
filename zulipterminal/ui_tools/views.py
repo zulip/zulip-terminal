@@ -305,7 +305,6 @@ class MessageView(urwid.ListBox):
         self.model.mark_message_ids_as_read(read_msg_ids)
 
 
-
 class RecentConversationsView(urwid.Frame):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
@@ -336,7 +335,6 @@ class RecentConversationsView(urwid.Frame):
             self.set_focus("body")
             self.body.set_focus_valign("middle")
 
-
     def _build_body_contents(
         self, conversations: List[Dict[str, Any]]
     ) -> List[urwid.Widget]:
@@ -349,6 +347,7 @@ class RecentConversationsView(urwid.Frame):
             contents.append(row)
 
         return contents
+
     def focus_restored(self) -> None:
         if self.focus_position is not None:
             self.set_focus(self.focus_position)
@@ -422,7 +421,6 @@ class RecentConversationsView(urwid.Frame):
             if len(self.log) > 1:
                 self.log.set_focus(1)
 
-
     def mouse_event(
         self,
         size: Tuple[int, int],
@@ -489,6 +487,7 @@ class RecentConversationsView(urwid.Frame):
             self.controller.update_screen()
             return None
         return super().keypress(size, key)
+
 
 class StreamsViewDivider(urwid.Divider):
     """
@@ -736,6 +735,7 @@ class UsersView(urwid.ListBox):
                     self.keypress(size, primary_key_for_command("GO_DOWN"))
         return super().mouse_event(size, event, button, col, row, focus)
 
+
 class MiddleColumnView(urwid.Frame):
     def __init__(self, view: Any, model: Any, write_box: Any, search_box: Any) -> None:
         self.model = model
@@ -752,7 +752,6 @@ class MiddleColumnView(urwid.Frame):
         super().__init__(self.message_view, header=search_box, footer=write_box)
 
     def set_view(self, view_name: str) -> None:
-
         if view_name == "recent":
             self.current_view = self.recent_convo_view
             header = None
@@ -881,7 +880,7 @@ class MiddleColumnView(urwid.Frame):
         ):  # 'r', 'enter', '@', '>', 'R'
             if self.current_view != self.message_view:
                 self.set_view("messages")
-                if len(self.message_view.log)>0:
+                if len(self.message_view.log) > 0:
                     self.message_view.set_focus(len(self.message_view.log) - 1)
             self.current_view.keypress(size, key)
             if self.footer.focus is not None:
