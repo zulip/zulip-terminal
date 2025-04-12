@@ -593,6 +593,7 @@ class Controller:
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)
+        self.view.middle_column.set_view("messages")
 
         if already_narrowed and anchor is None:
             return

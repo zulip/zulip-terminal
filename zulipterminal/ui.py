@@ -72,6 +72,7 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(
             self, self.model, self.write_box, self.search_box
         )
+
         return urwid.LineBox(
             self.middle_column,
             title="Messages",
@@ -160,6 +161,14 @@ class View(urwid.WidgetWrap):
         text_header = self.get_random_help()
         return urwid.AttrWrap(urwid.Text(text_header), "footer")
 
+    def on_column_focus_changed(self, index: int) -> None:
+            if self.middle_column.current_view == self.message_view:
+                self.message_view.read_message()
+            elif (
+                self.middle_column.current_view == self.middle_column.recent_convo_view
+            ):  # noqa: E501
+                self.middle_column.recent_convo_view.focus_restored()
+
     def main_window(self) -> Any:
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
@@ -184,7 +193,8 @@ class View(urwid.WidgetWrap):
         # NOTE: set_focus_changed_callback is actually called before the
         # focus is set, so the message is not read yet, it will be read when
         # the focus is changed again either vertically or horizontally.
-        self.body._contents.set_focus_changed_callback(self.message_view.read_message)
+
+        self.body._contents.set_focus_changed_callback(self.on_column_focus_changed)
 
         title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
             full_name=self.model.user_full_name,
@@ -213,7 +223,6 @@ class View(urwid.WidgetWrap):
     def show_left_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-
         if visible:
             self.frame.body = urwid.Overlay(
                 urwid.Columns(
@@ -234,7 +243,6 @@ class View(urwid.WidgetWrap):
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
-
         if visible:
             self.frame.body = urwid.Overlay(
                 urwid.Columns(
@@ -273,6 +281,8 @@ class View(urwid.WidgetWrap):
             self.pm_button.activate(key)
         elif is_command_key("ALL_STARRED", key):
             self.starred_button.activate(key)
+        elif is_command_key("OPEN_RECENT_CONVERSATIONS", key):
+            self.time_button.activate(key)
         elif is_command_key("ALL_MENTIONS", key):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
