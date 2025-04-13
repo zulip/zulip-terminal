@@ -315,18 +315,24 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
-        api_key=api_key,
         server_url=preferred_realm_url,
     )
+    zulip_key_path = os.path.join(
+        os.path.dirname(os.path.abspath(zuliprc_path)), "zulip_key"
+    )
+    save_zulipkey_failure = _write_zulip_key(zulip_key_path, api_key=api_key)
+    if not save_zulipkey_failure:
+        print(f"Generated API key saved at {zulip_key_path}")
+    else:
+        exit_with_error(save_zuliprc_failure)
+
     if not save_zuliprc_failure:
-        print(f"Generated API key saved at {zuliprc_path}")
+        print(f"Generated config file saved at {zuliprc_path}")
     else:
         exit_with_error(save_zuliprc_failure)
 
 
-def _write_zuliprc(
-    to_path: str, *, login_id: str, api_key: str, server_url: str
-) -> str:
+def _write_zuliprc(to_path: str, *, login_id: str, server_url: str) -> str:
     """
     Writes a zuliprc file, returning a non-empty error string on failure
     Only creates new private files; errors if file already exists
@@ -335,12 +341,37 @@ def _write_zuliprc(
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
-            f.write(f"[api]\nemail={login_id}\nkey={api_key}\nsite={server_url}")
+            f.write(
+                f"[api]\nemail={login_id}\n"
+                f"# Fill the passcmd field with a command that outputs the API key.\n"
+                f"# The API key is temporarily stored in the 'zulip_key' file at "
+                f"{os.path.dirname(os.path.abspath(to_path))}."
+                f"\n# After storing the key in a password manager, replace the cmd.\n"
+                f"passcmd=cat zulip_key\nsite={server_url}"
+            )
         return ""
     except FileExistsError:
         return f"zuliprc already exists at {to_path}"
     except OSError as ex:
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
+
+
+def _write_zulip_key(to_path: str, *, api_key: str) -> str:
+    """
+    Writes a zulip_key file, returning a non-empty error string on failure
+    Only creates new private files; errors if file already exists
+    """
+
+    try:
+        with open(
+            os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
+        ) as f:
+            f.write(api_key)
+        return ""
+    except FileExistsError:
+        return f"zulip_key already exists at {to_path}"
+    except OSError as ex:
+        return f"{ex.__class__.__name__}: zulip_key could not be created at {to_path}"
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:

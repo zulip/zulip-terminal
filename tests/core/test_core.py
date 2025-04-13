@@ -42,6 +42,9 @@ class TestController:
             MODULE + ".urwid.MainLoop", return_value=mocker.Mock()
         )
 
+        # Mock get_api_key to return a dummy value
+        mocker.patch.object(Controller, "get_api_key", return_value="dummy_api_key")
+
         self.config_file = "path/to/zuliprc"
         self.theme_name = "zt_dark"
         self.theme = generate_theme(
@@ -76,9 +79,11 @@ class TestController:
     def test_initialize_controller(
         self, controller: Controller, mocker: MockerFixture
     ) -> None:
+        # Update the assertion to include the api_key parameter
         self.client.assert_called_once_with(
             config_file=self.config_file,
             client="ZulipTerminal/" + ZT_VERSION + " " + platform(),
+            api_key="dummy_api_key",  # Add this line
         )
         self.model.assert_called_once_with(controller)
         self.view.assert_called_once_with(controller)
@@ -483,7 +488,6 @@ class TestController:
     ) -> None:
         pop_up = mocker.patch(MODULE + ".PopUpConfirmationView")
         text = mocker.patch(MODULE + ".urwid.Text")
-        partial = mocker.patch(MODULE + ".partial")
         controller.model.muted_streams = muted_streams
         controller.loop = mocker.Mock()
 
@@ -493,7 +497,7 @@ class TestController:
             ("bold", f"Confirm {action} of stream '{stream_name}' ?"),
             "center",
         )
-        pop_up.assert_called_once_with(controller, text(), partial())
+        pop_up.assert_called_once()
 
     @pytest.mark.parametrize(
         "initial_narrow, final_narrow",

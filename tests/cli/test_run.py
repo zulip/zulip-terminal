@@ -575,11 +575,18 @@ def test__write_zuliprc__success(
 ) -> None:
     path = os.path.join(str(tmp_path), "zuliprc")
 
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
+    error_message = _write_zuliprc(path, server_url=url, login_id=id)
 
     assert error_message == ""
 
-    expected_contents = f"[api]\nemail={id}\nkey={key}\nsite={url}"
+    expected_contents = (
+        f"[api]\nemail={id}\n"
+        f"# Fill the passcmd field with a command that outputs the API key.\n"
+        f"# The API key is temporarily stored in the 'zulip_key' file at "
+        f"{os.path.dirname(os.path.abspath(path))}."
+        f"\n# After storing the key in a password manager, replace the cmd.\n"
+        f"passcmd=cat zulip_key\nsite={url}"
+    )
     with open(path) as f:
         assert f.read() == expected_contents
 
@@ -595,7 +602,7 @@ def test__write_zuliprc__fail_file_exists(
 ) -> None:
     path = os.path.join(str(tmp_path), "zuliprc")
 
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
+    error_message = _write_zuliprc(path, server_url=url, login_id=id)
 
     assert error_message == "zuliprc already exists at " + path
 

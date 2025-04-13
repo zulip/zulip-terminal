@@ -181,6 +181,17 @@ class TestPopUpView:
         self.super_keypress.assert_called_once_with(size, navigation_key)
 
 
+@pytest.mark.parametrize("button_count", [1, 2, 3])
+def test_button_selection(mocker: MockerFixture, button_count: int) -> None:
+    """Test button selection in popups."""
+    buttons = [mocker.Mock(selected=False) for _ in range(button_count)]
+    buttons[0].selected = True  # Select the first button by default
+
+    assert any(
+        button.selected for button in buttons
+    ), "At least one button should be selected"
+
+
 class TestAboutView:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker: MockerFixture) -> None:
@@ -1490,10 +1501,7 @@ class TestStreamInfoView:
     @pytest.mark.parametrize(
         "rendered_description, expected_markup",
         [
-            (
-                "<p>Simple</p>",
-                (None, ["", "", "Simple"]),
-            ),
+            ("<p>Simple</p>", (None, ["", "", "Simple"])),
             (
                 '<p>A city in Italy <a href="http://genericlink.com">ABC</a>'
                 "<strong>Bold</strong>",

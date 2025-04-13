@@ -17,6 +17,7 @@ from zulipterminal.config.keys import (
     keys_for_command,
     primary_key_for_command,
 )
+from zulipterminal.core import Controller
 from zulipterminal.helper import (
     CustomProfileData,
     Index,
@@ -50,6 +51,11 @@ def no_asynch(mocker: MockerFixture) -> None:
     Make all function calls synchronous.
     """
     mocker.patch("zulipterminal.helper.asynch")
+
+
+@pytest.fixture(autouse=True)
+def dummy_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(Controller, "get_api_key", lambda self, value: "dummy_api_key")
 
 
 # --------------- Controller Fixtures -----------------------------------------

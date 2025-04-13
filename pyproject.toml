@@ -138,6 +138,10 @@ check_untyped_defs = false
 minversion = "6.0"
 xfail_strict = true
 addopts = "-rxXs --cov=zulipterminal --no-cov-on-fail"
+markers = [
+    "wsl: marks tests as WSL specific",
+    "quoted_content: marks tests dealing with quoted content rendering",
+]
 filterwarnings = [
     # distutils: imp module is deprecated in favor of importlib
     # * python3.6/3.7/3.8
